@@ -1,0 +1,8 @@
+*.py[cod~]
+old/
+api.conf
+.idea
+
+plugins/
+!plugins/__init__.py
+

@@ -1,0 +1,8 @@
+python-magic
+pydeep
+bottle
+pymongo
+enum34
+sqlalchemy
+SFlock
+pefile2

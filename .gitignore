@@ -3,6 +3,6 @@ old/
 api.conf
 .idea
 
-plugins/
+plugins/*
 !plugins/__init__.py
 

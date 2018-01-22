@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 import functools, json
 from bottle import Bottle, request, response
+from datetime import date, datetime
 
-from db.malware import Database
+from db import Database
 from libs.objects import Config
 
 app = application = Bottle()
@@ -30,46 +31,57 @@ def set_user():
     db.set_user(get_user())
 
 
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+
+    if hasattr(obj,'_view'):
+        return obj._view
+    
+    raise TypeError ("Type %s not serializable" % type(obj))
+
+    
 def jsonize(data):
     response.content_type = 'application/json'
-    return json.dumps(data, sort_keys=True)
+    return json.dumps(data, sort_keys=True,default=json_serial)
 
 
 def details(row):
     entry = {
         "id": row.id,
-        "file_name": row.file_name,
-        "file_type": row.file_type,
-        "file_size": row.file_size,
+        "file_names": row.names,
+        "file_type": row.type,
+        "file_size": row.size,
         "md5": row.md5,
         "sha1": row.sha1,
         "sha256": row.sha256,
         "sha512": row.sha512,
         "crc32": row.crc32,
         "ssdeep": row.ssdeep,
-        "created_at": row.created_at.__str__(),
+        "timestamp": row.timestamp,
         "tags": row.tags,
-        "via": map(lambda x: x.via, row.via),
-        "from": map(lambda x: x.source, row.source),
-        "childrens": map(lambda x: {'hash': x.sha1, 'tags': x.tags, 'created_at': x.created_at.__str__()},
-                         row.children),
-        "parents": map(lambda x: {'hash': x.sha1, 'tags': x.tags, 'created_at': x.created_at.__str__()}, row.parent),
+        "childrens": map(lambda x: {'hash': x.sha1, 'tags': x.tags, 'timestamp': x.timestamp.__str__()}, row.children),
+        "parents": map(lambda x: {'hash': x.sha1, 'tags': x.tags, 'timestamp': x.timestamp.__str__()}, row.parent),
         "comment": row.comment,
-        "static_config": row.config.hash if row.config else None,
-        "cuckoo_ids": map(lambda x: x.id, row.cuckoo)
+        "static_config": row.config.id if row.config else None,
+#        "cuckoo_ids": map(lambda x: x.id, row.cuckoo)
     }
     return entry
 
 
 def low_details(row):
     entry = {
-        "file_name": row.file_name,
-        "file_type": row.file_type,
-        "file_size": row.file_size,
+        "file_names": row.names,
+        "file_type": row.type,
+        "file_size": row.size,
         "md5": row.md5,
         "sha256": row.sha256,
-        "created_at": row.created_at.__str__(),
+        "timestamp": row.timestamp.__str__(),
         "tags": row.tags,
+        #map(lambda x:x.tag,row.tag),
+
         "children": map(lambda x: x.md5, row.children),
         "parents": map(lambda x: x.md5, row.parent),
     }

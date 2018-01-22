@@ -1,6 +1,6 @@
 from bottle import request
 
-from db.malware import Database
+from db import Database
 from libs.web import app, has_params, jsonize
 from libs.analysis import get_analysis_status
 
@@ -67,3 +67,10 @@ def recent_comms():
             'type': cm.type,
         })
     return jsonize(r)
+
+
+@app.route('/email/add',method='POST')
+def email_add():
+    r  = request.json
+    eml = db.email_add(r)
+    return jsonize({'id':eml.id})

@@ -32,4 +32,4 @@ if __name__ == "__main__":
         abs_prefix = '/'.join(part for p in prefixes for part in p.split('/'))
         print abs_prefix, route.rule, route.method, route.callback
 
-    app.run(host=args.host, port=args.port)
+    app.run(host=args.host, port=args.port,reloader=True)

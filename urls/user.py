@@ -1,4 +1,4 @@
-from db.malware import Database
+from db import Database
 from libs.web import app, low_details, jsonize
 
 db = Database()

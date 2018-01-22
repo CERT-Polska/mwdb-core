@@ -6,3 +6,6 @@ enum34
 sqlalchemy
 SFlock
 pefile2
+dateparser
+sqlalchemy-searchable
+psycopg2 

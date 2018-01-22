@@ -1,8 +1,11 @@
+import sys
 import ast
+import pprint
 import pyparsing
+#import database
 import operator
 import sqlalchemy.sql as sql
-from sqlalchemy import not_
+from collections import defaultdict
 
 '''
 grammar:
@@ -16,15 +19,12 @@ grammar:
 
 '''
 
-def type_error(str):
-    raise TypeError(str)
-
 
 class Query(object):
     _ops = {'=': operator.eq, '>': operator.gt,
             '<': operator.lt, '<=': operator.le, '>=': operator.ge,
-            'like': lambda a, b: type_error('This cannot be liked'),
-            '~': lambda a, b: type_error('This cannot be similar')
+            'like': lambda a, b: typ_error('This cannot be liked'),
+            '~': lambda a, b: typ_error('This cannot be similar')
             }
 
     def __init__(self, string, context, model):
@@ -66,7 +66,8 @@ class Query(object):
         expr = pyparsing.Forward()
         term = (field + eq_op + value).setParseAction(self.mk_term) | \
                (pyparsing.Word('not') + expr).setParseAction(self.mk_expr)
-        expr << term + pyparsing.ZeroOrMore((bool_op + term).setParseAction(self.mk_expr))
+        expr << term + \
+            pyparsing.ZeroOrMore((bool_op + term).setParseAction(self.mk_expr))
         return expr
 
     def parse(self):
@@ -76,4 +77,34 @@ class Query(object):
     def run(self, session):
         return session.query(self.model).filter(self.parse())
 
+# def typ_error(str):
+#    raise TypeError(str)
+#
+#
+# def ssdeep_sim(a,b):
+#    hash,sim = b.split(',')
+#    sim = int(sim)
+#    return sql.func.fuzzy_hash_compare(a,hash) > sim
+#
 
+
+# class base_ops(defaultdict):
+#    def __init__(self,v):
+#        vals = [('=',lambda a,b: a == b)] + v
+#        def_f = lambda a,b: type_error('you cant do it')
+#        super(base_ops,self).__init__(def_f,vals)
+
+
+#likable_ops= base_ops([('like',lambda a,b: sql.like(a,b))])
+# tag_ops = defaultdict(lambda a,b: type_error('you cant do it'),
+#                       [('=',lambda a,b :a.any(database.Tag.tag == b.lower()) ) ]
+#)
+#ssdeep_ops =base_ops([('~', ssdeep_sim)])
+#source_ops =base_ops([('like', lambda a,b: a.any(sql.like(database.Source.source,b)))])
+#
+# class MalwareQuery(Query):
+#    def __init__(self,q):
+#        ctx = {'tag': tag_ops,'source':source_ops,'ssdeep':ssdeep_ops,
+#               'file_name':likable_ops,'file_type':likable_ops,'comment':likable_ops,
+#        }
+#        return super(MalwareQuery,self).__init__(q,ctx)

@@ -1,76 +1,71 @@
-import bson
-import gridfs
-import pymongo
+from db.config.models import *
 
-from libs.objects import Singleton, Config
+from sqlalchemy import cast,and_, or_, func, desc, asc
+from sqlalchemy.dialects.postgresql.json import JSONB
 
+from db.base import InsertRet
+from db.decorators import searchable,time_sorted
 
-def is_int(x):
-    try:
-        return int(x) or True
-    except:
-        return False
+def get_cncs(cfg):
 
+    for k in ('cfg','cnc','url'):
+        if k in cfg:
+            yield cfg[k]
 
-def clean_tm(r):
-    tm = r.get('timestamp', 'unknown')
-    if tm.__class__ != str:
-        tm = str(tm)
-    return (str(r['_id']), tm)
+    for k in ('urls','domains'):
+        for itm in cfg.get(k,[]):
+            if 'url' in itm:
+                yield itm['url']
+            elif 'cnc' in itm and 'port' in itm:
+                yield 'unknown://%s:%d' %  (itm['cnc'],itm['port'])
+            elif 'cnc' in itm:
+                pref = 'http://'
+                if itm['cnc'].startswith('http'):
+                    pref = ''
+                
+                yield pref + itm['cnc']
+                
+            elif issubclass(itm,basestring):
+                yield itm
+    
+@time_sorted
+@searchable('id',{'type':'multi'})
+class MixConfig:
+    
+    def config_add(self,cfg,hash=None):
+        cfg = Config(cfg)
+        ret, cfg = self.save_object(cfg)
 
+        if hash:
+            o = self.object_get(hash)
+            if o not in cfg.objects:
+                cfg.objects.append(o)
+                self.session.commit()
+                
+        if ret == InsertRet.ok:
+            for cnc in get_cncs(cfg.cfg):
+                ret,cnc = self.network_url_add(cnc)
+                cfg._cncs.append(cnc)
+            
+        self.session.commit()
+        return cfg
 
-class Database:
-    __metaclass__ = Singleton
+    def config_samples(self,id):
+        cfg = self.config_get(id)
+        return cfg.objects
 
-    def __init__(self, connect=True, cfg='api.conf'):
-        self.database = Config(cfg).configs.database
-        self.dbname   = Config(cfg).configs.dbname
-        self.connection = getattr(pymongo.MongoClient(self.database), self.dbname)
+        
+    def config_find(self,key,val):
+        val = cast(val,JSONB)
+        q=self.session.query(Config)
+        q=q.filter(Config.is_sharable(self.user))
+        q=q.filter(Config.cfg[key]==val)
+        return q.all()
 
-    def __del__(self):
-        self.connection.close()
+    def config_get(self,id):
+        return self.config_find_id(id)
 
-    def config(self, v):
-        r = self.connection.config.find({'_id': bson.ObjectId(v)}).next()
-        r['_id'] = str(r['_id'])
-
-        if 'timestamp' in r:
-            r['timestamp'] = str(r['timestamp'])
-
-        return r
-
-    def recent(self):
-        for r in self.connection.config.find({'binary': {'$exists': 1}}).sort([('timestamp', -1)]).limit(100):
-
-            t = r.get('family', r.get('type', None))
-            if not t:
-                continue
-
-            yield (t,) + clean_tm(r)
-
-    def from_gridfs(self, id):
-        gr = gridfs.GridFS(self.connection)
-        return gr.get(bson.ObjectId(id))
-
-    def stats(self):
-
-        ret = self.connection.config.aggregate(
-            [{'$group': {'_id': {'type': "$type", 'fam': "$family"}, 'count': {'$sum': 1}}}])
-        ret = [(x['count'], x['_id'].get('type', x['_id'].get('fam', ''))) for x in ret]
-        return ret
-
-    def search(self, k, v):
-
-        print k, v
-        if k == 'binary':
-            q = {'binary': v}
-        elif is_int(v) and len(v) < 20:
-            q = {'$or': [{k: v}, {k: int(v)}]}
-
-        elif k == 'cnc':
-            src_list = map(lambda k: {k: v}, ['cfg', 'cnc', 'domains.cnc', 'urls.url', 'url', 'urls.cnc'])
-            q = {'$or': src_list}
-        else:
-            q = {k: v, 'binary': {'$exists': 1}}
-        for r in self.connection.config.find(q).sort([('timestamp', -1)]):
-            yield clean_tm(r)
+    def config_stats(self):
+        q = self.session.query(func.count(Config.type),Config.type)
+        q = q.group_by(Config.type)
+        return q.all()

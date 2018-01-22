@@ -1,10 +1,8 @@
 import ast
-
 from bottle import request, HTTPError
-
-from db.config import Database as CDB
-from db.malware import Database as MDB
+from db import Database as MDB
 from libs.web import app, jsonize, details
+
 
 db = MDB()
 
@@ -20,68 +18,58 @@ def wrap_to_dummy(x):
 
 
 def do_some_searching():
-    sha1 = request.forms.get('sha1')
-    md5 = request.forms.get("md5")
+
+    md5    = request.forms.get("md5")
+    sha1   = request.forms.get('sha1')
     sha256 = request.forms.get("sha256")
+    name   = request.forms.get("name")
 
-    if md5:
-        row = db.find_md5(md5)
-        if row:
-            return row
-        else:
-            raise HTTPError(404, "File not found")
-    elif sha256:
-        row = db.find_sha256(sha256)
-        if row:
-            return row
-        else:
-            raise HTTPError(404, "File not found")
 
-    elif sha1:
-        row = db.find_sha1(sha1)
-        if row:
-            return row
-        else:
-            raise HTTPError(404, "File not found")
+    ## basic search...
+    rows = None
+    for t in ('sha256',',md5','tag', 'config', 'date','sha1',
+              'ssdeep', 'name', 'size', 'type', 'config','sha512'):
+        v = request.forms.get(t)
+        if v:
 
-    else:
-        ## ok first search for malware...
-        rows = None
-        for t in ['tag', 'date', 'ssdeep', 'file_name', 'file_size', 'file_type', 'config']:
-            v = request.forms.get(t)
-            if v:
-                try:
-                    vx = ast.literal_eval(v)
-                except:
-                    vx = v
-                if t == 'config':
-                    rows = db.config_samples(v)
-                else:
-                    rows = getattr(db, 'find_' + t)(vx)
+            try:
+                vx = ast.literal_eval(v)
+            except:
+                vx = v
+                
+            if t == 'config':
+                rows = db.config_samples(v)
+            elif t == 'tag':
+                rows = db.tag_find_tagged(v)
+            elif t == 'name':
+                rows = db.name_find_named(v)
+            else:
+                rows = getattr(db, 'object_find_' + t)(vx)
+            
+            if rows:
+                return rows
 
-        if rows: return rows
+    # lets try to search in configs...
+    for k, v in request.forms.items():
+        if k.startswith('config.') and v:
+            try:
+                vx = ast.literal_eval(v)
+            except:
+                vx = v
+            rows = map(wrap_to_dummy, db.config_search(k[7:], v))
+            break
 
-        ## lets try to search in configs...
-        for k, v in request.forms.items():
-            if k.startswith('config.') and v:
-                try:
-                    vx = ast.literal_eval(v)
-                except:
-                    vx = v
-                rows = map(wrap_to_dummy, CDB().search(k[7:], vx))
-                break
+    if not rows:
+        raise HTTPError(404, "File not found")
 
-        if not rows:
-            raise HTTPError(404, "File not found")
-
-        return rows
+    return rows
 
 
 @app.route('/search/full', method='POST')
 def full_search():
     query = request.forms.get('query')
     r = db.full_search(query)
-    return jsonize(map(lambda r: {'sha256': r.sha256, 'created_at': r.created_at.__str__()}, r))
+    return jsonize(map(lambda r: {'sha256': r.sha256, 'timestamp': r.timestamp}, r))
 
 
 @app.route("/search", method="POST")
@@ -94,5 +82,13 @@ def find_malware():
 
 @app.route("/search/simple", method="POST")
 def find_malware():
-    r = do_some_searching()
-    return jsonize(map(lambda r: {'sha256': r.sha256, 'created_at': r.created_at.__str__()}, r))
+    ret = r = do_some_searching()
+    if type(r) == list:
+        ret = map(lambda r: r._view, r)
+    elif type(r) == dict:
+        ret = []
+        for t,elems in r.items():
+            t = t[:-1]
+            ret.append(map(lambda x: [t] + list(x._view),elems))
+        ret= sum(ret,[])
+    return jsonize(ret)

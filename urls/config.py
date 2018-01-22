@@ -1,11 +1,10 @@
 from bottle import HTTPError, response
 
-from db.config import Database as CDB
-from db.malware import Database as MDB
+from db import Database
 from libs.web import app, has_params, low_details, jsonize
 
-db = MDB()
-configdb = CDB
+db = Database()
+#configdb = CDB
 
 
 @app.route('/config/samples', method=["POST", "GET"])
@@ -27,24 +26,31 @@ def config_shared(cfg):
 @app.route('/config/get/<cfg>')
 @has_params
 def config_get(cfg):
-    if db.can_cfg_be_shared(cfg):
-        return jsonize(configdb().config(cfg))
-    return HTTPError(403, 'No sample matching this config was shared with you')
+    return jsonize(db.config_get(cfg).to_dict())
+
+# @app.route('/config/raw', method=["POST", "GET"])
+# @app.route('/config/raw/<cfg>')
+# @has_params
+# def config_raw(cfg):
+#     response.content_type = 'text/plain'
+#     return configdb().from_gridfs(cfg)
 
 
-@app.route('/config/raw', method=["POST", "GET"])
-@app.route('/config/raw/<cfg>')
-@has_params
-def config_raw(cfg):
-    response.content_type = 'text/plain'
-    return configdb().from_gridfs(cfg)
-
-
+@app.route('/config/recent/<max:int>', method=["POST", "GET"])
 @app.route('/config/recent', method='GET')
-def config_recent():
-    return jsonize(list(configdb().recent()))
+@has_params
+def config_recent(m):
+    r = [(c.id,c.type,c.cncs,c.timestamp) for c in db.config_recent(m)] 
+    return jsonize(r)
 
 
 @app.route('/config/stats', method='GET')
 def config_stats():
-    return jsonize(configdb().stats())
+    return jsonize(db.config_stats())
+
+
+@app.route('/config/add',method='POST')
+@app.route('/config/add/<hash>',method='POST')
+def config_add(hash=None):
+    cfg = db.config_add(request.json,hash)
+    return jsonize({'id':cfg.id})

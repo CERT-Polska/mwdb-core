@@ -56,12 +56,22 @@ class MixConfig:
 
         
     def config_find(self,key,val):
+        try:
+            val2 = int(val)
+            val2 = cast(val2,JSONB)
+            f = Config.cfg[key]==val2
+        except:
+            val2 = None
+            f = True
+
         val = cast(val,JSONB)
         q=self.session.query(Config)
         q=q.filter(Config.is_sharable(self.user))
-        q=q.filter(Config.cfg[key]==val)
+        q=q.filter(or_(Config.cfg[key]==val,f))
         return q.all()
-
+    
+    config_search = config_find
+    
     def config_get(self,id):
         return self.config_find_id(id)
 

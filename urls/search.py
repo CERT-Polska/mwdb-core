@@ -24,11 +24,20 @@ def do_some_searching():
     sha256 = request.forms.get("sha256")
     name   = request.forms.get("name")
 
-
+    ret_template = {
+        'ip'    : [],        
+        'url'   : [],
+        'email' : [],
+        'domain': [],
+        'object': [],
+        'config': [],
+    }
+    
     ## basic search...
     rows = None
     for t in ('sha256',',md5','tag', 'config', 'date','sha1',
-              'ssdeep', 'name', 'size', 'type', 'config','sha512'):
+              'ssdeep', 'name', 'size', 'type', 'config','sha512',
+              'email'):
         v = request.forms.get(t)
         if v:
 
@@ -38,31 +47,48 @@ def do_some_searching():
                 vx = v
                 
             if t == 'config':
-                rows = db.config_samples(v)
+                rows = list(db.config_samples(v))
+                t = 'object'
+                print rows,type(rows)
+                
             elif t == 'tag':
                 rows = db.tag_find_tagged(v)
+                
             elif t == 'name':
                 rows = db.name_find_named(v)
+                
+            elif t == 'email':
+                rows  = db.email_search_text(v)
             else:
                 rows = getattr(db, 'object_find_' + t)(vx)
-            
-            if rows:
-                return rows
-
+                t = 'object'
+                
+            if rows and type(rows) == list:
+                ret_template[t] = rows
+            if rows and type(rows) == dict:
+                ret_template.update(rows)
+                
     # lets try to search in configs...
     for k, v in request.forms.items():
-        if k.startswith('config.') and v:
-            try:
-                vx = ast.literal_eval(v)
-            except:
-                vx = v
-            rows = map(wrap_to_dummy, db.config_search(k[7:], v))
+        if not v:
+            continue
+        try:
+            vx = ast.literal_eval(v)
+        except:
+            vx = v
+            
+        if k.startswith('config.'):
+            rows = db.config_search(k[7:], vx)
+            ret_template['config'] = rows
             break
+        # elif k.startswith('email.'):
+        #     rows = db.config_search(k[7:], vx)
+        #     break
 
     if not rows:
         raise HTTPError(404, "File not found")
 
-    return rows
+    return ret_template
 
 
 @app.route('/search/full', method='POST')
@@ -82,13 +108,4 @@ def find_malware():
 
 @app.route("/search/simple", method="POST")
 def find_malware():
-    ret = r = do_some_searching()
-    if type(r) == list:
-        ret = map(lambda r: r._view, r)
-    elif type(r) == dict:
-        ret = []
-        for t,elems in r.items():
-            t = t[:-1]
-            ret.append(map(lambda x: [t] + list(x._view),elems))
-        ret= sum(ret,[])
-    return jsonize(ret)
+    return jsonize(do_some_searching())

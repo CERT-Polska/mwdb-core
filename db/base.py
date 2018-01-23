@@ -140,7 +140,7 @@ class MixTag:
         t = self.tag_get(tag)
         r = {}
         for o in t.__mapper__.relationships.keys() if t else []:
-            r[o] = getattr(t,o)
+            r[o[:-1]] = getattr(t,o)
             
         return r
     

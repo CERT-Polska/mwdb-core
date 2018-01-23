@@ -141,10 +141,11 @@ def get_descendants(hash=None):
 
 @app.route("/file/sample", method=["GET", "POST"])
 @app.route("/file/sample/<hash>", method="GET")
+@app.route("/file/sample/<id:int>", method="GET")
+
 @has_params
-def get_sample(hash=None):
-    print `request.auth`
-    row = db.object_get(hash)
+def get_sample(hash=None,id=-1):
+    row = db.object_get(hash or id)
     if row:
         return jsonize(details(row))
     raise HTTPError(404, "File not found")

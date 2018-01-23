@@ -23,7 +23,7 @@ from db.decorators import taggable,searchable,time_sorted
 
 @taggable
 @time_sorted
-@searchable('crc32','md5','sha1','sha256','sha512',
+@searchable('crc32','md5','sha1','sha256','sha512','id',
             {'size':'multi'},{'type':'multi'}
 )
 class MixObject:
@@ -38,7 +38,11 @@ class MixObject:
         c.sharable |= p.sharable
 
     def object_find_via_hash(self, has):
-        if has and not issubclass(type(has), basestring):
+
+        if type(has) == int:
+            return self.object_find_id(has)
+        
+        elif has and not issubclass(type(has), basestring):
             # this is allready an object
             return has
 

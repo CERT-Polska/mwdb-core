@@ -50,7 +50,11 @@ class MixEmail:
             
         return self.save_object(att_obj)
 
-    def email_search(self,val):
+
+    def email_search(self,k,val):
+        pass
+    
+    def email_search_text(self,val):
 
         ## search through emails metadata
         q=self.session.query(Email)

@@ -85,7 +85,7 @@ def add_cuckoo():
     cid = request.forms.get('cid')
     mid = request.forms.get('hash')
 #    print `mid`,`cid`
-    db.add_cuckoo(mid, cid)
+    db.object_add_cuckoo(mid, cid)
     return jsonize({'success': True})
 
 
@@ -139,10 +139,9 @@ def get_descendants(hash=None):
     return jsonize(map(low_details, m.descendants()))
 
 
-@app.route("/file/sample", method=["GET", "POST"])
-@app.route("/file/sample/<hash>", method="GET")
-@app.route("/file/sample/<id:int>", method="GET")
-
+@app.route("/file", method=["GET", "POST"])
+@app.route("/file/<hash>", method="GET")
+@app.route("/file/<id:int>", method="GET")
 @has_params
 def get_sample(hash=None,id=-1):
     row = db.object_get(hash or id)

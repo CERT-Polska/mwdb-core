@@ -130,3 +130,29 @@ def time_sorted(*args,**kwargs):
         return make_class(args[0])
     
     return wrap
+
+def has_cuckoo(*args,**kwargs):
+
+    def add_cuckoo(self,getter,base_cls,h,cid):
+        x = getattr(self,getter)(h)
+        x._cuckoo.append(base_cls(cid))
+        self.session.commit()
+        
+    def wrap(cls):
+        return make_class(cls)
+
+    def make_class(cls):
+        module = kwargs.get('module')
+        kname,bcls =get_base_class_from_mixin(cls,module)
+        bname  = make_bname(kname,module or '','add_cuckoo')
+        getter = make_bname(kname,module or '','get')
+        fpath  = bcls.__module__.split('.')[1]
+        _,base_cls =get_base_class_from_mixin(kname+'Cuckoo',fpath)
+        fx = partialmethod(add_cuckoo,getter,base_cls)
+        setattr(cls,bname,fx)
+        return cls
+
+    
+    if args and type(args[0]).__name__ == 'classobj':
+        return make_class(args[0])
+    return wrap

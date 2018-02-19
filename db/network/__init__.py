@@ -1,5 +1,5 @@
 from db.network.models import *
-from db.decorators import searchable,time_sorted
+from db.decorators import searchable,time_sorted,has_cuckoo
 
 @time_sorted(module='network')
 class MixIP:
@@ -24,6 +24,7 @@ class MixDomain:
 
 @time_sorted(module='network')
 @searchable({'port':'multi'},module='network')
+@has_cuckoo(module='network')
 class MixURL:
 
     def network_url_add(self,url):

@@ -27,8 +27,8 @@ class VTComment(Base):
     type = Column(Text(), nullable=True)
 
 
-class Cuckoo(Base):
-    __tablename__ = 'cuckoo'
+class ObjectCuckoo(Base):
+    __tablename__ = 'object_cuckoo'
 
     id = Column('cuckoo_id', Integer)
     m = Column('mid', Integer, ForeignKey('objects.id'))
@@ -98,6 +98,8 @@ class Object(Base,OwnedMixIn):
     _owners = relationship('User',
                        secondary=obj_user,
                        backref="objects")
+    
+    _cuckoo = relationship(ObjectCuckoo)
 
     def __init__(self,obj,comment=None, sharable=True):
         self.md5 = obj.get_md5()

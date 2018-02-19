@@ -12,7 +12,7 @@ def get_cncs(cfg):
         if k in cfg:
             yield cfg[k]
 
-    for k in ('urls','domains'):
+    for k in ('urls','domains','cncs'):
         for itm in cfg.get(k,[]):
             if 'url' in itm:
                 yield itm['url']

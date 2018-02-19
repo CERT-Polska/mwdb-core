@@ -89,7 +89,18 @@ class Domain(Base):
 
     def __init__(self,domain):
         self.domain = domain
-        
+
+class URLCuckoo(Base):
+    __tablename__ = 'url_cuckoo'
+
+    id  = Column('cuckoo_id', Integer)
+    uid = Column('uid', Integer, ForeignKey('urls.id'))
+    __mapper_args__ = {"primary_key": (id, uid)}
+
+    def __init__(self, id):
+        self.id = id
+
+
 @viewable('url')
 class URL(Base):
     __tablename__  = 'urls'
@@ -109,6 +120,8 @@ class URL(Base):
     _tags    = relationship(Tag,
                 secondary=url_tag,
                 backref="urls")
+
+    _cuckoo = relationship(URLCuckoo)
 
     def __init__(self,url):
         self.url = url

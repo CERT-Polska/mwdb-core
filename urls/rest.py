@@ -12,15 +12,15 @@ db = Database()
 @has_params
 def comment(hash=None):
     cmt = request.forms.get('cmt')
-    db.add_comment(hash, cmt)
+    db.object_add_comment(hash, cmt)
     return jsonize({'success': True})
 
 
-@app.route('/tags/add', method=["POST", "GET"])
-@app.route('/tags/add/<hash>/<tag>', method="GET")
+@app.route('/tag/add', method=["POST", "GET"])
+@app.route('/tag/add/<hash>/<tag>', method="GET")
 @has_params
 def add_tag(hash=None, tag=None):
-    m = db.find_via_hash(hash)
+    m = db.object_get(hash)
 
     db.add_tag(m, tag)
     if tag.startswith('ripped:') or tag.startswith('contains:') and m.parent:
@@ -33,15 +33,15 @@ def add_tag(hash=None, tag=None):
     return jsonize({'success': True})
 
 
-@app.route("/tags/list", method="GET")
-def list_tags():
-    rows = db.list_tags()
+# @app.route("/tag/list", method="GET")
+# def list_tags():
+#     rows = db.list_tags()
 
-    results = []
-    for row in rows:
-        results.append(row.tag)
+#     results = []
+#     for row in rows:
+#         results.append(row.tag)
 
-    return jsonize(results)
+#     return jsonize(results)
 
 
 @app.route('/task/<task_id>', method='GET')

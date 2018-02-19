@@ -19,9 +19,11 @@ from collections import defaultdict
 ## import model
 from db.base import Name
 from db.object.models import *
-from db.decorators import taggable,searchable,time_sorted
+from db.decorators import taggable,searchable
+from db.decorators import has_cuckoo,time_sorted
 
 @taggable
+@has_cuckoo
 @time_sorted
 @searchable('crc32','md5','sha1','sha256','sha512','id',
             {'size':'multi'},{'type':'multi'}

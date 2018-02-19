@@ -25,7 +25,7 @@ def get_cncs(cfg):
                 
                 yield pref + itm['cnc']
                 
-            elif issubclass(itm,basestring):
+            elif issubclass(type(itm), basestring):
                 yield itm
     
 @time_sorted

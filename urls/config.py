@@ -1,4 +1,4 @@
-from bottle import HTTPError, response
+from bottle import HTTPError, response,request
 
 from db import Database
 from libs.web import app, has_params, low_details, jsonize

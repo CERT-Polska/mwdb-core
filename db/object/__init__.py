@@ -1,22 +1,3 @@
-import sys
-import enum
-import sqlalchemy
-from sqlalchemy import and_, or_, func, desc, asc
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.sql import func, column, select
-from sqlalchemy.sql.expression import literal_column
-
-from libs.objects import File, Config, Singleton
-from datetime import datetime
-
-from collections import defaultdict
-
-
-# searching
-# import query
-# from db.malware.query import MalwareQuery
-
-## import model
 from db.base import Name
 from db.object.models import *
 from db.decorators import taggable,searchable

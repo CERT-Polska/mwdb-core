@@ -85,7 +85,7 @@ class User(Base):
         return self.login
 
 class Tag(Base):
-    
+
     id = Column(Integer(), primary_key=True)
     tag = Column(String(255), nullable=False, unique=True, index=True)
 

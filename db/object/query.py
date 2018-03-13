@@ -1,14 +1,10 @@
-import sys
-import enum
-import sqlalchemy
-from sqlalchemy.sql import func
 from collections import defaultdict
 
 import db.query as query
-from db.malware.models import *
+from db.object.models import *
 
 
-def typ_error(str):
+def type_error(str):
     raise TypeError(str)
 
 
@@ -18,27 +14,31 @@ def ssdeep_sim(a, b):
     return func.fuzzy_hash_compare(a, hash) > sim
 
 
-class base_ops(defaultdict):
+class opdict(defaultdict):
+    def __init__(self, vals):
+        def_f = lambda a, b: type_error('you cant do it')
+        super(opdict, self).__init__(lambda: def_f)
+        for k, v in vals:
+            self[k] = v
+
+
+class base_ops(opdict):
     def __init__(self, v):
-        vals = [('=', lambda a, b: a == b)] + v
-
-        def def_f(a, b): return type_error('you cant do it')
-        super(base_ops, self).__init__(def_f, vals)
-
+        super(base_ops, self).__init__([('=', lambda a, b: a == b)] + v)
 
 likable_ops = base_ops([('like', lambda a, b: a.like(b))])
-tag_ops = defaultdict(lambda a, b: type_error('you cant do it'),
-                      [('=', lambda a, b:a.any(Tag.tag == b.lower()))]
-                      )
+tag_ops = opdict([('=', lambda a, b: a.any(Tag.tag == b.lower()))])
 ssdeep_ops = base_ops([('~', ssdeep_sim)])
-source_ops = base_ops([('like', lambda a, b: a.any(Source.source.like(b)))])
+# No sauce anymore?
+# source_ops = base_ops([('like', lambda a, b: a.any(Source.source.like(b)))])
 
 
 class MalwareQuery(query.Query):
     def __init__(self, q):
-        ctx = {'tag': tag_ops, 'source': source_ops, 'ssdeep': ssdeep_ops,
+        #ctx = {'tag': tag_ops, 'source': source_ops, 'ssdeep': ssdeep_ops,
+        #       'file_name': likable_ops, 'file_type': likable_ops, 'comment': likable_ops,
+        #       }
+        ctx = {'tag': tag_ops, 'ssdeep': ssdeep_ops,
                'file_name': likable_ops, 'file_type': likable_ops, 'comment': likable_ops,
                }
-        return super(MalwareQuery, self).__init__(q, ctx, Malware)
-#    def run(self,s):#
-#	return s.query(Malware.created_at,Malware.sha256).filter(self.parse()).all()
+        super(MalwareQuery, self).__init__(q, ctx, Object)

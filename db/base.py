@@ -18,6 +18,10 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from db.decorators import searchable,taggable
 
 
+def get_db_uri(cfg='api.conf'):
+    return Config(cfg).api.database
+
+
 class _Base(object):
     
     @declared_attr
@@ -150,7 +154,7 @@ class BaseMixIn(object):
 
     def __init__(self, cfg='api.conf'):
         self.engine = create_engine(
-            Config(cfg).api.database, poolclass=NullPool)
+            get_db_uri(cfg), poolclass=NullPool)
         self.engine.echo = False
         self.engine.pool_timeout = 60
         configure_mappers()

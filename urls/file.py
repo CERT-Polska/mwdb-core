@@ -1,16 +1,11 @@
 import os
-import ast
-import json
-import hashlib
-
-from bottle import request, response
 from bottle import HTTPError,static_file
 
 import libs.analysis as anal
 
 from db.base import InsertRet
 from libs.extractor import extract
-from libs.objects import File, Config
+from libs.objects import File
 from libs.repository import store_sample, get_sample_path, file_name, is_raw_ext
 from libs.web import *
 from libs.objects import Config
@@ -115,12 +110,6 @@ def get_malware(sha256):
         raise HTTPError(404, "File not found")
 
     return static_file(path,root='/',mimetype="application/octet-stream; charset=UTF-8")
-    # response.content_length = os.path.getsize(path)
-    # response.content_type = "application/octet-stream; charset=UTF-8"
-    # with open(path, "rb") as f:
-    #     data = f.read()
-
-    # return data
 
 
 @app.route("/file/ancestors", method=["GET", "POST"])
@@ -175,10 +164,3 @@ def submit_md5(hash):
     cmd = anal.analyze_sample(ctx)
     return jsonize({'task_id': cmd.task_id })
 
-
-@app.route('/bytes/find/<needle>', method='GET')
-@app.route('/bytes/find', method=['GET', 'POST'])
-@has_params
-def bytes_find(needle):
-    needle = needle.decode('hex')
-    return jsonize(map(low_details, db.find_bytes(needle)))

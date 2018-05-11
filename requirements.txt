@@ -9,4 +9,3 @@ pefile2
 dateparser
 sqlalchemy-searchable
 psycopg2 
-alembic

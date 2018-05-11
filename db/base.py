@@ -147,7 +147,7 @@ class MixTag:
             r[o[:-1]] = getattr(t,o)
             
         return r
-    
+
 class BaseMixIn(object):
 
     __metaclass__ = Singleton

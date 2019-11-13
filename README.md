@@ -1,71 +1,64 @@
-# installation
+# Malwarecage
 
-Install required packages:
-```bash
-sudo apt-get install python-virtualenv postgresql
+Malware repository component for automated malware collection/analysis systems. 
+
+Under the hood of [MWDB service](https://mwdb.cert.pl) hosted by CERT.pl.
+
+**Features:**
+
+- Storage for malware binaries and static/dynamic configurations
+- Tracking and visualizing relations between objects
+- Quick search
+- Data sharing mechanism
+- Integration capabilities via webhooks and plugin system
+
+## Basic installation via Docker Compose
+
+The first step is to generate configuration using `./gen_vars.sh` script.
+
+```
+$ ./gen_vars.sh 
+Credentials for initial mwdb account:
+
+-----------------------------------------
+Admin login: admin
+Admin password: la/Z7MsmKA3UxW8Psrk1Opap
+-----------------------------------------
+
+Please be aware that initial account will be only set up on the first run. If you already have a database with at least one user, then this setting will be ignored for security reasons. You can always create an admin account manually by executing a command. See "flask create_admin --help" for reference.
 ```
 
-Setup project structure:
+Then build images via `docker-compose build` and run Malwarecage via `docker-compose up -d`.
 
-```bash
-mkdir malwarecage
-cd malwarecage
+Malwarecage should be accessible via `http://127.0.0.1`
 
-virtualenv . -p python3
-source bin/activate
+You can customize your Malwarecage installation e.g. by adding persistent volumes to `docker-compose.yml`:
 
-git clone git@vcs.cert.pl:malwaredb/malwarecage.git
-cd malwarecage
-git checkout dev
+```yaml
+services:
+  ...
+  mwdb:
+    ...
+    volumes:
+      - type: volume
+        source: mwcage-uploads
+        target: /app/uploads
+  postgres:
+    ...
+    volumes:
+      - type: volume
+        source: mwcage-postgres
+        target: /var/lib/postgresql/data
+  ...
+volumes:
+    mwcage-postgres:
+    mwcage-uploads:
 ```
 
-Copy config:
-```bash
-cp config.dist.py config.py
-```
+## Standalone installation
 
-Install dependencies:
-```bash
-pip3 install -r requirements.txt
-```
+Currently it's quite complicated, but we'll provide appropriate instructions until final release. (TODO)
 
-Setup postgres:
-```bash
-sudo -u postgres craeteuser scott
-sudo -u postgres createdb test
-sudo -u postgres psql
-```
-```sql
-alter user scott with encrypted password 'tiger';
-```
+## Contact
 
-
-Apply db migrations:
-```bash
-FLASK_APP=app.py python3 -m flask db upgrade
-```
-
-
-Build frontend:
-```bash
-cd malwarefront
-
-npm install 
-npm run build
-```
-
-# running
-
-## backendd
-
-```bash
-python3 app.py
-```
-
-## frontend
-
-```bash
-npm start
-```
-
-Login with admin:admin
+In case of any questions, send e-mail at info@cert.pl

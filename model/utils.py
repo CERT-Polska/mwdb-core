@@ -1,0 +1,1 @@
+ColumnToSearchInDict = {"searchable": True}

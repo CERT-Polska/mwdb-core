@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: mwdb-docs
+  name: mwdb-docs
+  namespace: malwarecage-prod
+spec:
+  selector:
+    matchLabels:
+      app: mwdb-docs
+  template:
+    metadata:
+      labels:
+        app: mwdb-docs
+    spec:
+      containers:
+      - env:
+        - name: API_URL
+          value: /api/swagger.json
+        image: swaggerapi/swagger-ui:latest
+        imagePullPolicy: Always
+        name: mwdb-docs-container
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/hostname: k2.cert.pl
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mwdb-docs-service
+  namespace: malwarecage-st
+spec:
+  ports:
+     -  name: http
+        port: 8080
+        protocol: TCP
+        targetPort: 8080
+  selector:
+    app: mwdb-docs
+  type: NodePort

@@ -1,0 +1,4 @@
+python-dateutil==2.7.0
+pytest
+requests
+python-baseconv

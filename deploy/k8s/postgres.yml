@@ -1,0 +1,69 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres-pv-claim-prod
+  namespace: malwarecage-prod
+  labels:
+    app: postgres
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: malwarecage-prod
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:10.4
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret-mwdb-postgres-password
+                key: password
+          - name: POSTGRES_DB
+            value: mwdb
+          - name: POSTGRES_USER
+            value: mwdb
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      nodeSelector:
+        kubernetes.io/hostname: mwdb-node.cert.pl
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim-prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: malwarecage-prod
+  labels:
+    app: postgres
+spec:
+  type: NodePort
+  ports:
+   - nodePort: 32569
+     port: 5432
+     protocol: TCP
+     targetPort: 5432
+  selector:
+   app: postgres

@@ -1,0 +1,38 @@
+version: "3.3"
+services:
+  mwdb:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    restart: on-failure
+    env_file:
+      # NOTE: use gen_vars.sh in order to generate this file
+      - mwdb-vars.env
+  malwarefront:
+    depends_on:
+      - mwdb
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile-malwarefront
+    ports:
+      - "80:80"
+    restart: on-failure
+  postgres:
+    image: postgres
+    restart: always
+    env_file:
+      # NOTE: use gen_vars.sh in order to generate this file
+      - postgres-vars.env
+  mwdb-tests:
+    build: tests
+    env_file:
+      - mwdb-vars.env
+  mwdb-docs:
+    image: swaggerapi/swagger-ui
+    environment:
+      - API_URL=/api/swagger.json
+  redis:
+    image: redis:alpine

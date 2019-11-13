@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: mwdb-redis
+  name: deployment-mwdb-redis
+  namespace: malwarecage-st
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mwdb-redis
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mwdb-redis
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k2.cert.pl
+      containers:
+      - image: redis:5.0.4
+        name: container-mwdb-redis
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-mwdb-redis
+  namespace: malwarecage-st
+spec:
+  type: ClusterIP
+  selector:
+    app: mwdb-redis
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379

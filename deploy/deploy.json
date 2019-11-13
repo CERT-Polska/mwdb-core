@@ -1,0 +1,36 @@
+{
+    "malwarefront": {
+        "docker": {
+            "image": "dr.cert.pl/malwarecage/malwarecage_malwarefront",
+            "dockerfile": "deploy/docker/Dockerfile-malwarefront",
+            "dir": "."
+        },
+        "k8s": {
+            "namespace": "malwarecage-prod",
+            "deployment": "malwarefront",
+            "container": "malwarefront-container"
+        },
+        "k8s-staging": {
+            "namespace": "malwarecage-st",
+            "deployment": "malwarefront",
+            "container": "malwarefront-container"
+        }
+    },
+    "mwdb": {
+        "docker": {
+            "image": "dr.cert.pl/malwarecage/malwarecage_mwdb",
+            "dockerfile": "deploy/docker/Dockerfile",
+            "dir": "."
+        },
+        "k8s": {
+            "namespace": "malwarecage-prod",
+            "deployment": "mwdb",
+            "container": "mwdb-container"
+        },
+        "k8s-staging": {
+            "namespace": "malwarecage-st",
+            "deployment": "mwdb",
+            "container": "mwdb-container"
+        }
+    }
+}

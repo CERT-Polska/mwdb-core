@@ -1,0 +1,98 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: mwdb
+  namespace: malwarecage-prod
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mwdb
+    spec:
+      containers:
+        - image: "dr.cert.pl/malwarecage/malwarecage_mwdb:latest"
+          imagePullPolicy: Always
+          name: mwdb-container
+          env:
+          - name: INJECTS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: secret-mwdb-injects-token
+                key: token
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: secret-mwdb-secret-key
+                key: key
+          - name: SQLALCHEMY_DATABASE_URI
+            valueFrom:
+              secretKeyRef:
+                name: secret-mwdb-database-uri-key
+                key: uri
+          - name: CUCKOO2_API
+            value: http://malwaredb-dev.cert.pl:8090
+          - name: INJECTS_URL
+            value: https://injects-node.cert.pl/
+          - name: MCELERY_URL
+            value: http://mcelery-web-service.mcelery-prod.svc.cluster.local/submit
+          - name: REDIS_DATABASE_URI
+            value: redis://service-mwdb-redis/
+          - name: ENABLE_RATE_LIMIT
+            value: "1"
+          - name: BASE_URL
+            value: "https://mwdb.cert.pl"
+          - name: ENABLE_REGISTRATION
+            value: "1"
+          - name: MAIL_SMTP
+            value: mailhub.cert.pl
+          - name: MAIL_FROM
+            value: noreply@mwdb.cert.pl
+          - name: RECAPTCHA_SITE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: secret-mwdb-recaptcha
+                key: sitekey
+          - name: RECAPTCHA_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: secret-mwdb-recaptcha
+                key: secret
+          volumeMounts:
+          - mountPath: /app/plugins/mwdbKarton/dispatchers/config.ini
+            name: karton-config-volume
+            subPath: config.ini
+          - mountPath: /app/uploads
+            name: mwdb-nfs-volume-prod
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 80
+      nodeSelector:
+        kubernetes.io/hostname: mwdb-node.cert.pl
+      volumes:
+      - name: mwdb-nfs-volume-prod
+        persistentVolumeClaim:
+          claimName: mwdb-nfs-claim-prod
+      - name: karton-config-volume
+        secret:
+          defaultMode: 420
+          items:
+          - key: config-file
+            path: config.ini
+          secretName: karton2-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mwdb-service
+  namespace: malwarecage-prod
+spec:
+  ports:
+     -  name: http
+        port: 80
+        nodePort: 31527
+        protocol: TCP
+  selector:
+    app: mwdb
+  type: NodePort

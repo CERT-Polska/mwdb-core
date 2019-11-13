@@ -1,0 +1,3 @@
+[submodule "plugins"]
+	path = plugins
+	url = git@vcs.cert.pl:malwaredb/malwarecage-plugins.git

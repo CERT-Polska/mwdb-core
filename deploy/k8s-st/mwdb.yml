@@ -30,8 +30,6 @@ spec:
               secretKeyRef:
                 name: secret-mwdb-database-uri-key
                 key: uri
-          - name: CUCKOO2_API
-            value: http://malwaredb-dev.cert.pl:8090
           - name: INJECTS_URL
             value: https://injects-node.cert.pl/
           - name: MCELERY_URL

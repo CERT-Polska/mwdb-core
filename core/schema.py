@@ -14,6 +14,10 @@ class CapabilitiesSchema(Schema):
     capabilities = fields.List(fields.Str(), allow_none=True)
 
 
+class GroupsSchema(Schema):
+    groups = fields.List(fields.Str())
+
+
 class GroupNameSchemaBase(Schema):
     name = fields.Str()
 
@@ -62,6 +66,10 @@ class UserLoginSchemaBase(Schema):
 
 class UserLoginSchema(UserLoginSchemaBase):
     password = fields.Str(required=True)
+
+
+class UserIdentitySchema(UserLoginSchemaBase, CapabilitiesSchema, GroupsSchema):
+    pass
 
 
 class UserTokenSchema(UserLoginSchemaBase):
@@ -119,7 +127,7 @@ class UserRegisterSchema(UserLoginSchemaBase, UserBasicInfoSchema):
     recaptcha = fields.Str()
 
 
-class UserLoginSuccessSchema(UserTokenSchema, CapabilitiesSchema):
+class UserLoginSuccessSchema(UserTokenSchema, UserIdentitySchema):
     pass
 
 

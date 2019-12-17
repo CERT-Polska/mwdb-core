@@ -11,7 +11,7 @@ from model import db, User, Group
 from core.capabilities import Capabilities
 from core.mail import MailError, send_email_notification
 from core.schema import UserLoginSchema, UserLoginSuccessSchema, UserTokenSchema, UserSetPasswordSchema, \
-    UserSuccessSchema, UserRegisterSchema
+    UserSuccessSchema, UserRegisterSchema, UserIdentitySchema
 from core.util import is_maintenance_set, is_registration_enabled, get_base_url
 
 from . import logger, requires_capabilities, requires_authorization
@@ -31,7 +31,7 @@ class LoginResource(Resource):
                 schema: UserLoginSchema
         responses:
             200:
-              description: Authorization token, on successful login
+              description: Authorization token with information about user capabilities
               content:
                 application/json:
                   schema: UserLoginSuccessSchema
@@ -65,7 +65,10 @@ class LoginResource(Resource):
 
         user_token = UserLoginSuccessSchema()
         auth_token = user.generate_session_token()
-        return user_token.dump({"login": user.login, "token": auth_token, "capabilities": user.capabilities})
+        return user_token.dump({"login": user.login,
+                                "token": auth_token,
+                                "capabilities": user.capabilities,
+                                "groups": user.group_names})
 
 
 class RegisterResource(Resource):
@@ -235,13 +238,13 @@ class RefreshTokenResource(Resource):
             - auth
         responses:
             200:
-              description: authorization token for password change
+              description: Regenerated authorization token with information about user capabilities
               content:
                 application/json:
-                  schema: UserTokenSchema
+                  schema: UserLoginSuccessSchema
         """
         user = g.auth_user
-        schema = UserTokenSchema()
+        schema = UserLoginSuccessSchema()
 
         user.logged_on = datetime.datetime.now()
         db.session.add(user)
@@ -250,4 +253,35 @@ class RefreshTokenResource(Resource):
         logger.info('refresh token', extra={'user': user.login})
         return schema.dump({
             "login": user.login,
-            "token": user.generate_session_token()})
+            "token": user.generate_session_token(),
+            "capabilities": user.capabilities,
+            "groups": user.group_names
+        })
+
+
+class ValidateTokenResource(Resource):
+    @requires_authorization
+    def get(self):
+        """
+        ---
+        description: Validates token for session
+        security:
+            - bearerAuth: []
+        tags:
+            - auth
+        responses:
+            200:
+                description: Information about user capabilities
+                content:
+                  application/json:
+                    schema: UserIdentitySchema
+        """
+        user = g.auth_user
+        schema = UserIdentitySchema()
+
+        logger.info('validate token', extra={'user': user.login})
+        return schema.dump({
+            "login": user.login,
+            "capabilities": user.capabilities,
+            "groups": user.group_names
+        })

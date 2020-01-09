@@ -258,7 +258,7 @@ class ObjectChildResource(Resource):
               name: type
               schema:
                 type: string
-                enum: [file, config, object]
+                enum: [file, config, blob, object]
               description: type of target object
             - in: path
               name: parent

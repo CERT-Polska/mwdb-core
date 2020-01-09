@@ -35,12 +35,6 @@ class FileListResource(ObjectListResource):
             - file
         parameters:
             - in: query
-              name: page
-              schema:
-                type: integer
-              description: Page number
-              required: true
-            - in: query
               name: older_than
               schema:
                 type: string

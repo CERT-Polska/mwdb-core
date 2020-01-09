@@ -14,14 +14,14 @@ class RelationsResource(Resource):
         description: Get relations attached to an object
         security:
             - bearerAuth: []
-        relations:
-            - relation
+        tags:
+            - relations
         parameters:
             - in: path
               name: type
               schema:
                 type: string
-                enum: [file, config, object]
+                enum: [file, config, blob, object]
               description: Type of target object
             - in: path
               name: identifier
@@ -33,10 +33,7 @@ class RelationsResource(Resource):
                 description: Relations object
                 content:
                   application/json:
-                    schema:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/Relations'
+                    schema: RelationsSchema
         """
         db_object = authenticated_access(Object, identifier)
 

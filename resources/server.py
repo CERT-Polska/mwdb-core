@@ -4,6 +4,8 @@ from core.schema import PingStatusSchema, ServerInfoSchema
 from version import app_build_version
 from core.util import is_maintenance_set, is_registration_enabled
 
+from . import requires_authorization
+
 
 class PingResource(Resource):
     def get(self):

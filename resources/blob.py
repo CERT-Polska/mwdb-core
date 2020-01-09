@@ -29,11 +29,11 @@ class TextBlobListResource(ObjectListResource):
             - blob
         parameters:
             - in: query
-              name: page
+              name: older_than
               schema:
-                type: integer
-              description: Page number
-              required: true
+                type: string
+              description: fetch objects which are older than the object specified by SHA256 identifier
+              required: false
             - in: query
               name: query
               schema:
@@ -66,7 +66,7 @@ class TextBlobResource(ObjectResource):
         security:
             - bearerAuth: []
         tags:
-            - file
+            - blob
         parameters:
             - in: path
               name: identifier

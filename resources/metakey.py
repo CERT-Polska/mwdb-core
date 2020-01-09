@@ -24,7 +24,7 @@ class MetakeyResource(Resource):
               name: type
               schema:
                 type: string
-                enum: [file, config, object]
+                enum: [file, config, blob, object]
               description: Type of target object
             - in: path
               name: identifier
@@ -60,7 +60,7 @@ class MetakeyResource(Resource):
               name: type
               schema:
                 type: string
-                enum: [file, config, object]
+                enum: [file, config, blob, object]
               description: Type of target object
             - in: path
               name: identifier

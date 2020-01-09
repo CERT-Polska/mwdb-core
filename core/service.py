@@ -85,16 +85,16 @@ def setup_restful_service(app):
 
     spec.options["servers"] = [
         {
-            "url": "{schema}://{host}/api",
+            "url": "{scheme}://{host}/api",
             "description": 'Malwarecage API endpoint',
             "variables": {
-                "schema": {
+                "scheme": {
                     "enum": ["http", "https"],
                     "default": "https"
                 },
                 "host": {
                     "default": "mwdb.cert.pl"
-                }
+                },
             }
         }
     ]

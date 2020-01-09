@@ -30,9 +30,5 @@ services:
     build: tests
     env_file:
       - mwdb-vars.env
-  mwdb-docs:
-    image: swaggerapi/swagger-ui
-    environment:
-      - API_URL=/api/swagger.json
   redis:
     image: redis:alpine

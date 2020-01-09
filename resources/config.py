@@ -76,11 +76,11 @@ class ConfigListResource(ObjectListResource):
             - config
         parameters:
             - in: query
-              name: page
+              name: older_than
               schema:
-                type: integer
-              description: Page number
-              required: true
+                type: string
+              description: fetch objects which are older than the object specified by SHA256 identifier
+              required: false
             - in: query
               name: query
               schema:

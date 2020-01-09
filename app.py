@@ -17,7 +17,7 @@ from datetime import datetime
 import sqlalchemy.exc
 import logmatic
 
-from flask import Flask, request, g, send_file
+from flask import Flask, request, g, jsonify
 from flask_migrate import Migrate
 from werkzeug.exceptions import Forbidden, TooManyRequests
 
@@ -27,6 +27,9 @@ from core.capabilities import Capabilities
 from core.service import setup_restful_service
 from core.util import HashConverter, is_maintenance_set, is_rate_limit_enabled
 from core import log
+
+from resources import requires_authorization
+
 import logging
 
 import redis
@@ -223,13 +226,16 @@ plugin_context = PluginAppContext(app, api, spec)
 
 load_plugins(plugin_context)
 
+spec_docs = spec.to_dict()
+
+
+@app.route("/docs")
+@requires_authorization
+def docs():
+    return jsonify(spec_docs)
+
+
 # validate_spec(spec)
-
-
-@app.route('/swagger.json')
-def swagger():
-    return send_file('swagger.json')
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -20,9 +20,6 @@ RUN apk add --no-cache postgresql-client postgresql-dev libmagic \
 COPY . /app
 COPY config.docker.py /app/config.py
 
-# Generate a swagger.json file
-RUN python3 makespec.py
-
 # Create a /app/uploads directory
 RUN mkdir -p /app/uploads/
 

@@ -1,0 +1,47 @@
+version: "3.3"
+services:
+  mwdb:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    restart: on-failure
+    env_file:
+      # NOTE: use gen_vars.sh in order to generate this file
+      - mwdb-vars.env
+    environment:
+      UWSGI_PY_AUTORELOAD: 1
+    volumes:
+      - "./core:/app/core"
+      - "./mail_templates:/app/mail_templates"
+      - "./model:/app/model"
+      - "./plugins:/app/plugins"
+      - "./resources:/app/resources"
+      - "./app.py:/app/app.py"
+      - "./plugin_engine.py:/app/plugin_engine.py"
+  malwarefront:
+    depends_on:
+      - mwdb
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile-malwarefront-dev
+    ports:
+      - "80:3000"
+    environment:
+      HOST: 0.0.0.0
+      REACT_APP_API_URL: "/api/"
+    volumes:
+      - "./malwarefront/public:/app/public"
+      - "./malwarefront/src:/app/src"
+      - "./plugins:/plugins"
+    restart: on-failure
+  postgres:
+    image: postgres
+    restart: always
+    env_file:
+      # NOTE: use gen_vars.sh in order to generate this file
+      - postgres-vars.env
+  redis:
+    image: redis:alpine

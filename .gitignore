@@ -5,13 +5,12 @@
 /venv
 *.pyc
 node_modules/
-api_docs/
 spec.json
 *.log
 .pytest_cache/
-mwdbv1_data/
 postgres_password.txt
-migrate/users.yml
 mwdb-vars.env
 postgres-vars.env
 .mypy_cache/
+/malwarefront/extensions/plugins/
+/malwarefront/extensions/package.json

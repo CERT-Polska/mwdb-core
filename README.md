@@ -55,6 +55,24 @@ volumes:
     mwcage-uploads:
 ```
 
+## Development environment
+
+Generate configuration using `./gen_vars.sh` as for production installation.
+
+Then build images using `docker-compose -f docker-compose-dev.yml build`. Then run Malwarecage via 
+`docker-compose -f docker-compose-dev.yml up -d`.  
+
+After a minute - Malwarecage should be accessible via `http://127.0.0.1` with enabled hot-reload and debug facilities.
+
+All changes in code are automatically reloaded excluding:
+- Changes in database model, which needs migrations
+- Changes in configuration
+- Registering new plugins or adding frontend extension to existing plugins without that feature
+
+In cases mentioned above - Docker images need to be rebuilt.
+
+Password for administration account is available in `mwdb-vars.env` file in `MWDB_ADMIN_PASSWORD` field.
+
 ## Standalone installation
 
 Currently it's quite complicated, but we'll provide appropriate instructions until final release. (TODO)

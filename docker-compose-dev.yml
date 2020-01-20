@@ -13,6 +13,7 @@ services:
       - mwdb-vars.env
     environment:
       UWSGI_PY_AUTORELOAD: 1
+      UWSGI_ENABLE_THREADS: 1
     volumes:
       - "./core:/app/core"
       - "./mail_templates:/app/mail_templates"

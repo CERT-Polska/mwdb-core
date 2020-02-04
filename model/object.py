@@ -5,12 +5,13 @@ from flask import g
 from sqlalchemy import and_, exists, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, contains_eager
+from sqlalchemy.sql.expression import true
 
 from core.capabilities import Capabilities
 from core.util import get_sample_path
 
 from . import db
-from .metakey import Metakey, MetakeyDefinition
+from .metakey import Metakey, MetakeyDefinition, MetakeyPermission
 from .tag import object_tag_table, Tag
 
 relation = db.Table(
@@ -338,9 +339,18 @@ class Object(db.Model):
 
     def get_metakeys(self, as_dict=False):
         metakeys = db.session.query(Metakey) \
-                             .filter(Metakey.object_id == self.id) \
-                             .order_by(Metakey.id) \
-                             .all()
+                             .filter(Metakey.object_id == self.id)
+
+        # TODO: Actually it should be "reading_all_attributes" superpower
+        if not g.auth_user.has_rights(Capabilities.reading_attributes):
+            metakeys = metakeys.filter(
+                Metakey.key.in_(
+                    db.session.query(MetakeyPermission.key)
+                              .filter(MetakeyPermission.can_read == true())
+                              .filter(g.auth_user.is_member(MetakeyPermission.group_id))))
+
+        metakeys = metakeys.order_by(Metakey.id).all()
+
         if not as_dict:
             return metakeys
 
@@ -351,13 +361,26 @@ class Object(db.Model):
             dict_metakeys[metakey.key].append(metakey.value)
         return dict_metakeys
 
-    def add_metakey(self, key, value):
-        metakey_definition = MetakeyDefinition(key=key)
-        db.session.merge(metakey_definition)
+    def add_metakey(self, key, value, commit=True):
+        metakey_definition = db.session.query(MetakeyDefinition) \
+                                       .filter(MetakeyDefinition.key == key).first()
+        if not metakey_definition:
+            # Attribute needs to be defined first
+            return None
+        # TODO: Actually it should be "adding_all_attributes" superpower
+        if not g.auth_user.has_rights(Capabilities.adding_attributes):
+            metakey_permission = db.session.query(MetakeyPermission) \
+                .filter(MetakeyPermission.key == key) \
+                .filter(MetakeyPermission.can_set == true()) \
+                .filter(g.auth_user.is_member(MetakeyPermission.group_id)).first()
+            if not metakey_permission:
+                # Nope, you don't have permission to set that metakey!
+                return None
 
         db_metakey = Metakey(key=key, value=value, object_id=self.id)
         _, is_new = Metakey.get_or_create(db_metakey)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return is_new
 
     __mapper_args__ = {

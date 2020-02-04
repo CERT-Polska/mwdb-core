@@ -15,7 +15,9 @@ from resources.config import ConfigResource, ConfigListResource, ConfigStatsReso
 from resources.download import RequestSampleDownloadResource, DownloadResource
 from resources.file import FileResource, FileListResource
 from resources.group import GroupResource, GroupListResource, GroupMemberResource
-from resources.metakey import MetakeyResource, MetakeyDefinitionResource, MetakeyListDefinitionResource
+from resources.metakey import MetakeyResource, MetakeyListDefinitionResource, \
+    MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource, \
+    MetakeyPermissionResource
 from resources.object import ObjectResource, ObjectListResource, ObjectChildResource
 from resources.relations import RelationsResource
 from resources.server import PingResource, ServerInfoResource
@@ -166,10 +168,14 @@ def setup_restful_service(app):
     spec.path(resource=SearchResource, api=api)
 
     # Metakey endpoints
-    api.add_resource(MetakeyListDefinitionResource, '/meta')
+    api.add_resource(MetakeyListDefinitionResource, '/meta/list/<access>')
     spec.path(resource=MetakeyListDefinitionResource, api=api)
-    api.add_resource(MetakeyDefinitionResource, '/meta/<key>')
-    spec.path(resource=MetakeyDefinitionResource, api=api)
+    api.add_resource(MetakeyListDefinitionManageResource, '/meta/manage')
+    spec.path(resource=MetakeyListDefinitionManageResource, api=api)
+    api.add_resource(MetakeyDefinitionManageResource, '/meta/manage/<key>')
+    spec.path(resource=MetakeyDefinitionManageResource, api=api)
+    api.add_resource(MetakeyPermissionResource, '/meta/manage/<key>/permissions/<group_name>')
+    spec.path(resource=MetakeyPermissionResource, api=api)
 
     # User endpoints
     api.add_resource(UserListResource, "/user")

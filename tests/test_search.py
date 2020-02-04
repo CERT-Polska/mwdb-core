@@ -125,7 +125,8 @@ def test_search_metakey():
     value = base62uuid().lower()
 
     sample = test.add_sample(filename, file_content)
-    test.add_meta(sample["id"], key, value)
+    test.add_attribute_definition(key, "")
+    test.add_attribute(sample["id"], key, value)
 
     found_objs = test.search(f'meta.{key}:{value}')
     assert len(found_objs) > 0

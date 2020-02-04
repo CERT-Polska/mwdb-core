@@ -181,8 +181,6 @@ class ObjectResource(Resource):
                 })
                 raise BadRequest()
             metakeys = metakeys.data['metakeys']
-            if metakeys and not g.auth_user.has_rights(Capabilities.adding_attributes):
-                raise Forbidden("You are not permitted to add metakeys")
 
         item, is_new = self.create_object(obj)
 
@@ -194,7 +192,9 @@ class ObjectResource(Resource):
 
         if metakeys:
             for metakey in metakeys:
-                item.add_metakey(metakey['key'], metakey['value'])
+                if item.add_metakey(metakey['key'], metakey['value'], commit=False) is None:
+                    raise NotFound("Metakey '{}' not defined or insufficient "
+                                   "permissions to set that one".format(metakey["key"]))
 
         if parent_object:
             item.add_parent(parent_object, commit=False)

@@ -3,10 +3,11 @@ from flask import g
 from luqum.parser import parser
 from luqum.utils import LuceneTreeVisitorV2
 
-from model import db, Object, Metakey, ObjectPermission, Group, User
+from model import db, Object, Metakey, ObjectPermission, Group, User, MetakeyPermission
 from model.object import AccessType
-from sqlalchemy.ext import baked
 from sqlalchemy import and_, or_, not_
+from sqlalchemy.ext import baked
+from sqlalchemy.sql.expression import true
 
 import functools
 from ..capabilities import Capabilities
@@ -308,6 +309,15 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
     def _meta_extract_condition(self, meta_key_path: list, column, node, is_range=False):
         key_column = Metakey.key
         value_column = Metakey.value
+
+        # Checking permissions for a given key
+        if not g.auth_user.has_rights(Capabilities.reading_attributes):
+            metakeys = (db.session.query(MetakeyPermission.key)
+                                  .filter(MetakeyPermission.key == meta_key_path[0])
+                                  .filter(MetakeyPermission.can_read == true())
+                                  .filter(g.auth_user.is_member(MetakeyPermission.group_id)))
+            if metakeys.first() is None:
+                raise ObjectNotFoundException("No such attribute: {}".format(meta_key_path[0]))
 
         value = self._get_value(node)
         if node.has_wildcard():

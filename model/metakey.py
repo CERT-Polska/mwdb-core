@@ -24,6 +24,14 @@ class Metakey(db.Model):
             return s.safe_substitute(value=self.value)
         return None
 
+    @property
+    def label(self):
+        return self.template.label
+
+    @property
+    def description(self):
+        return self.template.description
+
     @classmethod
     def get(cls, object_id, key, value):
         return db.session.query(cls).filter(
@@ -57,8 +65,30 @@ class Metakey(db.Model):
         return new_cls, is_new
 
 
+class MetakeyPermission(db.Model):
+    __tablename__ = 'metakey_permission'
+
+    key = db.Column(db.String(64), db.ForeignKey('metakey_definition.key'), primary_key=True, index=True)
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), primary_key=True, autoincrement=False, index=True)
+    __table_args__ = (
+        db.Index('ix_metakey_permission_metakey_group', 'key', 'group_id', unique=True),
+    )
+    can_read = db.Column(db.Boolean, nullable=False)
+    can_set = db.Column(db.Boolean, nullable=False)
+    template = db.relationship('MetakeyDefinition', foreign_keys=[key], lazy='joined',
+                               back_populates="permissions")
+    group = db.relationship('Group', foreign_keys=[group_id], lazy='joined')
+
+    @property
+    def group_name(self):
+        return self.group.name
+
+
 class MetakeyDefinition(db.Model):
     __tablename__ = 'metakey_definition'
 
     key = db.Column(db.String(64), primary_key=True)
+    label = db.Column(db.String(64))
+    description = db.Column(db.Text)
     url_template = db.Column(db.Text)
+    permissions = db.relationship('MetakeyPermission', lazy='joined', back_populates="template")

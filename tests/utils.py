@@ -189,23 +189,44 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def add_meta(self, identifier, key, value):
-        res = self.session.post(self.mwdb_url + '/file/' + identifier + '/meta', json={'key': key, 'value': value})
+    def add_attribute(self, identifier, key, value):
+        res = self.session.post(self.mwdb_url + '/object/' + identifier + '/meta', json={'key': key, 'value': value})
         res.raise_for_status()
         return res.json()
 
-    def get_meta(self, identifier):
-        res = self.session.get(self.mwdb_url + '/file/' + identifier + '/meta')
+    def get_attributes(self, identifier):
+        res = self.session.get(self.mwdb_url + '/object/' + identifier + '/meta')
         res.raise_for_status()
         return res.json()
 
-    def add_meta_definition(self, key, template):
-        res = self.session.post(self.mwdb_url + '/meta/' + key, json={'key': key, 'template': template})
+    def add_attribute_definition(self, key, template):
+        res = self.session.put(self.mwdb_url + '/meta/manage/' + key, json={'key': key, 'template': template})
         res.raise_for_status()
         return res.json()
 
-    def get_meta_definitions(self):
-        res = self.session.get(self.mwdb_url + '/meta')
+    def get_attribute_definitions(self):
+        res = self.session.get(self.mwdb_url + '/meta/manage')
+        res.raise_for_status()
+        return res.json()
+
+    def add_attribute_permission(self, key, group, can_read, can_set):
+        res = self.session.put(self.mwdb_url + '/meta/manage/' + key + '/permissions/' + group,
+                               json={'group_name': group, 'can_read': can_read, 'can_set': can_set})
+        res.raise_for_status()
+        return res.json()
+
+    def remove_attribute_permission(self, key, group):
+        res = self.session.delete(self.mwdb_url + '/meta/manage/' + key + '/permissions/' + group)
+        res.raise_for_status()
+        return res.json()
+
+    def get_readable_attributes(self):
+        res = self.session.get(self.mwdb_url + '/meta/list/read')
+        res.raise_for_status()
+        return res.json()
+
+    def get_settable_attributes(self):
+        res = self.session.get(self.mwdb_url + '/meta/list/set')
         res.raise_for_status()
         return res.json()
 

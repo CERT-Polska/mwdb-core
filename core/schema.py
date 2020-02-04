@@ -148,6 +148,8 @@ class MetakeySchemaBase(Schema):
 class MetakeySchema(MetakeySchemaBase):
     value = fields.Str()
     url = fields.Str()
+    label = fields.Str()
+    description = fields.Str()
 
     @validates_schema
     def validate_value(self, data):
@@ -155,16 +157,32 @@ class MetakeySchema(MetakeySchemaBase):
             raise ValidationError("You must specify value")
 
 
+class MetakeyPermissionSchema(Schema):
+    group_name = fields.Str(required=True)
+    can_read = fields.Boolean(required=True)
+    can_set = fields.Boolean(required=True)
+
+
 class MetakeyDefinitionSchema(MetakeySchemaBase):
     template = fields.Str(attribute="url_template")
+    label = fields.Str()
+    description = fields.Str()
+
+
+class MetakeyDefinitionManageSchema(MetakeyDefinitionSchema):
+    permissions = fields.Nested(MetakeyPermissionSchema, many=True)
 
 
 class MetakeyShowSchema(Schema):
     metakeys = fields.Nested(MetakeySchema, many=True)
 
 
-class MetakeyDefinitionShowSchema(Schema):
+class MetakeyDefinitionListSchema(Schema):
     metakeys = fields.Nested(MetakeyDefinitionSchema, many=True)
+
+
+class MetakeyDefinitionManageListSchema(Schema):
+    metakeys = fields.Nested(MetakeyDefinitionManageSchema, many=True)
 
 
 class CommentSchemaBase(Schema):

@@ -64,12 +64,24 @@ class UserPendingResource(Resource):
             return {"errors": user_login_obj.errors}, 400
 
         user = db.session.query(User).filter(User.login == login, User.pending == true()).first()
-        if user:
-            group = db.session.query(Group).filter(Group.name == login).first()
-            user.groups.remove(group)
-            db.session.delete(group)
-            db.session.delete(user)
-            db.session.commit()
+        if not user:
+            raise NotFound("User doesn't exist or is already rejected")
+        group = db.session.query(Group).filter(Group.name == login).first()
+        user.groups.remove(group)
+        db.session.delete(group)
+        db.session.delete(user)
+        db.session.commit()
+
+        try:
+            send_email_notification("rejection",
+                                    "Malwarecage account request has been rejected",
+                                    user.email,
+                                    base_url=get_base_url(),
+                                    login=user.login,
+                                    set_password_token=user.generate_set_password_token().decode("utf-8"))
+        except MailError:
+            logger.exception("Can't send e-mail notification")
+            raise InternalServerError("SMTP server needed to fulfill this request is not configured or unavailable.")
 
         logger.info('User rejected', extra={'user': login})
         schema = UserSuccessSchema()
@@ -188,3 +200,4 @@ class UserResource(Resource):
 
         schema = UserSuccessSchema()
         return schema.dump({"login": login})
+

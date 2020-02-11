@@ -1,0 +1,20 @@
+Hi {login},
+
+We appreciate that you took the time to apply for MWDB account. Unfortunately, your application did not conform to our Terms of Service ({base_url}/terms/en).
+
+Due to limited resources on our side, we're accepting requests from:
+- Independent researchers with documented, public malware research;
+- IT security specialists employed in company focused on malware analysis;
+- Specialists employed in public IT security institutions (for example national CSIRTs, banks, government institutions etc.);
+
+Unfortunately we're not open for small-business administrators, local ISPs and students without documented malware research.
+
+You can also improve your account request by filling up form with links to your articles and write-ups from analysis.
+
+Also remember that business e-mail is preferable. If you're an independent researcher and want to use private email address,
+please confirm your identity with an account related to your research – for example, with a Twitter message to @CERT_Polska_en;
+
+Thank you for interest. In case of any questions, feel free to contact us via our e-mail address: info@cert.pl.
+
+Regards,
+CERT.pl

@@ -152,14 +152,6 @@ def require_auth():
                 rate_limit(conn, "set-request", 15 * 60, 200)
 
 
-@app.after_request
-def add_header(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Headers'] = 'cache-control,x-requested-with,content-type,authorization'
-    response.headers['Access-Control-Allow-Methods'] = 'POST, PUT, GET, OPTIONS, DELETE'
-    return response
-
-
 @app.cli.command()
 @click.argument('username')
 @click.option('--expiration', default=3600, type=int, help='token expiration time in seconds')

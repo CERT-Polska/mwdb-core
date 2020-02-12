@@ -7,13 +7,13 @@ from .utils import MwdbTest, ShouldRaise
 def typical_user():
     test = MwdbTest()
     test.login()
-    test.register_user("typical", "typical")
+    test.register_user("typical", "typical8")
     test.create_group("very_typical", capabilities=["adding_tags"])
 
 
 def test_profile_change_invalidate():
     typical = MwdbTest()
-    typical.login_as("typical", "typical")
+    typical.login_as("typical", "typical8")
     typical.add_sample()
 
     admin = MwdbTest()
@@ -50,13 +50,13 @@ def test_profile_change_invalidate():
     with ShouldRaise(status_code=401):
         typical.recent_samples(1)
 
-    typical.login_as("typical", "typical")
+    typical.login_as("typical", "typical8")
     typical.recent_samples(1)
 
 
 def test_profile_password_change():
     typical = MwdbTest()
-    typical.login_as("typical", "typical")
+    typical.login_as("typical", "typical8")
     typical.add_sample()
 
     admin = MwdbTest()
@@ -79,16 +79,16 @@ def test_profile_password_change():
     # Valid only once
     with ShouldRaise(status_code=403):
         typical.request("POST", "/auth/change_password", json={
-            "password": "typical",
+            "password": "typical8",
             "token": set_pass_token
         })
 
     set_pass_token = admin.request("GET", "/user/typical/change_password")["token"]
     typical.request("POST", "/auth/change_password", json={
-        "password": "typical",
+        "password": "typical8",
         "token": set_pass_token
     })
-    typical.login_as("typical", "typical")
+    typical.login_as("typical", "typical8")
     typical.recent_samples(1)
 
 

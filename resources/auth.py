@@ -5,7 +5,7 @@ from flask import request, g, current_app
 from flask_restful import Resource
 from sqlalchemy import exists
 from sqlalchemy.orm.exc import NoResultFound
-from werkzeug.exceptions import Forbidden, Conflict, InternalServerError
+from werkzeug.exceptions import Forbidden, Conflict, InternalServerError, BadRequest
 
 from model import db, User, Group
 from core.capabilities import Capabilities
@@ -211,6 +211,7 @@ class UserChangePasswordResource(Resource):
                 application/json:
                   schema: UserSuccessSchema
         """
+        MIN_PASSWORD_LENGTH = 8
         schema = UserSetPasswordSchema()
         obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
@@ -218,7 +219,13 @@ class UserChangePasswordResource(Resource):
         user = User.verify_set_password_token(obj.data.get("token"))
         if user is None:
             raise Forbidden("Set password token expired")
-        user.set_password(obj.data.get("password"))
+        password = obj.data.get("password")
+        if password == "":
+            raise BadRequest("Empty password is not allowed")
+        if len(password) < MIN_PASSWORD_LENGTH:
+            raise BadRequest("Password is too short")
+
+        user.set_password(password)
         db.session.add(user)
         db.session.commit()
         schema = UserSuccessSchema()

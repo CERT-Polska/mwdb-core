@@ -14,9 +14,9 @@ def admin():
 def attr_user():
     admin = MwdbTest()
     admin.login()
-    admin.register_user("attr", "attr")
+    admin.register_user("attr", "attrattr")
     user = MwdbTest()
-    user.login_as("attr", "attr")
+    user.login_as("attr", "attrattr")
     return user
 
 

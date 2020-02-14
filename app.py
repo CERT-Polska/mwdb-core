@@ -38,6 +38,15 @@ app = Flask(__name__)
 migrate = Migrate(app, db)
 
 app.config.from_object('config')
+
+"""
+Flask-restful tries to be smart and transforms NotFound exceptions.
+Adds: "You have requested this URI [/file/root] but did you mean
+/file/<string:identifier> or /file ?" even if URI is completely correct,
+but some objects needed to fulfill request are missing.
+"""
+app.config["ERROR_404_HELP"] = False
+
 db.init_app(app)
 
 app.url_map.converters['hash64'] = HashConverter

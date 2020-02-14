@@ -6,6 +6,7 @@ from sqlalchemy import and_
 from werkzeug.exceptions import NotFound
 
 from model import db, Object, Group, ObjectPermission
+from model.user import User
 from core.capabilities import Capabilities
 from core.schema import ShareSchema, ShareShowSchema
 from model.object import AccessType
@@ -117,7 +118,8 @@ class ShareResource(Resource):
 
         group = db.session.query(Group).filter(permission_filter).first()
 
-        if group is None:
+        if group is None or group.pending_group:
             raise NotFound("Group {} doesn't exist".format(group_name))
+
         db_object.give_access(group.id, AccessType.SHARED, db_object, g.auth_user)
         logger.info('object shared', extra={'object': db_object.dhash, 'group': group})

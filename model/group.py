@@ -1,5 +1,5 @@
 from core.capabilities import Capabilities
-
+from model.user import User
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from . import db
 
@@ -10,6 +10,10 @@ class Group(db.Model):
     name = db.Column(db.String(32), index=True, unique=True, nullable=False)
     capabilities = db.Column('capabilities', ARRAY(db.Text), nullable=False, server_default='{}')
     private = db.Column(db.Boolean)
+
+    @property
+    def pending_group(self):
+        return self.private and db.session.query(User).filter(User.login == self.name).first().pending
 
     @property
     def immutable(self):

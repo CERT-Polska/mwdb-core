@@ -211,6 +211,8 @@ class ObjectResource(Resource):
             if group is None:
                 raise NotFound("Group {} doesn't exist".format(upload_as))
             share_with = [group.id, Group.get_by_name(g.auth_user.login).id]
+            if group.pending_group is True:
+                raise NotFound("Group {} is pending".format(upload_as))
 
         for share_group_id in share_with:
             item.give_access(share_group_id, AccessType.ADDED, item, g.auth_user, commit=False)

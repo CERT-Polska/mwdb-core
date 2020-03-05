@@ -14,6 +14,11 @@ services:
     environment:
       UWSGI_PY_AUTORELOAD: 1
       UWSGI_ENABLE_THREADS: 1
+      MAIL_SMTP: "mailhog:1025"
+      MAIL_FROM: "noreply@malwarecage.dev"
+      RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+      RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+      ENABLE_REGISTRATION: 1
     volumes:
       - "./core:/app/core"
       - "./mail_templates:/app/mail_templates"
@@ -46,3 +51,7 @@ services:
       - postgres-vars.env
   redis:
     image: redis:alpine
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "127.0.0.1:8025:8025"

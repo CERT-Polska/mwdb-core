@@ -8,7 +8,7 @@ from werkzeug.exceptions import HTTPException
 
 from resources.api_key import APIKeyResource, APIKeyIssueResource
 from resources.auth import LoginResource, UserChangePasswordResource, UserGetPasswordChangeTokenResource, \
-    RefreshTokenResource, RegisterResource, ValidateTokenResource
+    RefreshTokenResource, RegisterResource, ValidateTokenResource, RecoverPasswordResource
 from resources.blob import TextBlobResource, TextBlobListResource
 from resources.comment import CommentResource, CommentDeleteResource
 from resources.config import ConfigResource, ConfigListResource, ConfigStatsResource
@@ -111,6 +111,8 @@ def setup_restful_service(app):
     spec.path(resource=LoginResource, api=api)
     api.add_resource(UserChangePasswordResource, "/auth/change_password")
     spec.path(resource=UserChangePasswordResource, api=api)
+    api.add_resource(RecoverPasswordResource, '/auth/recover_password')
+    spec.path(resource=RecoverPasswordResource, api=api)
     api.add_resource(RefreshTokenResource, "/auth/refresh")
     spec.path(resource=RefreshTokenResource, api=api)
     api.add_resource(ValidateTokenResource, "/auth/validate")

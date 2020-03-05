@@ -5,13 +5,14 @@ from flask import request, g, current_app
 from flask_restful import Resource
 from sqlalchemy import exists
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql.expression import false
 from werkzeug.exceptions import Forbidden, Conflict, InternalServerError, BadRequest
 
 from model import db, User, Group
 from core.capabilities import Capabilities
 from core.mail import MailError, send_email_notification
 from core.schema import UserLoginSchema, UserLoginSuccessSchema, UserTokenSchema, UserSetPasswordSchema, \
-    UserSuccessSchema, UserRegisterSchema, UserIdentitySchema
+    UserSuccessSchema, UserRegisterSchema, UserIdentitySchema, UserRecoverPasswordSchema
 from core.util import is_maintenance_set, is_registration_enabled, get_base_url
 
 from . import logger, requires_capabilities, requires_authorization
@@ -231,6 +232,65 @@ class UserChangePasswordResource(Resource):
         schema = UserSuccessSchema()
         logger.info('change password', extra={'user': user.login})
         return schema.dump({"login": user.login})
+
+
+class RecoverPasswordResource(Resource):
+    def post(self):
+        """
+        ---
+        description: Request a recover password link
+        tags:
+            - auth
+        responses:
+            200:
+                description: Get the password reset link by providing login and email
+                content:
+                  application/json:
+                    schema: UserRecoverPasswordSchema
+        """
+        schema = UserRecoverPasswordSchema()
+        obj = schema.loads(request.get_data(as_text=True))
+
+        if obj.errors:
+            return {"errors": obj.errors}, 400
+
+        try:
+            user = User.query.filter(User.login == obj.data.get('login'), User.email == obj.data.get('email'), User.pending == false()).one()
+        except NoResultFound:
+            raise Forbidden('Invalid login or email address.')
+
+        recaptcha_secret = current_app.config.get("RECAPTCHA_SECRET")
+
+        if recaptcha_secret:
+            try:
+                recaptcha_token = obj.data.get("recaptcha")
+                recaptcha_response = requests.post(
+                    'https://www.google.com/recaptcha/api/siteverify',
+                    data={'secret': recaptcha_secret,
+                          'response': recaptcha_token})
+                recaptcha_response.raise_for_status()
+            except Exception as e:
+                logger.exception("Temporary problem with ReCAPTCHA.")
+                raise InternalServerError("Temporary problem with ReCAPTCHA.") from e
+
+            if not recaptcha_response.json().get('success'):
+                raise Forbidden("Wrong ReCAPTCHA, please try again.")
+
+        try:
+            send_email_notification("recover",
+                                    "Recover password in Malwarecage",
+                                    user.email,
+                                    base_url=get_base_url(),
+                                    login=user.login,
+                                    set_password_token=user.generate_set_password_token().decode("utf-8"))
+        except MailError:
+            logger.exception("Can't send e-mail notification")
+
+        logger.info('User password recovered', extra={'user': user.login})
+        return schema.dump({
+            "login": user.login, 
+            "email": user.email
+        })
 
 
 class RefreshTokenResource(Resource):

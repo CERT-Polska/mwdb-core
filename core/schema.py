@@ -68,6 +68,11 @@ class UserLoginSchema(UserLoginSchemaBase):
     password = fields.Str(required=True)
 
 
+class UserRecoverPasswordSchema(UserLoginSchemaBase):
+    email = fields.Str(required=True)
+    recaptcha = fields.Str()
+
+
 class UserIdentitySchema(UserLoginSchemaBase, CapabilitiesSchema, GroupsSchema):
     pass
 

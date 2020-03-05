@@ -66,6 +66,10 @@ spec:
             httpGet:
               path: /ping
               port: 80
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 80
       nodeSelector:
         kubernetes.io/hostname: k2.cert.pl
 ---

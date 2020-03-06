@@ -234,6 +234,43 @@ class UserChangePasswordResource(Resource):
         return schema.dump({"login": user.login})
 
 
+class RequestPasswordChangeResource(Resource):
+    @requires_authorization
+    def post(self):
+        """
+        ---
+        description: Generates new token for session continuation
+        security:
+            - bearerAuth: []
+        tags:
+            - auth
+        responses:
+            200:
+              description: Regenerated authorization token with information about user capabilities
+              content:
+                application/json:
+                  schema: UserLoginSuccessSchema
+        """
+        login = g.auth_user.login
+        email = g.auth_user.email
+
+        try:
+            send_email_notification("recover",
+                                    "Change password in Malwarecage",
+                                    email,
+                                    base_url=get_base_url(),
+                                    login=login,
+                                    set_password_token=g.auth_user.generate_set_password_token().decode("utf-8"))
+        except MailError:
+            logger.exception("Can't send e-mail notification")
+            raise InternalServerError("SMTP server needed to fulfill this request is"
+                                      " not configured or unavailable.")
+
+        schema = UserSuccessSchema()
+        logger.info('request change password', extra={'user': login})
+        return schema.dump({"login": login})
+
+
 class RecoverPasswordResource(Resource):
     def post(self):
         """
@@ -285,6 +322,8 @@ class RecoverPasswordResource(Resource):
                                     set_password_token=user.generate_set_password_token().decode("utf-8"))
         except MailError:
             logger.exception("Can't send e-mail notification")
+            raise InternalServerError("SMTP server needed to fulfill this request is"
+                                      " not configured or unavailable.")
 
         logger.info('User password recovered', extra={'user': user.login})
         return schema.dump({

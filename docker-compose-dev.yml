@@ -21,6 +21,7 @@ services:
       ENABLE_REGISTRATION: 1
     volumes:
       - "./core:/app/core"
+      - "./migrations/versions:/app/migrations/versions"
       - "./mail_templates:/app/mail_templates"
       - "./model:/app/model"
       - "./plugins:/app/plugins"

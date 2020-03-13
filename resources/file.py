@@ -7,6 +7,7 @@ import magic
 import ssdeep
 
 from flask import request, g
+from werkzeug.exceptions import BadRequest
 from werkzeug.utils import secure_filename
 
 from plugin_engine import hooks
@@ -92,11 +93,12 @@ class FileResource(ObjectResource):
 
     def create_object(self, obj):
         file = request.files['file']
-
-        sha256 = calc_hash(file.stream, hashlib.sha256(), lambda h: h.hexdigest())
-
         file.stream.seek(0, os.SEEK_END)
         fsize = file.tell()
+        if fsize == 0:
+            raise BadRequest("Uploaded file is empty")
+
+        sha256 = calc_hash(file.stream, hashlib.sha256(), lambda h: h.hexdigest())
 
         file.stream.seek(0, os.SEEK_SET)
         fmagic = magic.from_buffer(file.stream.read())

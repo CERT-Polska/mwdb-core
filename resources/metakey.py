@@ -123,8 +123,8 @@ class MetakeyListDefinitionResource(Resource):
 
         metakeys = db.session.query(MetakeyDefinition)
 
-        if (access == "read" and not g.auth_user.has_rights(Capabilities.reading_attributes)) or \
-           (access == "set" and not g.auth_user.has_rights(Capabilities.adding_attributes)):
+        if (access == "read" and not g.auth_user.has_rights(Capabilities.reading_all_attributes)) or \
+           (access == "set" and not g.auth_user.has_rights(Capabilities.adding_all_attributes)):
             subquery = db.session.query(MetakeyPermission.key)
             if access == "read":
                 subquery = subquery.filter(MetakeyPermission.can_read == true())

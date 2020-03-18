@@ -341,8 +341,7 @@ class Object(db.Model):
         metakeys = db.session.query(Metakey) \
                              .filter(Metakey.object_id == self.id)
 
-        # TODO: Actually it should be "reading_all_attributes" superpower
-        if not g.auth_user.has_rights(Capabilities.reading_attributes):
+        if not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             metakeys = metakeys.filter(
                 Metakey.key.in_(
                     db.session.query(MetakeyPermission.key)
@@ -367,8 +366,8 @@ class Object(db.Model):
         if not metakey_definition:
             # Attribute needs to be defined first
             return None
-        # TODO: Actually it should be "adding_all_attributes" superpower
-        if not g.auth_user.has_rights(Capabilities.adding_attributes):
+
+        if not g.auth_user.has_rights(Capabilities.adding_all_attributes):
             metakey_permission = db.session.query(MetakeyPermission) \
                 .filter(MetakeyPermission.key == key) \
                 .filter(MetakeyPermission.can_set == true()) \

@@ -311,7 +311,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         value_column = Metakey.value
 
         # Checking permissions for a given key
-        if not g.auth_user.has_rights(Capabilities.reading_attributes):
+        if not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             metakeys = (db.session.query(MetakeyPermission.key)
                                   .filter(MetakeyPermission.key == meta_key_path[0])
                                   .filter(MetakeyPermission.can_read == true())

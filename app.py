@@ -142,7 +142,7 @@ def require_auth():
             """
             Single sample view in malwarefront generates 7 requests (6 GET, 1 POST)
             """
-            conn = redis.from_url(app.config["REDIS_DATABASE_URI"])
+            conn = redis.from_url(app_config.malwarecage.redis_uri)
             if request.method == 'GET':
                 """
                 DownloadResource is token-based and shouldn't be limited

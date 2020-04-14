@@ -6,8 +6,9 @@ from sqlalchemy import func
 
 from plugin_engine import hooks
 from model import Config, db
+from core.config import app_config
 from core.schema import ConfigShowSchema, MultiConfigSchema, ConfigStatsSchema
-from core.util import config_dhash, is_maintenance_set
+from core.util import config_dhash
 
 from . import requires_authorization
 from .object import ObjectResource, ObjectListResource
@@ -143,7 +144,7 @@ class ConfigResource(ObjectResource):
         db_cfg.dhash = dhash
         db_cfg.upload_time = datetime.now()
 
-        if is_maintenance_set() and g.auth_user.login == "admin":
+        if app_config.malwarecage.enable_maintenance and g.auth_user.login == app_config.malwarecage.admin_login:
             db_cfg.upload_time = obj.data.get("upload_time", datetime.now())
 
         db_cfg, is_cfg_new = Config.get_or_create(db_cfg)

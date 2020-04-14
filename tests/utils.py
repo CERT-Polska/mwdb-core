@@ -22,6 +22,10 @@ def random_name():
     return base62uuid()
 
 
+def admin_login():
+    return os.environ['MALWARECAGE_ADMIN_LOGIN']
+
+
 class ShouldRaise(object):
     def __init__(self, status_code=None):
         self.status_code = status_code
@@ -59,7 +63,8 @@ class MwdbTest(object):
         return res.json()
 
     def login(self):
-        return self.login_as(os.environ['MWDB_ADMIN_LOGIN'], os.environ['MWDB_ADMIN_PASSWORD'])
+        return self.login_as(admin_login(),
+                             os.environ['MALWARECAGE_ADMIN_PASSWORD'])
 
     def api_key_create(self, login):
         res = self.session.post(self.mwdb_url + '/user/' + login + '/api_key')

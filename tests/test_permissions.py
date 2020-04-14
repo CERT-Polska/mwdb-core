@@ -18,14 +18,14 @@ def test_manage_users():
     group_name = random_name()
 
     request("GET", "/user")
-    request("GET", "/user/admin")
-    request("POST", "/user/{}".format(user_login), json={"email": user_email, "group_name": "admin"})
-    request("PUT", "/user/{}".format(user_login), json={"email": user_email, "group_name": "admin"})
+    request("GET", "/user/"+admin_login())
+    request("POST", "/user/{}".format(user_login), json={"email": user_email, "group_name": admin_login()})
+    request("PUT", "/user/{}".format(user_login), json={"email": user_email, "group_name": admin_login()})
 
-    request("GET", "/user/admin/change_password")
+    request("GET", "/user/{}/change_password".format(admin_login()))
 
     request("GET", "/group")
-    request("GET", "/group/admin")
+    request("GET", "/group/{}".format(admin_login()))
     request("POST", "/group/{}".format(group_name), json={"capabilities": []})
     request("PUT", "/group/{}".format(group_name), json={"capabilities": []})
 

@@ -1,8 +1,8 @@
 import functools
 import importlib
-import os
 import pkgutil
 
+from core.config import app_config
 from core import log
 from model import Object, File, Config, TextBlob
 
@@ -86,8 +86,8 @@ class PluginHookHandler(PluginHookBase):
 
 
 def load_plugins(app_context: PluginAppContext):
-    if os.environ.get('MWDB_DISABLE_PLUGINS') == '1':
-        logger.info("Plugins will not be loaded because MWDB_DISABLE_PLUGINS is set.")
+    if not app_config.malwarecage.enable_plugins:
+        logger.info("Plugins will not be loaded because enable_plugins is disabled.")
         return
 
     try:
@@ -109,8 +109,8 @@ def call_hook(hook_name, *args, **kwargs):
         logger.warning('Undefined hook: {}'.format(hook_name))
         return
 
-    if os.environ.get('MWDB_DISABLE_HOOKS') == '1':
-        logger.info('Hook {} will not be ran because MWDB_DISABLE_HOOKS is set.'.format(hook_name))
+    if not app_config.malwarecage.enable_hooks:
+        logger.info('Hook {} will not be ran because enable_hooks is disabled.'.format(hook_name))
         return
 
     for hook_handler in _plugin_handlers:

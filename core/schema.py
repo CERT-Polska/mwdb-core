@@ -8,6 +8,7 @@ class ServerInfoSchema(Schema):
     is_maintenance_set = fields.Boolean()
     is_registration_enabled = fields.Boolean()
     recaptcha_site_key = fields.Str()
+    base_url = fields.Str()
 
 
 class CapabilitiesSchema(Schema):

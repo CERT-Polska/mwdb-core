@@ -4,13 +4,13 @@ ADMIN_PASSWORD=$(openssl rand -base64 18)
 POSTGRES_PASSWORD=$(openssl rand -hex 18)
 SECRET_KEY=$(openssl rand -base64 18)
 
-echo "REDIS_DATABASE_URI=redis://redis/" > mwdb-vars.env
-echo "SQLALCHEMY_DATABASE_URI=postgresql://mwdb:$POSTGRES_PASSWORD@postgres/mwdb" >> mwdb-vars.env
-echo "SECRET_KEY=$SECRET_KEY" >> mwdb-vars.env
-echo "MWDB_ADMIN_LOGIN=admin" >> mwdb-vars.env
-echo "MWDB_ADMIN_EMAIL=admin@localhost" >> mwdb-vars.env
-echo "MWDB_ADMIN_PASSWORD=$ADMIN_PASSWORD" >> mwdb-vars.env
-echo "BASE_URL=http://127.0.0.1" >> mwdb-vars.env
+echo "MALWARECAGE_REDIS_URI=redis://redis/" > mwdb-vars.env
+echo "MALWARECAGE_POSTGRES_URI=postgresql://mwdb:$POSTGRES_PASSWORD@postgres/mwdb" >> mwdb-vars.env
+echo "MALWARECAGE_SECRET_KEY=$SECRET_KEY" >> mwdb-vars.env
+echo "MALWARECAGE_ADMIN_LOGIN=admin" >> mwdb-vars.env
+echo "MALWARECAGE_ADMIN_EMAIL=admin@localhost" >> mwdb-vars.env
+echo "MALWARECAGE_ADMIN_PASSWORD=$ADMIN_PASSWORD" >> mwdb-vars.env
+echo "MALWARECAGE_BASE_URL=http://127.0.0.1" >> mwdb-vars.env
 
 if [ "$1" != "raw" ]
 then
@@ -28,11 +28,11 @@ fi
 
 if [ "$1" = "test" ]
 then
-    echo "MWDB_DISABLE_HOOKS=1" >> mwdb-vars.env
-    echo "ENABLE_RATE_LIMIT=0" >> mwdb-vars.env
+    echo "MALWARECAGE_ENABLE_HOOKS=0" >> mwdb-vars.env
+    echo "MALWARECAGE_ENABLE_RATE_LIMIT=0" >> mwdb-vars.env
 else
-    echo "ENABLE_RATE_LIMIT=1" >> mwdb-vars.env
-    echo "ENABLE_REGISTRATION=0" >> mwdb-vars.env
+    echo "MALWARECAGE_ENABLE_RATE_LIMIT=1" >> mwdb-vars.env
+    echo "MALWARECAGE_ENABLE_REGISTRATION=0" >> mwdb-vars.env
 fi
 
 echo "POSTGRES_USER=mwdb" > postgres-vars.env

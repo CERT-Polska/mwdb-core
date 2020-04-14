@@ -3,11 +3,11 @@ import re
 
 from zlib import crc32
 
-from flask import current_app
 from flask_restful import abort
 from flask_sqlalchemy import Pagination
 from werkzeug.routing import BaseConverter
 
+from core.config import app_config
 import hashlib
 
 
@@ -86,7 +86,7 @@ def paginate_fast(q, page, per_page):
 
 
 def get_sample_path(sample_sha256):
-    upload_root = current_app.config['UPLOAD_FOLDER']
+    upload_root = app_config.malwarecage.uploads_folder
     sample_sha256 = sample_sha256.lower()
 
     if not re.match('^[a-f0-9]{64}$', sample_sha256):
@@ -106,22 +106,6 @@ def is_true(flag):
     if (isinstance(flag, int) or isinstance(flag, bool)) and flag:
         return True
     return False
-
-
-def is_maintenance_set():
-    return is_true(current_app.config.get('MAINTENANCE', False))
-
-
-def is_registration_enabled():
-    return is_true(current_app.config.get('ENABLE_REGISTRATION', False))
-
-
-def is_rate_limit_enabled():
-    return is_true(current_app.config.get('ENABLE_RATE_LIMIT', False))
-
-
-def get_base_url():
-    return current_app.config.get("BASE_URL")
 
 
 class HashConverter(BaseConverter):

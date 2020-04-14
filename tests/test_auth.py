@@ -1,6 +1,6 @@
 import pytest
 
-from .utils import MwdbTest, ShouldRaise
+from .utils import MwdbTest, ShouldRaise, admin_login
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -21,7 +21,7 @@ def test_profile_change_invalidate():
 
     # "Typical" shouldn't be able to create api key for admin
     with ShouldRaise(status_code=403):
-        typical.api_key_create("admin")
+        typical.api_key_create(admin_login())
     api_key = typical.api_key_create("typical").json()
 
     typical_via_api = MwdbTest()
@@ -98,7 +98,7 @@ def test_api_key_management():
     admin = MwdbTest()
     admin.login()
 
-    admin_key = admin.api_key_create("admin").json()
+    admin_key = admin.api_key_create(admin_login()).json()
     typical_key = admin.api_key_create("typical").json()
     typical_key_2 = admin.api_key_create("typical").json()
 

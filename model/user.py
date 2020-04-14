@@ -4,9 +4,11 @@ import bcrypt
 
 from flask import current_app as app
 from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadSignature
-from sqlalchemy import func, and_
+from sqlalchemy import and_
 
 from sqlalchemy.orm.exc import NoResultFound
+
+from core.config import app_config
 
 from . import db
 from .object import ObjectPermission
@@ -84,12 +86,12 @@ class User(db.Model):
         return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
 
     def _generate_token(self, fields, expiration):
-        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'], expires_in=expiration)
+        s = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key, expires_in=expiration)
         return s.dumps(dict([('login', self.login)] + [(field, getattr(self, field)) for field in fields]))
 
     @staticmethod
     def _verify_token(token, fields):
-        s = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'])
+        s = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key)
         try:
             data = s.loads(token)
         except SignatureExpired:

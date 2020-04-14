@@ -4,6 +4,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer, BadSignature, Signatur
 from werkzeug.exceptions import Forbidden
 
 from model import File
+from core.config import app_config
 from core.schema import URLReturnSchema
 from core.util import get_sample_path
 
@@ -37,7 +38,7 @@ class DownloadResource(Resource):
             403:
                 description: When access token is not valid
         """
-        s = TimedJSONWebSignatureSerializer(current_app.config['SECRET_KEY'])
+        s = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key)
         try:
             download_req = s.loads(access_token)
         except SignatureExpired:
@@ -76,7 +77,7 @@ class RequestSampleDownloadResource(Resource):
         """
         from core.service import get_url_for
         file = authenticated_access(File, identifier)
-        s = TimedJSONWebSignatureSerializer(current_app.config['SECRET_KEY'], expires_in=60)
+        s = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key, expires_in=60)
         obj = s.dumps({'identifier': file.sha256})
 
         schema = URLReturnSchema()

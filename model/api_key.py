@@ -1,11 +1,12 @@
 import uuid
 
-from flask import current_app as app
 from itsdangerous import JSONWebSignatureSerializer, SignatureExpired, BadSignature
 
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm.exc import NoResultFound
+
+from core.config import app_config
 
 from . import db
 
@@ -26,7 +27,7 @@ class APIKey(db.Model):
 
     @staticmethod
     def verify_token(token):
-        s = JSONWebSignatureSerializer(app.config['SECRET_KEY'])
+        s = JSONWebSignatureSerializer(app_config.malwarecage.secret_key)
         try:
             data = s.loads(token)
         except SignatureExpired:
@@ -45,5 +46,5 @@ class APIKey(db.Model):
         return api_key_obj.user
 
     def generate_token(self):
-        s = JSONWebSignatureSerializer(app.config['SECRET_KEY'])
+        s = JSONWebSignatureSerializer(app_config.malwarecage.secret_key)
         return s.dumps({"login": self.user.login, "api_key_id": str(self.id)})

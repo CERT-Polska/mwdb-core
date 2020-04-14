@@ -24,8 +24,9 @@ from werkzeug.exceptions import Forbidden, TooManyRequests
 from model import db, User, Group, APIKey
 
 from core.capabilities import Capabilities
+from core.config import app_config
 from core.service import setup_restful_service
-from core.util import HashConverter, is_maintenance_set, is_rate_limit_enabled
+from core.util import HashConverter
 from core import log
 
 from resources import requires_authorization
@@ -37,8 +38,9 @@ import redis
 app = Flask(__name__)
 migrate = Migrate(app, db)
 
-app.config.from_object('config')
-
+app.config["SQLALCHEMY_DATABASE_URI"] = app_config.malwarecage.postgres_uri
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = app_config.malwarecage.secret_key
 """
 Flask-restful tries to be smart and transforms NotFound exceptions.
 Adds: "You have requested this URI [/file/root] but did you mean
@@ -46,6 +48,10 @@ Adds: "You have requested this URI [/file/root] but did you mean
 but some objects needed to fulfill request are missing.
 """
 app.config["ERROR_404_HELP"] = False
+
+# Load Flask-specific overrides if specified
+if app_config.malwarecage.flask_config_file:
+    app.config.from_pyfile(app_config.malwarecage.flask_config_file)
 
 db.init_app(app)
 
@@ -126,13 +132,13 @@ def require_auth():
                 log.getLogger().warning("'%s' used legacy auth token for authentication", g.auth_user.login)
 
     if g.auth_user:
-        if is_maintenance_set() and g.auth_user.login != "admin":
+        if app_config.malwarecage.enable_maintenance and g.auth_user.login != app_config.malwarecage.admin_login:
             raise Forbidden('Maintenance underway. Please come back later.')
 
         if g.auth_user.disabled:
             raise Forbidden("User has been disabled.")
 
-        if is_rate_limit_enabled() and not g.auth_user.has_rights(Capabilities.unlimited_requests):
+        if app_config.malwarecage.enable_rate_limit and not g.auth_user.has_rights(Capabilities.unlimited_requests):
             """
             Single sample view in malwarefront generates 7 requests (6 GET, 1 POST)
             """
@@ -225,7 +231,8 @@ def create_admin(name, email, password, require_empty):
 # Load plugins
 plugin_context = PluginAppContext(app, api, spec)
 
-load_plugins(plugin_context)
+with app.app_context():
+    load_plugins(plugin_context)
 
 spec_docs = spec.to_dict()
 

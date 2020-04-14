@@ -18,7 +18,6 @@ RUN apk add --no-cache postgresql-client postgresql-dev libmagic \
     && apk del build
 
 COPY . /app
-COPY config.docker.py /app/config.py
 
 # Create a /app/uploads directory
 RUN mkdir -p /app/uploads/

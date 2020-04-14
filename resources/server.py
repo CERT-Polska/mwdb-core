@@ -1,10 +1,9 @@
-from flask import g, current_app
+from flask import g
 from flask_restful import Resource
-from core.schema import PingStatusSchema, ServerInfoSchema
 from version import app_build_version
-from core.util import is_maintenance_set, is_registration_enabled
 
-from . import requires_authorization
+from core.config import app_config
+from core.schema import PingStatusSchema, ServerInfoSchema
 
 
 class PingResource(Resource):
@@ -43,7 +42,8 @@ class ServerInfoResource(Resource):
         return schema.dump({
             "server_version": app_build_version,
             "is_authenticated": bool(g.auth_user),
-            "is_maintenance_set": is_maintenance_set(),
-            "is_registration_enabled": is_registration_enabled(),
-            "recaptcha_site_key": current_app.config.get('RECAPTCHA_SITE_KEY')
+            "is_maintenance_set": app_config.malwarecage.enable_maintenance,
+            "is_registration_enabled": app_config.malwarecage.enable_registration,
+            "recaptcha_site_key": app_config.malwarecage.recaptcha_site_key,
+            "base_url": app_config.malwarecage.base_url
         })

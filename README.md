@@ -71,7 +71,7 @@ All changes in code are automatically reloaded excluding:
 
 In cases mentioned above - Docker images need to be rebuilt.
 
-Password for administration account is available in `mwdb-vars.env` file in `MWDB_ADMIN_PASSWORD` field.
+Password for administration account is available in `mwdb-vars.env` file in `MALWARECAGE_ADMIN_PASSWORD` field.
 
 #### Testing mail-related features
 

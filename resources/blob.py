@@ -6,8 +6,8 @@ from flask import g
 from plugin_engine import hooks
 from model import db, TextBlob
 from core.capabilities import Capabilities
+from core.config import app_config
 from core.schema import TextBlobShowSchema, MultiTextBlobSchema
-from core.util import is_maintenance_set
 
 from . import requires_capabilities, requires_authorization
 from .object import ObjectResource, ObjectListResource
@@ -98,7 +98,7 @@ class TextBlobResource(ObjectResource):
         db_blob.upload_time = datetime.now()
         db_blob.last_seen = datetime.now()
 
-        if is_maintenance_set() and g.auth_user.login == "admin":
+        if app_config.malwarecage.enable_maintenance and g.auth_user.login == app_config.malwarecage.admin_login:
             db_blob.upload_time = obj.data.get("upload_time", datetime.now())
 
         db_blob, is_blob_new = TextBlob.get_or_create(db_blob)

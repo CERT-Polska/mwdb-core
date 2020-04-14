@@ -1,5 +1,5 @@
 from .relations import *
-from .utils import ShouldRaise, MwdbTest
+from .utils import ShouldRaise, MwdbTest, admin_login
 
 
 def test_member_public_groups():
@@ -79,4 +79,4 @@ def test_multigroup_sharing():
     groups = {"public", Alice.identity, Bob.identity, Joe.identity, Workgroup.identity}
     assert set(shares["groups"]).intersection(groups) == groups
     assert set(gr["group_name"] for gr in shares["shares"]).issuperset(
-        {Alice.identity, Bob.identity, Joe.identity, Workgroup.identity, "admin"})
+        {Alice.identity, Bob.identity, Joe.identity, Workgroup.identity, admin_login()})

@@ -1,7 +1,7 @@
 import datetime
 import requests
 
-from flask import request, g, current_app
+from flask import request, g
 from flask_restful import Resource
 from sqlalchemy import exists
 from sqlalchemy.orm.exc import NoResultFound
@@ -10,10 +10,10 @@ from werkzeug.exceptions import Forbidden, Conflict, InternalServerError, BadReq
 
 from model import db, User, Group
 from core.capabilities import Capabilities
+from core.config import app_config
 from core.mail import MailError, send_email_notification
 from core.schema import UserLoginSchema, UserLoginSuccessSchema, UserTokenSchema, UserSetPasswordSchema, \
     UserSuccessSchema, UserRegisterSchema, UserIdentitySchema, UserRecoverPasswordSchema
-from core.util import is_maintenance_set, is_registration_enabled, get_base_url
 
 from . import logger, requires_capabilities, requires_authorization
 
@@ -48,7 +48,7 @@ class LoginResource(Resource):
         except NoResultFound:
             raise Forbidden('Invalid login or password.')
 
-        if is_maintenance_set() and user.login != "admin":
+        if app_config.malwarecage.enable_maintenance and user.login != app_config.malwarecage.admin_login:
             raise Forbidden('Maintenance underway. Please come back later.')
 
         if not user.verify_password(obj.data.get('password')):
@@ -91,7 +91,7 @@ class RegisterResource(Resource):
                   application/json:
                     schema: UserSuccessSchema
         """
-        if not is_registration_enabled():
+        if not app_config.malwarecage.enable_registration:
             raise Forbidden("User registration is not enabled.")
 
         schema = UserRegisterSchema()
@@ -108,7 +108,7 @@ class RegisterResource(Resource):
         if db.session.query(exists().where(Group.name == login)).scalar():
             raise Conflict("Name already exists")
 
-        recaptcha_secret = current_app.config.get("RECAPTCHA_SECRET")
+        recaptcha_secret = app_config.malwarecage.recaptcha_secret
 
         if recaptcha_secret:
             try:
@@ -147,7 +147,7 @@ class RegisterResource(Resource):
             send_email_notification("pending",
                                     "Pending registration in Malwarecage",
                                     user.email,
-                                    base_url=get_base_url(),
+                                    base_url=app_config.malwarecage.base_url,
                                     login=user.login)
         except MailError:
             logger.exception("Can't send e-mail notification")
@@ -258,7 +258,7 @@ class RequestPasswordChangeResource(Resource):
             send_email_notification("recover",
                                     "Change password in Malwarecage",
                                     email,
-                                    base_url=get_base_url(),
+                                    base_url=app_config.malwarecage.base_url,
                                     login=login,
                                     set_password_token=g.auth_user.generate_set_password_token().decode("utf-8"))
         except MailError:
@@ -296,7 +296,7 @@ class RecoverPasswordResource(Resource):
         except NoResultFound:
             raise Forbidden('Invalid login or email address.')
 
-        recaptcha_secret = current_app.config.get("RECAPTCHA_SECRET")
+        recaptcha_secret = app_config.malwarecage.recaptcha_secret
 
         if recaptcha_secret:
             try:
@@ -317,7 +317,7 @@ class RecoverPasswordResource(Resource):
             send_email_notification("recover",
                                     "Recover password in Malwarecage",
                                     user.email,
-                                    base_url=get_base_url(),
+                                    base_url=app_config.malwarecage.base_url,
                                     login=user.login,
                                     set_password_token=user.generate_set_password_token().decode("utf-8"))
         except MailError:

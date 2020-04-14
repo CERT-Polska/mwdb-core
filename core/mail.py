@@ -1,11 +1,9 @@
 import os
-import socket
 import smtplib
 
 from email.message import EmailMessage
 
-from flask import current_app
-from core.util import is_true
+from .config import app_config
 
 
 class MailError(RuntimeError):
@@ -31,7 +29,7 @@ def create_message(kind, subject, recipient_email, **params) -> EmailMessage:
 
     message = EmailMessage()
     message['Subject'] = subject
-    message['From'] = current_app.config["MAIL_FROM"]
+    message['From'] = app_config.malwarecage.mail_from
     message['To'] = recipient_email
     message.set_content(template.format(**params))
     if html_template:
@@ -47,15 +45,17 @@ def send_email_notification(kind, subject, recipient_email, **params):
     :param recipient_email: Recipient e-mail address
     :param params: Additional message parameters
     """
-    if "MAIL_SMTP" not in current_app.config:
-        raise MailError("Missing MAIL_SMTP in config.py")
-    if "MAIL_FROM" not in current_app.config:
-        raise MailError("Missing MAIL_FROM in config.py")
+    if not app_config.malwarecage.mail_smtp:
+        raise MailError("mail_smtp is not set in configuration file")
+    if not app_config.malwarecage.mail_from:
+        raise MailError("mail_from is not set in configuration file")
+
+    mail_smtp = app_config.malwarecage.mail_smtp
     message = create_message(kind, subject, recipient_email, **params)
-    if ":" in current_app.config["MAIL_SMTP"]:
-        smtp_host, smtp_port = current_app.config["MAIL_SMTP"].split(":")
+    if ":" in mail_smtp:
+        smtp_host, smtp_port = mail_smtp.split(":")
     else:
-        smtp_host = current_app.config["MAIL_SMTP"]
+        smtp_host = mail_smtp
         smtp_port = 25
     try:
         with smtplib.SMTP(smtp_host, int(smtp_port), timeout=3) as s:

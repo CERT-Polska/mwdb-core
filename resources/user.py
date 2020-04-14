@@ -9,8 +9,8 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound, InternalServerErr
 
 from model import db, User, Group
 from core.capabilities import Capabilities
+from core.config import app_config
 from core.mail import MailError, send_email_notification
-from core.util import get_base_url
 from core.schema import UserSuccessSchema, MultiUserShowSchema, UserLoginSchemaBase, UserProfileSchema, UserManageSchema, \
     UserProfileManageInfoSchema
 
@@ -44,7 +44,7 @@ class UserPendingResource(Resource):
             send_email_notification("register",
                                     "New account registered in Malwarecage",
                                     user.email,
-                                    base_url=get_base_url(),
+                                    base_url=app_config.malwarecage.base_url,
                                     login=user.login,
                                     set_password_token=user.generate_set_password_token().decode("utf-8"))
         except MailError:
@@ -76,7 +76,7 @@ class UserPendingResource(Resource):
             send_email_notification("rejection",
                                     "Malwarecage account request has been rejected",
                                     user.email,
-                                    base_url=get_base_url(),
+                                    base_url=app_config.malwarecage.base_url,
                                     login=user.login,
                                     set_password_token=user.generate_set_password_token().decode("utf-8"))
         except MailError:
@@ -143,7 +143,7 @@ class UserResource(Resource):
                 send_email_notification("register",
                                         "New account registered in Malwarecage",
                                         user.email,
-                                        base_url=get_base_url(),
+                                        base_url=app_config.malwarecage.base_url,
                                         login=user.login,
                                         set_password_token=user.generate_set_password_token().decode("utf-8"))
             except MailError:

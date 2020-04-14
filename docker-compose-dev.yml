@@ -14,11 +14,11 @@ services:
     environment:
       UWSGI_PY_AUTORELOAD: 1
       UWSGI_ENABLE_THREADS: 1
-      MAIL_SMTP: "mailhog:1025"
-      MAIL_FROM: "noreply@malwarecage.dev"
-      RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-      RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-      ENABLE_REGISTRATION: 1
+      MALWARECAGE_MAIL_SMTP: "mailhog:1025"
+      MALWARECAGE_MAIL_FROM: "noreply@malwarecage.dev"
+      MALWARECAGE_RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+      MALWARECAGE_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+      MALWARECAGE_ENABLE_REGISTRATION: 1
     volumes:
       - "./core:/app/core"
       - "./migrations/versions:/app/migrations/versions"

@@ -13,8 +13,9 @@ from werkzeug.utils import secure_filename
 from plugin_engine import hooks
 from core.humanhash import Humanhash
 from model import File
+from core.config import app_config
 from core.schema import FileShowSchema, MultiFileShowSchema
-from core.util import calc_hash, crc32_sum, is_maintenance_set
+from core.util import calc_hash, crc32_sum
 
 from . import requires_authorization
 from .object import ObjectResource, ObjectListResource
@@ -119,7 +120,7 @@ class FileResource(ObjectResource):
         db_file.ssdeep = calc_hash(file.stream, ssdeep.Hash(), lambda h: h.digest())
         db_file.upload_time = datetime.now()
 
-        if is_maintenance_set() and g.auth_user.login == "admin":
+        if app_config.malwarecage.enable_maintenance and g.auth_user.login == app_config.malwarecage.admin_login:
             db_file.upload_time = obj.data.get("upload_time", datetime.now())
 
         db_file, is_file_new = File.get_or_create(db_file, file)

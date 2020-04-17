@@ -21,6 +21,9 @@ before_script:
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
   - ssh-keyscan -H vcs.cert.pl >> ~/.ssh/known_hosts
+  # This is really weird glitch in Gitlab Runner, we need to forcefully
+  # clean submodules and reinit them manually
+  - git submodule deinit --all --force
   - git submodule update --init --recursive
   - docker login -u "$DOCKER_REGISTRY_LOGIN" -p "$DOCKER_REGISTRY_PASSWORD" "$DOCKER_REGISTRY"
   - mkdir -p artifacts/test

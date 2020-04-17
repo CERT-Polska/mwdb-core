@@ -2,6 +2,7 @@ image: certpl/docker-ci-base:latest
 
 variables:
   DOCKER_REGISTRY: dr.cert.pl/malwarecage
+  GIT_SUBMODULE_STRATEGY: none
 
 services:
   - docker:dind

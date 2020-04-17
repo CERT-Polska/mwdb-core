@@ -15,6 +15,8 @@ spec:
           imagePullPolicy: Always
           name: mwdb-container
           env:
+          - name: UWSGI_CHEAPER
+            value: "4"
           - name: INJECTS_TOKEN
             valueFrom:
               secretKeyRef:

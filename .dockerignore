@@ -1,0 +1,9 @@
+*.pyc
+venv/
+.vscode
+.idea
+.mypy_cache
+uploads/
+malwarecage.ini
+malwarecage.example.ini
+

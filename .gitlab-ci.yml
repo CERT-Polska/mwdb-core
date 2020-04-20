@@ -3,6 +3,7 @@ image: certpl/docker-ci-base:latest
 variables:
   DOCKER_REGISTRY: dr.cert.pl/malwarecage
   GIT_SUBMODULE_STRATEGY: none
+  DOCKER_BUILDKIT: 1
 
 services:
   - docker:dind
@@ -28,7 +29,7 @@ before_script:
   - docker login -u "$DOCKER_REGISTRY_LOGIN" -p "$DOCKER_REGISTRY_PASSWORD" "$DOCKER_REGISTRY"
   - mkdir -p artifacts/test
   - export CI_COMMIT_REF_NAME=`echo -n $CI_COMMIT_REF_NAME | sed 's#/#-#g'`
-  
+
 build_mwdb:
   stage: build
   script:
@@ -42,8 +43,7 @@ build_mwdb_tests:
 build_malwarefront:
   stage: build
   script:
-    - ./build-image.sh "$DOCKER_REGISTRY/malwarecage_malwarefront_build" "--target build -f ./deploy/docker/Dockerfile-malwarefront ."
-    - ./build-image.sh "$DOCKER_REGISTRY/malwarecage_malwarefront" "--cache-from \"$DOCKER_REGISTRY/malwarecage_malwarefront_build:$CI_COMMIT_REF_NAME\" --cache-from \"$DOCKER_REGISTRY/malwarecage_malwarefront_build:latest\" -f ./deploy/docker/Dockerfile-malwarefront ."
+    - ./build-image.sh "$DOCKER_REGISTRY/malwarecage_malwarefront" ". -f ./deploy/docker/Dockerfile-malwarefront"
 
 test_mwdb:
   stage: test
@@ -72,34 +72,3 @@ test_mwdb:
       - artifacts/test/malwarefront.log
     when: always
     expire_in: 1 week
-
-deploy_staging:
-  stage: deploy
-  only:
-    - master
-  environment:
-    name: staging
-    url: https://mwdb-st.cert.pl
-  script:
-    - kubectl config set-cluster cert --server="https://kapi.cert.pl" --insecure-skip-tls-verify=true
-    - kubectl config set-credentials gitlab-ci --token "$KUBE_TOKEN"
-    - kubectl config set-context default --cluster=cert --user=gitlab-ci
-    - kubectl config use-context default
-    - kubectl -n malwarecage-st set image deployment.v1.apps/mwdb mwdb-container=$DOCKER_REGISTRY/malwarecage_mwdb:$CI_COMMIT_SHA
-    - kubectl -n malwarecage-st set image deployment.v1.apps/malwarefront malwarefront-container=$DOCKER_REGISTRY/malwarecage_malwarefront:$CI_COMMIT_SHA
-
-deploy:
-  stage: deploy
-  when: manual
-  only:
-    - master
-  environment:
-    name: production
-    url: https://mwdb.cert.pl
-  script:
-    - kubectl config set-cluster cert --server="https://kapi.cert.pl" --insecure-skip-tls-verify=true
-    - kubectl config set-credentials gitlab-ci --token "$KUBE_TOKEN"
-    - kubectl config set-context default --cluster=cert --user=gitlab-ci
-    - kubectl config use-context default
-    - kubectl -n malwarecage-prod set image deployment.v1.apps/mwdb mwdb-container=$DOCKER_REGISTRY/malwarecage_mwdb:$CI_COMMIT_SHA
-    - kubectl -n malwarecage-prod set image deployment.v1.apps/malwarefront malwarefront-container=$DOCKER_REGISTRY/malwarecage_malwarefront:$CI_COMMIT_SHA

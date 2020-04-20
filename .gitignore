@@ -14,3 +14,7 @@ postgres-vars.env
 .mypy_cache/
 /malwarefront/extensions/plugins/
 /malwarefront/extensions/package.json
+# These directories are user-controlled
+/plugins
+/mail_templates
+

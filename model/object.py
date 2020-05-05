@@ -337,11 +337,11 @@ class Object(db.Model):
                 raise
         return False
 
-    def get_metakeys(self, as_dict=False):
+    def get_metakeys(self, as_dict=False, check_permissions=True):
         metakeys = db.session.query(Metakey) \
                              .filter(Metakey.object_id == self.id)
 
-        if not g.auth_user.has_rights(Capabilities.reading_all_attributes):
+        if check_permissions and not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             metakeys = metakeys.filter(
                 Metakey.key.in_(
                     db.session.query(MetakeyPermission.key)
@@ -360,14 +360,14 @@ class Object(db.Model):
             dict_metakeys[metakey.key].append(metakey.value)
         return dict_metakeys
 
-    def add_metakey(self, key, value, commit=True):
+    def add_metakey(self, key, value, commit=True, check_permissions=True):
         metakey_definition = db.session.query(MetakeyDefinition) \
                                        .filter(MetakeyDefinition.key == key).first()
         if not metakey_definition:
             # Attribute needs to be defined first
             return None
 
-        if not g.auth_user.has_rights(Capabilities.adding_all_attributes):
+        if check_permissions and not g.auth_user.has_rights(Capabilities.adding_all_attributes):
             metakey_permission = db.session.query(MetakeyPermission) \
                 .filter(MetakeyPermission.key == key) \
                 .filter(MetakeyPermission.can_set == true()) \

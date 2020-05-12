@@ -70,9 +70,6 @@ class ObjectListResource(Resource):
 
         predicate = g.auth_user.has_access_to_object(self.ObjectType.id)
 
-        if request.args.get('filter') == 'mine':
-            predicate = g.auth_user.has_uploaded_object(self.ObjectType.id)
-
         if query:
             """
             If query parameter is passed, query for objects using search baked queries

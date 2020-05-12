@@ -337,9 +337,16 @@ class Object(db.Model):
                 raise
         return False
 
-    def get_metakeys(self, as_dict=False, check_permissions=True):
+    def get_metakeys(self, as_dict=False, check_permissions=True, show_hidden=False):
+        """
+        Gets all object metakeys (attributes)
+        :param as_dict: Return dict object instead of list of Metakey objects (default: False)
+        :param check_permissions: Filter results including current user permissions (default: True)
+        :param show_hidden: Show hidden metakeys
+        """
         metakeys = db.session.query(Metakey) \
-                             .filter(Metakey.object_id == self.id)
+                             .filter(Metakey.object_id == self.id) \
+                             .join(MetakeyDefinition, MetakeyDefinition.key == Metakey.key)
 
         if check_permissions and not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             metakeys = metakeys.filter(
@@ -347,6 +354,9 @@ class Object(db.Model):
                     db.session.query(MetakeyPermission.key)
                               .filter(MetakeyPermission.can_read == true())
                               .filter(g.auth_user.is_member(MetakeyPermission.group_id))))
+
+        if not show_hidden:
+            metakeys = metakeys.filter(MetakeyDefinition.hidden.is_(False))
 
         metakeys = metakeys.order_by(Metakey.id).all()
 

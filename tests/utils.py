@@ -199,13 +199,16 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def get_attributes(self, identifier):
-        res = self.session.get(self.mwdb_url + '/object/' + identifier + '/meta')
+    def get_attributes(self, identifier, show_hidden=False):
+        res = self.session.get(self.mwdb_url + '/object/' + identifier + '/meta', params={
+            "hidden": int(show_hidden)
+        })
         res.raise_for_status()
         return res.json()
 
-    def add_attribute_definition(self, key, template):
-        res = self.session.put(self.mwdb_url + '/meta/manage/' + key, json={'key': key, 'template': template})
+    def add_attribute_definition(self, key, template, hidden=False):
+        res = self.session.put(self.mwdb_url + '/meta/manage/' + key, json={'key': key, 'template': template,
+                                                                            'hidden': hidden})
         res.raise_for_status()
         return res.json()
 

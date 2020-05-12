@@ -173,6 +173,7 @@ class MetakeyDefinitionSchema(MetakeySchemaBase):
     template = fields.Str(attribute="url_template")
     label = fields.Str()
     description = fields.Str()
+    hidden = fields.Boolean()
 
 
 class MetakeyDefinitionManageSchema(MetakeyDefinitionSchema):

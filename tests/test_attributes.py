@@ -77,3 +77,44 @@ def test_metakey_public_perm(admin, attr_user):
     attr_user.add_attribute(sample_id, attr_name, 'random_value')
     attrs = attr_user.get_attributes(sample_id)['metakeys']
     assert len(attrs) == 0
+
+
+def test_metakey_hidden(admin, attr_user):
+    sample_id = attr_user.add_sample()["id"]
+    attr_name = random_name().lower()
+    admin.add_attribute_definition(attr_name, '', hidden=True)
+    admin.add_attribute_permission(attr_name, group='public', can_read=True, can_set=False)
+
+    admin.add_attribute(sample_id, attr_name, 'random_value')
+    # Admin should not see any attributes because all are hidden
+    attrs = admin.get_attributes(sample_id)["metakeys"]
+    assert len(attrs) == 0
+    # ... unless request to see them
+    attrs = admin.get_attributes(sample_id, show_hidden=True)['metakeys']
+    assert len(attrs) == 1
+
+    attrs = attr_user.get_attributes(sample_id)['metakeys']
+    assert len(attrs) == 0
+    with ShouldRaise(403):
+        attr_user.get_attributes(sample_id, show_hidden=True)
+
+
+def test_metakey_hidden_search(admin, attr_user):
+    sample_id = attr_user.add_sample()["id"]
+    attr_name = random_name().lower()
+    admin.add_attribute_definition(attr_name, '', hidden=True)
+    admin.add_attribute_permission(attr_name, group='public', can_read=True, can_set=False)
+
+    admin.add_attribute(sample_id, attr_name, 'random_value')
+    # User can search hidden attribute values
+    results = attr_user.search(f"file.meta.{attr_name}:random_value")
+    assert len(results) == 1
+    # but is not allowed to use wildcards
+    with ShouldRaise(400):
+        attr_user.search(f"file.meta.{attr_name}:random*")
+
+    # Administrators (reading_all_attributes enabled) can do anything
+    results = admin.search(f"file.meta.{attr_name}:random_value")
+    assert len(results) == 1
+    results = admin.search(f"file.meta.{attr_name}:random*")
+    assert len(results) == 1

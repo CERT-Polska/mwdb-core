@@ -40,6 +40,7 @@ class MultipleObjectsQueryException(SQLQueryBuilderBaseException):
         Raised when multiple objects are queried, eg. file.file_name:something AND static.cfg:something2
     """
 
+
 class ObjectNotFoundException(SQLQueryBuilderBaseException):
     """
         Raised when object referenced in query condition can't be found
@@ -299,6 +300,9 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
 
     def _share_extract_condition(self, column, column_field, node, is_range=False):
         value = self._get_value(node)
+        if is_range:
+            raise FieldNotQueryableException(f"Range queries are not supported for '{column_field}'")
+
         if column_field == "shared":
             group_id = db.session.query(Group).filter(Group.name == value).first()
             if group_id is None:
@@ -327,14 +331,19 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         key_column = Metakey.key
         value_column = Metakey.value
 
+        if is_range:
+            raise FieldNotQueryableException("Range queries are not supported for 'meta'")
+
         # Checking permissions for a given key
         if not g.auth_user.has_rights(Capabilities.reading_all_attributes):
-            metakeys = (db.session.query(MetakeyPermission.key)
-                                  .filter(MetakeyPermission.key == meta_key_path[0])
-                                  .filter(MetakeyPermission.can_read == true())
-                                  .filter(g.auth_user.is_member(MetakeyPermission.group_id)))
-            if metakeys.first() is None:
+            metakey = (db.session.query(MetakeyPermission)
+                                 .filter(MetakeyPermission.key == meta_key_path[0])
+                                 .filter(MetakeyPermission.can_read == true())
+                                 .filter(g.auth_user.is_member(MetakeyPermission.group_id))).first()
+            if metakey is None:
                 raise ObjectNotFoundException("No such attribute: {}".format(meta_key_path[0]))
+            if metakey.template.hidden and node.has_wildcard():
+                raise FieldNotQueryableException("Wildcards are not allowed for hidden attributes")
 
         value = self._get_value(node)
         if node.has_wildcard():
@@ -348,6 +357,9 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
 
     def _multi_extract_condition(self, column, node, is_range=False):
         value = self._get_value(node)
+
+        if is_range:
+            raise FieldNotQueryableException("Range queries are not supported for lists")
 
         # Get mapper for entity bound with relationship
         table_mapper = column.property.mapper

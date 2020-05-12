@@ -1,7 +1,7 @@
 from flask import request, g
 from flask_restful import Resource
 from sqlalchemy.sql.expression import true
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 
 from core.capabilities import Capabilities
 from core.schema import MetakeyShowSchema, MetakeySchema, MetakeyDefinitionManageSchema, \
@@ -32,6 +32,12 @@ class MetakeyResource(Resource):
               schema:
                 type: string
               description: Object's id
+            - in: query
+              name: hidden
+              schema:
+                type: int
+              description: show hidden metakeys (requires reading_all_attributes capability)
+              required: false
         responses:
             200:
                 description: Object metakeys
@@ -42,7 +48,11 @@ class MetakeyResource(Resource):
                 description: When object doesn't exist
         """
         db_object = authenticated_access(Object, identifier)
-        metakeys = db_object.get_metakeys()
+
+        show_hidden = bool(int(request.args.get('hidden', '0')))
+        if show_hidden and not g.auth_user.has_rights(Capabilities.reading_all_attributes):
+            raise Forbidden("You are not permitted to read hidden metakeys")
+        metakeys = db_object.get_metakeys(show_hidden=show_hidden)
         schema = MetakeyShowSchema()
         return schema.dump({"metakeys": metakeys})
 
@@ -227,11 +237,13 @@ class MetakeyDefinitionManageResource(Resource):
         url_template = obj.data.get('url_template')
         label = obj.data.get('label')
         description = obj.data.get('description')
+        hidden = obj.data.get('hidden', False)
 
         metakey_definition = MetakeyDefinition(key=key,
                                                url_template=url_template,
                                                label=label,
-                                               description=description)
+                                               description=description,
+                                               hidden=hidden)
         db.session.merge(metakey_definition)
         db.session.commit()
 

@@ -91,4 +91,5 @@ class MetakeyDefinition(db.Model):
     label = db.Column(db.String(64))
     description = db.Column(db.Text)
     url_template = db.Column(db.Text)
+    hidden = db.Column(db.Boolean, nullable=False, default=False)
     permissions = db.relationship('MetakeyPermission', lazy='joined', back_populates="template")

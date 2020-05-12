@@ -11,7 +11,6 @@ mapping_objects = {
 mapping = {
     "file": {
         "dhash": File.dhash,
-        "upload_time": File.upload_time,
         "sha512": File.sha512,
         "sha256": File.sha256,
         "sha1": File.sha1,
@@ -25,25 +24,19 @@ mapping = {
     },
     "object": {
         "dhash": Object.dhash,
-        "upload_time": Object.upload_time,
     },
     "static": {
         "dhash": Config.dhash,
-        "upload_time": Config.upload_time,
         "type": Config.config_type,
         "family": Config.family,
     },
     "config": {
         "dhash": Config.dhash,
-        "upload_time": Config.upload_time,
         "type": Config.config_type,
         "family": Config.family,
     },
     "blob": {
         "dhash": TextBlob.dhash,
-        "upload_time": TextBlob.upload_time,
-        "first_seen": TextBlob.upload_time,
-        "last_seen": TextBlob.last_seen,
         "content": TextBlob._content,
         "type": TextBlob.blob_type,
         "name": TextBlob.blob_name,
@@ -150,5 +143,33 @@ json_mapping = {
     },
     "config": {
         "cfg": Config.cfg,
+    }
+}
+
+date_mapping_objects = {
+    "file": File,
+    "object": Object,
+    "static": Config,
+    "config": Config,
+    "blob": TextBlob
+}
+
+date_mapping = {
+    "file": {
+        "upload_time": File.upload_time,
+    },
+    "object": {
+        "upload_time": Object.upload_time,
+    },
+    "static": {
+        "upload_time": Config.upload_time,
+    },
+    "config": {
+        "upload_time": Config.upload_time,
+    },
+    "blob": {
+        "upload_time": TextBlob.upload_time,
+        "first_seen": TextBlob.upload_time,
+        "last_seen": TextBlob.last_seen,
     }
 }

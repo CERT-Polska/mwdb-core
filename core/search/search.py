@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from flask import g
 
 from luqum.parser import parser
@@ -12,7 +13,8 @@ from sqlalchemy.sql.expression import true
 import functools
 from ..capabilities import Capabilities
 from .mappings import mapping, mapping_objects, json_mapping, json_mapping_objects, multi_mapping, \
-                      multi_mapping_objects, meta_mapping, meta_mapping_objects, share_mapping, share_mapping_objects
+                      multi_mapping_objects, meta_mapping, meta_mapping_objects, share_mapping, share_mapping_objects, \
+                      date_mapping, date_mapping_objects
 
 
 class SQLQueryBuilderBaseException(Exception):
@@ -188,6 +190,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
                                         ("multi", multi_mapping),
                                         ("meta", meta_mapping),
                                         ("share", share_mapping),
+                                        ("date", date_mapping),
                                         ("default", mapping)]:
             tmp = mapping_
             for i in range(2):
@@ -212,6 +215,8 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
             return self._meta_field_extractor
         elif type_of_query == "share":
             return self._share_field_extractor
+        elif type_of_query == "date":
+            return self._date_field_extractor
         elif 0 < len(field) <= 2 and type_of_query == "default":
             return self._default_extractor
         else:
@@ -279,6 +284,18 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
                 raise FieldNotQueryableException("No such field: {}".format(f))
 
         return object_type_class, functools.partial(self._json_extract_condition, field[2:], column)
+
+    def _date_field_extractor(self, field: list):
+        object_type_name = field[0]
+        object_type_class = date_mapping_objects.get(object_type_name, None)
+
+        column = date_mapping
+        for f in field:
+            column = column.get(f, None)
+            if column is None:
+                raise FieldNotQueryableException("No such field: {}".format(f))
+
+        return object_type_class, functools.partial(self._date_extract_condition, column)
 
     def _share_extract_condition(self, column, column_field, node, is_range=False):
         value = self._get_value(node)
@@ -369,6 +386,34 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         else:
             condition = column_to_query == value
 
+        return condition
+
+    def _get_date_range(self, date_string):
+        formats = [
+            ("%Y-%m-%d %H:%M", timedelta(minutes=1)),
+            ("%Y-%m-%d %H:%M:%S", timedelta(seconds=1)),
+            ("%Y-%m-%d", timedelta(days=1))
+        ]
+        for fmt, range_offs in formats:
+            try:
+                timestamp = datetime.strptime(date_string, fmt)
+                return timestamp, timestamp + range_offs
+            except ValueError:
+                continue
+        else:
+            raise FieldNotQueryableException(f"Unsupported date-time format ({date_string})")
+
+    def _date_extract_condition(self, column, node, is_range=False):
+        if is_range:
+            if not (node.include_low and node.include_high):
+                raise FieldNotQueryableException("Exclusive range is not supported for date-time field")
+            low = self._get_date_range(node.low.value)[0]
+            high = self._get_date_range(node.high.value)[1]
+        else:
+            if node.has_wildcard():
+                raise FieldNotQueryableException("Wildcards are not allowed for date-time field")
+            low, high = self._get_date_range(node.value)
+        condition = and_(column >= low, column < high)
         return condition
 
     def _default_extract_condition(self, column, node, is_range=False):

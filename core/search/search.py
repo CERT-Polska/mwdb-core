@@ -332,13 +332,14 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
     def _multi_extract_condition(self, column, node, is_range=False):
         value = self._get_value(node)
 
-        table = column.property.table
-        column_to_query = None
-        for c in table.c:
+        # Get mapper for entity bound with relationship
+        table_mapper = column.property.mapper
+        # Look for searchable field
+        for c in table_mapper.c:
             if c.info.get("searchable", False):
                 column_to_query = c
-
-        if column_to_query is None:
+                break
+        else:
             raise FieldNotQueryableException("No searchable column in this model")
 
         if node.has_wildcard():

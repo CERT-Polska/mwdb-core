@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from flask import g
 
 from luqum.parser import parser
+from luqum.tree import Phrase
 from luqum.utils import LuceneTreeVisitorV2
 
 from model import db, Object, Metakey, ObjectPermission, Group, User, MetakeyPermission
@@ -400,12 +401,18 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
 
         return condition
 
-    def _get_date_range(self, date_string):
+    def _get_date_range(self, date_node):
         formats = [
             ("%Y-%m-%d %H:%M", timedelta(minutes=1)),
             ("%Y-%m-%d %H:%M:%S", timedelta(seconds=1)),
             ("%Y-%m-%d", timedelta(days=1))
         ]
+        date_string = date_node.value
+
+        if isinstance(date_string, Phrase):
+            # Remove quotes from date_string for phrases
+            date_string = date_string[1:-1]
+
         for fmt, range_offs in formats:
             try:
                 timestamp = datetime.strptime(date_string, fmt)
@@ -419,12 +426,12 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         if is_range:
             if not (node.include_low and node.include_high):
                 raise FieldNotQueryableException("Exclusive range is not supported for date-time field")
-            low = self._get_date_range(node.low.value)[0]
-            high = self._get_date_range(node.high.value)[1]
+            low = self._get_date_range(node.low)[0]
+            high = self._get_date_range(node.high)[1]
         else:
             if node.has_wildcard():
                 raise FieldNotQueryableException("Wildcards are not allowed for date-time field")
-            low, high = self._get_date_range(node.value)
+            low, high = self._get_date_range(node)
         condition = and_(column >= low, column < high)
         return condition
 

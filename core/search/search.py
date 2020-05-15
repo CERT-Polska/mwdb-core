@@ -409,7 +409,8 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         ]
         date_string = date_node.value
 
-        if isinstance(date_node, Phrase):
+        # Phrase in Range are not unquoted by visit_phrase
+        if isinstance(date_node, Phrase) and date_string.startswith('"'):
             # Remove quotes from date_string for phrases
             date_string = date_string[1:-1]
 

@@ -1,11 +1,11 @@
-from flask import request, g
+from flask import g, request
 from flask_restful import Resource
 from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest
 
-from model import db
+from model import db, Object
 from core.schema import SearchSchema, ObjectBase
-from core.search import SQLQueryBuilderBaseException, search
+from core.search import SQLQueryBuilderBaseException, SQLQueryBuilder
 
 from . import logger, requires_authorization
 
@@ -46,11 +46,16 @@ class SearchResource(Resource):
         logger.info('search', extra={'query': query})
 
         try:
-            db_query = search(query, g.auth_user)
-            result = db_query(db.session()).all()
-            schema = ObjectBase(many=True)
-            return schema.dump(result)
+            result = (
+                SQLQueryBuilder().build_query(query)
+                                 .filter(g.auth_user.has_access_to_object(Object.id))
+                                 .order_by(Object.id.desc())
+                                 .limit(10000)
+            ).all()
         except SQLQueryBuilderBaseException as e:
             raise BadRequest(str(e))
         except ParseError as e:
             raise BadRequest(str(e))
+
+        schema = ObjectBase(many=True)
+        return schema.dump(result)

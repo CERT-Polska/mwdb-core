@@ -1,9 +1,7 @@
 
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy(session_options={
-    "enable_baked_queries": True
-})
+db = SQLAlchemy()
 
 # These imports must appear after "db" declaration
 

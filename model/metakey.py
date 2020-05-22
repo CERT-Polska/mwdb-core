@@ -4,7 +4,6 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.exc import IntegrityError
 
 from . import db
-from .utils import ColumnToSearchInDict
 
 
 class Metakey(db.Model):
@@ -14,7 +13,7 @@ class Metakey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     object_id = db.Column(db.Integer, db.ForeignKey('object.id'))
     key = db.Column(db.String(64), db.ForeignKey('metakey_definition.key'), index=True)
-    value = db.Column(db.Text, index=True, info=ColumnToSearchInDict)
+    value = db.Column(db.Text, index=True)
     template = db.relationship('MetakeyDefinition', lazy='joined')
 
     @property

@@ -1,6 +1,12 @@
-from model import File, Object, Config, TextBlob
+from typing import Dict, Type, Tuple, List
 
-mapping_objects = {
+from model import File, Object, Config, TextBlob, Tag, Comment
+
+from .exceptions import MultipleObjectsQueryException, FieldNotQueryableException
+from .fields import BaseField, StringField, IntegerField, ListField, AttributeField, ShareField, UploaderField, \
+    JSONField, DatetimeField
+
+object_mapping: Dict[str, Type[Object]] = {
     "file": File,
     "object": Object,
     "static": Config,
@@ -8,168 +14,66 @@ mapping_objects = {
     "blob": TextBlob
 }
 
-mapping = {
-    "file": {
-        "dhash": File.dhash,
-        "sha512": File.sha512,
-        "sha256": File.sha256,
-        "sha1": File.sha1,
-        "md5": File.md5,
-        "ssdeep": File.ssdeep,
-        "crc32": File.crc32,
-        "humanhash": File.humanhash,
-        "name": File.file_name,
-        "size": File.file_size,
-        "type": File.file_type,
+field_mapping: Dict[str, Dict[str, BaseField]] = {
+    Object.__name__: {
+        "dhash": StringField(Object.dhash),
+        "tag": ListField(Object.tags, Tag.tag),
+        "comment": ListField(Object.comments, Comment.comment),
+        "meta": AttributeField(Object.meta),
+        "shared": ShareField(Object.shares),
+        "uploader": UploaderField(Object.related_shares),
+        "upload_time": DatetimeField(Object.upload_time),
     },
-    "object": {
-        "dhash": Object.dhash,
+    File.__name__: {
+        "name": StringField(File.file_name),
+        "size": IntegerField(File.file_size),
+        "type": StringField(File.file_type),
+        "md5": StringField(File.md5),
+        "sha1": StringField(File.sha1),
+        "sha256": StringField(File.sha256),
+        "sha512": StringField(File.sha512),
+        "ssdeep": StringField(File.ssdeep),
+        "crc32": StringField(File.crc32),
+        "humanhash": StringField(File.humanhash),
     },
-    "static": {
-        "dhash": Config.dhash,
-        "type": Config.config_type,
-        "family": Config.family,
+    Config.__name__: {
+        "type": StringField(Config.config_type),
+        "family": StringField(Config.family),
+        "cfg": JSONField(Config.cfg)
     },
-    "config": {
-        "dhash": Config.dhash,
-        "type": Config.config_type,
-        "family": Config.family,
-    },
-    "blob": {
-        "dhash": TextBlob.dhash,
-        "content": TextBlob._content,
-        "type": TextBlob.blob_type,
-        "name": TextBlob.blob_name,
-        "size": TextBlob.blob_size
+    TextBlob.__name__: {
+        "name": StringField(TextBlob.blob_name),
+        "size": IntegerField(TextBlob.blob_size),
+        "type": StringField(TextBlob.blob_type),
+        "content": StringField(TextBlob._content),
+        "first_seen": DatetimeField(TextBlob.upload_time),
+        "last_seen": DatetimeField(TextBlob.last_seen),
     }
 }
 
-multi_mapping_objects = {
-    "file": File,
-    "object": Object,
-    "static": Config,
-    "config": Config,
-    "blob": TextBlob
-}
 
-multi_mapping = {
-    "file": {
-        "tag": File.tags,
-        "comment": File.comments,
-    },
-    "object": {
-        "tag": Object.tags,
-        "comment": Object.comments,
-    },
-    "static": {
-        "tag": Config.tags,
-        "comment": Config.comments,
-    },
-    "config": {
-        "tag": Config.tags,
-        "comment": Config.comments,
-    },
-    "blob": {
-        "tag": TextBlob.tags,
-        "comment": TextBlob.comments,
-    }
-}
+def get_field_mapper(queried_type: Type[Object], field_selector: str) -> Tuple[BaseField, List[str]]:
+    field_path = field_selector.split(".")
 
-meta_mapping_objects = {
-    "file": File,
-    "object": Object,
-    "static": Config,
-    "config": Config,
-    "blob": TextBlob
-}
+    # Map object type selector
+    if field_path[0] in object_mapping:
+        selected_type = object_mapping[field_path[0]]
+        # Because object type selector determines queried type, we can't use specialized
+        # fields from different types in the same query
+        if not issubclass(selected_type, queried_type):
+            raise MultipleObjectsQueryException(
+                f"Can't search for objects with type '{selected_type.__name__}' "
+                f"and '{queried_type.__name__}' in the same query"
+            )
+        field_path = field_path[1:]
+    else:
+        selected_type = queried_type
 
-meta_mapping = {
-    "file": {
-        "meta": File.meta,
-    },
-    "object": {
-        "meta": Object.meta,
-    },
-    "static": {
-        "meta": Config.meta,
-    },
-    "config": {
-        "meta": Config.meta,
-    },
-    "blob": {
-        "meta": TextBlob.meta,
-    }
-}
-
-share_mapping_objects = {
-    "file": File,
-    "object": Object,
-    "static": Config,
-    "config": Config,
-    "blob": TextBlob
-}
-
-share_mapping = {
-    "file": {
-        "shared": File.shares,
-        "uploader": File.related_shares,
-    },
-    "object": {
-        "shared": Object.shares,
-        "uploader": Object.related_shares,
-    },
-    "static": {
-        "shared": Config.shares,
-        "uploader": Config.related_shares,
-    },
-    "config": {
-        "shared": Config.shares,
-        "uploader": Config.related_shares,
-    },
-    "blob": {
-        "shared": TextBlob.shares,
-        "uploader": TextBlob.related_shares,
-    }
-}
-
-json_mapping_objects = {
-    "static": Config,
-    "config": Config
-}
-
-json_mapping = {
-    "static": {
-        "cfg": Config.cfg,
-    },
-    "config": {
-        "cfg": Config.cfg,
-    }
-}
-
-date_mapping_objects = {
-    "file": File,
-    "object": Object,
-    "static": Config,
-    "config": Config,
-    "blob": TextBlob
-}
-
-date_mapping = {
-    "file": {
-        "upload_time": File.upload_time,
-    },
-    "object": {
-        "upload_time": Object.upload_time,
-    },
-    "static": {
-        "upload_time": Config.upload_time,
-    },
-    "config": {
-        "upload_time": Config.upload_time,
-    },
-    "blob": {
-        "upload_time": TextBlob.upload_time,
-        "first_seen": TextBlob.upload_time,
-        "last_seen": TextBlob.last_seen,
-    }
-}
+    # Map object field selector
+    if field_path[0] in field_mapping[selected_type.__name__]:
+        field = field_mapping[selected_type.__name__][field_path[0]]
+    elif field_path[0] in field_mapping[Object.__name__]:
+        field = field_mapping[Object.__name__][field_path[0]]
+    else:
+        raise FieldNotQueryableException(f"No such field: {field_selector}")
+    return field, field_path[1:]

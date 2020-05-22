@@ -1,7 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
 from . import db
-from .utils import ColumnToSearchInDict
 
 
 object_tag_table = db.Table('object_tag', db.metadata,
@@ -14,7 +13,7 @@ class Tag(db.Model):
     __tablename__ = 'tag'
     id = db.Column(db.Integer, primary_key=True)
 
-    tag = db.Column(db.String, nullable=False, unique=True, index=True, info=ColumnToSearchInDict)
+    tag = db.Column(db.String, nullable=False, unique=True, index=True)
     objects = db.relationship('Object', secondary=object_tag_table, back_populates='tags')
 
     @classmethod

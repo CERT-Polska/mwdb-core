@@ -1,6 +1,6 @@
 from flask import request, g
 from flask_restful import Resource
-from luqum.parser import parser, ParseError
+from luqum.parser import ParseError
 from werkzeug.exceptions import Forbidden, BadRequest, MethodNotAllowed, Conflict, NotFound
 
 from model.object import AccessType
@@ -68,41 +68,31 @@ class ObjectListResource(Resource):
         if older_than:
             pivot_obj = authenticated_access(Object, older_than)
 
-        predicate = g.auth_user.has_access_to_object(self.ObjectType.id)
-
         if query:
-            """
-            If query parameter is passed, query for objects using search baked queries
-            """
             try:
-                builder = SQLQueryBuilder(object_type=self.ObjectType,
-                                          query_args=(self.ObjectType,))
-                tree = parser.parse(query)
-                if pivot_obj:
-                    builder.baked_query += lambda q: q.filter(Object.id < pivot_obj.id)
-                builder.baked_query += lambda q: q.filter(predicate)
-                baked_query = builder(tree, order_by=Object.id.desc(), limit=10)
-                if page > 1:
-                    baked_query += lambda q: q.offset((page - 1) * 10)
-                objs = baked_query(db.session()).all()
+                db_query = SQLQueryBuilder().build_query(query, queried_type=self.ObjectType)
             except SQLQueryBuilderBaseException as e:
                 raise BadRequest(str(e))
             except ParseError as e:
                 raise BadRequest(str(e))
         else:
-            """
-            If not, use simple query
-            """
-            objs = db.session.query(self.ObjectType) \
-                     .filter(predicate)
-            objs = objs.order_by(Object.id.desc())
-            if pivot_obj:
-                objs = objs.filter(Object.id < pivot_obj.id)
-            elif page > 1:
-                objs = objs.offset((page - 1) * 10)
-            objs = objs.limit(10).all()
+            db_query = db.session.query(self.ObjectType)
+
+        db_query = (
+            db_query.filter(g.auth_user.has_access_to_object(Object.id))
+                    .order_by(Object.id.desc())
+        )
+        if pivot_obj:
+            db_query = db_query.filter(Object.id < pivot_obj.id)
+        # Legacy parameter - to be removed
+        elif page > 1:
+            db_query = db_query.offset((page - 1) * 10)
+
+        db_query = db_query.limit(10)
+        objects = db_query.all()
+
         schema = self.Schema()
-        return schema.dump({self.SchemaKey: objs})
+        return schema.dump({self.SchemaKey: objects})
 
 
 class ObjectResource(Resource):

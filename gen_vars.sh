@@ -1,8 +1,8 @@
 #!/bin/sh
 
-ADMIN_PASSWORD=$(openssl rand -base64 18)
-POSTGRES_PASSWORD=$(openssl rand -hex 18)
-SECRET_KEY=$(openssl rand -base64 18)
+ADMIN_PASSWORD=$(od -vN 18 -An -tx1 /dev/urandom | tr -d " \n")
+POSTGRES_PASSWORD=$(od -vN 18 -An -tx1 /dev/urandom | tr -d " \n")
+SECRET_KEY=$(od -vN 18 -An -tx1 /dev/urandom | tr -d " \n")
 
 echo "MALWARECAGE_REDIS_URI=redis://redis/" > mwdb-vars.env
 echo "MALWARECAGE_POSTGRES_URI=postgresql://mwdb:$POSTGRES_PASSWORD@postgres/mwdb" >> mwdb-vars.env

@@ -9,7 +9,6 @@ from .fields import BaseField, StringField, IntegerField, ListField, AttributeFi
 object_mapping: Dict[str, Type[Object]] = {
     "file": File,
     "object": Object,
-    "static": Config,
     "config": Config,
     "blob": TextBlob
 }

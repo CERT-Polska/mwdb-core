@@ -29,12 +29,6 @@ class ObjectListResource(Resource):
             - object
         parameters:
             - in: query
-              name: page
-              schema:
-                type: integer
-              description: Page number (deprecated)
-              required: false
-            - in: query
               name: older_than
               schema:
                 type: string
@@ -54,13 +48,6 @@ class ObjectListResource(Resource):
             400:
                 description: Syntax error in Lucene query
         """
-        if 'page' in request.args and 'older_than' in request.args:
-            raise BadRequest("page and older_than can't be used simultaneously. Use `older_than` for new code.")
-
-        if 'page' in request.args:
-            logger.warning("'%s' used legacy 'page' parameter", g.auth_user.login)
-
-        page = max(1, int(request.args.get('page', 1)))
         query = request.args.get('query')
 
         pivot_obj = None
@@ -84,9 +71,6 @@ class ObjectListResource(Resource):
         )
         if pivot_obj:
             db_query = db_query.filter(Object.id < pivot_obj.id)
-        # Legacy parameter - to be removed
-        elif page > 1:
-            db_query = db_query.offset((page - 1) * 10)
 
         db_query = db_query.limit(10)
         objects = db_query.all()

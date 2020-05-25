@@ -125,11 +125,6 @@ def require_auth():
         # Not a session token? Maybe APIKey token
         if g.auth_user is None:
             g.auth_user = APIKey.verify_token(token)
-        # Still nothing? Maybe legacy API key
-        if g.auth_user is None:
-            g.auth_user = User.verify_legacy_token(token)
-            if g.auth_user is not None:
-                log.getLogger().warning("'%s' used legacy auth token for authentication", g.auth_user.login)
 
     if g.auth_user:
         if app_config.malwarecage.enable_maintenance and g.auth_user.login != app_config.malwarecage.admin_login:

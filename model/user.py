@@ -126,10 +126,6 @@ class User(db.Model):
     def verify_set_password_token(token):
         return User._verify_token(token, ["password_ver"])
 
-    @staticmethod
-    def verify_legacy_token(token):
-        return User._verify_token(token, ["version_uid"])
-
     def is_member(self, group_id):
         groups = db.session.query(member.c.group_id) \
             .filter(member.c.user_id == self.id)

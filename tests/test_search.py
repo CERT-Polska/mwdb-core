@@ -152,3 +152,41 @@ def test_search_metakey():
 
     sample_from_search = test.get_sample(first_found_obj["id"])
     assert sample_from_search["id"] == sample["id"]
+
+
+def test_search_json():
+    test = MwdbTest()
+    test.login()
+
+    value = base62uuid().lower()
+
+    test.add_config(None, "malwarex", {
+        "plain": value,
+        "list": [
+            {"dict_in_list": value}
+        ],
+        "dict": {
+            "field": value
+        }
+    })
+
+    found_objs = test.search(f'config.cfg.plain:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search('config.cfg.plain:xxx')
+    assert len(found_objs) == 0
+
+    found_objs = test.search(f'config.cfg.dict.field:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search('config.cfg.dict.field:xxx')
+    assert len(found_objs) == 0
+
+    found_objs = test.search(f'config.cfg:*{value}*')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg:"*\\"dict_in_list\\": \\"{value}\\"*"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search('config.cfg:"*\\"dict_in_list\\": \\"xxx\\"*"')
+    assert len(found_objs) == 0

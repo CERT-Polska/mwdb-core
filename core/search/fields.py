@@ -232,9 +232,7 @@ class UploaderField(BaseField):
 
 class JSONField(BaseField):
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        json_path = '.'.join(remainder)
-
-        column_to_query = self.column[json_path].astext
+        column_to_query = self.column[remainder].astext
 
         if isinstance(expression, Range):
             raise UnsupportedGrammarException(

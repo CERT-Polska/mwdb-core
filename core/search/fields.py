@@ -84,19 +84,21 @@ class IntegerField(BaseField):
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
         if isinstance(expression, Range):
-            if not expression.low.isdigit() or not expression.high.isdigit():
+            low_value = expression.low.value
+            high_value = expression.high.value
+            if not low_value.isdigit() or not high_value.isdigit():
                 raise UnsupportedGrammarException(
                     "Field supports only integer values"
                 )
             low_condition = (
-                self.column >= expression.low.value
+                self.column >= low_value
                 if expression.include_low
-                else self.column > expression.low.value
+                else self.column > low_value
             )
             high_condition = (
-                self.column <= expression.high.value
+                self.column <= high_value
                 if expression.include_high
-                else self.column < expression.high.value
+                else self.column < high_value
             )
             return and_(low_condition, high_condition)
         else:

@@ -74,6 +74,20 @@ def test_search_tag():
     assert sample_from_search["id"] == sample["id"]
 
 
+def test_search_size():
+    test = MwdbTest()
+    test.login()
+
+    filename = base62uuid()
+    file_content = b"a"*1337
+
+    test.add_sample(filename, file_content)
+    found_objs = test.search(f'file.size:1337')
+    assert len(found_objs) > 0
+    found_objs = test.search(f'file.size:[1336 TO 1337]')
+    assert len(found_objs) > 0
+
+
 def test_search_comment():
     test = MwdbTest()
     test.login()

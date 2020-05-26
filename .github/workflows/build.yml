@@ -1,0 +1,21 @@
+name: "Build and test Malwarecage"
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+jobs:
+  build_mwdb:
+    name: Build Malwarecage
+    runs-on: ubuntu-latest
+    env:
+      - DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - run: |
+          export CI_COMMIT_SHA=$GITHUB_SHA \
+          export CI_COMMIT_REF_NAME=$GITHUB_REF \
+          ./build-image.sh "certpl/malwarecage_mwdb" ". -f ./deploy/docker/Dockerfile"

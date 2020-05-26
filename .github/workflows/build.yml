@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - master
+    - ci/*
   pull_request:
     branches:
     - master
@@ -15,7 +16,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
-      - run: |
-          export CI_COMMIT_SHA=$GITHUB_SHA \
-          export CI_COMMIT_REF_NAME=$GITHUB_REF \
-          ./build-image.sh "certpl/malwarecage_mwdb" ". -f ./deploy/docker/Dockerfile"
+      - name: Build and push Malwarecage image
+        uses: docker/build-push-action@v1.1.0
+        with:
+          tag_with_sha: true
+          push: false
+          dockerfile: ./deploy/docker/Dockerfile
+        

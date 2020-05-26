@@ -19,9 +19,10 @@ jobs:
       - name: Build and push Malwarecage image
         uses: docker/build-push-action@v1.1.0
         with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: ./deploy/docker/Dockerfile
-          repository: certpl/malwarecage_mwdb
-          push: false
+          repository: certpl/malwarecage
           tag_with_sha: true
   build_frontend:
     name: Build Malwarecage frontend image
@@ -34,9 +35,10 @@ jobs:
       - name: Build and push Malwarefront image
         uses: docker/build-push-action@v1.1.0
         with:
-          dockerfile: ./deploy/docker/Dockerfile-malwarefront
-          repository: certpl/malwarecage_malwarefront
-          push: false
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          dockerfile: ./deploy/docker/Dockerfile-web
+          repository: certpl/malwarecage-web
           tag_with_sha: true
   build_e2e:
     name: Build e2e test image
@@ -49,9 +51,12 @@ jobs:
       - name: Build test image
         uses: docker/build-push-action@v1.1.0
         with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: ./tests/Dockerfile
-          repository: certpl/malwarecage_mwdb-tests
-          push: false
+          repository: certpl/malwarecage-tests
+          path: tests
           tag_with_sha: true
+  
           
   

@@ -7,6 +7,7 @@ services:
     depends_on:
       - postgres
       - redis
+    image: certpl/malwarecage
     restart: on-failure
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
@@ -16,7 +17,8 @@ services:
       - mwdb
     build:
       context: .
-      dockerfile: deploy/docker/Dockerfile-malwarefront
+      dockerfile: deploy/docker/Dockerfile-web
+    image: certpl/malwarecage-web
     ports:
       - "80:80"
     restart: on-failure
@@ -28,6 +30,7 @@ services:
       - postgres-vars.env
   mwdb-tests:
     build: tests
+    image: certpl/malwarecage-tests
     env_file:
       - mwdb-vars.env
   redis:

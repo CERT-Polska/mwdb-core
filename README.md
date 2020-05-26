@@ -1,15 +1,19 @@
+**This is a pre-release version.** You're welcome to try it, but if you want a smooth installation experience and stable interface you should wait for the official release instead.
+
+We're working hard to deliver all of these things as soon as possible. Stay tuned and [follow our Twitter](https://twitter.com/CERT_Polska_en)!
+
 # Malwarecage
 
 Malware repository component for automated malware collection/analysis systems. 
 
-Under the hood of [MWDB service](https://mwdb.cert.pl) hosted by CERT.pl.
+Under the hood of [mwdb.cert.pl service](https://mwdb.cert.pl) hosted by CERT.pl.
 
 **Features:**
 
-- Storage for malware binaries and static/dynamic configurations
+- Storage for malware binaries and static/dynamic malware configurations
 - Tracking and visualizing relations between objects
 - Quick search
-- Data sharing mechanism
+- Data sharing and user management mechanism
 - Integration capabilities via webhooks and plugin system
 
 ## Basic installation via Docker Compose
@@ -143,5 +147,14 @@ If you need to write change on your own e.g. because you need to migrate data in
 Currently it's quite complicated, but we'll provide appropriate instructions until final release. (TODO)
 
 ## Contact
+If you have any problems, bugs or feature requests related to Malwarecage, you're encouraged to create a GitHub issue. If you have other questions, question is related strictly with mwdb.cert.pl service or you want to contact the current maintainers directly, you can email:
 
-In case of any questions, send e-mail at info@cert.pl
+- Paweł Srokosz (psrok1@cert.pl)
+- Jarosław Jedynak (msm@cert.pl)
+- CERT.PL (info@cert.pl)
+
+## Contact
+
+In case of any questions, send an e-mail to info@cert.pl
+
+![Co-financed by the Connecting Europe Facility by of the European Union](https://www.cert.pl/wp-content/uploads/2019/02/en_horizontal_cef_logo-1.png)

@@ -8,18 +8,50 @@ on:
     branches:
     - master
 jobs:
-  build_mwdb:
-    name: Build Malwarecage
+  build_core:
+    name: Build Malwarecage core image
     runs-on: ubuntu-latest
     env:
-      - DOCKER_BUILDKIT: 1
+      DOCKER_BUILDKIT: 1
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
       - name: Build and push Malwarecage image
         uses: docker/build-push-action@v1.1.0
         with:
-          tag_with_sha: true
-          push: false
           dockerfile: ./deploy/docker/Dockerfile
-        
+          repository: certpl/malwarecage_mwdb
+          push: false
+          tag_with_sha: true
+  build_frontend:
+    name: Build Malwarecage frontend image
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Build and push Malwarefront image
+        uses: docker/build-push-action@v1.1.0
+        with:
+          dockerfile: ./deploy/docker/Dockerfile-malwarefront
+          repository: certpl/malwarecage_malwarefront
+          push: false
+          tag_with_sha: true
+  build_e2e:
+    name: Build e2e test image
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Build test image
+        uses: docker/build-push-action@v1.1.0
+        with:
+          dockerfile: ./tests/Dockerfile
+          repository: certpl/malwarecage_mwdb-tests
+          push: false
+          tag_with_sha: true
+          
+  

@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: ./deploy/docker/Dockerfile
           repository: certpl/malwarecage
-          tag_with_sha: true
+          tags: ${{ github.sha }}
   build_frontend:
     name: Build Malwarecage frontend image
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: ./deploy/docker/Dockerfile-web
           repository: certpl/malwarecage-web
-          tag_with_sha: true
+          tags: ${{ github.sha }}
   build_e2e:
     name: Build e2e test image
     runs-on: ubuntu-latest
@@ -56,7 +56,7 @@ jobs:
           dockerfile: ./tests/Dockerfile
           repository: certpl/malwarecage-tests
           path: tests
-          tag_with_sha: true
+          tags: ${{ github.sha }}
   test_e2e:
     needs: [build_core, build_e2e, build_frontend] 
     name: Perform e2e tests

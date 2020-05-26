@@ -82,6 +82,4 @@ jobs:
         run: |
           docker-compose up -d
           docker-compose logs -f -t mwdb-tests
-          ([ $(docker wait malwarecage_mwdb-tests_1) == 0 ])
-
-  
+          docker wait malwarecage_mwdb-tests_1

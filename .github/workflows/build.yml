@@ -1,0 +1,84 @@
+name: "Build and test Malwarecage"
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+jobs:
+  build_core:
+    name: Build Malwarecage core image
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Build and push Malwarecage image
+        uses: docker/build-push-action@v1.1.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          dockerfile: ./deploy/docker/Dockerfile
+          repository: certpl/malwarecage
+          tags: ${{ github.sha }}
+  build_frontend:
+    name: Build Malwarecage frontend image
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Build and push Malwarefront image
+        uses: docker/build-push-action@v1.1.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          dockerfile: ./deploy/docker/Dockerfile-web
+          repository: certpl/malwarecage-web
+          tags: ${{ github.sha }}
+  build_e2e:
+    name: Build e2e test image
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Build test image
+        uses: docker/build-push-action@v1.1.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          dockerfile: ./tests/Dockerfile
+          repository: certpl/malwarecage-tests
+          path: tests
+          tags: ${{ github.sha }}
+  test_e2e:
+    needs: [build_core, build_e2e, build_frontend] 
+    name: Perform e2e tests
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Pull images
+        run: |
+          docker pull certpl/malwarecage:$GITHUB_SHA > /dev/null
+          docker pull certpl/malwarecage-web:$GITHUB_SHA > /dev/null
+          docker pull certpl/malwarecage-tests:$GITHUB_SHA > /dev/null
+          docker tag certpl/malwarecage:$GITHUB_SHA certpl/malwarecage:latest
+          docker tag certpl/malwarecage-web:$GITHUB_SHA certpl/malwarecage-web:latest
+          docker tag certpl/malwarecage-tests:$GITHUB_SHA certpl/malwarecage-tests:latest
+      - name: Setup configuration      
+        run: |
+          chmod +x gen_vars.sh
+          ./gen_vars.sh test
+      - name: Perform tests
+        run: |
+          docker-compose up -d
+          docker-compose logs -f -t mwdb-tests
+          docker wait malwarecage_mwdb-tests_1

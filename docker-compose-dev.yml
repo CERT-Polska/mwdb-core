@@ -33,7 +33,7 @@ services:
       - mwdb
     build:
       context: .
-      dockerfile: deploy/docker/Dockerfile-malwarefront-dev
+      dockerfile: deploy/docker/Dockerfile-web-dev
     ports:
       - "80:3000"
     environment:

@@ -12,19 +12,19 @@ about: Create a report to help us improve
   - [ ] Native (from source)
   - [ ] Other (please explain)
 
-**Reproduction Steps**
 
-<!-- Please explain how can we reproduce your problem. -->
+**Behaviour the bug (what happened?)**
+
+<!-- What actually happened? -->
 
 
 **Expected behaviour**
 
 <!-- What did you expect to happen? -->
 
+**Reproduction Steps**
 
-**Actual behaviour the bug**
-
-<!-- What actually happened? -->
+<!-- Please explain how can we reproduce your problem. -->
 
 
 **Screenshots**

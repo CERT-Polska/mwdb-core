@@ -1,3 +1,5 @@
+# Docker Compose file for Malwarecage development environment
+
 version: "3.3"
 services:
   mwdb:

@@ -48,13 +48,13 @@ class Service(Api):
         if isinstance(e, HTTPException):
             logger.error(str(e))
         else:
-            logger.exception("Unhandled exception occured")
+            logger.exception("Unhandled exception occurred")
 
         # Handle all exceptions using handle_error, not only for owned routes
         try:
             return self.handle_error(e)
         except Exception:
-            logger.exception("Exception from handle_error occured")
+            logger.exception("Exception from handle_error occurred")
             pass
         # If something went wrong - fallback to original behavior
         return super().error_router(original_handler, e)

@@ -22,29 +22,24 @@ class ObjectListResource(Resource):
     def get(self):
         """
         ---
-        description: Retrieves list of objects
+        description: Retrieve list of objects
         security:
             - bearerAuth: []
         tags:
             - object
         parameters:
             - in: query
-              name: page
-              schema:
-                type: integer
-              description: Page number (deprecated)
-              required: false
-            - in: query
               name: older_than
               schema:
                 type: string
-              description: Fetch objects which are older than the object specified by SHA256 identifier
+              description: Fetch objects which are older than the object specified by identifier. Used for pagination
               required: false
             - in: query
               name: query
               schema:
                 type: string
               description: Filter results using Lucene query
+              required: false
         responses:
             200:
                 description: List of objects
@@ -106,7 +101,7 @@ class ObjectResource(Resource):
     def get(self, identifier):
         """
         ---
-        description: Fetch object information by hash
+        description: Get information about object
         security:
             - bearerAuth: []
         tags:
@@ -116,15 +111,15 @@ class ObjectResource(Resource):
               name: identifier
               schema:
                 type: string
-              description: SHA256 object unique identifier
+              description: Object identifier
         responses:
             200:
-                description: When object was found
+                description: Information about object
                 content:
                   application/json:
                     schema: ObjectShowBase
             404:
-                description: When object was not found
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         schema = self.Schema()
         obj = authenticated_access(self.ObjectType, identifier.lower())
@@ -135,6 +130,9 @@ class ObjectResource(Resource):
 
     @requires_authorization
     def post(self, identifier):
+        """
+        Abstract object upload method
+        """
         if self.ObjectType is Object:
             raise MethodNotAllowed()
 
@@ -238,7 +236,7 @@ class ObjectChildResource(Resource):
     def put(self, type, parent, child):
         """
         ---
-        description: Adds new relation between objects
+        description: Add new relation between existing objects
         security:
             - bearerAuth: []
         tags:
@@ -249,22 +247,26 @@ class ObjectChildResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: type of target object
+              description: Type of object (ignored)
             - in: path
               name: parent
-              description: Hash (e.g. sha256) of the parent sample
+              description: Identifier of the parent object
               required: true
               schema:
                 type: string
             - in: path
               name: child
-              description: Hash (e.g. sha256) of the child sample
+              description: Identifier of the child object
               required: true
               schema:
                 type: string
         responses:
             200:
                 description: When relation was successfully added
+            403:
+                description: When user doesn't have 'adding_parents' capability.
+            404:
+                description: When one of objects doesn't exist or user doesn't have access to object.
         """
         parent_object = authenticated_access(Object, parent)
         child_object = authenticated_access(Object, child)

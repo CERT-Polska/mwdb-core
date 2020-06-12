@@ -15,37 +15,39 @@ class MetakeyResource(Resource):
     def get(self, type, identifier):
         """
         ---
-        description: Get metakeys for specified object
+        description: Get attributes of specified object
         security:
             - bearerAuth: []
         tags:
-            - metakey
+            - attribute
         parameters:
             - in: path
               name: type
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of target object
+              description: Type of object (ignored)
             - in: path
               name: identifier
               schema:
                 type: string
-              description: Object's id
+              description: Object identifier
             - in: query
               name: hidden
               schema:
                 type: int
-              description: show hidden metakeys (requires reading_all_attributes capability)
+              description: Show hidden metakeys (requires 'reading_all_attributes' capability)
               required: false
         responses:
             200:
-                description: Object metakeys
+                description: Object attributes
                 content:
                   application/json:
                     schema: MetakeyShowSchema
+            403:
+                description: When user requested hidden metakeys but doesn't have 'reading_all_attributes' capability
             404:
-                description: When object doesn't exist
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         db_object = authenticated_access(Object, identifier)
 
@@ -60,25 +62,25 @@ class MetakeyResource(Resource):
     def post(self, type, identifier):
         """
         ---
-        description: Add metakey for specified object
+        description: Add attribute to specified object
         security:
             - bearerAuth: []
         tags:
-            - metakey
+            - attribute
         parameters:
             - in: path
               name: type
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of target object
+              description: Type of object (ignored)
             - in: path
               name: identifier
               schema:
                 type: string
-              description: Object's id
+              description: Object identifier
         requestBody:
-            description: Metakey description
+            description: Attribute key and value
             content:
               application/json:
                 schema: MetakeySchema
@@ -86,7 +88,9 @@ class MetakeyResource(Resource):
             200:
                 description: When metakey was added successfully
             404:
-                description: When object doesn't exist
+                description: |
+                    When object doesn't exist or user doesn't have access to this object.
+                    When attribute key is not defined or user doesn't have privileges to set that one.
         """
         schema = MetakeySchema()
         obj = schema.loads(request.get_data(as_text=True))
@@ -109,11 +113,11 @@ class MetakeyListDefinitionResource(Resource):
     def get(self, access):
         """
         ---
-        description: Get list of defined metakeys which user can read/set
+        description: Get list of attribute keys which currently authenticated user can read or set
         security:
             - bearerAuth: []
         tags:
-            - metakey
+            - attribute
         parameters:
             - in: path
               name: access
@@ -123,10 +127,12 @@ class MetakeyListDefinitionResource(Resource):
               description: Type of desired access
         responses:
             200:
-                description: metakeys
+                description: List of attribute keys and definitions
                 content:
                   application/json:
                     schema: MetakeyDefinitionListSchema
+            400:
+                description: When used unknown access type (other than read or set)
         """
         if access not in ["read", "set"]:
             raise BadRequest("Unknown desired access type '{}'".format(access))
@@ -154,17 +160,19 @@ class MetakeyListDefinitionManageResource(Resource):
     def get(self):
         """
         ---
-        description: Get management list of metakey definitions
+        description: Get list of metakey definitions. Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:
-            - metakey
+            - attribute
         responses:
             200:
-                description: metakeys
+                description: List of attribute keys and definitions
                 content:
                   application/json:
                     schema: MetakeyDefinitionManageListSchema
+            403:
+                description: When user doesn't have 'managing_attributes' capability.
         """
         metakeys = db.session.query(MetakeyDefinition).order_by(MetakeyDefinition.key).all()
         schema = MetakeyDefinitionManageListSchema()
@@ -177,23 +185,27 @@ class MetakeyDefinitionManageResource(Resource):
     def get(self, key):
         """
         ---
-        description: Get metakey definition
+        description: Get attribute definition details. Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:
-            - metakey
+            - attribute
         parameters:
             - in: path
               name: key
               schema:
                 type: string
-              description: Metakey
+              description: Attribute key
         responses:
             200:
-                description: Metakey definitions
+                description: Attribute key definition
                 content:
                   application/json:
                     schema: MetakeyDefinitionManageSchema
+            403:
+                description: When user doesn't have 'managing_attributes' capability.
+            404:
+                description: When specified attribute key doesn't exist
         """
         metakey = db.session.query(MetakeyDefinition) \
                             .filter(MetakeyDefinition.key == key) \
@@ -208,25 +220,29 @@ class MetakeyDefinitionManageResource(Resource):
     def put(self, key):
         """
         ---
-        description: Update new metakey definition
+        description: Create or update attribute key definition. Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:
-            - metakey
+            - attribute
         parameters:
             - in: path
               name: key
               schema:
                 type: string
-              description: Metakey
+              description: Attribute key
         requestBody:
-            description: Metakey definition
+            description: Attribute key definition
             content:
               application/json:
                 schema: MetakeyDefinitionSchema
         responses:
             200:
                 description: When metakey definition is successfully added
+            400:
+                description: When one of attribute definition fields is missing or incorrect.
+            403:
+                description: When user doesn't have 'managing_attributes' capability.
         """
         schema = MetakeyDefinitionSchema()
         obj = schema.loads(request.get_data(as_text=True))
@@ -254,25 +270,36 @@ class MetakeyPermissionResource(Resource):
     def put(self, key, group_name):
         """
         ---
-        description: Modify group permission for specified metakey
+        description: Add/modify group permission for specified attribute. Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:
-            - metakey
+            - attribute
         parameters:
             - in: path
               name: key
               schema:
                 type: string
-              description: Metakey
+              description: Attribute key
+            - in: path
+              name: group_name
+              schema:
+                type: string
+              description: Group name to add/modify
         requestBody:
-            description: Metakey permission definition
+            description: Attribute key permission definition
             content:
                 application/json:
                   schema: MetakeyPermissionSchema
         responses:
             200:
                 description: When group permission has been successfully changed
+            400:
+                description: When one of attribute permission fields is missing or incorrect.
+            403:
+                description: When user doesn't have 'managing_attributes' capability.
+            404:
+                description: When attribute key or group doesn't exist
         """
         schema = MetakeyPermissionSchema()
         obj = schema.loads(request.get_data(as_text=True))
@@ -301,17 +328,17 @@ class MetakeyPermissionResource(Resource):
     def delete(self, key, group_name):
         """
         ---
-        description: Remove group permission for specified metakey
+        description: Remove group permission for specified attribute. Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:
-            - metakey
+            - attribute
         parameters:
             - in: path
               name: key
               schema:
                 type: string
-              description: Metakey
+              description: Attribute key
             - in: path
               name: group_name
               schema:
@@ -319,7 +346,11 @@ class MetakeyPermissionResource(Resource):
               description: Group name to remove
         responses:
             200:
-                description: When group permission has been successfully changed
+                description: When group permission has been successfully removed
+            403:
+                description: When user doesn't have 'managing_attributes' capability.
+            404:
+                description: When attribute key or group or group permission doesn't exist
         """
         group = db.session.query(Group).filter(Group.name == group_name).first()
         if group is None:

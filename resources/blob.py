@@ -22,23 +22,24 @@ class TextBlobListResource(ObjectListResource):
     def get(self):
         """
         ---
-        description: Retrieves list of text blobs
+        description: Retrieve list of text blobs
         security:
             - bearerAuth: []
         tags:
-            - blob
+            - config
         parameters:
             - in: query
               name: older_than
               schema:
                 type: string
-              description: fetch objects which are older than the object specified by SHA256 identifier
+              description: Fetch blobs which are older than the blob specified by identifier. Used for pagination
               required: false
             - in: query
               name: query
               schema:
                 type: string
               description: Filter results using Lucene query
+              required: false
         responses:
             200:
                 description: List of text blobs

@@ -10,12 +10,12 @@ class PingResource(Resource):
     def get(self):
         """
         ---
-        description: check if the service is working (useful for tests)
+        description: Check if the service is working
         tags:
             - server
         responses:
             200:
-              description: successful ping response
+              description: Successful ping response
               content:
                 application/json:
                   schema: PingStatusSchema
@@ -28,12 +28,12 @@ class ServerInfoResource(Resource):
     def get(self):
         """
         ---
-        description: fetch server info and client-side configuration
+        description: Fetch server info and frontend configuration
         tags:
             - server
         responses:
             200:
-              description: server info with client-side configuration
+              description: server info with frontend configuration
               content:
                 application/json:
                   schema: ServerInfoSchema

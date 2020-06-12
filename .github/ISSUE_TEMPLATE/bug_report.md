@@ -12,11 +12,9 @@ about: Create a report to help us improve
   - [ ] Native (from source)
   - [ ] Other (please explain)
 
-
 **Behaviour the bug (what happened?)**
 
 <!-- What actually happened? -->
-
 
 **Expected behaviour**
 
@@ -26,11 +24,9 @@ about: Create a report to help us improve
 
 <!-- Please explain how can we reproduce your problem. -->
 
-
 **Screenshots**
 
 <!-- If applicable, add screenshots to help explain your problem. -->
-
 
 **Additional context**
 

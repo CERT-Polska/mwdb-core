@@ -1,4 +1,4 @@
-# Docker Compose file for Malwarecage production service
+# Docker Compose file for Malwarecage end-to-end test suite
 
 version: "3.3"
 services:
@@ -14,8 +14,6 @@ services:
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - mwdb-vars.env
-    volumes:
-      - malwarecage-uploads:/app/uploads
   malwarefront:
     depends_on:
       - mwdb
@@ -32,11 +30,10 @@ services:
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - postgres-vars.env
-    volumes:
-      - malwarecage-postgres:/var/lib/postgresql/data
+  mwdb-tests:
+    build: tests
+    image: certpl/malwarecage-tests
+    env_file:
+      - mwdb-vars.env
   redis:
     image: redis:alpine
-
-volumes:
-  malwarecage-postgres:
-  malwarecage-uploads:

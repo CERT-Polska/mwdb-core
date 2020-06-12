@@ -65,8 +65,8 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Import images
         run: |
-          docker load --input ./malwarecage-image
-          docker load --input ./malwarecage-web-image
+          docker load --input ./malwarecage-image/malwarecage-image
+          docker load --input ./malwarecage-web-image/malwarecage-web-image
           docker tag certpl/malwarecage:$GITHUB_SHA certpl/malwarecage:latest
           docker tag certpl/malwarecage-web:$GITHUB_SHA certpl/malwarecage-web:latest
       - name: Build test image

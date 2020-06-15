@@ -51,9 +51,6 @@ class ShareResource(Resource):
             groups = list(map(itemgetter(0), db.session.query(Group.name).filter(
                 g.auth_user.is_member(Group.id)
             ).all()))
-        if identifier is None:
-            schema = ShareShowSchema()
-            return schema.dump({"groups": groups})
 
         db_object = authenticated_access(Object, identifier)
 

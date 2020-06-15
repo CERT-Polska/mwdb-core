@@ -11,11 +11,16 @@ class RelationsResource(Resource):
     def get(self, type, identifier):
         """
         ---
-        description: Get relations attached to an object. Deprecated, use /object/<hash>.
+        summary: Get object relations (deprecated)
+        description: |
+            Returns relations attached to an object.
+
+            Deprecated: relations are already available via simple object get.
         security:
             - bearerAuth: []
         tags:
             - relations
+            - deprecated
         parameters:
             - in: path
               name: type
@@ -34,6 +39,8 @@ class RelationsResource(Resource):
                 content:
                   application/json:
                     schema: RelationsSchema
+            404:
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         db_object = authenticated_access(Object, identifier)
 

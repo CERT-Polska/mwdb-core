@@ -22,7 +22,8 @@ class LoginResource(Resource):
     def post(self):
         """
         ---
-        description: Exchange user credentials for authorization token
+        summary: Authenticate user
+        description: Returns authorization token for provided user credentials
         tags:
             - auth
         requestBody:
@@ -80,7 +81,8 @@ class RegisterResource(Resource):
     def post(self):
         """
         ---
-        description: Request new user account.
+        summary: Request for new user account
+        description: Creates new pending user account.
         tags:
             - auth
         requestBody:
@@ -173,7 +175,8 @@ class UserGetPasswordChangeTokenResource(Resource):
     def get(self, login):
         """
         ---
-        description: Retrieve token for password change. Requires 'manage_users' capability.
+        summary: Generate password change token
+        description: Generates token for password change. Requires 'manage_users' capability.
         security:
             - bearerAuth: []
         tags:
@@ -209,7 +212,8 @@ class UserChangePasswordResource(Resource):
     def post(self):
         """
         ---
-        description: Set password via authorization token.
+        summary: Set new password for user
+        description: Sets new password for user using password change token.
         tags:
             - auth
         requestBody:
@@ -255,7 +259,8 @@ class RequestPasswordChangeResource(Resource):
     def post(self):
         """
         ---
-        description: Request password change link for currently authenticated user.
+        summary: Get password change link for current user
+        description: Requests password change link for currently authenticated user.
         security:
             - bearerAuth: []
         tags:
@@ -293,7 +298,8 @@ class RecoverPasswordResource(Resource):
     def post(self):
         """
         ---
-        description: Request a recover password link for provided login and e-mail.
+        summary: Recover user password
+        description: Sends e-mail with recover password link for provided login and e-mail.
         tags:
             - auth
         responses:
@@ -361,7 +367,8 @@ class RefreshTokenResource(Resource):
     def post(self):
         """
         ---
-        description: Generate new token for session continuation.
+        summary: Refresh session
+        description: Generates new token for session continuation
         security:
             - bearerAuth: []
         tags:
@@ -394,7 +401,8 @@ class ValidateTokenResource(Resource):
     def get(self):
         """
         ---
-        description: Validate token for session.
+        summary: Get session information
+        description: Validates token for session and returns session information
         security:
             - bearerAuth: []
         tags:

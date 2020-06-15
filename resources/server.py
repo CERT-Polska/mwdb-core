@@ -10,7 +10,8 @@ class PingResource(Resource):
     def get(self):
         """
         ---
-        description: Check if the service is working
+        summary: Ping server
+        description: Returns 'ok' if the service is working
         tags:
             - server
         responses:
@@ -28,7 +29,8 @@ class ServerInfoResource(Resource):
     def get(self):
         """
         ---
-        description: Fetch server info and frontend configuration
+        summary: Get server information
+        description: Returns server information with frontend configuration
         tags:
             - server
         responses:

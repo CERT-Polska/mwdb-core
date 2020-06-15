@@ -30,7 +30,7 @@ class ConfigStatsResource(Resource):
               schema:
                 type: string
               description: Time range in hours "24h", days "2d" or all time "*"
-              default: *
+              default: '*'
               required: false
         responses:
             200:
@@ -188,7 +188,7 @@ class ConfigResource(ObjectResource):
                         Optional JSON-encoded `MetakeyShowSchema`. User must be allowed to set specified attribute keys.
                     upload_as:
                       type: string
-                      default: *
+                      default: '*'
                       description: |
                         Group that object will be shared with. If user doesn't have 'sharing_objects' capability,
                         user must be a member of specified group (unless 'Group doesn't exist' error will occur).

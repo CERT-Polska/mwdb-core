@@ -15,7 +15,9 @@ class MetakeyResource(Resource):
     def get(self, type, identifier):
         """
         ---
-        description: Get attributes of specified object
+        summary: Get object attributes
+        description: |
+            Returns all attributes of specified object that user is allowed to read
         security:
             - bearerAuth: []
         tags:
@@ -36,7 +38,7 @@ class MetakeyResource(Resource):
               name: hidden
               schema:
                 type: int
-              description: Show hidden metakeys (requires 'reading_all_attributes' capability)
+              description: Show hidden attributes (requires 'reading_all_attributes' capability)
               required: false
         responses:
             200:
@@ -62,7 +64,11 @@ class MetakeyResource(Resource):
     def post(self, type, identifier):
         """
         ---
-        description: Add attribute to specified object
+        summary: Add object attribute
+        description: |
+            Adds attribute to specified object
+
+            User must have 'set' access to the attribute key or 'adding_all_attributes' capability.
         security:
             - bearerAuth: []
         tags:
@@ -113,7 +119,9 @@ class MetakeyListDefinitionResource(Resource):
     def get(self, access):
         """
         ---
-        description: Get list of attribute keys which currently authenticated user can read or set
+        summary: Get list of attribute keys
+        description: |
+            Returns list of attribute keys which currently authenticated user can read or set
         security:
             - bearerAuth: []
         tags:
@@ -160,7 +168,11 @@ class MetakeyListDefinitionManageResource(Resource):
     def get(self):
         """
         ---
-        description: Get list of metakey definitions. Requires 'managing_attributes' capability.
+        summary: Get attribute key definitions
+        description: |
+            Returns list of attribute key definitions.
+
+            Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:
@@ -185,7 +197,11 @@ class MetakeyDefinitionManageResource(Resource):
     def get(self, key):
         """
         ---
-        description: Get attribute definition details. Requires 'managing_attributes' capability.
+        summary: Get attribute key details
+        description: |
+            Returns attribute key definition details.
+
+            Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:
@@ -220,7 +236,11 @@ class MetakeyDefinitionManageResource(Resource):
     def put(self, key):
         """
         ---
-        description: Create or update attribute key definition. Requires 'managing_attributes' capability.
+        summary: Create/update attribute key
+        description: |
+            Creates or updates attribute key definition.
+
+            Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:
@@ -270,7 +290,11 @@ class MetakeyPermissionResource(Resource):
     def put(self, key, group_name):
         """
         ---
-        description: Add/modify group permission for specified attribute. Requires 'managing_attributes' capability.
+        summary: Add/modify attribute key permission
+        description: |
+            Adds or modifies attribute key group permission for specified key and group name.
+
+            Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:
@@ -328,7 +352,11 @@ class MetakeyPermissionResource(Resource):
     def delete(self, key, group_name):
         """
         ---
-        description: Remove group permission for specified attribute. Requires 'managing_attributes' capability.
+        summary: Delete attribute key permission
+        description: |
+            Removes attribute key permission for specified key and group name.
+
+            Requires 'managing_attributes' capability.
         security:
             - bearerAuth: []
         tags:

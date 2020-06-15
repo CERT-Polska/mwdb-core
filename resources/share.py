@@ -19,7 +19,11 @@ class ShareResource(Resource):
     def get(self, type, identifier):
         """
         ---
-        description: Get sharing info for specified object
+        summary: Get object shares
+        description: |
+            Returns list of available groups and sharing info for specified object
+
+            If user doesn't have 'sharing_objects' capability, only own groups are included.
         security:
             - bearerAuth: []
         tags:
@@ -30,12 +34,12 @@ class ShareResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of target object
+              description: Type of object (ignored)
             - in: path
               name: identifier
               schema:
                 type: string
-              description: Object's id
+              description: Object identifier
         responses:
             200:
                 description: Sharing info for object
@@ -43,7 +47,7 @@ class ShareResource(Resource):
                   application/json:
                     schema: ShareShowSchema
             404:
-                description: When object doesn't exist
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         if g.auth_user.has_rights(Capabilities.sharing_objects):
             groups = list(map(itemgetter(0), db.session.query(Group.name).all()))
@@ -71,7 +75,11 @@ class ShareResource(Resource):
     def put(self, type, identifier):
         """
         ---
-        description: Share object with another group
+        summary: Share object with group
+        description: |
+            Shares object with another group.
+
+            If user doesn't have 'sharing_objects' capability, it can share object only within its own groups.
         security:
             - bearerAuth: []
         tags:
@@ -95,9 +103,11 @@ class ShareResource(Resource):
                 schema: ShareSchema
         responses:
             200:
-                description: When object is successfully shared
+                description: When object is successfully shared.
+            400:
+                description: When request body is invalid.
             404:
-                description: When object or group doesn't exist
+                description: When object or group doesn't exist or user doesn't have access to.
         """
         schema = ShareSchema()
 

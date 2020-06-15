@@ -13,7 +13,8 @@ class CommentResource(Resource):
     def get(self, type, identifier):
         """
         ---
-        description: Get comments attached to an object
+        summary: Get object comments
+        description: Returns all comments attached to the object.
         security:
             - bearerAuth: []
         tags:
@@ -55,7 +56,11 @@ class CommentResource(Resource):
     def post(self, type, identifier):
         """
         ---
-        description: Post a new comment. Requires 'adding_comments' capability.
+        summary: Create comment
+        description: |
+            Posts a new comment.
+
+            Requires 'adding_comments' capability.
         security:
             - bearerAuth: []
         tags:
@@ -119,7 +124,11 @@ class CommentDeleteResource(Resource):
     def delete(self, type, identifier, comment_id):
         """
         ---
-        description: Delete a comment. Requires 'removing_comments' capability.
+        summary: Delete comment
+        description: |
+            Deletes a comment.
+
+            Requires 'removing_comments' capability.
         security:
             - bearerAuth: []
         tags:

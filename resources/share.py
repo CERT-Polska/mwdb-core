@@ -16,7 +16,7 @@ from . import authenticated_access, logger, requires_authorization
 
 class ShareResource(Resource):
     @requires_authorization
-    def get(self, type=None, identifier=None):
+    def get(self, type, identifier):
         """
         ---
         description: Get sharing info for specified object
@@ -51,9 +51,6 @@ class ShareResource(Resource):
             groups = list(map(itemgetter(0), db.session.query(Group.name).filter(
                 g.auth_user.is_member(Group.id)
             ).all()))
-        if identifier is None:
-            schema = ShareShowSchema()
-            return schema.dump({"groups": groups})
 
         db_object = authenticated_access(Object, identifier)
 

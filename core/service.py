@@ -134,7 +134,7 @@ def setup_restful_service(app):
     spec.path(resource=CommentResource, api=api)
     api.add_resource(TagResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/tag')
     spec.path(resource=TagResource, api=api)
-    api.add_resource(ShareResource, '/share', '/<any(file, config, blob, object):type>/<hash64:identifier>/share')
+    api.add_resource(ShareResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/share')
     spec.path(resource=ShareResource, api=api)
     api.add_resource(MetakeyResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/meta')
     spec.path(resource=MetakeyResource, api=api)

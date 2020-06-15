@@ -160,7 +160,7 @@ class FileResource(ObjectResource):
                     json:
                       type: string
                       description: |
-                        Additional JSON-encoded information about object (currently ignored)
+                        Additional JSON-encoded information about object (ignored for files)
                     metakeys:
                       type: string
                       description: |
@@ -177,7 +177,7 @@ class FileResource(ObjectResource):
                     - file
         responses:
             200:
-                description: File uploaded successfully
+                description: Information about uploaded file
                 content:
                   application/json:
                     schema: FileShowSchema

@@ -36,6 +36,10 @@ class LoginResource(Resource):
               content:
                 application/json:
                   schema: UserLoginSuccessSchema
+            400:
+              description: When request body is invalid
+            403:
+              description: When credentials are invalid, account is inactive or system is set into maintenance mode.
         """
         schema = UserLoginSchema()
         obj = schema.loads(request.get_data(as_text=True))
@@ -76,7 +80,7 @@ class RegisterResource(Resource):
     def post(self):
         """
         ---
-        description: Request new user account
+        description: Request new user account.
         tags:
             - auth
         requestBody:
@@ -90,6 +94,12 @@ class RegisterResource(Resource):
                 content:
                   application/json:
                     schema: UserSuccessSchema
+            400:
+                description: When request body is invalid
+            403:
+                description: When registration feature is disabled or reCAPTCHA token wasn't valid.
+            409:
+                description: When user login or group name already exists
         """
         if not app_config.malwarecage.enable_registration:
             raise Forbidden("User registration is not enabled.")
@@ -163,7 +173,7 @@ class UserGetPasswordChangeTokenResource(Resource):
     def get(self, login):
         """
         ---
-        description: Retrieve token for password change
+        description: Retrieve token for password change. Requires 'manage_users' capability.
         security:
             - bearerAuth: []
         tags:
@@ -182,6 +192,8 @@ class UserGetPasswordChangeTokenResource(Resource):
                   type: object
                   schema:
                     $ref: '#/components/schemas/UserTokenSchema'
+            403:
+                description: When specified user doesn't exist
         """
         try:
             user = User.query.filter(User.login == login).one()
@@ -197,11 +209,11 @@ class UserChangePasswordResource(Resource):
     def post(self):
         """
         ---
-        description: Set password via authorization token
+        description: Set password via authorization token.
         tags:
             - auth
         requestBody:
-            description: User auth token and new password
+            description: User set password token and new password
             content:
               application/json:
                 schema: UserSetPasswordSchema
@@ -211,6 +223,10 @@ class UserChangePasswordResource(Resource):
               content:
                 application/json:
                   schema: UserSuccessSchema
+            400:
+                description: When request body is invalid or provided password doesn't match the policy
+            403:
+                description: When set password token is no longer valid
         """
         MIN_PASSWORD_LENGTH = 8
         schema = UserSetPasswordSchema()
@@ -239,17 +255,19 @@ class RequestPasswordChangeResource(Resource):
     def post(self):
         """
         ---
-        description: Generates new token for session continuation
+        description: Request password change link for currently authenticated user.
         security:
             - bearerAuth: []
         tags:
             - auth
         responses:
             200:
-              description: Regenerated authorization token with information about user capabilities
+              description: When password change link was successfully sent to the user's e-mail
               content:
                 application/json:
-                  schema: UserLoginSuccessSchema
+                  schema: UserSuccessSchema
+            500:
+              description: When SMTP server is unavailable or not properly configured on the server.
         """
         login = g.auth_user.login
         email = g.auth_user.email
@@ -275,15 +293,21 @@ class RecoverPasswordResource(Resource):
     def post(self):
         """
         ---
-        description: Request a recover password link
+        description: Request a recover password link for provided login and e-mail.
         tags:
             - auth
         responses:
             200:
-                description: Get the password reset link by providing login and email
+                description: Get the password reset link by providing login and e-mail
                 content:
                   application/json:
                     schema: UserRecoverPasswordSchema
+            400:
+                description: When request body is invalid
+            403:
+                description: When login and e-mail address doesn't match or doesn't exist
+            500:
+              description: When SMTP server is unavailable or not properly configured on the server.
         """
         schema = UserRecoverPasswordSchema()
         obj = schema.loads(request.get_data(as_text=True))
@@ -337,7 +361,7 @@ class RefreshTokenResource(Resource):
     def post(self):
         """
         ---
-        description: Generates new token for session continuation
+        description: Generate new token for session continuation.
         security:
             - bearerAuth: []
         tags:
@@ -370,7 +394,7 @@ class ValidateTokenResource(Resource):
     def get(self):
         """
         ---
-        description: Validates token for session
+        description: Validate token for session.
         security:
             - bearerAuth: []
         tags:

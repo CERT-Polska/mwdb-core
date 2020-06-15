@@ -24,21 +24,23 @@ class CommentResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of target object
+              description: Type of commented object (ignored)
             - in: path
               name: identifier
               schema:
                 type: string
-              description: Commented object's id
+              description: Object identifier
         responses:
             200:
-                description: Comment objects
+                description: List of comment objects
                 content:
                   application/json:
                     schema:
                       type: array
                       items:
                         $ref: '#/components/schemas/Comment'
+            404:
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         db_object = authenticated_access(Object, identifier)
         comments = db.session.query(Comment.id, Comment.comment, Comment.timestamp, User.login.label("author")) \
@@ -53,7 +55,7 @@ class CommentResource(Resource):
     def post(self, type, identifier):
         """
         ---
-        description: Create new comment
+        description: Post a new comment. Requires 'adding_comments' capability.
         security:
             - bearerAuth: []
         tags:
@@ -69,7 +71,7 @@ class CommentResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of target object
+              description: Type of commented object (ignored)
             - in: path
               name: identifier
               schema:
@@ -77,10 +79,16 @@ class CommentResource(Resource):
               description: Commented object's id
         responses:
             200:
-                description: Comment object after addition
+                description: Posted comment object
                 content:
                   application/json:
                     schema: CommentSchema
+            400:
+                description: When request body is invalid
+            403:
+                description: When user doesn't have 'adding_comments' capability.
+            404:
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         schema = CommentSchemaBase()
         obj = schema.loads(request.get_data(as_text=True))
@@ -111,7 +119,7 @@ class CommentDeleteResource(Resource):
     def delete(self, type, identifier, comment_id):
         """
         ---
-        description: Delete a comment
+        description: Delete a comment. Requires 'removing_comments' capability.
         security:
             - bearerAuth: []
         tags:
@@ -136,6 +144,10 @@ class CommentDeleteResource(Resource):
         responses:
             200:
                 description: When comment was successfully deleted
+            403:
+                description: When user doesn't have 'removing_comments' capability.
+            404:
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         db_object = authenticated_access(Object, identifier)
 

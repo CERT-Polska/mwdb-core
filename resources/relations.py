@@ -11,7 +11,7 @@ class RelationsResource(Resource):
     def get(self, type, identifier):
         """
         ---
-        description: Get relations attached to an object
+        description: Get relations attached to an object. Deprecated, use /object/<hash>.
         security:
             - bearerAuth: []
         tags:

@@ -63,7 +63,7 @@ class RequestSampleDownloadResource(Resource):
         parameters:
             - in: path
               name: identifier
-              description: SHA256 or MD5 of requested file
+              description: Requested file identifier (SHA256/MD5/SHA1/SHA512)
               schema:
                 type: string
         responses:
@@ -73,7 +73,7 @@ class RequestSampleDownloadResource(Resource):
                   application/json:
                     schema: URLReturnSchema
             404:
-                description: When file doesn't exist
+                description: When file doesn't exist, object is not a file or user doesn't have access to this object.
         """
         from core.service import get_url_for
         file = authenticated_access(File, identifier)

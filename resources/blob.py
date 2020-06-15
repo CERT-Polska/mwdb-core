@@ -26,7 +26,7 @@ class TextBlobListResource(ObjectListResource):
         security:
             - bearerAuth: []
         tags:
-            - config
+            - blob
         parameters:
             - in: query
               name: older_than
@@ -63,7 +63,7 @@ class TextBlobResource(ObjectResource):
     def get(self, identifier):
         """
         ---
-        description: Fetch text blob information by hash
+        description: Get text blob information and contents
         security:
             - bearerAuth: []
         tags:
@@ -73,15 +73,16 @@ class TextBlobResource(ObjectResource):
               name: identifier
               schema:
                 type: string
-              description: Text blob unique identifier
+              description: Text blob identifier
         responses:
             200:
-                description: When text blob was found
+                description: Text blob information and contents
                 content:
                   application/json:
                     schema: TextBlobShowSchema
             404:
-                description: When object was not found
+                description: |
+                    When text blob doesn't exist, object is not a blob or user doesn't have access to this object.
         """
         return super(TextBlobResource, self).get(identifier)
 

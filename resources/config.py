@@ -19,7 +19,7 @@ class ConfigStatsResource(Resource):
     def get(self):
         """
         ---
-        description: get static config global statistics
+        description: Get static configuration global statistics
         security:
             - bearerAuth: []
         tags:
@@ -28,12 +28,13 @@ class ConfigStatsResource(Resource):
             - in: query
               name: range
               schema:
-                type: str
-              description: Time range in hours "24h" (or days e.g. "2d")
+                type: string
+              description: Time range in hours "24h", days "2d" or all time "*"
+              default: *
               required: false
         responses:
             200:
-                description: Static config global statistics
+                description: Static configuration global statistics grouped per malware family
                 content:
                   application/json:
                     schema: ConfigStatsSchema
@@ -111,7 +112,7 @@ class ConfigResource(ObjectResource):
     def get(self, identifier):
         """
         ---
-        description: Fetch config information by hash
+        description: Get config information and contents
         security:
             - bearerAuth: []
         tags:
@@ -121,15 +122,16 @@ class ConfigResource(ObjectResource):
               name: identifier
               schema:
                 type: string
-              description: Config unique identifier
+              description: Config identifier
         responses:
             200:
-                description: When config was found
+                description: Config information and contents
                 content:
                   application/json:
                     schema: ConfigShowSchema
             404:
-                description: When object was not found
+                description: |
+                    When config doesn't exist, object is not a config or user doesn't have access to this object.
         """
         return super(ConfigResource, self).get(identifier)
 
@@ -155,7 +157,7 @@ class ConfigResource(ObjectResource):
     def put(self, identifier):
         """
         ---
-        description: Add config to given file
+        description: Upload new config
         security:
             - bearerAuth: []
         tags:
@@ -165,26 +167,33 @@ class ConfigResource(ObjectResource):
               name: identifier
               schema:
                 type: string
-              description: SHA256 or MD5 parent file unique identifier
+              default: root
+              description: |
+                Parent object identifier or 'root' if there is no parent.
+                User must have 'adding_parents' capability to specify a parent object.
         requestBody:
             required: true
             content:
               multipart/form-data:
                 schema:
                   type: object
-                  description: Uploaded configuration parameters (verbose mode)
+                  description: Configuration to be uploaded with additional parameters (verbose mode)
                   properties:
                     json:
                       type: string
-                      format: binary
-                      description: Configuration to be uploaded
+                      description: JSON-encoded configuration contents to be uploaded
                     metakeys:
                       type: string
-                      description: Optional JSON-encoded `MetakeyShowSchema` (only for permitted users)
+                      description: |
+                        Optional JSON-encoded `MetakeyShowSchema`. User must be allowed to set specified attribute keys.
                     upload_as:
                       type: string
-                      default: '*'
-                      description: Identity used for uploading sample
+                      default: *
+                      description: |
+                        Group that object will be shared with. If user doesn't have 'sharing_objects' capability,
+                        user must be a member of specified group (unless 'Group doesn't exist' error will occur).
+                        If default value '*' is specified - object will be exclusively shared with all user's groups
+                        excluding 'public'.
                   required:
                     - json
               application/json:
@@ -203,14 +212,18 @@ class ConfigResource(ObjectResource):
                     - family
         responses:
             200:
-                description: Config uploaded succesfully
+                description: Information about uploaded config
                 content:
                   application/json:
-                    schema: FileShowSchema
+                    schema: ConfigShowSchema
             403:
-                description: No permissions to perform additional operations (e.g. adding metakeys)
+                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
             404:
-                description: Specified group doesn't exist
+                description: |
+                    One of attribute keys doesn't exist or user doesn't have permission to set it.
+
+                    Specified 'upload_as' group doesn't exist or user doesn't have permission to share objects
+                    with that group
             409:
                 description: Object exists yet but has different type
         """

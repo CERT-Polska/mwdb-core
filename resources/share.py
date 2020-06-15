@@ -16,7 +16,7 @@ from . import authenticated_access, logger, requires_authorization
 
 class ShareResource(Resource):
     @requires_authorization
-    def get(self, type=None, identifier=None):
+    def get(self, type, identifier):
         """
         ---
         description: Get sharing info for specified object

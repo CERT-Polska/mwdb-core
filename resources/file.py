@@ -30,7 +30,13 @@ class FileListResource(ObjectListResource):
     def get(self):
         """
         ---
-        description: Retrieve list of files
+        summary: Search or list files
+        description: |
+            Returns list of files matching provided query, ordered from the latest one.
+
+            Limited to 10 objects, use `older_than` parameter to fetch more.
+
+            Don't rely on maximum count of returned objects because it can be changed/parametrized in future.
         security:
             - bearerAuth: []
         tags:
@@ -40,7 +46,7 @@ class FileListResource(ObjectListResource):
               name: older_than
               schema:
                 type: string
-              description: Fetch files which are older than the file specified by identifier. Used for pagination
+              description: Fetch objects which are older than the object specified by identifier. Used for pagination
               required: false
             - in: query
               name: query
@@ -55,7 +61,9 @@ class FileListResource(ObjectListResource):
                   application/json:
                     schema: MultiFileShowSchema
             400:
-                description: Syntax error in Lucene query
+                description: When wrong parameters were provided or syntax error occured in Lucene query
+            404:
+                description: When user doesn't have access to the `older_than` object
         """
         return super(FileListResource, self).get()
 
@@ -71,7 +79,9 @@ class FileResource(ObjectResource):
     def get(self, identifier):
         """
         ---
-        description: Get information about file
+        summary: Get file information
+        description: |
+            Returns information about file
         security:
             - bearerAuth: []
         tags:
@@ -132,7 +142,8 @@ class FileResource(ObjectResource):
     def post(self, identifier):
         """
         ---
-        description: Upload new file
+        summary: Upload file
+        description: Uploads new file.
         security:
             - bearerAuth: []
         tags:
@@ -145,6 +156,7 @@ class FileResource(ObjectResource):
               default: 'root'
               description: |
                 Parent object identifier or 'root' if there is no parent.
+
                 User must have 'adding_parents' capability to specify a parent object.
         requestBody:
             required: true

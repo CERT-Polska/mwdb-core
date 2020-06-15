@@ -62,6 +62,7 @@ class Service(Api):
 
 app_description = """
 Malwarecage API documentation.
+
 If you want to automate things, we recommend using <a href="http://github.com/CERT-Polska/mwdblib">mwdblib library</a>
 """
 
@@ -73,7 +74,7 @@ def get_url_for(app, resource, **params):
 def setup_restful_service(app):
     api = Service(app)
 
-    spec = APISpec(title='MWDB',
+    spec = APISpec(title='Malwarecage',
                    version=app_version,
                    openapi_version='3.0.2',
                    plugins=[ApispecFlaskRestful(), MarshmallowPlugin()],

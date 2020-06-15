@@ -19,7 +19,8 @@ class ConfigStatsResource(Resource):
     def get(self):
         """
         ---
-        description: Get static configuration global statistics
+        summary: Get config statistics
+        description: Get static configuration global statistics grouped per malware family.
         security:
             - bearerAuth: []
         tags:
@@ -34,7 +35,7 @@ class ConfigStatsResource(Resource):
               required: false
         responses:
             200:
-                description: Static configuration global statistics grouped per malware family
+                description: Static configuration global statistics
                 content:
                   application/json:
                     schema: ConfigStatsSchema
@@ -71,7 +72,13 @@ class ConfigListResource(ObjectListResource):
     def get(self):
         """
         ---
-        description: Retrieve list of configs
+        summary: Search or list configs
+        description: |
+            Returns list of configs matching provided query, ordered from the latest one.
+
+            Limited to 10 objects, use `older_than` parameter to fetch more.
+
+            Don't rely on maximum count of returned objects because it can be changed/parametrized in future.
         security:
             - bearerAuth: []
         tags:
@@ -81,7 +88,7 @@ class ConfigListResource(ObjectListResource):
               name: older_than
               schema:
                 type: string
-              description: Fetch configs which are older than the config specified by identifier. Used for pagination
+              description: Fetch objects which are older than the object specified by identifier. Used for pagination
               required: false
             - in: query
               name: query
@@ -91,12 +98,14 @@ class ConfigListResource(ObjectListResource):
               required: false
         responses:
             200:
-                description: List of configs
+                description: List of files
                 content:
                   application/json:
                     schema: MultiConfigSchema
             400:
-                description: Syntax error in Lucene query
+                description: When wrong parameters were provided or syntax error occured in Lucene query
+            404:
+                description: When user doesn't have access to the `older_than` object
         """
         return super(ConfigListResource, self).get()
 
@@ -112,7 +121,9 @@ class ConfigResource(ObjectResource):
     def get(self, identifier):
         """
         ---
-        description: Get config information and contents
+        summary: Get config
+        description: |
+            Returns config information and contents
         security:
             - bearerAuth: []
         tags:
@@ -130,8 +141,7 @@ class ConfigResource(ObjectResource):
                   application/json:
                     schema: ConfigShowSchema
             404:
-                description: |
-                    When config doesn't exist, object is not a config or user doesn't have access to this object.
+                description: When config doesn't exist, object is not a config or user doesn't have access to this object.
         """
         return super(ConfigResource, self).get(identifier)
 
@@ -157,7 +167,8 @@ class ConfigResource(ObjectResource):
     def put(self, identifier):
         """
         ---
-        description: Upload new config
+        summary: Upload config
+        description: Uploads new config
         security:
             - bearerAuth: []
         tags:

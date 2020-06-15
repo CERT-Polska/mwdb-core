@@ -23,7 +23,7 @@ class TagListResource(Resource):
             - bearerAuth: []
         tags:
             - tag
-         parameters:
+        parameters:
             - in: query
               name: query
               schema:

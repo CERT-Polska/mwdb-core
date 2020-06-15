@@ -140,9 +140,6 @@ class ObjectResource(Resource):
 
     @requires_authorization
     def post(self, identifier):
-        """
-        Abstract object upload method
-        """
         if self.ObjectType is Object:
             raise MethodNotAllowed()
 

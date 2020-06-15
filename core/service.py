@@ -107,6 +107,7 @@ def setup_restful_service(app):
     spec.path(resource=PingResource, api=api)
     api.add_resource(ServerInfoResource, '/server')
     spec.path(resource=ServerInfoResource, api=api)
+
     # Authentication endpoints
     api.add_resource(LoginResource, '/auth/login')
     spec.path(resource=LoginResource, api=api)
@@ -121,7 +122,8 @@ def setup_restful_service(app):
     api.add_resource(ValidateTokenResource, "/auth/validate")
     spec.path(resource=ValidateTokenResource, api=api)
     api.add_resource(RegisterResource, '/auth/register')
-    # todo: Temporarily undocumented spec.path(resource=RegisterResource, api=api)
+    spec.path(resource=RegisterResource, api=api)
+
     # Object endpoints
     api.add_resource(ObjectListResource, '/object')
     spec.path(resource=ObjectListResource, api=api)
@@ -144,14 +146,17 @@ def setup_restful_service(app):
     spec.path(resource=ObjectChildResource, api=api)
     api.add_resource(RelationsResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/relations')
     spec.path(resource=RelationsResource, api=api)
+
     # Tag endpoints
     api.add_resource(TagListResource, '/tag')
     spec.path(resource=TagListResource, api=api)
+
     # File endpoints
     api.add_resource(FileListResource, '/file')
     spec.path(resource=FileListResource, api=api)
     api.add_resource(FileResource, '/file/<string:identifier>')
     spec.path(resource=FileResource, api=api)
+
     # Config endpoints
     api.add_resource(ConfigListResource, '/config')
     spec.path(resource=ConfigListResource, api=api)
@@ -159,16 +164,20 @@ def setup_restful_service(app):
     spec.path(resource=ConfigStatsResource, api=api)
     api.add_resource(ConfigResource, '/config/<hash64:identifier>')
     spec.path(resource=ConfigResource, api=api)
+
     # Blob endpoints
     api.add_resource(TextBlobListResource, '/blob')
     spec.path(resource=TextBlobListResource, api=api)
     api.add_resource(TextBlobResource, '/blob/<hash64:identifier>')
     spec.path(resource=TextBlobResource, api=api)
-    # Util endpoints
+
+    # Download endpoints
     api.add_resource(RequestSampleDownloadResource, '/request/sample/<identifier>')
     spec.path(resource=RequestSampleDownloadResource, api=api)
     api.add_resource(DownloadResource, '/download/<access_token>')
     spec.path(resource=DownloadResource, api=api)
+
+    # Search endpoints
     api.add_resource(SearchResource, '/search')
     spec.path(resource=SearchResource, api=api)
 
@@ -184,24 +193,25 @@ def setup_restful_service(app):
 
     # User endpoints
     api.add_resource(UserListResource, "/user")
-    # spec.path(resource=UserListResource, api=api)
+    spec.path(resource=UserListResource, api=api)
     api.add_resource(UserResource, "/user/<login>")
-    # spec.path(resource=UserResource, api=api)
+    spec.path(resource=UserResource, api=api)
     api.add_resource(UserGetPasswordChangeTokenResource, "/user/<login>/change_password")
-    # spec.path(resource=UserGetPasswordChangeTokenResource, api=api)
-    api.add_resource(APIKeyIssueResource, "/user/<login>/api_key")
-    # spec.path(resource=APIKeyIssueResource, api=api)
+    spec.path(resource=UserGetPasswordChangeTokenResource, api=api)
     api.add_resource(UserPendingResource, "/user/<login>/pending")
-    # spec.path(resource=UserPendingResource, api=api)
+    spec.path(resource=UserPendingResource, api=api)
 
     # API key endpoints
+    api.add_resource(APIKeyIssueResource, "/user/<login>/api_key")
+    spec.path(resource=APIKeyIssueResource, api=api)
     api.add_resource(APIKeyResource, "/api_key/<api_key_id>")
+    spec.path(resource=APIKeyResource, api=api)
 
     # Group endpoints
     api.add_resource(GroupListResource, "/group")
-    # spec.path(resource=GroupListResource, api=api)
+    spec.path(resource=GroupListResource, api=api)
     api.add_resource(GroupResource, "/group/<name>")
-    # spec.path(resource=GroupResource, api=api)
+    spec.path(resource=GroupResource, api=api)
     api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
-    # spec.path(resource=GroupMemberResource, api=api)
+    spec.path(resource=GroupMemberResource, api=api)
     return api, spec

@@ -51,10 +51,7 @@ class CommentResource(Resource):
         dumped_comments = multi_comment.dump(comments)
         return dumped_comments
 
-    @requires_authorization
-    @requires_capabilities(Capabilities.adding_comments)
-    def post(self, type, identifier):
-        """
+    """
         ---
         summary: Create comment
         description: |
@@ -95,6 +92,9 @@ class CommentResource(Resource):
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
+    @requires_authorization
+    @requires_capabilities(Capabilities.adding_comments)
+    def post(self, type, identifier):
         schema = CommentSchemaBase()
         obj = schema.loads(request.get_data(as_text=True))
 

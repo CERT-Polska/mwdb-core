@@ -22,7 +22,13 @@ class ObjectListResource(Resource):
     def get(self):
         """
         ---
-        description: Retrieve list of objects
+        summary: Search or list objects
+        description: |
+            Returns list of objects matching provided query, ordered from the latest one.
+
+            Limited to 10 objects, use `older_than` parameter to fetch more.
+
+            Don't rely on maximum count of returned objects because it can be changed/parametrized in future.
         security:
             - bearerAuth: []
         tags:
@@ -47,7 +53,9 @@ class ObjectListResource(Resource):
                   application/json:
                     schema: MultiObjectSchema
             400:
-                description: Syntax error in Lucene query
+                description: When wrong parameters were provided or syntax error occured in Lucene query
+            404:
+                description: When user doesn't have access to the `older_than` object
         """
         if 'page' in request.args and 'older_than' in request.args:
             raise BadRequest("page and older_than can't be used simultaneously. Use `older_than` for new code.")
@@ -101,7 +109,9 @@ class ObjectResource(Resource):
     def get(self, identifier):
         """
         ---
-        description: Get information about object
+        summary: Get object
+        description: |
+            Returns information about object
         security:
             - bearerAuth: []
         tags:
@@ -236,7 +246,11 @@ class ObjectChildResource(Resource):
     def put(self, type, parent, child):
         """
         ---
-        description: Add new relation between existing objects
+        summary: Link existing objects
+        description: |
+            Add new relation between existing objects
+
+            Requires 'adding_parents' capability.
         security:
             - bearerAuth: []
         tags:

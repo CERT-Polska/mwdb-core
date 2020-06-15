@@ -14,14 +14,25 @@ class TagListResource(Resource):
     def get(self):
         """
         ---
-        description: Get list of tags for autocompletion purposes
+        summary: Get list of tags
+        description: |
+            Returns list of available tags starting with provided prefix.
+
+            Used for autocompletion purposes.
         security:
             - bearerAuth: []
         tags:
             - tag
+         parameters:
+            - in: query
+              name: query
+              schema:
+                type: string
+              description: Tag prefix
+              required: false
         responses:
             200:
-                description: Existing tags
+                description: List of tags
                 content:
                   application/json:
                     schema:
@@ -52,7 +63,9 @@ class TagResource(Resource):
     def get(self, type, identifier):
         """
         ---
-        description: Get tags attached to an object
+        summary: Get object tags
+        description: |
+            Returns tags attached to an object
         security:
             - bearerAuth: []
         tags:
@@ -63,21 +76,23 @@ class TagResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of target object
+              description: Type of object
             - in: path
               name: identifier
               schema:
                 type: string
-              description: SHA256 object unique identifier
+              description: Object identifier
         responses:
             200:
-                description: User object
+                description: List of object tags
                 content:
                   application/json:
                     schema:
                       type: array
                       items:
                         $ref: '#/components/schemas/Tag'
+            404:
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         db_object = authenticated_access(Object, identifier)
 
@@ -93,7 +108,11 @@ class TagResource(Resource):
     def put(self, type, identifier):
         """
         ---
-        description: Attach new tag to an object
+        summary: Add object tag
+        description: |
+            Add new tag to an object.
+
+            Requires 'adding_tags' capability.
         security:
             - bearerAuth: []
         tags:
@@ -109,10 +128,16 @@ class TagResource(Resource):
               name: identifier
               schema:
                 type: string
-              description: SHA256 object unique identifier
+              description: Object identifier
         responses:
             200:
                 description: When tag is successfully added
+            400:
+                description: When tag or request body isn't valid
+            403:
+                description: When user doesn't have 'adding_tags' capability.
+            404:
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         schema = TagSchema()
         obj = schema.loads(request.get_data(as_text=True))
@@ -133,7 +158,11 @@ class TagResource(Resource):
     def delete(self, type, identifier):
         """
         ---
-        description: Remove tag from object
+        summary: Delete object tag
+        description: |
+            Removes tag from object.
+
+            Requires 'removing_tags' capability.
         security:
             - bearerAuth: []
         tags:
@@ -144,15 +173,21 @@ class TagResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of target object
+              description: Type of object
             - in: path
               name: identifier
               schema:
                 type: string
-              description: SHA256 object unique identifier
+              description: Object identifier
         responses:
             200:
                 description: When tag is successfully removed
+            400:
+                description: When tag or request body isn't valid
+            403:
+                description: When user doesn't have 'adding_tags' capability.
+            404:
+                description: When object doesn't exist or user doesn't have access to this object.
         """
 
         schema = TagSchema()

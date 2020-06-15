@@ -10,7 +10,7 @@ from core.capabilities import Capabilities
 from core.schema import ObjectShowBase, MetakeyShowSchema, MultiObjectSchema
 from core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 
-from . import logger, authenticated_access, requires_authorization
+from . import logger, authenticated_access, requires_authorization, requires_capabilities
 
 
 class ObjectListResource(Resource):
@@ -234,6 +234,7 @@ class ObjectResource(Resource):
 
 class ObjectChildResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.adding_parents)
     def put(self, type, parent, child):
         """
         ---
@@ -265,8 +266,6 @@ class ObjectChildResource(Resource):
             200:
                 description: When relation was successfully added
         """
-        if not g.auth_user.has_rights(Capabilities.adding_parents):
-            raise Forbidden("You are not permitted to perform this action")
         parent_object = authenticated_access(Object, parent)
         child_object = authenticated_access(Object, child)
 

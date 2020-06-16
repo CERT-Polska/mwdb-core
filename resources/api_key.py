@@ -24,9 +24,9 @@ class APIKeyIssueResource(Resource):
         ---
         summary: Create new API key for user
         description: |
-            Creates new API key and returns its id and token
+            Creates new API key and returns its id and token.
 
-            Requires 'manage_users' capability if login doesn't match the login of currently authenticated
+            Requires `manage_users` capability if login doesn't match the login of currently authenticated
             user.
         security:
             - bearerAuth: []
@@ -46,7 +46,7 @@ class APIKeyIssueResource(Resource):
                     schema: APIKeyTokenSchema
             403:
                 description: |
-                    When user doesn't have required 'manage_users' capability or provided
+                    When user doesn't have required `manage_users` capability or provided
                     login doesn't exist.
         """
         if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.login != login:
@@ -79,9 +79,9 @@ class APIKeyResource(Resource):
         ---
         summary: Get token for API key
         description: |
-            Returns token for provided API key identifier
+            Returns token for provided API key identifier.
 
-            Requires 'manage_users' capability if current user doesn't own the key.
+            Requires `manage_users` capability if current user doesn't own the key.
         security:
             - bearerAuth: []
         tags:
@@ -101,7 +101,7 @@ class APIKeyResource(Resource):
             404:
                 description: |
                     When API key doesn't exist or user doesn't own the key and
-                    doesn't have the 'manage_users' capability.
+                    doesn't have the `manage_users` capability.
         """
         try:
             api_key = APIKey.query.filter(APIKey.id == uuid.UUID(api_key_id)).one()
@@ -122,9 +122,9 @@ class APIKeyResource(Resource):
         ---
         summary: Delete API key
         description: |
-            Deletes API key with provided identifier
+            Deletes API key with provided identifier.
 
-            Requires 'manage_users' capability if current user doesn't own the key.
+            Requires `manage_users` capability if current user doesn't own the key.
         security:
             - bearerAuth: []
         tags:
@@ -141,7 +141,7 @@ class APIKeyResource(Resource):
             404:
                 description: |
                     When API key doesn't exist or user doesn't own the key and
-                    doesn't have the 'manage_users' capability.
+                    doesn't have the `manage_users` capability.
         """
         try:
             api_key = APIKey.query.filter(APIKey.id == uuid.UUID(api_key_id)).one()

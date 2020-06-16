@@ -180,8 +180,8 @@ class ConfigResource(ObjectResource):
                 type: string
               default: root
               description: |
-                Parent object identifier or 'root' if there is no parent.
-                User must have 'adding_parents' capability to specify a parent object.
+                Parent object identifier or `root` if there is no parent.
+                User must have `adding_parents` capability to specify a parent object.
         requestBody:
             required: true
             content:
@@ -201,10 +201,10 @@ class ConfigResource(ObjectResource):
                       type: string
                       default: '*'
                       description: |
-                        Group that object will be shared with. If user doesn't have 'sharing_objects' capability,
-                        user must be a member of specified group (unless 'Group doesn't exist' error will occur).
-                        If default value '*' is specified - object will be exclusively shared with all user's groups
-                        excluding 'public'.
+                        Group that object will be shared with. If user doesn't have `sharing_objects` capability,
+                        user must be a member of specified group (unless `Group doesn't exist` error will occur).
+                        If default value `*` is specified - object will be exclusively shared with all user's groups
+                        excluding `public`.
                   required:
                     - json
               application/json:

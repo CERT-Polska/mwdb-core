@@ -130,7 +130,7 @@ class TextBlobResource(ObjectResource):
         description: |
             Uploads new text blob
 
-            Requires 'adding_blobs' capability.
+            Requires `adding_blobs` capability.
         security:
             - bearerAuth: []
         tags:

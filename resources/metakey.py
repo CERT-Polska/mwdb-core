@@ -38,7 +38,7 @@ class MetakeyResource(Resource):
               name: hidden
               schema:
                 type: int
-              description: Show hidden attributes (requires 'reading_all_attributes' capability)
+              description: Show hidden attributes (requires `reading_all_attributes` capability)
               required: false
         responses:
             200:
@@ -47,7 +47,7 @@ class MetakeyResource(Resource):
                   application/json:
                     schema: MetakeyShowSchema
             403:
-                description: When user requested hidden metakeys but doesn't have 'reading_all_attributes' capability
+                description: When user requested hidden metakeys but doesn't have `reading_all_attributes` capability
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
@@ -68,7 +68,7 @@ class MetakeyResource(Resource):
         description: |
             Adds attribute to specified object
 
-            User must have 'set' access to the attribute key or 'adding_all_attributes' capability.
+            User must have `set` access to the attribute key or `adding_all_attributes` capability.
         security:
             - bearerAuth: []
         tags:
@@ -172,7 +172,7 @@ class MetakeyListDefinitionManageResource(Resource):
         description: |
             Returns list of attribute key definitions.
 
-            Requires 'managing_attributes' capability.
+            Requires `managing_attributes` capability.
         security:
             - bearerAuth: []
         tags:
@@ -184,7 +184,7 @@ class MetakeyListDefinitionManageResource(Resource):
                   application/json:
                     schema: MetakeyDefinitionManageListSchema
             403:
-                description: When user doesn't have 'managing_attributes' capability.
+                description: When user doesn't have `managing_attributes` capability.
         """
         metakeys = db.session.query(MetakeyDefinition).order_by(MetakeyDefinition.key).all()
         schema = MetakeyDefinitionManageListSchema()
@@ -201,7 +201,7 @@ class MetakeyDefinitionManageResource(Resource):
         description: |
             Returns attribute key definition details.
 
-            Requires 'managing_attributes' capability.
+            Requires `managing_attributes` capability.
         security:
             - bearerAuth: []
         tags:
@@ -219,7 +219,7 @@ class MetakeyDefinitionManageResource(Resource):
                   application/json:
                     schema: MetakeyDefinitionManageSchema
             403:
-                description: When user doesn't have 'managing_attributes' capability.
+                description: When user doesn't have `managing_attributes` capability.
             404:
                 description: When specified attribute key doesn't exist
         """
@@ -240,7 +240,7 @@ class MetakeyDefinitionManageResource(Resource):
         description: |
             Creates or updates attribute key definition.
 
-            Requires 'managing_attributes' capability.
+            Requires `managing_attributes` capability.
         security:
             - bearerAuth: []
         tags:
@@ -262,7 +262,7 @@ class MetakeyDefinitionManageResource(Resource):
             400:
                 description: When one of attribute definition fields is missing or incorrect.
             403:
-                description: When user doesn't have 'managing_attributes' capability.
+                description: When user doesn't have `managing_attributes` capability.
         """
         schema = MetakeyDefinitionSchema()
         obj = schema.loads(request.get_data(as_text=True))
@@ -294,7 +294,7 @@ class MetakeyPermissionResource(Resource):
         description: |
             Adds or modifies attribute key group permission for specified key and group name.
 
-            Requires 'managing_attributes' capability.
+            Requires `managing_attributes` capability.
         security:
             - bearerAuth: []
         tags:
@@ -321,7 +321,7 @@ class MetakeyPermissionResource(Resource):
             400:
                 description: When one of attribute permission fields is missing or incorrect.
             403:
-                description: When user doesn't have 'managing_attributes' capability.
+                description: When user doesn't have `managing_attributes` capability.
             404:
                 description: When attribute key or group doesn't exist
         """
@@ -356,7 +356,7 @@ class MetakeyPermissionResource(Resource):
         description: |
             Removes attribute key permission for specified key and group name.
 
-            Requires 'managing_attributes' capability.
+            Requires `managing_attributes` capability.
         security:
             - bearerAuth: []
         tags:
@@ -376,7 +376,7 @@ class MetakeyPermissionResource(Resource):
             200:
                 description: When group permission has been successfully removed
             403:
-                description: When user doesn't have 'managing_attributes' capability.
+                description: When user doesn't have `managing_attributes` capability.
             404:
                 description: When attribute key or group or group permission doesn't exist
         """

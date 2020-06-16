@@ -21,7 +21,7 @@ class GroupListResource(Resource):
         description: |
             Returns list of all groups and members.
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -33,7 +33,7 @@ class GroupListResource(Resource):
                   application/json:
                     schema: MultiGroupShowSchema
             403:
-                description: When user doesn't have 'manage_users' capability.
+                description: When user doesn't have `manage_users` capability.
         """
         objs = db.session.query(Group).options(joinedload(Group.users)).all()
         schema = MultiGroupShowSchema()
@@ -50,7 +50,7 @@ class GroupResource(Resource):
         description: |
             Returns information about group.
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -68,7 +68,7 @@ class GroupResource(Resource):
                   application/json:
                     schema: MultiGroupShowSchema
             403:
-                description: When user doesn't have 'manage_users' capability.
+                description: When user doesn't have `manage_users` capability.
             404:
                 description: When group doesn't exist
         """
@@ -87,7 +87,7 @@ class GroupResource(Resource):
         description: |
             Creates a new group.
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -104,7 +104,7 @@ class GroupResource(Resource):
             400:
                 description: When group name or request body is invalid
             403:
-                description: When user doesn't have 'manage_users' capability
+                description: When user doesn't have `manage_users` capability
             409:
                 description: When group exists yet
         """
@@ -144,7 +144,7 @@ class GroupResource(Resource):
 
             Works only for user-defined groups (excluding private and 'public')
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -161,7 +161,7 @@ class GroupResource(Resource):
             400:
                 description: When group name or request body is invalid
             403:
-                description: When user doesn't have 'manage_users' capability or group is immutable
+                description: When user doesn't have `manage_users` capability or group is immutable
             404:
                 description: When group doesn't exist
         """
@@ -211,7 +211,7 @@ class GroupMemberResource(Resource):
 
             Works only for user-defined groups (excluding private and 'public')
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -233,7 +233,7 @@ class GroupMemberResource(Resource):
             400:
                 description: When request body is invalid
             403:
-                description: When user doesn't have 'manage_users' capability, group is immutable or user is pending
+                description: When user doesn't have `manage_users` capability, group is immutable or user is pending
             404:
                 description: When user or group doesn't exist
         """
@@ -280,7 +280,7 @@ class GroupMemberResource(Resource):
 
             Works only for user-defined groups (excluding private and 'public')
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -302,7 +302,7 @@ class GroupMemberResource(Resource):
             400:
                 description: When request body is invalid
             403:
-                description: When user doesn't have 'manage_users' capability, group is immutable or user is pending
+                description: When user doesn't have `manage_users` capability, group is immutable or user is pending
             404:
                 description: When user or group doesn't exist
         """

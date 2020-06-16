@@ -247,7 +247,7 @@ class ObjectChildResource(Resource):
         description: |
             Add new relation between existing objects
 
-            Requires 'adding_parents' capability.
+            Requires `adding_parents` capability.
         security:
             - bearerAuth: []
         tags:
@@ -275,7 +275,7 @@ class ObjectChildResource(Resource):
             200:
                 description: When relation was successfully added
             403:
-                description: When user doesn't have 'adding_parents' capability.
+                description: When user doesn't have `adding_parents` capability.
             404:
                 description: When one of objects doesn't exist or user doesn't have access to object.
         """

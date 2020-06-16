@@ -23,7 +23,7 @@ class ShareResource(Resource):
         description: |
             Returns list of available groups and sharing info for specified object
 
-            If user doesn't have 'sharing_objects' capability, only own groups are included.
+            If user doesn't have `sharing_objects` capability, only own groups are included.
         security:
             - bearerAuth: []
         tags:
@@ -79,7 +79,7 @@ class ShareResource(Resource):
         description: |
             Shares object with another group.
 
-            If user doesn't have 'sharing_objects' capability, it can share object only within its own groups.
+            If user doesn't have `sharing_objects` capability, it can share object only within its own groups.
         security:
             - bearerAuth: []
         tags:

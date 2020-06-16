@@ -112,7 +112,7 @@ class TagResource(Resource):
         description: |
             Add new tag to an object.
 
-            Requires 'adding_tags' capability.
+            Requires `adding_tags` capability.
         security:
             - bearerAuth: []
         tags:
@@ -135,7 +135,7 @@ class TagResource(Resource):
             400:
                 description: When tag or request body isn't valid
             403:
-                description: When user doesn't have 'adding_tags' capability.
+                description: When user doesn't have `adding_tags` capability.
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
@@ -162,7 +162,7 @@ class TagResource(Resource):
         description: |
             Removes tag from object.
 
-            Requires 'removing_tags' capability.
+            Requires `removing_tags` capability.
         security:
             - bearerAuth: []
         tags:
@@ -185,7 +185,7 @@ class TagResource(Resource):
             400:
                 description: When tag or request body isn't valid
             403:
-                description: When user doesn't have 'adding_tags' capability.
+                description: When user doesn't have `removing_tags` capability.
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """

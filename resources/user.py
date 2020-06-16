@@ -27,7 +27,7 @@ class UserListResource(Resource):
         description: |
             Returns list of all users.
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -48,7 +48,7 @@ class UserListResource(Resource):
                   application/json:
                     schema: MultiUserShowSchema
             403:
-                description: When user doesn't have 'manage_users' capability.
+                description: When user doesn't have `manage_users` capability.
         """
         pending = bool(request.args.get('pending', False))
         objs = db.session.query(User).filter(User.pending == pending).all()
@@ -65,7 +65,7 @@ class UserPendingResource(Resource):
         description: |
             Accepts pending user registration.
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -85,7 +85,7 @@ class UserPendingResource(Resource):
             400:
                 description: When invalid login is provided.
             403:
-                description: When user doesn't have 'manage_users' capability.
+                description: When user doesn't have `manage_users` capability.
             500:
                 description: When SMTP server is unavailable or not properly configured on the server.
         """
@@ -124,7 +124,7 @@ class UserPendingResource(Resource):
         description: |
             Rejects pending user registration.
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -144,7 +144,7 @@ class UserPendingResource(Resource):
             400:
                 description: When invalid login is provided.
             403:
-                description: When user doesn't have 'manage_users' capability.
+                description: When user doesn't have `manage_users` capability.
             404:
                 description: When user doesn't exist or is already accepted/rejected.
             500:
@@ -188,7 +188,7 @@ class UserResource(Resource):
         description: |
             Returns information about user.
 
-            If login doesn't match the login of currently authenticated user - 'manage_users' capability is required.
+            If login doesn't match the login of currently authenticated user - `manage_users` capability is required.
         security:
             - bearerAuth: []
         tags:
@@ -206,7 +206,7 @@ class UserResource(Resource):
                   application/json:
                     schema: UserProfileSchema
             403:
-                description: When user doesn't have 'manage_users' capability.
+                description: When user doesn't have `manage_users` capability.
         """
         obj = db.session.query(User).filter(User.login == login).first()
         if not g.auth_user.has_rights(Capabilities.manage_users):
@@ -226,7 +226,7 @@ class UserResource(Resource):
         description: |
             Creates new user account
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -251,7 +251,7 @@ class UserResource(Resource):
             400:
                 description: When request body is invalid
             403:
-                description: When user doesn't have 'manage_users' capability.
+                description: When user doesn't have `manage_users` capability.
             409:
                 description: When user or group with provided name already exists.
             500:
@@ -320,7 +320,7 @@ class UserResource(Resource):
         description: |
             Updates existing user account
 
-            Requires 'manage_users' capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -345,7 +345,7 @@ class UserResource(Resource):
             400:
                 description: When request body is invalid
             403:
-                description: When user doesn't have 'manage_users' capability or modified user is pending.
+                description: When user doesn't have `manage_users` capability or modified user is pending.
             404:
                 description: When user doesn't exist.
         """

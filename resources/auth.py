@@ -92,18 +92,18 @@ class RegisterResource(Resource):
                 schema: UserRegisterSchema
         responses:
             200:
-                description: User login on successful registration
+                description: User login on successful registration.
                 content:
                   application/json:
                     schema: UserSuccessSchema
             400:
-                description: When request body is invalid
+                description: When request body is invalid.
             403:
                 description: When registration feature is disabled or reCAPTCHA token wasn't valid.
             409:
-                description: When user login or group name already exists
+                description: When user login or group name already exists.
             500:
-                description: When ReCAPTCHA verification service is unavailable
+                description: When ReCAPTCHA verification service is unavailable.
         """
         if not app_config.malwarecage.enable_registration:
             raise Forbidden("User registration is not enabled.")
@@ -178,7 +178,7 @@ class UserGetPasswordChangeTokenResource(Resource):
         """
         ---
         summary: Generate password change token
-        description: Generates token for password change. Requires 'manage_users' capability.
+        description: Generates token for password change. Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:

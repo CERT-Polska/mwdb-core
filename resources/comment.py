@@ -57,7 +57,7 @@ class CommentResource(Resource):
         description: |
             Posts a new comment.
 
-            Requires 'adding_comments' capability.
+            Requires `adding_comments` capability.
         security:
             - bearerAuth: []
         tags:
@@ -88,7 +88,7 @@ class CommentResource(Resource):
             400:
                 description: When request body is invalid
             403:
-                description: When user doesn't have 'adding_comments' capability.
+                description: When user doesn't have `adding_comments` capability.
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
@@ -128,7 +128,7 @@ class CommentDeleteResource(Resource):
         description: |
             Deletes a comment.
 
-            Requires 'removing_comments' capability.
+            Requires `removing_comments` capability.
         security:
             - bearerAuth: []
         tags:
@@ -154,7 +154,7 @@ class CommentDeleteResource(Resource):
             200:
                 description: When comment was successfully deleted
             403:
-                description: When user doesn't have 'removing_comments' capability.
+                description: When user doesn't have `removing_comments` capability.
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """

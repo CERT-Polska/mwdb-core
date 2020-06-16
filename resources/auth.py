@@ -102,6 +102,8 @@ class RegisterResource(Resource):
                 description: When registration feature is disabled or reCAPTCHA token wasn't valid.
             409:
                 description: When user login or group name already exists
+            500:
+                description: When ReCAPTCHA verification service is unavailable
         """
         if not app_config.malwarecage.enable_registration:
             raise Forbidden("User registration is not enabled.")
@@ -260,7 +262,10 @@ class RequestPasswordChangeResource(Resource):
         """
         ---
         summary: Get password change link for current user
-        description: Requests password change link for currently authenticated user.
+        description: |
+            Requests password change link for currently authenticated user.
+
+            Link is sent to the e-mail address set in user's profile
         security:
             - bearerAuth: []
         tags:

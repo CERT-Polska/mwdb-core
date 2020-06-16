@@ -142,7 +142,7 @@ class GroupResource(Resource):
         description: |
             Updates group name and capabilities.
 
-            Works only for user-defined groups (not private nor public ones)
+            Works only for user-defined groups (excluding private and 'public')
 
             Requires 'manage_users' capability.
         security:
@@ -209,7 +209,7 @@ class GroupMemberResource(Resource):
         description: |
             Adds new member to existing group
 
-            Works only for user-defined groups (not private nor public ones)
+            Works only for user-defined groups (excluding private and 'public')
 
             Requires 'manage_users' capability.
         security:
@@ -278,7 +278,7 @@ class GroupMemberResource(Resource):
         description: |
             Removes member from existing group
 
-            Works only for user-defined groups (not private nor public ones)
+            Works only for user-defined groups (excluding private and 'public')
 
             Requires 'manage_users' capability.
         security:

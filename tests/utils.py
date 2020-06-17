@@ -99,6 +99,11 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
+    def get_sharing_groups(self):
+        res = self.session.get(self.mwdb_url + '/share')
+        res.raise_for_status()
+        return res.json()["groups"]
+
     def share_with(self, identifier, name):
         res = self.session.put(self.mwdb_url + '/object/' + identifier + '/share', json={
             "group": name

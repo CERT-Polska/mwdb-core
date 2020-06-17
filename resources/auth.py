@@ -181,6 +181,8 @@ class UserGetPasswordChangeTokenResource(Resource):
         description: |
             Generates token for password change.
 
+            Token expires after 14 days.
+
             Requires `manage_users` capability.
         security:
             - bearerAuth: []
@@ -265,6 +267,8 @@ class RequestPasswordChangeResource(Resource):
         summary: Get password change link for current user
         description: |
             Requests password change link for currently authenticated user.
+
+            Link expires after 14 days.
 
             Link is sent to the e-mail address set in user's profile.
         security:

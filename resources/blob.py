@@ -128,7 +128,7 @@ class TextBlobResource(ObjectResource):
         ---
         summary: Upload text blob
         description: |
-            Uploads new text blob
+            Uploads new text blob.
 
             Requires `adding_blobs` capability.
         security:

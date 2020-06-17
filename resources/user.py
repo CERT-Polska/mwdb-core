@@ -318,7 +318,7 @@ class UserResource(Resource):
         ---
         summary: Update existing user
         description: |
-            Updates existing user account
+            Updates existing user account.
 
             Requires `manage_users` capability.
         security:

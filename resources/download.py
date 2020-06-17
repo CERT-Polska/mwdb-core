@@ -59,7 +59,7 @@ class RequestSampleDownloadResource(Resource):
         ---
         summary: Get file download URL
         description: |
-            Returns download URL for given file
+            Returns download URL for given file.
         security:
             - bearerAuth: []
         tags:

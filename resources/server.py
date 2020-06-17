@@ -11,7 +11,7 @@ class PingResource(Resource):
         """
         ---
         summary: Ping server
-        description: Returns 'ok' if the service is working
+        description: Returns `ok` if the service is working.
         tags:
             - server
         responses:

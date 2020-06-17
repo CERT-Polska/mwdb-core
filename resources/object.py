@@ -245,7 +245,7 @@ class ObjectChildResource(Resource):
         ---
         summary: Link existing objects
         description: |
-            Add new relation between existing objects
+            Add new relation between existing objects.
 
             Requires `adding_parents` capability.
         security:

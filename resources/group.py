@@ -207,7 +207,7 @@ class GroupMemberResource(Resource):
         ---
         summary: Add member to group
         description: |
-            Adds new member to existing group
+            Adds new member to existing group.
 
             Works only for user-defined groups (excluding private and 'public')
 
@@ -276,7 +276,7 @@ class GroupMemberResource(Resource):
         ---
         summary: Delete member from group
         description: |
-            Removes member from existing group
+            Removes member from existing group.
 
             Works only for user-defined groups (excluding private and 'public')
 

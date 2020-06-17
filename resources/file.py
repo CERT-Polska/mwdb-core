@@ -81,7 +81,7 @@ class FileResource(ObjectResource):
         ---
         summary: Get file information
         description: |
-            Returns information about file
+            Returns information about file.
         security:
             - bearerAuth: []
         tags:
@@ -155,7 +155,7 @@ class FileResource(ObjectResource):
                 type: string
               default: 'root'
               description: |
-                Parent object identifier or 'root' if there is no parent.
+                Parent object identifier or `root` if there is no parent.
 
                 User must have `adding_parents` capability to specify a parent object.
         requestBody:
@@ -182,9 +182,9 @@ class FileResource(ObjectResource):
                       default: '*'
                       description: |
                         Group that object will be shared with. If user doesn't have `sharing_objects` capability,
-                        user must be a member of specified group (unless 'Group doesn't exist' error will occur).
-                        If default value '*' is specified - object will be exclusively shared with all user's groups
-                        excluding 'public'.
+                        user must be a member of specified group (unless `Group doesn't exist` error will occur).
+                        If default value `*` is specified - object will be exclusively shared with all user's groups
+                        excluding `public`.
                   required:
                     - file
         responses:
@@ -199,7 +199,7 @@ class FileResource(ObjectResource):
                 description: |
                     One of attribute keys doesn't exist or user doesn't have permission to set it.
 
-                    Specified 'upload_as' group doesn't exist or user doesn't have permission to share objects
+                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
                     with that group
             409:
                 description: Object exists yet but has different type

@@ -65,7 +65,7 @@ class TagResource(Resource):
         ---
         summary: Get object tags
         description: |
-            Returns tags attached to an object
+            Returns tags attached to an object.
         security:
             - bearerAuth: []
         tags:

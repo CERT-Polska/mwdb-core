@@ -30,7 +30,7 @@ class ConfigStatsResource(Resource):
               name: range
               schema:
                 type: string
-              description: Time range in hours "24h", days "2d" or all time "*"
+              description: Time range in hours `24h`, days `2d` or all time `*`
               default: '*'
               required: false
         responses:
@@ -123,7 +123,7 @@ class ConfigResource(ObjectResource):
         ---
         summary: Get config
         description: |
-            Returns config information and contents
+            Returns config information and contents.
         security:
             - bearerAuth: []
         tags:
@@ -141,7 +141,8 @@ class ConfigResource(ObjectResource):
                   application/json:
                     schema: ConfigShowSchema
             404:
-                description: When config doesn't exist, object is not a config or user doesn't have access to this object.
+                description: |
+                    When config doesn't exist, object is not a config or user doesn't have access to this object.
         """
         return super(ConfigResource, self).get(identifier)
 
@@ -168,7 +169,7 @@ class ConfigResource(ObjectResource):
         """
         ---
         summary: Upload config
-        description: Uploads new config
+        description: Uploads new config.
         security:
             - bearerAuth: []
         tags:
@@ -233,7 +234,7 @@ class ConfigResource(ObjectResource):
                 description: |
                     One of attribute keys doesn't exist or user doesn't have permission to set it.
 
-                    Specified 'upload_as' group doesn't exist or user doesn't have permission to share objects
+                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
                     with that group
             409:
                 description: Object exists yet but has different type

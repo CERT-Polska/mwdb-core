@@ -23,7 +23,7 @@ class LoginResource(Resource):
         """
         ---
         summary: Authenticate user
-        description: Returns authorization token for provided user credentials
+        description: Returns authorization token for provided user credentials.
         tags:
             - auth
         requestBody:
@@ -178,7 +178,10 @@ class UserGetPasswordChangeTokenResource(Resource):
         """
         ---
         summary: Generate password change token
-        description: Generates token for password change. Requires `manage_users` capability.
+        description: |
+            Generates token for password change.
+
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -265,7 +268,7 @@ class RequestPasswordChangeResource(Resource):
         description: |
             Requests password change link for currently authenticated user.
 
-            Link is sent to the e-mail address set in user's profile
+            Link is sent to the e-mail address set in user's profile.
         security:
             - bearerAuth: []
         tags:
@@ -373,7 +376,7 @@ class RefreshTokenResource(Resource):
         """
         ---
         summary: Refresh session
-        description: Generates new token for session continuation
+        description: Generates new token for session continuation.
         security:
             - bearerAuth: []
         tags:
@@ -407,7 +410,7 @@ class ValidateTokenResource(Resource):
         """
         ---
         summary: Get session information
-        description: Validates token for session and returns session information
+        description: Validates token for session and returns session information.
         security:
             - bearerAuth: []
         tags:

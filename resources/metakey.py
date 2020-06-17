@@ -17,7 +17,7 @@ class MetakeyResource(Resource):
         ---
         summary: Get object attributes
         description: |
-            Returns all attributes of specified object that user is allowed to read
+            Returns all attributes of specified object that user is allowed to read.
         security:
             - bearerAuth: []
         tags:
@@ -66,7 +66,7 @@ class MetakeyResource(Resource):
         ---
         summary: Add object attribute
         description: |
-            Adds attribute to specified object
+            Adds attribute to specified object.
 
             User must have `set` access to the attribute key or `adding_all_attributes` capability.
         security:
@@ -121,7 +121,7 @@ class MetakeyListDefinitionResource(Resource):
         ---
         summary: Get list of attribute keys
         description: |
-            Returns list of attribute keys which currently authenticated user can read or set
+            Returns list of attribute keys which currently authenticated user can read or set.
         security:
             - bearerAuth: []
         tags:

@@ -21,7 +21,7 @@ class ShareResource(Resource):
         ---
         summary: Get object shares
         description: |
-            Returns list of available groups and sharing info for specified object
+            Returns list of available groups and sharing info for specified object.
 
             If user doesn't have `sharing_objects` capability, only own groups are included.
         security:

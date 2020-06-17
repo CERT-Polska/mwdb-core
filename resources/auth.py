@@ -22,7 +22,11 @@ class LoginResource(Resource):
     def post(self):
         """
         ---
-        description: Exchange user credentials for authorization token
+        summary: Authenticate user
+        description: |
+            Authenticates user and returns authorization token and information about user capabilities.
+
+            Token expires after 24 hours.
         tags:
             - auth
         requestBody:
@@ -36,6 +40,10 @@ class LoginResource(Resource):
               content:
                 application/json:
                   schema: UserLoginSuccessSchema
+            400:
+              description: When request body is invalid
+            403:
+              description: When credentials are invalid, account is inactive or system is set into maintenance mode.
         """
         schema = UserLoginSchema()
         obj = schema.loads(request.get_data(as_text=True))
@@ -76,7 +84,8 @@ class RegisterResource(Resource):
     def post(self):
         """
         ---
-        description: Request new user account
+        summary: Request a new user account
+        description: Creates a new pending user account.
         tags:
             - auth
         requestBody:
@@ -86,10 +95,18 @@ class RegisterResource(Resource):
                 schema: UserRegisterSchema
         responses:
             200:
-                description: User login on successful registration
+                description: User login on successful registration.
                 content:
                   application/json:
                     schema: UserSuccessSchema
+            400:
+                description: When request body is invalid.
+            403:
+                description: When registration feature is disabled or reCAPTCHA token wasn't valid.
+            409:
+                description: When user login or group name already exists.
+            500:
+                description: When ReCAPTCHA verification service is unavailable.
         """
         if not app_config.malwarecage.enable_registration:
             raise Forbidden("User registration is not enabled.")
@@ -163,7 +180,13 @@ class UserGetPasswordChangeTokenResource(Resource):
     def get(self, login):
         """
         ---
-        description: Retrieve token for password change
+        summary: Generate a password change token
+        description: |
+            Generates token for password change.
+
+            Token expires after setting a new password or after 14 days.
+
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -179,9 +202,9 @@ class UserGetPasswordChangeTokenResource(Resource):
               description: Authorization token for password change
               content:
                 application/json:
-                  type: object
-                  schema:
-                    $ref: '#/components/schemas/UserTokenSchema'
+                  schema: UserTokenSchema
+            403:
+                description: When specified user doesn't exist
         """
         try:
             user = User.query.filter(User.login == login).one()
@@ -197,11 +220,15 @@ class UserChangePasswordResource(Resource):
     def post(self):
         """
         ---
-        description: Set password via authorization token
+        summary: Set a new password for user
+        description: Sets a new password for user using password change token.
         tags:
             - auth
         requestBody:
-            description: User auth token and new password
+            description: |
+                User set password token and new password.
+
+                Password must be longer than 8 chars.
             content:
               application/json:
                 schema: UserSetPasswordSchema
@@ -211,6 +238,10 @@ class UserChangePasswordResource(Resource):
               content:
                 application/json:
                   schema: UserSuccessSchema
+            400:
+                description: When request body is invalid or provided password doesn't match the policy
+            403:
+                description: When set password token is no longer valid
         """
         MIN_PASSWORD_LENGTH = 8
         schema = UserSetPasswordSchema()
@@ -239,17 +270,25 @@ class RequestPasswordChangeResource(Resource):
     def post(self):
         """
         ---
-        description: Generates new token for session continuation
+        summary: Get password change link for the current user
+        description: |
+            Requests password change link for currently authenticated user.
+
+            Link expires after setting a new password or after 14 days.
+
+            Link is sent to the e-mail address set in user's profile.
         security:
             - bearerAuth: []
         tags:
             - auth
         responses:
             200:
-              description: Regenerated authorization token with information about user capabilities
+              description: When password change link was successfully sent to the user's e-mail
               content:
                 application/json:
-                  schema: UserLoginSuccessSchema
+                  schema: UserSuccessSchema
+            500:
+              description: When SMTP server is unavailable or not properly configured on the server.
         """
         login = g.auth_user.login
         email = g.auth_user.email
@@ -275,15 +314,33 @@ class RecoverPasswordResource(Resource):
     def post(self):
         """
         ---
-        description: Request a recover password link
+        summary: Recover user password
+        description: |
+            Sends e-mail with password recovery link for provided login and e-mail.
+
+            Link expires after setting a new password or after 14 days.
+
+            Link is sent to the e-mail address set in user's profile.
+        requestBody:
+            description: |
+                User login and e-mail
+            content:
+              application/json:
+                schema: UserRecoverPasswordSchema
         tags:
             - auth
         responses:
             200:
-                description: Get the password reset link by providing login and email
+                description: Get the password reset link by providing login and e-mail
                 content:
                   application/json:
                     schema: UserRecoverPasswordSchema
+            400:
+                description: When request body is invalid
+            403:
+                description: When login and e-mail address doesn't match or doesn't exist
+            500:
+              description: When SMTP server is unavailable or not properly configured on the server.
         """
         schema = UserRecoverPasswordSchema()
         obj = schema.loads(request.get_data(as_text=True))
@@ -337,7 +394,8 @@ class RefreshTokenResource(Resource):
     def post(self):
         """
         ---
-        description: Generates new token for session continuation
+        summary: Refresh session
+        description: Generates a new token for session continuation.
         security:
             - bearerAuth: []
         tags:
@@ -370,7 +428,8 @@ class ValidateTokenResource(Resource):
     def get(self):
         """
         ---
-        description: Validates token for session
+        summary: Get session information
+        description: Validates token for session and returns session information.
         security:
             - bearerAuth: []
         tags:

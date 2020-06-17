@@ -15,6 +15,26 @@ class GroupListResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self):
+        """
+        ---
+        summary: List of groups
+        description: |
+            Returns list of all groups and members.
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        responses:
+            200:
+                description: List of groups
+                content:
+                  application/json:
+                    schema: MultiGroupShowSchema
+            403:
+                description: When user doesn't have `manage_users` capability.
+        """
         objs = db.session.query(Group).options(joinedload(Group.users)).all()
         schema = MultiGroupShowSchema()
         return schema.dump({"groups": objs})
@@ -24,6 +44,34 @@ class GroupResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, name):
+        """
+        ---
+        summary: Get group
+        description: |
+            Returns information about group.
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+        responses:
+            200:
+                description: List of groups
+                content:
+                  application/json:
+                    schema: MultiGroupShowSchema
+            403:
+                description: When user doesn't have `manage_users` capability.
+            404:
+                description: When group doesn't exist
+        """
         obj = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
         if obj is None:
             raise NotFound("No such group")
@@ -33,6 +81,33 @@ class GroupResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def post(self, name):
+        """
+        ---
+        summary: Create a new group
+        description: |
+            Creates a new group.
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+        responses:
+            200:
+                description: When group was created successfully
+            400:
+                description: When group name or request body is invalid
+            403:
+                description: When user doesn't have `manage_users` capability
+            409:
+                description: When group exists yet
+        """
         schema = GroupSchema()
         obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
@@ -61,6 +136,35 @@ class GroupResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def put(self, name):
+        """
+        ---
+        summary: Update group name and capabilities
+        description: |
+            Updates group name and capabilities.
+
+            Works only for user-defined groups (excluding private and 'public')
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+        responses:
+            200:
+                description: When group was updated successfully
+            400:
+                description: When group name or request body is invalid
+            403:
+                description: When user doesn't have `manage_users` capability or group is immutable
+            404:
+                description: When group doesn't exist
+        """
         obj = GroupSchema().loads(request.get_data(as_text=True))
         if obj.errors:
             return {"errors": obj.errors}, 400
@@ -99,6 +203,40 @@ class GroupMemberResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def put(self, name, login):
+        """
+        ---
+        summary: Add a member to the specified group
+        description: |
+            Adds new member to existing group.
+
+            Works only for user-defined groups (excluding private and 'public')
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+            - in: path
+              name: login
+              schema:
+                type: string
+              description: Member login
+        responses:
+            200:
+                description: When member was added successfully
+            400:
+                description: When request body is invalid
+            403:
+                description: When user doesn't have `manage_users` capability, group is immutable or user is pending
+            404:
+                description: When user or group doesn't exist
+        """
         group_name_obj = GroupNameSchemaBase().load({"name": name})
         if group_name_obj.errors:
             return {"errors": group_name_obj.errors}, 400
@@ -134,6 +272,40 @@ class GroupMemberResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def delete(self, name, login):
+        """
+        ---
+        summary: Delete member from group
+        description: |
+            Removes member from existing group.
+
+            Works only for user-defined groups (excluding private and 'public')
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+            - in: path
+              name: login
+              schema:
+                type: string
+              description: Member login
+        responses:
+            200:
+                description: When member was removed successfully
+            400:
+                description: When request body is invalid
+            403:
+                description: When user doesn't have `manage_users` capability, group is immutable or user is pending
+            404:
+                description: When user or group doesn't exist
+        """
         group_name_obj = GroupNameSchemaBase().load({"name": name})
         if group_name_obj.errors:
             return {"errors": group_name_obj.errors}, 400

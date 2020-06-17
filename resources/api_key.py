@@ -20,6 +20,35 @@ from . import requires_authorization
 class APIKeyIssueResource(Resource):
     @requires_authorization
     def post(self, login):
+        """
+        ---
+        summary: Create a new API key for user
+        description: |
+            Creates a new API key and returns its id and token.
+
+            Requires `manage_users` capability if login doesn't match the login of currently authenticated
+            user.
+        security:
+            - bearerAuth: []
+        tags:
+            - api_key
+        parameters:
+            - in: path
+              name: login
+              schema:
+                type: string
+              description: Owner login for the created API key
+        responses:
+            200:
+                description: Identifier and token for created API key
+                content:
+                  application/json:
+                    schema: APIKeyTokenSchema
+            403:
+                description: |
+                    When user doesn't have required `manage_users` capability or provided
+                    login doesn't exist.
+        """
         if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.login != login:
             raise Forbidden("You are not permitted to perform this action")
 
@@ -46,6 +75,34 @@ class APIKeyIssueResource(Resource):
 class APIKeyResource(Resource):
     @requires_authorization
     def get(self, api_key_id):
+        """
+        ---
+        summary: Get token for API key
+        description: |
+            Returns token for provided API key identifier.
+
+            Requires `manage_users` capability if current user doesn't own the key.
+        security:
+            - bearerAuth: []
+        tags:
+            - api_key
+        parameters:
+            - in: path
+              name: api_key_id
+              schema:
+                type: string
+              description: API key identifier
+        responses:
+            200:
+                description: Identifier and token for API key
+                content:
+                  application/json:
+                    schema: APIKeyTokenSchema
+            404:
+                description: |
+                    When API key doesn't exist or user doesn't own the key and
+                    doesn't have the `manage_users` capability.
+        """
         try:
             api_key = APIKey.query.filter(APIKey.id == uuid.UUID(api_key_id)).one()
         except NoResultFound:
@@ -61,6 +118,31 @@ class APIKeyResource(Resource):
 
     @requires_authorization
     def delete(self, api_key_id):
+        """
+        ---
+        summary: Delete API key
+        description: |
+            Deletes API key with provided identifier.
+
+            Requires `manage_users` capability if current user doesn't own the key.
+        security:
+            - bearerAuth: []
+        tags:
+            - api_key
+        parameters:
+            - in: path
+              name: api_key_id
+              schema:
+                type: string
+              description: API key identifier
+        responses:
+            200:
+                description: When API key was successfully deleted
+            404:
+                description: |
+                    When API key doesn't exist or user doesn't own the key and
+                    doesn't have the `manage_users` capability.
+        """
         try:
             api_key = APIKey.query.filter(APIKey.id == uuid.UUID(api_key_id)).one()
         except NoResultFound:

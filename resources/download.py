@@ -15,7 +15,9 @@ class DownloadResource(Resource):
     def get(self, access_token):
         """
         ---
-        description: Download file using previously obtained access token
+        summary: Download file
+        description: |
+            Returns file contents based on provided file download token.
         security:
             - bearerAuth: []
         tags:
@@ -26,7 +28,7 @@ class DownloadResource(Resource):
               schema:
                 type: string
               required: true
-              description: Access token obtained from /request/*
+              description: File download token
         responses:
             200:
                 description: File contents
@@ -36,7 +38,7 @@ class DownloadResource(Resource):
                       type: string
                       format: binary
             403:
-                description: When access token is not valid
+                description: When file download token is not valid
         """
         s = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key)
         try:
@@ -55,7 +57,9 @@ class RequestSampleDownloadResource(Resource):
     def post(self, identifier):
         """
         ---
-        description: Request download URL for given sample
+        summary: Get file download URL
+        description: |
+            Returns download URL for given file.
         security:
             - bearerAuth: []
         tags:
@@ -63,7 +67,7 @@ class RequestSampleDownloadResource(Resource):
         parameters:
             - in: path
               name: identifier
-              description: SHA256 or MD5 of requested file
+              description: Requested file identifier (SHA256/MD5/SHA1/SHA512)
               schema:
                 type: string
         responses:
@@ -73,7 +77,7 @@ class RequestSampleDownloadResource(Resource):
                   application/json:
                     schema: URLReturnSchema
             404:
-                description: When file doesn't exist
+                description: When file doesn't exist, object is not a file or user doesn't have access to this object.
         """
         from core.service import get_url_for
         file = authenticated_access(File, identifier)

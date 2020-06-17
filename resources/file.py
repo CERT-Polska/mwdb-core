@@ -30,7 +30,13 @@ class FileListResource(ObjectListResource):
     def get(self):
         """
         ---
-        description: Retrieves list of files
+        summary: Search or list files
+        description: |
+            Returns a list of files matching provided query, ordered from the latest one.
+
+            Limited to 10 objects, use `older_than` parameter to fetch more.
+
+            Don't rely on maximum count of returned objects because it can be changed/parametrized in future.
         security:
             - bearerAuth: []
         tags:
@@ -40,13 +46,14 @@ class FileListResource(ObjectListResource):
               name: older_than
               schema:
                 type: string
-              description: fetch objects which are older than the object specified by SHA256 identifier
+              description: Fetch objects which are older than the object specified by identifier. Used for pagination
               required: false
             - in: query
               name: query
               schema:
                 type: string
               description: Filter results using Lucene query
+              required: false
         responses:
             200:
                 description: List of files
@@ -54,7 +61,9 @@ class FileListResource(ObjectListResource):
                   application/json:
                     schema: MultiFileShowSchema
             400:
-                description: Syntax error in Lucene query
+                description: When wrong parameters were provided or syntax error occured in Lucene query
+            404:
+                description: When user doesn't have access to the `older_than` object
         """
         return super(FileListResource, self).get()
 
@@ -70,7 +79,9 @@ class FileResource(ObjectResource):
     def get(self, identifier):
         """
         ---
-        description: Fetch file information by hash
+        summary: Get file information
+        description: |
+            Returns information about file.
         security:
             - bearerAuth: []
         tags:
@@ -80,15 +91,15 @@ class FileResource(ObjectResource):
               name: identifier
               schema:
                 type: string
-              description: SHA256 or MD5 file unique identifier
+              description: File identifier (SHA256/SHA512/SHA1/MD5)
         responses:
             200:
-                description: When file was found
+                description: Information about file
                 content:
                   application/json:
                     schema: FileShowSchema
             404:
-                description: When object was not found
+                description: When file doesn't exist, object is not a file or user doesn't have access to this object.
         """
         return super(FileResource, self).get(identifier)
 
@@ -131,7 +142,8 @@ class FileResource(ObjectResource):
     def post(self, identifier):
         """
         ---
-        description: Upload new file
+        summary: Upload file
+        description: Uploads new file.
         security:
             - bearerAuth: []
         tags:
@@ -141,7 +153,11 @@ class FileResource(ObjectResource):
               name: identifier
               schema:
                 type: string
-              description: SHA256 or MD5 parent file unique identifier
+              default: 'root'
+              description: |
+                Parent object identifier or `root` if there is no parent.
+
+                User must have `adding_parents` capability to specify a parent object.
         requestBody:
             required: true
             content:
@@ -152,26 +168,39 @@ class FileResource(ObjectResource):
                     file:
                       type: string
                       format: binary
-                      description: Sample to be uploaded
+                      description: File contents to be uploaded
+                    json:
+                      type: string
+                      description: |
+                        Additional JSON-encoded information about object (ignored for files)
                     metakeys:
                       type: string
-                      description: Optional JSON-encoded `MetakeyShowSchema` (only for permitted users)
+                      description: |
+                        Optional JSON-encoded `MetakeyShowSchema`. User must be allowed to set specified attribute keys.
                     upload_as:
                       type: string
                       default: '*'
-                      description: Identity used for uploading sample
+                      description: |
+                        Group that object will be shared with. If user doesn't have `sharing_objects` capability,
+                        user must be a member of specified group (unless `Group doesn't exist` error will occur).
+                        If default value `*` is specified - object will be exclusively shared with all user's groups
+                        excluding `public`.
                   required:
                     - file
         responses:
             200:
-                description: File uploaded succesfully
+                description: Information about uploaded file
                 content:
                   application/json:
                     schema: FileShowSchema
             403:
-                description: No permissions to perform additional operations (e.g. adding metakeys)
+                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
             404:
-                description: Specified group doesn't exist
+                description: |
+                    One of attribute keys doesn't exist or user doesn't have permission to set it.
+
+                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
+                    with that group
             409:
                 description: Object exists yet but has different type
         """

@@ -22,29 +22,30 @@ class ObjectListResource(Resource):
     def get(self):
         """
         ---
-        description: Retrieves list of objects
+        summary: Search or list objects
+        description: |
+            Returns list of objects matching provided query, ordered from the latest one.
+
+            Limited to 10 objects, use `older_than` parameter to fetch more.
+
+            Don't rely on maximum count of returned objects because it can be changed/parametrized in future.
         security:
             - bearerAuth: []
         tags:
             - object
         parameters:
             - in: query
-              name: page
-              schema:
-                type: integer
-              description: Page number (deprecated)
-              required: false
-            - in: query
               name: older_than
               schema:
                 type: string
-              description: Fetch objects which are older than the object specified by SHA256 identifier
+              description: Fetch objects which are older than the object specified by identifier. Used for pagination
               required: false
             - in: query
               name: query
               schema:
                 type: string
               description: Filter results using Lucene query
+              required: false
         responses:
             200:
                 description: List of objects
@@ -52,7 +53,9 @@ class ObjectListResource(Resource):
                   application/json:
                     schema: MultiObjectSchema
             400:
-                description: Syntax error in Lucene query
+                description: When wrong parameters were provided or syntax error occured in Lucene query
+            404:
+                description: When user doesn't have access to the `older_than` object
         """
         if 'page' in request.args and 'older_than' in request.args:
             raise BadRequest("page and older_than can't be used simultaneously. Use `older_than` for new code.")
@@ -106,7 +109,9 @@ class ObjectResource(Resource):
     def get(self, identifier):
         """
         ---
-        description: Fetch object information by hash
+        summary: Get object
+        description: |
+            Returns information about object
         security:
             - bearerAuth: []
         tags:
@@ -116,15 +121,15 @@ class ObjectResource(Resource):
               name: identifier
               schema:
                 type: string
-              description: SHA256 object unique identifier
+              description: Object identifier
         responses:
             200:
-                description: When object was found
+                description: Information about object
                 content:
                   application/json:
                     schema: ObjectShowBase
             404:
-                description: When object was not found
+                description: When object doesn't exist or user doesn't have access to this object.
         """
         schema = self.Schema()
         obj = authenticated_access(self.ObjectType, identifier.lower())
@@ -238,7 +243,11 @@ class ObjectChildResource(Resource):
     def put(self, type, parent, child):
         """
         ---
-        description: Adds new relation between objects
+        summary: Link existing objects
+        description: |
+            Add new relation between existing objects.
+
+            Requires `adding_parents` capability.
         security:
             - bearerAuth: []
         tags:
@@ -249,22 +258,26 @@ class ObjectChildResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: type of target object
+              description: Type of object (ignored)
             - in: path
               name: parent
-              description: Hash (e.g. sha256) of the parent sample
+              description: Identifier of the parent object
               required: true
               schema:
                 type: string
             - in: path
               name: child
-              description: Hash (e.g. sha256) of the child sample
+              description: Identifier of the child object
               required: true
               schema:
                 type: string
         responses:
             200:
                 description: When relation was successfully added
+            403:
+                description: When user doesn't have `adding_parents` capability.
+            404:
+                description: When one of objects doesn't exist or user doesn't have access to object.
         """
         parent_object = authenticated_access(Object, parent)
         child_object = authenticated_access(Object, child)

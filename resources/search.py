@@ -15,11 +15,16 @@ class SearchResource(Resource):
     def post(self):
         """
         ---
-        description: Advanced search with Lucene query syntax
+        summary: Search for objects (deprecated)
+        description: |
+            Returns objects found by Lucene query.
+
+            Hard-limited to 10000 records. Use `query` argument in object get methods instead.
         security:
             - bearerAuth: []
         tags:
             - search
+            - deprecated
         requestBody:
             description: Search query
             content:
@@ -34,6 +39,8 @@ class SearchResource(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/ObjectBase'
+            400:
+                description: When request body or query syntax is invalid
         """
         schema = SearchSchema()
 

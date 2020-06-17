@@ -23,7 +23,7 @@ class UserListResource(Resource):
     def get(self):
         """
         ---
-        summary: List of users
+        summary: List all users
         description: |
             Returns list of all users.
 

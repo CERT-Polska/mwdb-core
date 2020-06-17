@@ -84,7 +84,7 @@ class RegisterResource(Resource):
     def post(self):
         """
         ---
-        summary: Request for new user account
+        summary: Request a new user account
         description: Creates a new pending user account.
         tags:
             - auth

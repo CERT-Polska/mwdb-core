@@ -24,7 +24,7 @@ class LoginResource(Resource):
         ---
         summary: Authenticate user
         description: |
-            Returns authorization token for provided user credentials.
+            Authenticates user and returns authorization token and information about user capabilities.
 
             Token expires after 24 hours.
         tags:
@@ -323,7 +323,7 @@ class RecoverPasswordResource(Resource):
             Link is sent to the e-mail address set in user's profile.
         requestBody:
             description: |
-                User login and e-mail for account to be recovered
+                User login and e-mail
             content:
               application/json:
                 schema: UserRecoverPasswordSchema

@@ -23,7 +23,10 @@ class LoginResource(Resource):
         """
         ---
         summary: Authenticate user
-        description: Returns authorization token for provided user credentials.
+        description: |
+            Returns authorization token for provided user credentials.
+
+            Token expires after 24 hours.
         tags:
             - auth
         requestBody:
@@ -181,7 +184,7 @@ class UserGetPasswordChangeTokenResource(Resource):
         description: |
             Generates token for password change.
 
-            Token expires after 14 days.
+            Token expires after setting a new password or after 14 days.
 
             Requires `manage_users` capability.
         security:
@@ -222,7 +225,10 @@ class UserChangePasswordResource(Resource):
         tags:
             - auth
         requestBody:
-            description: User set password token and new password
+            description: |
+                User set password token and new password.
+
+                Password must be longer than 8 chars.
             content:
               application/json:
                 schema: UserSetPasswordSchema
@@ -268,7 +274,7 @@ class RequestPasswordChangeResource(Resource):
         description: |
             Requests password change link for currently authenticated user.
 
-            Link expires after 14 days.
+            Link expires after setting a new password or after 14 days.
 
             Link is sent to the e-mail address set in user's profile.
         security:
@@ -309,7 +315,12 @@ class RecoverPasswordResource(Resource):
         """
         ---
         summary: Recover user password
-        description: Sends e-mail with recover password link for provided login and e-mail.
+        description: |
+            Sends e-mail with recover password link for provided login and e-mail.
+
+            Link expires after setting a new password or after 14 days.
+
+            Link is sent to the e-mail address set in user's profile.
         tags:
             - auth
         responses:

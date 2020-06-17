@@ -197,9 +197,7 @@ class UserGetPasswordChangeTokenResource(Resource):
               description: Authorization token for password change
               content:
                 application/json:
-                  type: object
-                  schema:
-                    $ref: '#/components/schemas/UserTokenSchema'
+                  schema: UserTokenSchema
             403:
                 description: When specified user doesn't exist
         """

@@ -38,8 +38,7 @@ class CommentResource(Resource):
                   application/json:
                     schema:
                       type: array
-                      items:
-                        $ref: '#/components/schemas/Comment'
+                      items: CommentSchema
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """

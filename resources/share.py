@@ -2,7 +2,7 @@ from operator import itemgetter
 
 from flask import request, g
 from flask_restful import Resource
-from sqlalchemy import and_
+from sqlalchemy import and_, not_
 from werkzeug.exceptions import NotFound
 
 from model import db, Object, Group, ObjectPermission
@@ -37,14 +37,27 @@ class ShareGroupListResource(Resource):
                     schema: ShareShowSchema
         """
         if g.auth_user.has_rights(Capabilities.sharing_objects):
-            groups = list(map(itemgetter(0), db.session.query(Group.name).all()))
+            groups = db.session.query(Group.name)
         else:
-            groups = list(map(itemgetter(0), db.session.query(Group.name).filter(
-                g.auth_user.is_member(Group.id)
-            ).all()))
+            groups = (
+                db.session.query(Group.name)
+                          .filter(g.auth_user.is_member(Group.id))
+            )
 
+        # Filter out groups that are created for pending users
+        groups = (
+            groups.filter(
+                Group.name.notin_(
+                    db.session.query(User.login).filter(
+                        User.pending.is_(True)
+                    )
+                )
+            )
+        )
+
+        group_names = [group[0] for group in groups.all()]
         schema = ShareShowSchema()
-        return schema.dump({"groups": groups})
+        return schema.dump({"groups": group_names})
 
 
 class ShareResource(Resource):
@@ -83,11 +96,25 @@ class ShareResource(Resource):
                 description: When object doesn't exist or user doesn't have access to this object.
         """
         if g.auth_user.has_rights(Capabilities.sharing_objects):
-            groups = list(map(itemgetter(0), db.session.query(Group.name).all()))
+            groups = db.session.query(Group.name)
         else:
-            groups = list(map(itemgetter(0), db.session.query(Group.name).filter(
-                g.auth_user.is_member(Group.id)
-            ).all()))
+            groups = (
+                db.session.query(Group.name)
+                          .filter(g.auth_user.is_member(Group.id))
+            )
+
+        # Filter out groups that are created for pending users
+        groups = (
+            groups.filter(
+                Group.name.notin_(
+                    db.session.query(User.login).filter(
+                        User.pending.is_(True)
+                    )
+                )
+            )
+        )
+
+        group_names = [group[0] for group in groups.all()]
 
         db_object = authenticated_access(Object, identifier)
 
@@ -102,7 +129,7 @@ class ShareResource(Resource):
             .all()
 
         schema = ShareShowSchema()
-        return schema.dump({"groups": groups, "shares": shares})
+        return schema.dump({"groups": group_names, "shares": shares})
 
     @requires_authorization
     def put(self, type, identifier):

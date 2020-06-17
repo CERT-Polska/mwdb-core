@@ -14,6 +14,39 @@ from model.object import AccessType
 from . import authenticated_access, logger, requires_authorization
 
 
+class ShareGroupListResource(Resource):
+    @requires_authorization
+    def get(self):
+        """
+        ---
+        summary: Get list of groups for share operation
+        description: |
+            Returns list of available groups that user can share objects with.
+
+            If user doesn't have `sharing_objects` capability, list includes only groups of which
+            the user is a member.
+        security:
+            - bearerAuth: []
+        tags:
+            - share
+        responses:
+            200:
+                description: Sharing info for object
+                content:
+                  application/json:
+                    schema: ShareShowSchema
+        """
+        if g.auth_user.has_rights(Capabilities.sharing_objects):
+            groups = list(map(itemgetter(0), db.session.query(Group.name).all()))
+        else:
+            groups = list(map(itemgetter(0), db.session.query(Group.name).filter(
+                g.auth_user.is_member(Group.id)
+            ).all()))
+
+        schema = ShareShowSchema()
+        return schema.dump({"groups": groups})
+
+
 class ShareResource(Resource):
     @requires_authorization
     def get(self, type, identifier):

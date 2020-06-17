@@ -316,11 +316,17 @@ class RecoverPasswordResource(Resource):
         ---
         summary: Recover user password
         description: |
-            Sends e-mail with recover password link for provided login and e-mail.
+            Sends e-mail with password recovery link for provided login and e-mail.
 
             Link expires after setting a new password or after 14 days.
 
             Link is sent to the e-mail address set in user's profile.
+        requestBody:
+            description: |
+                User login and e-mail for account to be recovered
+            content:
+              application/json:
+                schema: UserRecoverPasswordSchema
         tags:
             - auth
         responses:

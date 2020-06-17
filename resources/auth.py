@@ -85,7 +85,7 @@ class RegisterResource(Resource):
         """
         ---
         summary: Request for new user account
-        description: Creates new pending user account.
+        description: Creates a new pending user account.
         tags:
             - auth
         requestBody:
@@ -180,7 +180,7 @@ class UserGetPasswordChangeTokenResource(Resource):
     def get(self, login):
         """
         ---
-        summary: Generate password change token
+        summary: Generate a password change token
         description: |
             Generates token for password change.
 
@@ -220,8 +220,8 @@ class UserChangePasswordResource(Resource):
     def post(self):
         """
         ---
-        summary: Set new password for user
-        description: Sets new password for user using password change token.
+        summary: Set a new password for user
+        description: Sets a new password for user using password change token.
         tags:
             - auth
         requestBody:
@@ -270,7 +270,7 @@ class RequestPasswordChangeResource(Resource):
     def post(self):
         """
         ---
-        summary: Get password change link for current user
+        summary: Get password change link for the current user
         description: |
             Requests password change link for currently authenticated user.
 
@@ -395,7 +395,7 @@ class RefreshTokenResource(Resource):
         """
         ---
         summary: Refresh session
-        description: Generates new token for session continuation.
+        description: Generates a new token for session continuation.
         security:
             - bearerAuth: []
         tags:

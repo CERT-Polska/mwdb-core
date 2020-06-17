@@ -22,9 +22,9 @@ class APIKeyIssueResource(Resource):
     def post(self, login):
         """
         ---
-        summary: Create new API key for user
+        summary: Create a new API key for user
         description: |
-            Creates new API key and returns its id and token.
+            Creates a new API key and returns its id and token.
 
             Requires `manage_users` capability if login doesn't match the login of currently authenticated
             user.
@@ -37,7 +37,7 @@ class APIKeyIssueResource(Resource):
               name: login
               schema:
                 type: string
-              description: Owner login for created API key
+              description: Owner login for the created API key
         responses:
             200:
                 description: Identifier and token for created API key

@@ -32,7 +32,7 @@ class FileListResource(ObjectListResource):
         ---
         summary: Search or list files
         description: |
-            Returns list of files matching provided query, ordered from the latest one.
+            Returns a list of files matching provided query, ordered from the latest one.
 
             Limited to 10 objects, use `older_than` parameter to fetch more.
 

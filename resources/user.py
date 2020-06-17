@@ -61,7 +61,7 @@ class UserPendingResource(Resource):
     def post(self, login):
         """
         ---
-        summary: Accept pending registration
+        summary: Accept a pending registration
         description: |
             Accepts pending user registration.
 
@@ -120,7 +120,7 @@ class UserPendingResource(Resource):
     def delete(self, login):
         """
         ---
-        summary: Reject pending registration
+        summary: Reject a pending registration
         description: |
             Rejects pending user registration.
 
@@ -222,7 +222,7 @@ class UserResource(Resource):
     def post(self, login):
         """
         ---
-        summary: Create new user
+        summary: Create a new user
         description: |
             Creates new user account
 
@@ -389,4 +389,3 @@ class UserResource(Resource):
 
         schema = UserSuccessSchema()
         return schema.dump({"login": login})
-

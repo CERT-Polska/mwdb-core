@@ -52,7 +52,7 @@ class CommentResource(Resource):
 
     """
         ---
-        summary: Create comment
+        summary: Create a new comment
         description: |
             Posts a new comment.
 
@@ -153,7 +153,7 @@ class CommentDeleteResource(Resource):
             200:
                 description: When comment was successfully deleted
             403:
-                description: When user doesn't have `removing_comments` capability.
+                description: When user doesn't have the `removing_comments` capability.
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """

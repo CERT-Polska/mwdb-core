@@ -83,7 +83,7 @@ class GroupResource(Resource):
     def post(self, name):
         """
         ---
-        summary: Create new group
+        summary: Create a new group
         description: |
             Creates a new group.
 
@@ -205,7 +205,7 @@ class GroupMemberResource(Resource):
     def put(self, name, login):
         """
         ---
-        summary: Add member to group
+        summary: Add a member to the specified group
         description: |
             Adds new member to existing group.
 

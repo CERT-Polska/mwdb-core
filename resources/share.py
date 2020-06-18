@@ -2,7 +2,7 @@ from operator import itemgetter
 
 from flask import request, g
 from flask_restful import Resource
-from sqlalchemy import and_
+from sqlalchemy import and_, not_
 from werkzeug.exceptions import NotFound
 
 from model import db, Object, Group, ObjectPermission
@@ -12,6 +12,52 @@ from core.schema import ShareSchema, ShareShowSchema
 from model.object import AccessType
 
 from . import authenticated_access, logger, requires_authorization
+
+
+class ShareGroupListResource(Resource):
+    @requires_authorization
+    def get(self):
+        """
+        ---
+        summary: Get list of groups for share operation
+        description: |
+            Returns list of available groups that user can share objects with.
+
+            If user doesn't have `sharing_objects` capability, list includes only groups of which
+            the user is a member.
+        security:
+            - bearerAuth: []
+        tags:
+            - share
+        responses:
+            200:
+                description: Sharing info for object
+                content:
+                  application/json:
+                    schema: ShareShowSchema
+        """
+        if g.auth_user.has_rights(Capabilities.sharing_objects):
+            groups = db.session.query(Group.name)
+        else:
+            groups = (
+                db.session.query(Group.name)
+                          .filter(g.auth_user.is_member(Group.id))
+            )
+
+        # Filter out groups that are created for pending users
+        groups = (
+            groups.filter(
+                Group.name.notin_(
+                    db.session.query(User.login).filter(
+                        User.pending.is_(True)
+                    )
+                )
+            )
+        )
+
+        group_names = [group[0] for group in groups.all()]
+        schema = ShareShowSchema()
+        return schema.dump({"groups": group_names})
 
 
 class ShareResource(Resource):
@@ -50,11 +96,25 @@ class ShareResource(Resource):
                 description: When object doesn't exist or user doesn't have access to this object.
         """
         if g.auth_user.has_rights(Capabilities.sharing_objects):
-            groups = list(map(itemgetter(0), db.session.query(Group.name).all()))
+            groups = db.session.query(Group.name)
         else:
-            groups = list(map(itemgetter(0), db.session.query(Group.name).filter(
-                g.auth_user.is_member(Group.id)
-            ).all()))
+            groups = (
+                db.session.query(Group.name)
+                          .filter(g.auth_user.is_member(Group.id))
+            )
+
+        # Filter out groups that are created for pending users
+        groups = (
+            groups.filter(
+                Group.name.notin_(
+                    db.session.query(User.login).filter(
+                        User.pending.is_(True)
+                    )
+                )
+            )
+        )
+
+        group_names = [group[0] for group in groups.all()]
 
         db_object = authenticated_access(Object, identifier)
 
@@ -69,7 +129,7 @@ class ShareResource(Resource):
             .all()
 
         schema = ShareShowSchema()
-        return schema.dump({"groups": groups, "shares": shares})
+        return schema.dump({"groups": group_names, "shares": shares})
 
     @requires_authorization
     def put(self, type, identifier):

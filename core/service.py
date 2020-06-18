@@ -22,7 +22,7 @@ from resources.object import ObjectResource, ObjectListResource, ObjectChildReso
 from resources.relations import RelationsResource
 from resources.server import PingResource, ServerInfoResource
 from resources.search import SearchResource
-from resources.share import ShareResource
+from resources.share import ShareGroupListResource, ShareResource
 from resources.tag import TagResource, TagListResource
 from resources.user import UserResource, UserListResource, UserPendingResource
 
@@ -139,6 +139,8 @@ def setup_restful_service(app):
     spec.path(resource=TagResource, api=api)
     api.add_resource(ShareResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/share')
     spec.path(resource=ShareResource, api=api)
+    api.add_resource(ShareGroupListResource, '/share')
+    spec.path(resource=ShareGroupListResource, api=api)
     api.add_resource(MetakeyResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/meta')
     spec.path(resource=MetakeyResource, api=api)
     api.add_resource(ObjectChildResource,

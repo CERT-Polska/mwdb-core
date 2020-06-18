@@ -90,3 +90,39 @@ def test_share_and_leave():
 
     session.remove_member(Workgroup.identity, Joe.identity)
     File(should_access=[Alice, Bob]).test()
+
+
+def test_list_groups_for_share():
+    testCase = RelationTestCase()
+
+    Alice = testCase.new_user("Alice")
+    Bob = testCase.new_user("Bob")
+    Joe = testCase.new_user("Joe")
+
+    Workgroup = testCase.new_group("Workgroup")
+    Homegroup = testCase.new_group("Homegroup", ["sharing_objects"])
+
+    Workgroup.add_member(Alice)
+    Workgroup.add_member(Bob)
+    Homegroup.add_member(Joe)
+
+    assert sorted(Alice.session().get_sharing_groups()) == sorted([
+        Alice.identity,
+        Workgroup.identity,
+        "public"
+    ])
+
+    assert sorted(Bob.session().get_sharing_groups()) == sorted([
+        Bob.identity,
+        Workgroup.identity,
+        "public"
+    ])
+
+    assert set(Joe.session().get_sharing_groups()).issuperset([
+        Alice.identity,
+        Bob.identity,
+        Joe.identity,
+        Homegroup.identity,
+        Workgroup.identity,
+        "public"
+    ])

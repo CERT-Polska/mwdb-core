@@ -213,7 +213,14 @@ class UploaderField(BaseField):
 
         value = expression.unescaped_value
 
-        uploader = db.session.query(User).join(User.groups).filter(g.auth_user.is_member(Group.id)).filter(Group.name != "public").filter(User.login == value).scalar()
+        uploader = (db.session.query(User)
+                              .join(User.groups)
+                              .filter(g.auth_user.is_member(Group.id))
+                              .filter(Group.name != "public")
+                              .filter(User.login == value)).scalar()
+        if g.auth_user.has_rights(Capabilities.manage_users):
+            uploader = db.session.query(User).filter(User.login == value).first()
+
         if uploader is None:
             raise ObjectNotFoundException(f"No such user: {value}")
 

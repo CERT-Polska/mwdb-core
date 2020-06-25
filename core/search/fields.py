@@ -213,10 +213,15 @@ class UploaderField(BaseField):
 
         value = expression.unescaped_value
 
-        if not g.auth_user.has_rights(Capabilities.manage_users) and not g.auth_user.login == value:
-            raise ObjectNotFoundException("Currently you can query only for your own uploads.")
+        if g.auth_user.has_rights(Capabilities.manage_users):
+            uploader = db.session.query(User).filter(User.login == value).first()
+        else:
+            uploader = (db.session.query(User)
+                                  .join(User.groups)
+                                  .filter(g.auth_user.is_member(Group.id))
+                                  .filter(Group.name != "public")
+                                  .filter(User.login == value)).first()
 
-        uploader = db.session.query(User).filter(User.login == value).first()
         if uploader is None:
             raise ObjectNotFoundException(f"No such user: {value}")
 

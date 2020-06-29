@@ -244,6 +244,7 @@ class UserChangePasswordResource(Resource):
                 description: When set password token is no longer valid
         """
         MIN_PASSWORD_LENGTH = 8
+        MAX_PASSWORD_LENGTH = 72  #UTF-8 bytes
         schema = UserSetPasswordSchema()
         obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
@@ -256,6 +257,8 @@ class UserChangePasswordResource(Resource):
             raise BadRequest("Empty password is not allowed")
         if len(password) < MIN_PASSWORD_LENGTH:
             raise BadRequest("Password is too short")
+        if len(password.encode()) > MAX_PASSWORD_LENGTH:
+            raise BadRequest("The password should contain no more than 72 bytes of UTF-8 characters, your password is too long.")
 
         user.set_password(password)
         db.session.add(user)

@@ -300,15 +300,14 @@ class Object(db.Model):
         db_tag, is_new_tag = Tag.get_or_create(db_tag)
 
         try:
-            if self not in db_tag.objects:
-                db_tag.objects.append(self)
-                db.session.add(db_tag)
+            if db_tag not in self.tags:
+                self.tags.append(db_tag)
                 db.session.flush()
                 db.session.commit()
                 return True
         except IntegrityError:
-            db.session.refresh(db_tag)
-            if self not in db_tag.objects:
+            db.session.refresh(self)
+            if db_tag not in self.tags:
                 raise
         return False
 
@@ -325,15 +324,14 @@ class Object(db.Model):
             db_tag = db_tag.one()
 
         try:
-            if self in db_tag.objects:
-                db_tag.objects.remove(self)
-                db.session.add(db_tag)
+            if db_tag in self.tags:
+                self.tags.remove(db_tag)
                 db.session.flush()
                 db.session.commit()
                 return True
         except IntegrityError:
-            db.session.refresh(db_tag)
-            if self in db_tag.objects:
+            db.session.refresh(self)
+            if db_tag in self.tags:
                 raise
         return False
 

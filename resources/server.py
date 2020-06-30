@@ -1,6 +1,7 @@
 from flask import g
 from flask_restful import Resource
 from version import app_build_version
+from plugin_engine import active_plugins, _plugin_handlers
 
 from core.config import app_config
 from core.schema import PingStatusSchema, ServerInfoSchema
@@ -47,5 +48,6 @@ class ServerInfoResource(Resource):
             "is_maintenance_set": app_config.malwarecage.enable_maintenance,
             "is_registration_enabled": app_config.malwarecage.enable_registration,
             "recaptcha_site_key": app_config.malwarecage.recaptcha_site_key,
-            "base_url": app_config.malwarecage.base_url
+            "base_url": app_config.malwarecage.base_url,
+            "active_plugins": active_plugins
         })

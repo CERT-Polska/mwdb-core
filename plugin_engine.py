@@ -9,7 +9,7 @@ from model import Object, File, Config, TextBlob
 logger = log.getLogger()
 
 _plugin_handlers = []
-active_plugins = []
+active_plugins = {}
 
 
 class PluginAppContext(object):
@@ -97,9 +97,18 @@ def load_plugins(app_context: PluginAppContext):
             try:
                 plugin = importlib.import_module(name)
                 getattr(plugin, "__plugin_entrypoint__")(app_context)
-                active_plugins.append(name.split(".")[1])
+                active_plugins[name.split(".")[1]] = {
+                    "active": True,
+                    "author": getattr(plugin, "__author__"),
+                    "version": getattr(plugin, "__version__"),
+                    "description": getattr(plugin, "__doc__"),
+                }
+                print(active_plugins)
             except Exception:
                 logger.exception("Failed to load {} plugin".format(name))
+                active_plugins[name.split(".")[1]] = {
+                    "active": False
+                }
     except ImportError:
         logger.exception("Plugins not found, so cannot be loaded.")
 

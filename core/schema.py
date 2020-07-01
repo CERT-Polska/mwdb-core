@@ -9,7 +9,7 @@ class ServerInfoSchema(Schema):
     is_registration_enabled = fields.Boolean()
     recaptcha_site_key = fields.Str()
     base_url = fields.Str()
-    active_plugins = fields.List(fields.String())
+    active_plugins = fields.Dict()
 
 
 class CapabilitiesSchema(Schema):

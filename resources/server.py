@@ -1,7 +1,7 @@
 from flask import g
 from flask_restful import Resource
 from version import app_build_version
-from plugin_engine import active_plugins, _plugin_handlers
+from plugin_engine import active_plugins
 
 from core.config import app_config
 from core.schema import PingStatusSchema, ServerInfoSchema

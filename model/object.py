@@ -152,12 +152,29 @@ class Object(db.Model):
         Adding parent with permission inheritance
         """
         if parent in self.parents:
+            # Relationship already exist
             return False
-        self.parents.append(parent)
+
+        # Add relationship in nested transaction
+        db.session.begin_nested()
+        try:
+            self.parents.append(parent)
+            db.session.flush()
+            db.session.commit()
+        except IntegrityError:
+            # The same relationship was added concurrently
+            db.session.rollback()
+            db.session.refresh(self)
+            if parent not in self.parents:
+                raise
+            return False
+        # Inherit permissions from parent (in the same transaction)
         permissions = db.session.query(ObjectPermission) \
             .filter(ObjectPermission.object_id == parent.id).all()
         for perm in permissions:
-            self.give_access(perm.group_id, perm.reason_type, perm.related_object, perm.related_user, commit=commit)
+            self.give_access(perm.group_id, perm.reason_type, perm.related_object, perm.related_user, commit=False)
+        if commit:
+            db.session.commit()
         return True
 
     def give_access(self, group_id, reason_type, related_object, related_user, commit=True):

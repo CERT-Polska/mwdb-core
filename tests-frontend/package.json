@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "**Before you run tests:**",
   "main": "cypress/integration/login.js",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "cypress": "^4.9.0"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

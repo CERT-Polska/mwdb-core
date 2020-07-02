@@ -1,15 +1,16 @@
 {
   "name": "tests-frontend",
   "version": "1.0.0",
-  "description": "**Before you run tests:**",
+  "description": "Frontent tests for Malwarecage",
   "main": "cypress/integration/login.js",
   "dependencies": {},
   "devDependencies": {
-    "cypress": "^4.9.0"
+    "cypress": "^4.9.0",
+    "wait-on": "^5.0.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "wait-on http://malwarefront:3000 && cypress run"
   },
-  "author": "",
+  "author": "dsk",
   "license": "ISC"
 }

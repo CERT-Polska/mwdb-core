@@ -10,8 +10,8 @@ describe('Login test - Malwarecage', function() {
            .should('have.value', 'admin')
 
        cy.get(':nth-child(2) > .form-control')
-           .type('your-password')
-           .should('have.value', 'password')
+           .type('Your password')
+           .should('have.value', 'Your password')
 
        cy.contains('Submit').click()
        cy.contains('Logged as: admin')

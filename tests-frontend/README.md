@@ -1,18 +1,16 @@
 # e2e frontend tests
 
-**Before you run tests:**
+Before you run tests create test files in malwarecage/tests-frontend/integration.
 
-Move to tests-frontend directory and run (you should have node.js and npm installed):
-```
-npm install cypress --save-dev
-```
+For more information how to write tests visit:
+https://docs.cypress.io/
+
 **To run tests:**
 
-Create test files in ./tests-frontend/integration and run from tests-frontend directory:
+From main malwarecage directory:
 ```
-./node_modules/.bin/cypress run
+docker-compose -f docker-compose-frontend-tests.yml build
+docker-compose -f docker-compose-frontend-tests.yml up --exit-code-from frontend-tests
 ```
 
-For more information visit:
-https://docs.cypress.io/
  

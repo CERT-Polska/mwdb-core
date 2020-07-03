@@ -35,5 +35,10 @@ services:
     image: certpl/malwarecage-tests
     env_file:
       - mwdb-vars.env
+  frontend-tests:
+    build: tests/frontend
+    depends_on:
+      - mwdb
+      - malwarefront
   redis:
     image: redis:alpine

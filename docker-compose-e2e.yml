@@ -36,9 +36,7 @@ services:
     env_file:
       - mwdb-vars.env
   frontend-tests:
-    build:
-      context: .
-      dockerfile:  tests/frontend/Dockerfile
+    build: tests/frontend
     depends_on:
       - mwdb
       - malwarefront

@@ -31,8 +31,18 @@ services:
       # NOTE: use gen_vars.sh in order to generate this file
       - postgres-vars.env
   mwdb-tests:
-    build: tests
+    build: tests/backend
+    depends_on:
+      - mwdb
     image: certpl/malwarecage-tests
+    env_file:
+      - mwdb-vars.env
+  web-tests:
+    build: tests/frontend
+    depends_on:
+      - mwdb
+      - malwarefront
+    image: certpl/malwarecage-web-tests
     env_file:
       - mwdb-vars.env
   redis:

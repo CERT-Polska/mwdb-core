@@ -104,7 +104,6 @@ def load_plugins(app_context: PluginAppContext):
                     "version": getattr(plugin, "__version__", None),
                     "description": getattr(plugin, "__doc__", None),
                 }
-                print(active_plugins)
             except Exception:
                 logger.exception("Failed to load {} plugin".format(name))
                 active_plugins[name.split(".")[1]] = {

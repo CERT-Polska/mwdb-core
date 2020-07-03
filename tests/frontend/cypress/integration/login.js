@@ -1,6 +1,6 @@
 describe('Login test - Malwarecage', function() {
    it('Visit malwarecage', function () {
-       cy.visit('http://malwarefront:3000')
+       cy.visit('http://malwarefront:80')
 
        cy.url()
            .should('include', '/login')

@@ -16,6 +16,7 @@
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
+  config.env = config.env || {}
+  config.env.admin_password = process.env.MALWARECAGE_ADMIN_PASSWORD
+  return config
 }

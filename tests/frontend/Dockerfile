@@ -1,9 +1,9 @@
 FROM cypress/base:10
 
-COPY . /app/
-
 WORKDIR /app
-
+COPY package.json /app/package.json
 RUN npm install
 
-CMD ["npm","run","test"]
+COPY . /app/
+
+CMD ["npm", "run", "test"]

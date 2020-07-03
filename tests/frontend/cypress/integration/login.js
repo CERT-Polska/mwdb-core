@@ -10,8 +10,8 @@ describe('Login test - Malwarecage', function() {
            .should('have.value', 'admin')
 
        cy.get(':nth-child(2) > .form-control')
-           .type('Your password')
-           .should('have.value', 'Your password')
+           .type(Cypress.env('admin_password'))
+           .should('have.value', Cypress.env('admin_password'))
 
        cy.contains('Submit').click()
        cy.contains('Logged as: admin')

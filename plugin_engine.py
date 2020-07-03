@@ -96,7 +96,7 @@ def load_plugins(app_context: PluginAppContext):
         for finder, name, ispkg in pkgutil.iter_modules(ns_plugins.__path__, ns_plugins.__name__ + "."):
             try:
                 plugin = importlib.import_module(name)
-                if hasattr(plugin,"__plugin_entrypoint__"):
+                if hasattr(plugin, "__plugin_entrypoint__"):
                     getattr(plugin, "__plugin_entrypoint__")(app_context)
                 active_plugins[name.split(".")[1]] = {
                     "active": True,

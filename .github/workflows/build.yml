@@ -55,8 +55,8 @@ jobs:
         with:
           name: malwarecage-web-image
           path: malwarecage-web-image
-  build_e2e:
-    name: Build e2e test image
+  build_backend_e2e:
+    name: Build backend e2e test image
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
@@ -80,9 +80,34 @@ jobs:
         with:
           name: malwarecage-tests-image
           path: malwarecage-tests-image
-  test_e2e:
-    needs: [build_core, build_frontend, build_e2e] 
-    name: Perform e2e tests
+  build_frontend_e2e:
+    name: Build frontend e2e test image
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Build and push test image
+        uses: docker/build-push-action@v1.1.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          dockerfile: ./tests/frontend/Dockerfile
+          repository: certpl/malwarecage-web-tests
+          path: tests/frontend
+          tags: ${{ github.sha }}
+          push: ${{ github.event == 'push' }}
+      - name: Store test image
+        run: docker save -o ./malwarecage-web-tests-image certpl/malwarecage-web-tests:${{ github.sha }}
+      - name: Upload test image
+        uses: actions/upload-artifact@v2
+        with:
+          name: malwarecage-web-tests-image
+          path: malwarecage-web-tests-image
+  test_backend_e2e:
+    needs: [build_core, build_frontend, build_backend_e2e]
+    name: Perform backend e2e tests
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
@@ -105,6 +130,34 @@ jobs:
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          docker-compose -f docker-compose-e2e.yml up -d
+          docker-compose -f docker-compose-e2e.yml up -d mwdb-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t mwdb-tests
           docker wait malwarecage_mwdb-tests_1
+  test_frontend_e2e:
+    needs: [build_core, build_frontend, build_frontend_e2e]
+    name: Perform frontend e2e tests
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+      - name: Import images
+        run: |
+          docker load --input ./malwarecage-image/malwarecage-image
+          docker load --input ./malwarecage-web-image/malwarecage-web-image
+          docker load --input ./malwarecage-web-tests-image/malwarecage-web-tests-image
+          docker tag certpl/malwarecage:$GITHUB_SHA certpl/malwarecage:latest
+          docker tag certpl/malwarecage-web:$GITHUB_SHA certpl/malwarecage-web:latest
+          docker tag certpl/malwarecage-web-tests:$GITHUB_SHA certpl/malwarecage-web-tests:latest
+      - name: Setup configuration
+        run: |
+          chmod +x gen_vars.sh
+          ./gen_vars.sh test
+      - name: Perform tests
+        run: |
+          docker-compose -f docker-compose-e2e.yml up -d web-tests
+          docker-compose -f docker-compose-e2e.yml logs -f -t web-tests
+          docker wait malwarecage_web-tests_1

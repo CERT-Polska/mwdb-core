@@ -1,4 +1,4 @@
-FROM tiangolo/uwsgi-nginx-flask:python3.6-alpine3.8
+FROM python:3.6-alpine
 
 LABEL maintainer="info@cert.pl"
 
@@ -25,7 +25,7 @@ RUN ls /tmp/requirements-*.txt | xargs -i,, pip --no-cache-dir install -r ,,
 
 # Copy backend files
 
-COPY prestart.sh uwsgi.ini plugin_engine.py app.py version.py /app/
+COPY start.sh uwsgi.ini plugin_engine.py app.py version.py /app/
 
 COPY core /app/core
 COPY migrations /app/migrations
@@ -46,3 +46,8 @@ RUN mkdir -p /app/uploads/ && \
     chmod o=rX -R /app && \
     chmod 700 /app/uploads/ && \
     chown nobody:nobody /app/uploads/
+
+ENV PYTHONPATH=/app
+WORKDIR /app
+
+CMD ["/bin/sh", "/app/start.sh"]

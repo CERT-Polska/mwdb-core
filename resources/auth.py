@@ -80,14 +80,14 @@ class LoginResource(Resource):
             return {"errors": obj.errors}, 400
 
         try:
-            user = User.query.filter(User.login == obj.data.get('login')).one()
+            user = User.query.filter(User.login == obj.data['login']).one()
         except NoResultFound:
             raise Forbidden('Invalid login or password.')
 
         if app_config.malwarecage.enable_maintenance and user.login != app_config.malwarecage.admin_login:
             raise Forbidden('Maintenance underway. Please come back later.')
 
-        if not user.verify_password(obj.data.get('password')):
+        if not user.verify_password(obj.data['password']):
             raise Forbidden('Invalid login or password.')
 
         if user.pending:
@@ -150,7 +150,7 @@ class RegisterResource(Resource):
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        login = obj.data.get("login")
+        login = obj.data["login"]
 
         if db.session.query(exists().where(User.login == login)).scalar():
             raise Conflict("Name already exists")

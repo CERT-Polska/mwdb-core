@@ -329,7 +329,7 @@ class UserResource(Resource):
             obj.data["email"],
             obj.data["additional_info"],
             pending=False,
-            feed_quality=obj.data.get("feed_quality")
+            feed_quality=obj.data["feed_quality"]
         )
 
         if obj.data["send_email"]:

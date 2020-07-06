@@ -12,7 +12,7 @@ from model import db
 from model.api_key import APIKey
 from model.user import User
 
-from schema.api_key import APIKeyTokenResponseSchema
+from schema.api_key import APIKeyIdentifierBase, APIKeyTokenResponseSchema
 
 from . import logger, requires_authorization
 
@@ -72,7 +72,7 @@ class APIKeyIssueResource(Resource):
             "id": api_key.id
         })
         return APIKeyTokenResponseSchema().dump({
-            "id": str(api_key.id),
+            "id": api_key.id,
             "issued_on": api_key.issued_on,
             "issuer_login": api_key.issuer_login,
             "token": api_key.generate_token()
@@ -98,6 +98,7 @@ class APIKeyResource(Resource):
               name: api_key_id
               schema:
                 type: string
+                format: uuid
               description: API key identifier
         responses:
             200:
@@ -110,17 +111,20 @@ class APIKeyResource(Resource):
                     When API key doesn't exist or user doesn't own the key and
                     doesn't have the `manage_users` capability.
         """
+        obj = APIKeyIdentifierBase().load({"id": api_key_id})
+        if obj.errors:
+            return {"errors": obj.errors}, 400
+
         try:
-            api_key = APIKey.query.filter(APIKey.id == uuid.UUID(api_key_id)).one()
-        except (NoResultFound, ValueError):
-            # Handle NoResultFound and wrong UUID
+            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
+        except NoResultFound:
             raise NotFound("API key doesn't exist")
 
         if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.id != api_key.user_id:
             raise NotFound("API key doesn't exist")
 
         return APIKeyTokenResponseSchema().dump({
-            "id": str(api_key.id),
+            "id": api_key.id,
             "issued_on": api_key.issued_on,
             "issuer_login": api_key.issuer_login,
             "token": api_key.generate_token()
@@ -144,6 +148,7 @@ class APIKeyResource(Resource):
               name: api_key_id
               schema:
                 type: string
+                format: uuid
               description: API key identifier
         responses:
             200:
@@ -153,10 +158,13 @@ class APIKeyResource(Resource):
                     When API key doesn't exist or user doesn't own the key and
                     doesn't have the `manage_users` capability.
         """
+        obj = APIKeyIdentifierBase().load({"id": api_key_id})
+        if obj.errors:
+            return {"errors": obj.errors}, 400
+
         try:
-            api_key = APIKey.query.filter(APIKey.id == uuid.UUID(api_key_id)).one()
-        except (NoResultFound, ValueError):
-            # Handle NoResultFound and wrong UUID
+            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
+        except NoResultFound:
             raise NotFound("API key doesn't exist")
 
         if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.id != api_key.user_id:

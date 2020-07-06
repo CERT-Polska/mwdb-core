@@ -106,6 +106,8 @@ class APIKeyResource(Resource):
                 content:
                   application/json:
                     schema: APIKeyTokenResponseSchema
+            400:
+                description: When API key identifier is not a correct UUID
             404:
                 description: |
                     When API key doesn't exist or user doesn't own the key and
@@ -153,6 +155,8 @@ class APIKeyResource(Resource):
         responses:
             200:
                 description: When API key was successfully deleted
+            400:
+                description: When API key identifier is not a correct UUID
             404:
                 description: |
                     When API key doesn't exist or user doesn't own the key and

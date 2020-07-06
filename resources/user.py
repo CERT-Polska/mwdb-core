@@ -3,6 +3,7 @@ import datetime
 from flask import request, g
 from flask_restful import Resource
 from sqlalchemy import exists
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import true
 
 from werkzeug.exceptions import Conflict, Forbidden, NotFound, InternalServerError
@@ -11,8 +12,16 @@ from model import db, User, Group
 from core.capabilities import Capabilities
 from core.config import app_config
 from core.mail import MailError, send_email_notification
-from core.schema import UserSuccessSchema, MultiUserShowSchema, UserLoginSchemaBase, UserProfileSchema, UserManageSchema, \
-    UserProfileManageInfoSchema
+
+from schema.user import (
+    UserLoginSchemaBase,
+    UserCreateRequestSchema,
+    UserUpdateRequestSchema,
+    UserItemResponseSchema,
+    UserListResponseSchema,
+    UserSuccessResponseSchema,
+    UserSetPasswordTokenResponseSchema
+)
 
 from . import logger, requires_capabilities, requires_authorization
 
@@ -46,13 +55,13 @@ class UserListResource(Resource):
                 description: List of users
                 content:
                   application/json:
-                    schema: MultiUserShowSchema
+                    schema: UserListResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
         """
         pending = bool(request.args.get('pending', False))
         objs = db.session.query(User).filter(User.pending == pending).all()
-        schema = MultiUserShowSchema()
+        schema = UserListResponseSchema()
         return schema.dump({"users": objs})
 
 
@@ -81,7 +90,7 @@ class UserPendingResource(Resource):
                 description: When user is successfully accepted
                 content:
                   application/json:
-                    schema: UserSuccessSchema
+                    schema: UserSuccessResponseSchema
             400:
                 description: When invalid login is provided.
             403:
@@ -113,7 +122,7 @@ class UserPendingResource(Resource):
         db.session.commit()
 
         logger.info('User accepted', extra={'user': user.login})
-        schema = UserSuccessSchema()
+        schema = UserSuccessResponseSchema()
         return schema.dump({"login": user.login})
 
     @requires_capabilities(Capabilities.manage_users)
@@ -140,7 +149,7 @@ class UserPendingResource(Resource):
                 description: When user is successfully rejected
                 content:
                   application/json:
-                    schema: UserSuccessSchema
+                    schema: UserSuccessResponseSchema
             400:
                 description: When invalid login is provided.
             403:
@@ -175,12 +184,59 @@ class UserPendingResource(Resource):
             raise InternalServerError("SMTP server needed to fulfill this request is not configured or unavailable.")
 
         logger.info('User rejected', extra={'user': login})
-        schema = UserSuccessSchema()
+        schema = UserSuccessResponseSchema()
         return schema.dump({"login": login})
+
+
+class UserGetPasswordChangeTokenResource(Resource):
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def get(self, login):
+        """
+        ---
+        summary: Generate a password change token
+        description: |
+            Generates token for password change.
+
+            Token expires after setting a new password or after 14 days.
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - user
+        parameters:
+            - in: path
+              schema:
+                type: string
+              name: login
+              required: true
+        responses:
+            200:
+              description: Authorization token for password change
+              content:
+                application/json:
+                  schema: UserSetPasswordTokenResponseSchema
+            403:
+                description: When specified user doesn't exist
+        """
+        try:
+            user = User.query.filter(User.login == login).one()
+        except NoResultFound:
+            raise NotFound("User doesn't exist")
+
+        token = user.generate_set_password_token()
+
+        logger.info('Set password token generated', extra={
+            'user': login
+        })
+        schema = UserSetPasswordTokenResponseSchema()
+        return schema.dump({"login": login, "token": token})
 
 
 class UserResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
     def get(self, login):
         """
         ---
@@ -188,7 +244,7 @@ class UserResource(Resource):
         description: |
             Returns information about user.
 
-            If login doesn't match the login of currently authenticated user - `manage_users` capability is required.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -204,17 +260,12 @@ class UserResource(Resource):
                 description: User information
                 content:
                   application/json:
-                    schema: UserProfileSchema
+                    schema: UserItemResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
         """
         obj = db.session.query(User).filter(User.login == login).first()
-        if not g.auth_user.has_rights(Capabilities.manage_users):
-            if g.auth_user.login != login:
-                raise Forbidden("You are not permitted to perform this action")
-            schema = UserProfileSchema()
-        else:
-            schema = UserManageSchema()
+        schema = UserItemResponseSchema()
         return schema.dump(obj)
 
     @requires_authorization
@@ -241,13 +292,13 @@ class UserResource(Resource):
             description: User information
             content:
               application/json:
-                schema: UserProfileManageInfoSchema
+                schema: UserCreateRequestSchema
         responses:
             200:
                 description: When user was created successfully
                 content:
                   application/json:
-                    schema: UserSuccessSchema
+                    schema: UserSuccessResponseSchema
             400:
                 description: When request body is invalid
             403:
@@ -257,7 +308,7 @@ class UserResource(Resource):
             500:
                 description: When SMTP server is unavailable or not properly configured on the server.
         """
-        schema = UserProfileManageInfoSchema()
+        schema = UserCreateRequestSchema()
 
         obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
@@ -273,26 +324,15 @@ class UserResource(Resource):
         if db.session.query(exists().where(Group.name == login)).scalar():
             raise Conflict("Group exists yet")
 
-        user = User()
-        user.login = login
-        user.email = obj.data.get("email")
-        user.additional_info = obj.data.get("additional_info")
-        user.feed_quality = obj.data.get("feed_quality")
-        user.disabled = False
-        user.pending = False
-        user.registered_by = g.auth_user.id
-        user.registered_on = datetime.datetime.now()
-        user.groups.append(Group.public_group())
-        user.reset_sessions()
-        db.session.add(user)
+        user = User.create(
+            login,
+            obj.data["email"],
+            obj.data["additional_info"],
+            pending=False,
+            feed_quality=obj.data.get("feed_quality")
+        )
 
-        group = Group()
-        group.name = login
-        group.private = True
-        group.users.append(user)
-        db.session.add(group)
-
-        if obj.data.get("send_email", False):
+        if obj.data["send_email"]:
             try:
                 send_email_notification("register",
                                         "New account registered in Malwarecage",
@@ -308,7 +348,7 @@ class UserResource(Resource):
         db.session.commit()
 
         logger.info('User created', extra={'user': user.login})
-        schema = UserSuccessSchema()
+        schema = UserSuccessResponseSchema()
         return schema.dump({"login": user.login})
 
     @requires_authorization
@@ -335,13 +375,13 @@ class UserResource(Resource):
             description: User information
             content:
               application/json:
-                schema: UserProfileManageInfoSchema
+                schema: UserUpdateRequestSchema
         responses:
             200:
                 description: When user was updated successfully
                 content:
                   application/json:
-                    schema: UserSuccessSchema
+                    schema: UserSuccessResponseSchema
             400:
                 description: When request body is invalid
             403:
@@ -349,7 +389,7 @@ class UserResource(Resource):
             404:
                 description: When user doesn't exist.
         """
-        schema = UserProfileManageInfoSchema()
+        schema = UserUpdateRequestSchema()
 
         obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
@@ -366,26 +406,25 @@ class UserResource(Resource):
         if user.pending:
             raise Forbidden("User is pending and need to be accepted first")
 
-        email = obj.data.get("email")
+        email = obj.data["email"]
         if email is not None:
             user.email = email
 
-        additional_info = obj.data.get("additional_info")
+        additional_info = obj.data["additional_info"]
         if additional_info is not None:
             user.additional_info = additional_info
 
-        feed_quality = obj.data.get("feed_quality")
+        feed_quality = obj.data["feed_quality"]
         if feed_quality is not None:
             user.feed_quality = feed_quality
 
-        disabled = obj.data.get("disabled")
+        disabled = obj.data["disabled"]
         if disabled is not None:
             user.disabled = disabled
             user.reset_sessions()
 
-        db.session.add(user)
         db.session.commit()
-        logger.info('user updated', extra=obj.data)
+        logger.info('User updated', extra=obj.data)
 
-        schema = UserSuccessSchema()
+        schema = UserSuccessResponseSchema()
         return schema.dump({"login": login})

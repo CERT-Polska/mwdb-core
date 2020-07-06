@@ -19,8 +19,8 @@ def test_manage_users():
 
     request("GET", "/user")
     request("GET", "/user/"+admin_login())
-    request("POST", "/user/{}".format(user_login), json={"email": user_email, "group_name": admin_login()})
-    request("PUT", "/user/{}".format(user_login), json={"email": user_email, "group_name": admin_login()})
+    request("POST", "/user/{}".format(user_login), json={"email": user_email, "additional_info": "Test user"})
+    request("PUT", "/user/{}".format(user_login), json={"email": user_email, "additional_info": "Test user"})
 
     request("GET", "/user/{}/change_password".format(admin_login()))
 

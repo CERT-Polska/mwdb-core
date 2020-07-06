@@ -2,7 +2,7 @@ import datetime
 import os
 import bcrypt
 
-from flask import current_app as app
+from flask import g
 from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadSignature
 from sqlalchemy import and_
 
@@ -84,6 +84,42 @@ class User(db.Model):
         if self.password_hash is None:
             return False
         return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+
+    @staticmethod
+    def create(login, email, additional_info, pending=False, feed_quality=None, commit=True):
+        from model.group import Group
+        # Create user's private group
+        user_group = Group(
+            name=login,
+            private=True
+        )
+        db.session.add(user_group)
+
+        # Create user object
+        user = User(
+            login=login,
+            email=email,
+            additional_info=additional_info,
+            feed_quality=feed_quality or 'high',
+            pending=pending,
+            disabled=False,
+            groups=[
+                user_group,
+                Group.public_group()
+            ]
+        )
+        user.reset_sessions()
+
+        if not pending:
+            user.registered_by = g.auth_user.id
+            user.registered_on = datetime.datetime.now()
+        else:
+            user.requested_on = datetime.datetime.now()
+
+        db.session.add(user)
+        if commit:
+            db.session.commit()
+        return user
 
     def _generate_token(self, fields, expiration):
         s = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key, expires_in=expiration)

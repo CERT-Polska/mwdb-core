@@ -31,6 +31,7 @@ COPY core /app/core
 COPY migrations /app/migrations
 COPY model /app/model
 COPY resources /app/resources
+COPY schema /app/schema
 
 # Copy user-controlled plugins
 COPY plugins /app/plugins

@@ -2,7 +2,7 @@ import re
 
 from marshmallow import Schema, fields, validates, ValidationError
 
-from .api_key import APIKeyTokenResponseSchema
+from .api_key import APIKeyListItemResponseSchema
 from .group import GroupBasicResponseSchema, GroupItemResponseSchema
 
 
@@ -62,7 +62,7 @@ class UserItemResponseSchema(Schema):
     pending = fields.Boolean()
 
     groups = fields.Nested(GroupBasicResponseSchema, many=True)
-    api_keys = fields.Nested(APIKeyTokenResponseSchema, many=True)
+    api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True)
 
 
 class UserListItemResponseSchema(Schema):

@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, validates, ValidationError
 
-from .api_key import APIKeyTokenResponseSchema
+from .api_key import APIKeyListItemResponseSchema
 from .group import GroupBasicResponseSchema
 from .user import UserLoginSchemaBase
 
@@ -72,4 +72,4 @@ class AuthProfileResponseSchema(Schema):
 
     capabilities = fields.List(fields.Str())
     groups = fields.Nested(GroupBasicResponseSchema, many=True)
-    api_keys = fields.Nested(APIKeyTokenResponseSchema, many=True)
+    api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True)

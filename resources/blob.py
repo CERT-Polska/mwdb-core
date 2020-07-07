@@ -1,22 +1,30 @@
+from flask import request
+
 from werkzeug.exceptions import Conflict
 
 from plugin_engine import hooks
 
-from core.capabilities import Capabilities
-from core.schema import TextBlobShowSchema, MultiTextBlobSchema
-
-from model import TextBlob
+from model import db, TextBlob
 from model.object import ObjectTypeConflictError
 
-from . import requires_capabilities, requires_authorization
-from .object import ObjectResource, ObjectListResource
+from core.capabilities import Capabilities
+
+from schema.blob import (
+    BlobCreateRequestSchema,
+    BlobLegacyCreateRequestSchema,
+    BlobListResponseSchema,
+    BlobItemResponseSchema
+)
 
 
-class TextBlobListResource(ObjectListResource):
-    ObjectType = TextBlob
-    Schema = MultiTextBlobSchema
-    SchemaKey = "blobs"
+from . import logger, requires_capabilities, requires_authorization, deprecated
+from .object import (
+    list_objects, get_object_creation_params, get_object,
+    ObjectResource, ObjectsResource
+)
 
+
+class BlobsResource(ObjectsResource):
     @requires_authorization
     def get(self):
         """
@@ -50,22 +58,96 @@ class TextBlobListResource(ObjectListResource):
                 description: List of text blobs
                 content:
                   application/json:
-                    schema: MultiTextBlobSchema
+                    schema: BlobListResponseSchema
             400:
                 description: When wrong parameters were provided or syntax error occured in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
-        return super(TextBlobListResource, self).get()
+        return list_objects(
+            object_type=TextBlob,
+            response_schema=BlobListResponseSchema,
+            response_key="blobs"
+        )
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.adding_blobs)
+    def post(self):
+        """
+        ---
+        summary: Upload text blob
+        description: |
+            Uploads new text blob.
+
+            Requires `adding_blobs` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - blob
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Parent object unique identifier
+        requestBody:
+            required: true
+            description: Text blob to be uploaded
+            content:
+              application/json:
+                schema: BlobCreateRequestSchema
+        responses:
+            200:
+                description: Text blob uploaded succesfully
+                content:
+                  application/json:
+                    schema: BlobItemResponseSchema
+            403:
+                description: No permissions to perform additional operations (e.g. adding metakeys)
+            404:
+                description: Specified group doesn't exist
+            409:
+                description: Object exists yet but has different type
+        """
+        schema = BlobCreateRequestSchema()
+        params = schema.loads(request.get_data(as_text=True))
+
+        if params and params.errors:
+            return {"errors": params.errors}, 400
+
+        parent, share_with, metakeys = get_object_creation_params(params.data)
+
+        try:
+            blob, is_new = TextBlob.get_or_create(
+                params.data["content"],
+                params.data["blob_name"],
+                params.data["blob_type"],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
+            db.session.commit()
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a blob")
+
+        if is_new:
+            hooks.on_created_object(blob)
+            hooks.on_created_text_blob(blob)
+        else:
+            hooks.on_reuploaded_object(blob)
+            hooks.on_reuploaded_text_blob(blob)
+
+        logger.info(
+            "Blob added", extra={
+                'dhash': blob.dhash,
+                'is_new': is_new
+            }
+        )
+        schema = BlobItemResponseSchema()
+        return schema.dump(blob)
 
 
-class TextBlobResource(ObjectResource):
-    ObjectType = TextBlob
-    ObjectTypeStr = TextBlob.__tablename__
-    Schema = TextBlobShowSchema
-    on_created = hooks.on_created_text_blob
-    on_reuploaded = hooks.on_reuploaded_text_blob
-
+class BlobResource(ObjectResource):
     @requires_authorization
     def get(self, identifier):
         """
@@ -88,22 +170,17 @@ class TextBlobResource(ObjectResource):
                 description: Blob information and contents
                 content:
                   application/json:
-                    schema: TextBlobShowSchema
+                    schema: BlobItemResponseSchema
             404:
                 description: When blob doesn't exist, object is not a blob or user doesn't have access to this object.
         """
-        return super(TextBlobResource, self).get(identifier)
+        return get_object(
+            object_type=TextBlob,
+            object_identifier=identifier,
+            response_schema=BlobItemResponseSchema
+        )
 
-    def create_object(self, obj):
-        try:
-            return TextBlob.get_or_create(
-                obj.data["content"],
-                obj.data["blob_name"],
-                obj.data["blob_type"]
-            )
-        except ObjectTypeConflictError:
-            raise Conflict("Object already exists and is not a blob")
-
+    @deprecated
     @requires_authorization
     @requires_capabilities(Capabilities.adding_blobs)
     def put(self, identifier):
@@ -126,49 +203,16 @@ class TextBlobResource(ObjectResource):
               description: Parent object unique identifier
         requestBody:
             required: true
+            description: Text blob to be uploaded
             content:
-              multipart/form-data:
-                schema:
-                  type: object
-                  description: Uploaded text blob parameters (verbose mode)
-                  properties:
-                    json:
-                      type: string
-                      format: binary
-                      description: Text blob to be uploaded
-                    metakeys:
-                      type: string
-                      description: Optional JSON-encoded `MetakeyShowSchema` (only for permitted users)
-                    upload_as:
-                      type: string
-                      default: '*'
-                      description: Identity used for uploading sample
-                  required:
-                    - json
               application/json:
-                schema:
-                  type: object
-                  description: Text blob to be uploaded (simple mode)
-                  properties:
-                    content:
-                      type: string
-                      description: Text blob content
-                    blob_name:
-                      type: string
-                      description: Name of blob object
-                    blob_type:
-                      type: string
-                      description: Config type (static, dynamic, other)
-                  required:
-                    - content
-                    - blob_name
-                    - blob_type
+                schema: BlobLegacyCreateRequestSchema
         responses:
             200:
                 description: Text blob uploaded succesfully
                 content:
                   application/json:
-                    schema: TextBlobShowSchema
+                    schema: BlobItemResponseSchema
             403:
                 description: No permissions to perform additional operations (e.g. adding metakeys)
             404:
@@ -176,4 +220,51 @@ class TextBlobResource(ObjectResource):
             409:
                 description: Object exists yet but has different type
         """
-        return super(TextBlobResource, self).put(identifier)
+        schema = BlobLegacyCreateRequestSchema()
+        params = schema.loads(request.get_data(as_text=True))
+
+        if params and params.errors:
+            return {"errors": params.errors}, 400
+
+        params_data = dict(params.data)
+
+        if params_data["metakeys"]:
+            params_data["metakeys"] = params_data["metakeys"]["metakeys"]
+        else:
+            params_data["metakeys"] = []
+
+        if identifier != "root":
+            params_data["parent"] = identifier
+        else:
+            params_data["parent"] = None
+
+        parent, share_with, metakeys = get_object_creation_params(params_data)
+
+        try:
+            blob, is_new = TextBlob.get_or_create(
+                params.data["content"],
+                params.data["blob_name"],
+                params.data["blob_type"],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
+            db.session.commit()
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a blob")
+
+        if is_new:
+            hooks.on_created_object(blob)
+            hooks.on_created_text_blob(blob)
+        else:
+            hooks.on_reuploaded_object(blob)
+            hooks.on_reuploaded_text_blob(blob)
+
+        logger.info(
+            "Blob added", extra={
+                'dhash': blob.dhash,
+                'is_new': is_new
+            }
+        )
+        schema = BlobItemResponseSchema()
+        return schema.dump(blob)

@@ -3,21 +3,26 @@ from werkzeug.exceptions import BadRequest, Conflict
 
 from plugin_engine import hooks
 
-from model import File
+from model import db, File
 from model.file import EmptyFileError
 from model.object import ObjectTypeConflictError
 
-from core.schema import FileShowSchema, MultiFileShowSchema
+from schema.file import (
+    FileCreateRequestSchema,
+    FileLegacyCreateRequestSchema,
+    FileListResponseSchema,
+    FileItemResponseSchema
+)
+from schema.metakey import MetakeyMultipartRequestSchema
 
-from . import requires_authorization
-from .object import ObjectResource, ObjectListResource
+from . import logger, requires_authorization, deprecated
+from .object import (
+    list_objects, get_object_creation_params, get_object,
+    ObjectResource, ObjectsResource
+)
 
 
-class FileListResource(ObjectListResource):
-    ObjectType = File
-    Schema = MultiFileShowSchema
-    SchemaKey = "files"
-
+class FilesResource(ObjectsResource):
     @requires_authorization
     def get(self):
         """
@@ -51,22 +56,130 @@ class FileListResource(ObjectListResource):
                 description: List of files
                 content:
                   application/json:
-                    schema: MultiFileShowSchema
+                    schema: FileListResponseSchema
             400:
                 description: When wrong parameters were provided or syntax error occured in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
-        return super(FileListResource, self).get()
+        return list_objects(File, FileListResponseSchema, "files")
+
+    @requires_authorization
+    def post(self):
+        """
+        ---
+        summary: Upload file
+        description: Uploads new file.
+        security:
+            - bearerAuth: []
+        tags:
+            - file
+        requestBody:
+            required: true
+            content:
+              multipart/form-data:
+                schema:
+                  type: object
+                  properties:
+                    file:
+                      type: string
+                      format: binary
+                      description: File contents to be uploaded
+                    metakeys:
+                      type: object
+                      properties:
+                          metakeys:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/MetakeyItemRequest'
+                      description: |
+                        Attributes to be added after file upload
+
+                        User must be allowed to set specified attribute keys.
+                    parent:
+                      type: string
+                      description: |
+                        Parent object identifier or `root` if there is no parent.
+
+                        User must have `adding_parents` capability to specify a parent object.
+                    upload_as:
+                      type: string
+                      default: '*'
+                      description: |
+                        Group that object will be shared with.
+
+                        If user doesn't have `sharing_objects` capability,user must be a member of specified group
+                        (unless `Group doesn't exist` error will occur).
+
+                        If default value `*` is specified - object will be exclusively shared with all user's groups
+                        excluding `public`.
+                  required:
+                    - file
+        responses:
+            200:
+                description: Information about uploaded file
+                content:
+                  application/json:
+                    schema: FileItemResponseSchema
+            403:
+                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
+            404:
+                description: |
+                    One of attribute keys doesn't exist or user doesn't have permission to set it.
+
+                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
+                    with that group
+            409:
+                description: Object exists yet but has different type
+        """
+        params = request.form.to_dict()
+
+        if params.get("metakeys"):
+            metakeys = MetakeyMultipartRequestSchema().loads(params["metakeys"])
+            if metakeys and metakeys.errors:
+                return {"errors": metakeys.errors}, 400
+            params["metakeys"] = metakeys.data
+        else:
+            params["metakeys"] = None
+
+        schema = FileCreateRequestSchema()
+        params = schema.load(params)
+
+        if params and params.errors:
+            return {"errors": params.errors}, 400
+
+        parent, share_with, metakeys = get_object_creation_params(params.data)
+
+        try:
+            file, is_new = File.get_or_create(
+                request.files['file'],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
+            db.session.commit()
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a file")
+        except EmptyFileError:
+            raise BadRequest("File cannot be empty")
+
+        if is_new:
+            hooks.on_created_object(file)
+            hooks.on_created_file(file)
+        else:
+            hooks.on_reuploaded_object(file)
+            hooks.on_reuploaded_file(file)
+        logger.info(
+            "File added", extra={
+                'sha256': file.sha256,
+                'is_new': is_new
+            }
+        )
+        schema = FileItemResponseSchema()
+        return schema.dump(file)
 
 
 class FileResource(ObjectResource):
-    ObjectType = File
-    ObjectTypeStr = File.__tablename__
-    Schema = FileShowSchema
-    on_created = hooks.on_created_file
-    on_reuploaded = hooks.on_reuploaded_file
-
     @requires_authorization
     def get(self, identifier):
         """
@@ -89,20 +202,17 @@ class FileResource(ObjectResource):
                 description: Information about file
                 content:
                   application/json:
-                    schema: FileShowSchema
+                    schema: FileItemResponseSchema
             404:
                 description: When file doesn't exist, object is not a file or user doesn't have access to this object.
         """
-        return super(FileResource, self).get(identifier)
+        return get_object(
+            object_type=File,
+            object_identifier=identifier,
+            response_schema=FileItemResponseSchema
+        )
 
-    def create_object(self, obj):
-        try:
-            return File.get_or_create(request.files["file"])
-        except ObjectTypeConflictError:
-            raise Conflict("Object already exists and is not a file")
-        except EmptyFileError:
-            raise BadRequest("File cannot be empty")
-
+    @deprecated
     @requires_authorization
     def post(self, identifier):
         """
@@ -112,7 +222,7 @@ class FileResource(ObjectResource):
         security:
             - bearerAuth: []
         tags:
-            - file
+            - deprecated
         parameters:
             - in: path
               name: identifier
@@ -134,14 +244,17 @@ class FileResource(ObjectResource):
                       type: string
                       format: binary
                       description: File contents to be uploaded
-                    json:
-                      type: string
-                      description: |
-                        Additional JSON-encoded information about object (ignored for files)
                     metakeys:
-                      type: string
+                      type: object
+                      properties:
+                          metakeys:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/MetakeyItemRequest'
                       description: |
-                        Optional JSON-encoded `MetakeyShowSchema`. User must be allowed to set specified attribute keys.
+                        Attributes to be added after file upload
+
+                        User must be allowed to set specified attribute keys.
                     upload_as:
                       type: string
                       default: '*'
@@ -157,7 +270,7 @@ class FileResource(ObjectResource):
                 description: Information about uploaded file
                 content:
                   application/json:
-                    schema: FileShowSchema
+                    schema: FileItemResponseSchema
             403:
                 description: No permissions to perform additional operations (e.g. adding parent, metakeys)
             404:
@@ -169,4 +282,60 @@ class FileResource(ObjectResource):
             409:
                 description: Object exists yet but has different type
         """
-        return super(FileResource, self).post(identifier)
+        params = request.form.to_dict()
+
+        if params.get("metakeys"):
+            metakeys = MetakeyMultipartRequestSchema().loads(params["metakeys"])
+            if metakeys and metakeys.errors:
+                return {"errors": metakeys.errors}, 400
+            params["metakeys"] = metakeys.data
+        else:
+            params["metakeys"] = None
+
+        schema = FileLegacyCreateRequestSchema()
+        params = schema.load(params)
+
+        if params and params.errors:
+            return {"errors": params.errors}, 400
+
+        params_data = dict(params.data)
+
+        if params_data["metakeys"]:
+            params_data["metakeys"] = params_data["metakeys"]["metakeys"]
+        else:
+            params_data["metakeys"] = []
+
+        if identifier != "root":
+            params_data["parent"] = identifier
+        else:
+            params_data["parent"] = None
+
+        parent, share_with, metakeys = get_object_creation_params(params_data)
+
+        try:
+            file, is_new = File.get_or_create(
+                request.files['file'],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
+            db.session.commit()
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a file")
+        except EmptyFileError:
+            raise BadRequest("File cannot be empty")
+
+        if is_new:
+            hooks.on_created_object(file)
+            hooks.on_created_file(file)
+        else:
+            hooks.on_reuploaded_object(file)
+            hooks.on_reuploaded_file(file)
+        logger.info(
+            "File added", extra={
+                'sha256': file.sha256,
+                'is_new': is_new
+            }
+        )
+        schema = FileItemResponseSchema()
+        return schema.dump(file)

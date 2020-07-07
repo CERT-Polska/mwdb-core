@@ -2,76 +2,32 @@ from datetime import datetime, timedelta
 
 from flask import request
 from flask_restful import Resource
-
-from werkzeug.exceptions import Conflict
-
 from sqlalchemy import func
+
+from werkzeug.exceptions import BadRequest, Conflict
 
 from plugin_engine import hooks
 
 from model import Config, db
 from model.object import ObjectTypeConflictError
 
-from core.schema import ConfigShowSchema, MultiConfigSchema, ConfigStatsSchema
+from schema.config import (
+    ConfigCreateRequestSchema,
+    ConfigLegacyCreateRequestSchema,
+    ConfigListResponseSchema,
+    ConfigItemResponseSchema,
+    ConfigStatsRequestSchema,
+    ConfigStatsResponseSchema
+)
 
-from . import requires_authorization
-from .object import ObjectResource, ObjectListResource
-
-
-class ConfigStatsResource(Resource):
-    @requires_authorization
-    def get(self):
-        """
-        ---
-        summary: Get config statistics
-        description: Get static configuration global statistics grouped per malware family.
-        security:
-            - bearerAuth: []
-        tags:
-            - config
-        parameters:
-            - in: query
-              name: range
-              schema:
-                type: string
-              description: Time range in hours `24h`, days `2d` or all time `*`
-              default: '*'
-              required: false
-        responses:
-            200:
-                description: Static configuration global statistics
-                content:
-                  application/json:
-                    schema: ConfigStatsSchema
-        """
-        from_time = request.args.get('range', '*')
-        if from_time.endswith("h"):
-            from_time = int(from_time[:-1])
-        elif from_time.endswith("d"):
-            from_time = int(from_time[:-1]) * 24
-
-        query = db.session\
-            .query(Config.family,
-                   func.max(Config.upload_time).label('maxdate'),
-                   func.count())\
-            .group_by(Config.family)
-
-        if from_time != "*":
-            query = query.filter(Config.upload_time > (datetime.now() - timedelta(hours=from_time)))
-
-        families = [{"family": family,
-                     "last_upload": upload_time,
-                     "count": count} for family, upload_time, count in query.all()]
-
-        schema = ConfigStatsSchema()
-        return schema.dump({"families": families})
+from . import logger, requires_authorization, deprecated
+from .object import (
+    list_objects, get_object_creation_params, get_object,
+    ObjectResource, ObjectsResource
+)
 
 
-class ConfigListResource(ObjectListResource):
-    ObjectType = Config
-    Schema = MultiConfigSchema
-    SchemaKey = "configs"
-
+class ConfigsResource(ObjectsResource):
     @requires_authorization
     def get(self):
         """
@@ -102,25 +58,93 @@ class ConfigListResource(ObjectListResource):
               required: false
         responses:
             200:
-                description: List of files
+                description: List of configs
                 content:
                   application/json:
-                    schema: MultiConfigSchema
+                    schema: ConfigListResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occured in Lucene query
+                description: When wrong parameters were provided or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
-        return super(ConfigListResource, self).get()
+        return list_objects(
+            object_type=Config,
+            response_schema=ConfigListResponseSchema,
+            response_key="configs"
+        )
+
+    @requires_authorization
+    def post(self):
+        """
+        ---
+        summary: Upload config
+        description: Uploads new config.
+        security:
+            - bearerAuth: []
+        tags:
+            - config
+        requestBody:
+            required: true
+            description: Configuration to be uploaded
+            content:
+              application/json:
+                schema: ConfigCreateRequestSchema
+        responses:
+            200:
+                description: Information about uploaded config
+                content:
+                  application/json:
+                    schema: ConfigItemResponseSchema
+            403:
+                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
+            404:
+                description: |
+                    One of attribute keys doesn't exist or user doesn't have permission to set it.
+
+                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
+                    with that group
+            409:
+                description: Object exists yet but has different type
+        """
+        schema = ConfigCreateRequestSchema()
+        params = schema.loads(request.get_data(as_text=True))
+
+        if params and params.errors:
+            return {"errors": params.errors}, 400
+
+        parent, share_with, metakeys = get_object_creation_params(params.data)
+
+        try:
+            config, is_new = Config.get_or_create(
+                params.data["cfg"],
+                params.data["family"],
+                params.data["config_type"],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
+            db.session.commit()
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a config")
+
+        if is_new:
+            hooks.on_created_object(config)
+            hooks.on_created_config(config)
+        else:
+            hooks.on_reuploaded_object(config)
+            hooks.on_reuploaded_config(config)
+
+        logger.info(
+            "Config added", extra={
+                'dhash': config.dhash,
+                'is_new': is_new
+            }
+        )
+        schema = ConfigItemResponseSchema()
+        return schema.dump(config)
 
 
 class ConfigResource(ObjectResource):
-    ObjectType = Config
-    ObjectTypeStr = Config.__tablename__
-    Schema = ConfigShowSchema
-    on_created = hooks.on_created_config
-    on_reuploaded = hooks.on_reuploaded_config
-
     @requires_authorization
     def get(self, identifier):
         """
@@ -143,23 +167,18 @@ class ConfigResource(ObjectResource):
                 description: Config information and contents
                 content:
                   application/json:
-                    schema: ConfigShowSchema
+                    schema: ConfigItemResponseSchema
             404:
                 description: |
                     When config doesn't exist, object is not a config or user doesn't have access to this object.
         """
-        return super(ConfigResource, self).get(identifier)
+        return get_object(
+            object_type=Config,
+            object_identifier=identifier,
+            response_schema=ConfigItemResponseSchema
+        )
 
-    def create_object(self, obj):
-        try:
-            return Config.get_or_create(
-                obj.data["cfg"],
-                obj.data["family"],
-                obj.data.get("config_type", "static")
-            )
-        except ObjectTypeConflictError:
-            raise Conflict("Object already exists and is not a config")
-
+    @deprecated
     @requires_authorization
     def put(self, identifier):
         """
@@ -169,7 +188,7 @@ class ConfigResource(ObjectResource):
         security:
             - bearerAuth: []
         tags:
-            - config
+            - deprecated
         parameters:
             - in: path
               name: identifier
@@ -178,52 +197,20 @@ class ConfigResource(ObjectResource):
               default: root
               description: |
                 Parent object identifier or `root` if there is no parent.
+
                 User must have `adding_parents` capability to specify a parent object.
         requestBody:
             required: true
+            description: Configuration to be uploaded
             content:
-              multipart/form-data:
-                schema:
-                  type: object
-                  description: Configuration to be uploaded with additional parameters (verbose mode)
-                  properties:
-                    json:
-                      type: string
-                      description: JSON-encoded configuration contents to be uploaded
-                    metakeys:
-                      type: string
-                      description: |
-                        Optional JSON-encoded `MetakeyShowSchema`. User must be allowed to set specified attribute keys.
-                    upload_as:
-                      type: string
-                      default: '*'
-                      description: |
-                        Group that object will be shared with. If user doesn't have `sharing_objects` capability,
-                        user must be a member of specified group (unless `Group doesn't exist` error will occur).
-                        If default value `*` is specified - object will be exclusively shared with all user's groups
-                        excluding `public`.
-                  required:
-                    - json
               application/json:
-                schema:
-                  type: object
-                  description: Configuration to be uploaded (simple mode)
-                  properties:
-                    family:
-                      type: string
-                      description: Malware family related with configuration
-                    config_type:
-                      type: string
-                      description: Config type (static, dynamic, other)
-                      default: static
-                  required:
-                    - family
+                schema: ConfigLegacyCreateRequestSchema
         responses:
             200:
                 description: Information about uploaded config
                 content:
                   application/json:
-                    schema: ConfigShowSchema
+                    schema: ConfigItemResponseSchema
             403:
                 description: No permissions to perform additional operations (e.g. adding parent, metakeys)
             404:
@@ -235,4 +222,114 @@ class ConfigResource(ObjectResource):
             409:
                 description: Object exists yet but has different type
         """
-        return super(ConfigResource, self).put(identifier)
+        schema = ConfigLegacyCreateRequestSchema()
+        params = schema.loads(request.get_data(as_text=True))
+
+        if params and params.errors:
+            return {"errors": params.errors}, 400
+
+        params_data = dict(params.data)
+
+        if params_data["metakeys"]:
+            params_data["metakeys"] = params_data["metakeys"]["metakeys"]
+        else:
+            params_data["metakeys"] = []
+
+        if identifier != "root":
+            params_data["parent"] = identifier
+        else:
+            params_data["parent"] = None
+
+        parent, share_with, metakeys = get_object_creation_params(params_data)
+
+        try:
+            config, is_new = Config.get_or_create(
+                params.data["cfg"],
+                params.data["family"],
+                params.data["config_type"],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
+            db.session.commit()
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a config")
+
+        if is_new:
+            hooks.on_created_object(config)
+            hooks.on_created_config(config)
+        else:
+            hooks.on_reuploaded_object(config)
+            hooks.on_reuploaded_config(config)
+
+        logger.info(
+            "Config added", extra={
+                'dhash': config.dhash,
+                'is_new': is_new
+            }
+        )
+        schema = ConfigItemResponseSchema()
+        return schema.dump(config)
+
+
+class ConfigStatsResource(Resource):
+    @requires_authorization
+    def get(self):
+        """
+        ---
+        summary: Get config statistics
+        description: Get static configuration global statistics grouped per malware family.
+        security:
+            - bearerAuth: []
+        tags:
+            - config
+        parameters:
+            - in: query
+              name: range
+              schema:
+                type: string
+              description: Time range in hours `24h`, days `2d` or all time `*`
+              default: '*'
+              required: false
+        responses:
+            200:
+                description: Static configuration global statistics
+                content:
+                  application/json:
+                    schema: ConfigStatsResponseSchema
+        """
+        schema = ConfigStatsRequestSchema()
+        params = schema.load(request.args)
+
+        if params and params.errors:
+            return {"errors": params.errors}, 400
+
+        from_time = params.data["range"]
+        if from_time.endswith("h"):
+            from_time = int(from_time[:-1])
+        elif from_time.endswith("d"):
+            from_time = int(from_time[:-1]) * 24
+        elif from_time != "*":
+            raise BadRequest("Wrong range format")
+
+        query = (
+            db.session.query(
+                Config.family,
+                func.max(Config.upload_time).label('maxdate'),
+                func.count()
+            ).group_by(Config.family)
+        )
+
+        if from_time != "*":
+            query = query.filter(Config.upload_time > (datetime.now() - timedelta(hours=from_time)))
+
+        families = [
+            {
+                "family": family,
+                "last_upload": upload_time,
+                "count": count
+            } for family, upload_time, count in query.all()
+        ]
+
+        schema = ConfigStatsResponseSchema()
+        return schema.dump({"families": families})

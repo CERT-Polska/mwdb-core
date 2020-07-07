@@ -89,75 +89,6 @@ class RelationsSchema(Schema):
     children = fields.Nested(ObjectBase, many=True)
 
 
-class ObjectShowBase(ObjectBase, RelationsSchema):
-    pass
-
-
-class MultiObjectSchema(Schema):
-    objects = fields.Nested(ObjectBase, many=True)
-
-
-class ConfigSchema(ObjectBase):
-    family = fields.Str(required=True)
-    config_type = fields.Str()
-
-
-class ConfigShowSchema(ObjectShowBase):
-    family = fields.Str(required=True)
-    config_type = fields.Str()
-    cfg = fields.Dict(required=True)
-
-
-class MultiConfigSchema(Schema):
-    configs = fields.Nested(ConfigSchema, many=True)
-
-
-class TextBlobSchema(ObjectBase):
-    blob_name = fields.Str(required=True)
-    blob_size = fields.Int()
-    blob_type = fields.Str(required=True)
-    last_seen = fields.DateTime()
-
-
-class TextBlobShowSchema(ObjectShowBase):
-    blob_name = fields.Str(required=True)
-    blob_size = fields.Int()
-    blob_type = fields.Str(required=True)
-    last_seen = fields.DateTime()
-    content = fields.Str(required=True)
-    latest_config = fields.Nested(ConfigShowSchema)
-
-
-class MultiTextBlobSchema(Schema):
-    blobs = fields.Nested(TextBlobSchema, many=True)
-
-
-class FileSchema(ObjectBase):
-    file_name = fields.Str()
-    file_size = fields.Int()
-    file_type = fields.Str()
-    md5 = fields.Str()
-    sha256 = fields.Str()
-
-
-class FileShowSchema(ObjectShowBase):
-    file_name = fields.Str()
-    file_size = fields.Int()
-    file_type = fields.Str()
-    crc32 = fields.Str()
-    md5 = fields.Str()
-    sha1 = fields.Str()
-    sha256 = fields.Str()
-    sha512 = fields.Str()
-    humanhash = fields.Str()
-    ssdeep = fields.Str()
-    latest_config = fields.Nested(ConfigShowSchema)
-
-
-class MultiFileShowSchema(Schema):
-    files = fields.Nested(FileSchema, many=True)
-
-
 class URLReturnSchema(Schema):
     url = fields.Str()
 
@@ -187,13 +118,3 @@ class SearchSchema(Schema):
 
 class PingStatusSchema(Schema):
     status = fields.Str(required=True)
-
-
-class ConfigStatsEntry(Schema):
-    family = fields.Str(required=True)
-    last_upload = fields.Date(required=True)
-    count = fields.Int(required=True)
-
-
-class ConfigStatsSchema(Schema):
-    families = fields.Nested(ConfigStatsEntry, many=True)

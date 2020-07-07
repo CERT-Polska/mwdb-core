@@ -1,19 +1,12 @@
-FROM tiangolo/uwsgi-nginx-flask:python3.6-alpine3.8
+FROM python:3.6-alpine
 
 LABEL maintainer="info@cert.pl"
 
 RUN apk add --no-cache postgresql-client postgresql-dev libmagic
 
 COPY requirements.txt /tmp/requirements.txt
-RUN apk add --no-cache -t build libffi libffi-dev py3-cffi build-base python3-dev automake m4 perl autoconf libtool \
-    && wget -O /tmp/ssdeep.tar.gz https://github.com/ssdeep-project/ssdeep/releases/download/release-2.14.1/ssdeep-2.14.1.tar.gz \
-    && cd /tmp \
-    && tar -xopf /tmp/ssdeep.tar.gz \
-    && cd ssdeep-2.14.1 \
-    && ./configure \
-    && make \
-    && make install \
-    && cd /tmp && pip --no-cache-dir install -r requirements.txt \
+RUN apk add --no-cache -t build libffi libffi-dev py3-cffi build-base python3-dev automake m4 autoconf libtool \
+    && BUILD_LIB=1 pip --no-cache-dir install -r /tmp/requirements.txt \
     && apk del build
 
 # Install plugin requirements 
@@ -25,7 +18,7 @@ RUN ls /tmp/requirements-*.txt | xargs -i,, pip --no-cache-dir install -r ,,
 
 # Copy backend files
 
-COPY prestart.sh uwsgi.ini plugin_engine.py app.py version.py /app/
+COPY start.sh uwsgi.ini plugin_engine.py app.py version.py /app/
 
 COPY core /app/core
 COPY migrations /app/migrations
@@ -47,3 +40,8 @@ RUN mkdir -p /app/uploads/ && \
     chmod o=rX -R /app && \
     chmod 700 /app/uploads/ && \
     chown nobody:nobody /app/uploads/
+
+ENV PYTHONPATH=/app
+WORKDIR /app
+
+CMD ["/app/start.sh"]

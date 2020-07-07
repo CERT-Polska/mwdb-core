@@ -17,4 +17,4 @@ else
     flask create_admin --require-empty "$MALWARECAGE_ADMIN_LOGIN" "$MALWARECAGE_ADMIN_EMAIL" "$MALWARECAGE_ADMIN_PASSWORD"
 fi
 
-uwsgi --ini /app/uwsgi.ini
+exec uwsgi --ini /app/uwsgi.ini

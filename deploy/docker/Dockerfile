@@ -50,4 +50,4 @@ RUN mkdir -p /app/uploads/ && \
 ENV PYTHONPATH=/app
 WORKDIR /app
 
-CMD ["/bin/sh", "/app/start.sh"]
+CMD ["/app/start.sh"]

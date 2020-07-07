@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "Waiting for DB to become operational"
 until psql "$MALWARECAGE_POSTGRES_URI" -c "\q" ; do

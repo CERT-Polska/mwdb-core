@@ -8,7 +8,7 @@ RUN cd /app \
     && CI=true npm run build \
     && npm cache clean --force
 
-ENV PROXY_BACKEND_URL http://mwdb./
+ENV PROXY_BACKEND_URL http://mwdb.:8080/
 
 WORKDIR /app
 CMD ["npm", "run", "start"]

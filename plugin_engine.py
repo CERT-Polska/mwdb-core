@@ -9,6 +9,7 @@ from model import Object, File, Config, TextBlob
 logger = log.getLogger()
 
 _plugin_handlers = []
+active_plugins = {}
 
 
 class PluginAppContext(object):
@@ -95,9 +96,19 @@ def load_plugins(app_context: PluginAppContext):
         for finder, name, ispkg in pkgutil.iter_modules(ns_plugins.__path__, ns_plugins.__name__ + "."):
             try:
                 plugin = importlib.import_module(name)
-                getattr(plugin, "__plugin_entrypoint__")(app_context)
+                if hasattr(plugin, "__plugin_entrypoint__"):
+                    getattr(plugin, "__plugin_entrypoint__")(app_context)
+                active_plugins[name.split(".")[1]] = {
+                    "active": True,
+                    "author": getattr(plugin, "__author__", None),
+                    "version": getattr(plugin, "__version__", None),
+                    "description": getattr(plugin, "__doc__", None),
+                }
             except Exception:
                 logger.exception("Failed to load {} plugin".format(name))
+                active_plugins[name.split(".")[1]] = {
+                    "active": False
+                }
     except ImportError:
         logger.exception("Plugins not found, so cannot be loaded.")
 

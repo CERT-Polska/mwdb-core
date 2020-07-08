@@ -359,9 +359,11 @@ class Object(db.Model):
         :param check_permissions: Filter results including current user permissions (default: True)
         :param show_hidden: Show hidden metakeys
         """
-        metakeys = db.session.query(Metakey) \
-                             .filter(Metakey.object_id == self.id) \
-                             .join(MetakeyDefinition, MetakeyDefinition.key == Metakey.key)
+        metakeys = (
+            db.session.query(Metakey)
+                      .filter(Metakey.object_id == self.id)
+                      .join(Metakey.template)
+        )
 
         if check_permissions and not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             metakeys = metakeys.filter(
@@ -386,20 +388,15 @@ class Object(db.Model):
         return dict_metakeys
 
     def add_metakey(self, key, value, commit=True, check_permissions=True):
-        metakey_definition = db.session.query(MetakeyDefinition) \
-                                       .filter(MetakeyDefinition.key == key).first()
+        if not check_permissions:
+            metakey_definition = db.session.query(MetakeyDefinition) \
+                                           .filter(MetakeyDefinition.key == key).first()
+        else:
+            metakey_definition = MetakeyDefinition.query_for_set(key).first()
+
         if not metakey_definition:
             # Attribute needs to be defined first
             return None
-
-        if check_permissions and not g.auth_user.has_rights(Capabilities.adding_all_attributes):
-            metakey_permission = db.session.query(MetakeyPermission) \
-                .filter(MetakeyPermission.key == key) \
-                .filter(MetakeyPermission.can_set == true()) \
-                .filter(g.auth_user.is_member(MetakeyPermission.group_id)).first()
-            if not metakey_permission:
-                # Nope, you don't have permission to set that metakey!
-                return None
 
         db_metakey = Metakey(key=key, value=value, object_id=self.id)
         _, is_new = Metakey.get_or_create(db_metakey)

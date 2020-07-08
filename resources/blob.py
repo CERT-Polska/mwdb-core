@@ -84,12 +84,6 @@ class BlobsResource(ObjectsResource):
             - bearerAuth: []
         tags:
             - blob
-        parameters:
-            - in: path
-              name: identifier
-              schema:
-                type: string
-              description: Parent object unique identifier
         requestBody:
             required: true
             description: Text blob to be uploaded

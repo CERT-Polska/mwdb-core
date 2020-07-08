@@ -1,4 +1,6 @@
-from marshmallow import Schema, fields
+import json
+
+from marshmallow import Schema, fields, pre_load
 
 from .object import (
     ObjectCreateRequestSchemaBase,
@@ -13,9 +15,33 @@ from .config import ConfigItemResponseSchema
 class FileCreateRequestSchema(ObjectCreateRequestSchemaBase):
     metakeys = fields.Nested(MetakeyMultipartRequestSchema, missing=None)
 
+    @pre_load
+    def unpack_metakeys(self, params):
+        """
+        Metakeys are provided as string that need to be deserialized first.
+        Empty string is treated as None.
+        """
+        params = dict(params)
+        if params.get("metakeys"):
+            params["metakeys"] = json.loads(params["metakeys"])
+        else:
+            params["metakeys"] = None
+        return params
+
 
 class FileLegacyCreateRequestSchema(ObjectLegacyCreateRequestSchemaBase):
-    pass
+    @pre_load
+    def unpack_metakeys(self, params):
+        """
+        Metakeys are provided as string that need to be deserialized first.
+        Empty string is treated as None.
+        """
+        params = dict(params)
+        if params.get("metakeys"):
+            params["metakeys"] = json.loads(params["metakeys"])
+        else:
+            params["metakeys"] = None
+        return params
 
 
 class FileListItemResponseSchema(ObjectListItemResponseSchema):

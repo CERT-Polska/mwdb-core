@@ -132,18 +132,8 @@ class FilesResource(ObjectsResource):
             409:
                 description: Object exists yet but has different type
         """
-        params = request.form.to_dict()
-
-        if params.get("metakeys"):
-            metakeys = MetakeyMultipartRequestSchema().loads(params["metakeys"])
-            if metakeys and metakeys.errors:
-                return {"errors": metakeys.errors}, 400
-            params["metakeys"] = metakeys.data
-        else:
-            params["metakeys"] = None
-
         schema = FileCreateRequestSchema()
-        params = schema.load(params)
+        params = schema.load(request.form.to_dict())
 
         if params and params.errors:
             return {"errors": params.errors}, 400
@@ -169,6 +159,7 @@ class FilesResource(ObjectsResource):
         else:
             hooks.on_reuploaded_object(file)
             hooks.on_reuploaded_file(file)
+
         logger.info(
             "File added", extra={
                 'sha256': file.sha256,
@@ -282,18 +273,8 @@ class FileResource(ObjectResource):
             409:
                 description: Object exists yet but has different type
         """
-        params = request.form.to_dict()
-
-        if params.get("metakeys"):
-            metakeys = MetakeyMultipartRequestSchema().loads(params["metakeys"])
-            if metakeys and metakeys.errors:
-                return {"errors": metakeys.errors}, 400
-            params["metakeys"] = metakeys.data
-        else:
-            params["metakeys"] = None
-
         schema = FileLegacyCreateRequestSchema()
-        params = schema.load(params)
+        params = schema.load(request.form.to_dict())
 
         if params and params.errors:
             return {"errors": params.errors}, 400
@@ -331,6 +312,7 @@ class FileResource(ObjectResource):
         else:
             hooks.on_reuploaded_object(file)
             hooks.on_reuploaded_file(file)
+
         logger.info(
             "File added", extra={
                 'sha256': file.sha256,

@@ -41,6 +41,10 @@ RUN mkdir -p /app/uploads/ && \
     chown nobody:nobody /app/uploads/
 
 ENV PYTHONPATH=/app
+
+ENV UWSGI_CHEAPER=2
+ENV UWSGI_PROCESSES=16
+
 WORKDIR /app
 
 CMD ["/app/start.sh"]

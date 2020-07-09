@@ -1,14 +1,14 @@
 describe("Login test - Malwarecage", function () {
-  it("Visit malwarecage", function () {
+  it("Login test", function () {
     cy.visit("http://malwarefront:80");
 
     cy.url().should("include", "/login");
 
-    cy.get(":nth-child(1) > .form-control")
+    cy.get("input[name=login]")
       .type("admin")
       .should("have.value", "admin");
 
-    cy.get(":nth-child(2) > .form-control")
+    cy.get("input[name=password]")
       .type(Cypress.env("admin_password"))
       .should("have.value", Cypress.env("admin_password"));
 

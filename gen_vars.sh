@@ -34,6 +34,7 @@ else
     echo "MALWARECAGE_ENABLE_RATE_LIMIT=1" >> mwdb-vars.env
     echo "MALWARECAGE_ENABLE_REGISTRATION=0" >> mwdb-vars.env
 fi
+echo "UWSGI_PROCESSES=4" >> mwdb-vars.env
 
 echo "POSTGRES_USER=mwdb" > postgres-vars.env
 echo "POSTGRES_DB=mwdb" >> postgres-vars.env

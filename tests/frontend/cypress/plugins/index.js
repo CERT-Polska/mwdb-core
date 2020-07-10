@@ -16,7 +16,8 @@
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  config.env = config.env || {}
-  config.env.admin_password = process.env.MALWARECAGE_ADMIN_PASSWORD
-  return config
-}
+  config.env = config.env || {};
+  config.env.user = "admin";
+  config.env.password = process.env.MALWARECAGE_ADMIN_PASSWORD;
+  return config;
+};

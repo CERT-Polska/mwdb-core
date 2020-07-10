@@ -1,18 +1,14 @@
+import { request_login } from "./util";
+import { browser_login } from "./util";
+
 describe("Config view test - Malwarecage", function () {
   it("Config view test - existent and non-existent hash", function () {
-    cy.request("POST", "http://malwarefront:80/api/auth/login", {
-      login: "admin",
-      password: Cypress.env("admin_password"),
-    }).then((response) => {
-      expect(response.status).to.eq(200);
-      expect(response.body).to.have.property("token");
-      cy.wrap(response.body.token).as("token");
-    });
+    request_login(Cypress.env("user"), Cypress.env("password"));
 
     cy.get("@token").then((token) => {
       cy.request({
         method: "PUT",
-        url: "http://malwarefront:80/api/config/root",
+        url: "/api/config/root",
         body: {
           cfg: {
             plain: "cos",
@@ -32,18 +28,9 @@ describe("Config view test - Malwarecage", function () {
       });
     });
 
-    cy.visit("http://malwarefront:80");
+    cy.visit("/");
 
-    cy.url().should("include", "/login");
-
-    cy.get("input[name=login]").type("admin").should("have.value", "admin");
-
-    cy.get("input[name=password]")
-      .type(Cypress.env("admin_password"))
-      .should("have.value", Cypress.env("admin_password"));
-
-    cy.contains("Submit").click();
-    cy.contains("Logged as: admin");
+    browser_login(Cypress.env("user"), Cypress.env("password"));
 
     cy.contains("Recent configs").click();
 
@@ -64,7 +51,7 @@ describe("Config view test - Malwarecage", function () {
     cy.contains("cos");
     cy.contains("Upload time");
 
-    cy.visit("http://malwarefront:80/config/fake");
+    cy.visit("/config/fake");
     cy.contains(
       "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
     );

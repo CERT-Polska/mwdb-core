@@ -11,10 +11,10 @@ describe("Config view test - Malwarecage", function () {
         url: "/api/config/root",
         body: {
           cfg: {
-            plain: "cos",
-            list: [{ dict_in_list: "cos" }],
+            plain: "test",
+            list: [{ dict_in_list: "test" }],
             dict: {
-              field: "cos",
+              field: "test",
             },
           },
           family: "malwarex",
@@ -44,24 +44,17 @@ describe("Config view test - Malwarecage", function () {
     cy.contains("Config type");
     cy.contains("static");
     cy.contains("dict");
-    cy.contains('{ "field": "cos" }');
+    cy.contains('{ "field": "test" }');
     cy.contains("list");
-    cy.contains('[ { "dict_in_list": "cos" } ]');
+    cy.contains('[ { "dict_in_list": "test" } ]');
     cy.contains("plain");
-    cy.contains("cos");
+    cy.contains("test");
     cy.contains("Upload time");
 
     cy.visit("/config/fake");
     cy.contains(
       "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
     );
-    cy.contains("Details").click();
-
-    cy.contains("Config type");
-    cy.contains("Upload time");
-    cy.contains("Group name");
-    cy.contains("Reason");
-    cy.contains("Access time");
 
     cy.contains("Logout").click();
   });

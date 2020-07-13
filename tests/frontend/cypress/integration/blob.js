@@ -48,13 +48,6 @@ describe("Blob view test - Malwarecage", function () {
     cy.contains(
       "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
     );
-    cy.contains("Details").click();
-
-    cy.contains("Blob name");
-    cy.contains("Blob size");
-    cy.contains("Blob type");
-    cy.contains("First seen");
-    cy.contains("Last seen");
 
     cy.contains("Logout").click();
   });

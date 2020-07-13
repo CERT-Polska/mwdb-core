@@ -149,7 +149,7 @@ class GroupResource(Resource):
             'capabilities': group.capabilities
         })
         schema = GroupSuccessResponseSchema()
-        return schema.dump({"name": obj.data.get("name")})
+        return schema.dump({"name": name})
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)

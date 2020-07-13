@@ -26,7 +26,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     login = db.Column(db.String(32), index=True, unique=True, nullable=False)
-    email = db.Column(db.String(128))
+    email = db.Column(db.String(128), nullable=False)
 
     password_hash = db.Column(db.String(128))
     # Legacy "version_uid", todo: remove it when users are ready
@@ -38,7 +38,7 @@ class User(db.Model):
     # Invalidates session when user capabilities has been changed
     identity_ver = db.Column(db.String(16))
 
-    additional_info = db.Column(db.String)
+    additional_info = db.Column(db.String, nullable=False)
     disabled = db.Column(db.Boolean, default=False, nullable=False)
     pending = db.Column(db.Boolean, default=False, nullable=False)
 
@@ -54,7 +54,7 @@ class User(db.Model):
     registrar = db.relationship('User', foreign_keys="User.registered_by", remote_side=[id], uselist=False)
 
     # used to load-balance the malware processing pipeline
-    feed_quality = db.Column(db.String(32), server_default='high')
+    feed_quality = db.Column(db.String(32), nullable=False, server_default='high')
 
     @property
     def group_names(self):

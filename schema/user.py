@@ -48,8 +48,8 @@ class UserUpdateRequestSchema(Schema):
 
 class UserItemResponseSchema(UserLoginSchemaBase):
     email = fields.Email(required=True, allow_none=False)
-    additional_info = fields.Str(required=True)
-    feed_quality = fields.Str(required=True)
+    additional_info = fields.Str(required=True, allow_none=False)
+    feed_quality = fields.Str(required=True, allow_none=False)
 
     requested_on = fields.DateTime(required=True)
     registered_on = fields.DateTime(required=True)
@@ -57,8 +57,8 @@ class UserItemResponseSchema(UserLoginSchemaBase):
     set_password_on = fields.DateTime(required=True)
     registrar_login = fields.Str(required=True)
 
-    disabled = fields.Boolean(required=True)
-    pending = fields.Boolean(required=True)
+    disabled = fields.Boolean(required=True, allow_none=False)
+    pending = fields.Boolean(required=True, allow_none=False)
 
     groups = fields.Nested(GroupBasicResponseSchema, many=True, required=True, allow_none=False)
     api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True, required=True, allow_none=False)
@@ -66,11 +66,11 @@ class UserItemResponseSchema(UserLoginSchemaBase):
 
 class UserListItemResponseSchema(UserLoginSchemaBase):
     email = fields.Email(required=True, allow_none=False)
-    additional_info = fields.Str(required=True)
-    feed_quality = fields.Str(required=True)
+    additional_info = fields.Str(required=True, allow_none=False)
+    feed_quality = fields.Str(required=True, allow_none=False)
     requested_on = fields.DateTime(required=True)
-    disabled = fields.Boolean(required=True)
-    pending = fields.Boolean(required=True)
+    disabled = fields.Boolean(required=True, allow_none=False)
+    pending = fields.Boolean(required=True, allow_none=False)
     groups = fields.Nested(GroupItemResponseSchema, many=True, required=True, allow_none=False)
 
 

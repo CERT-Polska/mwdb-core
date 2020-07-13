@@ -46,44 +46,41 @@ class UserUpdateRequestSchema(Schema):
             )
 
 
-class UserItemResponseSchema(Schema):
-    login = fields.Str()
-    email = fields.Str()
-    additional_info = fields.Str()
-    feed_quality = fields.Str()
+class UserItemResponseSchema(UserLoginSchemaBase):
+    email = fields.Email(required=True, allow_none=False)
+    additional_info = fields.Str(required=True)
+    feed_quality = fields.Str(required=True)
 
-    requested_on = fields.DateTime()
-    registered_on = fields.DateTime()
-    logged_on = fields.DateTime()
-    set_password_on = fields.DateTime()
-    registrar_login = fields.Str()
+    requested_on = fields.DateTime(required=True)
+    registered_on = fields.DateTime(required=True)
+    logged_on = fields.DateTime(required=True)
+    set_password_on = fields.DateTime(required=True)
+    registrar_login = fields.Str(required=True)
 
-    disabled = fields.Boolean()
-    pending = fields.Boolean()
+    disabled = fields.Boolean(required=True)
+    pending = fields.Boolean(required=True)
 
-    groups = fields.Nested(GroupBasicResponseSchema, many=True)
-    api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True)
-
-
-class UserListItemResponseSchema(Schema):
-    login = fields.Str()
-    email = fields.Str()
-    additional_info = fields.Str()
-    feed_quality = fields.Str()
-    requested_on = fields.DateTime()
-    disabled = fields.Boolean()
-    pending = fields.Boolean()
-    groups = fields.Nested(GroupItemResponseSchema, many=True)
+    groups = fields.Nested(GroupBasicResponseSchema, many=True, required=True, allow_none=False)
+    api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True, required=True, allow_none=False)
 
 
-class UserListResponseSchema(Schema):
-    users = fields.Nested(UserListItemResponseSchema, many=True)
+class UserListItemResponseSchema(UserLoginSchemaBase):
+    email = fields.Email(required=True, allow_none=False)
+    additional_info = fields.Str(required=True)
+    feed_quality = fields.Str(required=True)
+    requested_on = fields.DateTime(required=True)
+    disabled = fields.Boolean(required=True)
+    pending = fields.Boolean(required=True)
+    groups = fields.Nested(GroupItemResponseSchema, many=True, required=True, allow_none=False)
 
 
-class UserSetPasswordTokenResponseSchema(Schema):
-    login = fields.Str()
-    token = fields.Str()
+class UserListResponseSchema(UserLoginSchemaBase):
+    users = fields.Nested(UserListItemResponseSchema, many=True, required=True, allow_none=False)
 
 
-class UserSuccessResponseSchema(Schema):
-    login = fields.Str()
+class UserSetPasswordTokenResponseSchema(UserLoginSchemaBase):
+    token = fields.Str(required=True, allow_none=False)
+
+
+class UserSuccessResponseSchema(UserLoginSchemaBase):
+    pass

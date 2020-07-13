@@ -6,7 +6,7 @@ from .user import UserLoginSchemaBase
 
 
 class RecaptchaSchemaMixin(Schema):
-    recaptcha = fields.Str()
+    recaptcha = fields.Str(allow_none=False)
 
 
 class AuthLoginRequestSchema(UserLoginSchemaBase):
@@ -49,27 +49,24 @@ class AuthRecoverPasswordRequestSchema(UserLoginSchemaBase, RecaptchaSchemaMixin
     email = fields.Email(required=True, allow_none=False)
 
 
-class AuthSuccessResponseSchema(Schema):
-    login = fields.Str()
-    token = fields.Str()
-    capabilities = fields.List(fields.Str())
-    groups = fields.List(fields.Str())
+class AuthSuccessResponseSchema(UserLoginSchemaBase):
+    token = fields.Str(required=True, allow_none=False)
+    capabilities = fields.List(fields.Str(), required=True, allow_none=False)
+    groups = fields.List(fields.Str(), required=True, allow_none=False)
 
 
-class AuthValidateTokenResponseSchema(Schema):
-    login = fields.Str()
-    capabilities = fields.List(fields.Str())
-    groups = fields.List(fields.Str())
+class AuthValidateTokenResponseSchema(UserLoginSchemaBase):
+    capabilities = fields.List(fields.Str(), required=True, allow_none=False)
+    groups = fields.List(fields.Str(), required=True, allow_none=False)
 
 
-class AuthProfileResponseSchema(Schema):
-    login = fields.Str()
-    email = fields.Str()
+class AuthProfileResponseSchema(UserLoginSchemaBase):
+    email = fields.Email(required=True, allow_none=False)
 
-    registered_on = fields.DateTime()
-    logged_on = fields.DateTime()
-    set_password_on = fields.DateTime()
+    registered_on = fields.DateTime(required=True)
+    logged_on = fields.DateTime(required=True)
+    set_password_on = fields.DateTime(required=True)
 
-    capabilities = fields.List(fields.Str())
-    groups = fields.Nested(GroupBasicResponseSchema, many=True)
-    api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True)
+    capabilities = fields.List(fields.Str(), required=True, allow_none=False)
+    groups = fields.Nested(GroupBasicResponseSchema, many=True, required=True, allow_none=False)
+    api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True, required=True, allow_none=False)

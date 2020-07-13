@@ -31,20 +31,19 @@ class GroupUpdateRequestSchema(Schema):
 
 
 class GroupBasicResponseSchema(GroupNameSchemaBase):
-    capabilities = fields.List(fields.Str())
-    private = fields.Boolean()
+    capabilities = fields.List(fields.Str(), required=True, allow_none=False)
+    private = fields.Boolean(required=True)
 
 
 class GroupItemResponseSchema(GroupNameSchemaBase):
-    capabilities = fields.List(fields.Str())
-    private = fields.Boolean()
-    users = fields.List(fields.Str(), attribute="user_logins")
+    capabilities = fields.List(fields.Str(), required=True, allow_none=False)
+    private = fields.Boolean(required=True)
+    users = fields.List(fields.Str(), attribute="user_logins", required=True, allow_none=False)
 
 
 class GroupListResponseSchema(Schema):
-    groups = fields.Nested(GroupItemResponseSchema, many=True)
+    groups = fields.Nested(GroupItemResponseSchema, many=True, required=True, allow_none=False)
 
 
-class GroupSuccessResponseSchema(Schema):
-    name = fields.Str()
-
+class GroupSuccessResponseSchema(GroupNameSchemaBase):
+    pass

@@ -217,7 +217,7 @@ class UserGetPasswordChangeTokenResource(Resource):
               content:
                 application/json:
                   schema: UserSetPasswordTokenResponseSchema
-            403:
+            404:
                 description: When specified user doesn't exist
         """
         try:

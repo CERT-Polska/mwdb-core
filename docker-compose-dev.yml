@@ -28,6 +28,7 @@ services:
       - "./model:/app/model"
       - "./plugins:/app/plugins"
       - "./resources:/app/resources"
+      - "./schema:/app/schema"
       - "./app.py:/app/app.py"
       - "./plugin_engine.py:/app/plugin_engine.py"
   malwarefront:

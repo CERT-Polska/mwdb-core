@@ -7,24 +7,34 @@ from flask_restful import Api
 from werkzeug.exceptions import HTTPException
 
 from resources.api_key import APIKeyResource, APIKeyIssueResource
-from resources.auth import LoginResource, UserChangePasswordResource, UserGetPasswordChangeTokenResource, \
-    RefreshTokenResource, RegisterResource, ValidateTokenResource, RecoverPasswordResource, RequestPasswordChangeResource
+from resources.auth import (
+    LoginResource, ChangePasswordResource,
+    RefreshTokenResource, RegisterResource,
+    RecoverPasswordResource, RequestPasswordChangeResource,
+    ValidateTokenResource, ProfileResource
+)
+
 from resources.blob import TextBlobResource, TextBlobListResource
 from resources.comment import CommentResource, CommentDeleteResource
 from resources.config import ConfigResource, ConfigListResource, ConfigStatsResource
 from resources.download import RequestSampleDownloadResource, DownloadResource
 from resources.file import FileResource, FileListResource
 from resources.group import GroupResource, GroupListResource, GroupMemberResource
-from resources.metakey import MetakeyResource, MetakeyListDefinitionResource, \
-    MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource, \
+from resources.metakey import (
+    MetakeyResource, MetakeyListDefinitionResource,
+    MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource,
     MetakeyPermissionResource
+)
 from resources.object import ObjectResource, ObjectListResource, ObjectChildResource
 from resources.relations import RelationsResource
 from resources.server import PingResource, ServerInfoResource
 from resources.search import SearchResource
 from resources.share import ShareGroupListResource, ShareResource
 from resources.tag import TagResource, TagListResource
-from resources.user import UserResource, UserListResource, UserPendingResource
+from resources.user import (
+    UserResource, UserListResource, UserPendingResource,
+    UserGetPasswordChangeTokenResource
+)
 
 from . import log
 from .apispec_utils import ApispecFlaskRestful
@@ -111,8 +121,8 @@ def setup_restful_service(app):
     # Authentication endpoints
     api.add_resource(LoginResource, '/auth/login')
     spec.path(resource=LoginResource, api=api)
-    api.add_resource(UserChangePasswordResource, "/auth/change_password")
-    spec.path(resource=UserChangePasswordResource, api=api)
+    api.add_resource(ChangePasswordResource, "/auth/change_password")
+    spec.path(resource=ChangePasswordResource, api=api)
     api.add_resource(RecoverPasswordResource, '/auth/recover_password')
     spec.path(resource=RecoverPasswordResource, api=api)
     api.add_resource(RequestPasswordChangeResource, '/auth/request_password_change')
@@ -121,6 +131,8 @@ def setup_restful_service(app):
     spec.path(resource=RefreshTokenResource, api=api)
     api.add_resource(ValidateTokenResource, "/auth/validate")
     spec.path(resource=ValidateTokenResource, api=api)
+    api.add_resource(ProfileResource, "/auth/profile")
+    spec.path(resource=ProfileResource, api=api)
     api.add_resource(RegisterResource, '/auth/register')
     spec.path(resource=RegisterResource, api=api)
 

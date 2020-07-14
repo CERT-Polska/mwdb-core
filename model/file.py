@@ -8,15 +8,16 @@ class File(Object):
     __tablename__ = 'file'
 
     id = db.Column(db.Integer, db.ForeignKey('object.id'), primary_key=True)
-    file_name = db.Column(db.String, nullable=True, index=True)
+    file_name = db.Column(db.String, nullable=False, index=True)
     file_size = db.Column(db.Integer, nullable=False, index=True)
-    file_type = db.Column(db.Text, nullable=True, index=True)
+    file_type = db.Column(db.Text, nullable=False, index=True)
     md5 = db.Column(db.String(32), nullable=False, index=True)
     crc32 = db.Column(db.String(8), nullable=False, index=True)
     sha1 = db.Column(db.String(40), nullable=False, index=True)
     sha256 = db.Column(db.String(64), nullable=False, index=True, unique=True)
     sha512 = db.Column(db.String(128), nullable=False, index=True)
     humanhash = db.Column(db.String, nullable=False, index=True)
+    # ssdeep is nullable due to lack of support in earlier versions
     ssdeep = db.Column(db.String(255), nullable=True, index=True)
 
     __mapper_args__ = {

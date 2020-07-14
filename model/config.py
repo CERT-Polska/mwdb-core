@@ -11,7 +11,7 @@ class Config(Object):
     __tablename__ = 'static_config'
 
     id = db.Column(db.Integer, db.ForeignKey('object.id'), primary_key=True)
-    family = db.Column(db.String(32), index=True)
+    family = db.Column(db.String(32), nullable=False, index=True)
     config_type = db.Column(db.String(32), index=True, nullable=False, server_default="static")
     _cfg = db.Column("cfg", JSON, nullable=False)
 

@@ -118,8 +118,8 @@ class Object(db.Model):
     __tablename__ = 'object'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    type = db.Column(db.String(50))
-    dhash = db.Column(db.String(64), unique=True, index=True)
+    type = db.Column(db.String(50), nullable=False)
+    dhash = db.Column(db.String(64), unique=True, index=True, nullable=False)
     upload_time = db.Column(db.DateTime, nullable=False, index=True, default=func.now())
 
     parents = db.relationship(

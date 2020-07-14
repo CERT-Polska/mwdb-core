@@ -7,10 +7,11 @@ from model import db, Object
 from core.schema import SearchSchema, ObjectBase
 from core.search import SQLQueryBuilderBaseException, SQLQueryBuilder
 
-from . import logger, requires_authorization
+from . import deprecated, logger, requires_authorization
 
 
 class SearchResource(Resource):
+    @deprecated
     @requires_authorization
     def post(self):
         """
@@ -23,7 +24,6 @@ class SearchResource(Resource):
         security:
             - bearerAuth: []
         tags:
-            - search
             - deprecated
         requestBody:
             description: Search query

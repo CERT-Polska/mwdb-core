@@ -3,10 +3,11 @@ from flask_restful import Resource
 from model import Object
 from core.schema import RelationsSchema
 
-from . import authenticated_access, requires_authorization
+from . import deprecated, authenticated_access, requires_authorization
 
 
 class RelationsResource(Resource):
+    @deprecated
     @requires_authorization
     def get(self, type, identifier):
         """
@@ -19,7 +20,6 @@ class RelationsResource(Resource):
         security:
             - bearerAuth: []
         tags:
-            - relations
             - deprecated
         parameters:
             - in: path

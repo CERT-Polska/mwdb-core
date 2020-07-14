@@ -227,8 +227,8 @@ class UserGetPasswordChangeTokenResource(Resource):
 
         token = user.generate_set_password_token()
 
-        logger.info('Set password token generated', extra={
-            'user': login
+        logger.info("Set password token generated", extra={
+            "user": login
         })
         schema = UserSetPasswordTokenResponseSchema()
         return schema.dump({"login": login, "token": token})

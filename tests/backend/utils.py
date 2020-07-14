@@ -49,8 +49,8 @@ class MwdbTest(object):
         self.session = requests.session()
 
     def login_as(self, username, password):
-        res = self.session.post(self.mwdb_url + '/auth/login', json={
-            'login': username, 'password': password
+        res = self.session.post(self.mwdb_url + "/auth/login", json={
+            "login": username, "password": password
         })
         res.raise_for_status()
         self.session.headers.update({'Authorization': 'Bearer ' + res.json()['token']})

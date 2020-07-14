@@ -220,7 +220,7 @@ class GroupResource(Resource):
 
         logger.info('Group updated', extra={
             "group": group.name,
-            'capabilities': group.capabilities
+            "capabilities": group.capabilities
         })
         schema = GroupSuccessResponseSchema()
         return schema.dump({"name": group.name})

@@ -1,3 +1,6 @@
+import datetime
+import hashlib
+
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from . import db
@@ -22,6 +25,21 @@ class TextBlob(Object):
     def content(self):
         return bytes(self._content, "utf-8").decode("unicode_escape")
 
-    @content.setter
-    def content(self, content):
-        self._content = content.encode("unicode_escape").decode("utf-8")
+    @classmethod
+    def get_or_create(cls, content, blob_name, blob_type, parent=None, metakeys=None, share_with=None):
+        dhash = hashlib.sha256(content.encode('utf-8')).hexdigest()
+
+        blob_obj = TextBlob(
+            dhash=dhash,
+            blob_name=blob_name,
+            blob_size=len(content),
+            blob_type=blob_type,
+            last_seen=datetime.datetime.now(),
+            _content=content.encode("unicode_escape").decode("utf-8")
+        )
+        blob_obj, is_new = cls._get_or_create(blob_obj, parent=parent, metakeys=metakeys, share_with=share_with)
+        # If object exists yet: we need to refresh last_seen timestamp
+        if not is_new:
+            blob_obj.last_seen = datetime.datetime.now()
+
+        return blob_obj, is_new

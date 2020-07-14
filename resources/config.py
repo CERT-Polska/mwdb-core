@@ -1,14 +1,18 @@
 from datetime import datetime, timedelta
 
-from flask import g, request
+from flask import request
 from flask_restful import Resource
+
+from werkzeug.exceptions import Conflict
+
 from sqlalchemy import func
 
 from plugin_engine import hooks
+
 from model import Config, db
-from core.config import app_config
+from model.object import ObjectTypeConflictError
+
 from core.schema import ConfigShowSchema, MultiConfigSchema, ConfigStatsSchema
-from core.util import config_dhash
 
 from . import requires_authorization
 from .object import ObjectResource, ObjectListResource
@@ -147,22 +151,14 @@ class ConfigResource(ObjectResource):
         return super(ConfigResource, self).get(identifier)
 
     def create_object(self, obj):
-        cfg = obj.data.get('cfg')
-
-        dhash = config_dhash(cfg)
-
-        db_cfg = Config()
-        db_cfg.cfg = cfg
-        db_cfg.family = obj.data.get('family')
-        db_cfg.config_type = obj.data.get('config_type', 'static')
-        db_cfg.dhash = dhash
-        db_cfg.upload_time = datetime.now()
-
-        if app_config.malwarecage.enable_maintenance and g.auth_user.login == app_config.malwarecage.admin_login:
-            db_cfg.upload_time = obj.data.get("upload_time", datetime.now())
-
-        db_cfg, is_cfg_new = Config.get_or_create(db_cfg)
-        return db_cfg, is_cfg_new
+        try:
+            return Config.get_or_create(
+                obj.data["cfg"],
+                obj.data["family"],
+                obj.data("config_type", "static")
+            )
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a config")
 
     @requires_authorization
     def put(self, identifier):

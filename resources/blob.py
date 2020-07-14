@@ -102,7 +102,7 @@ class TextBlobResource(ObjectResource):
                 obj.data["blob_type"]
             )
         except ObjectTypeConflictError:
-            raise Conflict("Object already exists and is not a file")
+            raise Conflict("Object already exists and is not a blob")
 
     @requires_authorization
     @requires_capabilities(Capabilities.adding_blobs)

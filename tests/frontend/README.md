@@ -7,7 +7,8 @@ https://docs.cypress.io/
 
 **To run tests:**
 
-Put your password in test files in malwarecage/tests/frontend/integration.
+- Put your login and password in /plugins/index.js
+- Change baseUrl in cypress.json to 127.0.0.1
 
 Tests are included in e2e tests package and can be run from there:
 ```

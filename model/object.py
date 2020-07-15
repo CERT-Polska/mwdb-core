@@ -388,11 +388,13 @@ class Object(db.Model):
         return dict_metakeys
 
     def add_metakey(self, key, value, commit=True, check_permissions=True):
-        if not check_permissions:
-            metakey_definition = db.session.query(MetakeyDefinition) \
-                                           .filter(MetakeyDefinition.key == key).first()
-        else:
+        if check_permissions:
             metakey_definition = MetakeyDefinition.query_for_set(key).first()
+        else:
+            metakey_definition = (
+                db.session.query(MetakeyDefinition)
+                          .filter(MetakeyDefinition.key == key)
+            ).first()
 
         if not metakey_definition:
             # Attribute needs to be defined first

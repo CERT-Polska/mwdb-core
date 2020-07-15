@@ -152,9 +152,9 @@ class AttributeField(BaseField):
         if metakey_definition is None:
             raise ObjectNotFoundException(f"No such attribute: {attribute_key}")
 
-        if (not g.auth_user.has_rights(Capabilities.reading_all_attributes)
-                and metakey_definition.hidden
-                and expression.has_wildcard()):
+        if (metakey_definition.hidden
+                and expression.has_wildcard()
+                and not g.auth_user.has_rights(Capabilities.reading_all_attributes)):
             raise FieldNotQueryableException("Wildcards are not allowed for hidden attributes")
 
         value = get_term_value(expression)

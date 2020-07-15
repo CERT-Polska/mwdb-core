@@ -1,7 +1,9 @@
 from core.capabilities import Capabilities
-from model.user import User
+
 from sqlalchemy.dialects.postgresql.array import ARRAY
+
 from . import db
+from .user import User
 
 
 class Group(db.Model):

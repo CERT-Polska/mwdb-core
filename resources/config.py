@@ -155,7 +155,7 @@ class ConfigResource(ObjectResource):
             return Config.get_or_create(
                 obj.data["cfg"],
                 obj.data["family"],
-                obj.data("config_type", "static")
+                obj.data.get("config_type", "static")
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")

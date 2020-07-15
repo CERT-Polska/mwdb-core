@@ -1,23 +1,27 @@
-import { request_login } from "./util";
-import { browser_login } from "./util";
+import { request_login, browser_login } from "./util";
 
 describe("Config view test - Malwarecage", function () {
   it("Config view test - existent and non-existent hash", function () {
     request_login(Cypress.env("user"), Cypress.env("password"));
 
+    const request_method = "PUT";
+    const api_url = "/api/config/root";
+    const test_text = "test";
+    const malware_family = "malwarex";
+
     cy.get("@token").then((token) => {
       cy.request({
-        method: "PUT",
-        url: "/api/config/root",
+        method: request_method,
+        url: api_url,
         body: {
           cfg: {
-            plain: "test",
-            list: [{ dict_in_list: "test" }],
+            plain: test_text,
+            list: [{ dict_in_list: test_text }],
             dict: {
-              field: "test",
+              field: test_text,
             },
           },
-          family: "malwarex",
+          family: malware_family,
         },
         headers: {
           Authorization: " Bearer " + token,

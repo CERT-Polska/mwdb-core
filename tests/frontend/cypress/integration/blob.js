@@ -1,18 +1,23 @@
-import { request_login } from "./util";
-import { browser_login } from "./util";
+import { request_login, browser_login } from "./util";
 
 describe("Blob view test - Malwarecage", function () {
   it("Blob view test - existent and non-existent hash", function () {
     request_login(Cypress.env("user"), Cypress.env("password"));
 
+    const request_method = "PUT";
+    const api_url = "/api/blob/root";
+    const blob_name = "some.blob";
+    const blob_type = "inject";
+    const blob_content = "TEST";
+
     cy.get("@token").then((token) => {
       cy.request({
-        method: "PUT",
-        url: "/api/blob/root",
+        method: request_method,
+        url: api_url,
         body: {
-          blob_name: "some.blob",
-          blob_type: "inject",
-          content: "TEST",
+          blob_name: blob_name,
+          blob_type: blob_type,
+          content: blob_content,
         },
         headers: {
           Authorization: " Bearer " + token,

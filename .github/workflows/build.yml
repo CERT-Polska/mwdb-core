@@ -48,7 +48,7 @@ jobs:
           repository: certpl/malwarecage-web
           tags: ${{ github.sha }}
           push: ${{ github.event == 'push' }} 
-      - name: Store Malwarefront image 
+      - name: Store Malwarefront image
         run: docker save -o ./malwarecage-web-image certpl/malwarecage-web:${{ github.sha }}
       - name: Upload Malwarefront image
         uses: actions/upload-artifact@v2 
@@ -132,7 +132,7 @@ jobs:
         run: |
           docker-compose -f docker-compose-e2e.yml up -d mwdb-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t mwdb-tests
-          docker wait malwarecage_mwdb-tests_1
+          ([ $(docker wait malwarecage_mwdb-tests_1) == 0 ])
   test_frontend_e2e:
     needs: [build_core, build_frontend, build_frontend_e2e]
     name: Perform frontend e2e tests
@@ -160,4 +160,4 @@ jobs:
         run: |
           docker-compose -f docker-compose-e2e.yml up -d web-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t web-tests
-          docker wait malwarecage_web-tests_1
+          ([ $(docker wait malwarecage_web-tests_1) == 0 ])

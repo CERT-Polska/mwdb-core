@@ -228,7 +228,7 @@ class Object(db.Model):
         Pattern from here - http://rachbelaid.com/handling-race-condition-insert-with-sqlalchemy/
         Returns tuple with object and boolean value if new object was created or not, True == new object
 
-        We don't perform permission check, all data need to be validated by Resource.
+        We don't perform permission checks, all data needs to be validated by Resource.
         """
         from .group import Group
 
@@ -238,22 +238,26 @@ class Object(db.Model):
         is_new = False
         new_cls = Object.get(obj.dhash).first()
 
+        # Object with the specified dhash doesn't exist - create it
         if new_cls is None:
             db.session.begin_nested()
 
             new_cls = obj
             try:
+                # Try to create the requested object
                 new_cls.upload_time = datetime.datetime.now()
                 db.session.add(new_cls)
                 db.session.flush()
                 db.session.commit()
                 is_new = True
             except IntegrityError:
+                # Object creation failed - probably a race condition
                 db.session.rollback()
                 new_cls = Object.get(obj.dhash).first()
                 if new_cls is None:
                     raise
 
+        # Ensure that existing object has the expected type
         if new_cls is not isinstance(obj, cls):
             # If Object has been fetched, fetch typed instance
             new_cls = cls.get(obj.dhash).first()

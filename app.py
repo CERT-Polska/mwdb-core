@@ -212,7 +212,9 @@ def create_admin(name, email, password, require_empty):
     group = db.session.query(Group).filter(Group.name == name).first()
 
     try:
-        user = User(login=name, email=email)
+        user = User(login=name,
+                    email=email,
+                    additional_info="Malwarecage built-in administration account")
         user.set_password(password)
         user.version_uid = '0' * 16
         user.identity_ver = '0' * 16

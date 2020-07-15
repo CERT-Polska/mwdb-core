@@ -1,6 +1,5 @@
 from flask import request, g
 from flask_restful import Resource
-from sqlalchemy.sql.expression import true
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 
 from core.capabilities import Capabilities
@@ -142,20 +141,12 @@ class MetakeyListDefinitionResource(Resource):
             400:
                 description: When used unknown access type (other than read or set)
         """
-        if access not in ["read", "set"]:
+        if access == "read":
+            metakeys = MetakeyDefinition.query_for_read()
+        elif access == "set":
+            metakeys = MetakeyDefinition.query_for_set()
+        else:
             raise BadRequest("Unknown desired access type '{}'".format(access))
-
-        metakeys = db.session.query(MetakeyDefinition)
-
-        if (access == "read" and not g.auth_user.has_rights(Capabilities.reading_all_attributes)) or \
-           (access == "set" and not g.auth_user.has_rights(Capabilities.adding_all_attributes)):
-            subquery = db.session.query(MetakeyPermission.key)
-            if access == "read":
-                subquery = subquery.filter(MetakeyPermission.can_read == true())
-            elif access == "set":
-                subquery = subquery.filter(MetakeyPermission.can_set == true())
-            subquery = subquery.filter(g.auth_user.is_member(MetakeyPermission.group_id))
-            metakeys = metakeys.filter(MetakeyDefinition.key.in_(subquery))
 
         metakeys = metakeys.order_by(MetakeyDefinition.key).all()
         schema = MetakeyDefinitionListSchema()

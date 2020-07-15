@@ -1,7 +1,11 @@
+from flask import g
+
 from string import Template
 
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.exc import IntegrityError
+
+from core.capabilities import Capabilities
 
 from . import db
 
@@ -92,3 +96,47 @@ class MetakeyDefinition(db.Model):
     url_template = db.Column(db.Text)
     hidden = db.Column(db.Boolean, nullable=False, default=False)
     permissions = db.relationship('MetakeyPermission', lazy='joined', back_populates="template")
+
+    @staticmethod
+    def query_for_read(key=None, include_hidden=False):
+        """
+        Prepares query for attribute keys that currently authenticated user can read
+
+        :param key: Query for specific key (default: all matching keys)
+        :param include_hidden: Include hidden keys
+        """
+        query = db.session.query(MetakeyDefinition)
+
+        if key is not None:
+            query = query.filter(MetakeyDefinition.key == key)
+
+        if not include_hidden:
+            query = query.filter(MetakeyDefinition.hidden.isnot_(True))
+
+        if not g.auth_user.has_rights(Capabilities.reading_all_attributes):
+            query = (
+                query.join(MetakeyDefinition.permissions)
+                     .filter(MetakeyPermission.can_read.is_(True))
+                     .filter(g.auth_user.is_member(MetakeyPermission.group_id))
+            )
+        return query
+
+    @staticmethod
+    def query_for_set(key=None):
+        """
+        Prepares query for attribute keys that currently authenticated user can set
+
+        :param key: Query for specific key (default: all matching keys)
+        """
+        query = db.session.query(MetakeyDefinition)
+
+        if key is not None:
+            query = query.filter(MetakeyDefinition.key == key)
+
+        if not g.auth_user.has_rights(Capabilities.adding_all_attributes):
+            query = (
+                query.join(MetakeyDefinition.permissions)
+                     .filter(MetakeyPermission.can_set.is_(True))
+                     .filter(g.auth_user.is_member(MetakeyPermission.group_id))
+            )
+        return query

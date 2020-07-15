@@ -49,7 +49,9 @@ class MwdbTest(object):
         self.session = requests.session()
 
     def login_as(self, username, password):
-        res = self.session.post(self.mwdb_url + '/auth/login', json={'login': username, 'password': password})
+        res = self.session.post(self.mwdb_url + "/auth/login", json={
+            "login": username, "password": password
+        })
         res.raise_for_status()
         self.session.headers.update({'Authorization': 'Bearer ' + res.json()['token']})
         return res.json()
@@ -83,14 +85,14 @@ class MwdbTest(object):
 
     def create_group(self, name, capabilities=None):
         res = self.session.post(self.mwdb_url + '/group/' + name, json={
-            'capabilities': capabilities
+            'capabilities': capabilities or []
         })
         res.raise_for_status()
 
     def set_group(self, name, new_name=None, capabilities=None):
         res = self.session.put(self.mwdb_url + '/group/' + name, json={
-            'name': new_name or None,
-            'capabilities': capabilities or []
+            'name': new_name,
+            'capabilities': capabilities
         })
         res.raise_for_status()
 
@@ -124,7 +126,8 @@ class MwdbTest(object):
         self.login()
         res = self.session.post(self.mwdb_url + '/user/' + username, json={
             'email': username + "@" + username + '.pl',
-            'group_name': username})
+            'additional_info': 'Test user'
+        })
         res.raise_for_status()
         res = self.session.get(self.mwdb_url + '/user/' + username + '/change_password')
         res.raise_for_status()

@@ -9,7 +9,7 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(32), index=True, unique=True, nullable=False)
     capabilities = db.Column('capabilities', ARRAY(db.Text), nullable=False, server_default='{}')
-    private = db.Column(db.Boolean)
+    private = db.Column(db.Boolean, nullable=False, default=False)
 
     @property
     def pending_group(self):

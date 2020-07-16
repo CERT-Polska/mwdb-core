@@ -27,7 +27,7 @@ npm install cypress --save-dev
 ```
 - To run one test and leave browser open:
 ```
-./node_modules/.bin/cypress run --no-exit run --spec cypress/integration/sample.js
+./node_modules/.bin/cypress run --no-exit --browser chrome --spec cypress/integration/sample.js
 ```
 
 

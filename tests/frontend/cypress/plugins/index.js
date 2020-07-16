@@ -17,7 +17,7 @@
  */
 module.exports = (on, config) => {
   config.env = config.env || {};
-  config.env.user = "admin";
+  config.env.user = process.env.MALWARECAGE_ADMIN_LOGIN;
   config.env.password = process.env.MALWARECAGE_ADMIN_PASSWORD;
 
   return config;

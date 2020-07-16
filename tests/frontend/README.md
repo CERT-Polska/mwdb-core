@@ -1,14 +1,42 @@
 # e2e frontend tests
 
-Before you run tests create test files in malwarecage/tests/frontend/integration.
+**To create tests from cypress dev:**
+
+- Create test files in malwarecage/tests/frontend/integration.
+
+- Set configuration from terminal:
+```
+export MALWARECAGE_ADMIN_LOGIN="admin"
+export MALWARECAGE_ADMIN_PASSWORD="your-password"
+```
+- Run Malwarecage dev environment.
+- Set baseUrl in cypress.json to http://127.0.0.1
+
+- Then run from tests/frontend:
+```
+npm install cypress --save-dev
+```
+
+- To run tests in cypress dev environment :
+```
+./node_modules/.bin/cypress open
+```
+- To run tests as they run on docker and CI:
+```
+./node_modules/.bin/cypress run
+```
+- To run one test and leave browser open:
+```
+./node_modules/.bin/cypress run --no-exit run --spec cypress/integration/sample.js
+```
+
 
 For more information how to write tests visit:
 https://docs.cypress.io/
 
-**To run tests:**
+**To run tests from docker:**
 
-- Put your login and password in /plugins/index.js
-- Change baseUrl in cypress.json to 127.0.0.1
+Set baseUrl in cypress.json to http://malwarefront
 
 Tests are included in e2e tests package and can be run from there:
 ```

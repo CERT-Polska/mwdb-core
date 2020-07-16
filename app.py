@@ -213,8 +213,7 @@ def create_admin(name, email, password, require_empty):
 
     try:
         user = User(login=name,
-                    email=email,
-                    additional_info="Malwarecage built-in administration account")
+                    email=email)
         user.set_password(password)
         user.version_uid = '0' * 16
         user.identity_ver = '0' * 16

@@ -1,21 +1,13 @@
-import hashlib
-import os
-
-from datetime import datetime
-
-import magic
-import ssdeep
-
-from flask import request, g
-from werkzeug.exceptions import BadRequest
-from werkzeug.utils import secure_filename
+from flask import request
+from werkzeug.exceptions import BadRequest, Conflict
 
 from plugin_engine import hooks
-from core.humanhash import Humanhash
+
 from model import File
-from core.config import app_config
+from model.file import EmptyFileError
+from model.object import ObjectTypeConflictError
+
 from core.schema import FileShowSchema, MultiFileShowSchema
-from core.util import calc_hash, crc32_sum
 
 from . import requires_authorization
 from .object import ObjectResource, ObjectListResource
@@ -104,39 +96,12 @@ class FileResource(ObjectResource):
         return super(FileResource, self).get(identifier)
 
     def create_object(self, obj):
-        file = request.files['file']
-        file.stream.seek(0, os.SEEK_END)
-        fsize = file.tell()
-        if fsize == 0:
-            raise BadRequest("Uploaded file is empty")
-
-        sha256 = calc_hash(file.stream, hashlib.sha256(), lambda h: h.hexdigest())
-
-        file.stream.seek(0, os.SEEK_SET)
-        fmagic = magic.from_buffer(file.stream.read())
-
-        # Create file first so we can add it without worrying about race conditions thanks to get_or_create
-        db_file = File()
-        db_file.file_name = secure_filename(request.files['file'].filename)
-        db_file.file_size = fsize
-        db_file.file_type = fmagic
-        db_file.parents = []
-        db_file.crc32 = crc32_sum(file.stream)
-        db_file.md5 = calc_hash(file.stream, hashlib.md5(), lambda h: h.hexdigest())
-        db_file.sha1 = calc_hash(file.stream, hashlib.sha1(), lambda h: h.hexdigest())
-        db_file.sha256 = sha256
-        db_file.dhash = sha256
-        db_file.sha512 = calc_hash(file.stream, hashlib.sha512(), lambda h: h.hexdigest())
-        db_file.humanhash = Humanhash._humanhash(sha256)
-        db_file.ssdeep = calc_hash(file.stream, ssdeep.Hash(), lambda h: h.digest())
-        db_file.upload_time = datetime.now()
-
-        if app_config.malwarecage.enable_maintenance and g.auth_user.login == app_config.malwarecage.admin_login:
-            db_file.upload_time = obj.data.get("upload_time", datetime.now())
-
-        db_file, is_file_new = File.get_or_create(db_file, file)
-
-        return db_file, is_file_new
+        try:
+            return File.get_or_create(request.files["file"])
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a file")
+        except EmptyFileError:
+            raise BadRequest("File cannot be empty")
 
     @requires_authorization
     def post(self, identifier):

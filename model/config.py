@@ -1,7 +1,7 @@
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from core.util import config_encode, config_decode
+from core.util import config_encode, config_decode, config_dhash
 
 from . import db
 from .object import Object
@@ -27,9 +27,17 @@ class Config(Object):
     def cfg(self):
         return config_decode(self._cfg)
 
-    @cfg.setter
-    def cfg(self, cfg):
-        self._cfg = config_encode(cfg)
+    @classmethod
+    def get_or_create(cls, cfg, family, config_type, parent=None, metakeys=None, share_with=None):
+        dhash = config_dhash(cfg)
+
+        cfg_obj = Config(
+            dhash=dhash,
+            _cfg=config_encode(cfg),
+            family=family,
+            config_type=config_type
+        )
+        return cls._get_or_create(cfg_obj, parent=parent, metakeys=metakeys, share_with=share_with)
 
 
 # Compatibility reasons

@@ -1,13 +1,12 @@
-import hashlib
-from datetime import datetime
-
-from flask import g
+from werkzeug.exceptions import Conflict
 
 from plugin_engine import hooks
-from model import db, TextBlob
+
 from core.capabilities import Capabilities
-from core.config import app_config
 from core.schema import TextBlobShowSchema, MultiTextBlobSchema
+
+from model import TextBlob
+from model.object import ObjectTypeConflictError
 
 from . import requires_capabilities, requires_authorization
 from .object import ObjectResource, ObjectListResource
@@ -96,30 +95,14 @@ class TextBlobResource(ObjectResource):
         return super(TextBlobResource, self).get(identifier)
 
     def create_object(self, obj):
-        content = obj.data.get('content')
-
-        dhash = hashlib.sha256(content.encode('utf-8')).hexdigest()
-
-        db_blob = TextBlob()
-        db_blob.blob_name = obj.data.get("blob_name")
-        db_blob.content = content
-        db_blob.blob_size = len(content)
-        db_blob.blob_type = obj.data.get('blob_type')
-        db_blob.dhash = dhash
-        db_blob.upload_time = datetime.now()
-        db_blob.last_seen = datetime.now()
-
-        if app_config.malwarecage.enable_maintenance and g.auth_user.login == app_config.malwarecage.admin_login:
-            db_blob.upload_time = obj.data.get("upload_time", datetime.now())
-
-        db_blob, is_blob_new = TextBlob.get_or_create(db_blob)
-
-        if not is_blob_new:
-            db_blob.last_seen = datetime.now()
-            db.session.add(db_blob)
-            db.session.commit()
-
-        return db_blob, is_blob_new
+        try:
+            return TextBlob.get_or_create(
+                obj.data["content"],
+                obj.data["blob_name"],
+                obj.data["blob_type"]
+            )
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a blob")
 
     @requires_authorization
     @requires_capabilities(Capabilities.adding_blobs)

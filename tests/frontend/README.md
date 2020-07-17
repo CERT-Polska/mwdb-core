@@ -4,10 +4,11 @@
 
 - Create test files in malwarecage/tests/frontend/integration.
 
-- Set configuration from terminal:
+- Set configuration from terminal (project main directory):
 ```
-export MALWARECAGE_ADMIN_LOGIN="admin"
-export MALWARECAGE_ADMIN_PASSWORD="your-password"
+source mwdb-vars.env
+export MALWARECAGE_ADMIN_LOGIN
+export MALWARECAGE_ADMIN_PASSWORD
 ```
 - Run Malwarecage dev environment.
 - Set baseUrl in cypress.json to http://127.0.0.1

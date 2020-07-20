@@ -1,46 +1,46 @@
-import { request_login, browser_login } from "./util";
+import { requestLogin, browserLogin } from "./util";
 
 describe("Config view test - Malwarecage", function () {
   it("Config view test - existent and non-existent hash", function () {
-    request_login(Cypress.env("user"), Cypress.env("password"));
+    requestLogin(Cypress.env("user"), Cypress.env("password"));
 
-    const request_method = "PUT";
-    const api_url = "/api/config/root";
-    const test_text = "test";
-    const malware_family = "malwarex";
+    const requestMethod = "PUT";
+    const apiUrl = "/api/config/root";
+    const testText = "test";
+    const malwareFamily = "malwarex";
 
     cy.get("@token").then((token) => {
       cy.request({
-        method: request_method,
-        url: api_url,
+        method: requestMethod,
+        url: apiUrl,
         body: {
           cfg: {
-            plain: test_text,
-            list: [{ dict_in_list: test_text }],
+            plain: testText,
+            list: [{ dict_in_list: testText }],
             dict: {
-              field: test_text,
+              field: testText,
             },
           },
-          family: malware_family,
+          family: malwareFamily,
         },
         headers: {
           Authorization: " Bearer " + token,
         },
       }).then((response) => {
-        cy.wrap(response.body.id).as("config_id");
+        cy.wrap(response.body.id).as("configId");
         expect(response.status).to.eq(200);
       });
     });
 
     cy.visit("/");
 
-    browser_login(Cypress.env("user"), Cypress.env("password"));
+    browserLogin(Cypress.env("user"), Cypress.env("password"));
 
     cy.contains("Recent configs").click();
 
-    cy.get("@config_id").then((config_id) => {
-      cy.contains(config_id).click();
-      cy.contains("Config " + config_id);
+    cy.get("@configId").then((configId) => {
+      cy.contains(configId).click();
+      cy.contains("Config " + configId);
     });
 
     cy.contains("Family");

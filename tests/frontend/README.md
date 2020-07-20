@@ -1,5 +1,16 @@
 # e2e frontend tests
 
+**To run tests from docker:**
+
+Set baseUrl in cypress.json to http://malwarefront
+
+Tests are included in e2e tests package and can be run from there:
+```
+sudo docker-compose -f docker-compose-e2e.yml down
+sudo docker-compose -f docker-compose-e2e.yml build web-tests
+sudo docker-compose -f docker-compose-e2e.yml up web-tests
+```
+
 **To create tests from cypress dev:**
 
 - Create test files in malwarecage/tests/frontend/integration.
@@ -34,15 +45,4 @@ npm install cypress --save-dev
 
 For more information how to write tests visit:
 https://docs.cypress.io/
-
-**To run tests from docker:**
-
-Set baseUrl in cypress.json to http://malwarefront
-
-Tests are included in e2e tests package and can be run from there:
-```
-sudo docker-compose -f docker-compose-e2e.yml down
-sudo docker-compose -f docker-compose-e2e.yml build web-tests
-sudo docker-compose -f docker-compose-e2e.yml up web-tests
-```
  

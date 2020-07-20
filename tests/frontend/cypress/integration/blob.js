@@ -1,42 +1,42 @@
-import { request_login, browser_login } from "./util";
+import { requestLogin, browserLogin } from "./util";
 
 describe("Blob view test - Malwarecage", function () {
   it("Blob view test - existent and non-existent hash", function () {
-    request_login(Cypress.env("user"), Cypress.env("password"));
+    requestLogin(Cypress.env("user"), Cypress.env("password"));
 
-    const request_method = "PUT";
-    const api_url = "/api/blob/root";
-    const blob_name = "some.blob";
-    const blob_type = "inject";
-    const blob_content = "TEST";
+    const requestMethod = "PUT";
+    const apiUrl = "/api/blob/root";
+    const blobName = "some.blob";
+    const blobType = "inject";
+    const blobContent = "TEST";
 
     cy.get("@token").then((token) => {
       cy.request({
-        method: request_method,
-        url: api_url,
+        method: requestMethod,
+        url: apiUrl,
         body: {
-          blob_name: blob_name,
-          blob_type: blob_type,
-          content: blob_content,
+          blob_name: blobName,
+          blob_type: blobType,
+          content: blobContent,
         },
         headers: {
           Authorization: " Bearer " + token,
         },
       }).then((response) => {
-        cy.wrap(response.body.id).as("blob_id");
+        cy.wrap(response.body.id).as("blobId");
         expect(response.status).to.eq(200);
       });
     });
 
     cy.visit("/");
 
-    browser_login(Cypress.env("user"), Cypress.env("password"));
+    browserLogin(Cypress.env("user"), Cypress.env("password"));
 
     cy.contains("Recent blobs").click();
 
-    cy.get("@blob_id").then((blob_id) => {
-      cy.contains(blob_id).click();
-      cy.contains("Blob " + blob_id);
+    cy.get("@blobId").then((blobId) => {
+      cy.contains(blobId).click();
+      cy.contains("Blob " + blobId);
     });
 
     cy.contains("Details").click();

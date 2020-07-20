@@ -1,4 +1,4 @@
-export const request_login = (username, password) => {
+export const requestLogin = (username, password) => {
   cy.request("POST", "/api/auth/login", {
     login: username,
     password: password,
@@ -9,7 +9,7 @@ export const request_login = (username, password) => {
   });
 };
 
-export const browser_login = (username, password) => {
+export const browserLogin = (username, password) => {
   cy.url().should("include", "/login");
 
   cy.get("input[name=login]").type(username).should("have.value", username);

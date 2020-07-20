@@ -17,6 +17,7 @@ from schema.file import (
 from . import logger, requires_authorization, deprecated
 from .object import (
     list_objects, get_object_creation_params, get_object,
+    get_legacy_form_options,
     ObjectResource, ObjectsResource
 )
 
@@ -259,7 +260,7 @@ class FileResource(ObjectResource):
                 description: Object exists yet but has different type
         """
         schema = FileLegacyCreateRequestSchema()
-        params = schema.load(request.form.to_dict())
+        params = schema.load(get_legacy_form_options())
 
         if params and params.errors:
             return {"errors": params.errors}, 400
@@ -306,3 +307,8 @@ class FileResource(ObjectResource):
         )
         schema = FileItemResponseSchema()
         return schema.dump(file)
+
+    @deprecated
+    @requires_authorization
+    def put(self, identifier):
+        return self.post(identifier)

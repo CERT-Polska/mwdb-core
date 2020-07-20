@@ -20,6 +20,7 @@ from schema.blob import (
 from . import logger, requires_capabilities, requires_authorization, deprecated
 from .object import (
     list_objects, get_object_creation_params, get_object,
+    get_legacy_form_options,
     ObjectResource, ObjectsResource
 )
 
@@ -232,7 +233,7 @@ class BlobResource(ObjectResource):
                 description: Object exists yet but has different type
         """
         schema = BlobLegacyCreateRequestSchema()
-        params = schema.loads(request.get_data(as_text=True))
+        params = schema.load(get_legacy_form_options())
 
         if params and params.errors:
             return {"errors": params.errors}, 400

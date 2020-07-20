@@ -1,3 +1,5 @@
+import json
+
 from flask import request, g
 from flask_restful import Resource
 from luqum.parser import ParseError
@@ -133,6 +135,24 @@ def get_object_creation_params(params):
             raise NotFound(f"Metakey '{key}' not defined or insufficient "
                            "permissions to set that one")
     return parent_object, share_with, metakeys
+
+
+def get_legacy_form_options():
+    """
+    Parse all possible forms of legacy upload request.
+    JSON options and multipart/form-data fields can be mixed (and usually they are).
+    """
+    if request.is_json:
+        obj = json.loads(request.get_data(parse_form_data=True, as_text=True))
+    elif 'json' in request.form:
+        obj = json.loads(request.form["json"])
+    else:
+        obj = {}
+    if request.form.get('metakeys'):
+        obj["metakeys"] = request.form["metakeys"]
+    if request.form.get('upload_as'):
+        obj["upload_as"] = request.form["upload_as"]
+    return obj
 
 
 class ObjectsResource(Resource):

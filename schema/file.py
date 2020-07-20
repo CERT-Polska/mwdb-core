@@ -31,18 +31,7 @@ class FileCreateRequestSchema(Schema):
 
 
 class FileLegacyCreateRequestSchema(ObjectLegacyCreateRequestSchemaBase):
-    @pre_load
-    def unpack_metakeys(self, params):
-        """
-        Metakeys are provided as string that need to be deserialized first.
-        Empty string is treated as None.
-        """
-        params = dict(params)
-        if params.get("metakeys"):
-            params["metakeys"] = json.loads(params["metakeys"])
-        else:
-            params["metakeys"] = None
-        return params
+    pass
 
 
 class FileListItemResponseSchema(ObjectListItemResponseSchema):

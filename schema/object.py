@@ -1,4 +1,5 @@
-from marshmallow import Schema, fields, validates_schema, ValidationError
+import json
+from marshmallow import Schema, fields, validates_schema, ValidationError, pre_load
 
 from .metakey import MetakeyItemRequestSchema, MetakeyMultipartRequestSchema
 from .tag import TagItemResponseSchema
@@ -26,6 +27,19 @@ class ObjectCreateRequestSchemaBase(Schema):
 class ObjectLegacyCreateRequestSchemaBase(Schema):
     metakeys = fields.Nested(MetakeyMultipartRequestSchema, missing=None)
     upload_as = fields.Str(missing="*", allow_none=False)
+
+    @pre_load
+    def unpack_metakeys(self, params):
+        """
+        Metakeys are provided as string that need to be deserialized first.
+        Empty string is treated as None.
+        """
+        params = dict(params)
+        if params.get("metakeys"):
+            params["metakeys"] = json.loads(params["metakeys"])
+        else:
+            params["metakeys"] = None
+        return params
 
 
 class ObjectListItemResponseSchema(Schema):

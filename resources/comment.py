@@ -1,11 +1,14 @@
 from flask import request, g
 from flask_restful import Resource
 
-from model import db, User, Object, Comment
-from core.capabilities import Capabilities
-from core.schema import CommentSchemaBase, CommentSchema
+from werkzeug.exceptions import NotFound
 
-from . import authenticated_access, logger, requires_capabilities, requires_authorization
+from model import db, Object, Comment
+from core.capabilities import Capabilities
+
+from schema.comment import CommentRequestSchema, CommentItemResponseSchema
+
+from . import logger, requires_capabilities, requires_authorization
 
 
 class CommentResource(Resource):
@@ -38,19 +41,21 @@ class CommentResource(Resource):
                   application/json:
                     schema:
                       type: array
-                      items: CommentSchema
+                      items: CommentItemResponseSchema
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        db_object = authenticated_access(Object, identifier)
-        comments = db.session.query(Comment.id, Comment.comment, Comment.timestamp, User.login.label("author")) \
-            .filter(Comment.object_id == db_object.id, User.id == Comment.user_id)
+        db_object = Object.access(identifier)
+        if not db_object:
+            raise NotFound("Object not found")
 
-        multi_comment = CommentSchema(many=True)
-        dumped_comments = multi_comment.dump(comments)
-        return dumped_comments
+        schema = CommentItemResponseSchema(many=True)
+        return schema.dump(db_object.comments)
 
-    """
+    @requires_authorization
+    @requires_capabilities(Capabilities.adding_comments)
+    def post(self, type, identifier):
+        """
         ---
         summary: Create a new comment
         description: |
@@ -61,11 +66,6 @@ class CommentResource(Resource):
             - bearerAuth: []
         tags:
             - comment
-        requestBody:
-            description: Comment content
-            content:
-              application/json:
-                schema: CommentSchemaBase
         parameters:
             - in: path
               name: type
@@ -78,12 +78,17 @@ class CommentResource(Resource):
               schema:
                 type: string
               description: Commented object's id
+        requestBody:
+            description: Comment content
+            content:
+              application/json:
+                schema: CommentRequestSchema
         responses:
             200:
                 description: Posted comment object
                 content:
                   application/json:
-                    schema: CommentSchema
+                    schema: CommentItemResponseSchema
             400:
                 description: When request body is invalid
             403:
@@ -91,30 +96,29 @@ class CommentResource(Resource):
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-    @requires_authorization
-    @requires_capabilities(Capabilities.adding_comments)
-    def post(self, type, identifier):
-        schema = CommentSchemaBase()
+        schema = CommentRequestSchema()
         obj = schema.loads(request.get_data(as_text=True))
 
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        db_object = authenticated_access(Object, identifier)
+        db_object = Object.access(identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
-        db_comment = Comment()
-        db_comment.comment = obj.data["comment"]
-        db_comment.user_id = g.auth_user.id
-        db_comment.object_id = db_object.id
-
-        db.session.add(db_comment)
+        comment = Comment(
+            comment=obj.data["comment"],
+            user_id=g.auth_user.id,
+            object_id=db_object.id
+        )
+        db.session.add(comment)
         db.session.commit()
 
-        logger.info('comment added', extra={'comment': db_comment.object_id})
+        logger.info('comment added', extra={'comment': comment.object_id})
 
-        db.session.refresh(db_comment)
-        schema = CommentSchema()
-        return schema.dump(db_comment)
+        db.session.refresh(comment)
+        schema = CommentItemResponseSchema()
+        return schema.dump(comment)
 
 
 class CommentDeleteResource(Resource):
@@ -143,7 +147,7 @@ class CommentDeleteResource(Resource):
               name: identifier
               schema:
                 type: string
-              description: Commented object's id
+              description: Commented object identifier
             - in: path
               name: comment_id
               schema:
@@ -157,12 +161,13 @@ class CommentDeleteResource(Resource):
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        db_object = authenticated_access(Object, identifier)
+        db_object = Object.access(identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
-        for comment in db_object.comments:
-            if comment.id == comment_id:
-                db_object.comments.remove(comment)
-                logger.info('comment deleted', extra={'comment': comment_id})
-                break
+        db_comment = db.session.query(Comment).filter(Comment.id == comment_id).first()
 
-        db.session.commit()
+        if db_comment is not None:
+            db.session.delete(db_comment)
+            logger.info('comment deleted', extra={'comment': comment_id})
+            db.session.commit()

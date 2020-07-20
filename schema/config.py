@@ -25,26 +25,25 @@ class ConfigLegacyCreateRequestSchema(ObjectLegacyCreateRequestSchemaBase):
 
 
 class ConfigListItemResponseSchema(ObjectListItemResponseSchema):
-    family = fields.Str()
-    config_type = fields.Str()
+    family = fields.Str(required=True, allow_none=False)
+    config_type = fields.Str(required=True, allow_none=False)
 
 
 class ConfigListResponseSchema(Schema):
-    configs = fields.Nested(ConfigListItemResponseSchema, many=True)
+    configs = fields.Nested(ConfigListItemResponseSchema, many=True, required=True, allow_none=False)
 
 
 class ConfigItemResponseSchema(ObjectItemResponseSchema):
-    family = fields.Str()
-    config_type = fields.Str()
-    cfg = fields.Dict()
+    family = fields.Str(required=True, allow_none=False)
+    config_type = fields.Str(required=True, allow_none=False)
+    cfg = fields.Dict(required=True, allow_none=False)
 
 
 class ConfigStatsItemResponseSchema(Schema):
-    family = fields.Str()
-    last_upload = fields.Date()
-    count = fields.Int()
+    family = fields.Str(required=True, allow_none=False)
+    last_upload = fields.Date(required=True, allow_none=False)
+    count = fields.Int(required=True, allow_none=False)
 
 
 class ConfigStatsResponseSchema(Schema):
-    families = fields.Nested(ConfigStatsItemResponseSchema, many=True)
-
+    families = fields.Nested(ConfigStatsItemResponseSchema, many=True, required=True, allow_none=False)

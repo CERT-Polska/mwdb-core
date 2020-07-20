@@ -180,7 +180,7 @@ class BlobResource(ObjectResource):
     def put(self, identifier):
         """
         ---
-        summary: Upload text blob
+        summary: Upload text blob (deprecated)
         description: |
             Uploads new text blob.
 
@@ -188,7 +188,7 @@ class BlobResource(ObjectResource):
         security:
             - bearerAuth: []
         tags:
-            - blob
+            - deprecated
         parameters:
             - in: path
               name: identifier

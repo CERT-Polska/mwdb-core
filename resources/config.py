@@ -183,7 +183,7 @@ class ConfigResource(ObjectResource):
     def put(self, identifier):
         """
         ---
-        summary: Upload config
+        summary: Upload config (deprecated)
         description: Uploads new config.
         security:
             - bearerAuth: []

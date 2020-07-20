@@ -29,21 +29,21 @@ class ObjectLegacyCreateRequestSchemaBase(Schema):
 
 
 class ObjectListItemResponseSchema(Schema):
-    id = fields.Str(attribute="dhash")
-    type = fields.Str()
-    tags = fields.Nested(TagItemResponseSchema, many=True)
-    upload_time = fields.DateTime()
+    id = fields.Str(attribute="dhash", required=True, allow_none=False)
+    type = fields.Str(required=True, allow_none=False)
+    tags = fields.Nested(TagItemResponseSchema, many=True, required=True, allow_none=False)
+    upload_time = fields.DateTime(required=True, allow_none=False)
 
 
 class ObjectListResponseSchema(Schema):
-    objects = fields.Nested(ObjectListItemResponseSchema, many=True)
+    objects = fields.Nested(ObjectListItemResponseSchema, many=True, required=True, allow_none=False)
 
 
 class ObjectItemResponseSchema(Schema):
-    id = fields.Str(attribute="dhash")
-    type = fields.Str()
-    tags = fields.Nested(TagItemResponseSchema, many=True)
-    upload_time = fields.DateTime()
+    id = fields.Str(attribute="dhash", required=True, allow_none=False)
+    type = fields.Str(required=True, allow_none=False)
+    tags = fields.Nested(TagItemResponseSchema, many=True, required=True, allow_none=False)
+    upload_time = fields.DateTime(required=True, allow_none=False)
 
-    parents = fields.Nested(ObjectListItemResponseSchema, many=True)
-    children = fields.Nested(ObjectListItemResponseSchema, many=True)
+    parents = fields.Nested(ObjectListItemResponseSchema, many=True, required=True, allow_none=False)
+    children = fields.Nested(ObjectListItemResponseSchema, many=True, required=True, allow_none=False)

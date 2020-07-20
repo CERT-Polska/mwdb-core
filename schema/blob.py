@@ -22,21 +22,21 @@ class BlobLegacyCreateRequestSchema(ObjectLegacyCreateRequestSchemaBase):
 
 
 class BlobListItemResponseSchema(ObjectListItemResponseSchema):
-    blob_name = fields.Str(required=True)
-    blob_size = fields.Int()
-    blob_type = fields.Str(required=True)
-    last_seen = fields.DateTime()
+    blob_name = fields.Str(required=True, allow_none=False)
+    blob_size = fields.Int(required=True, allow_none=False)
+    blob_type = fields.Str(required=True, allow_none=False)
+    last_seen = fields.DateTime(required=True, allow_none=False)
 
 
 class BlobListResponseSchema(Schema):
-    blobs = fields.Nested(BlobListItemResponseSchema, many=True)
+    blobs = fields.Nested(BlobListItemResponseSchema, many=True, required=True, allow_none=False)
 
 
 class BlobItemResponseSchema(ObjectItemResponseSchema):
-    blob_name = fields.Str()
-    blob_size = fields.Int()
-    blob_type = fields.Str()
-    last_seen = fields.DateTime()
+    blob_name = fields.Str(required=True, allow_none=False)
+    blob_size = fields.Int(required=True, allow_none=False)
+    blob_type = fields.Str(required=True, allow_none=False)
+    last_seen = fields.DateTime(required=True, allow_none=False)
 
-    content = fields.Str()
-    latest_config = fields.Nested(ConfigItemResponseSchema)
+    content = fields.Str(required=True, allow_none=False)
+    latest_config = fields.Nested(ConfigItemResponseSchema, required=True, allow_none=True)

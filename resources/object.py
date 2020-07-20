@@ -111,13 +111,17 @@ def get_object_creation_params(params):
     upload_as = params["upload_as"]
 
     if upload_as == "*":
+        # If '*' is provided: share with all user's groups except 'public'
         share_with = [group for group in g.auth_user.groups if group.name != "public"]
     else:
         share_group = Group.get_by_name(upload_as)
+        # Does group exist?
         if share_group is None:
             raise NotFound(f"Group {upload_as} doesn't exist")
-        elif share_group not in g.auth_user.groups and not g.auth_user.has_rights(Capabilities.sharing_objects):
+        # Has user access to group?
+        if share_group not in g.auth_user.groups and not g.auth_user.has_rights(Capabilities.sharing_objects):
             raise NotFound(f"Group {upload_as} doesn't exist")
+        # Is group pending?
         if share_group.pending_group is True:
             raise NotFound(f"Group {upload_as} is pending")
         share_with = [share_group, Group.get_by_name(g.auth_user.login)]

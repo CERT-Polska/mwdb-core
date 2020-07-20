@@ -2,4 +2,4 @@ from marshmallow import Schema, fields
 
 
 class TagItemResponseSchema(Schema):
-    tag = fields.Str()
+    tag = fields.Str(required=True, allow_none=False)

@@ -13,7 +13,6 @@ from schema.file import (
     FileListResponseSchema,
     FileItemResponseSchema
 )
-from schema.metakey import MetakeyMultipartRequestSchema
 
 from . import logger, requires_authorization, deprecated
 from .object import (
@@ -85,34 +84,20 @@ class FilesResource(ObjectsResource):
                       type: string
                       format: binary
                       description: File contents to be uploaded
-                    metakeys:
+                    options:
                       type: object
+                      description: |
+                        Additional upload options
                       properties:
-                          metakeys:
-                            type: array
-                            items:
-                                $ref: '#/components/schemas/MetakeyItemRequest'
-                      description: |
-                        Attributes to be added after file upload
-
-                        User must be allowed to set specified attribute keys.
-                    parent:
-                      type: string
-                      description: |
-                        Parent object identifier or `root` if there is no parent.
-
-                        User must have `adding_parents` capability to specify a parent object.
-                    upload_as:
-                      type: string
-                      default: '*'
-                      description: |
-                        Group that object will be shared with.
-
-                        If user doesn't have `sharing_objects` capability,user must be a member of specified group
-                        (unless `Group doesn't exist` error will occur).
-
-                        If default value `*` is specified - object will be exclusively shared with all user's groups
-                        excluding `public`.
+                        parent:
+                          type: string
+                        metakeys:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/MetakeyItemRequest'
+                        upload_as:
+                          type: string
+                      schema: ObjectCreateRequestSchemaBase
                   required:
                     - file
         responses:
@@ -138,7 +123,7 @@ class FilesResource(ObjectsResource):
         if params and params.errors:
             return {"errors": params.errors}, 400
 
-        parent, share_with, metakeys = get_object_creation_params(params.data)
+        parent, share_with, metakeys = get_object_creation_params(params.data["options"])
 
         try:
             file, is_new = File.get_or_create(
@@ -208,7 +193,7 @@ class FileResource(ObjectResource):
     def post(self, identifier):
         """
         ---
-        summary: Upload file
+        summary: Upload file (deprecated)
         description: Uploads new file.
         security:
             - bearerAuth: []

@@ -6,7 +6,16 @@ from werkzeug.exceptions import NotFound, Conflict, Forbidden
 
 from model import db, Group, User
 from core.capabilities import Capabilities
-from core.schema import GroupSchema, MultiGroupShowSchema, GroupNameSchemaBase, UserLoginSchemaBase
+
+from schema.user import UserLoginSchemaBase
+from schema.group import (
+    GroupNameSchemaBase,
+    GroupCreateRequestSchema,
+    GroupUpdateRequestSchema,
+    GroupItemResponseSchema,
+    GroupListResponseSchema,
+    GroupSuccessResponseSchema
+)
 
 from . import logger, requires_capabilities, requires_authorization
 
@@ -31,12 +40,12 @@ class GroupListResource(Resource):
                 description: List of groups
                 content:
                   application/json:
-                    schema: MultiGroupShowSchema
+                    schema: GroupListResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
         """
         objs = db.session.query(Group).options(joinedload(Group.users)).all()
-        schema = MultiGroupShowSchema()
+        schema = GroupListResponseSchema()
         return schema.dump({"groups": objs})
 
 
@@ -63,10 +72,10 @@ class GroupResource(Resource):
               description: Group name
         responses:
             200:
-                description: List of groups
+                description: Group information
                 content:
                   application/json:
-                    schema: MultiGroupShowSchema
+                    schema: GroupItemResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
             404:
@@ -75,7 +84,7 @@ class GroupResource(Resource):
         obj = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
         if obj is None:
             raise NotFound("No such group")
-        schema = GroupSchema()
+        schema = GroupItemResponseSchema()
         return schema.dump(obj)
 
     @requires_authorization
@@ -98,9 +107,17 @@ class GroupResource(Resource):
               schema:
                 type: string
               description: Group name
+        requestBody:
+            description: Group information
+            content:
+              application/json:
+                schema: GroupCreateRequestSchema
         responses:
             200:
                 description: When group was created successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
             400:
                 description: When group name or request body is invalid
             403:
@@ -108,7 +125,7 @@ class GroupResource(Resource):
             409:
                 description: When group exists yet
         """
-        schema = GroupSchema()
+        schema = GroupCreateRequestSchema()
         obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
             return {"errors": obj.errors}, 400
@@ -120,18 +137,19 @@ class GroupResource(Resource):
         if db.session.query(exists().where(Group.name == name)).scalar():
             raise Conflict("Group exists yet")
 
-        group = Group()
-        group.name = name
-        group.capabilities = obj.data.get("capabilities") or []
+        group = Group(
+            name=name,
+            capabilities=obj.data["capabilities"]
+        )
         db.session.add(group)
         db.session.commit()
 
-        logger.info('group created', extra={
+        logger.info('Group created', extra={
             'group': group.name,
             'capabilities': group.capabilities
         })
-        schema = GroupSchema()
-        return schema.dump({"name": obj.data.get("name")})
+        schema = GroupSuccessResponseSchema()
+        return schema.dump({"name": name})
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -155,9 +173,17 @@ class GroupResource(Resource):
               schema:
                 type: string
               description: Group name
+        requestBody:
+            description: Group information
+            content:
+              application/json:
+                schema: GroupUpdateRequestSchema
         responses:
             200:
                 description: When group was updated successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
             400:
                 description: When group name or request body is invalid
             403:
@@ -165,7 +191,8 @@ class GroupResource(Resource):
             404:
                 description: When group doesn't exist
         """
-        obj = GroupSchema().loads(request.get_data(as_text=True))
+        schema = GroupUpdateRequestSchema()
+        obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
             return {"errors": obj.errors}, 400
 
@@ -177,26 +204,26 @@ class GroupResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
-        params = dict(capabilities=obj.data.get("capabilities", group.capabilities),
-                      name=obj.data.get("name", name))
+        if obj.data["name"] is not None:
+            if obj.data["name"] != name and group.immutable:
+                raise Forbidden("Renaming group not allowed - group is immutable")
+            group.name = obj.data["name"]
 
-        if params["name"] != name and group.immutable:
-            raise Forbidden("Renaming group not allowed - group is immutable")
-
-        db.session.query(Group) \
-            .filter(Group.name == name) \
-            .update(params)
+        if obj.data["capabilities"] is not None:
+            group.capabilities = obj.data["capabilities"]
 
         # Invalidate all sessions due to potentially changed capabilities
         for member in group.users:
             member.reset_sessions()
-            db.session.add(member)
 
         db.session.commit()
 
-        logger.info('group updated', extra={"group": params["name"]})
-        schema = GroupSchema()
-        return schema.dump({"name": params["name"]})
+        logger.info('Group updated', extra={
+            "group": group.name,
+            "capabilities": group.capabilities
+        })
+        schema = GroupSuccessResponseSchema()
+        return schema.dump({"name": group.name})
 
 
 class GroupMemberResource(Resource):
@@ -230,6 +257,9 @@ class GroupMemberResource(Resource):
         responses:
             200:
                 description: When member was added successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
             400:
                 description: When request body is invalid
             403:
@@ -261,12 +291,10 @@ class GroupMemberResource(Resource):
 
         group.users.append(member)
         member.reset_sessions()
-        db.session.add(member)
-        db.session.add(group)
         db.session.commit()
 
         logger.info('Group member added', extra={'user': member.login, 'group': group.name})
-        schema = GroupSchema()
+        schema = GroupSuccessResponseSchema()
         return schema.dump({"name": name})
 
     @requires_authorization
@@ -299,6 +327,9 @@ class GroupMemberResource(Resource):
         responses:
             200:
                 description: When member was removed successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
             400:
                 description: When request body is invalid
             403:
@@ -330,10 +361,8 @@ class GroupMemberResource(Resource):
 
         group.users.remove(member)
         member.reset_sessions()
-        db.session.add(member)
-        db.session.add(group)
         db.session.commit()
 
         logger.info('Group member deleted', extra={'user': member.login, 'group': group.name})
-        schema = GroupSchema()
+        schema = GroupSuccessResponseSchema()
         return schema.dump({"name": name})

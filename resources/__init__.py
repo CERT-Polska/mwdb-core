@@ -1,7 +1,7 @@
 from functools import wraps
 from core import log
 
-from flask import g
+from flask import g, request
 from werkzeug.exceptions import NotFound, Forbidden, Unauthorized
 
 logger = log.getLogger()
@@ -34,6 +34,17 @@ def requires_authorization(f):
     def endpoint(*args, **kwargs):
         if not g.auth_user:
             raise Unauthorized('Not authenticated.')
+        return f(*args, **kwargs)
+    return endpoint
+
+
+def deprecated(f):
+    """
+    Decorator for deprecated methods
+    """
+    @wraps(f)
+    def endpoint(*args, **kwargs):
+        logger.warning("Used deprecated endpoint: %s", request.path)
         return f(*args, **kwargs)
     return endpoint
 

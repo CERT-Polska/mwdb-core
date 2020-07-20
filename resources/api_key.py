@@ -12,9 +12,9 @@ from model import db
 from model.api_key import APIKey
 from model.user import User
 
-from core.schema import APIKeyTokenSchema
+from schema.api_key import APIKeyIdentifierBase, APIKeyTokenResponseSchema
 
-from . import requires_authorization
+from . import logger, requires_authorization
 
 
 class APIKeyIssueResource(Resource):
@@ -43,11 +43,13 @@ class APIKeyIssueResource(Resource):
                 description: Identifier and token for created API key
                 content:
                   application/json:
-                    schema: APIKeyTokenSchema
+                    schema: APIKeyTokenResponseSchema
             403:
                 description: |
-                    When user doesn't have required `manage_users` capability or provided
-                    login doesn't exist.
+                    When user doesn't have required `manage_users` capability
+            404:
+                description: |
+                    If provided login doesn't exist.
         """
         if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.login != login:
             raise Forbidden("You are not permitted to perform this action")
@@ -55,19 +57,24 @@ class APIKeyIssueResource(Resource):
         try:
             api_key_owner = User.query.filter(User.login == login).one()
         except NoResultFound:
-            raise Forbidden('User not found')
+            raise NotFound('User not found')
 
-        api_key = APIKey()
-        api_key.id = uuid.uuid4()
-        api_key.user_id = api_key_owner.id
-        api_key.issued_by = g.auth_user.id
-        api_key.issued_on = datetime.now()
-
+        api_key = APIKey(
+            id=uuid.uuid4(),
+            user_id=api_key_owner.id,
+            issued_by=g.auth_user.id,
+            issued_on=datetime.now()
+        )
         db.session.add(api_key)
         db.session.commit()
 
-        return APIKeyTokenSchema().dump({
-            "id": str(api_key.id),
+        logger.info('API key created', extra={
+            "id": api_key.id
+        })
+        return APIKeyTokenResponseSchema().dump({
+            "id": api_key.id,
+            "issued_on": api_key.issued_on,
+            "issuer_login": api_key.issuer_login,
             "token": api_key.generate_token()
         })
 
@@ -91,28 +98,37 @@ class APIKeyResource(Resource):
               name: api_key_id
               schema:
                 type: string
+                format: uuid
               description: API key identifier
         responses:
             200:
                 description: Identifier and token for API key
                 content:
                   application/json:
-                    schema: APIKeyTokenSchema
+                    schema: APIKeyTokenResponseSchema
+            400:
+                description: When API key identifier is not a correct UUID
             404:
                 description: |
                     When API key doesn't exist or user doesn't own the key and
                     doesn't have the `manage_users` capability.
         """
+        obj = APIKeyIdentifierBase().load({"id": api_key_id})
+        if obj.errors:
+            return {"errors": obj.errors}, 400
+
         try:
-            api_key = APIKey.query.filter(APIKey.id == uuid.UUID(api_key_id)).one()
+            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
         except NoResultFound:
             raise NotFound("API key doesn't exist")
 
         if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.id != api_key.user_id:
             raise NotFound("API key doesn't exist")
 
-        return APIKeyTokenSchema().dump({
-            "id": str(api_key.id),
+        return APIKeyTokenResponseSchema().dump({
+            "id": api_key.id,
+            "issued_on": api_key.issued_on,
+            "issuer_login": api_key.issuer_login,
             "token": api_key.generate_token()
         })
 
@@ -134,17 +150,24 @@ class APIKeyResource(Resource):
               name: api_key_id
               schema:
                 type: string
+                format: uuid
               description: API key identifier
         responses:
             200:
                 description: When API key was successfully deleted
+            400:
+                description: When API key identifier is not a correct UUID
             404:
                 description: |
                     When API key doesn't exist or user doesn't own the key and
                     doesn't have the `manage_users` capability.
         """
+        obj = APIKeyIdentifierBase().load({"id": api_key_id})
+        if obj.errors:
+            return {"errors": obj.errors}, 400
+
         try:
-            api_key = APIKey.query.filter(APIKey.id == uuid.UUID(api_key_id)).one()
+            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
         except NoResultFound:
             raise NotFound("API key doesn't exist")
 
@@ -153,3 +176,6 @@ class APIKeyResource(Resource):
 
         db.session.delete(api_key)
         db.session.commit()
+        logger.info('API key deleted', extra={
+            "id": api_key.id
+        })

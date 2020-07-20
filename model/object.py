@@ -1,5 +1,4 @@
 import datetime
-import os
 
 from flask import g
 from sqlalchemy import and_, exists, func
@@ -8,7 +7,6 @@ from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql.expression import true
 
 from core.capabilities import Capabilities
-from core.util import get_sample_path
 
 from . import db
 from .metakey import Metakey, MetakeyDefinition, MetakeyPermission
@@ -28,6 +26,10 @@ class AccessType:
     SHARED = "shared"
     QUERIED = "queried"
     MIGRATED = "migrated"
+
+
+class ObjectTypeConflictError(Exception):
+    pass
 
 
 class ObjectPermission(db.Model):
@@ -116,8 +118,8 @@ class Object(db.Model):
     __tablename__ = 'object'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    type = db.Column(db.String(50))
-    dhash = db.Column(db.String(64), unique=True, index=True)
+    type = db.Column(db.String(50), nullable=False)
+    dhash = db.Column(db.String(64), unique=True, index=True, nullable=False)
     upload_time = db.Column(db.DateTime, nullable=False, index=True, default=func.now())
 
     parents = db.relationship(
@@ -190,7 +192,7 @@ class Object(db.Model):
             visited.add(obj.id)
             if ObjectPermission.create(obj.id, group_id, reason_type, related_object, related_user):
                 """
-                If permission hasn't exist earlier - continue propagation
+                If permission was just created: continue propagation
                 """
                 queue += obj.children
 
@@ -218,55 +220,90 @@ class Object(db.Model):
         return cls.query.filter(cls.dhash == identifier)
 
     @classmethod
-    def get_or_create(cls, obj, file=None):
+    def _get_or_create(cls, obj, parent=None, metakeys=None, share_with=None):
         """
         Polymophic get or create pattern, useful in dealing with race condition resulting in IntegrityError
         on the dhash unique constraint.
+
         Pattern from here - http://rachbelaid.com/handling-race-condition-insert-with-sqlalchemy/
         Returns tuple with object and boolean value if new object was created or not, True == new object
+
+        We don't perform permission checks, all data needs to be validated by Resource.
         """
+        from .group import Group
+
+        share_with = share_with or []
+        metakeys = metakeys or []
+
         is_new = False
         new_cls = Object.get(obj.dhash).first()
-        if new_cls is not None:
-            new_cls = cls.get(obj.dhash).first()
-            return new_cls, is_new
 
-        db.session.begin_nested()
+        # Object with the specified dhash doesn't exist - create it
+        if new_cls is None:
+            db.session.begin_nested()
 
-        new_cls = obj
-        try:
-            db.session.add(new_cls)
-            db.session.flush()
+            new_cls = obj
+            try:
+                # Try to create the requested object
+                new_cls.upload_time = datetime.datetime.now()
+                db.session.add(new_cls)
+                db.session.flush()
+                db.session.commit()
+                is_new = True
+            except IntegrityError:
+                # Object creation failed - probably a race condition
+                db.session.rollback()
+                new_cls = Object.get(obj.dhash).first()
+                if new_cls is None:
+                    raise
 
-            if file is not None:
-                file.stream.seek(0, os.SEEK_SET)
-                file.save(get_sample_path(obj.dhash))
-
-            db.session.commit()
-            is_new = True
-        except IntegrityError:
-            db.session.rollback()
+        # Ensure that existing object has the expected type
+        if new_cls is not isinstance(obj, cls):
+            # If Object has been fetched, fetch typed instance
             new_cls = cls.get(obj.dhash).first()
             if new_cls is None:
-                raise
+                raise ObjectTypeConflictError
+
+        # Add parent to object if specified
+        if parent:
+            new_cls.add_parent(parent, commit=False)
+
+        # Add metakeys
+        for metakey in metakeys:
+            new_cls.add_metakey(metakey['key'], metakey['value'], commit=False)
+
+        # Share with all specified groups
+        for share_group in share_with:
+            new_cls.give_access(share_group.id, AccessType.ADDED, new_cls, g.auth_user, commit=False)
+
+        # Share with all groups that access all objects
+        for all_access_group in Group.all_access_groups():
+            new_cls.give_access(all_access_group.id, AccessType.ADDED, new_cls, g.auth_user, commit=False)
+
         return new_cls, is_new
 
     @classmethod
-    def access(cls, identifier, requestor):
-        from .group import Group
+    def access(cls, identifier, requestor=None):
         """
         Gets object with specified identifier including requestor rights.
-        Shouldn't be used directly in Resources definition (use authenticated_access wrapper)
+
         Returns None when user has no rights to specified object or object doesn't exist
+
+        :param identifier: Object identifier
+        :param requestor: User requesting for object (default: currently authenticated user)
+        :return: Object instance or None
         """
+        from .group import Group
+
+        if requestor is None:
+            requestor = g.auth_user
+
         obj = cls.get(identifier)
         # If object doesn't exist - it doesn't exist
         if obj.first() is None:
             return None
 
-        """
-        In that case we want only those parents to which requestor has access.
-        """
+        # In that case we want only those parents to which requestor has access.
         stmtp = (
             db.session.query(Object)
                       .filter(Object.id.in_(
@@ -359,9 +396,11 @@ class Object(db.Model):
         :param check_permissions: Filter results including current user permissions (default: True)
         :param show_hidden: Show hidden metakeys
         """
-        metakeys = db.session.query(Metakey) \
-                             .filter(Metakey.object_id == self.id) \
-                             .join(MetakeyDefinition, MetakeyDefinition.key == Metakey.key)
+        metakeys = (
+            db.session.query(Metakey)
+                      .filter(Metakey.object_id == self.id)
+                      .join(Metakey.template)
+        )
 
         if check_permissions and not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             metakeys = metakeys.filter(
@@ -386,20 +425,17 @@ class Object(db.Model):
         return dict_metakeys
 
     def add_metakey(self, key, value, commit=True, check_permissions=True):
-        metakey_definition = db.session.query(MetakeyDefinition) \
-                                       .filter(MetakeyDefinition.key == key).first()
+        if check_permissions:
+            metakey_definition = MetakeyDefinition.query_for_set(key).first()
+        else:
+            metakey_definition = (
+                db.session.query(MetakeyDefinition)
+                          .filter(MetakeyDefinition.key == key)
+            ).first()
+
         if not metakey_definition:
             # Attribute needs to be defined first
             return None
-
-        if check_permissions and not g.auth_user.has_rights(Capabilities.adding_all_attributes):
-            metakey_permission = db.session.query(MetakeyPermission) \
-                .filter(MetakeyPermission.key == key) \
-                .filter(MetakeyPermission.can_set == true()) \
-                .filter(g.auth_user.is_member(MetakeyPermission.group_id)).first()
-            if not metakey_permission:
-                # Nope, you don't have permission to set that metakey!
-                return None
 
         db_metakey = Metakey(key=key, value=value, object_id=self.id)
         _, is_new = Metakey.get_or_create(db_metakey)

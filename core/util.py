@@ -1,6 +1,9 @@
 import os
 import re
 
+import magic
+import ssdeep
+
 from zlib import crc32
 
 from flask_restful import abort
@@ -41,7 +44,7 @@ def config_decode(obj):
 
 
 def calc_hash(stream, hash_obj, digest_cb):
-    stream.seek(0, 0)
+    stream.seek(0, os.SEEK_SET)
 
     for chunk in iter(lambda: stream.read(128 * 1024), b''):
         hash_obj.update(chunk)
@@ -49,7 +52,16 @@ def calc_hash(stream, hash_obj, digest_cb):
     return digest_cb(hash_obj)
 
 
-def crc32_sum(stream):
+def calc_magic(stream):
+    stream.seek(0, os.SEEK_SET)
+    return magic.from_buffer(stream.read())
+
+
+def calc_ssdeep(stream):
+    return calc_hash(stream, ssdeep.Hash(), lambda h: h.digest())
+
+
+def calc_crc32(stream):
     csum = None
     stream.seek(0, 0)
 

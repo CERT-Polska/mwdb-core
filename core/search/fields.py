@@ -8,7 +8,7 @@ from flask import g
 from luqum.tree import Range, Term
 from sqlalchemy import and_
 
-from model import db, Object, Metakey, MetakeyPermission, Group, ObjectPermission, User
+from model import db, Object, Metakey, MetakeyDefinition, Group, ObjectPermission, User
 from model.object import AccessType
 
 from core.capabilities import Capabilities
@@ -145,16 +145,17 @@ class AttributeField(BaseField):
 
         attribute_key = remainder[0]
 
-        # Checking permissions for a given key
-        if not g.auth_user.has_rights(Capabilities.reading_all_attributes):
-            metakey = (db.session.query(MetakeyPermission)
-                                 .filter(MetakeyPermission.key == attribute_key)
-                                 .filter(MetakeyPermission.can_read.is_(True))
-                                 .filter(g.auth_user.is_member(MetakeyPermission.group_id))).first()
-            if metakey is None:
-                raise ObjectNotFoundException(f"No such attribute: {attribute_key}")
-            if metakey.template.hidden and expression.has_wildcard():
-                raise FieldNotQueryableException("Wildcards are not allowed for hidden attributes")
+        metakey_definition = (
+            MetakeyDefinition.query_for_read(key=attribute_key, include_hidden=True).first()
+        )
+
+        if metakey_definition is None:
+            raise ObjectNotFoundException(f"No such attribute: {attribute_key}")
+
+        if (metakey_definition.hidden
+                and expression.has_wildcard()
+                and not g.auth_user.has_rights(Capabilities.reading_all_attributes)):
+            raise FieldNotQueryableException("Wildcards are not allowed for hidden attributes")
 
         value = get_term_value(expression)
         if expression.has_wildcard():

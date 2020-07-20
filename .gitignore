@@ -19,5 +19,4 @@ postgres-vars.env
 /mail_templates
 tests/frontend/cypress/videos/
 tests/frontend/cypress/screenshots/
-tests/frontend/package-lock.json
 

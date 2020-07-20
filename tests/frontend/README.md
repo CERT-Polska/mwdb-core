@@ -6,9 +6,9 @@ Set baseUrl in cypress.json to http://malwarefront
 
 Tests are included in e2e tests package and can be run from there:
 ```
-sudo docker-compose -f docker-compose-e2e.yml down
-sudo docker-compose -f docker-compose-e2e.yml build web-tests
-sudo docker-compose -f docker-compose-e2e.yml up web-tests
+docker-compose -f docker-compose-e2e.yml down
+docker-compose -f docker-compose-e2e.yml build web-tests
+docker-compose -f docker-compose-e2e.yml up web-tests
 ```
 
 **To create tests from cypress dev:**
@@ -26,7 +26,7 @@ export MALWARECAGE_ADMIN_PASSWORD
 
 - Then run from tests/frontend:
 ```
-npm install cypress --save-dev
+npm install
 ```
 
 - To run tests in cypress dev environment :

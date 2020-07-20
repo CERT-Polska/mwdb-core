@@ -20,7 +20,7 @@ describe("Blob view test - Malwarecage", function () {
           content: blobContent,
         },
         headers: {
-          Authorization: " Bearer " + token,
+          Authorization: "Bearer " + token,
         },
       }).then((response) => {
         cy.wrap(response.body.id).as("blobId");

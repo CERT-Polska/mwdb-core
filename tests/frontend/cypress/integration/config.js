@@ -24,7 +24,7 @@ describe("Config view test - Malwarecage", function () {
           family: malwareFamily,
         },
         headers: {
-          Authorization: " Bearer " + token,
+          Authorization: "Bearer " + token,
         },
       }).then((response) => {
         cy.wrap(response.body.id).as("configId");

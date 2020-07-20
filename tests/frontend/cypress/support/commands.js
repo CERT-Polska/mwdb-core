@@ -33,7 +33,7 @@ Cypress.Commands.add("formRequest", (method, url, formData, token) => {
     .then((win) => {
       let xhr = new win.XMLHttpRequest();
       xhr.open(method, url);
-      xhr.setRequestHeader("Authorization", " Bearer " + token);
+      xhr.setRequestHeader("Authorization", "Bearer " + token);
       xhr.send(formData);
     })
     .wait("@formRequest");

@@ -4,7 +4,7 @@
   "description": "Front-end tests for Malwarecage",
   "dependencies": {},
   "devDependencies": {
-    "cypress": "^4.9.0",
+    "cypress": "^4.10.0",
     "wait-on": "^5.0.1"
   },
   "scripts": {

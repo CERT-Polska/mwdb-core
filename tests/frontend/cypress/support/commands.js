@@ -23,3 +23,18 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add("formRequest", (method, url, formData, token) => {
+  return cy
+    .server()
+    .route(method, url)
+    .as("formRequest")
+    .window()
+    .then((win) => {
+      let xhr = new win.XMLHttpRequest();
+      xhr.open(method, url);
+      xhr.setRequestHeader("Authorization", "Bearer " + token);
+      xhr.send(formData);
+    })
+    .wait("@formRequest");
+});

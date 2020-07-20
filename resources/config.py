@@ -89,6 +89,26 @@ class ConfigsResource(ObjectsResource):
             content:
               application/json:
                 schema: ConfigCreateRequestSchema
+                examples:
+                  simple:
+                    summary: Simple configuration upload
+                    value:
+                      cfg:
+                        family: malwarex
+                        urls: ["http://evil.local"]
+                      family: malwarex
+                  full:
+                    summary: Fully-featured configuration upload
+                    value:
+                      cfg:
+                        family: malwarex
+                        urls: ["http://evil.local"]
+                      family: malwarex
+                      config_type: static
+                      parent: null
+                      upload_as: "*"
+                      metakeys:
+                       key: value
         responses:
             200:
                 description: Information about uploaded config

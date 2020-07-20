@@ -90,6 +90,23 @@ class BlobsResource(ObjectsResource):
             content:
               application/json:
                 schema: BlobCreateRequestSchema
+                examples:
+                  simple:
+                    summary: Simple blob upload
+                    value:
+                      blob_name: malwarex_blob123
+                      blob_type: raw_cfg
+                      content: "blob contents"
+                  full:
+                    summary: Fully-featured configuration upload
+                    value:
+                      blob_name: malwarex_blob123
+                      blob_type: raw_cfg
+                      content: "blob contents"
+                      parent: null
+                      upload_as: "*"
+                      metakeys:
+                       key: value
         responses:
             200:
                 description: Text blob uploaded succesfully
@@ -152,7 +169,7 @@ class BlobResource(ObjectResource):
         security:
             - bearerAuth: []
         tags:
-            - config
+            - blob
         parameters:
             - in: path
               name: identifier

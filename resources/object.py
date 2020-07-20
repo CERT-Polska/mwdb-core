@@ -3,7 +3,7 @@ from flask_restful import Resource
 from luqum.parser import ParseError
 from werkzeug.exceptions import Forbidden, BadRequest, NotFound
 
-from model import db, Object, Group, MetakeyPermission
+from model import db, Object, Group, MetakeyDefinition
 from core.capabilities import Capabilities
 from core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 
@@ -125,7 +125,7 @@ def get_object_creation_params(params):
     metakeys = params["metakeys"]
     for metakey in params["metakeys"]:
         key = metakey["key"]
-        if not MetakeyPermission.can_set_metakey(key):
+        if not MetakeyDefinition.query_for_set(key).first():
             raise NotFound(f"Metakey '{key}' not defined or insufficient "
                            "permissions to set that one")
     return parent_object, share_with, metakeys

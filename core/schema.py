@@ -63,16 +63,6 @@ class MetakeyDefinitionManageListSchema(Schema):
     metakeys = fields.Nested(MetakeyDefinitionManageSchema, many=True)
 
 
-class CommentSchemaBase(Schema):
-    comment = fields.Str()
-
-
-class CommentSchema(CommentSchemaBase):
-    id = fields.Int()
-    author = fields.Str()
-    timestamp = fields.DateTime()
-
-
 class TagSchema(Schema):
     tag = fields.Str()
 

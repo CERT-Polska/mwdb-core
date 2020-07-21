@@ -3,7 +3,7 @@ import requests
 
 from flask import request, g
 from flask_restful import Resource
-from sqlalchemy import exists
+from sqlalchemy import exists, func
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import false
 from werkzeug.exceptions import Forbidden, Conflict, InternalServerError
@@ -317,7 +317,7 @@ class RecoverPasswordResource(Resource):
         try:
             user = User.query.filter(
                 User.login == obj.data['login'],
-                User.email == obj.data['email'],
+                func.lower(User.email) == obj.data['email'].lower(),
                 User.pending == false()
             ).one()
         except NoResultFound:

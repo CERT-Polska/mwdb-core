@@ -37,6 +37,7 @@ class File(Object):
 
     @classmethod
     def get(cls, identifier):
+        identifier = identifier.lower()
         file = File.query.filter(File.dhash == identifier)
         if file.scalar():
             return file
@@ -44,9 +45,7 @@ class File(Object):
             File.sha1 == identifier,
             File.sha256 == identifier,
             File.sha512 == identifier,
-            File.md5 == identifier,
-            File.ssdeep == identifier,
-            File.humanhash == identifier))
+            File.md5 == identifier))
 
     @classmethod
     def get_or_create(cls, file, parent=None, metakeys=None, share_with=None):

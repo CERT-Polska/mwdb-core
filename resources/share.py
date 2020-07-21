@@ -1,8 +1,6 @@
-from operator import itemgetter
-
 from flask import request, g
 from flask_restful import Resource
-from sqlalchemy import and_, not_
+from sqlalchemy import and_
 from werkzeug.exceptions import NotFound
 
 from model import db, Object, Group, ObjectPermission
@@ -11,7 +9,7 @@ from core.capabilities import Capabilities
 from core.schema import ShareSchema, ShareShowSchema
 from model.object import AccessType
 
-from . import authenticated_access, logger, requires_authorization
+from . import access_object, logger, requires_authorization
 
 
 class ShareGroupListResource(Resource):
@@ -116,7 +114,9 @@ class ShareResource(Resource):
 
         group_names = [group[0] for group in groups.all()]
 
-        db_object = authenticated_access(Object, identifier)
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
         permission_filter = (ObjectPermission.object_id == db_object.id)
 
@@ -175,9 +175,11 @@ class ShareResource(Resource):
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        db_object = authenticated_access(Object, identifier)
-        group_name = obj.data["group"]
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
+        group_name = obj.data["group"]
         permission_filter = (Group.name == group_name)
 
         if not g.auth_user.has_rights(Capabilities.sharing_objects):

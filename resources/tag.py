@@ -55,8 +55,8 @@ class TagListResource(Resource):
                             and_(ObjectPermission.object_id == object_tag_table.c.object_id,
                                  g.auth_user.is_member(ObjectPermission.group_id)))
         )
-        tag_prefix = obj.data["query"]
 
+        tag_prefix = obj.data["query"]
         if tag_prefix:
             tags = tags.filter(Tag.tag.startswith(tag_prefix, autoescape=True))
         tags = tags.all()
@@ -163,8 +163,8 @@ class TagResource(Resource):
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
-        tag_name = obj.data["tag"]
 
+        tag_name = obj.data["tag"]
         db_object.add_tag(tag_name)
 
         logger.info('Tag added', extra={

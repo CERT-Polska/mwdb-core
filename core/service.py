@@ -139,7 +139,7 @@ def setup_restful_service(app):
     # Object endpoints
     api.add_resource(ObjectListResource, '/object')
     spec.path(resource=ObjectListResource, api=api)
-    api.add_resource(ObjectResource, '/object/<string:identifier>')
+    api.add_resource(ObjectResource, '/object/<hash64:identifier>')
     spec.path(resource=ObjectResource, api=api)
     api.add_resource(CommentDeleteResource,
                      '/<any(file, config, blob, object):type>/<hash64:identifier>/comment/<int:comment_id>',
@@ -168,7 +168,7 @@ def setup_restful_service(app):
     # File endpoints
     api.add_resource(FileListResource, '/file')
     spec.path(resource=FileListResource, api=api)
-    api.add_resource(FileResource, '/file/<string:identifier>')
+    api.add_resource(FileResource, '/file/<hash64:identifier>')
     spec.path(resource=FileResource, api=api)
 
     # Config endpoints

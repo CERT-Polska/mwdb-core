@@ -1,12 +1,13 @@
 from flask import request, g
 from flask_restful import Resource
 from sqlalchemy.sql import and_
+from werkzeug.exceptions import NotFound
 
 from model import db, Object, Tag, object_tag_table, ObjectPermission
 from core.capabilities import Capabilities
 from core.schema import TagSchema
 
-from . import authenticated_access, logger, requires_capabilities, requires_authorization
+from . import access_object, logger, requires_capabilities, requires_authorization
 
 
 class TagListResource(Resource):
@@ -94,7 +95,9 @@ class TagResource(Resource):
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        db_object = authenticated_access(Object, identifier)
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
         tags = db.session.query(Tag) \
             .filter(Tag.objects.any(id=db_object.id)).all()
@@ -145,7 +148,9 @@ class TagResource(Resource):
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        db_object = authenticated_access(Object, identifier)
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
         tag_name = obj.data["tag"].lower().strip()
 
         was_modified = db_object.add_tag(tag_name)
@@ -196,7 +201,9 @@ class TagResource(Resource):
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        db_object = authenticated_access(Object, identifier)
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
         tag_name = obj.data["tag"].lower().strip()
 
         was_modified = db_object.remove_tag(tag_name)

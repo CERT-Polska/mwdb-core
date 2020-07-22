@@ -51,6 +51,10 @@ describe("Sample view test - Malwarecage", function () {
       cy.contains(fileData.sha256);
 
       cy.visit("/sample/fake");
+      cy.contains(
+        "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
+      );
+      cy.visit("/sample/03040506708090aabbccddeeff112233");
       cy.contains("Object not found");
 
       cy.contains("Logout").click();

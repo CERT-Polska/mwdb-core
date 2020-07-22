@@ -121,4 +121,5 @@ def is_true(flag):
 
 
 class HashConverter(BaseConverter):
-    regex = '(root|[A-Fa-f0-9]{64})'
+    # MD5/SHA1/SHA256/SHA512 (32,40,64,128)
+    regex = '(root|[A-Fa-f0-9]{32,128})'

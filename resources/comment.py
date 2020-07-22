@@ -8,7 +8,7 @@ from core.capabilities import Capabilities
 
 from schema.comment import CommentRequestSchema, CommentItemResponseSchema
 
-from . import logger, requires_capabilities, requires_authorization
+from . import logger, requires_capabilities, requires_authorization, access_object
 
 
 class CommentResource(Resource):
@@ -28,7 +28,7 @@ class CommentResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of commented object (ignored)
+              description: Type of commented object
             - in: path
               name: identifier
               schema:
@@ -45,7 +45,7 @@ class CommentResource(Resource):
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        db_object = Object.access(identifier)
+        db_object = access_object(type, identifier)
         if not db_object:
             raise NotFound("Object not found")
 
@@ -72,7 +72,7 @@ class CommentResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of commented object (ignored)
+              description: Type of commented object
             - in: path
               name: identifier
               schema:
@@ -102,7 +102,7 @@ class CommentResource(Resource):
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        db_object = Object.access(identifier)
+        db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
@@ -161,7 +161,7 @@ class CommentDeleteResource(Resource):
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        db_object = Object.access(identifier)
+        db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 

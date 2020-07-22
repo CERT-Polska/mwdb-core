@@ -49,7 +49,7 @@ class User(db.Model):
     set_password_on = db.Column(db.DateTime)
 
     groups = db.relationship('Group', secondary=member, backref='users', lazy='selectin')
-    comments = db.relationship('Comment', backref='user')
+    comments = db.relationship('Comment', back_populates='author')
     api_keys = db.relationship('APIKey', foreign_keys="APIKey.user_id", backref='user')
     registrar = db.relationship('User', foreign_keys="User.registered_by", remote_side=[id], uselist=False)
 

@@ -3,7 +3,7 @@ from flask_restful import Resource
 from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest
 
-from model import db, Object
+from model import Object
 from core.schema import SearchSchema, ObjectBase
 from core.search import SQLQueryBuilderBaseException, SQLQueryBuilder
 

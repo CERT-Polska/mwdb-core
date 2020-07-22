@@ -10,7 +10,7 @@ from core.capabilities import Capabilities
 from core.schema import ObjectShowBase, MetakeyShowSchema, MultiObjectSchema
 from core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 
-from . import logger, authenticated_access, requires_authorization, requires_capabilities
+from . import logger, requires_authorization, requires_capabilities, access_object
 
 
 class ObjectListResource(Resource):
@@ -69,7 +69,9 @@ class ObjectListResource(Resource):
         pivot_obj = None
         older_than = request.args.get('older_than')
         if older_than:
-            pivot_obj = authenticated_access(Object, older_than)
+            pivot_obj = Object.access(older_than)
+            if pivot_obj is None:
+                raise NotFound("Object provided in 'older_than' not found")
 
         if query:
             try:
@@ -132,7 +134,9 @@ class ObjectResource(Resource):
                 description: When object doesn't exist or user doesn't have access to this object.
         """
         schema = self.Schema()
-        obj = authenticated_access(self.ObjectType, identifier.lower())
+        obj = self.ObjectType.access(identifier)
+        if obj is None:
+            raise NotFound("Object not found")
         return schema.dump(obj)
 
     def create_object(self, obj):
@@ -160,7 +164,9 @@ class ObjectResource(Resource):
         else:
             if not g.auth_user.has_rights(Capabilities.adding_parents):
                 raise Forbidden("You are not permitted to link with parent")
-            parent_object = authenticated_access(Object, identifier)
+            parent_object = Object.access(identifier)
+            if parent_object is None:
+                raise NotFound("Parent object not found")
 
         metakeys = request.form.get('metakeys')
         upload_as = request.form.get("upload_as") or "*"
@@ -258,7 +264,7 @@ class ObjectChildResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of object (ignored)
+              description: Type of parent object
             - in: path
               name: parent
               description: Identifier of the parent object
@@ -279,8 +285,13 @@ class ObjectChildResource(Resource):
             404:
                 description: When one of objects doesn't exist or user doesn't have access to object.
         """
-        parent_object = authenticated_access(Object, parent)
-        child_object = authenticated_access(Object, child)
+        parent_object = access_object(type, parent)
+        if parent_object is None:
+            raise NotFound("Parent object not found")
+
+        child_object = Object.access(child)
+        if child_object is None:
+            raise NotFound("Child object not found")
 
         child_object.add_parent(parent_object, commit=False)
 

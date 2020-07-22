@@ -196,7 +196,7 @@ def setup_restful_service(app):
     spec.path(resource=SearchResource, api=api)
 
     # Metakey endpoints
-    api.add_resource(MetakeyListDefinitionResource, '/meta/list/<access>')
+    api.add_resource(MetakeyListDefinitionResource, '/meta/list/<any(read, set):access>')
     spec.path(resource=MetakeyListDefinitionResource, api=api)
     api.add_resource(MetakeyListDefinitionManageResource, '/meta/manage')
     spec.path(resource=MetakeyListDefinitionManageResource, api=api)

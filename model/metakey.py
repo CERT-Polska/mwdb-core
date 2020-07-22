@@ -15,9 +15,9 @@ class Metakey(db.Model):
     __table_args__ = (UniqueConstraint("object_id", "key", "value"),)
 
     id = db.Column(db.Integer, primary_key=True)
-    object_id = db.Column(db.Integer, db.ForeignKey('object.id'))
-    key = db.Column(db.String(64), db.ForeignKey('metakey_definition.key'), index=True)
-    value = db.Column(db.Text, index=True)
+    object_id = db.Column(db.Integer, db.ForeignKey('object.id'), nullable=False)
+    key = db.Column(db.String(64), db.ForeignKey('metakey_definition.key'), nullable=False, index=True)
+    value = db.Column(db.Text, nullable=False, index=True)
     template = db.relationship('MetakeyDefinition', lazy='joined')
 
     @property
@@ -91,9 +91,9 @@ class MetakeyDefinition(db.Model):
     __tablename__ = 'metakey_definition'
 
     key = db.Column(db.String(64), primary_key=True)
-    label = db.Column(db.String(64))
-    description = db.Column(db.Text)
-    url_template = db.Column(db.Text)
+    label = db.Column(db.String(64), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    url_template = db.Column(db.Text, nullable=False)
     hidden = db.Column(db.Boolean, nullable=False, default=False)
     permissions = db.relationship('MetakeyPermission', lazy='joined', back_populates="template")
 
@@ -111,7 +111,7 @@ class MetakeyDefinition(db.Model):
             query = query.filter(MetakeyDefinition.key == key)
 
         if not include_hidden:
-            query = query.filter(MetakeyDefinition.hidden.isnot_(True))
+            query = query.filter(MetakeyDefinition.hidden.isnot(True))
 
         if not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             query = (

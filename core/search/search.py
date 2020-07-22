@@ -41,10 +41,6 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         if context.field_node is None:
             raise FieldNotQueryableException("You have to specify field, check help for more information")
 
-        is_range_term = isinstance(parents[-1], Range)
-
-        if node.has_wildcard() and is_range_term:
-            raise UnsupportedGrammarException("Wildcards are not supported in range queries")
         return node
 
     def visit_word(self, node: Word, parents: List[Item], context: SQLQueryBuilderContext) -> Word:

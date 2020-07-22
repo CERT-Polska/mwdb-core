@@ -86,9 +86,9 @@ class IntegerField(BaseField):
         if isinstance(expression, Range):
             low_value = expression.low.value
             high_value = expression.high.value
-            if not low_value.isdigit() or not high_value.isdigit():
+            if (not low_value.isdigit() or not high_value.isdigit()) and low_value != "*" and high_value != "*":
                 raise UnsupportedGrammarException(
-                    "Field supports only integer values"
+                    "Field supports only integer values or *"
                 )
             low_condition = (
                 self.column >= low_value
@@ -100,6 +100,14 @@ class IntegerField(BaseField):
                 if expression.include_high
                 else self.column < high_value
             )
+
+            if high_value == "*" and low_value == "*":
+                return True
+            if high_value == "*":
+                return low_condition
+            if low_value == "*":
+                return high_condition
+
             return and_(low_condition, high_condition)
         else:
             if not expression.value.isdigit():

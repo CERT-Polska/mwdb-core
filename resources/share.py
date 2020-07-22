@@ -78,7 +78,7 @@ class ShareResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of object (ignored)
+              description: Type of object
             - in: path
               name: identifier
               schema:

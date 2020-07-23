@@ -48,6 +48,8 @@ def get_term_value(node: Term) -> str:
 
 
 class BaseField:
+    accepts_range = False
+
     def __init__(self, column):
         self.column = column
 
@@ -78,6 +80,8 @@ class StringField(BaseField):
 
 
 class IntegerField(BaseField):
+    accepts_range = True
+
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
         if remainder:
             raise FieldNotQueryableException(
@@ -86,6 +90,7 @@ class IntegerField(BaseField):
         if isinstance(expression, Range):
             low_value = expression.low.value
             high_value = expression.high.value
+
             if (not low_value.isdigit() or not high_value.isdigit()) and low_value != "*" and high_value != "*":
                 raise UnsupportedGrammarException(
                     "Field supports only integer values or *"
@@ -262,6 +267,8 @@ class JSONField(BaseField):
 
 
 class DatetimeField(BaseField):
+    accepts_range = True
+
     def _get_date_range(self, date_node):
         formats = [
             ("%Y-%m-%d %H:%M", timedelta(minutes=1)),
@@ -288,6 +295,16 @@ class DatetimeField(BaseField):
         if isinstance(expression, Range):
             if not (expression.include_low and expression.include_high):
                 raise UnsupportedGrammarException("Exclusive range is not allowed for date-time field")
+
+            if expression.low.value == "*" and expression.high.value == "*":
+                return True
+            if expression.low.value == "*":
+                high = self._get_date_range(expression.high)[1]
+                return self.column < high
+            if expression.high.value == "*":
+                low = self._get_date_range(expression.low)[0]
+                return self.column > low
+
             low = self._get_date_range(expression.low)[0]
             high = self._get_date_range(expression.high)[1]
         else:

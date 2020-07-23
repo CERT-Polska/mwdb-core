@@ -41,6 +41,11 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         if context.field_node is None:
             raise FieldNotQueryableException("You have to specify field, check help for more information")
 
+        is_range_term = isinstance(parents[-1], Range)
+
+        if node.has_wildcard() and is_range_term and str(node) != "*":
+            raise UnsupportedGrammarException("Wildcards other than * are not supported in range queries")
+
         return node
 
     def visit_word(self, node: Word, parents: List[Item], context: SQLQueryBuilderContext) -> Word:
@@ -58,11 +63,15 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         return self.visit_term(node, parents, context)
 
     def visit_range(self, node: Range, parents: List[Item], context: SQLQueryBuilderContext) -> Range:
+
         """
         Visitor for Range
         - inclusive [<Term> TO <Term>]
         - exclusive [<Term> TO <Term>]
         """
+        if not context.field_mapper.accepts_range:
+            raise UnsupportedGrammarException("Range is not accepted")
+
         node.low = self.visit(node.low, parents + [node], context)
         node.high = self.visit(node.high, parents + [node], context)
         return node
@@ -75,6 +84,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         if field_mapper.field_type is not Object:
             context.queried_type = field_mapper.field_type
 
+        context.field_mapper = field_mapper
         context.field_node = node
         condition = field_mapper.get_condition(
             self.visit(node.expr, parents + [node], context),

@@ -149,7 +149,7 @@ class TagResource(Resource):
                       items:
                         $ref: '#/components/schemas/TagItemResponse'
             400:
-                description: When tag isn't valid
+                description: When tag is invalid
             403:
                 description: When user doesn't have `adding_tags` capability.
             404:
@@ -217,7 +217,7 @@ class TagResource(Resource):
                       items:
                         $ref: '#/components/schemas/TagItemResponse'
             400:
-                description: When tag isn't valid
+                description: When tag is invalid
             403:
                 description: When user doesn't have `removing_tags` capability.
             404:

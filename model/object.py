@@ -217,7 +217,7 @@ class Object(db.Model):
         Don't include internal (sequential) identifiers in filtering!
         Used by Object.access
         """
-        return cls.query.filter(cls.dhash == identifier)
+        return cls.query.filter(cls.dhash == identifier.lower())
 
     @classmethod
     def _get_or_create(cls, obj, parent=None, metakeys=None, share_with=None):

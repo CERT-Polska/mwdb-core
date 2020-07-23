@@ -1,8 +1,10 @@
 from functools import wraps
-from core import log
 
 from flask import g, request
-from werkzeug.exceptions import NotFound, Forbidden, Unauthorized
+from werkzeug.exceptions import NotFound, Forbidden, Unauthorized, BadRequest
+
+from core import log
+from model import Object, File, Config, TextBlob
 
 logger = log.getLogger()
 
@@ -49,16 +51,21 @@ def deprecated(f):
     return endpoint
 
 
-def authenticated_access(object_type, identifier):
+def access_object(object_type, identifier):
     """
-    Safe getter for objects with authenticated user rights
-    :param object_type: Object type to get (Object for generics,
-                                            File/StaticConfig/DynamicConfig for specialized operations)
+    Get object by provided string type and identifier
+    :param object_type: String type [file, config, blob, object]
     :param identifier: Object identifier
-    :return: Returns specified object or throws 404 when object doesn't exist or shouldn't exist in current user view
+    :return: Returns specified object or None when object doesn't exist, has different type or user doesn't have
+             access to this object.
     """
-    object = object_type.access(identifier, g.auth_user)
-    if not object:
-        raise NotFound("Object not found")
-
-    return object
+    object_types = {
+        "object": Object,
+        "file": File,
+        "config": Config,
+        "blob": TextBlob
+    }
+    if object_type not in object_types:
+        # Should never happen, routes should be restricted on route definition level
+        raise ValueError(f"Incorrect object type '{object_type}'")
+    return object_types[object_type].access(identifier)

@@ -1,12 +1,14 @@
 from flask import request, g
 from flask_restful import Resource
 from sqlalchemy.sql import and_
+from werkzeug.exceptions import NotFound
 
-from model import db, Object, Tag, object_tag_table, ObjectPermission
+from model import db, Tag, object_tag_table, ObjectPermission
 from core.capabilities import Capabilities
-from core.schema import TagSchema
 
-from . import authenticated_access, logger, requires_capabilities, requires_authorization
+from schema.tag import TagListRequestSchema, TagRequestSchema, TagItemResponseSchema
+
+from . import access_object, logger, requires_capabilities, requires_authorization
 
 
 class TagListResource(Resource):
@@ -38,24 +40,29 @@ class TagListResource(Resource):
                     schema:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Tag'
+                        $ref: '#/components/schemas/TagItemResponse'
         """
-        tag_prefix = request.args.get('query')
+        schema = TagListRequestSchema()
+        obj = schema.load(request.args)
+        if obj.errors:
+            return {"errors": obj.errors}, 400
 
-        if not tag_prefix or len(tag_prefix) == 0:
-            tags = []
-        else:
-            tag_prefix = tag_prefix.lower()
-            tags = db.session.query(Tag.tag)\
-                             .distinct(Tag.tag)\
-                             .join(object_tag_table, object_tag_table.c.tag_id == Tag.id) \
-                             .join(ObjectPermission,
-                                   and_(ObjectPermission.object_id == object_tag_table.c.object_id,
-                                        g.auth_user.is_member(ObjectPermission.group_id))) \
-                             .filter(Tag.tag.like(tag_prefix + "%")).all()
-        multi_tag = TagSchema(many=True)
-        dumped_tags = multi_tag.dump(tags)
-        return dumped_tags
+        tags = (
+            db.session.query(Tag.tag)
+                      .distinct(Tag.tag)
+                      .join(object_tag_table, object_tag_table.c.tag_id == Tag.id)
+                      .join(ObjectPermission,
+                            and_(ObjectPermission.object_id == object_tag_table.c.object_id,
+                                 g.auth_user.is_member(ObjectPermission.group_id)))
+        )
+
+        tag_prefix = obj.data["query"]
+        if tag_prefix:
+            tags = tags.filter(Tag.tag.startswith(tag_prefix, autoescape=True))
+        tags = tags.all()
+
+        schema = TagItemResponseSchema(many=True)
+        return schema.dump(tags)
 
 
 class TagResource(Resource):
@@ -90,18 +97,16 @@ class TagResource(Resource):
                     schema:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Tag'
+                        $ref: '#/components/schemas/TagItemResponse'
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        db_object = authenticated_access(Object, identifier)
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
-        tags = db.session.query(Tag) \
-            .filter(Tag.objects.any(id=db_object.id)).all()
-
-        multi_tag = TagSchema(many=True)
-        dumped_tags = multi_tag.dump(tags)
-        return dumped_tags
+        schema = TagItemResponseSchema(many=True)
+        return schema.dump(db_object.tags)
 
     @requires_authorization
     @requires_capabilities(Capabilities.adding_tags)
@@ -129,29 +134,46 @@ class TagResource(Resource):
               schema:
                 type: string
               description: Object identifier
+        requestBody:
+            description: Tag value
+            content:
+              application/json:
+                schema: TagRequestSchema
         responses:
             200:
                 description: When tag is successfully added
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/TagItemResponse'
             400:
-                description: When tag or request body isn't valid
+                description: When tag is invalid
             403:
                 description: When user doesn't have `adding_tags` capability.
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        schema = TagSchema()
+        schema = TagRequestSchema()
         obj = schema.loads(request.get_data(as_text=True))
-
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        db_object = authenticated_access(Object, identifier)
-        tag_name = obj.data["tag"].lower().strip()
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
-        was_modified = db_object.add_tag(tag_name)
+        tag_name = obj.data["tag"]
+        db_object.add_tag(tag_name)
 
-        logger.info('tag added', extra={'tag_name': tag_name, 'dhash': db_object.dhash})
-        return {"modified": was_modified}, 200
+        logger.info('Tag added', extra={
+            'tag': tag_name,
+            'dhash': db_object.dhash
+        })
+        db.session.refresh(db_object)
+        schema = TagItemResponseSchema(many=True)
+        return schema.dump(db_object.tags)
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_tags)
@@ -179,27 +201,45 @@ class TagResource(Resource):
               schema:
                 type: string
               description: Object identifier
+            - in: query
+              name: tag
+              schema:
+                type: string
+              description: Tag to be deleted
+              required: true
         responses:
             200:
                 description: When tag is successfully removed
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/TagItemResponse'
             400:
-                description: When tag or request body isn't valid
+                description: When tag is invalid
             403:
                 description: When user doesn't have `removing_tags` capability.
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
 
-        schema = TagSchema()
-        obj = schema.load({"tag": request.args.get("tag")})
-
+        schema = TagRequestSchema()
+        obj = schema.load(request.args)
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        db_object = authenticated_access(Object, identifier)
-        tag_name = obj.data["tag"].lower().strip()
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
-        was_modified = db_object.remove_tag(tag_name)
+        tag_name = obj.data["tag"]
+        db_object.remove_tag(tag_name)
 
-        logger.info('tag removed', extra={'tag_name': tag_name, 'dhash': db_object.dhash})
-        return {"modified": was_modified}, 200
+        logger.info('Tag removed', extra={
+            'tag': tag_name,
+            'dhash': db_object.dhash
+        })
+        db.session.refresh(db_object)
+        schema = TagItemResponseSchema(many=True)
+        return schema.dump(db_object.tags)

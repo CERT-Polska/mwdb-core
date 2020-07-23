@@ -5,8 +5,8 @@ from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 from core.capabilities import Capabilities
 from core.schema import MetakeyShowSchema, MetakeySchema, MetakeyDefinitionManageSchema, \
     MetakeyDefinitionManageListSchema, MetakeyDefinitionSchema, MetakeyDefinitionListSchema, MetakeyPermissionSchema
-from model import db, Object, Group, MetakeyDefinition, MetakeyPermission
-from . import requires_capabilities, authenticated_access, requires_authorization
+from model import db, Group, MetakeyDefinition, MetakeyPermission
+from . import requires_capabilities, access_object, requires_authorization
 
 
 class MetakeyResource(Resource):
@@ -27,7 +27,7 @@ class MetakeyResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of object (ignored)
+              description: Type of object
             - in: path
               name: identifier
               schema:
@@ -50,11 +50,14 @@ class MetakeyResource(Resource):
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        db_object = authenticated_access(Object, identifier)
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
         show_hidden = bool(int(request.args.get('hidden', '0')))
         if show_hidden and not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             raise Forbidden("You are not permitted to read hidden metakeys")
+
         metakeys = db_object.get_metakeys(show_hidden=show_hidden)
         schema = MetakeyShowSchema()
         return schema.dump({"metakeys": metakeys})
@@ -78,7 +81,7 @@ class MetakeyResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of object (ignored)
+              description: Type of object
             - in: path
               name: identifier
               schema:
@@ -102,7 +105,10 @@ class MetakeyResource(Resource):
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        db_object = authenticated_access(Object, identifier)
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
+
         key = obj.data['key'].strip().lower()
         value = obj.data['value']
         is_new = db_object.add_metakey(key, value)

@@ -1,9 +1,9 @@
 from flask_restful import Resource
+from werkzeug.exceptions import NotFound
 
-from model import Object
 from core.schema import RelationsSchema
 
-from . import deprecated, authenticated_access, requires_authorization
+from . import access_object, deprecated, requires_authorization
 
 
 class RelationsResource(Resource):
@@ -42,7 +42,9 @@ class RelationsResource(Resource):
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        db_object = authenticated_access(Object, identifier)
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
 
         relations = RelationsSchema()
         dumped_relations = relations.dump(db_object)

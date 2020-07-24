@@ -85,7 +85,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         - exclusive [<Term> TO <Term>]
         """
         if not context.field_mapper.accepts_range:
-            raise UnsupportedGrammarException("Range is not accepted")
+            raise UnsupportedGrammarException("Range queries are not supported for this type of field")
 
         node.low = self.visit(node.low, parents + [node], context)
         node.high = self.visit(node.high, parents + [node], context)

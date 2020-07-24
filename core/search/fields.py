@@ -68,10 +68,6 @@ class StringField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
-        if isinstance(expression, Range):
-            raise UnsupportedGrammarException(
-                f"Range queries are not allowed for string fields"
-            )
 
         value = get_term_value(expression)
         if expression.has_wildcard():

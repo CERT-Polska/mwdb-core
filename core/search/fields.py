@@ -31,6 +31,7 @@ def get_term_value(node: Term) -> str:
             "*": "%",
             "?": "_"
         }
+
         # Escape already contained SQL wildcards
         node_value = re.sub(r"([%_])", r"\\\1", node.value)
         # Transform unescaped Lucene wildcards to SQL form
@@ -91,7 +92,10 @@ class IntegerField(BaseField):
             low_value = expression.low.value
             high_value = expression.high.value
 
-            if (not low_value.isdigit() or not high_value.isdigit()) and low_value != "*" and high_value != "*":
+            low_value_digit_or_asterisk = low_value == "*" or low_value.isdigit()
+            high_value_digit_or_asterisk = high_value == "*" or high_value.isdigit()
+
+            if not low_value_digit_or_asterisk or not high_value_digit_or_asterisk:
                 raise UnsupportedGrammarException(
                     "Field supports only integer values or *"
                 )
@@ -270,6 +274,7 @@ class DatetimeField(BaseField):
     accepts_range = True
 
     def _get_date_range(self, date_node):
+
         formats = [
             ("%Y-%m-%d %H:%M", timedelta(minutes=1)),
             ("%Y-%m-%d %H:%M:%S", timedelta(seconds=1)),
@@ -293,7 +298,9 @@ class DatetimeField(BaseField):
             )
 
         if isinstance(expression, Range):
-            if not (expression.include_low and expression.include_high):
+            if expression.high.value != "*" and not expression.include_high:
+                raise UnsupportedGrammarException("Exclusive range is not allowed for date-time field")
+            if expression.low.value != "*" and not expression.include_low:
                 raise UnsupportedGrammarException("Exclusive range is not allowed for date-time field")
 
             if expression.low.value == "*" and expression.high.value == "*":

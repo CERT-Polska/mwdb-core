@@ -3,6 +3,7 @@ from typing import List, Any, TypeVar, Optional, Type
 from luqum.parser import parser
 from luqum.tree import Range, Term, Item, Word, Phrase, SearchField, AndOperation, OrOperation, Not, Prohibit, \
                        BaseGroup
+
 from luqum.utils import LuceneTreeVisitorV2
 
 from sqlalchemy import and_, or_, not_
@@ -45,6 +46,20 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
 
         if node.has_wildcard() and is_range_term and str(node) != "*":
             raise UnsupportedGrammarException("Wildcards other than * are not supported in range queries")
+
+        if context.field_mapper.accepts_range and not is_range_term:
+            if node.value.startswith(">="):
+                node.value = node.value[2:]
+                return Range(low=node, high=Term("*"), include_low=True, include_high=False)
+            elif node.value.startswith(">"):
+                node.value = node.value[1:]
+                return Range(low=node, high=Term("*"), include_low=False, include_high=False)
+            elif node.value.startswith("<="):
+                node.value = node.value[2:]
+                return Range(low=Term("*"), high=node, include_low=False, include_high=True)
+            elif node.value.startswith("<"):
+                node.value = node.value[1:]
+                return Range(low=Term("*"), high=node, include_low=False, include_high=False)
 
         return node
 

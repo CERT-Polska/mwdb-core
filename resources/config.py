@@ -209,7 +209,15 @@ class ConfigResource(ObjectResource):
                   description: Configuration to be uploaded with additional parameters (verbose mode)
                   properties:
                     json:
-                      schema: ConfigLegacyCreateRequestSchema
+                      type: object
+                      properties:
+                          family:
+                             type: string
+                          config_type:
+                             type: string
+                             default: static
+                          cfg:
+                             type: object
                       description: JSON-encoded config object specification
                     metakeys:
                       type: object
@@ -233,7 +241,7 @@ class ConfigResource(ObjectResource):
                   required:
                     - json
               application/json:
-                schema: ConfigLegacyCreateRequestSchema
+                schema: ConfigCreateSpecSchema
         responses:
             200:
                 description: Information about uploaded config

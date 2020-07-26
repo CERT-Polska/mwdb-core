@@ -144,7 +144,14 @@ class TextBlobResource(ObjectResource):
                   description: Blob to be uploaded with additional parameters (verbose mode)
                   properties:
                     json:
-                      schema: BlobLegacyCreateRequestSchema
+                      type: object
+                      properties:
+                          blob_name:
+                             type: string
+                          blob_type:
+                             type: string
+                          content:
+                             type: string
                       description: JSON-encoded blob object specification
                     metakeys:
                       type: object
@@ -168,7 +175,7 @@ class TextBlobResource(ObjectResource):
                   required:
                     - json
               application/json:
-                schema: BlobLegacyCreateRequestSchema
+                schema: BlobCreateSpecSchema
         responses:
             200:
                 description: Text blob uploaded succesfully

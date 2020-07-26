@@ -1,4 +1,4 @@
-from marshmallow import fields
+from marshmallow import fields, Schema
 
 from .object import (
     ObjectCreateRequestSchemaBase,
@@ -10,10 +10,15 @@ from .object import (
 from .config import ConfigItemResponseSchema
 
 
-class BlobCreateRequestSchema(ObjectCreateRequestSchemaBase):
+# Merge it with BlobCreateRequestSchema during legacy upload remove
+class BlobCreateSpecSchema(Schema):
     blob_name = fields.Str(required=True, allow_none=False)
     blob_type = fields.Str(required=True, allow_none=False)
     content = fields.Str(required=True, allow_none=False)
+
+
+class BlobCreateRequestSchema(ObjectCreateRequestSchemaBase, BlobCreateSpecSchema):
+    pass
 
 
 class BlobLegacyCreateRequestSchema(BlobCreateRequestSchema, ObjectLegacyMetakeysMixin):

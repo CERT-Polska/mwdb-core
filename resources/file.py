@@ -142,10 +142,6 @@ class FileResource(ObjectResource):
                       type: string
                       format: binary
                       description: File contents to be uploaded
-                    json:
-                      type: string
-                      description: |
-                        Additional JSON-encoded information about object (ignored for files)
                     metakeys:
                       type: object
                       properties:

@@ -13,10 +13,15 @@ class ConfigStatsRequestSchema(Schema):
     range = fields.Str(missing="*", allow_none=False)
 
 
-class ConfigCreateRequestSchema(ObjectCreateRequestSchemaBase):
+# Merge it with ConfigCreateRequestSchema during legacy upload remove
+class ConfigCreateSpecSchema(Schema):
     family = fields.Str(required=True, allow_none=False)
     config_type = fields.Str(missing="static", allow_none=False)
     cfg = fields.Dict(required=True, allow_none=False)
+
+
+class ConfigCreateRequestSchema(ObjectCreateRequestSchemaBase, ConfigCreateSpecSchema):
+    pass
 
 
 class ConfigLegacyCreateRequestSchema(ConfigCreateRequestSchema, ObjectLegacyMetakeysMixin):

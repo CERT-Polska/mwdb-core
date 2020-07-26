@@ -55,8 +55,10 @@ class ObjectListResponseSchema(Schema):
     __envelope_key__ = "objects"
     __item_schewa__ = ObjectListItemResponseSchema
 
-    @post_dump
-    def wrap_with_envelope(self, data):
+    @post_dump(pass_many=True)
+    def wrap_with_envelope(self, data, many):
+        if not many:
+            raise ValueError("Schema supports only lists of objects")
         return {self.__envelope_key__: data}
 
 

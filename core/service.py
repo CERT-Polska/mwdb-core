@@ -230,7 +230,4 @@ def setup_restful_service(app):
     spec.path(resource=GroupResource, api=api)
     api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
     spec.path(resource=GroupMemberResource, api=api)
-
-    # Additional schemas
-    spec.components.schema("TagItemResponse", schema=TagItemResponseSchema)
     return api, spec

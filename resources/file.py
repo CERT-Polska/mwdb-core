@@ -8,17 +8,36 @@ from model.file import EmptyFileError
 from model.object import ObjectTypeConflictError
 
 from schema.file import (
-    FileLegacyCreateRequestSchema,
+    FileLegacyCreateRequestSchema, FileCreateRequestSchema,
     FileListResponseSchema, FileItemResponseSchema
 )
 
 from . import requires_authorization
-from .object import ObjectResource, ObjectListResource
+from .object import ObjectUploader, ObjectResource, ObjectsResource
 
 
-class FileListResource(ObjectListResource):
+class FileUploader(ObjectUploader):
+    def _create_object(self, spec, parent, share_with, metakeys):
+        try:
+            return File.get_or_create(
+                request.files["file"],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a file")
+        except EmptyFileError:
+            raise BadRequest("File cannot be empty")
+
+
+class FilesResource(ObjectsResource, FileUploader):
     ObjectType = File
     ListResponseSchema = FileListResponseSchema
+    ItemResponseSchema = FileItemResponseSchema
+
+    on_created = hooks.on_created_file
+    on_reuploaded = hooks.on_reuploaded_file
 
     @requires_authorization
     def get(self):
@@ -61,8 +80,69 @@ class FileListResource(ObjectListResource):
         """
         return super().get()
 
+    @requires_authorization
+    def post(self):
+        """
+        ---
+        summary: Upload file
+        description: Uploads new file.
+        security:
+            - bearerAuth: []
+        tags:
+            - file
+        requestBody:
+            required: true
+            content:
+              multipart/form-data:
+                schema:
+                  type: object
+                  properties:
+                    file:
+                      type: string
+                      format: binary
+                      description: File contents to be uploaded
+                    options:
+                      type: object
+                      description: |
+                        Additional upload options
+                      properties:
+                        parent:
+                          type: string
+                        metakeys:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/MetakeyItemRequest'
+                        upload_as:
+                          type: string
+                      schema: ObjectCreateRequestSchemaBase
+                  required:
+                    - file
+        responses:
+            200:
+                description: Information about uploaded file
+                content:
+                  application/json:
+                    schema: FileItemResponseSchema
+            403:
+                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
+            404:
+                description: |
+                    One of attribute keys doesn't exist or user doesn't have permission to set it.
 
-class FileResource(ObjectResource):
+                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
+                    with that group
+            409:
+                description: Object exists yet but has different type
+        """
+        schema = FileCreateRequestSchema()
+        obj = schema.load(request.form.to_dict())
+
+        if obj and obj.errors:
+            return {"errors": obj.errors}, 400
+        return self.create_object(obj.data["options"])
+
+
+class FileResource(ObjectResource, FileUploader):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema
 
@@ -98,19 +178,6 @@ class FileResource(ObjectResource):
         """
         return super().get(identifier)
 
-    def _create_object(self, spec, parent, share_with, metakeys):
-        try:
-            return File.get_or_create(
-                request.files["file"],
-                parent=parent,
-                share_with=share_with,
-                metakeys=metakeys
-            )
-        except ObjectTypeConflictError:
-            raise Conflict("Object already exists and is not a file")
-        except EmptyFileError:
-            raise BadRequest("File cannot be empty")
-
     @requires_authorization
     def post(self, identifier):
         """
@@ -120,7 +187,7 @@ class FileResource(ObjectResource):
         security:
             - bearerAuth: []
         tags:
-            - file
+            - deprecated
         parameters:
             - in: path
               name: identifier

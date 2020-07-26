@@ -14,18 +14,18 @@ from resources.auth import (
     ValidateTokenResource, ProfileResource
 )
 
-from resources.blob import TextBlobResource, TextBlobListResource
+from resources.blob import TextBlobResource, TextBlobsResource
 from resources.comment import CommentResource, CommentDeleteResource
-from resources.config import ConfigResource, ConfigListResource, ConfigStatsResource
+from resources.config import ConfigResource, ConfigsResource, ConfigStatsResource
 from resources.download import RequestSampleDownloadResource, DownloadResource
-from resources.file import FileResource, FileListResource
+from resources.file import FileResource, FilesResource
 from resources.group import GroupResource, GroupListResource, GroupMemberResource
 from resources.metakey import (
     MetakeyResource, MetakeyListDefinitionResource,
     MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource,
     MetakeyPermissionResource
 )
-from resources.object import ObjectResource, ObjectListResource, ObjectChildResource
+from resources.object import ObjectResource, ObjectsResource, ObjectChildResource
 from resources.relations import RelationsResource
 from resources.server import PingResource, ServerInfoResource
 from resources.search import SearchResource
@@ -137,8 +137,8 @@ def setup_restful_service(app):
     spec.path(resource=RegisterResource, api=api)
 
     # Object endpoints
-    api.add_resource(ObjectListResource, '/object')
-    spec.path(resource=ObjectListResource, api=api)
+    api.add_resource(ObjectsResource, '/object')
+    spec.path(resource=ObjectsResource, api=api)
     api.add_resource(ObjectResource, '/object/<hash64:identifier>')
     spec.path(resource=ObjectResource, api=api)
     api.add_resource(CommentDeleteResource,
@@ -166,22 +166,22 @@ def setup_restful_service(app):
     spec.path(resource=TagListResource, api=api)
 
     # File endpoints
-    api.add_resource(FileListResource, '/file')
-    spec.path(resource=FileListResource, api=api)
+    api.add_resource(FilesResource, '/file')
+    spec.path(resource=FilesResource, api=api)
     api.add_resource(FileResource, '/file/<hash64:identifier>')
     spec.path(resource=FileResource, api=api)
 
     # Config endpoints
-    api.add_resource(ConfigListResource, '/config')
-    spec.path(resource=ConfigListResource, api=api)
+    api.add_resource(ConfigsResource, '/config')
+    spec.path(resource=ConfigsResource, api=api)
     api.add_resource(ConfigStatsResource, '/config/stats')
     spec.path(resource=ConfigStatsResource, api=api)
     api.add_resource(ConfigResource, '/config/<hash64:identifier>')
     spec.path(resource=ConfigResource, api=api)
 
     # Blob endpoints
-    api.add_resource(TextBlobListResource, '/blob')
-    spec.path(resource=TextBlobListResource, api=api)
+    api.add_resource(TextBlobsResource, '/blob')
+    spec.path(resource=TextBlobsResource, api=api)
     api.add_resource(TextBlobResource, '/blob/<hash64:identifier>')
     spec.path(resource=TextBlobResource, api=api)
 

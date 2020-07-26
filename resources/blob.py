@@ -1,3 +1,5 @@
+from flask import request
+
 from werkzeug.exceptions import Conflict
 
 from plugin_engine import hooks
@@ -8,17 +10,36 @@ from model import TextBlob
 from model.object import ObjectTypeConflictError
 
 from schema.blob import (
-    BlobLegacyCreateRequestSchema,
+    BlobLegacyCreateRequestSchema, BlobCreateRequestSchema,
     BlobListResponseSchema, BlobItemResponseSchema
 )
 
 from . import requires_capabilities, requires_authorization
-from .object import ObjectResource, ObjectListResource
+from .object import ObjectUploader, ObjectResource, ObjectsResource
 
 
-class TextBlobListResource(ObjectListResource):
+class TextBlobUploader(ObjectUploader):
+    def _create_object(self, spec, parent, share_with, metakeys):
+        try:
+            return TextBlob.get_or_create(
+                spec["content"],
+                spec["blob_name"],
+                spec["blob_type"],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a blob")
+
+
+class TextBlobsResource(ObjectsResource, TextBlobUploader):
     ObjectType = TextBlob
     ListResponseSchema = BlobListResponseSchema
+    ItemResponseSchema = BlobItemResponseSchema
+
+    on_created = hooks.on_created_text_blob
+    on_reuploaded = hooks.on_reuploaded_text_blob
 
     @requires_authorization
     def get(self):
@@ -61,8 +82,66 @@ class TextBlobListResource(ObjectListResource):
         """
         return super().get()
 
+    @requires_authorization
+    @requires_capabilities(Capabilities.adding_blobs)
+    def post(self):
+        """
+        ---
+        summary: Upload text blob
+        description: |
+            Uploads new text blob.
 
-class TextBlobResource(ObjectResource):
+            Requires `adding_blobs` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - blob
+        requestBody:
+            required: true
+            description: Text blob to be uploaded
+            content:
+              application/json:
+                schema: BlobCreateRequestSchema
+                examples:
+                  simple:
+                    summary: Simple blob upload
+                    value:
+                      blob_name: malwarex_blob123
+                      blob_type: raw_cfg
+                      content: "blob contents"
+                  full:
+                    summary: Fully-featured configuration upload
+                    value:
+                      blob_name: malwarex_blob123
+                      blob_type: raw_cfg
+                      content: "blob contents"
+                      parent: null
+                      upload_as: "*"
+                      metakeys:
+                        - key: string
+                          value: string
+        responses:
+            200:
+                description: Text blob uploaded succesfully
+                content:
+                  application/json:
+                    schema: BlobItemResponseSchema
+            403:
+                description: No permissions to perform additional operations (e.g. adding metakeys)
+            404:
+                description: Specified group doesn't exist
+            409:
+                description: Object exists yet but has different type
+        """
+        schema = BlobCreateRequestSchema()
+        obj = schema.loads(request.get_data(as_text=True))
+
+        if obj and obj.errors:
+            return {"errors": obj.errors}, 400
+        return self.create_object(obj.data)
+
+
+class TextBlobResource(ObjectResource, TextBlobUploader):
     ObjectType = TextBlob
     ItemResponseSchema = BlobItemResponseSchema
 
@@ -98,19 +177,6 @@ class TextBlobResource(ObjectResource):
         """
         return super().get(identifier)
 
-    def _create_object(self, spec, parent, share_with, metakeys):
-        try:
-            return TextBlob.get_or_create(
-                spec.data["content"],
-                spec.data["blob_name"],
-                spec.data["blob_type"],
-                parent=parent,
-                share_with=share_with,
-                metakeys=metakeys
-            )
-        except ObjectTypeConflictError:
-            raise Conflict("Object already exists and is not a blob")
-
     @requires_authorization
     @requires_capabilities(Capabilities.adding_blobs)
     def put(self, identifier):
@@ -124,7 +190,7 @@ class TextBlobResource(ObjectResource):
         security:
             - bearerAuth: []
         tags:
-            - blob
+            - deprecated
         parameters:
             - in: path
               name: identifier

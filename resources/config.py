@@ -12,13 +12,13 @@ from model import Config, db
 from model.object import ObjectTypeConflictError
 
 from schema.config import (
-    ConfigLegacyCreateRequestSchema,
+    ConfigLegacyCreateRequestSchema, ConfigCreateRequestSchema,
     ConfigStatsRequestSchema, ConfigStatsResponseSchema,
     ConfigListResponseSchema, ConfigItemResponseSchema
 )
 
 from . import requires_authorization
-from .object import ObjectResource, ObjectListResource
+from .object import ObjectUploader, ObjectResource, ObjectsResource
 
 
 class ConfigStatsResource(Resource):
@@ -84,9 +84,28 @@ class ConfigStatsResource(Resource):
         return schema.dump({"families": families})
 
 
-class ConfigListResource(ObjectListResource):
+class ConfigUploader(ObjectUploader):
+    def _create_object(self, spec, parent, share_with, metakeys):
+        try:
+            return Config.get_or_create(
+                spec["cfg"],
+                spec["family"],
+                spec["config_type"],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a config")
+
+
+class ConfigsResource(ObjectsResource, ConfigUploader):
     ObjectType = Config
     ListResponseSchema = ConfigListResponseSchema
+    ItemResponseSchema = ConfigItemResponseSchema
+
+    on_created = hooks.on_created_config
+    on_reuploaded = hooks.on_reuploaded_config
 
     @requires_authorization
     def get(self):
@@ -129,8 +148,69 @@ class ConfigListResource(ObjectListResource):
         """
         return super().get()
 
+    @requires_authorization
+    def post(self):
+        """
+        ---
+        summary: Upload config
+        description: Uploads new config.
+        security:
+            - bearerAuth: []
+        tags:
+            - config
+        requestBody:
+            required: true
+            description: Configuration to be uploaded
+            content:
+              application/json:
+                schema: ConfigCreateRequestSchema
+                examples:
+                  simple:
+                    summary: Simple configuration upload
+                    value:
+                      cfg:
+                        family: malwarex
+                        urls: ["http://evil.local"]
+                      family: malwarex
+                  full:
+                    summary: Fully-featured configuration upload
+                    value:
+                      cfg:
+                        family: malwarex
+                        urls: ["http://evil.local"]
+                      family: malwarex
+                      config_type: static
+                      parent: null
+                      upload_as: "*"
+                      metakeys:
+                       - key: string
+                         value: string
+        responses:
+            200:
+                description: Information about uploaded config
+                content:
+                  application/json:
+                    schema: ConfigItemResponseSchema
+            403:
+                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
+            404:
+                description: |
+                    One of attribute keys doesn't exist or user doesn't have permission to set it.
 
-class ConfigResource(ObjectResource):
+                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
+                    with that group
+            409:
+                description: Object exists yet but has different type
+        """
+        schema = ConfigCreateRequestSchema()
+        obj = schema.loads(request.get_data(as_text=True))
+
+        if obj and obj.errors:
+            return {"errors": obj.errors}, 400
+        return self.create_object(obj.data)
+
+
+class ConfigResource(ObjectResource, ConfigUploader):
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
 
@@ -167,19 +247,6 @@ class ConfigResource(ObjectResource):
         """
         return super().get(identifier)
 
-    def _create_object(self, spec, parent, share_with, metakeys):
-        try:
-            return Config.get_or_create(
-                spec.data["cfg"],
-                spec.data["family"],
-                spec.data["config_type"],
-                parent=parent,
-                share_with=share_with,
-                metakeys=metakeys
-            )
-        except ObjectTypeConflictError:
-            raise Conflict("Object already exists and is not a config")
-
     @requires_authorization
     def put(self, identifier):
         """
@@ -189,7 +256,7 @@ class ConfigResource(ObjectResource):
         security:
             - bearerAuth: []
         tags:
-            - config
+            - deprecated
         parameters:
             - in: path
               name: identifier

@@ -1,21 +1,11 @@
-describe('Login test - Malwarecage', function() {
-   it('Visit malwarecage', function () {
-       cy.visit('http://malwarefront:80')
+import { browserLogin } from "./util";
 
-       cy.url()
-           .should('include', '/login')
+describe("Login test - Malwarecage", function () {
+  it("Login test", function () {
+    cy.visit("/");
 
-       cy.get(':nth-child(1) > .form-control')
-           .type('admin')
-           .should('have.value', 'admin')
+    browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-       cy.get(':nth-child(2) > .form-control')
-           .type(Cypress.env('admin_password'))
-           .should('have.value', Cypress.env('admin_password'))
-
-       cy.contains('Submit').click()
-       cy.contains('Logged as: admin')
-
-       cy.contains('Logout').click()
-   })
-})
+    cy.contains("Logout").click();
+  });
+});

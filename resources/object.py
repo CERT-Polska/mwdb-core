@@ -14,7 +14,7 @@ from schema.object import (
     ObjectItemResponseSchema
 )
 
-from . import logger, requires_authorization, requires_capabilities
+from . import logger, requires_authorization, requires_capabilities, access_object
 
 
 def list_objects(object_type, response_schema, response_key):
@@ -257,7 +257,7 @@ class ObjectChildResource(Resource):
               schema:
                 type: string
                 enum: [file, config, blob, object]
-              description: Type of object (ignored)
+              description: Type of parent object
             - in: path
               name: parent
               description: Identifier of the parent object
@@ -278,7 +278,7 @@ class ObjectChildResource(Resource):
             404:
                 description: When one of objects doesn't exist or user doesn't have access to object.
         """
-        parent_object = Object.access(parent)
+        parent_object = access_object(type, parent)
         if parent_object is None:
             raise NotFound("Parent object not found")
 

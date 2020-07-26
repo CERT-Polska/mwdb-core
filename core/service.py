@@ -36,6 +36,8 @@ from resources.user import (
     UserGetPasswordChangeTokenResource
 )
 
+from schema.tag import TagItemResponseSchema
+
 from . import log
 from .apispec_utils import ApispecFlaskRestful
 
@@ -139,7 +141,7 @@ def setup_restful_service(app):
     # Object endpoints
     api.add_resource(ObjectsResource, '/object')
     spec.path(resource=ObjectsResource, api=api)
-    api.add_resource(ObjectResource, '/object/<string:identifier>')
+    api.add_resource(ObjectResource, '/object/<hash64:identifier>')
     spec.path(resource=ObjectResource, api=api)
     api.add_resource(CommentDeleteResource,
                      '/<any(file, config, blob, object):type>/<hash64:identifier>/comment/<int:comment_id>',
@@ -168,7 +170,7 @@ def setup_restful_service(app):
     # File endpoints
     api.add_resource(FilesResource, '/file')
     spec.path(resource=FilesResource, api=api)
-    api.add_resource(FileResource, '/file/<string:identifier>')
+    api.add_resource(FileResource, '/file/<hash64:identifier>')
     spec.path(resource=FileResource, api=api)
 
     # Config endpoints
@@ -228,4 +230,7 @@ def setup_restful_service(app):
     spec.path(resource=GroupResource, api=api)
     api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
     spec.path(resource=GroupMemberResource, api=api)
+
+    # Additional schemas
+    spec.components.schema("TagItemResponse", schema=TagItemResponseSchema)
     return api, spec

@@ -17,4 +17,6 @@ postgres-vars.env
 # These directories are user-controlled
 /plugins
 /mail_templates
+tests/frontend/cypress/videos/
+tests/frontend/cypress/screenshots/
 

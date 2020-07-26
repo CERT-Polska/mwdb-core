@@ -4,7 +4,7 @@ from .object import (
     ObjectCreateRequestSchemaBase,
     ObjectLegacyMetakeysMixin,
     ObjectListItemResponseSchema,
-    ObjectListResponseSchema,
+    ObjectListResponseSchemaBase,
     ObjectItemResponseSchema
 )
 from .config import ConfigItemResponseSchema
@@ -27,9 +27,8 @@ class FileListItemResponseSchema(ObjectListItemResponseSchema):
     sha256 = fields.Str(required=True, allow_none=False)
 
 
-class FileListResponseSchema(ObjectListResponseSchema):
+class FileListResponseSchema(ObjectListResponseSchemaBase, FileListItemResponseSchema):
     __envelope_key__ = "files"
-    __item_schewa__ = FileListItemResponseSchema
 
 
 class FileItemResponseSchema(ObjectItemResponseSchema):

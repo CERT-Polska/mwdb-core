@@ -4,7 +4,7 @@ from .object import (
     ObjectCreateRequestSchemaBase,
     ObjectLegacyMetakeysMixin,
     ObjectListItemResponseSchema,
-    ObjectListResponseSchema,
+    ObjectListResponseSchemaBase,
     ObjectItemResponseSchema,
 )
 
@@ -28,9 +28,8 @@ class ConfigListItemResponseSchema(ObjectListItemResponseSchema):
     config_type = fields.Str(required=True, allow_none=False)
 
 
-class ConfigListResponseSchema(ObjectListResponseSchema):
+class ConfigListResponseSchema(ObjectListResponseSchemaBase, ConfigListItemResponseSchema):
     __envelope_key__ = "configs"
-    __item_schewa__ = ConfigListItemResponseSchema
 
 
 class ConfigItemResponseSchema(ObjectItemResponseSchema):

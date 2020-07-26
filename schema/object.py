@@ -51,15 +51,19 @@ class ObjectListItemResponseSchema(Schema):
     upload_time = fields.DateTime(required=True, allow_none=False)
 
 
-class ObjectListResponseSchema(Schema):
+class ObjectListResponseSchemaBase(Schema):
     __envelope_key__ = "objects"
-    __item_schewa__ = ObjectListItemResponseSchema
 
     @post_dump(pass_many=True)
     def wrap_with_envelope(self, data, many):
+        print(data, flush=True)
         if not many:
             raise ValueError("Schema supports only lists of objects")
         return {self.__envelope_key__: data}
+
+
+class ObjectListResponseSchema(ObjectListResponseSchemaBase, ObjectListItemResponseSchema):
+    pass
 
 
 class ObjectItemResponseSchema(Schema):

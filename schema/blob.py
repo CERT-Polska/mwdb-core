@@ -4,7 +4,7 @@ from .object import (
     ObjectCreateRequestSchemaBase,
     ObjectLegacyMetakeysMixin,
     ObjectListItemResponseSchema,
-    ObjectListResponseSchema,
+    ObjectListResponseSchemaBase,
     ObjectItemResponseSchema,
 )
 from .config import ConfigItemResponseSchema
@@ -27,9 +27,8 @@ class BlobListItemResponseSchema(ObjectListItemResponseSchema):
     last_seen = fields.DateTime(required=True, allow_none=False)
 
 
-class BlobListResponseSchema(ObjectListResponseSchema):
+class BlobListResponseSchema(ObjectListResponseSchemaBase, BlobListItemResponseSchema):
     __envelope_key__ = "blobs"
-    __item_schewa__ = BlobListItemResponseSchema
 
 
 class BlobItemResponseSchema(ObjectItemResponseSchema):

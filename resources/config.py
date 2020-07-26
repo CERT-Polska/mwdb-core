@@ -2,8 +2,7 @@ from datetime import datetime, timedelta
 
 from flask import request
 from flask_restful import Resource
-
-from werkzeug.exceptions import Conflict
+from werkzeug.exceptions import BadRequest, Conflict
 
 from sqlalchemy import func
 
@@ -12,7 +11,11 @@ from plugin_engine import hooks
 from model import Config, db
 from model.object import ObjectTypeConflictError
 
-from core.schema import ConfigShowSchema, MultiConfigSchema, ConfigStatsSchema
+from schema.config import (
+    ConfigLegacyCreateRequestSchema,
+    ConfigStatsRequestSchema, ConfigStatsResponseSchema,
+    ConfigListResponseSchema, ConfigItemResponseSchema
+)
 
 from . import requires_authorization
 from .object import ObjectResource, ObjectListResource
@@ -42,35 +45,48 @@ class ConfigStatsResource(Resource):
                 description: Static configuration global statistics
                 content:
                   application/json:
-                    schema: ConfigStatsSchema
+                    schema: ConfigStatsResponseSchema
         """
-        from_time = request.args.get('range', '*')
+        schema = ConfigStatsRequestSchema()
+        params = schema.load(request.args)
+
+        if params and params.errors:
+            return {"errors": params.errors}, 400
+
+        from_time = params.data["range"]
         if from_time.endswith("h"):
             from_time = int(from_time[:-1])
         elif from_time.endswith("d"):
             from_time = int(from_time[:-1]) * 24
+        elif from_time != "*":
+            raise BadRequest("Wrong range format")
 
-        query = db.session\
-            .query(Config.family,
-                   func.max(Config.upload_time).label('maxdate'),
-                   func.count())\
-            .group_by(Config.family)
+        query = (
+            db.session.query(
+                Config.family,
+                func.max(Config.upload_time).label('maxdate'),
+                func.count()
+            ).group_by(Config.family)
+        )
 
         if from_time != "*":
             query = query.filter(Config.upload_time > (datetime.now() - timedelta(hours=from_time)))
 
-        families = [{"family": family,
-                     "last_upload": upload_time,
-                     "count": count} for family, upload_time, count in query.all()]
+        families = [
+            {
+                "family": family,
+                "last_upload": upload_time,
+                "count": count
+            } for family, upload_time, count in query.all()
+        ]
 
-        schema = ConfigStatsSchema()
+        schema = ConfigStatsResponseSchema()
         return schema.dump({"families": families})
 
 
 class ConfigListResource(ObjectListResource):
     ObjectType = Config
-    Schema = MultiConfigSchema
-    SchemaKey = "configs"
+    ListResponseSchema = ConfigListResponseSchema
 
     @requires_authorization
     def get(self):
@@ -102,22 +118,23 @@ class ConfigListResource(ObjectListResource):
               required: false
         responses:
             200:
-                description: List of files
+                description: List of configs
                 content:
                   application/json:
-                    schema: MultiConfigSchema
+                    schema: ConfigListResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occured in Lucene query
+                description: When wrong parameters were provided or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
-        return super(ConfigListResource, self).get()
+        return super().get()
 
 
 class ConfigResource(ObjectResource):
     ObjectType = Config
-    ObjectTypeStr = Config.__tablename__
-    Schema = ConfigShowSchema
+    ItemResponseSchema = ConfigItemResponseSchema
+
+    CreateRequestSchema = ConfigLegacyCreateRequestSchema
     on_created = hooks.on_created_config
     on_reuploaded = hooks.on_reuploaded_config
 
@@ -143,19 +160,22 @@ class ConfigResource(ObjectResource):
                 description: Config information and contents
                 content:
                   application/json:
-                    schema: ConfigShowSchema
+                    schema: ConfigItemResponseSchema
             404:
                 description: |
                     When config doesn't exist, object is not a config or user doesn't have access to this object.
         """
-        return super(ConfigResource, self).get(identifier)
+        return super().get(identifier)
 
-    def create_object(self, obj):
+    def _create_object(self, spec, parent, share_with, metakeys):
         try:
             return Config.get_or_create(
-                obj.data["cfg"],
-                obj.data["family"],
-                obj.data.get("config_type", "static")
+                spec.data["cfg"],
+                spec.data["family"],
+                spec.data.get("config_type", "static"),
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")
@@ -178,6 +198,7 @@ class ConfigResource(ObjectResource):
               default: root
               description: |
                 Parent object identifier or `root` if there is no parent.
+
                 User must have `adding_parents` capability to specify a parent object.
         requestBody:
             required: true
@@ -188,12 +209,19 @@ class ConfigResource(ObjectResource):
                   description: Configuration to be uploaded with additional parameters (verbose mode)
                   properties:
                     json:
-                      type: string
-                      description: JSON-encoded configuration contents to be uploaded
+                      schema: ConfigLegacyCreateRequestSchema
+                      description: JSON-encoded config object specification
                     metakeys:
-                      type: string
+                      type: object
+                      properties:
+                          metakeys:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/MetakeyItemRequest'
                       description: |
-                        Optional JSON-encoded `MetakeyShowSchema`. User must be allowed to set specified attribute keys.
+                        Attributes to be added after file upload
+
+                        User must be allowed to set specified attribute keys.
                     upload_as:
                       type: string
                       default: '*'
@@ -205,25 +233,13 @@ class ConfigResource(ObjectResource):
                   required:
                     - json
               application/json:
-                schema:
-                  type: object
-                  description: Configuration to be uploaded (simple mode)
-                  properties:
-                    family:
-                      type: string
-                      description: Malware family related with configuration
-                    config_type:
-                      type: string
-                      description: Config type (static, dynamic, other)
-                      default: static
-                  required:
-                    - family
+                schema: ConfigLegacyCreateRequestSchema
         responses:
             200:
                 description: Information about uploaded config
                 content:
                   application/json:
-                    schema: ConfigShowSchema
+                    schema: ConfigItemResponseSchema
             403:
                 description: No permissions to perform additional operations (e.g. adding parent, metakeys)
             404:
@@ -235,4 +251,4 @@ class ConfigResource(ObjectResource):
             409:
                 description: Object exists yet but has different type
         """
-        return super(ConfigResource, self).put(identifier)
+        return super().put(identifier)

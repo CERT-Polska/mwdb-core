@@ -172,7 +172,7 @@ class ConfigResource(ObjectResource):
             return Config.get_or_create(
                 spec.data["cfg"],
                 spec.data["family"],
-                spec.data.get("config_type", "static"),
+                spec.data["static"],
                 parent=parent,
                 share_with=share_with,
                 metakeys=metakeys

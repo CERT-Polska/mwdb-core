@@ -273,7 +273,9 @@ class DatetimeField(BaseField):
             )
 
         if isinstance(expression, Range):
-            if not (expression.include_low and expression.include_high):
+            if expression.high.value != "*" and not expression.include_high:
+                raise UnsupportedGrammarException("Exclusive range is not allowed for date-time field")
+            if expression.low.value != "*" and not expression.include_low:
                 raise UnsupportedGrammarException("Exclusive range is not allowed for date-time field")
             if expression.low.value == "*" and expression.high.value == "*":
                 return True

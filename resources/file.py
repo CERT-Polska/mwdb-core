@@ -7,7 +7,10 @@ from model import File
 from model.file import EmptyFileError
 from model.object import ObjectTypeConflictError
 
-from core.schema import FileShowSchema, MultiFileShowSchema
+from schema.file import (
+    FileLegacyCreateRequestSchema,
+    FileListResponseSchema, FileItemResponseSchema
+)
 
 from . import requires_authorization
 from .object import ObjectResource, ObjectListResource
@@ -15,8 +18,7 @@ from .object import ObjectResource, ObjectListResource
 
 class FileListResource(ObjectListResource):
     ObjectType = File
-    Schema = MultiFileShowSchema
-    SchemaKey = "files"
+    ListResponseSchema = FileListResponseSchema
 
     @requires_authorization
     def get(self):
@@ -51,19 +53,20 @@ class FileListResource(ObjectListResource):
                 description: List of files
                 content:
                   application/json:
-                    schema: MultiFileShowSchema
+                    schema: FileListResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occured in Lucene query
+                description: When wrong parameters were provided or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
-        return super(FileListResource, self).get()
+        return super().get()
 
 
 class FileResource(ObjectResource):
     ObjectType = File
-    ObjectTypeStr = File.__tablename__
-    Schema = FileShowSchema
+    ItemResponseSchema = FileItemResponseSchema
+
+    CreateRequestSchema = FileLegacyCreateRequestSchema
     on_created = hooks.on_created_file
     on_reuploaded = hooks.on_reuploaded_file
 
@@ -89,15 +92,20 @@ class FileResource(ObjectResource):
                 description: Information about file
                 content:
                   application/json:
-                    schema: FileShowSchema
+                    schema: FileItemResponseSchema
             404:
                 description: When file doesn't exist, object is not a file or user doesn't have access to this object.
         """
-        return super(FileResource, self).get(identifier)
+        return super().get(identifier)
 
-    def create_object(self, obj):
+    def _create_object(self, spec, parent, share_with, metakeys):
         try:
-            return File.get_or_create(request.files["file"])
+            return File.get_or_create(
+                request.files["file"],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
+            )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a file")
         except EmptyFileError:
@@ -134,14 +142,17 @@ class FileResource(ObjectResource):
                       type: string
                       format: binary
                       description: File contents to be uploaded
-                    json:
-                      type: string
-                      description: |
-                        Additional JSON-encoded information about object (ignored for files)
                     metakeys:
-                      type: string
+                      type: object
+                      properties:
+                          metakeys:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/MetakeyItemRequest'
                       description: |
-                        Optional JSON-encoded `MetakeyShowSchema`. User must be allowed to set specified attribute keys.
+                        Attributes to be added after file upload
+
+                        User must be allowed to set specified attribute keys.
                     upload_as:
                       type: string
                       default: '*'
@@ -157,7 +168,7 @@ class FileResource(ObjectResource):
                 description: Information about uploaded file
                 content:
                   application/json:
-                    schema: FileShowSchema
+                    schema: FileItemResponseSchema
             403:
                 description: No permissions to perform additional operations (e.g. adding parent, metakeys)
             404:
@@ -169,4 +180,4 @@ class FileResource(ObjectResource):
             409:
                 description: Object exists yet but has different type
         """
-        return super(FileResource, self).post(identifier)
+        return super().post(identifier)

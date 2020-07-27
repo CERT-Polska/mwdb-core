@@ -303,10 +303,10 @@ class DatetimeField(BaseField):
                 return True
             if expression.low.value == "*":
                 high = self._get_date_range(expression.high)[1]
-                return self.column < high
+                return self.column <= high
             if expression.high.value == "*":
                 low = self._get_date_range(expression.low)[0]
-                return self.column > low
+                return self.column >= low
 
             low = self._get_date_range(expression.low)[0]
             high = self._get_date_range(expression.high)[1]

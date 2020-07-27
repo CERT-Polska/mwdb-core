@@ -2,16 +2,6 @@ import re
 from marshmallow import Schema, fields, validates_schema, ValidationError
 
 
-class ServerInfoSchema(Schema):
-    server_version = fields.Str()
-    is_authenticated = fields.Boolean()
-    is_maintenance_set = fields.Boolean()
-    is_registration_enabled = fields.Boolean()
-    recaptcha_site_key = fields.Str()
-    base_url = fields.Str()
-    active_plugins = fields.Dict()
-
-
 class MetakeySchemaBase(Schema):
     key = fields.Str()
 
@@ -173,10 +163,6 @@ class ShareShowSchema(Schema):
 
 class SearchSchema(Schema):
     query = fields.Str()
-
-
-class PingStatusSchema(Schema):
-    status = fields.Str(required=True)
 
 
 class ConfigStatsEntry(Schema):

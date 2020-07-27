@@ -50,7 +50,7 @@ class ConfigStatsResource(Resource):
         schema = ConfigStatsRequestSchema()
         params = schema.load(request.args)
 
-        if params and params.errors:
+        if params.errors:
             return {"errors": params.errors}, 400
 
         from_time = params.data["range"]

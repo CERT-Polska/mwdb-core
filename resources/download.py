@@ -1,12 +1,9 @@
 from flask import current_app, send_file
 from flask_restful import Resource
-from itsdangerous import TimedJSONWebSignatureSerializer, BadSignature, SignatureExpired
 from werkzeug.exceptions import Forbidden, NotFound
 
 from model import File
-from core.config import app_config
-from core.schema import URLReturnSchema
-from core.util import get_sample_path
+from schema.download import DownloadURLResponseSchema
 
 from . import requires_authorization
 
@@ -38,18 +35,12 @@ class DownloadResource(Resource):
                       type: string
                       format: binary
             403:
-                description: When file download token is not valid
+                description: When file download token is no longer valid
         """
-        s = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key)
-        try:
-            download_req = s.loads(access_token)
-        except SignatureExpired:
-            raise Forbidden('Download URL valid but expired, please re-request download.')
-        except BadSignature:
-            raise Forbidden('Invalid download URL.')
-
-        sample_sha256 = download_req['identifier']
-        return send_file(get_sample_path(sample_sha256), attachment_filename=sample_sha256, as_attachment=True)
+        file_obj = File.get_by_download_token(access_token)
+        if not file_obj:
+            raise Forbidden('Download token expired, please re-request download.')
+        return send_file(file_obj.get_path(), attachment_filename=file_obj.sha256, as_attachment=True)
 
 
 class RequestSampleDownloadResource(Resource):
@@ -75,7 +66,7 @@ class RequestSampleDownloadResource(Resource):
                 description: Absolute download URL for the sample, valid for 60 seconds
                 content:
                   application/json:
-                    schema: URLReturnSchema
+                    schema: DownloadURLResponseSchema
             404:
                 description: When file doesn't exist, object is not a file or user doesn't have access to this object.
         """
@@ -85,9 +76,7 @@ class RequestSampleDownloadResource(Resource):
         if file is None:
             raise NotFound("Object not found")
 
-        s = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key, expires_in=60)
-        obj = s.dumps({'identifier': file.sha256})
-
-        schema = URLReturnSchema()
-        url = get_url_for(current_app, DownloadResource, access_token=obj.decode("utf-8"))
+        download_token = file.generate_download_token()
+        schema = DownloadURLResponseSchema()
+        url = get_url_for(current_app, DownloadResource, access_token=download_token.decode())
         return schema.dump({"url": url})

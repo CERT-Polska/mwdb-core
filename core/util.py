@@ -1,5 +1,4 @@
 import os
-import re
 
 import magic
 import ssdeep
@@ -9,8 +8,6 @@ from zlib import crc32
 from flask_restful import abort
 from flask_sqlalchemy import Pagination
 from werkzeug.routing import BaseConverter
-
-from core.config import app_config
 import hashlib
 
 
@@ -95,19 +92,6 @@ def paginate_fast(q, page, per_page):
         abort(404)
 
     return Pagination(q, page, per_page, 0, items)
-
-
-def get_sample_path(sample_sha256):
-    upload_root = app_config.malwarecage.uploads_folder
-    sample_sha256 = sample_sha256.lower()
-
-    if not re.match('^[a-f0-9]{64}$', sample_sha256):
-        raise RuntimeError('Not a valid sha256 hash provided as argument: {}'.format(sample_sha256))
-
-    # example: uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
-    subdir_path = os.path.join(upload_root, *list(sample_sha256)[0:4])
-    os.makedirs(subdir_path, mode=0o755, exist_ok=True)
-    return os.path.join(subdir_path, sample_sha256)
 
 
 def is_true(flag):

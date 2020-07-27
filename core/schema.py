@@ -2,16 +2,6 @@ import re
 from marshmallow import Schema, fields, validates_schema, ValidationError
 
 
-class ServerInfoSchema(Schema):
-    server_version = fields.Str()
-    is_authenticated = fields.Boolean()
-    is_maintenance_set = fields.Boolean()
-    is_registration_enabled = fields.Boolean()
-    recaptcha_site_key = fields.Str()
-    base_url = fields.Str()
-    active_plugins = fields.Dict()
-
-
 class MetakeySchemaBase(Schema):
     key = fields.Str()
 
@@ -150,29 +140,6 @@ class MultiFileShowSchema(Schema):
 
 class URLReturnSchema(Schema):
     url = fields.Str()
-
-
-class ShareSchema(Schema):
-    group = fields.Str()
-
-
-class ShareObjectSchema(Schema):
-    group_name = fields.Str()
-    access_time = fields.DateTime()
-    reason_type = fields.Str()
-    access_reason = fields.Str()  # backwards compatibility
-    related_object_dhash = fields.Str()
-    related_object_type = fields.Str()
-    related_user_login = fields.Str()
-
-
-class ShareShowSchema(Schema):
-    groups = fields.List(fields.Str())
-    shares = fields.Nested(ShareObjectSchema, many=True)
-
-
-class PingStatusSchema(Schema):
-    status = fields.Str(required=True)
 
 
 class ConfigStatsEntry(Schema):

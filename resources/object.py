@@ -91,7 +91,7 @@ class ObjectListResource(Resource):
         )
         if pivot_obj:
             db_query = db_query.filter(Object.id < pivot_obj.id)
-        # Legacy parameter - to be removed in future
+        # Legacy parameter - to be removed in the future
         elif obj.data["page"] is not None and obj.data["page"] > 1:
             db_query = db_query.offset((obj.data["page"] - 1) * 10)
 

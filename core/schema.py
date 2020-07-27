@@ -142,10 +142,6 @@ class URLReturnSchema(Schema):
     url = fields.Str()
 
 
-class SearchSchema(Schema):
-    query = fields.Str()
-
-
 class ConfigStatsEntry(Schema):
     family = fields.Str(required=True)
     last_upload = fields.Date(required=True)

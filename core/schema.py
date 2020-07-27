@@ -142,25 +142,6 @@ class URLReturnSchema(Schema):
     url = fields.Str()
 
 
-class ShareSchema(Schema):
-    group = fields.Str()
-
-
-class ShareObjectSchema(Schema):
-    group_name = fields.Str()
-    access_time = fields.DateTime()
-    reason_type = fields.Str()
-    access_reason = fields.Str()  # backwards compatibility
-    related_object_dhash = fields.Str()
-    related_object_type = fields.Str()
-    related_user_login = fields.Str()
-
-
-class ShareShowSchema(Schema):
-    groups = fields.List(fields.Str())
-    shares = fields.Nested(ShareObjectSchema, many=True)
-
-
 class SearchSchema(Schema):
     query = fields.Str()
 

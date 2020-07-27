@@ -447,3 +447,20 @@ class Object(db.Model):
         'polymorphic_identity': __tablename__,
         'polymorphic_on': type
     }
+
+    def get_shares(self):
+        """
+        Gets all object shares visible for currently authenticated user
+        :rtype: List[ObjectPermission]
+        """
+        permission_filter = (ObjectPermission.object_id == self.id)
+
+        if not g.auth_user.has_rights(Capabilities.sharing_objects):
+            permission_filter = and_(permission_filter, g.auth_user.is_member(ObjectPermission.group_id))
+
+        shares = (
+            db.session.query(ObjectPermission)
+                      .filter(permission_filter)
+                      .order_by(ObjectPermission.access_time.desc())
+        ).all()
+        return shares

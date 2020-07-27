@@ -215,8 +215,13 @@ class MwdbTest(object):
         return res.json()
 
     def add_attribute_definition(self, key, template, hidden=False):
-        res = self.session.put(self.mwdb_url + '/meta/manage/' + key, json={'key': key, 'template': template,
-                                                                            'hidden': hidden})
+        res = self.session.put(self.mwdb_url + '/meta/manage/' + key,
+                               json={
+                                   'label': '',
+                                   'description': '',
+                                   'template': template,
+                                   'hidden': hidden
+                               })
         res.raise_for_status()
         return res.json()
 
@@ -227,7 +232,7 @@ class MwdbTest(object):
 
     def add_attribute_permission(self, key, group, can_read, can_set):
         res = self.session.put(self.mwdb_url + '/meta/manage/' + key + '/permissions/' + group,
-                               json={'group_name': group, 'can_read': can_read, 'can_set': can_set})
+                               json={'can_read': can_read, 'can_set': can_set})
         res.raise_for_status()
         return res.json()
 

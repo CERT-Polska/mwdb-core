@@ -1,10 +1,14 @@
 from flask import g
 from flask_restful import Resource
+
 from version import app_build_version
 from plugin_engine import active_plugins
 
 from core.config import app_config
-from core.schema import PingStatusSchema, ServerInfoSchema
+from schema.server import (
+    ServerPingResponseSchema,
+    ServerInfoResponseSchema
+)
 
 
 class PingResource(Resource):
@@ -20,9 +24,11 @@ class PingResource(Resource):
               description: Successful ping response
               content:
                 application/json:
-                  schema: PingStatusSchema
+                  schema: ServerPingResponseSchema
+                  example:
+                    status: ok
         """
-        schema = PingStatusSchema()
+        schema = ServerPingResponseSchema()
         return schema.dump({"status": "ok"})
 
 
@@ -31,17 +37,17 @@ class ServerInfoResource(Resource):
         """
         ---
         summary: Get server information
-        description: Returns server information with frontend configuration
+        description: Returns server information with public configuration
         tags:
             - server
         responses:
             200:
-              description: server info with frontend configuration
+              description: Server info with public configuration
               content:
                 application/json:
-                  schema: ServerInfoSchema
+                  schema: ServerInfoResponseSchema
         """
-        schema = ServerInfoSchema()
+        schema = ServerInfoResponseSchema()
         return schema.dump({
             "server_version": app_build_version,
             "is_authenticated": bool(g.auth_user),

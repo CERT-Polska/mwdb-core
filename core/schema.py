@@ -171,10 +171,6 @@ class ShareShowSchema(Schema):
     shares = fields.Nested(ShareObjectSchema, many=True)
 
 
-class SearchSchema(Schema):
-    query = fields.Str()
-
-
 class PingStatusSchema(Schema):
     status = fields.Str(required=True)
 

@@ -251,7 +251,7 @@ class ObjectChildResource(Resource):
         security:
             - bearerAuth: []
         tags:
-            - object
+            - relations
         parameters:
             - in: path
               name: type

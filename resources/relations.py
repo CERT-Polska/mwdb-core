@@ -1,26 +1,25 @@
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
-from core.schema import RelationsSchema
+from schema.relations import RelationsResponseSchema
 
-from . import access_object, deprecated, requires_authorization
+from . import access_object, requires_authorization
 
 
 class RelationsResource(Resource):
-    @deprecated
     @requires_authorization
     def get(self, type, identifier):
         """
         ---
-        summary: Get object relations (deprecated)
+        summary: Get object relations
         description: |
             Returns relations attached to an object.
 
-            Deprecated: relations are already available via simple object get.
+            Note: relations are already available via simple object get.
         security:
             - bearerAuth: []
         tags:
-            - deprecated
+            - relations
         parameters:
             - in: path
               name: type
@@ -38,7 +37,7 @@ class RelationsResource(Resource):
                 description: Relations object
                 content:
                   application/json:
-                    schema: RelationsSchema
+                    schema: RelationsResponseSchema
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
@@ -46,6 +45,5 @@ class RelationsResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        relations = RelationsSchema()
-        dumped_relations = relations.dump(db_object)
-        return dumped_relations
+        relations = RelationsResponseSchema()
+        return relations.dump(db_object)

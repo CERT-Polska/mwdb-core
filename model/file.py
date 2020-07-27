@@ -98,7 +98,7 @@ class File(Object):
         serializer = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key)
         try:
             download_req = serializer.loads(download_token)
-            return File.access(download_req["identifier"])
+            return File.get(download_req["identifier"]).first()
         except SignatureExpired:
             return None
         except BadSignature:

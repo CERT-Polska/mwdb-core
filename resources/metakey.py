@@ -297,7 +297,7 @@ class MetakeyDefinitionManageResource(Resource):
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        metakey_definition = MetakeyDefinition(key=key,
+        metakey_definition = MetakeyDefinition(key=args_obj.data["key"],
                                                url_template=obj.data["url_template"],
                                                label=obj.data["label"],
                                                description=obj.data["description"],
@@ -366,16 +366,18 @@ class MetakeyPermissionResource(Resource):
         if obj.errors:
             return {"errors": obj.errors}, 400
 
-        metakey_definition = db.session.query(MetakeyDefinition).filter(MetakeyDefinition.key == key).first()
+        metakey_definition = db.session.query(MetakeyDefinition).filter(
+            MetakeyDefinition.key == args_obj.data["key"]
+        ).first()
         if metakey_definition is None:
             raise NotFound("No such metakey")
 
-        group = db.session.query(Group).filter(Group.name == group_name).first()
+        group = db.session.query(Group).filter(Group.name == args_obj.data["group_name"]).first()
         if group is None:
             raise NotFound("No such group")
 
         permission = MetakeyPermission(
-            key=key,
+            key=args_obj.data["key"],
             group_id=group.id,
             can_read=obj.data["can_read"],
             can_set=obj.data["can_set"]
@@ -428,12 +430,12 @@ class MetakeyPermissionResource(Resource):
         if args_obj.errors:
             return {"errors": args_obj.errors}, 400
 
-        group = db.session.query(Group).filter(Group.name == group_name).first()
+        group = db.session.query(Group).filter(Group.name == args_obj.data["group_name"]).first()
         if group is None:
             raise NotFound("No such group")
 
         metakey_permission = db.session.query(MetakeyPermission).filter(
-            MetakeyPermission.key == key,
+            MetakeyPermission.key == args_obj.data["key"],
             MetakeyPermission.group_id == group.id).first()
 
         if metakey_permission is None:

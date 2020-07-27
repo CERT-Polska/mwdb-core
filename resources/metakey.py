@@ -133,7 +133,7 @@ class MetakeyResource(Resource):
         value = obj.data['value']
         is_new = db_object.add_metakey(key, value)
         if is_new is None:
-            raise NotFound(f"Metakey '{key}' not defined or insufficient permissions to set that one")
+            raise NotFound(f"Metakey '{key}' is not defined or you have insufficient permissions to set it")
 
         db.session.commit()
         db.session.refresh(db_object)

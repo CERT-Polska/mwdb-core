@@ -1,22 +1,26 @@
+import json
+
 from flask import request, g
 from flask_restful import Resource
 from luqum.parser import ParseError
-from werkzeug.exceptions import Forbidden, BadRequest, MethodNotAllowed, Conflict, NotFound
+from werkzeug.exceptions import Forbidden, BadRequest, MethodNotAllowed, NotFound
 
-from model.object import AccessType
 from plugin_engine import hooks
-from model import db, Object, Group
+from model import db, Object, Group, MetakeyDefinition
 from core.capabilities import Capabilities
-from core.schema import ObjectShowBase, MetakeyShowSchema, MultiObjectSchema
 from core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
+
+from schema.object import (
+    ObjectListRequestSchema, ObjectListResponseSchema,
+    ObjectItemResponseSchema
+)
 
 from . import logger, requires_authorization, requires_capabilities, access_object
 
 
 class ObjectListResource(Resource):
     ObjectType = Object
-    Schema = MultiObjectSchema
-    SchemaKey = "objects"
+    ListResponseSchema = ObjectListResponseSchema
 
     @requires_authorization
     def get(self):
@@ -51,28 +55,26 @@ class ObjectListResource(Resource):
                 description: List of objects
                 content:
                   application/json:
-                    schema: MultiObjectSchema
+                    schema: ObjectListResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occured in Lucene query
+                description: When wrong parameters were provided or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
-        if 'page' in request.args and 'older_than' in request.args:
-            raise BadRequest("page and older_than can't be used simultaneously. Use `older_than` for new code.")
-
         if 'page' in request.args:
             logger.warning("'%s' used legacy 'page' parameter", g.auth_user.login)
 
-        page = max(1, int(request.args.get('page', 1)))
-        query = request.args.get('query')
+        obj = ObjectListRequestSchema().load(request.args)
+        if obj.errors:
+            return {"errors": obj.errors}, 400
 
         pivot_obj = None
-        older_than = request.args.get('older_than')
-        if older_than:
-            pivot_obj = Object.access(older_than)
+        if obj.data["older_than"]:
+            pivot_obj = Object.access(obj.data["older_than"])
             if pivot_obj is None:
-                raise NotFound("Object provided in 'older_than' not found")
+                raise NotFound("Object specified in 'older_than' parameter not found")
 
+        query = obj.data["query"]
         if query:
             try:
                 db_query = SQLQueryBuilder().build_query(query, queried_type=self.ObjectType)
@@ -89,21 +91,21 @@ class ObjectListResource(Resource):
         )
         if pivot_obj:
             db_query = db_query.filter(Object.id < pivot_obj.id)
-        # Legacy parameter - to be removed
-        elif page > 1:
-            db_query = db_query.offset((page - 1) * 10)
+        # Legacy parameter - to be removed in the future
+        elif obj.data["page"] is not None and obj.data["page"] > 1:
+            db_query = db_query.offset((obj.data["page"] - 1) * 10)
 
-        db_query = db_query.limit(10)
-        objects = db_query.all()
+        objects = db_query.limit(10).all()
 
-        schema = self.Schema()
-        return schema.dump({self.SchemaKey: objects})
+        schema = self.ListResponseSchema()
+        return schema.dump(objects, many=True)
 
 
 class ObjectResource(Resource):
     ObjectType = Object
-    ObjectTypeStr = Object.__tablename__
-    Schema = ObjectShowBase
+    ItemResponseSchema = ObjectItemResponseSchema
+
+    CreateRequestSchema = None
     on_created = None
     on_reuploaded = None
 
@@ -111,7 +113,7 @@ class ObjectResource(Resource):
     def get(self, identifier):
         """
         ---
-        summary: Get object
+        summary: Get object information
         description: |
             Returns information about object
         security:
@@ -129,117 +131,109 @@ class ObjectResource(Resource):
                 description: Information about object
                 content:
                   application/json:
-                    schema: ObjectShowBase
+                    schema: ObjectItemResponseSchema
             404:
                 description: When object doesn't exist or user doesn't have access to this object.
         """
-        schema = self.Schema()
         obj = self.ObjectType.access(identifier)
         if obj is None:
             raise NotFound("Object not found")
+        schema = self.ItemResponseSchema()
         return schema.dump(obj)
 
-    def create_object(self, obj):
+    def _create_object(self, spec, parent, share_with, metakeys):
         raise NotImplementedError()
+
+    def _get_upload_args(self, parent_identifier):
+        """
+        Transforms upload arguments mixed into various request fields
+        """
+        if request.is_json:
+            # If request is application/json: all args are in JSON
+            args = json.loads(request.get_data(parse_form_data=True, as_text=True))
+        else:
+            if 'json' in request.form:
+                # If request is multipart/form-data: some args are in JSON and some are part of form
+                args = json.loads(request.form["json"])
+            else:
+                args = {}
+            if request.form.get('metakeys'):
+                args["metakeys"] = request.form["metakeys"]
+            if request.form.get('upload_as'):
+                args["upload_as"] = request.form["upload_as"]
+        args["parent"] = parent_identifier if parent_identifier != "root" else None
+        return args
 
     @requires_authorization
     def post(self, identifier):
         if self.ObjectType is Object:
             raise MethodNotAllowed()
 
-        schema = self.Schema()
-
-        if request.is_json:
-            obj = schema.loads(request.get_data(parse_form_data=True, as_text=True))
-        elif 'json' in request.form:
-            obj = schema.loads(request.form["json"])
-        else:
-            obj = None
-
+        schema = self.CreateRequestSchema()
+        obj = schema.load(self._get_upload_args(identifier))
         if obj and obj.errors:
             return {"errors": obj.errors}, 400
 
-        if identifier == 'root':
-            parent_object = None
-        else:
+        params = dict(obj.data)
+
+        # Validate parent object
+        if params["parent"] is not None:
             if not g.auth_user.has_rights(Capabilities.adding_parents):
                 raise Forbidden("You are not permitted to link with parent")
-            parent_object = Object.access(identifier)
+
+            parent_object = Object.access(params["parent"])
+
             if parent_object is None:
                 raise NotFound("Parent object not found")
-
-        metakeys = request.form.get('metakeys')
-        upload_as = request.form.get("upload_as") or "*"
-
-        if metakeys:
-            metakeys = MetakeyShowSchema().loads(metakeys)
-            if metakeys.errors:
-                logger.warn('schema error', extra={
-                    'error': metakeys.errors
-                })
-                raise BadRequest()
-            metakeys = metakeys.data['metakeys']
-
-        item, is_new = self.create_object(obj)
-
-        if item is None:
-            raise Conflict("Conflicting object types")
-
-        if is_new:
-            db.session.add(item)
-
-        if metakeys:
-            for metakey in metakeys:
-                if item.add_metakey(metakey['key'], metakey['value'], commit=False) is None:
-                    raise NotFound("Metakey '{}' not defined or insufficient "
-                                   "permissions to set that one".format(metakey["key"]))
-
-        if parent_object:
-            item.add_parent(parent_object, commit=False)
-            logger.info('relation added', extra={'parent': parent_object.dhash,
-                                                 'child': item.dhash})
-
-        if upload_as == "*":
-            share_with = [group.id for group in g.auth_user.groups if group.name != "public"]
         else:
-            if not g.auth_user.has_rights(Capabilities.sharing_objects) and \
-               upload_as not in [group.name for group in g.auth_user.groups]:
-                raise NotFound("Group {} doesn't exist".format(upload_as))
-            group = Group.get_by_name(upload_as)
-            if group is None:
-                raise NotFound("Group {} doesn't exist".format(upload_as))
-            share_with = [group.id, Group.get_by_name(g.auth_user.login).id]
-            if group.pending_group is True:
-                raise NotFound("Group {} is pending".format(upload_as))
+            parent_object = None
 
-        for share_group_id in share_with:
-            item.give_access(share_group_id, AccessType.ADDED, item, g.auth_user, commit=False)
+        # Validate metakeys
+        metakeys = params["metakeys"]
+        for metakey in params["metakeys"]:
+            key = metakey["key"]
+            if not MetakeyDefinition.query_for_set(key).first():
+                raise NotFound(f"Metakey '{key}' not defined or insufficient "
+                               "permissions to set that one")
 
-        if is_new:
-            for all_access_group in Group.all_access_groups():
-                item.give_access(all_access_group.id, AccessType.ADDED, item, g.auth_user, commit=False)
+        # Validate upload_as argument
+        upload_as = params["upload_as"]
+        if upload_as == "*":
+            # If '*' is provided: share with all user's groups except 'public'
+            share_with = [group for group in g.auth_user.groups if group.name != "public"]
+        else:
+            share_group = Group.get_by_name(upload_as)
+            # Does group exist?
+            if share_group is None:
+                raise NotFound(f"Group {upload_as} doesn't exist")
+            # Has user access to group?
+            if share_group not in g.auth_user.groups and not g.auth_user.has_rights(Capabilities.sharing_objects):
+                raise NotFound(f"Group {upload_as} doesn't exist")
+            # Is group pending?
+            if share_group.pending_group is True:
+                raise NotFound(f"Group {upload_as} is pending")
+            share_with = [share_group, Group.get_by_name(g.auth_user.login)]
+
+        item, is_new = self._create_object(obj, parent_object, share_with, metakeys)
 
         db.session.commit()
 
         if is_new:
             hooks.on_created_object(item)
-            if self.on_created:
-                self.on_created(item)
+            self.on_created(item)
         else:
             hooks.on_reuploaded_object(item)
-            if self.on_reuploaded:
-                self.on_reuploaded(item)
+            self.on_reuploaded(item)
 
-        logger.info('{} added'.format(self.ObjectTypeStr), extra={
+        logger.info(f'{self.ObjectType.__name__} added', extra={
             'dhash': item.dhash,
             'is_new': is_new
         })
-
+        schema = self.ItemResponseSchema()
         return schema.dump(item)
 
     @requires_authorization
     def put(self, identifier):
-        # All should be PUT
         return self.post(identifier)
 
 

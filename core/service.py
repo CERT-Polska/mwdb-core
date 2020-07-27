@@ -36,8 +36,6 @@ from resources.user import (
     UserGetPasswordChangeTokenResource
 )
 
-from schema.tag import TagItemResponseSchema
-
 from . import log
 from .apispec_utils import ApispecFlaskRestful
 
@@ -230,7 +228,4 @@ def setup_restful_service(app):
     spec.path(resource=GroupResource, api=api)
     api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
     spec.path(resource=GroupMemberResource, api=api)
-
-    # Additional schemas
-    spec.components.schema("TagItemResponse", schema=TagItemResponseSchema)
     return api, spec

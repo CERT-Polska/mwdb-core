@@ -3,10 +3,14 @@ from werkzeug.exceptions import Conflict
 from plugin_engine import hooks
 
 from core.capabilities import Capabilities
-from core.schema import TextBlobShowSchema, MultiTextBlobSchema
 
 from model import TextBlob
 from model.object import ObjectTypeConflictError
+
+from schema.blob import (
+    BlobLegacyCreateRequestSchema,
+    BlobListResponseSchema, BlobItemResponseSchema
+)
 
 from . import requires_capabilities, requires_authorization
 from .object import ObjectResource, ObjectListResource
@@ -14,8 +18,7 @@ from .object import ObjectResource, ObjectListResource
 
 class TextBlobListResource(ObjectListResource):
     ObjectType = TextBlob
-    Schema = MultiTextBlobSchema
-    SchemaKey = "blobs"
+    ListResponseSchema = BlobListResponseSchema
 
     @requires_authorization
     def get(self):
@@ -50,19 +53,20 @@ class TextBlobListResource(ObjectListResource):
                 description: List of text blobs
                 content:
                   application/json:
-                    schema: MultiTextBlobSchema
+                    schema: BlobListResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occured in Lucene query
+                description: When wrong parameters were provided or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
-        return super(TextBlobListResource, self).get()
+        return super().get()
 
 
 class TextBlobResource(ObjectResource):
     ObjectType = TextBlob
-    ObjectTypeStr = TextBlob.__tablename__
-    Schema = TextBlobShowSchema
+    ItemResponseSchema = BlobItemResponseSchema
+
+    CreateRequestSchema = BlobLegacyCreateRequestSchema
     on_created = hooks.on_created_text_blob
     on_reuploaded = hooks.on_reuploaded_text_blob
 
@@ -76,7 +80,7 @@ class TextBlobResource(ObjectResource):
         security:
             - bearerAuth: []
         tags:
-            - config
+            - blob
         parameters:
             - in: path
               name: identifier
@@ -88,18 +92,21 @@ class TextBlobResource(ObjectResource):
                 description: Blob information and contents
                 content:
                   application/json:
-                    schema: TextBlobShowSchema
+                    schema: BlobItemResponseSchema
             404:
                 description: When blob doesn't exist, object is not a blob or user doesn't have access to this object.
         """
-        return super(TextBlobResource, self).get(identifier)
+        return super().get(identifier)
 
-    def create_object(self, obj):
+    def _create_object(self, spec, parent, share_with, metakeys):
         try:
             return TextBlob.get_or_create(
-                obj.data["content"],
-                obj.data["blob_name"],
-                obj.data["blob_type"]
+                spec.data["content"],
+                spec.data["blob_name"],
+                spec.data["blob_type"],
+                parent=parent,
+                share_with=share_with,
+                metakeys=metakeys
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a blob")
@@ -123,52 +130,58 @@ class TextBlobResource(ObjectResource):
               name: identifier
               schema:
                 type: string
-              description: Parent object unique identifier
+              default: root
+              description: |
+                Parent object identifier or `root` if there is no parent.
+
+                User must have `adding_parents` capability to specify a parent object.
         requestBody:
             required: true
             content:
               multipart/form-data:
                 schema:
                   type: object
-                  description: Uploaded text blob parameters (verbose mode)
+                  description: Blob to be uploaded with additional parameters (verbose mode)
                   properties:
                     json:
-                      type: string
-                      format: binary
-                      description: Text blob to be uploaded
+                      type: object
+                      properties:
+                          blob_name:
+                             type: string
+                          blob_type:
+                             type: string
+                          content:
+                             type: string
+                      description: JSON-encoded blob object specification
                     metakeys:
-                      type: string
-                      description: Optional JSON-encoded `MetakeyShowSchema` (only for permitted users)
+                      type: object
+                      properties:
+                          metakeys:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/MetakeyItemRequest'
+                      description: |
+                        Attributes to be added after file upload
+
+                        User must be allowed to set specified attribute keys.
                     upload_as:
                       type: string
                       default: '*'
-                      description: Identity used for uploading sample
+                      description: |
+                        Group that object will be shared with. If user doesn't have `sharing_objects` capability,
+                        user must be a member of specified group (unless `Group doesn't exist` error will occur).
+                        If default value `*` is specified - object will be exclusively shared with all user's groups
+                        excluding `public`.
                   required:
                     - json
               application/json:
-                schema:
-                  type: object
-                  description: Text blob to be uploaded (simple mode)
-                  properties:
-                    content:
-                      type: string
-                      description: Text blob content
-                    blob_name:
-                      type: string
-                      description: Name of blob object
-                    blob_type:
-                      type: string
-                      description: Config type (static, dynamic, other)
-                  required:
-                    - content
-                    - blob_name
-                    - blob_type
+                schema: BlobCreateSpecSchema
         responses:
             200:
                 description: Text blob uploaded succesfully
                 content:
                   application/json:
-                    schema: TextBlobShowSchema
+                    schema: BlobItemResponseSchema
             403:
                 description: No permissions to perform additional operations (e.g. adding metakeys)
             404:
@@ -176,4 +189,4 @@ class TextBlobResource(ObjectResource):
             409:
                 description: Object exists yet but has different type
         """
-        return super(TextBlobResource, self).put(identifier)
+        return super().put(identifier)

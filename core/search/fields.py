@@ -132,10 +132,6 @@ class ListField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
-        if isinstance(expression, Range):
-            raise UnsupportedGrammarException(
-                f"Range queries are not allowed for list fields"
-            )
 
         value = get_term_value(expression)
 
@@ -147,10 +143,6 @@ class ListField(BaseField):
 
 class AttributeField(BaseField):
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if isinstance(expression, Range):
-            raise UnsupportedGrammarException(
-                f"Range queries are not allowed for attribute fields"
-            )
         if len(remainder) > 1:
             raise FieldNotQueryableException(
                 f"Attribute doesn't have subfields: {'.'.join(remainder[1:])}"
@@ -187,10 +179,6 @@ class ShareField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
-        if isinstance(expression, Range):
-            raise UnsupportedGrammarException(
-                f"Range queries are not allowed for shared field"
-            )
         if expression.has_wildcard():
             raise UnsupportedGrammarException(
                 f"Wildcards are not allowed for shared field"
@@ -215,10 +203,6 @@ class UploaderField(BaseField):
         if remainder:
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-        if isinstance(expression, Range):
-            raise UnsupportedGrammarException(
-                f"Range queries are not allowed for uploader field"
             )
         if expression.has_wildcard():
             raise UnsupportedGrammarException(
@@ -252,11 +236,6 @@ class UploaderField(BaseField):
 class JSONField(BaseField):
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
         column_to_query = self.column[remainder].astext
-
-        if isinstance(expression, Range):
-            raise UnsupportedGrammarException(
-                f"Range queries are not allowed for JSON fields"
-            )
 
         value = get_term_value(expression)
 
@@ -294,11 +273,8 @@ class DatetimeField(BaseField):
             )
 
         if isinstance(expression, Range):
-            if expression.high.value != "*" and not expression.include_high:
+            if not (expression.include_low and expression.include_high):
                 raise UnsupportedGrammarException("Exclusive range is not allowed for date-time field")
-            if expression.low.value != "*" and not expression.include_low:
-                raise UnsupportedGrammarException("Exclusive range is not allowed for date-time field")
-
             if expression.low.value == "*" and expression.high.value == "*":
                 return True
             if expression.low.value == "*":

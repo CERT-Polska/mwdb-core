@@ -3,7 +3,6 @@ from typing import List, Any, TypeVar, Optional, Type
 from luqum.parser import parser
 from luqum.tree import Range, Term, Item, Word, Phrase, SearchField, AndOperation, OrOperation, Not, Prohibit, \
                        BaseGroup
-
 from luqum.utils import LuceneTreeVisitorV2
 
 from sqlalchemy import and_, or_, not_
@@ -78,11 +77,10 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         return self.visit_term(node, parents, context)
 
     def visit_range(self, node: Range, parents: List[Item], context: SQLQueryBuilderContext) -> Range:
-
         """
         Visitor for Range
         - inclusive [<Term> TO <Term>]
-        - exclusive [<Term> TO <Term>]
+        - exclusive {<Term> TO <Term>}
         """
         if not context.field_mapper.accepts_range:
             raise UnsupportedGrammarException("Range queries are not supported for this type of field")

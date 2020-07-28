@@ -6,7 +6,7 @@ from typing import List, Union, Type, Any
 from flask import g
 
 from luqum.tree import Range, Term
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 
 from model import db, Object, Metakey, MetakeyDefinition, Group, ObjectPermission, User
 from model.object import AccessType
@@ -210,25 +210,37 @@ class UploaderField(BaseField):
             )
 
         value = expression.unescaped_value
+        if value == "public":
+            raise ObjectNotFoundException("uploader:public is no-op, all uploaders are in public group")
+
+        # Look only for upload actions (reason_type=ADDED and uploaded_object=shared_object)
+        condition = and_(
+            ObjectPermission.reason_type == AccessType.ADDED,
+            ObjectPermission.related_object_id == ObjectPermission.object_id,
+        )
 
         if g.auth_user.has_rights(Capabilities.manage_users):
-            uploader = db.session.query(User).filter(User.login == value).first()
+            uploaders = (db.session.query(User)
+                         .join(User.groups)
+                         .filter(Group.name == value)).all()
         else:
-            uploader = (db.session.query(User)
-                                  .join(User.groups)
-                                  .filter(g.auth_user.is_member(Group.id))
-                                  .filter(Group.name != "public")
-                                  .filter(User.login == value)).first()
+            uploaders = (db.session.query(User)
+                         .join(User.groups)
+                         .filter(g.auth_user.is_member(Group.id))
+                         .filter(or_(Group.name == value, User.login == value))).all()
+            # Regular users can see only uploads to its own groups
+            condition = and_(
+                condition,
+                g.auth_user.is_member(ObjectPermission.group_id)
+            )
+        if not uploaders:
+            raise ObjectNotFoundException(f"No such user or group: {value}")
 
-        if uploader is None:
-            raise ObjectNotFoundException(f"No such user: {value}")
-
-        uploader_id = uploader.id
+        uploader_ids = [u.id for u in uploaders]
         return self.column.any(
             and_(
-                ObjectPermission.related_user_id == uploader_id,
-                ObjectPermission.reason_type == AccessType.ADDED,
-                ObjectPermission.related_object_id == ObjectPermission.object_id
+                condition,
+                ObjectPermission.related_user_id.in_(uploader_ids)
             )
         )
 

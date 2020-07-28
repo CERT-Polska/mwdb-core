@@ -212,17 +212,19 @@ class UploaderField(BaseField):
         value = expression.unescaped_value
 
         if g.auth_user.has_rights(Capabilities.manage_users):
-            uploader = (db.session.query(User)
-                                  .join(User.groups)
-                                  .filter(Group.name == value)).all()
+            uploaders = (db.session.query(User)
+                         .join(User.groups)
+                         .filter(Group.name == value)).all()
         else:
-            uploader = (db.session.query(User)
-                                  .join(User.groups)
-                                  .filter(g.auth_user.is_member(Group.id))
-                                  .filter(Group.name != "public")
-                                  .filter(or_(Group.name == value, User.login == value))).all()
+            uploaders = (db.session.query(User)
+                         .join(User.groups)
+                         .filter(g.auth_user.is_member(Group.id))
+                         .filter(Group.name != "public")
+                         .filter(or_(Group.name == value, User.login == value))).all()
+        if not uploaders:
+            raise ObjectNotFoundException(f"No such user or group: {value}")
 
-        uploader_ids = [u.id for u in uploader]
+        uploader_ids = [u.id for u in uploaders]
         return self.column.any(
             and_(
                 ObjectPermission.related_user_id.in_(uploader_ids),

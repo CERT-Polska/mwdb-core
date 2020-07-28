@@ -1,3 +1,4 @@
+import logging
 import re
 
 from datetime import datetime, timedelta
@@ -50,6 +51,7 @@ def get_term_value(node: Term) -> str:
 
 class BaseField:
     accepts_range = False
+    accepts_subquery = False
 
     def __init__(self, column):
         self.column = column
@@ -294,3 +296,11 @@ class DatetimeField(BaseField):
             low, high = self._get_date_range(expression)
 
         return and_(self.column >= low, self.column < high)
+
+
+class RelationField(BaseField):
+    accepts_subquery = True
+    logging.info("In relation field!!!!")
+
+    def get_condition(self, subquery: Any, remainder: List[str]) -> Any:
+        return self.column.any(Object.id.in_(subquery))

@@ -4,7 +4,7 @@ from model import File, Object, Config, TextBlob, Tag, Comment
 
 from .exceptions import MultipleObjectsQueryException, FieldNotQueryableException
 from .fields import BaseField, StringField, IntegerField, ListField, AttributeField, ShareField, UploaderField, \
-    JSONField, DatetimeField
+    JSONField, DatetimeField, RelationField
 
 object_mapping: Dict[str, Type[Object]] = {
     "file": File,
@@ -23,6 +23,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "shared": ShareField(Object.shares),
         "uploader": UploaderField(Object.related_shares),
         "upload_time": DatetimeField(Object.upload_time),
+        "parent": RelationField(Object.parents),
     },
     File.__name__: {
         "name": StringField(File.file_name),

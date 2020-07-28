@@ -15,7 +15,7 @@ from schema.object import (
     ObjectItemResponseSchema
 )
 
-from . import logger, requires_authorization, requires_capabilities, access_object
+from . import logger, requires_authorization
 
 
 class ObjectListResource(Resource):
@@ -235,62 +235,3 @@ class ObjectResource(Resource):
     @requires_authorization
     def put(self, identifier):
         return self.post(identifier)
-
-
-class ObjectChildResource(Resource):
-    @requires_authorization
-    @requires_capabilities(Capabilities.adding_parents)
-    def put(self, type, parent, child):
-        """
-        ---
-        summary: Link existing objects
-        description: |
-            Add new relation between existing objects.
-
-            Requires `adding_parents` capability.
-        security:
-            - bearerAuth: []
-        tags:
-            - object
-        parameters:
-            - in: path
-              name: type
-              schema:
-                type: string
-                enum: [file, config, blob, object]
-              description: Type of parent object
-            - in: path
-              name: parent
-              description: Identifier of the parent object
-              required: true
-              schema:
-                type: string
-            - in: path
-              name: child
-              description: Identifier of the child object
-              required: true
-              schema:
-                type: string
-        responses:
-            200:
-                description: When relation was successfully added
-            403:
-                description: When user doesn't have `adding_parents` capability.
-            404:
-                description: When one of objects doesn't exist or user doesn't have access to object.
-        """
-        parent_object = access_object(type, parent)
-        if parent_object is None:
-            raise NotFound("Parent object not found")
-
-        child_object = Object.access(child)
-        if child_object is None:
-            raise NotFound("Child object not found")
-
-        child_object.add_parent(parent_object, commit=False)
-
-        db.session.commit()
-        logger.info('child added', extra={
-            'parent': parent_object.dhash,
-            'child': child_object.dhash
-        })

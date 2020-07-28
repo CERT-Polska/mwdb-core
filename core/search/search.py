@@ -1,4 +1,4 @@
-from typing import List, Any, TypeVar, Optional, Type
+from typing import List, Any, TypeVar, Optional, Type, Union
 
 from luqum.parser import parser
 from luqum.tree import Range, Term, Item, Word, Phrase, SearchField, AndOperation, OrOperation, Not, Prohibit, \
@@ -21,7 +21,7 @@ Condition = Any
 class SQLQueryBuilderContext:
     def __init__(self, queried_type: Optional[Type[Object]] = None):
         self.queried_type = queried_type or Object
-        self.field_node = None
+        self.field_mapper = None
 
 
 class SQLQueryBuilder(LuceneTreeVisitorV2):
@@ -29,7 +29,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
 
     # Visitor methods for value nodes
 
-    def visit_term(self, node: T, parents: List[Item], context: SQLQueryBuilderContext) -> T:
+    def visit_term(self, node: T, parents: List[Item], context: SQLQueryBuilderContext) -> Union[T, Range]:
         """
         Visitor for Term (Word and Phrase).
         - checks if field is already set
@@ -38,13 +38,28 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
 
         Returns mapped node
         """
-        if context.field_node is None:
+        if context.field_mapper is None:
             raise FieldNotQueryableException("You have to specify field, check help for more information")
 
         is_range_term = isinstance(parents[-1], Range)
 
-        if node.has_wildcard() and is_range_term:
-            raise UnsupportedGrammarException("Wildcards are not supported in range queries")
+        if node.has_wildcard() and is_range_term and str(node) != "*":
+            raise UnsupportedGrammarException("Wildcards other than * are not supported in range queries")
+
+        if context.field_mapper.accepts_range and not is_range_term:
+            if node.value.startswith(">="):
+                node.value = node.value[2:]
+                return Range(low=node, high=Term("*"), include_low=True, include_high=False)
+            elif node.value.startswith(">"):
+                node.value = node.value[1:]
+                return Range(low=node, high=Term("*"), include_low=False, include_high=False)
+            elif node.value.startswith("<="):
+                node.value = node.value[2:]
+                return Range(low=Term("*"), high=node, include_low=False, include_high=True)
+            elif node.value.startswith("<"):
+                node.value = node.value[1:]
+                return Range(low=Term("*"), high=node, include_low=False, include_high=False)
+
         return node
 
     def visit_word(self, node: Word, parents: List[Item], context: SQLQueryBuilderContext) -> Word:
@@ -65,8 +80,11 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         """
         Visitor for Range
         - inclusive [<Term> TO <Term>]
-        - exclusive [<Term> TO <Term>]
+        - exclusive {<Term> TO <Term>}
         """
+        if not context.field_mapper.accepts_range:
+            raise UnsupportedGrammarException("Range queries are not supported for this type of field")
+
         node.low = self.visit(node.low, parents + [node], context)
         node.high = self.visit(node.high, parents + [node], context)
         return node
@@ -79,12 +97,12 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         if field_mapper.field_type is not Object:
             context.queried_type = field_mapper.field_type
 
-        context.field_node = node
+        context.field_mapper = field_mapper
         condition = field_mapper.get_condition(
             self.visit(node.expr, parents + [node], context),
             name_remainder
         )
-        context.field_node = None
+        context.field_mapper = None
 
         return condition
 

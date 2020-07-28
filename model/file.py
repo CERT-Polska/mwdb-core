@@ -2,10 +2,12 @@ import os
 import hashlib
 
 from sqlalchemy import or_
+from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadSignature
 from werkzeug.utils import secure_filename
 
+from core.config import app_config
 from core.humanhash import Humanhash
-from core.util import calc_hash, calc_crc32, calc_magic, calc_ssdeep, get_sample_path
+from core.util import calc_hash, calc_crc32, calc_magic, calc_ssdeep
 
 from . import db
 from .object import Object
@@ -75,6 +77,29 @@ class File(Object):
 
         if is_new:
             file.stream.seek(0, os.SEEK_SET)
-            file.save(get_sample_path(sha256))
+            file.save(file_obj.get_path())
 
         return file_obj, is_new
+
+    def get_path(self):
+        upload_root = app_config.malwarecage.uploads_folder
+        sample_sha256 = self.sha256.lower()
+        # example: uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+        subdir_path = os.path.join(upload_root, *list(sample_sha256)[0:4])
+        os.makedirs(subdir_path, mode=0o755, exist_ok=True)
+        return os.path.join(subdir_path, sample_sha256)
+
+    def generate_download_token(self):
+        serializer = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key, expires_in=60)
+        return serializer.dumps({'identifier': self.sha256})
+
+    @staticmethod
+    def get_by_download_token(download_token):
+        serializer = TimedJSONWebSignatureSerializer(app_config.malwarecage.secret_key)
+        try:
+            download_req = serializer.loads(download_token)
+            return File.get(download_req["identifier"]).first()
+        except SignatureExpired:
+            return None
+        except BadSignature:
+            return None

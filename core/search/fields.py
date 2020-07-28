@@ -6,7 +6,7 @@ from typing import List, Union, Type, Any
 from flask import g
 
 from luqum.tree import Range, Term
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 
 from model import db, Object, Metakey, MetakeyDefinition, Group, ObjectPermission, User
 from model.object import AccessType
@@ -223,7 +223,7 @@ class UploaderField(BaseField):
                                   .join(User.groups)
                                   .filter(g.auth_user.is_member(Group.id))
                                   .filter(Group.name != "public")
-                                  .filter(Group.name == value)).all()
+                                  .filter(or_(Group.name == value, User.login == value))).all()
 
         uploader_ids = [u.id for u in uploader]
         return self.column.any(

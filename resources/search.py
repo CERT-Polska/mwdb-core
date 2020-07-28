@@ -4,10 +4,12 @@ from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest
 
 from model import Object
-from core.schema import SearchSchema, ObjectBase
 from core.search import SQLQueryBuilderBaseException, SQLQueryBuilder
 
-from . import deprecated, logger, requires_authorization
+from schema.object import ObjectListItemResponseSchema
+from schema.search import SearchRequestSchema
+
+from . import deprecated, requires_authorization
 
 
 class SearchResource(Resource):
@@ -29,7 +31,7 @@ class SearchResource(Resource):
             description: Search query
             content:
               application/json:
-                schema: SearchSchema
+                schema: SearchRequestSchema
         responses:
             200:
                 description: Resulting objects
@@ -38,20 +40,17 @@ class SearchResource(Resource):
                     schema:
                       type: array
                       items:
-                        $ref: '#/components/schemas/ObjectBase'
+                        $ref: '#/components/schemas/ObjectListItemResponse'
             400:
                 description: When request body or query syntax is invalid
         """
-        schema = SearchSchema()
-
+        schema = SearchRequestSchema()
         obj = schema.loads(request.get_data(as_text=True))
 
         if obj.errors:
             return {"errors": obj.errors}, 400
 
         query = obj.data["query"]
-        logger.info('search', extra={'query': query})
-
         try:
             result = (
                 SQLQueryBuilder().build_query(query)
@@ -64,5 +63,5 @@ class SearchResource(Resource):
         except ParseError as e:
             raise BadRequest(str(e))
 
-        schema = ObjectBase(many=True)
+        schema = ObjectListItemResponseSchema(many=True)
         return schema.dump(result)

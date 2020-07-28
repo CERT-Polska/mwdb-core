@@ -25,8 +25,8 @@ from resources.metakey import (
     MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource,
     MetakeyPermissionResource
 )
-from resources.object import ObjectResource, ObjectListResource, ObjectChildResource
-from resources.relations import RelationsResource
+from resources.object import ObjectResource, ObjectListResource
+from resources.relations import RelationsResource, ObjectChildResource
 from resources.server import PingResource, ServerInfoResource
 from resources.search import SearchResource
 from resources.share import ShareGroupListResource, ShareResource

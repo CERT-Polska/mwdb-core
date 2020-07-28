@@ -1,4 +1,4 @@
-from typing import List, Any, TypeVar, Optional, Type
+from typing import List, Any, TypeVar, Optional, Type, Union
 
 from luqum.parser import parser
 from luqum.tree import Range, Term, Item, Word, Phrase, SearchField, AndOperation, OrOperation, Not, Prohibit, \
@@ -21,7 +21,7 @@ Condition = Any
 class SQLQueryBuilderContext:
     def __init__(self, queried_type: Optional[Type[Object]] = None):
         self.queried_type = queried_type or Object
-        self.field_node = None
+        self.field_mapper = None
 
 
 class SQLQueryBuilder(LuceneTreeVisitorV2):
@@ -29,7 +29,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
 
     # Visitor methods for value nodes
 
-    def visit_term(self, node: T, parents: List[Item], context: SQLQueryBuilderContext) -> T:
+    def visit_term(self, node: T, parents: List[Item], context: SQLQueryBuilderContext) -> Union[T, Range]:
         """
         Visitor for Term (Word and Phrase).
         - checks if field is already set
@@ -38,7 +38,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
 
         Returns mapped node
         """
-        if context.field_node is None:
+        if context.field_mapper is None:
             raise FieldNotQueryableException("You have to specify field, check help for more information")
 
         is_range_term = isinstance(parents[-1], Range)
@@ -98,12 +98,11 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
             context.queried_type = field_mapper.field_type
 
         context.field_mapper = field_mapper
-        context.field_node = node
         condition = field_mapper.get_condition(
             self.visit(node.expr, parents + [node], context),
             name_remainder
         )
-        context.field_node = None
+        context.field_mapper = None
 
         return condition
 

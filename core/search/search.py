@@ -6,6 +6,7 @@ from luqum.tree import Range, Term, Item, Word, Phrase, SearchField, AndOperatio
 from luqum.utils import LuceneTreeVisitorV2
 
 from sqlalchemy import and_, or_, not_
+from sqlalchemy.orm import aliased
 
 from model import db, Object
 
@@ -148,10 +149,13 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         if context.field_mapper.accepts_subquery:
             inner_context = SQLQueryBuilderContext()
             condition = self.visit(node.expr, parents + [node], inner_context)
+            # Make aliased entity for inner query
+            relative = aliased(inner_context.queried_type)
             subquery = (
-                db.session.query(inner_context.queried_type.id)\
-                .filter(condition)
-                .filter(g.auth_user.has_access_to_object(inner_context.queried_type.id))
+                db.session.query(relative.id)
+                          .select_entity_from(relative)  # Use aliased entity in subquery
+                          .filter(condition)
+                          .filter(g.auth_user.has_access_to_object(relative.id))
             )
             return Subquery(node.expr, subquery)
         else:

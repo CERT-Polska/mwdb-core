@@ -148,7 +148,6 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         )
 
     def visit_field_group(self, node: FieldGroup, parents: List[Item], context: SQLQueryBuilderContext) -> Subquery:
-
         if context.field_mapper.accepts_subquery:
             inner_context = SQLQueryBuilderContext()
             condition = self.visit(node.expr, parents + [node], inner_context)

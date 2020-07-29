@@ -300,7 +300,6 @@ class DatetimeField(BaseField):
 
 class RelationField(BaseField):
     accepts_subquery = True
-    logging.info("In relation field!!!!")
 
-    def get_condition(self, subquery: Any, remainder: List[str]) -> Any:
-        return self.column.any(Object.id.in_(subquery))
+    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
+        return self.column.any(Object.id.in_(expression.subquery))

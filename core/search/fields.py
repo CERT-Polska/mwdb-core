@@ -1,4 +1,3 @@
-import logging
 import re
 
 from datetime import datetime, timedelta
@@ -8,6 +7,8 @@ from flask import g
 
 from luqum.tree import Range, Term
 from sqlalchemy import and_, or_
+
+from .tree import Subquery
 
 from model import db, Object, Metakey, MetakeyDefinition, Group, ObjectPermission, User
 from model.object import AccessType
@@ -314,4 +315,6 @@ class RelationField(BaseField):
     accepts_subquery = True
 
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        return self.column.any(Object.id.in_(expression.subquery))
+        if not isinstance(expression, Subquery):
+            raise UnsupportedGrammarException("Only Field Group is allowed for Relation Field")
+        return self.column.any(Object.id.in_(expression.subquery.all()))

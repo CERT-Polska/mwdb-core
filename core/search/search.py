@@ -12,16 +12,13 @@ from model import db, Object
 from .exceptions import FieldNotQueryableException, UnsupportedGrammarException
 from .mappings import get_field_mapper
 
+from .tree import Subquery
+
+from flask import g
 
 T = TypeVar('T', bound=Term)
 # SQLAlchemy doesn't provide typings
 Condition = Any
-
-
-class Subquery(FieldGroup):
-    def __init__(self, expr, subquery):
-        super().__init__(expr)
-        self.subquery = subquery
 
 
 class SQLQueryBuilderContext:
@@ -34,7 +31,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
     generic_visitor_method_name = 'visit_unsupported'
 
     # Visitor methods for value nodes
-
+    
     def visit_term(self, node: T, parents: List[Item], context: SQLQueryBuilderContext) -> Union[T, Range]:
         """
         Visitor for Term (Word and Phrase).
@@ -151,7 +148,11 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
         if context.field_mapper.accepts_subquery:
             inner_context = SQLQueryBuilderContext()
             condition = self.visit(node.expr, parents + [node], inner_context)
-            subquery = db.session.query(inner_context.queried_type.id).filter(condition)
+            subquery = (
+                db.session.query(inner_context.queried_type.id)\
+                .filter(condition)
+                .filter(g.auth_user.has_access_to_object(inner_context.queried_type.id))
+            )
             return Subquery(node.expr, subquery)
         else:
             raise UnsupportedGrammarException(

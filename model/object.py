@@ -127,7 +127,15 @@ class Object(db.Model):
         primaryjoin=(id == relation.c.child_id),
         secondaryjoin=(id == relation.c.parent_id),
         order_by=relation.c.creation_time.desc(),
-        backref=db.backref('children', order_by=relation.c.creation_time.desc()))
+        back_populates="children"
+    )
+    children = db.relationship(
+        "Object", secondary=relation,
+        primaryjoin=(id == relation.c.parent_id),
+        secondaryjoin=(id == relation.c.child_id),
+        order_by=relation.c.creation_time.desc(),
+        back_populates="parents"
+    )
 
     meta = db.relationship('Metakey', backref='object', lazy=True)
     comments = db.relationship('Comment', backref='object', lazy='dynamic')

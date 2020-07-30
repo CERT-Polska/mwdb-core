@@ -317,4 +317,4 @@ class RelationField(BaseField):
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
         if not isinstance(expression, Subquery):
             raise UnsupportedGrammarException("Only Field Group is allowed for Relation Field")
-        return self.column.any(Object.id.in_(expression.subquery.all()))
+        return self.column.any(Object.id.in_(expression.subquery))

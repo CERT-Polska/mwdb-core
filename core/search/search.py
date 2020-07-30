@@ -1,4 +1,5 @@
 from typing import List, Any, TypeVar, Optional, Type, Union
+from flask import g
 
 from luqum.parser import parser
 from luqum.tree import Range, Term, Item, Word, Phrase, SearchField, AndOperation, OrOperation, Not, Prohibit, \
@@ -12,10 +13,7 @@ from model import db, Object
 
 from .exceptions import FieldNotQueryableException, UnsupportedGrammarException
 from .mappings import get_field_mapper
-
 from .tree import Subquery
-
-from flask import g
 
 T = TypeVar('T', bound=Term)
 # SQLAlchemy doesn't provide typings

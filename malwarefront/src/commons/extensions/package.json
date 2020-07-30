@@ -1,0 +1,10 @@
+{
+    "name": "@malwarefront/extensions",
+    "main": "index.js",
+    "private": true,
+    "dependencies": {},
+    "peerDependencies": {
+        "react": "*",
+        "lodash": "*"
+    }
+}

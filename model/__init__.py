@@ -15,3 +15,4 @@ from .blob import TextBlob                                          # noqa: E402
 from .metakey import Metakey, MetakeyDefinition, MetakeyPermission  # noqa: E402
 from .tag import Tag, object_tag_table                              # noqa: E402
 from .comment import Comment                                        # noqa: E402
+from .query import Query                                            # noqa: E402

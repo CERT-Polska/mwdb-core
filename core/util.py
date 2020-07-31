@@ -7,7 +7,6 @@ from zlib import crc32
 
 from flask_restful import abort
 from flask_sqlalchemy import Pagination
-from werkzeug.routing import BaseConverter
 import hashlib
 
 
@@ -102,8 +101,3 @@ def is_true(flag):
     if (isinstance(flag, int) or isinstance(flag, bool)) and flag:
         return True
     return False
-
-
-class HashConverter(BaseConverter):
-    # MD5/SHA1/SHA256/SHA512 (32,40,64,128)
-    regex = '(root|[A-Fa-f0-9]{32,128})'

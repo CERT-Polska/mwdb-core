@@ -84,7 +84,7 @@ class File(Object):
     def get_path(self):
         upload_root = app_config.malwarecage.uploads_folder
         sample_sha256 = self.sha256.lower()
-        # example: uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0Z
+        # example: uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
         subdir_path = os.path.abspath(os.path.join(upload_root, *list(sample_sha256)[0:4]))
         os.makedirs(subdir_path, mode=0o755, exist_ok=True)
         return os.path.join(subdir_path, sample_sha256)

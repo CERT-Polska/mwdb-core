@@ -14,7 +14,7 @@ from model.object import AccessType
 from core.capabilities import Capabilities
 
 from .exceptions import FieldNotQueryableException, UnsupportedGrammarException, ObjectNotFoundException
-
+from .tree import Subquery
 
 Expression = Union[Range, Term]
 
@@ -50,6 +50,7 @@ def get_term_value(node: Term) -> str:
 
 class BaseField:
     accepts_range = False
+    accepts_subquery = False
 
     def __init__(self, column):
         self.column = column
@@ -306,3 +307,16 @@ class DatetimeField(BaseField):
             low, high = self._get_date_range(expression)
 
         return and_(self.column >= low, self.column < high)
+
+
+class RelationField(BaseField):
+    accepts_subquery = True
+
+    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
+        if remainder:
+            raise FieldNotQueryableException(
+                f"Field doesn't have subfields: {'.'.join(remainder)}"
+            )
+        if not isinstance(expression, Subquery):
+            raise UnsupportedGrammarException("Only subquery is allowed for relation field")
+        return self.column.any(Object.id.in_(expression.subquery))

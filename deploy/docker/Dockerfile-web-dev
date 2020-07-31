@@ -4,7 +4,7 @@ COPY ./malwarefront /app
 COPY ./plugins /plugins
 
 RUN cd /app \
-    && npm install --unsafe-perm \
+    && npm install --unsafe-perm . $(find /plugins -name 'package.json' -printf "%h\n" | sort -u) \
     && CI=true npm run build \
     && npm cache clean --force
 

@@ -1,0 +1,3 @@
+graft malwarecage
+recursive-exclude * *.pyc
+prune malwarecage/web/node_modules

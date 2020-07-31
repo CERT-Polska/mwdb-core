@@ -1,6 +1,6 @@
 FROM node:8 AS build
 
-COPY ./malwarefront /app
+COPY ./malwarecage/web /app
 COPY ./plugins /plugins
 
 RUN cd /app \

@@ -17,14 +17,12 @@ COPY requirements.txt plugins/requirements-*.txt /tmp/
 RUN ls /tmp/requirements-*.txt | xargs -i,, pip --no-cache-dir install -r ,,
 
 # Copy backend files
-
-COPY start.sh uwsgi.ini plugin_engine.py app.py version.py /app/
-
-COPY core /app/core
-COPY migrations /app/migrations
-COPY model /app/model
-COPY resources /app/resources
-COPY schema /app/schema
+COPY dist/start.sh dist/uwsgi.ini /app/
+COPY malwarecage/core /app/malwarecage/core
+COPY malwarecage/model /app/malwarecage/model
+COPY malwarecage/resources /app/malwarecage/resources
+COPY malwarecage/schema /app/malwarecage/schema
+COPY malwarecage/*.py /app/malwarecage/
 
 # Copy user-controlled plugins
 COPY plugins /app/plugins
@@ -42,6 +40,7 @@ RUN mkdir -p /app/uploads/ && \
     chown nobody:nobody /app/uploads/
 
 ENV PYTHONPATH=/app
+ENV FLASK_APP=/app/malwarecage/app.py
 WORKDIR /app
 
 CMD ["/app/start.sh"]

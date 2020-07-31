@@ -4,6 +4,7 @@
 .vscode
 /venv
 *.pyc
+*.egg-info/
 node_modules/
 spec.json
 *.log
@@ -12,11 +13,6 @@ postgres_password.txt
 mwdb-vars.env
 postgres-vars.env
 .mypy_cache/
-/malwarefront/extensions/plugins/
-/malwarefront/extensions/package.json
-# These directories are user-controlled
 /plugins
-/mail_templates
 tests/frontend/cypress/videos/
 tests/frontend/cypress/screenshots/
-

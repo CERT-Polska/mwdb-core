@@ -17,5 +17,5 @@ python-magic==0.4.15
 luqum==0.7.4
 logmatic-python==0.1.7
 click==6.7
-PyYAML==5.1.1
+PyYAML==5.3.1
 redis==3.2.1

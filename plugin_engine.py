@@ -19,7 +19,7 @@ class PluginAppContext(object):
         _plugin_handlers.append(hook_handler_cls())
 
     def register_resource(self, resource, *urls, **kwargs):
-        api.spec.add_resource(resource, *urls, **kwargs)
+        api.add_resource(resource, *urls, **kwargs)
 
     def register_converter(self, converter_name, converter):
         app.url_map.converters[converter_name] = converter

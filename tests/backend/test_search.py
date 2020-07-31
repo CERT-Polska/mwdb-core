@@ -1,3 +1,5 @@
+import datetime
+import time
 from .relations import *
 from .utils import base62uuid
 
@@ -190,3 +192,62 @@ def test_search_json():
 
     found_objs = test.search('config.cfg:"*\\"dict_in_list\\": \\"xxx\\"*"')
     assert len(found_objs) == 0
+
+
+def test_search_file_size_unbounded():
+    test = MwdbTest()
+    test.login()
+
+    filename = base62uuid()
+    file_content = b"a" * 1338
+    file2name = base62uuid()
+    file2_content = b"a" * 2000
+    file3name = base62uuid()
+    file3_content = b"a" * 1000
+    tag = "file_size_unbounded_search"
+
+    sample = test.add_sample(filename, file_content)
+    test.add_tag(sample["id"], tag)
+    sample2 = test.add_sample(file2name, file2_content)
+    test.add_tag(sample2["id"], tag)
+    sample3 = test.add_sample(file3name, file3_content)
+    test.add_tag(sample3["id"], tag)
+
+    found_objs = test.search(f'file.size:[* TO *] AND tag:{tag}')
+    assert len(found_objs) == 3
+    found_objs = test.search(f'file.size:[1338 TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = test.search(f'file.size:>=1338 AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = test.search(f'file.size:[* TO 1338}} AND tag:{tag}')
+    assert len(found_objs) == 1
+    found_objs = test.search(f'file.size:[* TO 1000}} AND tag:{tag}')
+    assert len(found_objs) == 0
+
+
+def test_search_date_time_unbounded():
+    test = MwdbTest()
+    test.login()
+
+    filename = base62uuid()
+    file_content = b"a" * 5000
+    file2name = base62uuid()
+    file2_content = b"a" * 5100
+    tag = "date_time_unbounded_search"
+
+    now = datetime.datetime.now()
+    now = now.strftime("%Y-%m-%d %H:%M:%S")
+    sample = test.add_sample(filename, file_content)
+    test.add_tag(sample["id"], tag)
+    time.sleep(1)
+    sample2 = test.add_sample(file2name, file2_content)
+    test.add_tag(sample2["id"], tag)
+
+    found_objs = test.search(f'upload_time:["{now}" TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = test.search(f'upload_time:">={now}" AND tag:{tag}')
+    assert len(found_objs) == 2
+    try:
+        found_objs = test.search(f'upload_time:"<{now}" AND tag:{tag}')
+    except requests.HTTPError:
+        assert True

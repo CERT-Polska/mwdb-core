@@ -2,6 +2,7 @@ import functools
 import importlib
 import pkgutil
 
+from core.app import app, api
 from core.config import app_config
 from core import log
 from model import Object, File, Config, TextBlob
@@ -13,25 +14,18 @@ active_plugins = {}
 
 
 class PluginAppContext(object):
-    def __init__(self, app, api, spec):
-        self.app = app
-        self.api = api
-        self.spec = spec
-
     def register_hook_handler(self, hook_handler_cls):
         global _plugin_handlers
         _plugin_handlers.append(hook_handler_cls())
 
-    def register_resource(self, resource, *urls, undocumented=False, **kwargs):
-        self.api.add_resource(resource, *urls, **kwargs)
-        if not undocumented:
-            self.spec.path(resource=resource, api=self.api)
+    def register_resource(self, resource, *urls, **kwargs):
+        api.spec.add_resource(resource, *urls, **kwargs)
 
     def register_converter(self, converter_name, converter):
-        self.app.url_map.converters[converter_name] = converter
+        app.url_map.converters[converter_name] = converter
 
     def register_schema_spec(self, schema_name, schema):
-        self.spec.components.schema(schema_name, schema=schema)
+        api.spec.components.schema(schema_name, schema=schema)
 
 
 def hook_handler_method(meth):

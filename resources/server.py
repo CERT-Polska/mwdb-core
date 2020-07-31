@@ -4,6 +4,7 @@ from flask_restful import Resource
 from version import app_build_version
 from plugin_engine import active_plugins
 
+from core.app import api
 from core.config import app_config
 from schema.server import (
     ServerPingResponseSchema,
@@ -57,3 +58,18 @@ class ServerInfoResource(Resource):
             "base_url": app_config.malwarecage.base_url,
             "active_plugins": active_plugins
         })
+
+
+class ServerDocsResource(Resource):
+    def get(self):
+        """
+        ---
+        summary: Get server API documentation
+        description: Returns API documentation in OAS3 format
+        tags:
+            - server
+        responses:
+            200:
+              description: OAS3 server API documentation
+        """
+        return api.spec.to_dict()

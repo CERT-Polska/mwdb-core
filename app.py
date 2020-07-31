@@ -15,61 +15,52 @@ except ImportError:
 from datetime import datetime
 
 import sqlalchemy.exc
-import logmatic
 
-from flask import Flask, request, g, jsonify
+from flask import request, g
 from flask_migrate import Migrate
 from werkzeug.exceptions import Forbidden, TooManyRequests
 
 from model import db, User, Group, APIKey
 
+from core.app import app, api
 from core.capabilities import Capabilities
 from core.config import app_config
-from core.service import setup_restful_service
-from core.util import HashConverter
 from core import log
 
-from resources import requires_authorization
+from resources.api_key import APIKeyResource, APIKeyIssueResource
+from resources.auth import (
+    LoginResource, ChangePasswordResource,
+    RefreshTokenResource, RegisterResource,
+    RecoverPasswordResource, RequestPasswordChangeResource,
+    ValidateTokenResource, ProfileResource
+)
 
-import logging
+from resources.blob import TextBlobResource, TextBlobListResource
+from resources.comment import CommentResource, CommentDeleteResource
+from resources.config import ConfigResource, ConfigListResource, ConfigStatsResource
+from resources.download import RequestSampleDownloadResource, DownloadResource
+from resources.file import FileResource, FileListResource
+from resources.group import GroupResource, GroupListResource, GroupMemberResource
+from resources.metakey import (
+    MetakeyResource, MetakeyListDefinitionResource,
+    MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource,
+    MetakeyPermissionResource
+)
+from resources.object import ObjectResource, ObjectListResource
+from resources.relations import RelationsResource, ObjectChildResource
+from resources.server import PingResource, ServerInfoResource, ServerDocsResource
+from resources.search import SearchResource
+from resources.share import ShareGroupListResource, ShareResource
+from resources.tag import TagResource, TagListResource
+from resources.user import (
+    UserResource, UserListResource, UserPendingResource,
+    UserGetPasswordChangeTokenResource
+)
 
 import redis
 
-app = Flask(__name__)
 migrate = Migrate(app, db)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = app_config.malwarecage.postgres_uri
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = app_config.malwarecage.secret_key
-"""
-Flask-restful tries to be smart and transforms NotFound exceptions.
-Adds: "You have requested this URI [/file/root] but did you mean
-/file/<string:identifier> or /file ?" even if URI is completely correct,
-but some objects needed to fulfill request are missing.
-"""
-app.config["ERROR_404_HELP"] = False
-
-# Load Flask-specific overrides if specified
-if app_config.malwarecage.flask_config_file:
-    app.config.from_pyfile(app_config.malwarecage.flask_config_file)
-
 db.init_app(app)
-
-app.url_map.converters['hash64'] = HashConverter
-api, spec = setup_restful_service(app)
-
-logger = log.getLogger()
-
-# Don't propagate to root logger
-logger.propagate = False
-
-# Setup JSON stream handler for main logger
-handler = logging.StreamHandler()
-handler.setFormatter(
-    logmatic.JsonFormatter(fmt="%(filename) %(funcName) %(levelname) %(lineno) %(module) %(threadName) %(message)"))
-logger.addHandler(handler)
-logger.addFilter(log.ContextFilter())
-logger.setLevel(logging.INFO)
 
 
 @app.before_request
@@ -230,22 +221,90 @@ def create_admin(name, email, password, require_empty):
         logger.info('Succesfully added admin user %s', name)
 
 
+# Server health endpoints
+api.add_resource(PingResource, '/ping')
+api.add_resource(ServerInfoResource, '/server')
+api.add_resource(ServerDocsResource, '/docs')
+
+# Authentication endpoints
+api.add_resource(LoginResource, '/auth/login')
+api.add_resource(ChangePasswordResource, "/auth/change_password")
+api.add_resource(RecoverPasswordResource, '/auth/recover_password')
+api.add_resource(RequestPasswordChangeResource, '/auth/request_password_change')
+api.add_resource(RefreshTokenResource, "/auth/refresh")
+api.add_resource(ValidateTokenResource, "/auth/validate")
+api.add_resource(ProfileResource, "/auth/profile")
+api.add_resource(RegisterResource, '/auth/register')
+
+# API key endpoints
+api.add_resource(APIKeyIssueResource, "/user/<login>/api_key")
+api.add_resource(APIKeyResource, "/api_key/<api_key_id>")
+
+# Object endpoints
+api.add_resource(ObjectListResource, '/object')
+api.add_resource(ObjectResource, '/object/<hash64:identifier>')
+
+# Tag endpoints
+api.add_resource(TagListResource, '/tag')
+api.add_resource(TagResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/tag')
+
+# Comment endpoints
+api.add_resource(CommentResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/comment')
+api.add_resource(CommentDeleteResource,
+                 '/<any(file, config, blob, object):type>/<hash64:identifier>/comment/<int:comment_id>')
+
+# Share endpoints
+api.add_resource(ShareResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/share')
+api.add_resource(ShareGroupListResource, '/share')
+
+# Relation endpoints
+api.add_resource(RelationsResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/relations')
+api.add_resource(ObjectChildResource,
+                 '/<any(file, config, blob, object):type>/<hash64:parent>/child/<hash64:child>')
+
+# File endpoints
+api.add_resource(FileListResource, '/file')
+api.add_resource(FileResource, '/file/<hash64:identifier>')
+
+# Config endpoints
+api.add_resource(ConfigListResource, '/config')
+api.add_resource(ConfigStatsResource, '/config/stats')
+api.add_resource(ConfigResource, '/config/<hash64:identifier>')
+
+# Blob endpoints
+api.add_resource(TextBlobListResource, '/blob')
+api.add_resource(TextBlobResource, '/blob/<hash64:identifier>')
+
+# Download endpoints
+api.add_resource(RequestSampleDownloadResource, '/request/sample/<identifier>')
+api.add_resource(DownloadResource, '/download/<access_token>')
+
+# Search endpoints
+api.add_resource(SearchResource, '/search')
+
+# Metakey endpoints
+api.add_resource(MetakeyListDefinitionResource, '/meta/list/<any(read, set):access>')
+api.add_resource(MetakeyResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/meta')
+api.add_resource(MetakeyListDefinitionManageResource, '/meta/manage')
+api.add_resource(MetakeyDefinitionManageResource, '/meta/manage/<key>')
+api.add_resource(MetakeyPermissionResource, '/meta/manage/<key>/permissions/<group_name>')
+
+# User endpoints
+api.add_resource(UserListResource, "/user")
+api.add_resource(UserResource, "/user/<login>")
+api.add_resource(UserGetPasswordChangeTokenResource, "/user/<login>/change_password")
+api.add_resource(UserPendingResource, "/user/<login>/pending")
+
+# Group endpoints
+api.add_resource(GroupListResource, "/group")
+api.add_resource(GroupResource, "/group/<name>")
+api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
+
 # Load plugins
-plugin_context = PluginAppContext(app, api, spec)
+plugin_context = PluginAppContext()
 
 with app.app_context():
     load_plugins(plugin_context)
-
-spec_docs = spec.to_dict()
-
-
-@app.route("/docs")
-@requires_authorization
-def docs():
-    return jsonify(spec_docs)
-
-
-# validate_spec(spec)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

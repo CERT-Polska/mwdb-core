@@ -1,4 +1,5 @@
 import json
+
 from marshmallow import Schema, fields, validates_schema, ValidationError, pre_load, post_dump
 
 from .metakey import MetakeyItemRequestSchema

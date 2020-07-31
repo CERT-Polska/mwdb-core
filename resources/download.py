@@ -1,7 +1,8 @@
-from flask import current_app, send_file
+from flask import send_file
 from flask_restful import Resource
 from werkzeug.exceptions import Forbidden, NotFound
 
+from core.app import api
 from model import File
 from schema.download import DownloadURLResponseSchema
 
@@ -70,13 +71,11 @@ class RequestSampleDownloadResource(Resource):
             404:
                 description: When file doesn't exist, object is not a file or user doesn't have access to this object.
         """
-        from core.service import get_url_for
-
         file = File.access(identifier)
         if file is None:
             raise NotFound("Object not found")
 
         download_token = file.generate_download_token()
         schema = DownloadURLResponseSchema()
-        url = get_url_for(current_app, DownloadResource, access_token=download_token.decode())
+        url = api.url_for(DownloadResource, access_token=download_token.decode())
         return schema.dump({"url": url})

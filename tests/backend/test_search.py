@@ -1,5 +1,6 @@
-import datetime
 import time
+import datetime
+
 from .relations import *
 from .utils import base62uuid
 
@@ -251,3 +252,29 @@ def test_search_date_time_unbounded():
         found_objs = test.search(f'upload_time:"<{now}" AND tag:{tag}')
     except requests.HTTPError:
         assert True
+
+
+def test_search_no_access_to_parent():
+    test = MwdbTest()
+    test.login()
+
+    filename = base62uuid()
+    file_content = b"a" * 5000
+    file2name = base62uuid()
+    file2_content = b"a" * 5100
+    tag = "no_access_to_parent"
+
+    sample = test.add_sample(filename, file_content)
+    test.add_tag(sample["id"], tag)
+    sample2 = test.add_sample(file2name, file2_content, sample["sha256"])
+    test.add_tag(sample2["id"], tag)
+
+    test.register_user("test1", "testpass", ["adding_tags"])
+    test.login_as("test1", "testpass")
+
+    sample2 = test.add_sample(file2name, file2_content)
+    test.add_tag(sample2["id"], tag)
+
+    found_objs = test.search(f'parent:(file.size:5000) AND tag:{tag}')
+
+    assert len(found_objs) == 0

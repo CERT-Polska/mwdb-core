@@ -7,6 +7,7 @@ from schema.query import QuerySchemaBase, QueryResponseSchema
 
 from . import logger, requires_capabilities, requires_authorization, access_object
 
+
 class QueryResource(Resource):
     @requires_authorization
     def get(self, type):
@@ -18,10 +19,11 @@ class QueryResource(Resource):
     def post(self, type):
 
         schema = QuerySchemaBase()
-        obj = schema.loads(request.get_date(as_text=True))
-
+        obj = schema.loads(request.get_data(as_text=True))
+        print(obj)
+        print(obj.data)
         query = Query(
-            query = obj.data["query"],
+            query=obj.data["query"],
             name=obj.data["name"],
             type=type,
             user_id=g.auth_user.id,
@@ -32,15 +34,7 @@ class QueryResource(Resource):
 
         db.session.refresh(query)
         schema = QueryResponseSchema()
-
-        return schema.dump(query)
-
-
-class QueryLoadResource(Resource):
-    @requires_authorization
-    def get(self, query_id):
-        query = db.session.query(Query).filter(Query.id == query_id).first()
-        schema = QueryResponseSchema()
+        print("POSZŁO!")
         return schema.dump(query)
 
 

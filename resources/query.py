@@ -1,7 +1,7 @@
-from flask import request, g
+from flask import request, g, jsonify
 from flask_restful import Resource
-
 from model import db, Query
+import json
 
 from schema.query import QuerySchemaBase, QueryResponseSchema
 
@@ -17,11 +17,8 @@ class QueryResource(Resource):
 
     @requires_authorization
     def post(self, type):
-
         schema = QuerySchemaBase()
         obj = schema.loads(request.get_data(as_text=True))
-        print(obj)
-        print(obj.data)
         query = Query(
             query=obj.data["query"],
             name=obj.data["name"],
@@ -34,7 +31,6 @@ class QueryResource(Resource):
 
         db.session.refresh(query)
         schema = QueryResponseSchema()
-        print("POSZŁO!")
         return schema.dump(query)
 
 

@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields
-from schema.object import ObjectListItemResponseSchema
+
+from .object import ObjectListItemResponseSchema
 
 
 class RelationsResponseSchema(Schema):

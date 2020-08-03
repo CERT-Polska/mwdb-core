@@ -1,5 +1,7 @@
 import logging
+
 from flask import g
+import logmatic
 
 
 class ContextFilter(logging.Filter):
@@ -9,5 +11,19 @@ class ContextFilter(logging.Filter):
         return True
 
 
+logger = logging.getLogger('malwarecage.application')
+
+# Don't propagate to root logger
+logger.propagate = False
+
+# Setup JSON stream handler for main logger
+handler = logging.StreamHandler()
+handler.setFormatter(
+    logmatic.JsonFormatter(fmt="%(filename) %(funcName) %(levelname) %(lineno) %(module) %(threadName) %(message)"))
+logger.addHandler(handler)
+logger.addFilter(ContextFilter())
+logger.setLevel(logging.INFO)
+
+
 def getLogger():
-    return logging.getLogger('malwarecage.application')
+    return logger

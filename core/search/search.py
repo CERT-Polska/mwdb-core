@@ -1,17 +1,19 @@
 from typing import List, Any, TypeVar, Optional, Type, Union
+from flask import g
 
 from luqum.parser import parser
 from luqum.tree import Range, Term, Item, Word, Phrase, SearchField, AndOperation, OrOperation, Not, Prohibit, \
-                       BaseGroup
+                       BaseGroup, FieldGroup
 from luqum.utils import LuceneTreeVisitorV2
 
 from sqlalchemy import and_, or_, not_
+from sqlalchemy.orm import aliased
 
 from model import db, Object
 
 from .exceptions import FieldNotQueryableException, UnsupportedGrammarException
 from .mappings import get_field_mapper
-
+from .tree import Subquery
 
 T = TypeVar('T', bound=Term)
 # SQLAlchemy doesn't provide typings
@@ -28,7 +30,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
     generic_visitor_method_name = 'visit_unsupported'
 
     # Visitor methods for value nodes
-
+    
     def visit_term(self, node: T, parents: List[Item], context: SQLQueryBuilderContext) -> Union[T, Range]:
         """
         Visitor for Term (Word and Phrase).
@@ -140,6 +142,24 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
             f"Lucene grammar element {node.__class__.__name__} "
             f"is not supported in search"
         )
+
+    def visit_field_group(self, node: FieldGroup, parents: List[Item], context: SQLQueryBuilderContext) -> Subquery:
+        if context.field_mapper.accepts_subquery:
+            inner_context = SQLQueryBuilderContext()
+            condition = self.visit(node.expr, parents + [node], inner_context)
+            # Make aliased entity for inner query
+            relative = aliased(inner_context.queried_type)
+            subquery = (
+                db.session.query(relative.id)
+                          .select_entity_from(relative)  # Use aliased entity in subquery
+                          .filter(condition)
+                          .filter(g.auth_user.has_access_to_object(relative.id))
+            )
+            return Subquery(node.expr, subquery)
+        else:
+            raise UnsupportedGrammarException(
+                "Subqueries are not supported for this type of field"
+            )
 
     # Main function
     def build_query(self, query: str, queried_type: Optional[Type[Object]] = None):

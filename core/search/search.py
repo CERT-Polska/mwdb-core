@@ -148,7 +148,7 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
             inner_context = SQLQueryBuilderContext()
             condition = self.visit(node.expr, parents + [node], inner_context)
             # Make aliased entity for inner query
-            relative = aliased(inner_context.queried_type)
+            relative = aliased(inner_context.queried_type, flat=True)
             subquery = (
                 db.session.query(relative.id)
                           .select_entity_from(relative)  # Use aliased entity in subquery

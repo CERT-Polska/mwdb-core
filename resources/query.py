@@ -18,7 +18,8 @@ class QueryResource(Resource):
     def post(self, type):
         schema = QuerySchemaBase()
         obj = schema.loads(request.get_data(as_text=True))
-        print(obj)
+        if obj.errors:
+            return {"errors": obj.errors}, 400
         query = Query(
             query=obj.data["query"],
             name=obj.data["name"],

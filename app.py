@@ -56,7 +56,7 @@ from resources.user import (
     UserResource, UserListResource, UserPendingResource,
     UserGetPasswordChangeTokenResource
 )
-from resources.query import QueryResource, QueryDeleteResource
+from resources.query import QueryResource, QueryDeleteResource, QueriesGetResource
 
 import redis
 
@@ -302,7 +302,8 @@ api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
 
 # Query endpoints
-api.add_resource(QueryResource, "/<any(file, config, blob, object):type>/query")
+api.add_resource(QueryResource, "/query")
+api.add_resource(QueriesGetResource, "/<any(file, config, blob, object):type>/query")
 api.add_resource(QueryDeleteResource, "/query/<int:id>")
 
 # Load plugins

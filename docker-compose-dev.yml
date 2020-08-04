@@ -22,7 +22,6 @@ services:
       MALWARECAGE_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
       MALWARECAGE_ENABLE_REGISTRATION: 1
     volumes:
-      - "./migrations/versions:/app/migrations/versions"
       - "./mail_templates:/app/mail_templates"
       - "./plugins:/app/plugins"
       - "./malwarecage:/app/malwarecage"
@@ -38,8 +37,8 @@ services:
       HOST: 0.0.0.0
       REACT_APP_API_URL: "/api/"
     volumes:
-      - "./malwarefront/public:/app/public"
-      - "./malwarefront/src:/app/src"
+      - "./malwarecage/web/public:/app/public"
+      - "./malwarecage/web/src:/app/src"
       - "./plugins:/plugins"
     restart: on-failure
   postgres:
@@ -48,6 +47,8 @@ services:
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - postgres-vars.env
+    ports:
+      - "54322:5432"
   redis:
     image: redis:alpine
   mailhog:

@@ -17,18 +17,14 @@ COPY requirements.txt plugins/requirements-*.txt /tmp/
 RUN ls /tmp/requirements-*.txt | xargs -i,, pip --no-cache-dir install -r ,,
 
 # Copy backend files
-COPY dist/start.sh dist/uwsgi.ini /app/
-COPY malwarecage/core /app/malwarecage/core
-COPY malwarecage/model /app/malwarecage/model
-COPY malwarecage/resources /app/malwarecage/resources
-COPY malwarecage/schema /app/malwarecage/schema
-COPY malwarecage/*.py /app/malwarecage/
+COPY dist/start.sh dist/uwsgi.ini dist/malwarecage.ini setup.py MANIFEST.in requirements.txt /app/
+COPY malwarecage /app/malwarecage/
 
 # Copy user-controlled plugins
 COPY plugins /app/plugins
 
-# Copy user-controlled mail templates
-COPY mail_templates /app/mail_templates
+# Install malwarecage package
+RUN pip install /app
 
 # Create a /app/uploads directory
 # Give +r to everything in /app and +x for directories

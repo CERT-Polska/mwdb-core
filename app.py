@@ -283,6 +283,11 @@ api.add_resource(DownloadResource, '/download/<access_token>')
 # Search endpoints
 api.add_resource(SearchResource, '/search')
 
+# Query endpoints
+api.add_resource(QueryResource, "/query")
+api.add_resource(QueriesGetResource, "/<any(file, config, blob, object):type>/query")
+api.add_resource(QueryDeleteResource, "/query/<int:id>")
+
 # Metakey endpoints
 api.add_resource(MetakeyListDefinitionResource, '/meta/list/<any(read, set):access>')
 api.add_resource(MetakeyResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/meta')
@@ -300,11 +305,6 @@ api.add_resource(UserPendingResource, "/user/<login>/pending")
 api.add_resource(GroupListResource, "/group")
 api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
-
-# Query endpoints
-api.add_resource(QueryResource, "/query")
-api.add_resource(QueriesGetResource, "/<any(file, config, blob, object):type>/query")
-api.add_resource(QueryDeleteResource, "/query/<int:id>")
 
 # Load plugins
 plugin_context = PluginAppContext()

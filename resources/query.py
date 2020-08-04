@@ -10,6 +10,28 @@ from . import logger, requires_capabilities, requires_authorization, access_obje
 class QueriesGetResource(Resource):
     @requires_authorization
     def get(self, type):
+        """
+        ---
+        summary: Get objects queries
+        description: Returns all saved queries attached to the type of objects.
+        tags:
+            - query
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of objects view.
+        responses:
+            200:
+                description: List of saved queries attached to the type of objects view.
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      items: QueryResponseSchema
+        """
         query = db.session.query(Query).filter(Query.type == type).all()
         schema = QueryResponseSchema(many=True)
         return schema.dump(query)
@@ -18,6 +40,26 @@ class QueriesGetResource(Resource):
 class QueryResource(Resource):
     @requires_authorization
     def post(self):
+        """
+        ---
+        summary: Create a new query
+        description: Create a new saved quick query.
+        tags:
+            - query
+        requestBody:
+            description: Basic information for saving query
+            content:
+              application/json:
+                schema: QuerySchemaBase
+        responses:
+            200:
+                description: List of saved queries attached to the type of objects view.
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      items: QueryResponseSchema
+        """
         schema = QuerySchemaBase()
         obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
@@ -40,6 +82,22 @@ class QueryResource(Resource):
 class QueryDeleteResource(Resource):
     @requires_authorization
     def delete(self, id):
+        """
+        ---
+        summary: Delete query
+        description: Deletes a query.
+        tags:
+            - query
+        parameters:
+            - in: path
+              name: id
+              schema:
+                id: int
+              description: Query identifier
+        responses:
+            200:
+                description: When query was successfully deleted
+        """
         query = db.session.query(Query).filter(Query.id == id).first()
 
         if query is not None:

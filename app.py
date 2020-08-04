@@ -303,7 +303,7 @@ api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
 
 # Query endpoints
 api.add_resource(QueryResource, "/<any(file, config, blob, object):type>/query")
-api.add_resource(QueryDeleteResource, "/<any(file, config, blob, object):type>/query/<int:identifier>")
+api.add_resource(QueryDeleteResource, "/query/<int:id>")
 
 # Load plugins
 plugin_context = PluginAppContext()

@@ -1,7 +1,6 @@
 from flask import request, g, jsonify
 from flask_restful import Resource
 from model import db, Query
-import json
 
 from schema.query import QuerySchemaBase, QueryResponseSchema
 
@@ -19,6 +18,7 @@ class QueryResource(Resource):
     def post(self, type):
         schema = QuerySchemaBase()
         obj = schema.loads(request.get_data(as_text=True))
+        print(obj)
         query = Query(
             query=obj.data["query"],
             name=obj.data["name"],
@@ -36,10 +36,10 @@ class QueryResource(Resource):
 
 class QueryDeleteResource(Resource):
     @requires_authorization
-    def delete(self, query_id):
-        query = db.session.query(Query).filter(Query.id == query_id).first()
+    def delete(self, id):
+        query = db.session.query(Query).filter(Query.id == id).first()
 
         if query is not None:
             db.session.delete(query)
-            logger.info('query deleted', extra={'query': query_id})
+            logger.info('query deleted', extra={'query': id})
             db.session.commit()

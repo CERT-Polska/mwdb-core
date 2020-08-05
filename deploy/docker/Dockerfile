@@ -17,7 +17,7 @@ COPY requirements.txt plugins/requirements-*.txt /tmp/
 RUN ls /tmp/requirements-*.txt | xargs -i,, pip --no-cache-dir install -r ,,
 
 # Copy backend files
-COPY dist/start.sh dist/uwsgi.ini dist/malwarecage.ini setup.py MANIFEST.in requirements.txt /app/
+COPY docker/start.sh docker/uwsgi.ini docker/malwarecage.ini setup.py MANIFEST.in requirements.txt /app/
 COPY malwarecage /app/malwarecage/
 
 # Copy user-controlled plugins

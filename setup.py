@@ -7,7 +7,7 @@ Under the hood of mwdb.cert.pl service hosted by CERT.pl.
 """
 
 setup(name="malwarecage",
-      version="2.0.0-alpha2",
+      version="2.0.0a2",
       description="Malwarecage malware database",
       long_description=LONG_DESCRIPTION,
       author="CERT Polska",
@@ -16,7 +16,7 @@ setup(name="malwarecage",
       include_package_data=True,
       url="https://github.com/CERT-Polska/malwarecage",
       install_requires=open("requirements.txt").read().splitlines(),
-      python_requires='>3.6',
+      python_requires='>=3.6',
       entry_points={
         'console_scripts': [
             'malwarecage=malwarecage.cli:cli'

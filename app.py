@@ -56,7 +56,7 @@ from resources.user import (
     UserResource, UserListResource, UserPendingResource,
     UserGetPasswordChangeTokenResource
 )
-from resources.query import QueryResource, QueryDeleteResource, QueriesGetResource
+from resources.query import QueryResource, QueryUpdateResource, QueriesGetResource
 
 import redis
 
@@ -286,7 +286,7 @@ api.add_resource(SearchResource, '/search')
 # Query endpoints
 api.add_resource(QueryResource, "/query")
 api.add_resource(QueriesGetResource, "/<any(file, config, blob, object):type>/query")
-api.add_resource(QueryDeleteResource, "/query/<int:id>")
+api.add_resource(QueryUpdateResource, "/query/<int:id>")
 
 # Metakey endpoints
 api.add_resource(MetakeyListDefinitionResource, '/meta/list/<any(read, set):access>')

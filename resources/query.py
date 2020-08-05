@@ -4,7 +4,7 @@ from model import db, Query
 
 from schema.query import QuerySchemaBase, QueryResponseSchema
 
-from . import logger, requires_capabilities, requires_authorization, access_object
+from . import logger, requires_authorization
 
 
 class QueriesGetResource(Resource):
@@ -64,28 +64,59 @@ class QueryResource(Resource):
         obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
             return {"errors": obj.errors}, 400
-        query = Query(
+        quick_query = Query(
             query=obj.data["query"],
             name=obj.data["name"],
             type=obj.data["type"],
             user_id=g.auth_user.id,
         )
-        db.session.add(query)
+        db.session.add(quick_query)
         db.session.commit()
-        logger.info('Query saved', extra={'query': query.name})
+        logger.info('Query saved', extra={'query': quick_query.name})
 
-        db.session.refresh(query)
+        db.session.refresh(quick_query)
         schema = QueryResponseSchema()
-        return schema.dump(query)
+        return schema.dump(quick_query)
 
 
-class QueryDeleteResource(Resource):
+class QueryUpdateResource(Resource):
+    @requires_authorization
+    def put(self, id):
+        """
+        ---
+        summary: Update query.
+        description: Update custom quick query.
+        tags:
+            - query
+        parameters:
+            - in: path
+              name: id
+              schema:
+                id: int
+              description: Query identifier
+        requestBody:
+            description: Basic information of query
+            content:
+              application/json:
+                schema: QuerySchemaBase
+        responses:
+            200:
+                description: When query was successfully updated
+        """
+        schema = QuerySchemaBase()
+        obj = schema.loads(request.get_data(as_text=True))
+        quick_query = db.session.query(Query).filter(Query.id == id).first()
+        if quick_query is not None:
+            quick_query.query = obj.data['query']
+            quick_query.name = obj.data['name']
+            db.session.commit()
+
     @requires_authorization
     def delete(self, id):
         """
         ---
         summary: Delete query
-        description: Deletes a query.
+        description: Delete custom quick query.
         tags:
             - query
         parameters:
@@ -98,9 +129,9 @@ class QueryDeleteResource(Resource):
             200:
                 description: When query was successfully deleted
         """
-        query = db.session.query(Query).filter(Query.id == id).first()
+        quick_query = db.session.query(Query).filter(Query.id == id).first()
 
-        if query is not None:
-            db.session.delete(query)
+        if quick_query is not None:
+            db.session.delete(quick_query)
             logger.info('query deleted', extra={'query': id})
             db.session.commit()

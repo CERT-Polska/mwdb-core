@@ -278,3 +278,34 @@ def test_search_no_access_to_parent():
     found_objs = test.search(f'parent:(file.size:5000) AND tag:{tag}')
 
     assert len(found_objs) == 0
+
+
+def test_child_mixed():
+    test = MwdbTest()
+    test.login()
+
+    filename = base62uuid()
+    file_content = b"a" * 7000
+    tag = "child_mixed"
+
+    sample = test.add_sample(filename, file_content)
+    test.add_tag(sample["id"], tag)
+
+    cfg = {
+        "config": {
+            "field": "test",
+        },
+    }
+
+    config = test.add_config(sample["sha256"], "malwarex", cfg)
+
+    filename2 = base62uuid()
+    file_content2 = b"a" * 7500
+    tag = "child_mixed"
+
+    sample = test.add_sample(filename2, file_content2, config["id"])
+    test.add_tag(sample["id"], tag)
+
+    found_objs = test.search(f'child:(config.cfg.config.field:test AND child:(file.size:7500 AND tag:{tag}))')
+
+    assert len(found_objs) == 1

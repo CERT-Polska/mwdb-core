@@ -60,6 +60,8 @@ class MetakeyPermissionSetRequestBodySchema(Schema):
 
 class MetakeyItemResponseSchema(MetakeyKeySchema, MetakeyValueSchema):
     url = fields.Str(required=True)
+    label = fields.Str(required=True)
+    description = fields.Str(required=True)
 
 
 class MetakeyPermissionItemResponseSchema(Schema):

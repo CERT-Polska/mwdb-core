@@ -3,6 +3,7 @@ import datetime
 
 from .relations import *
 from .utils import base62uuid
+from .utils import ShouldRaise
 
 
 def test_file_name_search():
@@ -248,10 +249,8 @@ def test_search_date_time_unbounded():
     assert len(found_objs) == 2
     found_objs = test.search(f'upload_time:">={now}" AND tag:{tag}')
     assert len(found_objs) == 2
-    try:
+    with ShouldRaise(status_code=400):
         found_objs = test.search(f'upload_time:"<{now}" AND tag:{tag}')
-    except requests.HTTPError:
-        assert True
 
 
 def test_search_no_access_to_parent():
@@ -276,7 +275,6 @@ def test_search_no_access_to_parent():
     test.add_tag(sample2["id"], tag)
 
     found_objs = test.search(f'parent:(file.size:5000) AND tag:{tag}')
-
     assert len(found_objs) == 0
 
 
@@ -303,9 +301,8 @@ def test_child_mixed():
     file_content2 = b"a" * 7500
     tag = "child_mixed"
 
-    sample = test.add_sample(filename2, file_content2, config["id"])
-    test.add_tag(sample["id"], tag)
+    sample2 = test.add_sample(filename2, file_content2, config["id"])
+    test.add_tag(sample2["id"], tag)
 
     found_objs = test.search(f'child:(config.cfg.config.field:test AND child:(file.size:7500 AND tag:{tag}))')
-
-    assert len(found_objs) == 1
+    assert len(found_objs) == 1 and found_objs[0]["id"] == sample["id"]

@@ -1,7 +1,8 @@
 from flask import request, g, jsonify
 from flask_restful import Resource
-from model import db, Query
+from werkzeug.exceptions import NotFound
 
+from model import db, Query
 from schema.query import QuerySchemaBase, QueryResponseSchema
 
 from . import logger, requires_authorization
@@ -32,9 +33,9 @@ class QueriesGetResource(Resource):
                       type: array
                       items: QueryResponseSchema
         """
-        query = db.session.query(Query).filter(Query.type == type).all()
+        quick_queries = db.session.query(Query).filter(Query.type == type).all()
         schema = QueryResponseSchema(many=True)
-        return schema.dump(query)
+        return schema.dump(quick_queries)
 
 
 class QueryResource(Resource):
@@ -59,6 +60,8 @@ class QueryResource(Resource):
                     schema:
                       type: array
                       items: QueryResponseSchema
+            400:
+                description: When query is invalid
         """
         schema = QuerySchemaBase()
         obj = schema.loads(request.get_data(as_text=True))
@@ -102,9 +105,13 @@ class QueryUpdateResource(Resource):
         responses:
             200:
                 description: When query was successfully updated
+            400:
+                description: When query is invalid
         """
         schema = QuerySchemaBase()
         obj = schema.loads(request.get_data(as_text=True))
+        if obj.errors:
+            return {"errors": obj.errors}, 400
         quick_query = db.session.query(Query).filter(Query.id == id).first()
         if quick_query is not None:
             quick_query.query = obj.data['query']

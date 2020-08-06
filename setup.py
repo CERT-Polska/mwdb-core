@@ -23,6 +23,6 @@ setup(name="malwarecage",
         ],
       },
       classifiers=[
-        "Programming Language :: Python 3",
+        "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
       ])

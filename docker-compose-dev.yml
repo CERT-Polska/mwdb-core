@@ -47,8 +47,6 @@ services:
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - postgres-vars.env
-    ports:
-      - "54322:5432"
   redis:
     image: redis:alpine
   mailhog:

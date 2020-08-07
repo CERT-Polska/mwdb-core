@@ -7,7 +7,7 @@ Under the hood of mwdb.cert.pl service hosted by CERT.pl.
 """
 
 setup(name="malwarecage",
-      version="2.0.0a2-dev1",
+      version="2.0.0a2-dev2",
       description="Malwarecage malware database",
       long_description=LONG_DESCRIPTION,
       author="CERT Polska",
@@ -23,6 +23,7 @@ setup(name="malwarecage",
         ],
       },
       classifiers=[
-        "Programming Language :: Python :: 3",
-        "Operating System :: OS Independent",
+        "Development Status :: 3 - Alpha",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3"
       ])

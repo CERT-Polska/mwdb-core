@@ -2,8 +2,8 @@ from flask import request, g, jsonify
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
-from model import db, Query
-from schema.query import QuerySchemaBase, QueryResponseSchema
+from model import db, QuickQuery
+from schema.quick_query import QuickQuerySchemaBase, QuickQueryResponseSchema
 
 from . import logger, requires_authorization
 
@@ -21,7 +21,7 @@ class QuickQueryResource(Resource):
             description: Basic information for saving query
             content:
               application/json:
-                schema: QuerySchemaBase
+                schema: QuickQuerySchemaBase
         responses:
             200:
                 description: List of saved queries attached to the type of objects view.
@@ -29,16 +29,17 @@ class QuickQueryResource(Resource):
                   application/json:
                     schema:
                       type: array
-                      items: QueryResponseSchema
+                      items: QuickQueryResponseSchema
             400:
                 description: When query is invalid
         """
-        schema = QuerySchemaBase()
+        schema = QuickQuerySchemaBase()
         obj = schema.loads(request.get_data(as_text=True))
         if obj.errors:
+            print(obj)
             return {"errors": obj.errors}, 400
-        quick_query = Query(
-            query=obj.data["query"],
+        quick_query = QuickQuery(
+            quick_query=obj.data["quick_query"],
             name=obj.data["name"],
             type=obj.data["type"],
             user_id=g.auth_user.id,
@@ -48,7 +49,7 @@ class QuickQueryResource(Resource):
         logger.info('Query saved', extra={'query': quick_query.name})
 
         db.session.refresh(quick_query)
-        schema = QueryResponseSchema()
+        schema = QuickQueryResponseSchema()
         return schema.dump(quick_query)
 
     @requires_authorization
@@ -73,10 +74,10 @@ class QuickQueryResource(Resource):
                   application/json:
                     schema:
                       type: array
-                      items: QueryResponseSchema
+                      items: QuickQueryResponseSchema
         """
-        quick_queries = db.session.query(Query).filter(Query.type == type).filter(Query.user_id == g.auth_user.id).all()
-        schema = QueryResponseSchema(many=True)
+        quick_queries = db.session.query(QuickQuery).filter(QuickQuery.type == type).filter(QuickQuery.user_id == g.auth_user.id).all()
+        schema = QuickQueryResponseSchema(many=True)
         return schema.dump(quick_queries)
 
 
@@ -101,7 +102,7 @@ class QuickQueryItemResource(Resource):
             200:
                 description: When query was successfully deleted
         """
-        quick_query = db.session.query(Query).filter(Query.id == id).filter(Query.user_id == g.auth_user.id).first()
+        quick_query = db.session.query(QuickQuery).filter(QuickQuery.id == id).filter(QuickQuery.user_id == g.auth_user.id).first()
         if quick_query is None:
             raise NotFound("Query was not found")
         if quick_query is not None:

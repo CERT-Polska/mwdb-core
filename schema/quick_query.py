@@ -1,9 +1,9 @@
 from marshmallow import Schema, fields, validates, ValidationError
 
 
-class QuerySchemaBase(Schema):
+class QuickQuerySchemaBase(Schema):
+    quick_query = fields.Str(required=True, allow_none=False)
     name = fields.Str(required=True, allow_none=False)
-    query = fields.Str(required=True, allow_none=False)
     type = fields.Str(required=True, allow_none=False)
 
     @validates("name")
@@ -12,11 +12,11 @@ class QuerySchemaBase(Schema):
             raise ValidationError("Please set name to your query.")
 
 
-class QueryRequestSchema(QuerySchemaBase):
+class QuickQueryRequestSchema(QuickQuerySchemaBase):
     pass
 
 
-class QueryResponseSchema(QuerySchemaBase):
+class QuickQueryResponseSchema(QuickQuerySchemaBase):
     id = fields.Int(required=True, allow_none=False)
-    author = fields.Str(required=True, allow_none=False, attribute="author_login")
+    owner = fields.Str(required=True, allow_none=False, attribute="owner_login")
     timestamp = fields.DateTime(required=True, allow_none=False)

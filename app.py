@@ -56,7 +56,7 @@ from resources.user import (
     UserResource, UserListResource, UserPendingResource,
     UserGetPasswordChangeTokenResource
 )
-from resources.query import QuickQueryResource, QuickQueryItemResource
+from resources.quick_query import QuickQueryResource, QuickQueryItemResource
 
 import redis
 
@@ -284,8 +284,8 @@ api.add_resource(DownloadResource, '/download/<access_token>')
 api.add_resource(SearchResource, '/search')
 
 # Query endpoints
-api.add_resource(QuickQueryResource, "/<any(file, config, blob, object):type>/query")
-api.add_resource(QuickQueryItemResource, "/query/<int:id>")
+api.add_resource(QuickQueryResource, "/<any(file, config, blob, object):type>/quick_query")
+api.add_resource(QuickQueryItemResource, "/quick_query/<int:id>")
 
 # Metakey endpoints
 api.add_resource(MetakeyListDefinitionResource, '/meta/list/<any(read, set):access>')

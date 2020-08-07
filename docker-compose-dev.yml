@@ -23,7 +23,6 @@ services:
       MALWARECAGE_ENABLE_REGISTRATION: 1
     volumes:
       - "./mail_templates:/app/mail_templates"
-      - "./plugins:/app/plugins"
       - "./malwarecage:/app/malwarecage"
   malwarefront:
     depends_on:
@@ -39,7 +38,6 @@ services:
     volumes:
       - "./malwarecage/web/public:/app/public"
       - "./malwarecage/web/src:/app/src"
-      - "./plugins:/plugins"
     restart: on-failure
   postgres:
     image: postgres

@@ -1,0 +1,4 @@
+graft malwarecage
+recursive-exclude * *.pyc
+global-exclude *.js.map *.css.map
+prune malwarecage/web/node_modules

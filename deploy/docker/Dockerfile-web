@@ -1,6 +1,6 @@
 FROM node:8 AS build
 
-COPY ./malwarefront /app
+COPY ./malwarecage/web /app
 COPY ./plugins /plugins
 
 RUN cd /app \
@@ -10,10 +10,10 @@ RUN cd /app \
 
 FROM nginx:stable
 
-ENV PROXY_BACKEND_URL http://mwdb.:8080/
+ENV PROXY_BACKEND_URL http://mwdb.:8080
 
-COPY malwarefront/default.conf.template /etc/nginx/conf.d/default.conf.template
-COPY malwarefront/start.sh /start.sh
+COPY docker/nginx.conf.template /etc/nginx/conf.d/default.conf.template
+COPY docker/start-web.sh /start-web.sh
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Give +r to everything in /usr/share/nginx/html and +x for directories
@@ -22,4 +22,4 @@ RUN chmod u=rX,go= -R /usr/share/nginx/html
 # By default everything is owned by root - change owner to nginx
 RUN chown nginx:nginx -R /usr/share/nginx/html
 
-CMD ["/bin/sh", "/start.sh"]
+CMD ["/bin/sh", "/start-web.sh"]

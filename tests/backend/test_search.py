@@ -1,5 +1,9 @@
+import time
+import datetime
+
 from .relations import *
 from .utils import base62uuid
+from .utils import ShouldRaise
 
 
 def test_file_name_search():
@@ -190,3 +194,115 @@ def test_search_json():
 
     found_objs = test.search('config.cfg:"*\\"dict_in_list\\": \\"xxx\\"*"')
     assert len(found_objs) == 0
+
+
+def test_search_file_size_unbounded():
+    test = MwdbTest()
+    test.login()
+
+    filename = base62uuid()
+    file_content = b"a" * 1338
+    file2name = base62uuid()
+    file2_content = b"a" * 2000
+    file3name = base62uuid()
+    file3_content = b"a" * 1000
+    tag = "file_size_unbounded_search"
+
+    sample = test.add_sample(filename, file_content)
+    test.add_tag(sample["id"], tag)
+    sample2 = test.add_sample(file2name, file2_content)
+    test.add_tag(sample2["id"], tag)
+    sample3 = test.add_sample(file3name, file3_content)
+    test.add_tag(sample3["id"], tag)
+
+    found_objs = test.search(f'file.size:[* TO *] AND tag:{tag}')
+    assert len(found_objs) == 3
+    found_objs = test.search(f'file.size:[1338 TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = test.search(f'file.size:>=1338 AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = test.search(f'file.size:[* TO 1338}} AND tag:{tag}')
+    assert len(found_objs) == 1
+    found_objs = test.search(f'file.size:[* TO 1000}} AND tag:{tag}')
+    assert len(found_objs) == 0
+
+
+def test_search_date_time_unbounded():
+    test = MwdbTest()
+    test.login()
+
+    filename = base62uuid()
+    file_content = b"a" * 5000
+    file2name = base62uuid()
+    file2_content = b"a" * 5100
+    tag = "date_time_unbounded_search"
+
+    now = datetime.datetime.now()
+    now = now.strftime("%Y-%m-%d %H:%M:%S")
+    sample = test.add_sample(filename, file_content)
+    test.add_tag(sample["id"], tag)
+    time.sleep(1)
+    sample2 = test.add_sample(file2name, file2_content)
+    test.add_tag(sample2["id"], tag)
+
+    found_objs = test.search(f'upload_time:["{now}" TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = test.search(f'upload_time:">={now}" AND tag:{tag}')
+    assert len(found_objs) == 2
+    with ShouldRaise(status_code=400):
+        found_objs = test.search(f'upload_time:"<{now}" AND tag:{tag}')
+
+
+def test_search_no_access_to_parent():
+    test = MwdbTest()
+    test.login()
+
+    filename = base62uuid()
+    file_content = b"a" * 5000
+    file2name = base62uuid()
+    file2_content = b"a" * 5100
+    tag = "no_access_to_parent"
+
+    sample = test.add_sample(filename, file_content)
+    test.add_tag(sample["id"], tag)
+    sample2 = test.add_sample(file2name, file2_content, sample["sha256"])
+    test.add_tag(sample2["id"], tag)
+
+    test.register_user("test1", "testpass", ["adding_tags"])
+    test.login_as("test1", "testpass")
+
+    sample2 = test.add_sample(file2name, file2_content)
+    test.add_tag(sample2["id"], tag)
+
+    found_objs = test.search(f'parent:(file.size:5000) AND tag:{tag}')
+    assert len(found_objs) == 0
+
+
+def test_child_mixed():
+    test = MwdbTest()
+    test.login()
+
+    filename = base62uuid()
+    file_content = b"a" * 7000
+    tag = "child_mixed"
+
+    sample = test.add_sample(filename, file_content)
+    test.add_tag(sample["id"], tag)
+
+    cfg = {
+        "config": {
+            "field": "test",
+        },
+    }
+
+    config = test.add_config(sample["sha256"], "malwarex", cfg)
+
+    filename2 = base62uuid()
+    file_content2 = b"a" * 7500
+    tag = "child_mixed"
+
+    sample2 = test.add_sample(filename2, file_content2, config["id"])
+    test.add_tag(sample2["id"], tag)
+
+    found_objs = test.search(f'child:(config.cfg.config.field:test AND child:(file.size:7500 AND tag:{tag}))')
+    assert len(found_objs) == 1 and found_objs[0]["id"] == sample["id"]

@@ -22,15 +22,8 @@ services:
       MALWARECAGE_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
       MALWARECAGE_ENABLE_REGISTRATION: 1
     volumes:
-      - "./core:/app/core"
-      - "./migrations/versions:/app/migrations/versions"
       - "./mail_templates:/app/mail_templates"
-      - "./model:/app/model"
-      - "./plugins:/app/plugins"
-      - "./resources:/app/resources"
-      - "./schema:/app/schema"
-      - "./app.py:/app/app.py"
-      - "./plugin_engine.py:/app/plugin_engine.py"
+      - "./malwarecage:/app/malwarecage"
   malwarefront:
     depends_on:
       - mwdb
@@ -43,9 +36,8 @@ services:
       HOST: 0.0.0.0
       REACT_APP_API_URL: "/api/"
     volumes:
-      - "./malwarefront/public:/app/public"
-      - "./malwarefront/src:/app/src"
-      - "./plugins:/plugins"
+      - "./malwarecage/web/public:/app/public"
+      - "./malwarecage/web/src:/app/src"
     restart: on-failure
   postgres:
     image: postgres

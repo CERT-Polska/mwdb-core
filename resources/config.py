@@ -8,7 +8,7 @@ from sqlalchemy import func
 
 from plugin_engine import hooks
 
-from model import Config, db
+from model import Config, db, TextBlob
 from model.object import ObjectTypeConflictError
 
 from schema.config import (
@@ -169,14 +169,43 @@ class ConfigResource(ObjectResource):
 
     def _create_object(self, spec, parent, share_with, metakeys):
         try:
-            return Config.get_or_create(
-                spec.data["cfg"],
-                spec.data["family"],
-                spec.data["config_type"],
-                parent=parent,
-                share_with=share_with,
-                metakeys=metakeys
-            )
+            inblob = False
+            for first, second in spec.data.items():
+                if isinstance(second, dict):
+                    for key in second:
+                        if key == "in-blob" and isinstance(second[key], dict):
+                            inblob = True
+                            blob_obj, is_new = TextBlob.get_or_create(
+                                second[key]["content"],
+                                second[key]["blob_name"],
+                                second[key]["blob_type"],
+                                parent=None,
+                                share_with=share_with,
+                                metakeys=metakeys
+                            )
+
+                        obj, is_new = Config.get_or_create(
+                            {"in-blob": blob_obj.dhash},
+                            spec.data["family"],
+                            spec.data["config_type"],
+                            parent=parent,
+                            share_with=share_with,
+                            metakeys=metakeys
+                        )
+
+                        blob_obj.add_parent(obj, commit=False)
+
+            if not inblob:
+                return Config.get_or_create(
+                    spec.data["cfg"],
+                    spec.data["family"],
+                    spec.data["config_type"],
+                    parent=parent,
+                    share_with=share_with,
+                    metakeys=metakeys
+                )
+            else:
+                return obj, is_new
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")
 

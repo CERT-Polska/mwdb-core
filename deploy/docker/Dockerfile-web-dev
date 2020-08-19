@@ -1,6 +1,6 @@
 FROM node:8 AS build
 
-COPY ./malwarefront /app
+COPY ./malwarecage/web /app
 COPY ./plugins /plugins
 
 RUN cd /app \
@@ -8,7 +8,7 @@ RUN cd /app \
     && CI=true npm run build \
     && npm cache clean --force
 
-ENV PROXY_BACKEND_URL http://mwdb.:8080/
+ENV PROXY_BACKEND_URL http://mwdb.:8080
 
 WORKDIR /app
 CMD ["npm", "run", "start"]

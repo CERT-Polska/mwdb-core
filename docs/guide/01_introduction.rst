@@ -2,7 +2,7 @@
 ==============================
 
 A brief history (Why do I need Malwarecage?)
------------------------
+--------------------------------------------
 
 It's just a matter of time before researcher faces a problem of maintaining the constantly-increasing set of malware samples. It's not only about the binaries, but also all of the information that comes as a result of malware analysis like static configurations, associations between files and configs, metadata etc.
 
@@ -42,12 +42,39 @@ Malwarecage welcomes us with a list of recently uploaded samples.
 
 .. image:: ../images/recent-samples.png
 
-Recent views allow to see basic information about latest objects in the repository and interactively explore the dataset using Lucene-based queries and clickable fields.
+**Recent views** allow to see basic information about latest objects in the repository and interactively explore the dataset using Lucene-based queries and clickable fields. If sample was uploaded within last 72 hours, it is additionally marked with yellowish background. Yellow color is a bit more intense if file was uploaded at least 24 hours ago.
 
 If you simply want to find a sample with specific SHA256 hash: just paste this hash into a search box and press ENTER.
 
+.. image:: ../images/search-sha256.gif
+
 `sha256:` has been added automatically to your query.
+
+Interactive search is even more powerful. For example: you can filter out samples with specific tags just by clicking on them. Reset your query and click on tag to include only these samples that are currently in your interest.
+
+.. image:: ../images/search-tags.gif
 
 Sample view
 -----------
 
+Let's click on one of the hashes to navigate to the **detailed sample view**.
+
+.. image:: ../images/sample-view.png
+
+Here you can see all the details about file. Left side contains four tabs. The first one called **Details** presents basic file information like original file name, size, file type and hash values.
+
+On the right side of view you can see tags, relations with other objects, attributes containing some extra information and finally: the comments section. All of these things will be described in details in further chapters of this guide.
+
+Let's come back to the tabs. The second tab is **Relations** that shows graph representation of relations with other objects. You can expand next levels of graph by clicking on nodes.
+
+.. image:: ../images/sample-relations-view.gif
+
+The third tab is **Preview** where you can quickly view the file contents, both in text mode and hex view.
+
+.. image:: ../images/sample-preview-view.gif
+
+Finally you can download the sample file just by clicking **Download** button.
+
+The fourth tab called **Static config** is optional and shows only if there are some configurations related with sample.
+
+This is only an overview of the most basic Malwarecage functions. Follow this guide to learn in details how to effectively navigate in repository, upload new objects and define relationships between them.

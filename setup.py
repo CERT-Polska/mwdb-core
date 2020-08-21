@@ -1,15 +1,17 @@
+from malwarecage.version import app_version
 from setuptools import setup, find_packages
 
-LONG_DESCRIPTION = """
+long_description = """
 Malware repository component for automated malware collection/analysis systems.
 
 Under the hood of mwdb.cert.pl service hosted by CERT.pl.
 """
+release = f"{app_version}-dev2"
 
 setup(name="malwarecage",
-      version="2.0.0a2-dev2",
+      version=release,
       description="Malwarecage malware database",
-      long_description=LONG_DESCRIPTION,
+      long_description=long_description,
       author="CERT Polska",
       author_email="info@cert.pl",
       packages=find_packages(),
@@ -26,4 +28,11 @@ setup(name="malwarecage",
         "Development Status :: 3 - Alpha",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3"
-      ])
+      ],
+      command_options={
+          'build_sphinx': {
+              'version': ('setup.py', app_version),
+              'release': ('setup.py', release)
+          }
+      }
+)

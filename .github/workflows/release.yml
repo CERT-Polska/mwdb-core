@@ -1,0 +1,29 @@
+name: Release new Malwarecage version
+
+on:
+  push:
+    tags: 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+      - name: Build web bundle
+        working-directory: malwarecage/web
+        run: |
+          npm install
+          npm run build
+      - name: Build package
+        run: |
+          pip3 install setuptools wheel
+          python3 setup.py bdist_wheel
+      - name: Publish to PyPi
+        uses: pypa/gh-action-pypi-publish@v1.3.0
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}

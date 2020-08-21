@@ -172,9 +172,9 @@ class MwdbTest(object):
         res = self.session.post(self.mwdb_url + '/file', files={
             'file': (filename, content),
             'options': (None, json.dumps({
-                parent: parent,
-                metakeys: metakeys or [],
-                upload_as: upload_as or "*"
+                "parent": parent,
+                "metakeys": metakeys or [],
+                "upload_as": upload_as or "*"
             }))
         })
         res.raise_for_status()
@@ -275,7 +275,7 @@ class MwdbTest(object):
         return res.json()
 
     def add_config(self, parent, family, config_json):
-        res = self.session.put(self.mwdb_url + '/config', json={
+        res = self.session.post(self.mwdb_url + '/config', json={
             'family': family,
             'cfg': config_json,
             'parent': parent
@@ -299,7 +299,7 @@ class MwdbTest(object):
         return res.json()
 
     def add_blob(self, parent, blobname=None, blobtype=None, content=None):
-        res = self.session.put(self.mwdb_url + '/blob', json={
+        res = self.session.post(self.mwdb_url + '/blob', json={
             'blob_name': blobname or str(uuid.uuid4()),
             'blob_type': blobtype or "inject",
             'content': content or str(uuid.uuid4()),

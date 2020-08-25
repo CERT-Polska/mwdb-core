@@ -224,7 +224,7 @@ def test_removing_objects():
 
     Bob.session().get_sample(SampleA.dhash)
 
-    with ShouldRaise(status_code=403):
+    with ShouldRaise(status_code=404):
         Charlie.session().remove_object(SampleA.dhash)
 
     Bob.session().get_sample(SampleA.dhash)

@@ -167,6 +167,11 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
+    def remove_object(self, identifier):
+        res = self.session.get(self.mwdb_url + '/object/' + identifier)
+        res.raise_for_status()
+        return res.json()
+
     def add_tag(self, identifier, tag):
         res = self.session.put(self.mwdb_url + '/object/' + identifier + '/tag', json={'tag': tag})
         res.raise_for_status()

@@ -168,7 +168,7 @@ class MwdbTest(object):
         return res.json()
 
     def remove_object(self, identifier):
-        res = self.session.get(self.mwdb_url + '/object/' + identifier)
+        res = self.session.delete(self.mwdb_url + '/object/' + identifier)
         res.raise_for_status()
         return res.json()
 

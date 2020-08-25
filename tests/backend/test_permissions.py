@@ -202,8 +202,8 @@ def test_removing_objects():
     testCase = RelationTestCase()
 
     Alice = testCase.new_user("Alice")
-    Bob = testCase.new_user("Bob", capabilities=["removing_object"])
-    Charlie = testCase.new_user("Charlie", capabilities=["removing_object"])
+    Bob = testCase.new_user("Bob", capabilities=["removing_objects"])
+    Charlie = testCase.new_user("Charlie", capabilities=["removing_objects"])
 
     SampleA = testCase.new_sample("Sample")
     SampleB = testCase.new_sample("Sample")

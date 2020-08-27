@@ -194,3 +194,47 @@ def test_adding_parents():
     SampleB.create(Bob, SampleA)
 
     assert session.get_sample(SampleB.dhash)["parents"] != []
+
+
+def test_removing_objects():
+    session = MwdbTest()
+    session.login()
+    testCase = RelationTestCase()
+
+    Alice = testCase.new_user("Alice")
+    Bob = testCase.new_user("Bob", capabilities=["removing_objects"])
+    Charlie = testCase.new_user("Charlie", capabilities=["removing_objects"])
+
+    SampleA = testCase.new_sample("Sample")
+    SampleB = testCase.new_sample("Sample")
+
+    SampleA.create(Alice)
+    SampleA.create(Bob)
+    SampleB.create(Bob)
+
+    SampleA([
+        SampleB()
+    ]).create()
+
+    session.add_tag(SampleA.dhash, "tag123")
+    session.add_tag(SampleB.dhash, "tag123")
+
+    with ShouldRaise(status_code=403):
+        Alice.session().remove_object(SampleA.dhash)
+
+    Bob.session().get_sample(SampleA.dhash)
+
+    with ShouldRaise(status_code=404):
+        Charlie.session().remove_object(SampleA.dhash)
+
+    Bob.session().get_sample(SampleA.dhash)
+
+    Bob.session().remove_object(SampleA.dhash)
+
+    with ShouldRaise(status_code=404):
+        Bob.session().get_sample(SampleA.dhash)
+
+    Bob.session().get_sample(SampleB.dhash)
+
+    assert {"tag": "tag123"} in session.get_tags(SampleB.dhash)
+

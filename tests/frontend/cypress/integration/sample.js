@@ -31,7 +31,7 @@ describe("Sample view test - Malwarecage", function () {
       cy.visit("/");
       browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-      cy.contains("Recent samples").click();
+      cy.contains("Samples").click();
       cy.contains(fileData.md5).click();
       cy.contains(fileData.md5);
       cy.contains("Filename");

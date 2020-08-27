@@ -32,7 +32,7 @@ describe("Blob view test - Malwarecage", function () {
 
     browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-    cy.contains("Recent blobs").click();
+    cy.contains("Blobs").click();
 
     cy.get("@blobId").then((blobId) => {
       cy.contains(blobId).click();

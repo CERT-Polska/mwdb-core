@@ -46,6 +46,12 @@ describe("Sample view test - Malwarecage", function () {
       cy.contains("ssdeep");
       cy.contains("Upload time");
 
+      cy.contains("Relations").click();
+      cy.get("g[class='node expanded-node']");
+
+      cy.contains("Preview").click();
+      cy.get("div[class='ace_line']");
+      
       cy.contains("Recent samples").click();
       cy.contains(fileData.sha256).click();
       cy.contains(fileData.sha256);

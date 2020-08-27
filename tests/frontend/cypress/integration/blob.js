@@ -39,6 +39,8 @@ describe("Blob view test - Malwarecage", function () {
       cy.contains("Blob " + blobId);
     });
 
+    cy.get("div[class='ace_line']");
+
     cy.contains("Details").click();
 
     cy.contains("Blob name");
@@ -48,6 +50,10 @@ describe("Blob view test - Malwarecage", function () {
     cy.contains("inject");
     cy.contains("First seen");
     cy.contains("Last seen");
+
+    //cy.contains("Relations").click();
+    //cy.get("g[class='node expanded-node']");
+
 
     cy.visit("/blob/fake");
     cy.contains(

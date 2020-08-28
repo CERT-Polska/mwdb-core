@@ -6,7 +6,7 @@ describe("Sample view test - Malwarecage", function () {
 
     const fileName = "TEST";
     const method = "POST";
-    const apiUrl = "/api/file/root";
+    const apiUrl = "/api/file";
     const fileType = "text/plain";
 
     const addedFile = new Cypress.Promise((resolve) => {

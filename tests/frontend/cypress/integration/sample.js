@@ -31,7 +31,7 @@ describe("Sample view test - Malwarecage", function () {
       cy.visit("/");
       browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-      cy.contains("Recent samples").click();
+      cy.contains("Samples").click();
       // TODO: Cypress incorrectly thinks that element is not visible
       cy.get('a[href*="'+fileData.md5+'"]').click({force: true});
       cy.contains(fileData.md5);
@@ -47,7 +47,7 @@ describe("Sample view test - Malwarecage", function () {
       cy.contains("ssdeep");
       cy.contains("Upload time");
 
-      cy.contains("Recent samples").click();
+      cy.contains("Samples").click();
       cy.get('a[href*="'+fileData.sha256+'"]').click({force: true});
       cy.contains(fileData.sha256);
 

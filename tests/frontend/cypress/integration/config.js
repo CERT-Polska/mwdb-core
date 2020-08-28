@@ -36,7 +36,7 @@ describe("Config view test - Malwarecage", function () {
 
     browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-    cy.contains("Recent configs").click();
+    cy.contains("Configs").click();
 
     cy.get("@configId").then((configId) => {
       cy.contains(configId).click({force: true});

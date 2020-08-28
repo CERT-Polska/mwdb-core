@@ -38,3 +38,7 @@ Cypress.Commands.add("formRequest", (method, url, formData, token) => {
     })
     .wait("@formRequest");
 });
+
+Cypress.Commands.add("get$", (selector) => {
+  return cy.wrap(Cypress.$(selector)).should("have.length.gte", 1);
+});

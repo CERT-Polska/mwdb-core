@@ -50,10 +50,10 @@ describe("Blob view test - Malwarecage", function () {
     cy.contains("inject");
     cy.contains("First seen");
     cy.contains("Last seen");
-
-    //cy.contains("Relations").click();
-    //cy.get("g[class='node expanded-node']");
-
+    
+    cy.get$("ul[class='nav nav-tabs mr-auto']").click();
+   
+    cy.get("g[class='node expanded-node']");
 
     cy.visit("/blob/fake");
     cy.contains(

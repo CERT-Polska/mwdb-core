@@ -51,10 +51,11 @@ describe("Blob view test - Malwarecage", function () {
     cy.contains("First seen");
     cy.contains("Last seen");
     
-    cy.get$("ul[class='nav nav-tabs mr-auto']").click();
-   
+    cy.wait(5)
+    
+    cy.contains("Relations").click()
     cy.get("g[class='node expanded-node']");
-
+  
     cy.visit("/blob/fake");
     cy.contains(
       "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."

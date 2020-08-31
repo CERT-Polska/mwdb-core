@@ -4,8 +4,8 @@ describe("Blob view test - Malwarecage", function () {
   it("Blob view test - existent and non-existent hash", function () {
     requestLogin(Cypress.env("user"), Cypress.env("password"));
 
-    const requestMethod = "PUT";
-    const apiUrl = "/api/blob/root";
+    const requestMethod = "POST";
+    const apiUrl = "/api/blob";
     const blobName = "some.blob";
     const blobType = "inject";
     const blobContent = "TEST";
@@ -32,7 +32,7 @@ describe("Blob view test - Malwarecage", function () {
 
     browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-    cy.contains("Recent blobs").click();
+    cy.contains("Blobs").click();
 
     cy.get("@blobId").then((blobId) => {
       cy.contains(blobId).click();

@@ -143,7 +143,7 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def add_sample(self, filename=None, content=None, parent=None, metakeys=None, upload_as=None):
+    def add_sample_legacy(self, filename=None, content=None, parent=None, metakeys=None, upload_as=None):
         parent = parent or "root"
 
         if filename is None:
@@ -159,6 +159,24 @@ class MwdbTest(object):
             params["upload_as"] = upload_as
 
         res = self.session.post(self.mwdb_url + '/file/' + parent, files={'file': (filename, content)}, data=params)
+        res.raise_for_status()
+        return res.json()
+
+    def add_sample(self, filename=None, content=None, parent=None, metakeys=None, upload_as=None):
+        if filename is None:
+            filename = str(uuid.uuid4())
+
+        if content is None:
+            content = str(uuid.uuid4())
+
+        res = self.session.post(self.mwdb_url + '/file', files={
+            'file': (filename, content),
+            'options': (None, json.dumps({
+                "parent": parent,
+                "metakeys": metakeys or [],
+                "upload_as": upload_as or "*"
+            }))
+        })
         res.raise_for_status()
         return res.json()
 
@@ -262,8 +280,11 @@ class MwdbTest(object):
         return res.json()
 
     def add_config(self, parent, family, config_json):
-        parent = parent or "root"
-        res = self.session.put(self.mwdb_url + '/config/' + parent, json={'family': family, 'cfg': config_json})
+        res = self.session.post(self.mwdb_url + '/config', json={
+            'family': family,
+            'cfg': config_json,
+            'parent': parent
+        })
         res.raise_for_status()
         return res.json()
 
@@ -283,11 +304,12 @@ class MwdbTest(object):
         return res.json()
 
     def add_blob(self, parent, blobname=None, blobtype=None, content=None):
-        parent = parent or "root"
-        res = self.session.put(self.mwdb_url + '/blob/' + parent, json={
+        res = self.session.post(self.mwdb_url + '/blob', json={
             'blob_name': blobname or str(uuid.uuid4()),
             'blob_type': blobtype or "inject",
-            'content': content or str(uuid.uuid4())})
+            'content': content or str(uuid.uuid4()),
+            'parent': parent
+        })
         res.raise_for_status()
         return res.json()
 

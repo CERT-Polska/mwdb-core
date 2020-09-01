@@ -4,8 +4,8 @@ describe("Config view test - Malwarecage", function () {
   it("Config view test - existent and non-existent hash", function () {
     requestLogin(Cypress.env("user"), Cypress.env("password"));
 
-    const requestMethod = "PUT";
-    const apiUrl = "/api/config/root";
+    const requestMethod = "POST";
+    const apiUrl = "/api/config";
     const testText = "test";
     const malwareFamily = "malwarex";
 
@@ -36,7 +36,7 @@ describe("Config view test - Malwarecage", function () {
 
     browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-    cy.contains("Recent configs").click();
+    cy.contains("Configs").click();
 
     cy.get("@configId").then((configId) => {
       cy.contains(configId).click();

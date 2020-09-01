@@ -6,7 +6,7 @@ describe("Sample view test - Malwarecage", function () {
 
     const fileName = "TEST";
     const method = "POST";
-    const apiUrl = "/api/file/root";
+    const apiUrl = "/api/file";
     const fileType = "text/plain";
 
     const addedFile = new Cypress.Promise((resolve) => {
@@ -31,7 +31,7 @@ describe("Sample view test - Malwarecage", function () {
       cy.visit("/");
       browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-      cy.contains("Recent samples").click();
+      cy.contains("Samples").click();
       cy.contains(fileData.md5).click();
       cy.contains(fileData.md5);
       cy.contains("Filename");
@@ -53,8 +53,8 @@ describe("Sample view test - Malwarecage", function () {
       cy.get("a.active").contains("Relations")
       cy.get("a").contains("Preview").click()
       cy.get("div[class='ace_line']");
-      
-      cy.contains("Recent samples").click();
+
+      cy.contains("Samples").click();
       cy.contains(fileData.sha256).click();
       cy.contains(fileData.sha256);
 

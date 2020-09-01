@@ -39,7 +39,7 @@ describe("Blob view test - Malwarecage", function () {
       cy.contains("Blob " + blobId);
     });
 
-    cy.get("div[class='ace_line']");
+    cy.get("div[class='ace_line']").contains(blobContent);
 
     cy.contains("Details").click();
     cy.contains("Blob name");
@@ -49,9 +49,6 @@ describe("Blob view test - Malwarecage", function () {
     cy.contains("inject");
     cy.contains("First seen");
     cy.contains("Last seen");
-
-    // Somehow test is flaky without that wait: tab re-renders even if Details is active
-    cy.wait(5)
 
     cy.get("a.active").contains("Details")
     cy.get("a.nav-link").contains("Relations").click()

@@ -39,10 +39,9 @@ describe("Blob view test - Malwarecage", function () {
       cy.contains("Blob " + blobId);
     });
 
-    cy.get("div[class='ace_line']");
+    cy.get("div[class='ace_line']").contains(blobContent);
 
     cy.contains("Details").click();
-
     cy.contains("Blob name");
     cy.contains("some.blob");
     cy.contains("Blob size");
@@ -50,10 +49,9 @@ describe("Blob view test - Malwarecage", function () {
     cy.contains("inject");
     cy.contains("First seen");
     cy.contains("Last seen");
-    
-    cy.wait(5)
-    
-    cy.contains("Relations").click()
+
+    cy.get("a.active").contains("Details")
+    cy.get("a.nav-link").contains("Relations").click()
     cy.get("g[class='node expanded-node']");
   
     cy.visit("/blob/fake");

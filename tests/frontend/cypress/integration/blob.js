@@ -40,7 +40,10 @@ describe("Blob view test - Malwarecage", function () {
       cy.server().route('GET', '/api/blob/'+blobId).as('dataGetFirst');
     });
 
-    cy.get("div[class='ace_line']").contains(blobContent);
+    cy.get("div[class='ace_line']").should(($div) => {
+      const text = $div.text()
+      expect(text).to.include(blobContent)
+    })
 
     cy.contains("Details").click();
     cy.contains("Blob name");
@@ -51,7 +54,7 @@ describe("Blob view test - Malwarecage", function () {
     cy.contains("First seen");
     cy.contains("Last seen");
     
-    //waiting for XHR request due to flaky tests
+    //waiting for XHR request after clicking on Details tab due to flaky tests
     cy.wait('@dataGetFirst').its('status').should('be', 200);
 
     cy.get("a.nav-link").contains("Relations").click()

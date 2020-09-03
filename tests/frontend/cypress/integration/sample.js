@@ -47,8 +47,16 @@ describe("Sample view test - Malwarecage", function () {
       cy.contains("ssdeep");
       cy.contains("Upload time");
 
+      cy.get("a").contains("Relations").click()
+      cy.get("g[class='node expanded-node']");
+
+      cy.get("a").contains("Preview").click()
+      cy.get("div[class='ace_line']");
+
       cy.contains("Samples").click();
+
       cy.get('a[href*="'+fileData.sha256+'"]').click({force: true});
+
       cy.contains(fileData.sha256);
 
       cy.visit("/sample/fake");

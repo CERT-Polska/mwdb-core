@@ -55,6 +55,12 @@ describe("Config view test - Malwarecage", function () {
     cy.contains("test");
     cy.contains("Upload time");
 
+    cy.get("a").contains("Relations").click()
+    cy.get("g[class='node expanded-node']");
+
+    cy.get("a").contains("Preview").click()
+    cy.get("div[class='ace_line']");
+
     cy.visit("/config/fake");
     cy.contains(
       "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."

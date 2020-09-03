@@ -35,7 +35,7 @@ describe("Blob view test - Malwarecage", function () {
     cy.contains("Blobs").click();
 
     cy.get("@blobId").then((blobId) => {
-      cy.contains(blobId).click({force: true});
+      cy.get('.d-none a[href*="'+blobId+'"] > div').click();
       cy.contains("Blob " + blobId);
       cy.server().route('GET', '/api/blob/' + blobId).as('dataGetFirst');
     });

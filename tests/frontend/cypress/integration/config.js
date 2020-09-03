@@ -39,7 +39,7 @@ describe("Config view test - Malwarecage", function () {
     cy.contains("Configs").click();
 
     cy.get("@configId").then((configId) => {
-      cy.contains(configId).click({force: true});
+      cy.get('.d-none a[href*="'+configId+'"] > div').click();
       cy.contains("Config " + configId);
     });
 

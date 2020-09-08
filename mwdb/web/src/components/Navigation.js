@@ -58,7 +58,7 @@ class Navigation extends Component {
                 <Link className="navbar-brand" to={'/'}>
                     <Extendable ident="navbarLogo">
                         <img src={logo} alt="logo" style={{width: "64px", marginRight: "12px"}}/>
-                        mwdb-core
+                        mwdb
                     </Extendable>
                 </Link>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
@@ -131,7 +131,7 @@ class Navigation extends Component {
                         <NavDropdown title="About"
                                      elements={[
                                         ...(this.props.isAuthenticated ? [
-                                            <Link key="about" className="dropdown-item" to="/about">About mwdb-core</Link>,
+                                            <Link key="about" className="dropdown-item" to="/about">About mwdb</Link>,
                                             <Link key="docs" className="dropdown-item" to="/docs">Docs</Link>
                                         ] : []),
                                         ...fromPlugin("navdropdownAbout")

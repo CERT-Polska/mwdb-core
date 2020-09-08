@@ -39,7 +39,7 @@ class About extends Component {
                                 <img src={logo} alt="logo" width="100%"/>
                             </div>
                             <div className="col-lg-8 col-sm-6">
-                                <h1>mwdb-core</h1>
+                                <h1>mwdb</h1>
                                 <p>
                                     Powered by CERT.pl<br/>
                                     Version: {this.props.config["server_version"]}<br/>

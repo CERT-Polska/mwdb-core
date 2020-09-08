@@ -132,7 +132,7 @@ jobs:
         run: |
           docker-compose -f docker-compose-e2e.yml up -d mwdb-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t mwdb-tests
-          ([ $(docker wait mwdb_mwdb-tests_1) == 0 ])
+          ([ $(docker wait mwdb-core_mwdb-tests_1) == 0 ])
   test_frontend_e2e:
     needs: [build_core, build_frontend, build_frontend_e2e]
     name: Perform frontend e2e tests
@@ -160,4 +160,4 @@ jobs:
         run: |
           docker-compose -f docker-compose-e2e.yml up -d web-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t web-tests
-          ([ $(docker wait mwdb_web-tests_1) == 0 ])
+          ([ $(docker wait mwdb-core_web-tests_1) == 0 ])

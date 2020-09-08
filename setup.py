@@ -7,7 +7,7 @@ Under the hood of mwdb.cert.pl service hosted by CERT.pl.
 """
 
 setup(name="malwarecage",
-      version="2.0.0a2-dev3",
+      version="2.0.0a2-dev4",
       description="Malwarecage malware database",
       long_description=LONG_DESCRIPTION,
       author="CERT Polska",

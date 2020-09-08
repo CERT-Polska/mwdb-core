@@ -6,6 +6,8 @@ We're working hard to deliver all of these things as soon as possible. Stay tune
 
 Malware repository component for automated malware collection/analysis systems. 
 
+Formerly known as Malwarecage.
+
 Under the hood of [mwdb.cert.pl service](https://mwdb.cert.pl) hosted by CERT.pl.
 
 **Features:**

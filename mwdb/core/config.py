@@ -77,8 +77,8 @@ def _config_sources():
     return [
         EnvironmentConfigSource(),
         IniFileConfigSource("mwdb.ini", must_exist=False),
-        IniFileConfigSource(os.path.expanduser("~/.mwdb/mwdb.ini"), must_exist=False),
-        IniFileConfigSource("/etc/mwdb/mwdb.ini", must_exist=False)
+        IniFileConfigSource(os.path.expanduser("~/.mwdb-core/mwdb.ini"), must_exist=False),
+        IniFileConfigSource("/etc/mwdb-core/mwdb.ini", must_exist=False)
     ]
 
 

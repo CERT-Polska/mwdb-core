@@ -18,16 +18,16 @@ def generate_config(**options):
 
 
 def create_configuration():
-    local_user_dir = os.path.expanduser("~/.mwdb")
+    local_user_dir = os.path.expanduser("~/.mwdb-core")
     message = textwrap.dedent(f"""
     Where do you want to place MWDB local files?
     
-    1) Global directories (/var/lib/mwdb, /etc/mwdb)
+    1) Global directories (/var/lib/mwdb-core, /etc/mwdb-core)
     2) Local user directory ({local_user_dir})
     3) Current directory
     """)
     options = {
-        "1": ("/var/lib/mwdb", "/etc/mwdb"),
+        "1": ("/var/lib/mwdb-core", "/etc/mwdb-core"),
         "2": (local_user_dir, local_user_dir),
         "3": (".", ".")
     }

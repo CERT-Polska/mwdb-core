@@ -23,7 +23,7 @@ def random_name():
 
 
 def admin_login():
-    return os.environ['MALWARECAGE_ADMIN_LOGIN']
+    return os.environ['MWDB_ADMIN_LOGIN']
 
 
 class ShouldRaise(object):
@@ -66,7 +66,7 @@ class MwdbTest(object):
 
     def login(self):
         return self.login_as(admin_login(),
-                             os.environ['MALWARECAGE_ADMIN_PASSWORD'])
+                             os.environ['MWDB_ADMIN_PASSWORD'])
 
     def api_key_create(self, login):
         res = self.session.post(self.mwdb_url + '/user/' + login + '/api_key')

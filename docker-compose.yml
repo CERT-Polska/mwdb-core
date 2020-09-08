@@ -1,4 +1,4 @@
-# Docker Compose file for Malwarecage production service
+# Docker Compose file for mwdb-core production service
 
 version: "3.3"
 services:
@@ -9,20 +9,20 @@ services:
     depends_on:
       - postgres
       - redis
-    image: certpl/malwarecage
+    image: certpl/mwdb
     restart: on-failure
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - mwdb-vars.env
     volumes:
-      - malwarecage-uploads:/app/uploads
-  malwarefront:
+      - mwdb-uploads:/app/uploads
+  mwdb-web:
     depends_on:
       - mwdb
     build:
       context: .
       dockerfile: deploy/docker/Dockerfile-web
-    image: certpl/malwarecage-web
+    image: certpl/mwdb-web
     ports:
       - "80:80"
     restart: on-failure
@@ -33,10 +33,10 @@ services:
       # NOTE: use gen_vars.sh in order to generate this file
       - postgres-vars.env
     volumes:
-      - malwarecage-postgres:/var/lib/postgresql/data
+      - mwdb-postgres:/var/lib/postgresql/data
   redis:
     image: redis:alpine
 
 volumes:
-  malwarecage-postgres:
-  malwarecage-uploads:
+  mwdb-postgres:
+  mwdb-uploads:

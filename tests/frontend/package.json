@@ -1,14 +1,14 @@
 {
   "name": "tests-frontend",
   "version": "1.0.0",
-  "description": "Front-end tests for Malwarecage",
+  "description": "Front-end tests for mwdb-core",
   "dependencies": {},
   "devDependencies": {
     "cypress": "^4.10.0",
     "wait-on": "^5.0.1"
   },
   "scripts": {
-    "test": "wait-on http://malwarefront:80 && cypress run"
+    "test": "wait-on http://mwdb-web:80 && cypress run"
   },
   "private": true
 }

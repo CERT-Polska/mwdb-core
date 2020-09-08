@@ -1,6 +1,6 @@
 import { browserLogin } from "./util";
 
-describe("Login test - Malwarecage", function () {
+describe("Login test - mwdb-core", function () {
   it("Login test", function () {
     cy.visit("/");
 

@@ -4,6 +4,6 @@ venv/
 .idea
 .mypy_cache
 uploads/
-malwarecage.ini
-malwarecage.example.ini
+mwdb.ini
+mwdb.example.ini
 

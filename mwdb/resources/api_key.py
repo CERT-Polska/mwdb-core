@@ -1,0 +1,177 @@
+import uuid
+
+from datetime import datetime
+from flask import g
+from flask_restful import Resource
+from sqlalchemy.orm.exc import NoResultFound
+from werkzeug.exceptions import Forbidden, NotFound
+
+from mwdb.core.capabilities import Capabilities
+from mwdb.model import db, APIKey, User
+from mwdb.schema.api_key import APIKeyIdentifierBase, APIKeyTokenResponseSchema
+
+from . import logger, requires_authorization
+
+
+class APIKeyIssueResource(Resource):
+    @requires_authorization
+    def post(self, login):
+        """
+        ---
+        summary: Create a new API key for user
+        description: |
+            Creates a new API key and returns its id and token.
+
+            Requires `manage_users` capability if login doesn't match the login of currently authenticated
+            user.
+        security:
+            - bearerAuth: []
+        tags:
+            - api_key
+        parameters:
+            - in: path
+              name: login
+              schema:
+                type: string
+              description: Owner login for the created API key
+        responses:
+            200:
+                description: Identifier and token for created API key
+                content:
+                  application/json:
+                    schema: APIKeyTokenResponseSchema
+            403:
+                description: |
+                    When user doesn't have required `manage_users` capability
+            404:
+                description: |
+                    If provided login doesn't exist.
+        """
+        if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.login != login:
+            raise Forbidden("You are not permitted to perform this action")
+
+        try:
+            api_key_owner = User.query.filter(User.login == login).one()
+        except NoResultFound:
+            raise NotFound('User not found')
+
+        api_key = APIKey(
+            id=uuid.uuid4(),
+            user_id=api_key_owner.id,
+            issued_by=g.auth_user.id,
+            issued_on=datetime.now()
+        )
+        db.session.add(api_key)
+        db.session.commit()
+
+        logger.info('API key created', extra={
+            "id": api_key.id
+        })
+        return APIKeyTokenResponseSchema().dump({
+            "id": api_key.id,
+            "issued_on": api_key.issued_on,
+            "issuer_login": api_key.issuer_login,
+            "token": api_key.generate_token()
+        })
+
+
+class APIKeyResource(Resource):
+    @requires_authorization
+    def get(self, api_key_id):
+        """
+        ---
+        summary: Get token for API key
+        description: |
+            Returns token for provided API key identifier.
+
+            Requires `manage_users` capability if current user doesn't own the key.
+        security:
+            - bearerAuth: []
+        tags:
+            - api_key
+        parameters:
+            - in: path
+              name: api_key_id
+              schema:
+                type: string
+                format: uuid
+              description: API key identifier
+        responses:
+            200:
+                description: Identifier and token for API key
+                content:
+                  application/json:
+                    schema: APIKeyTokenResponseSchema
+            400:
+                description: When API key identifier is not a correct UUID
+            404:
+                description: |
+                    When API key doesn't exist or user doesn't own the key and
+                    doesn't have the `manage_users` capability.
+        """
+        obj = APIKeyIdentifierBase().load({"id": api_key_id})
+        if obj.errors:
+            return {"errors": obj.errors}, 400
+
+        try:
+            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
+        except NoResultFound:
+            raise NotFound("API key doesn't exist")
+
+        if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.id != api_key.user_id:
+            raise NotFound("API key doesn't exist")
+
+        return APIKeyTokenResponseSchema().dump({
+            "id": api_key.id,
+            "issued_on": api_key.issued_on,
+            "issuer_login": api_key.issuer_login,
+            "token": api_key.generate_token()
+        })
+
+    @requires_authorization
+    def delete(self, api_key_id):
+        """
+        ---
+        summary: Delete API key
+        description: |
+            Deletes API key with provided identifier.
+
+            Requires `manage_users` capability if current user doesn't own the key.
+        security:
+            - bearerAuth: []
+        tags:
+            - api_key
+        parameters:
+            - in: path
+              name: api_key_id
+              schema:
+                type: string
+                format: uuid
+              description: API key identifier
+        responses:
+            200:
+                description: When API key was successfully deleted
+            400:
+                description: When API key identifier is not a correct UUID
+            404:
+                description: |
+                    When API key doesn't exist or user doesn't own the key and
+                    doesn't have the `manage_users` capability.
+        """
+        obj = APIKeyIdentifierBase().load({"id": api_key_id})
+        if obj.errors:
+            return {"errors": obj.errors}, 400
+
+        try:
+            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
+        except NoResultFound:
+            raise NotFound("API key doesn't exist")
+
+        if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.id != api_key.user_id:
+            raise NotFound("API key doesn't exist")
+
+        db.session.delete(api_key)
+        db.session.commit()
+        logger.info('API key deleted', extra={
+            "id": api_key.id
+        })

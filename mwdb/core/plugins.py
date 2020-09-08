@@ -1,0 +1,181 @@
+import contextlib
+import functools
+import importlib
+import os
+import pkgutil
+import sys
+
+from mwdb.core.app import app, api
+from mwdb.core.config import app_config
+from mwdb.core.log import getLogger
+from mwdb.model import Object, File, Config, TextBlob
+
+logger = getLogger()
+
+_plugin_handlers = []
+active_plugins = {}
+
+
+class PluginAppContext(object):
+    def register_hook_handler(self, hook_handler_cls):
+        global _plugin_handlers
+        _plugin_handlers.append(hook_handler_cls())
+
+    def register_resource(self, resource, *urls, **kwargs):
+        api.add_resource(resource, *urls, **kwargs)
+
+    def register_converter(self, converter_name, converter):
+        app.url_map.converters[converter_name] = converter
+
+    def register_schema_spec(self, schema_name, schema):
+        api.spec.components.schema(schema_name, schema=schema)
+
+
+def hook_handler_method(meth):
+    @functools.wraps(meth)
+    def hook_handler(self, *args, **kwargs):
+        if self.is_callee:
+            meth(self, *args, **kwargs)
+        else:
+            call_hook(meth.__name__, *args, **kwargs)
+    return hook_handler
+
+
+class PluginHookBase(object):
+    def __init__(self, is_callee=False):
+        self.is_callee = is_callee
+
+    @hook_handler_method
+    def on_created_object(self, object: Object):
+        pass
+
+    @hook_handler_method
+    def on_reuploaded_object(self, object: Object):
+        pass
+
+    @hook_handler_method
+    def on_created_file(self, file: File):
+        pass
+
+    @hook_handler_method
+    def on_reuploaded_file(self, file: File):
+        pass
+
+    @hook_handler_method
+    def on_created_config(self, config: Config):
+        pass
+
+    @hook_handler_method
+    def on_reuploaded_config(self, config: Config):
+        pass
+
+    @hook_handler_method
+    def on_created_text_blob(self, blob: TextBlob):
+        pass
+
+    @hook_handler_method
+    def on_reuploaded_text_blob(self, blob: TextBlob):
+        pass
+
+
+class PluginHookHandler(PluginHookBase):
+    def __init__(self):
+        super().__init__(True)
+
+
+def is_subdir(parent, child):
+    return (
+        os.path.commonpath([
+            os.path.abspath(parent)
+        ]) == os.path.commonpath([
+            os.path.abspath(parent),
+            os.path.abspath(child)
+        ])
+    )
+
+
+def iter_local_plugin_modules():
+    local_plugins_folder = app_config.mwdb.local_plugins_folder
+    for module_info in pkgutil.iter_modules():
+        if (
+            module_info.module_finder
+            and getattr(module_info.module_finder, "path", None)
+            and is_subdir(local_plugins_folder, module_info.module_finder.path)
+        ):
+            yield module_info
+
+
+@contextlib.contextmanager
+def local_plugins():
+    plugin_list = app_config.mwdb.plugins
+    old_syspath = sys.path[:]
+    try:
+        if app_config.mwdb.local_plugins_folder:
+            sys.path.append(app_config.mwdb.local_plugins_folder)
+        if app_config.mwdb.local_plugins_autodiscover:
+            plugin_list += [
+                module_info.name
+                for module_info in iter_local_plugin_modules()
+            ]
+        yield plugin_list
+    finally:
+        sys.path = old_syspath
+
+
+def discover_plugins():
+    plugins = {}
+    if not app_config.mwdb.enable_plugins:
+        logger.info("Plugins will not be loaded because plugins are not enabled (enable_plugins is 0).")
+        return plugins
+
+    with local_plugins() as plugin_list:
+        for plugin_name in plugin_list:
+            spec = importlib.util.find_spec(plugin_name)
+            if not spec:
+                raise RuntimeError(f"Plugin package '{plugin_name}' not found")
+            plugins[plugin_name] = spec
+    return plugins
+
+
+def load_plugins(app_context: PluginAppContext):
+    if not app_config.mwdb.enable_plugins:
+        logger.info("Plugins will not be loaded because plugins are not enabled (enable_plugins is 0).")
+        return
+
+    with local_plugins() as plugin_list:
+        for plugin_name in plugin_list:
+            try:
+                plugin = importlib.import_module(plugin_name)
+                if hasattr(plugin, "__plugin_entrypoint__"):
+                    getattr(plugin, "__plugin_entrypoint__")(app_context)
+                active_plugins[plugin_name.split(".")[-1]] = {
+                    "active": True,
+                    "author": getattr(plugin, "__author__", None),
+                    "version": getattr(plugin, "__version__", None),
+                    "description": getattr(plugin, "__doc__", None),
+                }
+            except Exception:
+                logger.exception(f"Failed to load '{plugin_name}' plugin")
+                raise
+
+
+def call_hook(hook_name, *args, **kwargs):
+    global _plugin_handlers
+
+    if not hasattr(PluginHookBase, hook_name):
+        logger.warning('Undefined hook: {}'.format(hook_name))
+        return
+
+    if not app_config.mwdb.enable_hooks:
+        logger.info('Hook {} will not be ran because enable_hooks is disabled.'.format(hook_name))
+        return
+
+    for hook_handler in _plugin_handlers:
+        try:
+            fn = getattr(hook_handler, hook_name)
+            fn(*args, **kwargs)
+        except Exception:
+            logger.exception("Hook {} raised exception".format(hook_name))
+
+
+hooks = PluginHookBase()

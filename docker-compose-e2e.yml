@@ -1,4 +1,4 @@
-# Docker Compose file for Malwarecage end-to-end test suite
+# Docker Compose file for mwdb-core end-to-end test suite
 
 version: "3.3"
 services:
@@ -9,18 +9,18 @@ services:
     depends_on:
       - postgres
       - redis
-    image: certpl/malwarecage
+    image: certpl/mwdb
     restart: on-failure
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - mwdb-vars.env
-  malwarefront:
+  mwdb-web:
     depends_on:
       - mwdb
     build:
       context: .
       dockerfile: deploy/docker/Dockerfile-web
-    image: certpl/malwarecage-web
+    image: certpl/mwdb-web
     ports:
       - "80:80"
     restart: on-failure
@@ -34,15 +34,15 @@ services:
     build: tests/backend
     depends_on:
       - mwdb
-    image: certpl/malwarecage-tests
+    image: certpl/mwdb-tests
     env_file:
       - mwdb-vars.env
   web-tests:
     build: tests/frontend
     depends_on:
       - mwdb
-      - malwarefront
-    image: certpl/malwarecage-web-tests
+      - mwdb-web
+    image: certpl/mwdb-web-tests
     env_file:
       - mwdb-vars.env
   redis:

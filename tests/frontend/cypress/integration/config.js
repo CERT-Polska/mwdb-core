@@ -1,6 +1,6 @@
 import { requestLogin, browserLogin } from "./util";
 
-describe("Config view test - Malwarecage", function () {
+describe("Config view test - mwdb-core", function () {
   it("Config view test - existent and non-existent hash", function () {
     requestLogin(Cypress.env("user"), Cypress.env("password"));
 

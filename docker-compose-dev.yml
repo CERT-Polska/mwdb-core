@@ -1,4 +1,4 @@
-# Docker Compose file for Malwarecage development environment
+# Docker Compose file for mwdb-core development environment
 
 version: "3.3"
 services:
@@ -16,15 +16,15 @@ services:
     environment:
       UWSGI_PY_AUTORELOAD: 1
       UWSGI_ENABLE_THREADS: 1
-      MALWARECAGE_MAIL_SMTP: "mailhog:1025"
-      MALWARECAGE_MAIL_FROM: "noreply@malwarecage.dev"
-      MALWARECAGE_RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-      MALWARECAGE_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-      MALWARECAGE_ENABLE_REGISTRATION: 1
+      MWDB_MAIL_SMTP: "mailhog:1025"
+      MWDB_MAIL_FROM: "noreply@mwdb.dev"
+      MWDB_RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+      MWDB_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+      MWDB_ENABLE_REGISTRATION: 1
     volumes:
       - "./mail_templates:/app/mail_templates"
-      - "./malwarecage:/app/malwarecage"
-  malwarefront:
+      - "./mwdb:/app/mwdb"
+  mwdb-web:
     depends_on:
       - mwdb
     build:
@@ -36,8 +36,8 @@ services:
       HOST: 0.0.0.0
       REACT_APP_API_URL: "/api/"
     volumes:
-      - "./malwarecage/web/public:/app/public"
-      - "./malwarecage/web/src:/app/src"
+      - "./mwdb/web/public:/app/public"
+      - "./mwdb/web/src:/app/src"
     restart: on-failure
   postgres:
     image: postgres

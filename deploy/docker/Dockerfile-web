@@ -1,6 +1,6 @@
 FROM node:8 AS build
 
-COPY ./malwarecage/web /app
+COPY ./mwdb/web /app
 COPY ./plugins /plugins
 
 RUN cd /app \

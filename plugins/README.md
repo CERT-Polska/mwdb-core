@@ -1,5 +1,5 @@
-# Malwarecage plugins
+# mwdb-core plugins
 
-Plugins allow you to personalize your Malwarecage instance and provide integration with other systems.
+Plugins allow you to personalize your MWDB instance and provide integration with other systems.
 
 TBD

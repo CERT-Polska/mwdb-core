@@ -2,7 +2,7 @@
 
 **To run tests from docker:**
 
-Set baseUrl in cypress.json to http://malwarefront
+Set baseUrl in cypress.json to http://mwdb-web
 
 Tests are included in e2e tests package and can be run from there:
 ```
@@ -13,15 +13,15 @@ docker-compose -f docker-compose-e2e.yml up web-tests
 
 **To create tests from cypress dev:**
 
-- Create test files in malwarecage/tests/frontend/integration.
+- Create test files in tests/frontend/integration.
 
 - Set configuration from terminal (project main directory):
 ```
 source mwdb-vars.env
-export MALWARECAGE_ADMIN_LOGIN
-export MALWARECAGE_ADMIN_PASSWORD
+export MWDB_ADMIN_LOGIN
+export MWDB_ADMIN_PASSWORD
 ```
-- Run Malwarecage dev environment.
+- Run mwdb-core dev environment.
 - Set baseUrl in cypress.json to http://127.0.0.1
 
 - Then run from tests/frontend:

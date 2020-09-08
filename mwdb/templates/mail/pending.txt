@@ -1,0 +1,11 @@
+Hi {login},
+
+Your MWDB account is waiting for acceptance. Please remember that all submissions are reviewed manually, so the
+approval process can take a few days before you receive access to the MWDB system.
+
+Meanwhile, please read Terms of Use of the MWDB System: {base_url}/terms/en
+
+In case of any questions, feel free to contact us via our e-mail address: info@cert.pl.
+
+Regards,
+CERT.pl

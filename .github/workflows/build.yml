@@ -1,4 +1,4 @@
-name: "Build and test Malwarecage"
+name: "Build and test mwdb-core"
 on:
   push:
     branches:
@@ -8,53 +8,53 @@ on:
     - master
 jobs:
   build_core:
-    name: Build Malwarecage core image
+    name: Build mwdb-core core image
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
-      - name: Build and push Malwarecage image
+      - name: Build and push mwdb-core image
         uses: docker/build-push-action@v1.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: ./deploy/docker/Dockerfile
-          repository: certpl/malwarecage
+          repository: certpl/mwdb
           tags: ${{ github.sha }}
           push: ${{ github.event == 'push' }}
-      - name: Store Malwarecage image 
-        run: docker save -o ./malwarecage-image certpl/malwarecage:${{ github.sha }}
-      - name: Upload Malwarecage image
+      - name: Store mwdb-core image
+        run: docker save -o ./mwdb-image certpl/mwdb:${{ github.sha }}
+      - name: Upload mwdb-core image
         uses: actions/upload-artifact@v2 
         with:
-          name: malwarecage-image
-          path: malwarecage-image
+          name: mwdb-image
+          path: mwdb-image
   build_frontend:
-    name: Build Malwarecage frontend image
+    name: Build mwdb-core web image
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
-      - name: Build and push Malwarefront image
+      - name: Build and push mwdb-core web image
         uses: docker/build-push-action@v1.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: ./deploy/docker/Dockerfile-web
-          repository: certpl/malwarecage-web
+          repository: certpl/mwdb-web
           tags: ${{ github.sha }}
           push: ${{ github.event == 'push' }} 
-      - name: Store Malwarefront image
-        run: docker save -o ./malwarecage-web-image certpl/malwarecage-web:${{ github.sha }}
-      - name: Upload Malwarefront image
+      - name: Store mwdb-core web image
+        run: docker save -o ./mwdb-web-image certpl/mwdb-web:${{ github.sha }}
+      - name: Upload mwdb-core web image
         uses: actions/upload-artifact@v2 
         with:
-          name: malwarecage-web-image
-          path: malwarecage-web-image
+          name: mwdb-web-image
+          path: mwdb-web-image
   build_backend_e2e:
     name: Build backend e2e test image
     runs-on: ubuntu-latest
@@ -69,17 +69,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: ./tests/backend/Dockerfile
-          repository: certpl/malwarecage-tests
+          repository: certpl/mwdb-tests
           path: tests/backend
           tags: ${{ github.sha }}
           push: ${{ github.event == 'push' }} 
       - name: Store test image 
-        run: docker save -o ./malwarecage-tests-image certpl/malwarecage-tests:${{ github.sha }}
+        run: docker save -o ./mwdb-tests-image certpl/mwdb-tests:${{ github.sha }}
       - name: Upload test image
         uses: actions/upload-artifact@v2 
         with:
-          name: malwarecage-tests-image
-          path: malwarecage-tests-image
+          name: mwdb-tests-image
+          path: mwdb-tests-image
   build_frontend_e2e:
     name: Build frontend e2e test image
     runs-on: ubuntu-latest
@@ -94,17 +94,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: ./tests/frontend/Dockerfile
-          repository: certpl/malwarecage-web-tests
+          repository: certpl/mwdb-web-tests
           path: tests/frontend
           tags: ${{ github.sha }}
           push: ${{ github.event == 'push' }}
       - name: Store test image
-        run: docker save -o ./malwarecage-web-tests-image certpl/malwarecage-web-tests:${{ github.sha }}
+        run: docker save -o ./mwdb-web-tests-image certpl/mwdb-web-tests:${{ github.sha }}
       - name: Upload test image
         uses: actions/upload-artifact@v2
         with:
-          name: malwarecage-web-tests-image
-          path: malwarecage-web-tests-image
+          name: mwdb-web-tests-image
+          path: mwdb-web-tests-image
   test_backend_e2e:
     needs: [build_core, build_frontend, build_backend_e2e]
     name: Perform backend e2e tests
@@ -118,12 +118,12 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Import images
         run: |
-          docker load --input ./malwarecage-image/malwarecage-image
-          docker load --input ./malwarecage-web-image/malwarecage-web-image
-          docker load --input ./malwarecage-tests-image/malwarecage-tests-image
-          docker tag certpl/malwarecage:$GITHUB_SHA certpl/malwarecage:latest
-          docker tag certpl/malwarecage-web:$GITHUB_SHA certpl/malwarecage-web:latest
-          docker tag certpl/malwarecage-tests:$GITHUB_SHA certpl/malwarecage-tests:latest
+          docker load --input ./mwdb-image/mwdb-image
+          docker load --input ./mwdb-web-image/mwdb-web-image
+          docker load --input ./mwdb-tests-image/mwdb-tests-image
+          docker tag certpl/mwdb:$GITHUB_SHA certpl/mwdb:latest
+          docker tag certpl/mwdb-web:$GITHUB_SHA certpl/mwdb-web:latest
+          docker tag certpl/mwdb-tests:$GITHUB_SHA certpl/mwdb-tests:latest
       - name: Setup configuration      
         run: |
           chmod +x gen_vars.sh
@@ -132,7 +132,7 @@ jobs:
         run: |
           docker-compose -f docker-compose-e2e.yml up -d mwdb-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t mwdb-tests
-          ([ $(docker wait malwarecage_mwdb-tests_1) == 0 ])
+          ([ $(docker wait mwdb-core_mwdb-tests_1) == 0 ])
   test_frontend_e2e:
     needs: [build_core, build_frontend, build_frontend_e2e]
     name: Perform frontend e2e tests
@@ -146,12 +146,12 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Import images
         run: |
-          docker load --input ./malwarecage-image/malwarecage-image
-          docker load --input ./malwarecage-web-image/malwarecage-web-image
-          docker load --input ./malwarecage-web-tests-image/malwarecage-web-tests-image
-          docker tag certpl/malwarecage:$GITHUB_SHA certpl/malwarecage:latest
-          docker tag certpl/malwarecage-web:$GITHUB_SHA certpl/malwarecage-web:latest
-          docker tag certpl/malwarecage-web-tests:$GITHUB_SHA certpl/malwarecage-web-tests:latest
+          docker load --input ./mwdb-image/mwdb-image
+          docker load --input ./mwdb-web-image/mwdb-web-image
+          docker load --input ./mwdb-web-tests-image/mwdb-web-tests-image
+          docker tag certpl/mwdb:$GITHUB_SHA certpl/mwdb:latest
+          docker tag certpl/mwdb-web:$GITHUB_SHA certpl/mwdb-web:latest
+          docker tag certpl/mwdb-web-tests:$GITHUB_SHA certpl/mwdb-web-tests:latest
       - name: Setup configuration
         run: |
           chmod +x gen_vars.sh
@@ -160,4 +160,4 @@ jobs:
         run: |
           docker-compose -f docker-compose-e2e.yml up -d web-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t web-tests
-          ([ $(docker wait malwarecage_web-tests_1) == 0 ])
+          ([ $(docker wait mwdb-core_web-tests_1) == 0 ])

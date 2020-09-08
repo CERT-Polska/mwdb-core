@@ -5,7 +5,7 @@ about: Create a report to help us improve
 ---
 
 **Environment information**
-* Malwarecage version (from `/about`):
+* MWDB version (from `/about`):
 * Installation method:
   - [ ] Generic docker-compose
   - [ ] Dev docker-compose

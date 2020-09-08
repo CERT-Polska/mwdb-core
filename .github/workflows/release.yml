@@ -1,4 +1,4 @@
-name: Release new Malwarecage version
+name: Release new mwdb-core version
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: '12'
       - name: Build web bundle
-        working-directory: malwarecage/web
+        working-directory: mwdb/web
         run: |
           npm install
           npm run build

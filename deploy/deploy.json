@@ -1,14 +1,14 @@
 {
-    "malwarefront": {
+    "mwdb-web": {
         "docker": {
-            "image": "certpl/malwarecage-web",
+            "image": "certpl/mwdb-web",
             "dockerfile": "deploy/docker/Dockerfile-web",
             "dir": "."
         }
     },
     "mwdb": {
         "docker": {
-            "image": "certpl/malwarecage",
+            "image": "certpl/mwdb",
             "dockerfile": "deploy/docker/Dockerfile",
             "dir": "."
         }

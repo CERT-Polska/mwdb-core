@@ -1,6 +1,6 @@
 import { requestLogin, browserLogin } from "./util";
 
-describe("Blob view test - Malwarecage", function () {
+describe("Blob view test - mwdb-core", function () {
   it("Blob view test - existent and non-existent hash", function () {
     requestLogin(Cypress.env("user"), Cypress.env("password"));
 

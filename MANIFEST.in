@@ -1,4 +1,4 @@
-graft malwarecage
+graft mwdb
 recursive-exclude * *.pyc
 global-exclude *.js.map *.css.map
-prune malwarecage/web/node_modules
+prune mwdb/web/node_modules

@@ -56,7 +56,6 @@ class FileItemResponseSchema(ObjectItemResponseSchema):
     sha256 = fields.Str(required=True, allow_none=False)
     sha512 = fields.Str(required=True, allow_none=False)
     crc32 = fields.Str(required=True, allow_none=False)
-    humanhash = fields.Str(required=True, allow_none=False)
     ssdeep = fields.Str(required=True, allow_none=True)
 
     latest_config = fields.Nested(ConfigItemResponseSchema, required=True, allow_none=True)

@@ -198,6 +198,10 @@ function removeGroupMember(name, member) {
     return axios.delete(`/group/${name}/member/${member}`)
 }
 
+function getUserGroups() {
+    return axios.get("/user/group")
+}
+
 function getUsers() {
     return axios.get("/user", {timeout: null})
 }
@@ -342,6 +346,7 @@ export default {
     getPendingUsers,
     acceptPendingUser,
     rejectPendingUser,
+    getUserGroups,
     getUsers,
     getUser,
     generateApiToken,

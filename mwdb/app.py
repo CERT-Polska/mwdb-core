@@ -29,7 +29,7 @@ from mwdb.resources.comment import CommentResource, CommentDeleteResource
 from mwdb.resources.config import ConfigItemResource, ConfigResource, ConfigStatsResource
 from mwdb.resources.download import RequestSampleDownloadResource, DownloadResource
 from mwdb.resources.file import FileItemResource, FileResource
-from mwdb.resources.group import GroupResource, GroupListResource, GroupMemberResource
+from mwdb.resources.group import GroupResource, GroupListResource, GroupMemberResource, UserGroupsListResource
 from mwdb.resources.metakey import (
     MetakeyResource, MetakeyListDefinitionResource,
     MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource,
@@ -234,6 +234,7 @@ api.add_resource(UserListResource, "/user")
 api.add_resource(UserResource, "/user/<login>")
 api.add_resource(UserGetPasswordChangeTokenResource, "/user/<login>/change_password")
 api.add_resource(UserPendingResource, "/user/<login>/pending")
+api.add_resource(UserGroupsListResource, "/user/group")
 
 # Group endpoints
 api.add_resource(GroupListResource, "/group")

@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, g
 from flask_restful import Resource
 from sqlalchemy.orm import joinedload
 from sqlalchemy import exists
@@ -365,3 +365,33 @@ class GroupMemberResource(Resource):
         logger.info('Group member deleted', extra={'user': member.login, 'group': group.name})
         schema = GroupSuccessResponseSchema()
         return schema.dump({"name": name})
+
+
+class UserGroupsListResource(Resource):
+    @requires_authorization
+    def get(self):
+        """
+        ---
+        summary: List of user groups
+        description: |
+            Returns list of user groups and members.
+        security:
+            - bearerAuth: []
+        tags:
+            - user
+        responses:
+            200:
+                description: List of user groups
+                content:
+                  application/json:
+                    schema: GroupListResponseSchema
+        """
+        objs = (db.session.query(Group)
+                          .options(joinedload(Group.users))
+                          .filter(g.auth_user.is_member(Group.id))
+                          .filter(Group.name != "public")
+                          .filter(Group.private.is_(False))).all()
+
+        schema = GroupListResponseSchema()
+        print("\nobjs:\n", schema.dump({"groups": objs}))
+        return schema.dump({"groups": objs})

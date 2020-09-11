@@ -118,9 +118,9 @@ class SamplePresenter extends ShowObjectPresenter {
     
     shortenHash(hash, distance) {
         let str = "" + hash;
-        let subStr = str.slice(0,distance) + "..." + str.slice(-distance);
+        let subStr = str.slice(0, distance) + "..." + str.slice(-distance);
         return subStr
-    }
+    };
     
     handleDownload = async (event) => {
         let response = await api.requestFileDownload(this.props.sha256)

@@ -18,8 +18,12 @@ logger.propagate = False
 
 # Setup JSON stream handler for main logger
 handler = logging.StreamHandler()
+formatter = logging.Formatter("%(filename)s:%(funcName)s:%(levelname)s:%(lineno)s:%(module)s:%(threadName)s:%(message)s")
 handler.setFormatter(
-    logmatic.JsonFormatter(fmt="%(filename) %(funcName) %(levelname) %(lineno) %(module) %(threadName) %(message)"))
+    formatter
+    #logmatic.JsonFormatter(fmt="%(filename) %(funcName) %(levelname) %(lineno) %(module) %(threadName) %(message)")
+
+)
 logger.addHandler(handler)
 logger.addFilter(ContextFilter())
 logger.setLevel(logging.INFO)

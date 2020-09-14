@@ -86,21 +86,25 @@ class UserGroups extends Component {
         return (
             <div className="container-fluid">
                 <ErrorBoundary error={this.state.error}>
-                    <table className="table table-striped table-bordered wrap-table">
-                        <thead>
-                            <tr>
-                                <th>
-                                    Group name
-                                </th>
-                                <th>
-                                    Members
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {UserGroupItems}
-                        </tbody>
-                    </table>
+                    {this.state.groups.length ?
+                        <table className="table table-striped table-bordered wrap-table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Group name
+                                    </th>
+                                    <th>
+                                        Members
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {UserGroupItems}
+                            </tbody>
+                        </table>
+                        :
+                        <h4 className="text-center">You are currently not a member of any group.</h4>
+                    }
                 </ErrorBoundary>
             </div>
         );

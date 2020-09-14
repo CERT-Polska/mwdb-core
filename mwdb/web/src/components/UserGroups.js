@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
-import { UserLink } from "./ShowUsers";
+import {makeSearchLink} from "@malwarefront/helpers";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import api from "@malwarefront/api";
 import { ErrorBoundary, HighlightText } from "@malwarefront/ui";
@@ -33,8 +33,11 @@ class UserGroupRow extends Component {
                     </th>
 
                             <td>
-                                {this.props.group.users.map((c, idx) =>
-                                        [<UserLink key={idx} login={c}/>, idx+1 < this.props.group.users.length ? <span>,</span> : ""])
+                                {this.props.group.users.map((c, idx) => [
+                                    <Link key={idx} to={makeSearchLink("uploader", c, false, '')}>
+                                        {c}
+                                    </Link>,
+                                    idx+1 < this.props.group.users.length ? <span>,</span> : ""])
                                 }
                             </td>
                 </tr>
@@ -42,7 +45,10 @@ class UserGroupRow extends Component {
                     this.props.group.users.map((c, idx) =>
                             <tr className="nested">
                                 <td colSpan="2">
-                                    <UserLink key={idx} login={c}/>
+                                    <Link key={idx} to={makeSearchLink("uploader", c, false, '')}>
+                                        {c}
+                                    </Link>
+                                    {/*<UserLink key={idx} login={c}/>*/}
                                 </td>
                             </tr>
                     ))

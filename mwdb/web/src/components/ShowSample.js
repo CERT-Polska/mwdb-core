@@ -16,7 +16,7 @@ function SampleDetails(props) {
         <DataTable>
             <Extendable ident="showSampleDetails" object={props}>
                 <tr className="flickerable">
-                    <th>Filename</th>
+                    <th>File name</th>
                     <td id="file_name">
                         <Link to={makeSearchLink("name", props.file_name, false, '')}>
                             {props.file_name}

@@ -2,6 +2,7 @@ import logging
 
 from flask import g
 import logmatic
+from .config import app_config
 
 
 class ContextFilter(logging.Filter):
@@ -16,13 +17,18 @@ logger = logging.getLogger('mwdb.application')
 # Don't propagate to root logger
 logger.propagate = False
 
-# Setup JSON stream handler for main logger
+logging_type = app_config.mwdb.logging_type
+
+# Setup stream handler for main logger
 handler = logging.StreamHandler()
-formatter = logging.Formatter("%(filename)s:%(funcName)s:%(levelname)s:%(lineno)s:%(module)s:%(threadName)s:%(message)s")
+
+if logging_type == "standard":
+    formatter = logging.Formatter("%(filename)s %(funcName)s %(levelname)s %(lineno)s %(module)s %(threadName)s %(message)s")
+elif logging_type == "json":
+    formatter = logmatic.JsonFormatter(fmt="%(filename) %(funcName) %(levelname) %(lineno) %(module) %(threadName) %(message)")
+
 handler.setFormatter(
     formatter
-    #logmatic.JsonFormatter(fmt="%(filename) %(funcName) %(levelname) %(lineno) %(module) %(threadName) %(message)")
-
 )
 logger.addHandler(handler)
 logger.addFilter(ContextFilter())

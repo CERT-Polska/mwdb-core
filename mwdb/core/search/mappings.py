@@ -36,7 +36,6 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "sha512": StringField(File.sha512),
         "ssdeep": StringField(File.ssdeep),
         "crc32": StringField(File.crc32),
-        "humanhash": StringField(File.humanhash),
     },
     Config.__name__: {
         "type": StringField(Config.config_type),

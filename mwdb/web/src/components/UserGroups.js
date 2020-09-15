@@ -51,6 +51,8 @@ class UserGroupRow extends Component {
     render(){
         let modal = (this.state.isAddModalOpen) ?
             <ConfirmationModal isOpen={this.state.isAddModalOpen}
+                               buttonStyle="btn-success"
+                               confirmText="Add"
                                onRequestClose={() => this.setState({isAddModalOpen: false, newMember: null})}
                                onConfirm={() => {
                                    this.addMember(this.state.newMember);

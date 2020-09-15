@@ -115,13 +115,6 @@ function SamplePreview(props) {
 }
 
 class SamplePresenter extends ShowObjectPresenter {
-    
-    shortenHash(hash, distance) {
-        let str = "" + hash;
-        let subStr = str.slice(0, distance) + "..." + str.slice(-distance);
-        return subStr
-    };
-    
     handleDownload = async (event) => {
         let response = await api.requestFileDownload(this.props.sha256)
         window.location.href = api.getApiForEnvironment().replace(/\/$/g, '') + response.data.url;
@@ -133,8 +126,8 @@ class SamplePresenter extends ShowObjectPresenter {
                 <div className="align-self-center mr-3">
                     <Identicon hash={this.props.md5} size="45" />
                 </div>
-                <div className="align-self-center media-body">
-                    <h5 className="mt-0">{this.shortenHash(this.props.sha256, 6)}</h5>
+                <div className="align-self-center recent-field">
+                    <h5 className="mt-0"><Hash hash={this.props.sha256}/></h5>
                 </div>
             </React.Fragment>
         );

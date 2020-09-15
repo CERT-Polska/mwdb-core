@@ -4,10 +4,10 @@ import {Link} from 'react-router-dom';
 import ShowObject from "./ShowObject";
 import {ConfigTable} from "./ShowConfig";
 
-import api from "@malwarefront/api";
-import {makeSearchLink, makeSearchDateLink} from "@malwarefront/helpers";
-import { Extendable } from "@malwarefront/extensions";
-import { Identicon, DataTable, DateString, Hash, View, ActionCopyToClipboard } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import {makeSearchLink, makeSearchDateLink} from "@mwdb-web/commons/helpers";
+import { Extendable } from "@mwdb-web/commons/extensions";
+import { Identicon, DataTable, DateString, Hash, View, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
 import ShowSamplePreview from "./ShowSamplePreview";
 

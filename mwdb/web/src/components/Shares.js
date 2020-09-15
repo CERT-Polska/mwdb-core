@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import Autocomplete from 'react-autocomplete';
 
-import api from "@malwarefront/api";
-import { RefString, DateString, ObjectLink, ConfirmationModal } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { RefString, DateString, ObjectLink, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 class ShareItem extends Component {
     render() {

@@ -3,8 +3,8 @@ import { useHistory } from 'react-router';
 
 import queryString from "query-string";
 
-import api from "@malwarefront/api";
-import { capitalize } from "@malwarefront/helpers";
+import api from "@mwdb-web/commons/api";
+import { capitalize } from "@mwdb-web/commons/helpers";
 
 import DagreD3Plot from "./DagreD3Plot";
 import {Tag} from "./Tag";

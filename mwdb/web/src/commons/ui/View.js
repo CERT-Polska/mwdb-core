@@ -1,6 +1,6 @@
 import React from "react";
 import ErrorBoundary, {Alert} from "./ErrorBoundary";
-import { Extendable } from "@malwarefront/extensions";
+import { Extendable } from "../extensions";
 
 export default function View(props) {
     let ident = props.ident;

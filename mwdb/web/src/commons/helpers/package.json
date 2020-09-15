@@ -1,8 +1,0 @@
-{
-  "name": "@malwarefront/helpers",
-  "main": "helpers.js",
-  "private": true,
-  "peerDependencies": {
-    "lodash": "*"
-  }
-}

@@ -5,9 +5,9 @@ import {TagList} from "./Tag";
 
 import queryString from "query-string";
 
-import api from "@malwarefront/api";
-import {decodeSearchQuery, encodeSearchQuery} from "@malwarefront/helpers";
-import { PagedList, DateString, ObjectLink, View } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import {decodeSearchQuery, encodeSearchQuery} from "@mwdb-web/commons/helpers";
+import { PagedList, DateString, ObjectLink, View } from "@mwdb-web/commons/ui";
 
 function SearchItem(props) {
     const fieldStyle = {

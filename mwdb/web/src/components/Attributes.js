@@ -2,9 +2,9 @@ import React, {Component} from 'react';
 import { connect } from "react-redux";
 import AttributesAddModal from './AttributesAddModal';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import api from "@malwarefront/api";
-import { fromPlugin, Extendable } from "@malwarefront/extensions";
-import { DataTable, ConfirmationModal, ActionCopyToClipboard } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
+import { DataTable, ConfirmationModal, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 
 let attributeRenderers = {}
 

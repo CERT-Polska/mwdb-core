@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 import ShowObject from "./ShowObject";
 import {ConfigTable} from "./ShowConfig";
 
-import api from "@malwarefront/api";
-import { makeSearchLink, makeSearchDateLink, downloadData } from '@malwarefront/helpers';
-import { DataTable, View, DateString, HexView } from "@malwarefront/ui";
-import { Extendable } from "@malwarefront/extensions";
+import api from "@mwdb-web/commons/api";
+import { makeSearchLink, makeSearchDateLink, downloadData } from '@mwdb-web/commons/helpers';
+import { DataTable, View, DateString, HexView } from "@mwdb-web/commons/ui";
+import { Extendable } from "@mwdb-web/commons/extensions";
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
 
 function TextBlobDetails(props) {

@@ -4,7 +4,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import Hash from "./Hash";
 
 import { connect } from "react-redux";
-import { mapObjectType } from "@malwarefront/helpers";
+import { mapObjectType } from "../helpers";
 
 class ObjectLink extends Component {
     render() {

@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
-import api from "@malwarefront/api";
+import api from "@mwdb-web/commons/api";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-import { fromPlugin, Extendable } from "@malwarefront/extensions";
-import { capitalize } from '@malwarefront/helpers';
-import {ConfirmationModal} from "@malwarefront/ui";
+import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
+import { capitalize } from '@mwdb-web/commons/helpers';
+import {ConfirmationModal} from "@mwdb-web/commons/ui";
 
 import RelationsPlot from './RelationsPlot';
 

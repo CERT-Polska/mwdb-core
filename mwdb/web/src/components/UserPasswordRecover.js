@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import { View } from "@malwarefront/ui";
+import { View } from "@mwdb-web/commons/ui";
 import { connect } from 'react-redux';
-import api from "@malwarefront/api";
+import api from "@mwdb-web/commons/api";
 import ReCAPTCHA from "react-google-recaptcha";
 
 class UserPasswordRecover extends Component {

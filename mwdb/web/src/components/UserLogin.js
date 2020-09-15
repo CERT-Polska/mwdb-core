@@ -3,9 +3,9 @@ import {Link} from 'react-router-dom';
 
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { authActions } from "@malwarefront/auth";
-import { Extension } from "@malwarefront/extensions";
-import { View } from "@malwarefront/ui";
+import { authActions } from "@mwdb-web/commons/auth";
+import { Extension } from "@mwdb-web/commons/extensions";
+import { View } from "@mwdb-web/commons/ui";
 
 
 class UserLogin extends Component {

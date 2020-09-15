@@ -34,7 +34,7 @@ describe("Sample view test - mwdb-core", function () {
       cy.contains("Samples").click();
       cy.get('.d-none a[href*="'+fileData.md5+'"] > div').click();
       cy.contains(fileData.md5);
-      cy.contains("Filename");
+      cy.contains("File name");
       cy.contains("TEST");
       cy.contains("12");
       cy.contains("File type");

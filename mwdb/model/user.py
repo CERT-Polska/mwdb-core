@@ -180,7 +180,7 @@ class User(db.Model):
     def set_group_admin(self, group_id):
         db.session.query(member) \
             .filter(member.c.user_id == self.id, member.c.group_id == group_id) \
-            .update({'group_admin': True})
+            .update({member.c.group_admin: True})
         return True
 
     def has_access_to_object(self, object_id):

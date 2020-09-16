@@ -256,9 +256,6 @@ class GroupMemberResource(Resource):
         responses:
             200:
                 description: When member was added successfully
-                content:
-                  application/json:
-                    schema: GroupSuccessResponseSchema
             400:
                 description: When request body is invalid
             403:
@@ -298,6 +295,67 @@ class GroupMemberResource(Resource):
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
+    def post(self, name, login):
+        """
+        ---
+        summary:
+        description: |
+            Adds group admin status for a member
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+            - in: path
+              name: login
+              schema:
+                type: string
+              description: Member login
+        responses:
+            200:
+                description: When member was added successfully
+            400:
+                description: When request body is invalid
+            403:
+                description: When user doesn't have `manage_users` capability
+            404:
+                description: When user or group doesn't exist
+        """
+        group_name_obj = GroupNameSchemaBase().load({"name": name})
+        if group_name_obj.errors:
+            return {"errors": group_name_obj.errors}, 400
+
+        user_login_obj = UserLoginSchemaBase().load({"login": login})
+        if user_login_obj.errors:
+            return {"errors": user_login_obj.errors}, 400
+
+        member = db.session.query(User).filter(User.login == login).first()
+        if member is None:
+            raise NotFound("No such user")
+
+        if member.pending:
+            raise Forbidden("User is pending and need to be accepted first")
+
+        group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
+        if group is None:
+            raise NotFound("No such group")
+
+        if member.is_member(group.id):
+            member.set_group_admin(group.id)
+
+        member.reset_sessions()
+        db.session.commit()
+        logger.info('Group admin was added', extra={'user': member.login, 'group': group.name})
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
     def delete(self, name, login):
         """
         ---
@@ -325,10 +383,7 @@ class GroupMemberResource(Resource):
               description: Member login
         responses:
             200:
-                description: When member was removed successfully
-                content:
-                  application/json:
-                    schema: GroupSuccessResponseSchema
+                description: When member was set as admin successfully
             400:
                 description: When request body is invalid
             403:

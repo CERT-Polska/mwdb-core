@@ -17,7 +17,8 @@ from .object import ObjectPermission
 member = db.Table(
     'member', db.metadata,
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('group_id', db.Integer, db.ForeignKey('group.id'))
+    db.Column('group_id', db.Integer, db.ForeignKey('group.id')),
+    db.Column('group_admin', db.Boolean, default=False)
 )
 
 
@@ -170,6 +171,17 @@ class User(db.Model):
         groups = db.session.query(member.c.group_id) \
             .filter(member.c.user_id == self.id)
         return group_id.in_(groups)
+
+    def is_group_admin(self, group_id):
+        group = db.session.query(member) \
+            .filter(member.c.user_id == self.id, member.c.group_id == group_id).first()
+        return group.group_admin
+
+    def set_group_admin(self, group_id):
+        group = db.session.query(member) \
+            .filter(member.c.user_id == self.id, member.c.group_id == group_id).first()
+        group.group_admin = True
+        return True
 
     def has_access_to_object(self, object_id):
         return object_id.in_(db.session.query(ObjectPermission.object_id)

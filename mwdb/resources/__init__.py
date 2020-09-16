@@ -1,7 +1,10 @@
+import sys
 from functools import wraps
+from json import JSONDecodeError
 
 from flask import g, request
-from werkzeug.exceptions import Forbidden, Unauthorized
+from werkzeug.exceptions import Forbidden, Unauthorized, BadRequest
+from marshmallow import ValidationError
 
 from mwdb.core import log
 from mwdb.model import Object, File, Config, TextBlob
@@ -73,3 +76,16 @@ def access_object(object_type, identifier):
              access to this object.
     """
     return get_type_from_str(object_type).access(identifier)
+
+
+def load_schema(request, schema):
+    try:
+        obj = schema.loads(request.get_data(as_text=True))
+    except ValidationError as val_err:
+        raise BadRequest(val_err)
+    except JSONDecodeError as json_decode_err:
+        raise BadRequest(json_decode_err)
+    except Exception as err:
+        raise BadRequest(err)
+
+    return obj

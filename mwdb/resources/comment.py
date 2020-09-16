@@ -9,7 +9,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.model import db, Comment
 from mwdb.schema.comment import CommentRequestSchema, CommentItemResponseSchema
 
-from . import logger, requires_capabilities, requires_authorization, access_object
+from . import logger, requires_capabilities, requires_authorization, access_object, load_schema
 
 
 class CommentResource(Resource):
@@ -99,12 +99,13 @@ class CommentResource(Resource):
         """
         schema = CommentRequestSchema()
 
-        #try:
-        obj = schema.loads(request.get_data(as_text=True))
-        except Exception as err:
-            raise BadRequest(sys.exc_info())
-            #print(f"Error MESSAGES: {err}")
+        # try:
+        #     obj = schema.loads(request.get_data(as_text=True))
+        # except Exception as err:
+        #     raise BadRequest(sys.exc_info())
+        #print(f"Error MESSAGES: {err}")
 
+        obj = load_schema(request, schema)
 
         # if obj.errors:
         #     return {"errors": obj.errors}, 400
@@ -114,7 +115,7 @@ class CommentResource(Resource):
             raise NotFound("Object not found")
 
         comment = Comment(
-            comment=obj.data["comment"],
+            comment=obj["comment"],
             user_id=g.auth_user.id,
             object_id=db_object.id
         )

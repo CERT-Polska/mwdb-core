@@ -256,6 +256,9 @@ class GroupMemberResource(Resource):
         responses:
             200:
                 description: When member was added successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
             400:
                 description: When request body is invalid
             403:

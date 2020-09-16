@@ -1,7 +1,9 @@
+import sys
+
 from flask import request, g
 from flask_restful import Resource
 
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, BadRequest
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import db, Comment
@@ -96,10 +98,16 @@ class CommentResource(Resource):
                 description: When object doesn't exist or user doesn't have access to this object.
         """
         schema = CommentRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
 
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        #try:
+        obj = schema.loads(request.get_data(as_text=True))
+        except Exception as err:
+            raise BadRequest(sys.exc_info())
+            #print(f"Error MESSAGES: {err}")
+
+
+        # if obj.errors:
+        #     return {"errors": obj.errors}, 400
 
         db_object = access_object(type, identifier)
         if db_object is None:

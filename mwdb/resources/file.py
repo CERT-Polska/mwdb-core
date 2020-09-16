@@ -137,9 +137,9 @@ class FileResource(ObjectResource, FileUploader):
         schema = FileCreateRequestSchema()
         obj = schema.load(request.form.to_dict())
 
-        if obj and obj.errors:
-            return {"errors": obj.errors}, 400
-        return self.create_object(obj.data["options"])
+        #if obj and obj.errors:
+        #    return {"errors": obj.errors}, 400
+        return self.create_object(obj["options"])
 
 
 class FileItemResource(ObjectItemResource, FileUploader):

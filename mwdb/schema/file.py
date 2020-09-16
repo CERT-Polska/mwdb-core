@@ -15,7 +15,7 @@ class FileCreateRequestSchema(Schema):
     options = fields.Nested(ObjectCreateRequestSchemaBase, missing={})
 
     @pre_load
-    def unpack_options(self, params):
+    def unpack_options(self, params, **kwargs):
         """
         Options are packed into JSON string that needs to be deserialized first.
         Empty string in 'options' field is treated like missing key.

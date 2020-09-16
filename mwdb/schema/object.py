@@ -12,7 +12,7 @@ class ObjectListRequestSchema(Schema):
     older_than = fields.Str(missing=None)
 
     @validates_schema
-    def validate_key(self, data):
+    def validate_key(self, data, **kwargs):
         if data['page'] is not None and data['older_than'] is not None:
             raise ValidationError(
                 "'page' and 'older_than' can't be used simultaneously. Use 'older_than' for new code."

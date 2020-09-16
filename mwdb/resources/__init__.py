@@ -20,7 +20,7 @@ def requires_capabilities(*required_caps):
         def endpoint(*args, **kwargs):
             for required_cap in required_caps:
                 if not g.auth_user.has_rights(required_cap):
-                    raise Forbidden("You are not permitted to perform action: " + required_cap)
+                    raise Forbidden(f"You don't have required capability ({required_cap}) to perform this action")
             return f(*args, **kwargs)
 
         return endpoint

@@ -114,7 +114,7 @@ class APIKeyResource(Resource):
             return {"errors": obj.errors}, 400
 
         try:
-            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
+            api_key = APIKey.query.filter(APIKey.id == obj["id"]).one()
         except NoResultFound:
             raise NotFound("API key doesn't exist")
 
@@ -163,7 +163,7 @@ class APIKeyResource(Resource):
             return {"errors": obj.errors}, 400
 
         try:
-            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
+            api_key = APIKey.query.filter(APIKey.id == obj["id"]).one()
         except NoResultFound:
             raise NotFound("API key doesn't exist")
 

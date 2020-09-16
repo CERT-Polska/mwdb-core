@@ -138,7 +138,7 @@ class GroupResource(Resource):
 
         group = Group(
             name=name,
-            capabilities=obj.data["capabilities"]
+            capabilities=obj["capabilities"]
         )
         db.session.add(group)
         db.session.commit()
@@ -203,13 +203,13 @@ class GroupResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
-        if obj.data["name"] is not None:
-            if obj.data["name"] != name and group.immutable:
+        if obj["name"] is not None:
+            if obj["name"] != name and group.immutable:
                 raise Forbidden("Renaming group not allowed - group is immutable")
-            group.name = obj.data["name"]
+            group.name = obj["name"]
 
-        if obj.data["capabilities"] is not None:
-            group.capabilities = obj.data["capabilities"]
+        if obj["capabilities"] is not None:
+            group.capabilities = obj["capabilities"]
 
         # Invalidate all sessions due to potentially changed capabilities
         for member in group.users:

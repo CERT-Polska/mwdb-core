@@ -99,16 +99,7 @@ class CommentResource(Resource):
         """
         schema = CommentRequestSchema()
 
-        # try:
-        #     obj = schema.loads(request.get_data(as_text=True))
-        # except Exception as err:
-        #     raise BadRequest(sys.exc_info())
-        #print(f"Error MESSAGES: {err}")
-
         obj = load_schema(request, schema)
-
-        # if obj.errors:
-        #     return {"errors": obj.errors}, 400
 
         db_object = access_object(type, identifier)
         if db_object is None:

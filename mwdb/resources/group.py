@@ -320,7 +320,7 @@ class GroupMemberResource(Resource):
               description: Member login
         responses:
             200:
-                description: When member was added successfully
+                description: When member was set as admin successfully
             400:
                 description: When request body is invalid
             403:
@@ -383,7 +383,10 @@ class GroupMemberResource(Resource):
               description: Member login
         responses:
             200:
-                description: When member was set as admin successfully
+                description: When member was removed successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
             400:
                 description: When request body is invalid
             403:

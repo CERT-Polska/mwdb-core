@@ -48,7 +48,7 @@ class APIKeyIssueResource(Resource):
                     If provided login doesn't exist.
         """
         if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.login != login:
-            raise Forbidden("You are not permitted to manage users")
+            raise Forbidden("You don't have required capability (manage_users) to perform this action")
 
         try:
             api_key_owner = User.query.filter(User.login == login).one()

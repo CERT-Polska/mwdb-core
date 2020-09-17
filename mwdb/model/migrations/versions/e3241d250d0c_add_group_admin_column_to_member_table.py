@@ -1,8 +1,8 @@
 """Add group_admin column to member table
 
-Revision ID: bbd63c67663c
-Revises: 43b78a070936
-Create Date: 2020-09-16 15:48:39.096611
+Revision ID: e3241d250d0c
+Revises: e2d99ffcb8ce
+Create Date: 2020-09-17 15:24:00.140409
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bbd63c67663c'
+revision = 'e3241d250d0c'
 down_revision = 'e2d99ffcb8ce'
 branch_labels = None
 depends_on = None

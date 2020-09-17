@@ -180,10 +180,6 @@ class UserUpdate extends Component {
         return this.state.groups.filter(x => x.name !== 'public' && x.name !== this.props.match.params.login)
     }
 
-    get admins() {
-        return this.state.groups.filter(x => x.name !== 'public' && x.name !== this.props.match.params.admins)
-    }
-
     itemsFromDifferentGroups() {
         return this.state.allGroups.filter(g => !this.state.groups.map(x => x.name).includes(g.name) && !g.private && g.name !== "public")
     }

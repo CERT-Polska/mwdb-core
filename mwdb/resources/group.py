@@ -84,6 +84,7 @@ class GroupResource(Resource):
         if obj is None:
             raise NotFound("No such group")
         schema = GroupItemResponseSchema()
+        print(schema.dump(obj))
         return schema.dump(obj)
 
     @requires_authorization
@@ -227,7 +228,6 @@ class GroupResource(Resource):
 
 class GroupMemberResource(Resource):
     @requires_authorization
-    @requires_capabilities(Capabilities.manage_users)
     def put(self, name, login):
         """
         ---
@@ -274,6 +274,16 @@ class GroupMemberResource(Resource):
         if user_login_obj.errors:
             return {"errors": user_login_obj.errors}, 400
 
+        group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
+        if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):
+            raise Forbidden("You are not permitted to manage this group")
+
+        if group is None:
+            raise NotFound("No such group")
+
+        if group.immutable:
+            raise Forbidden("Adding members to private or public group is not allowed")
+
         member = db.session.query(User).filter(User.login == login).first()
         if member is None:
             raise NotFound("No such user")
@@ -281,18 +291,13 @@ class GroupMemberResource(Resource):
         if member.pending:
             raise Forbidden("User is pending and need to be accepted first")
 
-        group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
-        if group is None:
-            raise NotFound("No such group")
-
-        if group.immutable:
-            raise Forbidden("Adding members to private or public group is not allowed")
-
-        if group in member.groups:
-            member.set_group_admin(group.id)
+        if group in member.groups and g.auth_user.has_rights(Capabilities.manage_users):
+            if member.is_group_admin(group.id):
+                member.set_group_admin(group.id, False)
+            else:
+                member.set_group_admin(group.id, True)
         else:
             group.users.append(member)
-
         member.reset_sessions()
         db.session.commit()
 
@@ -301,7 +306,6 @@ class GroupMemberResource(Resource):
         return schema.dump({"name": name})
 
     @requires_authorization
-    @requires_capabilities(Capabilities.manage_users)
     def delete(self, name, login):
         """
         ---
@@ -348,19 +352,24 @@ class GroupMemberResource(Resource):
         if user_login_obj.errors:
             return {"errors": user_login_obj.errors}, 400
 
-        member = db.session.query(User).filter(User.login == login).first()
-        if member is None:
-            raise NotFound("No such user")
-
-        if member.pending:
-            raise Forbidden("User is pending and need to be accepted first")
-
         group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
+        if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):
+            raise Forbidden("You are not permitted to manage this group")
+
         if group is None:
             raise NotFound("No such group")
 
         if group.immutable:
             raise Forbidden("Removing members from private or public group is not allowed")
+
+        member = db.session.query(User).filter(User.login == login).first()
+        if g.auth_user.login == member.login:
+            raise Forbidden("You can't remove yourself from the group, only global admin can ramoves group admins.")
+        if member is None:
+            raise NotFound("No such user")
+
+        if member.pending:
+            raise Forbidden("User is pending and need to be accepted first")
 
         group.users.remove(member)
         member.reset_sessions()
@@ -397,5 +406,4 @@ class UserGroupsListResource(Resource):
                           .filter(Group.private.is_(False))).all()
 
         schema = GroupListResponseSchema()
-        print("\nobjs:\n", schema.dump({"groups": objs}))
         return schema.dump({"groups": objs})

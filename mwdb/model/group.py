@@ -28,6 +28,10 @@ class Group(db.Model):
     def user_logins(self):
         return [ug.login for ug in self.users]
 
+    @property
+    def group_admins(self):
+        return [ug.login for ug in self.users if ug.is_group_admin(self.id)]
+
     @staticmethod
     def public_group():
         return Group.get_by_name(Group.PUBLIC_GROUP_NAME)

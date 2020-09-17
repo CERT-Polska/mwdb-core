@@ -21,6 +21,7 @@ class GroupUpdate extends Component {
         error: null,
         loginFilter: '',
         users: [],
+        admins: [],
         capabilities: [],
         success: null,
         allUsers: [],
@@ -46,6 +47,7 @@ class GroupUpdate extends Component {
                     _.toPairs(response.data).reduce((p, c) => p.concat([c], [["original_"+c[0], c[1]]]), [])
                 ))
             }
+            state.admins = response.data.admins.map(c => (c));
             state.users = response.data.users.map(c => ({login: c}));
             this.setState(state);
         } catch(error) {
@@ -77,13 +79,14 @@ class GroupUpdate extends Component {
             await api.addGroupMember(this.props.match.params.name, login)
             this.doUpdate();
             this.setState({
-                success: "Member added successfully",
+                success: "Member updated successfully",
                 error: null
             });
         } catch(error) {
             this.setState({error})
         }
     }
+
 
     removeMember = async (login) => {
         try {
@@ -133,7 +136,6 @@ class GroupUpdate extends Component {
             return isChanged() ? <span style={{color: "red"}}>*</span> : <span/>
         };
         let groupName = this.props.match.params.name;
-
         return (
             <div className="container">
                 <Alert error={this.state.error} success={this.state.success} warning={
@@ -169,6 +171,7 @@ class GroupUpdate extends Component {
                 <h4>Members</h4>
 
                 <GroupMemberList items={this.state.users}
+                                 admins={this.state.admins}
                                  addMember={this.addMember}
                                  removeMember={this.removeMember}
                                  newMemberItems={this.itemsFromDifferentGroups()}

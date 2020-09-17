@@ -177,11 +177,10 @@ class User(db.Model):
             .filter(member.c.user_id == self.id, member.c.group_id == group_id).first()
         return group.group_admin
 
-    def set_group_admin(self, group_id):
-        db.session.query(member) \
-            .filter(member.c.user_id == self.id, member.c.group_id == group_id) \
-            .update({member.c.group_admin: True})
-        return True
+    def set_group_admin(self, group_id, set_admin):
+        stmt = member.update().values(group_admin=set_admin) \
+            .where(and_(member.c.user_id == self.id, member.c.group_id == group_id))
+        db.engine.execute(stmt)
 
     def has_access_to_object(self, object_id):
         return object_id.in_(db.session.query(ObjectPermission.object_id)

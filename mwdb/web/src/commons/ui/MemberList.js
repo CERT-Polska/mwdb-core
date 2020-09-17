@@ -19,10 +19,13 @@ export default class MemberList extends Component {
         let propagatedProps = {
             newMemberItems: this.props.newMemberItems,
             nameKey: this.props.nameKey,
+            admins: this.props.admins,
             disabled: this.props.disabled,
             itemLinkClass: this.props.itemLinkClass,
             addMember: this.addMember,
-            removeMember: this.removeMember
+            setAdmin: this.setAdmin,
+            removeMember: this.removeMember,
+            groupName: this.props.groupName
         }
         return this.props.items.map((item) => ({
             ...propagatedProps,
@@ -51,6 +54,23 @@ export default class MemberList extends Component {
         })
     }
 
+    setAdmin = (member) => {
+        let message = `Are you sure to change admin group permissions for ${member}?`
+
+        this.setState({
+            isModalOpen: true,
+            modalSpec: {
+                message,
+                action: (() => {
+                    this.setState({isModalOpen: false});
+                    this.props.addMember(member);
+                }),
+                buttonStyle: "bg-success",
+                confirmText: "Yes"
+            }
+        })
+    }
+
     removeMember = (member) => {
         let message;
         if(this.props.groupName)
@@ -72,6 +92,7 @@ export default class MemberList extends Component {
     }
 
     render() {
+        let columns = this.props.groupName ? ["Name", "Actions", "Set membership"] : ["Name", "Actions"]
         return (
             <React.Fragment>
                 <ConfirmationModal isOpen={this.state.isModalOpen}
@@ -81,7 +102,7 @@ export default class MemberList extends Component {
                                    buttonStyle={this.state.modalSpec.buttonStyle}
                                    confirmText={this.state.modalSpec.confirmText} />
                 <PagedList listItem={MemberItem}
-                           columnNames={["Name", "Set membership"]}
+                           columnNames={columns}
                            items={this.items}
                            itemCount={this.items.length}
                            activePage={this.state.activePage}
@@ -149,18 +170,37 @@ class MemberItem extends Component {
         } else {
             return (
                 <tr>
-                    <td style={{textAlign: 'left'}}>
-                        <this.props.itemLinkClass {...this.props}/>
+                    <td>
+                        {this.props.groupName && this.props.admins.includes(this.props[this.props.nameKey]) ?
+                            <span style={{textAlign: 'left'}}>
+                                <this.props.itemLinkClass {...this.props}/>{" (admin)"}
+                            </span>
+                            : <this.props.itemLinkClass {...this.props}/>
+                        }
                     </td>
                     <td>
-                        {
+                        <span>
                             <button type="button" className="btn btn-danger"
                                     onClick={() => !this.props.disabled && this.props.removeMember(this.props[this.props.nameKey])}
                                     disabled={this.props.disabled}>
                                 Remove member
                             </button>
-                        }
+                        </span>
                     </td>
+                    {this.props.groupName &&
+                    <td>
+                        <span>
+                            <button type="button" className="btn btn-info"
+                                    onClick={() => !this.props.disabled && this.props.setAdmin(this.props[this.props.nameKey])}
+                                    disabled={this.props.disabled}>
+                                {this.props.admins.includes(this.props[this.props.nameKey]) ?
+                                        <span>Revoke admin</span> :
+                                        <span>Set as admin</span>
+                                }
+                            </button>
+                        </span>
+                    </td>
+                    }
                 </tr>
             );
         }

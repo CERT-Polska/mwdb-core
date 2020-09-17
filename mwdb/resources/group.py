@@ -231,13 +231,14 @@ class GroupMemberResource(Resource):
     def put(self, name, login):
         """
         ---
-        summary: Add a member to the specified group
+        summary: Add a member to the specified group or set group admin for member
         description: |
-            Adds new member to existing group.
+            Adds new member to existing group or set group admin for specific member.
 
             Works only for user-defined groups (excluding private and 'public')
 
-            Requires `manage_users` capability.
+            Requires `manage_users` capability to set user as group admin or to add new user to the group.
+            If user is group_admin he is able only yo adding new users to that group.
         security:
             - bearerAuth: []
         tags:
@@ -315,7 +316,7 @@ class GroupMemberResource(Resource):
 
             Works only for user-defined groups (excluding private and 'public')
 
-            Requires `manage_users` capability.
+            Requires `manage_users` capability or group_admin membership.
         security:
             - bearerAuth: []
         tags:

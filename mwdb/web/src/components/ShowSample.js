@@ -16,7 +16,7 @@ function SampleDetails(props) {
         <DataTable>
             <Extendable ident="showSampleDetails" object={props}>
                 <tr className="flickerable">
-                    <th>Filename</th>
+                    <th>File name</th>
                     <td id="file_name">
                         <Link to={makeSearchLink("name", props.file_name, false, '')}>
                             {props.file_name}
@@ -126,8 +126,8 @@ class SamplePresenter extends ShowObjectPresenter {
                 <div className="align-self-center mr-3">
                     <Identicon hash={this.props.md5} size="45" />
                 </div>
-                <div className="align-self-center media-body">
-                    <h5 className="mt-0">{this.props.humanhash}</h5>
+                <div className="align-self-center recent-field">
+                    <h5 className="mt-0"><Hash hash={this.props.sha256}/></h5>
                 </div>
             </React.Fragment>
         );

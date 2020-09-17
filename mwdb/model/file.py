@@ -6,7 +6,6 @@ from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadS
 from werkzeug.utils import secure_filename
 
 from mwdb.core.config import app_config
-from mwdb.core.humanhash import Humanhash
 from mwdb.core.util import calc_hash, calc_crc32, calc_magic, calc_ssdeep
 
 from . import db
@@ -29,7 +28,6 @@ class File(Object):
     sha1 = db.Column(db.String(40), nullable=False, index=True)
     sha256 = db.Column(db.String(64), nullable=False, index=True, unique=True)
     sha512 = db.Column(db.String(128), nullable=False, index=True)
-    humanhash = db.Column(db.String, nullable=False, index=True)
     # ssdeep is nullable due to lack of support in earlier versions
     ssdeep = db.Column(db.String(255), nullable=True, index=True)
 
@@ -67,7 +65,6 @@ class File(Object):
             sha1=calc_hash(file.stream, hashlib.sha1(), lambda h: h.hexdigest()),
             sha256=sha256,
             sha512=calc_hash(file.stream, hashlib.sha512(), lambda h: h.hexdigest()),
-            humanhash=Humanhash._humanhash(sha256),
             ssdeep=calc_ssdeep(file.stream)
         )
 

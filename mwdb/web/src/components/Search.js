@@ -33,7 +33,7 @@ export class SearchHelp extends Component {
                             <p>Syntax used in all queries follows <a href="http://www.lucenetutorial.com/lucene-query-syntax.html">lucene syntax</a>. Supported features:</p>
                             <ul>
                                 <li>Search fields - <kbd>file.name:something.exe</kbd></li>
-                                <li>Boolean operators and grouping(<kbd>AND</kbd>, <kbd>OR</kbd>, <kbd>NOT</kbd>) - <kbd>tag:danabot AND file.md5:e49533942dd1b8d28193b36960cfcec6</kbd> <kbd>tag:danabot AND (file.type:data OR file.humanhash:KnobbyMuscidYamensReeving)</kbd></li>
+                                <li>Boolean operators and grouping(<kbd>AND</kbd>, <kbd>OR</kbd>, <kbd>NOT</kbd>) - <kbd>tag:danabot AND file.md5:e49533942dd1b8d28193b36960cfcec6</kbd> <kbd>tag:danabot AND (file.type:data OR file.sha256:752163e8b2d0df7480aa38aeba146e96686655efd15bbd3351b7338544c50738)</kbd></li>
                                 <li>Wildcards matching(<kbd>*</kbd> - many, <kbd>?</kbd> - single) - <kbd>file.type:PE32*</kbd> <kbd>file.type:"Zip archive data, at least v?.? to extract"</kbd></li>
                                 <li>Range searches(<kbd>[x TO y]</kbd>, <kbd>{'{}'}</kbd> for inclusive) - <kbd>file.size:[0 TO 5000]</kbd> <kbd>file.size:{'{'}0 TO 5000{'}'}</kbd></li>
                             </ul>
@@ -51,7 +51,6 @@ export class SearchHelp extends Component {
                                 <li>file.sha1</li>
                                 <li>file.sha256</li>
                                 <li>file.sha512</li>
-                                <li>file.humanhash</li>
                                 <li>file.ssdeep</li>
                                 <li>static.family</li>
                             </ul>

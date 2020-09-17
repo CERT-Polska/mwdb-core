@@ -231,7 +231,7 @@ class GroupMemberResource(Resource):
     def put(self, name, login):
         """
         ---
-        summary: Add a member to the specified group or set group admin for member
+        summary: Add a member to the specific group or set group admin membership
         description: |
             Adds new member to existing group or set group admin for specific member.
 

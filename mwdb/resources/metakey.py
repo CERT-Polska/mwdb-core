@@ -17,7 +17,7 @@ from mwdb.schema.metakey import (
     MetakeyPermissionSetRequestBodySchema,
 )
 
-from . import requires_capabilities, access_object, requires_authorization
+from . import requires_capabilities, access_object, requires_authorization, load_schema, loads_schema
 
 
 class MetakeyResource(Resource):
@@ -62,11 +62,9 @@ class MetakeyResource(Resource):
                 description: When object doesn't exist or user doesn't have access to this object.
         """
         schema = MetakeyListRequestSchema()
-        obj = schema.load(request.args)
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema(request.args, schema)
 
-        show_hidden = obj.data["hidden"]
+        show_hidden = obj["hidden"]
         if show_hidden and not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             raise Forbidden("You are not permitted to read hidden metakeys")
 
@@ -120,16 +118,14 @@ class MetakeyResource(Resource):
                     When attribute key is not defined or user doesn't have privileges to set that one.
         """
         schema = MetakeyItemRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
-        key = obj.data['key']
-        value = obj.data['value']
+        key = obj['key']
+        value = obj['value']
         is_new = db_object.add_metakey(key, value)
         if is_new is None:
             raise NotFound(f"Metakey '{key}' is not defined or you have insufficient permissions to set it")
@@ -187,16 +183,14 @@ class MetakeyResource(Resource):
                     When attribute key is not defined or user doesn't have privileges to set that one.
         """
         schema = MetakeyItemRequestSchema()
-        obj = schema.load(request.args)
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema(request.args, schema)
 
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
-        key = obj.data['key']
-        value = obj.data['value']
+        key = obj['key']
+        value = obj['value']
 
         deleted_object = db_object.remove_metakey(key, value)
         if deleted_object is False:
@@ -350,20 +344,16 @@ class MetakeyDefinitionManageResource(Resource):
                 description: When user doesn't have `managing_attributes` capability.
         """
         schema = MetakeyDefinitionItemRequestArgsSchema()
-        args_obj = schema.load({"key": key})
-        if args_obj.errors:
-            return {"errors": args_obj.errors}, 400
+        args_obj = load_schema({"key": key}, schema)
 
         schema = MetakeyDefinitionItemRequestBodySchema()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        metakey_definition = MetakeyDefinition(key=args_obj.data["key"],
-                                               url_template=obj.data["url_template"],
-                                               label=obj.data["label"],
-                                               description=obj.data["description"],
-                                               hidden=obj.data["hidden"])
+        metakey_definition = MetakeyDefinition(key=args_obj["key"],
+                                               url_template=obj["url_template"],
+                                               label=obj["label"],
+                                               description=obj["description"],
+                                               hidden=obj["hidden"])
         metakey_definition = db.session.merge(metakey_definition)
         db.session.commit()
 
@@ -416,33 +406,29 @@ class MetakeyPermissionResource(Resource):
                 description: When attribute key or group doesn't exist
         """
         schema = MetakeyPermissionSetRequestArgsSchema()
-        args_obj = schema.load({
+        args_obj = load_schema({
             "key": key,
             "group_name": group_name
-        })
-        if args_obj.errors:
-            return {"errors": args_obj.errors}, 400
+        }, schema)
 
         schema = MetakeyPermissionSetRequestBodySchema()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         metakey_definition = db.session.query(MetakeyDefinition).filter(
-            MetakeyDefinition.key == args_obj.data["key"]
+            MetakeyDefinition.key == args_obj["key"]
         ).first()
         if metakey_definition is None:
             raise NotFound("No such metakey")
 
-        group = db.session.query(Group).filter(Group.name == args_obj.data["group_name"]).first()
+        group = db.session.query(Group).filter(Group.name == args_obj["group_name"]).first()
         if group is None:
             raise NotFound("No such group")
 
         permission = MetakeyPermission(
-            key=args_obj.data["key"],
+            key=args_obj["key"],
             group_id=group.id,
-            can_read=obj.data["can_read"],
-            can_set=obj.data["can_set"]
+            can_read=obj["can_read"],
+            can_set=obj["can_set"]
         )
         db.session.merge(permission)
         db.session.commit()
@@ -485,19 +471,17 @@ class MetakeyPermissionResource(Resource):
                 description: When attribute key or group or group permission doesn't exist
         """
         schema = MetakeyPermissionSetRequestArgsSchema()
-        args_obj = schema.load({
+        args_obj = load_schema({
             "key": key,
             "group_name": group_name
-        })
-        if args_obj.errors:
-            return {"errors": args_obj.errors}, 400
+        }, schema)
 
-        group = db.session.query(Group).filter(Group.name == args_obj.data["group_name"]).first()
+        group = db.session.query(Group).filter(Group.name == args_obj["group_name"]).first()
         if group is None:
             raise NotFound("No such group")
 
         metakey_permission = db.session.query(MetakeyPermission).filter(
-            MetakeyPermission.key == args_obj.data["key"],
+            MetakeyPermission.key == args_obj["key"],
             MetakeyPermission.group_id == group.id).first()
 
         if metakey_permission is None:

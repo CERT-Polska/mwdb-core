@@ -8,7 +8,7 @@ from mwdb.model import Object
 from mwdb.schema.object import ObjectListItemResponseSchema
 from mwdb.schema.search import SearchRequestSchema
 
-from . import deprecated, requires_authorization
+from . import deprecated, requires_authorization, loads_schema
 
 
 class SearchResource(Resource):
@@ -44,12 +44,9 @@ class SearchResource(Resource):
                 description: When request body or query syntax is invalid
         """
         schema = SearchRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        if obj.errors:
-            return {"errors": obj.errors}, 400
-
-        query = obj.data["query"]
+        query = obj["query"]
         try:
             result = (
                 SQLQueryBuilder().build_query(query)

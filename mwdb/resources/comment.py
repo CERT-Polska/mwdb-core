@@ -1,5 +1,3 @@
-import sys
-
 from flask import request, g
 from flask_restful import Resource
 
@@ -9,7 +7,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.model import db, Comment
 from mwdb.schema.comment import CommentRequestSchema, CommentItemResponseSchema
 
-from . import logger, requires_capabilities, requires_authorization, access_object, load_schema
+from . import logger, requires_capabilities, requires_authorization, access_object, loads_schema
 
 
 class CommentResource(Resource):
@@ -99,7 +97,7 @@ class CommentResource(Resource):
         """
         schema = CommentRequestSchema()
 
-        obj = load_schema(request, schema)
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         db_object = access_object(type, identifier)
         if db_object is None:

@@ -1,9 +1,8 @@
-import sys
 from functools import wraps
 from json import JSONDecodeError
 
 from flask import g, request
-from werkzeug.exceptions import Forbidden, Unauthorized, BadRequest, InternalServerError
+from werkzeug.exceptions import Forbidden, Unauthorized, BadRequest
 from marshmallow import ValidationError
 
 from mwdb.core import log
@@ -78,9 +77,20 @@ def access_object(object_type, identifier):
     return get_type_from_str(object_type).access(identifier)
 
 
-def load_schema(request, schema):
+def loads_schema(request_data, schema):
     try:
-        obj = schema.loads(request.get_data(as_text=True))
+        obj = schema.loads(request_data)
+    except ValidationError as val_err:
+        raise BadRequest(f"ValidationError: {val_err}")
+    except JSONDecodeError as json_decode_err:
+        raise BadRequest(f"JSONDecodeError: {json_decode_err}")
+
+    return obj
+
+
+def load_schema(request_data, schema):
+    try:
+        obj = schema.load(request_data)
     except ValidationError as val_err:
         raise BadRequest(f"ValidationError: {val_err}")
     except JSONDecodeError as json_decode_err:

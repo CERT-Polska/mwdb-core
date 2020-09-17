@@ -23,7 +23,7 @@ from mwdb.schema.auth import (
 )
 from mwdb.schema.user import UserSuccessResponseSchema
 
-from . import logger, requires_authorization
+from . import logger, requires_authorization, loads_schema
 
 
 def verify_recaptcha(recaptcha_token):
@@ -74,10 +74,7 @@ class LoginResource(Resource):
               description: When credentials are invalid, account is inactive or system is set into maintenance mode.
         """
         schema = AuthLoginRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-
-        #if obj.error_messages:
-        #    return {"errors": obj.error_messages}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         try:
             user = User.query.filter(User.login == obj['login']).one()
@@ -145,10 +142,7 @@ class RegisterResource(Resource):
             raise Forbidden("User registration is not enabled.")
 
         schema = AuthRegisterRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         login = obj["login"]
 
@@ -211,9 +205,7 @@ class ChangePasswordResource(Resource):
                 description: When set password token is no longer valid
         """
         schema = AuthSetPasswordRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         user = User.verify_set_password_token(obj["token"])
         if user is None:
@@ -309,10 +301,7 @@ class RecoverPasswordResource(Resource):
               description: When SMTP server is unavailable or not properly configured on the server.
         """
         schema = AuthRecoverPasswordRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         try:
             user = User.query.filter(

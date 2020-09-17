@@ -15,7 +15,7 @@ from mwdb.schema.object import (
     ObjectCountRequestSchema, ObjectCountResponseSchema
 )
 
-from . import logger, requires_authorization, requires_capabilities, get_type_from_str
+from . import logger, requires_authorization, requires_capabilities, get_type_from_str, load_schema
 
 
 class ObjectUploader:
@@ -138,10 +138,8 @@ class ObjectResource(Resource):
         """
         if 'page' in request.args:
             logger.warning("'%s' used legacy 'page' parameter", g.auth_user.login)
-        print(f"REQUEST ARGS: {request.args}")
-        obj = ObjectListRequestSchema().load(request.args)
-        #if obj.errors:
-        #    return {"errors": obj.errors}, 400
+
+        obj = load_schema(request.args, ObjectListRequestSchema())
 
         pivot_obj = None
         if obj["older_than"]:
@@ -242,9 +240,8 @@ class ObjectItemResource(Resource, ObjectUploader):
             raise MethodNotAllowed()
 
         schema = self.CreateRequestSchema()
-        obj = schema.load(self._get_upload_args(identifier))
-        if obj and obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema(self._get_upload_args(identifier), schema)
+
         return self.create_object(obj)
 
     @requires_authorization
@@ -323,9 +320,7 @@ class ObjectCountResource(Resource):
                 description: When wrong parameters were provided or syntax error occurred in Lucene query
         """
         schema = ObjectCountRequestSchema()
-        obj = schema.load(request.args)
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema(request.args, schema)
 
         query = obj["query"]
         if query:

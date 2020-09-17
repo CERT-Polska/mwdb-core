@@ -11,7 +11,7 @@ from mwdb.schema.file import (
     FileListResponseSchema, FileItemResponseSchema
 )
 
-from . import requires_authorization, requires_capabilities
+from . import requires_authorization, requires_capabilities, load_schema
 
 from .object import ObjectUploader, ObjectItemResource, ObjectResource
 
@@ -135,10 +135,8 @@ class FileResource(ObjectResource, FileUploader):
                 description: Object exists yet but has different type
         """
         schema = FileCreateRequestSchema()
-        obj = schema.load(request.form.to_dict())
+        obj = load_schema(request.form.to_dict(), schema)
 
-        #if obj and obj.errors:
-        #    return {"errors": obj.errors}, 400
         return self.create_object(obj["options"])
 
 

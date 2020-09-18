@@ -8,8 +8,8 @@ import DiffMatchPatch from "diff-match-patch";
 import 'brace/mode/text';
 import 'brace/theme/chrome';
 
-import api from "@malwarefront/api";
-import { ErrorBoundary } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { ErrorBoundary } from "@mwdb-web/commons/ui";
 
 class DiffTextBlobContentPresenter extends Component {
     constructor(props) {

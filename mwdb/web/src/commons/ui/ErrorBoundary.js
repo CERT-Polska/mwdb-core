@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import { intersperse } from '@malwarefront/helpers';
+import { intersperse } from '../helpers';
 
 function getErrorMessage(error) {
     if(error.response)

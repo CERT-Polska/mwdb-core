@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import ReCAPTCHA from "react-google-recaptcha";
 
-import { View } from "@malwarefront/ui";
-import api from "@malwarefront/api";
+import { View } from "@mwdb-web/commons/ui";
+import api from "@mwdb-web/commons/api";
 
 class UserRegister extends Component {
     constructor(props) {

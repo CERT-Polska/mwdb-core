@@ -3,9 +3,9 @@ import {Link} from 'react-router-dom';
 
 import queryString from "query-string";
 
-import api from "@malwarefront/api";
-import { encodeSearchQuery, decodeSearchQuery, queryFromHash, addFieldToQuery } from "@malwarefront/helpers";
-import { View } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { encodeSearchQuery, decodeSearchQuery, queryFromHash, addFieldToQuery } from "@mwdb-web/commons/helpers";
+import { View } from "@mwdb-web/commons/ui";
 
 import RecentViewList from "./RecentViewList";
 import QuickQuery from "./QuickQuery";

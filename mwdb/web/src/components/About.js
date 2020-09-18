@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux';
-import { View } from "@malwarefront/ui";
+import { View } from "@mwdb-web/commons/ui";
 
 import logo from "../assets/logo.png";
 

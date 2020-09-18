@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import RecentObjects from "./RecentObjects";
-import { View } from "@malwarefront/ui";
+import { View } from "@mwdb-web/commons/ui";
 
 export default (props) => (
     <RecentObjects disallowEmpty {...props} />

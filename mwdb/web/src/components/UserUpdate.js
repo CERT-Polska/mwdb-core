@@ -4,8 +4,8 @@ import {capabilitiesList} from "./Capabilities";
 import {GroupLink} from "./ShowGroups";
 
 import _ from "lodash";
-import api from "@malwarefront/api";
-import { View, MemberList, DateString } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { View, MemberList, DateString } from "@mwdb-web/commons/ui";
 import ManageAPIKeys from './ManageAPIKeys';
 
 export let GroupMemberList = (props) =>

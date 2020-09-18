@@ -6,7 +6,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
 import { TagList } from './Tag';
-import { DateString, ObjectLink, Hash } from "@malwarefront/ui";
+import { DateString, ObjectLink, Hash } from "@mwdb-web/commons/ui";
 
 export function RecentBlobRow(props) {
     let location = useLocation();

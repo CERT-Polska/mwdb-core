@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
-import api from "@malwarefront/api";
-import { ErrorBoundary, PagedList } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { ErrorBoundary, PagedList } from "@mwdb-web/commons/ui";
 
 class ManageAttributes extends Component {
     state = {

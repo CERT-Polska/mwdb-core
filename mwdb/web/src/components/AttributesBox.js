@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import { Extendable } from '@malwarefront/extensions';
+import { Extendable } from '@mwdb-web/commons/extensions';
 import ObjectAttributes from "./Attributes";
 
 class AttributesBox extends Component {

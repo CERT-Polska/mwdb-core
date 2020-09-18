@@ -4,12 +4,12 @@ import {withRouter} from 'react-router-dom';
 
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import api from "@malwarefront/api";
-import { authActions } from "@malwarefront/auth";
+import api from "@mwdb-web/commons/api";
+import { authActions } from "@mwdb-web/commons/auth";
 
 import logo from "../assets/logo.png"
-import { NavDropdown } from '@malwarefront/ui';
-import { fromPlugin, Extendable } from "@malwarefront/extensions";
+import { NavDropdown } from '@mwdb-web/commons/ui';
+import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 
 import { faFile, faTable, faScroll, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

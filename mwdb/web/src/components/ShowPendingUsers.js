@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
-import api from "@malwarefront/api";
-import { PagedList, View, DateString, ConfirmationModal } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { PagedList, View, DateString, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 class ShowPendingUsers extends Component {
     state = {

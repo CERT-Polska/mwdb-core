@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 
-import api from "@malwarefront/api";
+import api from "@mwdb-web/commons/api";
 
 
 export default function RecentViewList(props) {

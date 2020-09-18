@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PagedList from "./PagedList";
-import { DateString } from '@malwarefront/ui';
+import DateString from "./DateString";
 
 export default class APIKeyList extends Component {
     state = {

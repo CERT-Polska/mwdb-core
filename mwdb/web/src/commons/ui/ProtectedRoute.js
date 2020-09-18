@@ -5,8 +5,8 @@ import { bindActionCreators } from "redux";
 
 import ErrorBoundary from "./ErrorBoundary";
 
-import { authActions } from "@malwarefront/auth";
-import history from "@malwarefront/history";
+import { authActions } from "../auth";
+import history from "../history";
 
 function ProtectedRoute(props) {
     let routeRender = (renderProps) => {

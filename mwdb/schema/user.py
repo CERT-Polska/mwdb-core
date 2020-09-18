@@ -1,6 +1,6 @@
 import re
 
-from marshmallow import Schema, fields, validates, ValidationError, INCLUDE
+from marshmallow import Schema, fields, validates, ValidationError
 
 from .api_key import APIKeyListItemResponseSchema
 from .group import GroupBasicResponseSchema, GroupItemResponseSchema
@@ -8,9 +8,6 @@ from .group import GroupBasicResponseSchema, GroupItemResponseSchema
 
 class UserLoginSchemaBase(Schema):
     login = fields.Str(required=True, allow_none=False)
-
-    class Meta:
-        unknown = INCLUDE
 
     @validates("login")
     def validate_login(self, value):
@@ -26,9 +23,6 @@ class UserCreateRequestSchema(Schema):
     feed_quality = fields.Str(missing="high")
     send_email = fields.Boolean(missing=False)
 
-    class Meta:
-        unknown = INCLUDE
-
     @validates("additional_info")
     def validate_additional_info(self, value):
         if not value:
@@ -43,9 +37,6 @@ class UserUpdateRequestSchema(Schema):
     feed_quality = fields.Str(missing=None)
     send_email = fields.Boolean(missing=None)
     disabled = fields.Boolean(missing=None)
-
-    class Meta:
-        unknown = INCLUDE
 
     @validates("additional_info")
     def validate_additional_info(self, value):
@@ -72,9 +63,6 @@ class UserItemResponseSchema(UserLoginSchemaBase):
     groups = fields.Nested(GroupBasicResponseSchema, many=True, required=True, allow_none=False)
     api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True, required=True, allow_none=False)
 
-    class Meta:
-        unknown = INCLUDE
-
 
 class UserListItemResponseSchema(UserLoginSchemaBase):
     email = fields.Email(required=True, allow_none=False)
@@ -85,26 +73,14 @@ class UserListItemResponseSchema(UserLoginSchemaBase):
     pending = fields.Boolean(required=True, allow_none=False)
     groups = fields.Nested(GroupItemResponseSchema, many=True, required=True, allow_none=False)
 
-    class Meta:
-        unknown = INCLUDE
-
 
 class UserListResponseSchema(UserLoginSchemaBase):
     users = fields.Nested(UserListItemResponseSchema, many=True, required=True, allow_none=False)
-
-    class Meta:
-        unknown = INCLUDE
 
 
 class UserSetPasswordTokenResponseSchema(UserLoginSchemaBase):
     token = fields.Str(required=True, allow_none=False)
 
-    class Meta:
-        unknown = INCLUDE
-
 
 class UserSuccessResponseSchema(UserLoginSchemaBase):
-    class Meta:
-        unknown = INCLUDE
-
     pass

@@ -30,7 +30,12 @@ export default function RecentView(props) {
      */
     
     const getLinkForQuery = (query) => (
-        `${props.location.pathname}?q=${encodeSearchQuery(query)}`
+        `${props.location.pathname}?${
+            queryString.stringify({
+                ...queryString.parse(props.location.search),
+                q: encodeSearchQuery(query)
+            })
+        }`
     )
     const currentQuery = decodeSearchQuery(
         (queryString.parse(props.location.search)["q"] || "").trim()

@@ -16,6 +16,7 @@ export default function RecentInnerRow(props) {
                     <b style={{minWidth: props.labelWidth}}>{props.label}: </b>
                 ) : []
             }
+            {props.icon}
             <div className={!props.noEllipsis ? "recent-field" : ""} data-toggle="tooltip" title={props.value}>
                 {props.children || props.value}
             </div>

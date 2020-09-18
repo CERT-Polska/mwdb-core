@@ -84,15 +84,16 @@ class TextBlobPresenter extends ShowObjectPresenter {
     get actions() {
         let blobActions = {
             details: [
-                {label: "Diff with", icon: "random",  action: (() => this.props.history.push(`/search?diff=${this.props.id}`))}
+                {label: "Diff with", icon: "random", link: `/blobs?diff=${this.props.id}`}
             ],
             preview: [
-                {label: "Diff with", icon: "random",  action: (() => this.props.history.push(`/search?diff=${this.props.id}`))},
-            ],
-            config: [
-                {label: "Go to config", action: () => this.props.history.push("/config/"+this.props.latest_config.id)}
+                {label: "Diff with", icon: "random", link: `/blobs?diff=${this.props.id}`},
             ]
         }
+        if(this.props.latest_config)
+            blobActions['config'] = [
+                {label: "Go to config", link: `/config/${this.props.latest_config.id}`}
+            ]
         return joinActions(super.actions, blobActions);
     }
 }

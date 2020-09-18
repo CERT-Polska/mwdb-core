@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import Hash from "./Hash";
 
 import { connect } from "react-redux";
@@ -21,19 +20,7 @@ class ObjectLink extends Component {
             linkElement = <span>{this.props.id}</span>
         }
 
-        return (
-            <React.Fragment>
-                { this.props.diffWith 
-                    ? (
-                        <Link to={`/diff/${this.props.id}/${this.props.diffWith}`}>
-                            <button target="_self" className="btn btn-primary" style={{marginRight: "8pt"}}>
-                                <FontAwesomeIcon icon="random" pull="left" size="x"/>
-                            </button>
-                        </Link>
-                    ) : []}
-                {linkElement}
-            </React.Fragment>
-        );
+        return linkElement;
     }
 }
 

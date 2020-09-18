@@ -12,7 +12,9 @@ from .config import ConfigItemResponseSchema
 
 
 class FileCreateRequestSchema(Schema):
-    options = fields.Nested(ObjectCreateRequestSchemaBase, missing={})
+    # BUG: https://github.com/marshmallow-code/marshmallow/issues/1042
+    options = fields.Nested(ObjectCreateRequestSchemaBase,
+                            missing=ObjectCreateRequestSchemaBase().load({}))
 
     @pre_load
     def unpack_options(self, params, **kwargs):

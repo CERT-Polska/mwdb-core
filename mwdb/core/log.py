@@ -4,26 +4,26 @@ from flask import g
 import logmatic
 from .config import app_config
 
+logging_type = app_config.mwdb.logging_type
 
-class ContextFilterJSON(logging.Filter):
+
+class ContextFilter(logging.Filter):
     def filter(self, record):
         record.auth_user = g.auth_user.login if g.get('auth_user') is not None else None
         record.request_id = g.request_id
 
-        return True
+        if logging_type == "standard":
+            dummy = logging.LogRecord(None, None, None, None, None, None, None)
+            extra_list = []
 
-class ContextFilterStandard(logging.Filter):
-    def filter(self, record):
-        record.auth_user = g.auth_user.login if g.get('auth_user') is not None else None
-        record.request_id = g.request_id
+            for k, v in record.__dict__.items():
+                if k == "arguments":
+                    v = v.to_dict()
+                if k not in dummy.__dict__:
+                    extra_list.append('{}:{}'.format(k, v))
 
-        dummy = logging.LogRecord(None, None, None, None, None, None, None)
-        extra_txt = ''
-        for k, v in record.__dict__.items():
-            if k not in dummy.__dict__:
-                extra_txt += '{}:{} - '.format(k, v)
-
-        record.extra = extra_txt
+            extra_txt = ' - '.join(extra_list)
+            record.extra = extra_txt
 
         return True
 
@@ -32,8 +32,6 @@ logger = logging.getLogger('mwdb.application')
 
 # Don't propagate to root logger
 logger.propagate = False
-
-logging_type = app_config.mwdb.logging_type
 
 # Setup stream handler for main logger
 handler = logging.StreamHandler()
@@ -46,16 +44,14 @@ if logging_type == "standard":
         formatter
     )
 
-    logger.addFilter(ContextFilterStandard())
-
 elif logging_type == "json":
     formatter = logmatic.JsonFormatter(fmt="%(filename) %(funcName) %(levelname) %(lineno) %(module) %(threadName) %(message)")
 
     handler.setFormatter(
         formatter
     )
-    logger.addFilter(ContextFilterJSON())
 
+logger.addFilter(ContextFilter())
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 

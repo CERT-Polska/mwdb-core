@@ -2,15 +2,18 @@ const { override, babelInclude, removeModuleScopePlugin, addWebpackModuleRule } 
 const fs = require("fs");
 const path = require('path');
 
-const pluginPackagePrefix = "@mwdb-web/plugin";
+const mwdbPackageNamespace = "@mwdb-web";
+const pluginPackagePrefix = "plugin-";
 const pluginsIndexFile = path.join(require.resolve("@mwdb-web/commons"), 'extensions', '..', 'plugins.js');
 
 function findInstalledPlugins() {
     let modules = {};
-    const modulesDir = path.join(__dirname, "node_modules", pluginPackagePrefix);
+    const modulesDir = path.join(__dirname, "node_modules", mwdbPackageNamespace);
     if(!fs.existsSync(modulesDir))
         return modules;
     for(const pluginName of fs.readdirSync(modulesDir)) {
+        if(!pluginName.startsWith(pluginPackagePrefix))
+            continue;
         let realPath = path.join(modulesDir, pluginName);
         try {
             realPath = path.resolve(modulesDir, fs.readlinkSync(realPath));
@@ -18,7 +21,7 @@ function findInstalledPlugins() {
             if(e.errno != -22 /* EINVAL */)
                 throw e;
         }
-        modules[pluginPackagePrefix + "/" + pluginName] = realPath;
+        modules[mwdbPackageNamespace + "/" + pluginName] = realPath;
     }
     return modules;
 }

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
-import api from "@malwarefront/api";
-import { HexView } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { HexView } from "@mwdb-web/commons/ui";
 
 class ShowSamplePreview extends Component {
     state = {

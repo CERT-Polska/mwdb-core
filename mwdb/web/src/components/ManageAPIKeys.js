@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
-import api from "@malwarefront/api";
-import { APIKeyList, ConfirmationModal } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { APIKeyList, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 
 class ManageAPIKeys extends Component {

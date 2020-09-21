@@ -3,8 +3,8 @@ import {Link} from 'react-router-dom';
 
 import { UserLink } from "./ShowUsers";
 
-import api from "@malwarefront/api";
-import { ErrorBoundary, PagedList, HighlightText } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { ErrorBoundary, PagedList, HighlightText } from "@mwdb-web/commons/ui";
 
 class ShowGroups extends Component {
     state = {

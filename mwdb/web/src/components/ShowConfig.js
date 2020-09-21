@@ -5,10 +5,10 @@ import ShowObject from "./ShowObject";
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
-import api from "@malwarefront/api";
-import { makeSearchConfigElementLink, makeSearchLink, makeSearchDateLink, downloadData } from "@malwarefront/helpers";
-import { Extension } from "@malwarefront/extensions";
-import { DataTable, DateString, ObjectLink, View, HexView, ActionCopyToClipboard } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { makeSearchConfigElementLink, makeSearchLink, makeSearchDateLink, downloadData } from "@mwdb-web/commons/helpers";
+import { Extension } from "@mwdb-web/commons/extensions";
+import { DataTable, DateString, ObjectLink, View, HexView, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter from './ShowObjectPresenter';
 
 class ConfigRow extends Component {

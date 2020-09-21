@@ -37,10 +37,10 @@ import { faTimes, faUpload, faDownload, faPlus, faMinus, faRandom,
          faExchangeAlt, faBan, faSearch, faToggleOn, faToggleOff, faSort, faSortUp, faSortDown, faProjectDiagram, faFile, faFileImage, faFilePdf,
          faFingerprint, faBoxes, faTrash, faCopy } from '@fortawesome/free-solid-svg-icons'
 
-import { configActions } from '@malwarefront/config';
-import { Extension } from "@malwarefront/extensions";
-import history from "@malwarefront/history";
-import { ProtectedRoute, View } from "@malwarefront/ui";
+import { configActions } from '@mwdb-web/commons/config';
+import { Extension } from "@mwdb-web/commons/extensions";
+import history from "@mwdb-web/commons/history";
+import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
 import ShowPendingUsers from './components/ShowPendingUsers';
 import Docs from './components/Docs';
 

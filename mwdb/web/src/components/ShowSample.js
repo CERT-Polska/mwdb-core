@@ -4,10 +4,10 @@ import {Link} from 'react-router-dom';
 import ShowObject from "./ShowObject";
 import {ConfigTable} from "./ShowConfig";
 
-import api from "@malwarefront/api";
-import {makeSearchLink, makeSearchDateLink} from "@malwarefront/helpers";
-import { Extendable } from "@malwarefront/extensions";
-import { Identicon, DataTable, DateString, Hash, View, ActionCopyToClipboard } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import {makeSearchLink, makeSearchDateLink} from "@mwdb-web/commons/helpers";
+import { Extendable } from "@mwdb-web/commons/extensions";
+import { Identicon, DataTable, DateString, Hash, View, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
 import ShowSamplePreview from "./ShowSamplePreview";
 
@@ -126,8 +126,8 @@ class SamplePresenter extends ShowObjectPresenter {
                 <div className="align-self-center mr-3">
                     <Identicon hash={this.props.md5} size="45" />
                 </div>
-                <div className="align-self-center media-body">
-                    <h5 className="mt-0">{this.props.humanhash}</h5>
+                <div className="align-self-center recent-field">
+                    <h5 className="mt-0"><Hash hash={this.props.sha256}/></h5>
                 </div>
             </React.Fragment>
         );

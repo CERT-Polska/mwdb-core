@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import { Link } from "react-router-dom";
-import { View } from "@malwarefront/ui";
+import { View } from "@mwdb-web/commons/ui";
 
 import $ from "jquery"
-import api from "@malwarefront/api";
+import api from "@mwdb-web/commons/api";
 
 class UserSetPassword extends Component {
     constructor(props) {

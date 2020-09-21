@@ -1,10 +1,9 @@
-const { override, babelInclude, removeModuleScopePlugin, addWebpackPlugin, addWebpackModuleRule, addWebpackResolve } = require('customize-cra');
+const { override, babelInclude, removeModuleScopePlugin, addWebpackModuleRule } = require('customize-cra');
 const fs = require("fs");
 const path = require('path');
-const webpack = require('webpack');
 
-const pluginPackagePrefix = "@malwarefront-plugin";
-const pluginsIndexFile = path.join(require.resolve("@malwarefront/extensions"), '..', 'plugins.js');
+const pluginPackagePrefix = "@mwdb-web/plugin";
+const pluginsIndexFile = path.join(require.resolve("@mwdb-web/commons"), 'extensions', '..', 'plugins.js');
 
 function findInstalledPlugins() {
     let modules = {};

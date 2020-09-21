@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { ConfirmationModal, View } from "@malwarefront/ui";
+import { ConfirmationModal, View } from "@mwdb-web/commons/ui";
 
 class RelationsAddModal extends Component {
     constructor(props) {

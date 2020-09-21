@@ -4,7 +4,7 @@ import CommentBox from './Comments';
 import TagBox from './Tag';
 import ShareBox from "./Shares";
 import AttributesBox from "./AttributesBox"
-import { Extendable } from "@malwarefront/extensions";
+import { Extendable } from "@mwdb-web/commons/extensions";
 
 export default class ShowObject extends Component {
     render() {

@@ -450,13 +450,14 @@ class UserProfileResource(Resource):
                     schema: UserProfileResponseSchema
         """
         schema = UserProfileResponseSchema()
-        user = (db.session.query(User)
-                          .join(User.groups)
-                          .filter(Group.name != "public")
-                          .filter(g.auth_user.is_member(Group.id))
-                          .filter(User.login == login)).first()
+        if g.auth_user.has_rights(Capabilities.manage_users):
+            user = db.session.query(User).filter(User.login == login).first()
+        else:
+            user = (db.session.query(User)
+                              .join(User.groups)
+                              .filter(Group.name != "public")
+                              .filter(g.auth_user.is_member(Group.id))
+                              .filter(User.login == login)).first()
         if user is None:
-            raise Forbidden("User doesn't exist or you don't have capability to see his profile")
-        print("USER")
-        print(schema.dump(user))
+            raise NotFound("User doesn't exist or you don't have capability to see his profile")
         return schema.dump(user)

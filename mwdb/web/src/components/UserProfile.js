@@ -2,14 +2,14 @@ import React, {Component} from 'react';
 import { connect } from "react-redux";
 import {capabilitiesList} from "./Capabilities";
 import api from "@mwdb-web/commons/api";
-import { View, DateString } from "@mwdb-web/commons/ui";
+import { View, DateString, ErrorBoundary } from "@mwdb-web/commons/ui";
 
 import ManageAPIKeys from './ManageAPIKeys';
 
 class UserProfile extends Component {
     state = {
         pressedRequestPassword: false,
-        error:null
+        error: false
     }
 
     get capabilities() {
@@ -24,7 +24,7 @@ class UserProfile extends Component {
         return this.state.profile.groups.filter(g => g.name !== "public" && !g.private)
     }
 
-    async handleUpdate() {
+    handleUpdate = async () => {
         try {
             let response = await api.getUserProfile(this.props.match.params.login)
             this.setState({
@@ -48,14 +48,16 @@ class UserProfile extends Component {
         } 
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         this.handleUpdate();
     }
 
     render() {
         console.log(this.state.error)
-        if (!this.state.profile) {
+        if (!this.state.profile && !this.state.error) {
             return <div>Loading...</div>;
+        } else if(!this.state.profile && this.state.error) {
+            return <ErrorBoundary error={this.state.error}/>
         }
         
         return (

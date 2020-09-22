@@ -62,10 +62,6 @@ function authRecoverPassword(login, email, recaptcha) {
     return axios.post("/auth/recover_password", {login, email, recaptcha})
 }
 
-function authProfile() {
-    return axios.get("/auth/profile")
-}
-
 function apiKeyGetToken(key_id) {
     return axios.get(`/api_key/${key_id}`)
 }
@@ -309,7 +305,6 @@ export default {
     getServerDocs,
     getServerInfo,
     authLogin,
-    authProfile,
     authRefresh,
     authSetPassword,
     authRequestPasswordChange,

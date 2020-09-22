@@ -15,7 +15,7 @@ from mwdb.schema.object import (
     ObjectCountRequestSchema, ObjectCountResponseSchema
 )
 
-from . import logger, requires_authorization, requires_capabilities, get_type_from_str
+from . import logger, requires_authorization, requires_capabilities, get_type_from_str, load_schema
 
 
 class ObjectUploader:
@@ -139,17 +139,15 @@ class ObjectResource(Resource):
         if 'page' in request.args:
             logger.warning("'%s' used legacy 'page' parameter", g.auth_user.login)
 
-        obj = ObjectListRequestSchema().load(request.args)
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema(request.args, ObjectListRequestSchema())
 
         pivot_obj = None
-        if obj.data["older_than"]:
-            pivot_obj = Object.access(obj.data["older_than"])
+        if obj["older_than"]:
+            pivot_obj = Object.access(obj["older_than"])
             if pivot_obj is None:
                 raise NotFound("Object specified in 'older_than' parameter not found")
 
-        query = obj.data["query"]
+        query = obj["query"]
         if query:
             try:
                 db_query = SQLQueryBuilder().build_query(query, queried_type=self.ObjectType)
@@ -167,8 +165,8 @@ class ObjectResource(Resource):
         if pivot_obj:
             db_query = db_query.filter(Object.id < pivot_obj.id)
         # Legacy parameter - to be removed in the future
-        elif obj.data["page"] is not None and obj.data["page"] > 1:
-            db_query = db_query.offset((obj.data["page"] - 1) * 10)
+        elif obj["page"] is not None and obj["page"] > 1:
+            db_query = db_query.offset((obj["page"] - 1) * 10)
 
         objects = db_query.limit(10).all()
 
@@ -242,10 +240,9 @@ class ObjectItemResource(Resource, ObjectUploader):
             raise MethodNotAllowed()
 
         schema = self.CreateRequestSchema()
-        obj = schema.load(self._get_upload_args(identifier))
-        if obj and obj.errors:
-            return {"errors": obj.errors}, 400
-        return self.create_object(obj.data)
+        obj = load_schema(self._get_upload_args(identifier), schema)
+
+        return self.create_object(obj)
 
     @requires_authorization
     def put(self, identifier):
@@ -323,11 +320,9 @@ class ObjectCountResource(Resource):
                 description: When wrong parameters were provided or syntax error occurred in Lucene query
         """
         schema = ObjectCountRequestSchema()
-        obj = schema.load(request.args)
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema(request.args, schema)
 
-        query = obj.data["query"]
+        query = obj["query"]
         if query:
             try:
                 db_query = SQLQueryBuilder().build_query(query, queried_type=get_type_from_str(type))

@@ -84,3 +84,15 @@ class UserSetPasswordTokenResponseSchema(UserLoginSchemaBase):
 
 class UserSuccessResponseSchema(UserLoginSchemaBase):
     pass
+
+
+class UserProfileResponseSchema(UserLoginSchemaBase):
+    email = fields.Email(required=True, allow_none=False)
+
+    registered_on = fields.DateTime(required=True)
+    logged_on = fields.DateTime(required=True)
+    set_password_on = fields.DateTime(required=True)
+
+    capabilities = fields.List(fields.Str(), required=True, allow_none=False)
+    groups = fields.Nested(GroupBasicResponseSchema, many=True, required=True, allow_none=False)
+    api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True, required=True, allow_none=False)

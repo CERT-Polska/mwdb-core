@@ -19,7 +19,8 @@ from mwdb.schema.user import (
     UserItemResponseSchema,
     UserListResponseSchema,
     UserSuccessResponseSchema,
-    UserSetPasswordTokenResponseSchema
+    UserSetPasswordTokenResponseSchema,
+    UserProfileResponseSchema
 )
 
 from . import logger, requires_capabilities, requires_authorization
@@ -427,3 +428,35 @@ class UserResource(Resource):
 
         schema = UserSuccessResponseSchema()
         return schema.dump({"login": login})
+
+
+class UserProfileResource(Resource):
+    @requires_authorization
+    def get(self, login):
+        """
+        ---
+        summary: Get profile information
+        description: |
+            Returns information about specific user
+        security:
+            - bearerAuth: []
+        tags:
+            - auth
+        responses:
+            200:
+                description: Returns information about specific user
+                content:
+                  application/json:
+                    schema: UserProfileResponseSchema
+        """
+        schema = UserProfileResponseSchema()
+        user = (db.session.query(User)
+                          .join(User.groups)
+                          .filter(Group.name != "public")
+                          .filter(g.auth_user.is_member(Group.id))
+                          .filter(User.login == login)).first()
+        if user is None:
+            raise Forbidden("User doesn't exist or you don't have capability to see his profile")
+        print("USER")
+        print(schema.dump(user))
+        return schema.dump(user)

@@ -8,7 +8,8 @@ import ManageAPIKeys from './ManageAPIKeys';
 
 class UserProfile extends Component {
     state = {
-        pressedRequestPassword: false
+        pressedRequestPassword: false,
+        error:null
     }
 
     get capabilities() {
@@ -25,7 +26,7 @@ class UserProfile extends Component {
 
     async handleUpdate() {
         try {
-            let response = await api.authProfile()
+            let response = await api.getUserProfile(this.props.match.params.login)
             this.setState({
                 profile: response.data,
             })
@@ -52,14 +53,14 @@ class UserProfile extends Component {
     }
 
     render() {
+        console.log(this.state.error)
         if (!this.state.profile) {
             return <div>Loading...</div>;
         }
-
         
         return (
             <View ident="userProfile" error={this.state.error} success={this.state.success}>
-                <h2>Profile {this.props.userLogin} info</h2>
+                <h2>Profile {this.state.profile.login} info</h2>
                 <table className="table table-striped table-bordered wrap-table">
                     <thead>
                         <tr>
@@ -84,6 +85,7 @@ class UserProfile extends Component {
                             <td>Last password set</td>
                             <td><DateString date={this.state.profile.set_password_on}/></td>
                         </tr>
+                        {this.props.userLogin === this.state.profile.login &&
                         <tr>
                             <td style={{textAlign: 'left'}} colspan="3">
                                     <button type="button" className="btn btn-success" 
@@ -92,6 +94,7 @@ class UserProfile extends Component {
                                     </button>
                             </td>
                         </tr>
+                        }
                     </tbody>
                 </table>
                 {
@@ -119,12 +122,16 @@ class UserProfile extends Component {
                       </div>
                     : []
                 }
-                <h4>API keys</h4>
+                {this.props.userLogin === this.state.profile.login &&
+                <div>
+                    <h4>API keys</h4>
 
-                <ManageAPIKeys items={this.state.profile.api_keys}
-                               userLogin={this.props.userLogin}
-                               onSuccess={(success) => { this.handleUpdate(); this.setState({success}); }}
-                               onError={(error) => this.setState({error})} />
+                    <ManageAPIKeys items={this.state.profile.api_keys}
+                                   userLogin={this.props.userLogin}
+                                   onSuccess={(success) => { this.handleUpdate(); this.setState({success}); }}
+                                   onError={(error) => this.setState({error})} />
+                </div>
+                }
             </View>
         )
     }

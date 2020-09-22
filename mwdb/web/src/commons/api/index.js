@@ -221,6 +221,10 @@ function getUser(login) {
     return axios.get(`/user/${login}`)
 }
 
+function getUserProfile(login) {
+    return axios.get(`/profile/${login}`)
+}
+
 function generateApiToken(login, expiration) {
     expiration = expiration || (3600 * 24 * 365 * 10)
     return axios.post(`/user/${login}/api_token`, { expiration })
@@ -344,6 +348,7 @@ export default {
     rejectPendingUser,
     getUsers,
     getUser,
+    getUserProfile,
     generateApiToken,
     generateSetPasswordToken,
     setUserDisabled,

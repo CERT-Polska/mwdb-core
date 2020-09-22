@@ -121,16 +121,16 @@ class SamplePresenter extends ShowObjectPresenter {
     };
 
     renderHeader() {
-        return (
-            <React.Fragment>
-                <div className="align-self-center mr-3">
-                    <Identicon hash={this.props.md5} size="45" />
-                </div>
-                <div className="align-self-center recent-field">
-                    <h5 className="mt-0"><Hash hash={this.props.sha256}/></h5>
-                </div>
-            </React.Fragment>
-        );
+        // return (
+        //     <React.Fragment>
+        //         <div className="align-self-center mr-3">
+        //             <Identicon hash={this.props.md5} size="45" />
+        //         </div>
+        //         <div className="align-self-center recent-field">
+        //             <h5 className="mt-0"><Hash hash={this.props.sha256}/></h5>
+        //         </div>
+        //     </React.Fragment>
+        // );
     }
 
     get presenters() {

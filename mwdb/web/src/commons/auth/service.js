@@ -1,4 +1,4 @@
-import api from "@malwarefront/api";
+import api from "../api";
 
 function setAuthToken(userData) {
     let previousInfo = getAuthenticatedUser() || {}

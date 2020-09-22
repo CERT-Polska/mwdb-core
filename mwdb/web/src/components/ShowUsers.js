@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
-import api from "@malwarefront/api";
-import { PagedList, View, HighlightText } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { PagedList, View, HighlightText } from "@mwdb-web/commons/ui";
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import { faUser, faRobot } from '@fortawesome/free-solid-svg-icons'

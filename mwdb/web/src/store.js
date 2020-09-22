@@ -3,11 +3,11 @@ import reduxThunk from "redux-thunk";
 import { connectRouter, routerMiddleware } from 'connected-react-router'
 import { composeWithDevTools } from 'redux-devtools-extension';
 
-import api from "@malwarefront/api";
-import {authActions, authService, authReducer} from "@malwarefront/auth";
-import {configReducer} from "@malwarefront/config";
-import history from "@malwarefront/history";
-import { fromPlugin } from "@malwarefront/extensions";
+import api from "@mwdb-web/commons/api";
+import {authActions, authService, authReducer} from "@mwdb-web/commons/auth";
+import {configReducer} from "@mwdb-web/commons/config";
+import history from "@mwdb-web/commons/history";
+import { fromPlugin } from "@mwdb-web/commons/extensions";
 
 let reducers = combineReducers({
     auth: authReducer,

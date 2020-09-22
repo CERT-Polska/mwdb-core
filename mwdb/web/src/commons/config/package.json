@@ -1,9 +1,0 @@
-{
-  "name": "@malwarefront/config",
-  "main": "config.js",
-  "private": true,
-  "peerDependencies": {
-    "@malwarefront/api": "*"
-  }
-}
-  

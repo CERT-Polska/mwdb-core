@@ -3,8 +3,8 @@ import Autocomplete from 'react-autocomplete';
 
 import _ from "lodash";
 
-import api from "@malwarefront/api";
-import { ConfirmationModal, ObjectLink, View } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { ConfirmationModal, ObjectLink, View } from "@mwdb-web/commons/ui";
 
 
 class AttributePermissionsBox extends Component {

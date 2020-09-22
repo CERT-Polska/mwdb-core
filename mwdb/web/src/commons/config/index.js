@@ -1,4 +1,4 @@
-import api from "@malwarefront/api";
+import api from "../api";
 
 const CONFIG_INIT_STATE = Symbol("CONFIG_INIT_STATE");
 const CONFIG_FAILED_STATE = Symbol("CONFIG_FAILED_STATE");

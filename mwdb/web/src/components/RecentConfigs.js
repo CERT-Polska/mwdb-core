@@ -3,7 +3,7 @@ import React from 'react';
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
 import { TagList } from './Tag';
 
-import { DateString, ObjectLink } from "@malwarefront/ui";
+import { DateString, ObjectLink } from "@mwdb-web/commons/ui";
 
 export function RecentConfigRow(props) {
     const family = (

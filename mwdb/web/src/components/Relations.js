@@ -2,8 +2,8 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {TagList} from './Tag';
-import api from "@malwarefront/api";
-import { ObjectLink, ActionCopyToClipboard } from '@malwarefront/ui';
+import api from "@mwdb-web/commons/api";
+import { ObjectLink, ActionCopyToClipboard } from '@mwdb-web/commons/ui';
 import RelationsAddModal from "./RelationsAddModal";
 
 class RelationsBox extends Component {

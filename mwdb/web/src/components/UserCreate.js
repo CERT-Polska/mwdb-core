@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Link} from "react-router-dom";
-import { View } from "@malwarefront/ui";
-import api from "@malwarefront/api";
+import { View } from "@mwdb-web/commons/ui";
+import api from "@mwdb-web/commons/api";
 
 class UserCreate extends Component {
     constructor(props) {

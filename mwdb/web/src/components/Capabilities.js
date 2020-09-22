@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { fromPlugin } from "@malwarefront/extensions";
+import { fromPlugin } from "@mwdb-web/commons/extensions";
 
 export let capabilitiesList = {
     "manage_users": "Managing users and groups (system administration)",

@@ -3,9 +3,9 @@ import {Link} from 'react-router-dom';
 
 import queryString from "query-string";
 
-import api from "@malwarefront/api";
-import { encodeSearchQuery, decodeSearchQuery, queryFromHash, addFieldToQuery } from "@malwarefront/helpers";
-import { View } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { encodeSearchQuery, decodeSearchQuery, queryFromHash, addFieldToQuery } from "@mwdb-web/commons/helpers";
+import { View } from "@mwdb-web/commons/ui";
 
 import RecentViewList from "./RecentViewList";
 import QuickQuery from "./QuickQuery";
@@ -30,7 +30,12 @@ export default function RecentView(props) {
      */
     
     const getLinkForQuery = (query) => (
-        `${props.location.pathname}?q=${encodeSearchQuery(query)}`
+        `${props.location.pathname}?${
+            queryString.stringify({
+                ...queryString.parse(props.location.search),
+                q: encodeSearchQuery(query)
+            })
+        }`
     )
     const currentQuery = decodeSearchQuery(
         (queryString.parse(props.location.search)["q"] || "").trim()

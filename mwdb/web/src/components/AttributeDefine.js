@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
-import api from "@malwarefront/api";
-import { Alert } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { Alert } from "@mwdb-web/commons/ui";
 
 class AttributeDefine extends Component {
     constructor(props) {

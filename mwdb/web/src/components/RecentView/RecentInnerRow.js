@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActionCopyToClipboard } from "@malwarefront/ui";
+import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 
 export default function RecentInnerRow(props) {
     const classNames = (
@@ -16,6 +16,7 @@ export default function RecentInnerRow(props) {
                     <b style={{minWidth: props.labelWidth}}>{props.label}: </b>
                 ) : []
             }
+            {props.icon}
             <div className={!props.noEllipsis ? "recent-field" : ""} data-toggle="tooltip" title={props.value}>
                 {props.children || props.value}
             </div>

@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import { connect } from "react-redux";
 import {capabilitiesList} from "./Capabilities";
-import api from "@malwarefront/api";
-import { View, DateString } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { View, DateString } from "@mwdb-web/commons/ui";
 
 import ManageAPIKeys from './ManageAPIKeys';
 

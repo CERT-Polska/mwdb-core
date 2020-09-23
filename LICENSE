@@ -1,0 +1,21 @@
+mwdb-core is distributed under the terms of the GNU Affero General Public License
+as published by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version, with a special exception described below.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+See the GNU Affero General Public License for more details.
+
+A copy of GNU Affero General Public License (AGPL) is included in this distribution,
+in the file LICENSE.AGPL. If you do not have the source code, it is available at: 
+	
+	https://www.gnu.org/licenses/agpl-3.0.html
+
+LICENSE file forms part of the mwdb-core software for which the following exception is added:
+
+	Plugins which merely make function calls to the mwdb-core software, and for that purpose
+	include it by reference shall not be considered modifications of the software.
+
+If you wish to use this file in another project or create a modified version that will 
+not be part of the mwdb-core software, you may remove the exception above and use this 
+source code under the original version of the license.

@@ -11,7 +11,7 @@ in the file LICENSE.AGPL. If you do not have the source code, it is available at
 	
 	https://www.gnu.org/licenses/agpl-3.0.html
 
-This file forms part of the mwdb-core software for which the following exception is added:
+LICENSE file forms part of the mwdb-core software for which the following exception is added:
 
 	Plugins which merely make function calls to the mwdb-core software, and for that purpose
 	include it by reference shall not be considered modifications of the software.

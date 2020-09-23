@@ -4,7 +4,7 @@ as published by the Free Software Foundation, either version 3 of the License, o
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-See the GNU General Public License for more details.
+See the GNU Affero General Public License for more details.
 
 A copy of GNU Affero General Public License (AGPL) is included in this distribution,
 in the file LICENSE.AGPL. If you do not have the source code, it is available at: 
@@ -17,5 +17,5 @@ This file forms part of the mwdb-core software for which the following exception
 	include it by reference shall not be considered modifications of the software.
 
 If you wish to use this file in another project or create a modified version that will 
-not be part of the mwdb-core software, you may remove the exception above and use 
-this source code under the original version of the license.
+not be part of the mwdb-core software, you may remove the exception above and use this 
+source code under the original version of the license.

@@ -162,6 +162,6 @@ This software is licensed under [GNU Affero General Public License version 3](ht
 
 For more information, read [LICENSE](LICENSE) file.
 
-In case of any questions according to license, send an e-mail to info@cert.pl
+In case of any questions according to the license, send an e-mail to info@cert.pl
 
 ![Co-financed by the Connecting Europe Facility by of the European Union](https://www.cert.pl/wp-content/uploads/2019/02/en_horizontal_cef_logo-1.png)

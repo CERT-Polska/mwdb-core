@@ -149,14 +149,19 @@ If you need to write change on your own e.g. because you need to migrate data in
 Currently it's quite complicated, but we'll provide appropriate instructions until final release. (TODO)
 
 ## Contact
+
 If you have any problems, bugs or feature requests related to MWDB, you're encouraged to create a GitHub issue. If you have other questions, question is related strictly with mwdb.cert.pl service or you want to contact the current maintainers directly, you can email:
 
 - Paweł Srokosz (psrok1@cert.pl)
 - Jarosław Jedynak (msm@cert.pl)
 - CERT.PL (info@cert.pl)
 
-## Contact
+## License
 
-In case of any questions, send an e-mail to info@cert.pl
+This software is licensed under [GNU Affero General Public License version 3](http://www.gnu.org/licenses/agpl-3.0.html) with exceptions for plugins.
+
+For more information, read [LICENSE](LICENSE) file.
+
+In case of any questions according to license, send an e-mail to info@cert.pl
 
 ![Co-financed by the Connecting Europe Facility by of the European Union](https://www.cert.pl/wp-content/uploads/2019/02/en_horizontal_cef_logo-1.png)

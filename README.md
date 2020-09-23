@@ -158,10 +158,10 @@ If you have any problems, bugs or feature requests related to MWDB, you're encou
 
 ## License
 
-This software is licensed under [GNU Affero General Public License version 3](http://www.gnu.org/licenses/agpl-3.0.html) with exceptions for plugins.
+This software is licensed under [GNU Affero General Public License version 3](http://www.gnu.org/licenses/agpl-3.0.html) except for plugins.
 
 For more information, read [LICENSE](LICENSE) file.
 
-In case of any questions according to the license, send an e-mail to info@cert.pl
+In case of any questions regarding the license send an e-mail to info@cert.pl.
 
 ![Co-financed by the Connecting Europe Facility by of the European Union](https://www.cert.pl/wp-content/uploads/2019/02/en_horizontal_cef_logo-1.png)

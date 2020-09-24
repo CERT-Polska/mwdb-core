@@ -140,13 +140,6 @@ export default class ShowObjectPresenter extends Component {
 
         return (
             <Extendable ident="showObjectPresenter" object={this.props}>
-                <div className="card-header" style={{wordBreak: "break-all"}}>
-                    <div className="media row flex-nowrap">
-                        <Extendable ident="showObjectHeader" object={this.props}>
-                            {this.renderHeader()}
-                        </Extendable>
-                    </div>
-                </div>
                 <nav className="navbar navbar-expand-sm bg-white">
                     <ul className="nav nav-tabs mr-auto">
                         <Extendable ident="showObjectTabs" object={this.props}>

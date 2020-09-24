@@ -57,14 +57,6 @@ class TextBlobPresenter extends ShowObjectPresenter {
         downloadData(this.props.content, this.props.id, 'text/plain');
     };
 
-    renderHeader() {
-        return (
-            <div className="align-self-center media-body">
-                <h5 className="mt-0">Blob <span class="text-monospace">{this.props.id}</span></h5>
-            </div>
-        );
-    }
-
     get presenters() {
         return {
             ...super.presenters,

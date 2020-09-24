@@ -40,7 +40,6 @@ describe("Config view test - mwdb-core", function () {
 
     cy.get("@configId").then((configId) => {
       cy.get('.d-none a[href*="'+configId+'"] > div').click();
-      cy.contains("Config " + configId);
     });
 
     cy.contains("Family");

@@ -107,10 +107,36 @@ class UserProfile extends Component {
                             <td>Last password set</td>
                             <td><DateString date={this.state.profile.set_password_on}/></td>
                         </tr>
+                        {this.capabilities.length > 0 &&
+                        <tr>
+                            <td>
+                                Capabilities
+                            </td>
+                            <td style={{padding: 22}}>
+                                        {
+                                            this.capabilities.map(
+                                                c => <li>{capabilitiesList[c]} (inherited
+                                                    from: {this.inheritedFrom(c).join(", ")})</li>)
+                                        }
+                            </td>
+                        </tr>
+                        }
+                        {this.groups.length > 0 &&
+                        <tr>
+                            <td>
+                                Groups
+                            </td>
+                            <td style={{padding: 22}}>
+                                        {
+                                             this.groups.map(g => <li>{g.name}</li>)
+                                        }
+                            </td>
+                        </tr>
+                        }
                         {this.props.userLogin === this.state.profile.login &&
                         <tr>
                             <td style={{textAlign: 'left'}} colspan="3">
-                                    <button type="button" className="btn btn-success" 
+                                    <button type="button" className="btn btn-success"
                                     onClick={this.requestPasswordChange} disabled = {this.state.pressedRequestPassword}>
                                         Request new password
                                     </button>
@@ -119,31 +145,6 @@ class UserProfile extends Component {
                         }
                     </tbody>
                 </table>
-                {
-                    this.capabilities.length > 0
-                    ? <div className="form-group">
-                        <label>User is allowed to:</label>
-                        <ul>
-                        {
-                            this.capabilities.map(
-                                c => <li>{capabilitiesList[c]} (inherited from: {this.inheritedFrom(c).join(", ")})</li>)
-                        }
-                        </ul>
-                      </div>
-                    : []
-                }
-                {
-                    this.groups.length > 0
-                    ? <div className="form-group">
-                        <label>User is member of:</label>
-                        <ul>
-                        {
-                            this.groups.map(g => <li>{g.name}</li>)
-                        }
-                        </ul>
-                      </div>
-                    : []
-                }
                 {this.props.userLogin === this.state.profile.login &&
                 <div>
                     <h4>API keys</h4>

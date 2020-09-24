@@ -1,8 +1,12 @@
 import React, {Component} from 'react';
 import { connect } from "react-redux";
+import { Link } from "react-router-dom"
 import {capabilitiesList} from "./Capabilities";
+
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import api from "@mwdb-web/commons/api";
-import { View, DateString, ErrorBoundary } from "@mwdb-web/commons/ui";
+import { View, DateString, ErrorBoundary, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
+import { makeSearchLink } from "../commons/helpers";
 
 import ManageAPIKeys from './ManageAPIKeys';
 
@@ -53,7 +57,6 @@ class UserProfile extends Component {
     }
 
     render() {
-        console.log(this.state.error)
         if (!this.state.profile && !this.state.error) {
             return <div>Loading...</div>;
         } else if(!this.state.profile && this.state.error) {
@@ -62,7 +65,6 @@ class UserProfile extends Component {
         
         return (
             <View ident="userProfile" error={this.state.error} success={this.state.success}>
-                <h2>Profile {this.state.profile.login} info</h2>
                 <table className="table table-striped table-bordered wrap-table">
                     <thead>
                         <tr>
@@ -71,9 +73,27 @@ class UserProfile extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        <tr className="flickerable">
+                            <td>Login</td>
+                            <td>
+                                {this.state.profile.login}
+                                <span className="ml-2">
+                                    <i data-toggle="tooltip" title="Click to search for user samples">
+                                        <Link to={makeSearchLink("uploader", this.state.profile.login)} style={{color:'black'}}>
+                                            <FontAwesomeIcon icon={"search"} size="sm" style={{cursor: "pointer"}}/>
+                                        </Link>
+                                    </i>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr className="flickerable">
                             <td>E-mail</td>
-                            <td>{this.state.profile.email}</td>
+                            <td>
+                                {this.state.profile.email}
+                                <span className="ml-2">
+                                    <ActionCopyToClipboard text={this.state.profile.email}/>
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td>Registered</td>

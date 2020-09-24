@@ -56,6 +56,12 @@ class UserProfile extends Component {
         this.handleUpdate();
     }
 
+    componentDidUpdate(prevProps) {
+        if (this.props.match.params.login !== prevProps.match.params.login) {
+            this.handleUpdate();
+        }
+    }
+
     render() {
         if (!this.state.profile && !this.state.error) {
             return <div>Loading...</div>;

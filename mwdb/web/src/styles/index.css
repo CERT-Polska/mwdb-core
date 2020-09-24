@@ -9,6 +9,15 @@ body {
     margin-top: 12pt;
 }
 
+img.logo {
+    height: 40px;
+    margin-right: 12px;
+}
+
+img.logo-about {
+    height: 120px;
+}
+
 .navbar {
     background-color: #101c28;
     padding: 0.2rem 1rem;

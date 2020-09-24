@@ -1,4 +1,4 @@
-"""empty message
+"""Removed humanhash feature
 
 Revision ID: e2d99ffcb8ce
 Revises: 43b78a070936

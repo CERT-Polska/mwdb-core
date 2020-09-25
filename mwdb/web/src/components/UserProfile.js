@@ -104,62 +104,67 @@ class UserProfile extends Component {
                             <td><DateString date={this.state.profile.set_password_on}/></td>
                         </tr>
                         }
-                        {(this.props.userLogin === this.state.profile.login && this.capabilities.length > 0) &&
-                        <tr>
-                            <td>
-                                Capabilities
-                            </td>
-                            <td>
-                                <ul className="table-ul">
-                                        {
-                                            this.capabilities.map(
-                                                c => <li>{capabilitiesList[c]} (inherited
-                                                    from: {this.inheritedFrom(c).join(", ")})</li>)
-                                        }
-                                </ul>
-                            </td>
-                        </tr>
+                        {
+                            this.capabilities.length > 0 &&
+                            <tr>
+                                <td>
+                                    Capabilities
+                                </td>
+                                <td>
+                                    <ul className="table-ul">
+                                            {
+                                                this.capabilities.map(
+                                                    c => <li>{capabilitiesList[c]} (inherited
+                                                        from: {this.inheritedFrom(c).join(", ")})</li>)
+                                            }
+                                    </ul>
+                                </td>
+                            </tr>
                         }
-                        {(this.props.userLogin === this.state.profile.login && this.groups.length > 0) &&
-                        <tr>
-                            <td>
-                                Groups
-                            </td>
-                            <td>
-                                <ul className="table-ul">
-                                        {
-                                             this.groups.map(g => <li>{g.name}</li>)
-                                        }
-                                </ul>
-                            </td>
-                        </tr>
+                        {
+                            this.groups.length > 0 &&
+                            <tr>
+                                <td>
+                                    Groups
+                                </td>
+                                <td>
+                                    <ul className="table-ul">
+                                            {
+                                                 this.groups.map(g => <li>{g.name}</li>)
+                                            }
+                                    </ul>
+                                </td>
+                            </tr>
                         }
                         <tr>
                             <td style={{textAlign: 'left'}} colspan="3">
-                                {this.props.userLogin === this.state.profile.login ?
-                                    <button type="button" className="btn btn-success"
-                                    onClick={this.requestPasswordChange} disabled = {this.state.pressedRequestPassword}>
-                                        Request new password
-                                    </button>
-                                    :
-                                    <button type="button" className="btn btn-success">
-                                        <Link to={makeSearchLink("uploader", this.state.profile.login)} style={{color:'black'}}>
-                                            Search {this.state.profile.login} samples
+                                {
+                                    this.props.userLogin === this.state.profile.login ? (
+                                        <button type="button" className="btn btn-success"
+                                        onClick={this.requestPasswordChange} disabled = {this.state.pressedRequestPassword}>
+                                            Request new password
+                                        </button>
+                                        ) : (
+                                        <Link to={makeSearchLink("uploader", this.state.profile.login)}>
+                                            <button type="button" className="btn btn-success">
+                                                Search {this.state.profile.login}'s uploads
+                                            </button>
                                         </Link>
-                                    </button>
+                                    )
                                 }
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                {this.props.userLogin === this.state.profile.login &&
-                <div>
-                    <h4>API keys</h4>
-                    <ManageAPIKeys items={this.state.profile.api_keys}
-                                   userLogin={this.props.userLogin}
-                                   onSuccess={(success) => { this.handleUpdate(); this.setState({success}); }}
-                                   onError={(error) => this.setState({error})} />
-                </div>
+                {
+                    this.props.userLogin === this.state.profile.login &&
+                    <div>
+                        <h4>API keys</h4>
+                        <ManageAPIKeys items={this.state.profile.api_keys}
+                                       userLogin={this.props.userLogin}
+                                       onSuccess={(success) => { this.handleUpdate(); this.setState({success}); }}
+                                       onError={(error) => this.setState({error})} />
+                    </div>
                 }
             </View>
         )

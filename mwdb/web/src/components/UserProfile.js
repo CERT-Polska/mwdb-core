@@ -98,11 +98,12 @@ class UserProfile extends Component {
                             <td>Last login</td>
                             <td><DateString date={this.state.profile.logged_on}/></td>
                         </tr>
-                        {this.props.userLogin === this.state.profile.login &&
-                        <tr>
-                            <td>Last password set</td>
-                            <td><DateString date={this.state.profile.set_password_on}/></td>
-                        </tr>
+                        {
+                            this.props.userLogin === this.state.profile.login &&
+                            <tr>
+                                <td>Last password set</td>
+                                <td><DateString date={this.state.profile.set_password_on}/></td>
+                            </tr>
                         }
                         {
                             (this.state.profile.capabilities && this.capabilities.length > 0) &&
@@ -144,7 +145,7 @@ class UserProfile extends Component {
                                         onClick={this.requestPasswordChange} disabled = {this.state.pressedRequestPassword}>
                                             Request new password
                                         </button>
-                                        ) : (
+                                    ) : (
                                         <Link to={makeSearchLink("uploader", this.state.profile.login)}>
                                             <button type="button" className="btn btn-success">
                                                 Search {this.state.profile.login}'s uploads

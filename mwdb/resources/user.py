@@ -442,7 +442,13 @@ class UserProfileResource(Resource):
         security:
             - bearerAuth: []
         tags:
-            - auth
+            - user
+        parameters:
+            - in: path
+              name: login
+              schema:
+                type: string
+              description: User login
         responses:
             200:
                 description: Returns information about specific user

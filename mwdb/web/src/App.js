@@ -106,7 +106,7 @@ class App extends Component {
                                     <AuthenticatedRoute exact path='/' component={RecentSamples} />
                                     <AuthenticatedRoute exact path='/about' component={About} />
                                     <AuthenticatedRoute exact path='/docs' component={Docs} />
-                                    <AuthenticatedRoute exact path='/profile' component={UserProfile} />
+                                    <AuthenticatedRoute exact path='/profile/:login' component={UserProfile} />
                                     <AuthenticatedRoute exact path='/configs' component={RecentConfigs} />
                                     <AuthenticatedRoute exact path='/configs/stats' component={ConfigStats} />
                                     <AuthenticatedRoute exact path='/upload' component={Upload} />

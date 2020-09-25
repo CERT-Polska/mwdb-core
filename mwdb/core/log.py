@@ -2,13 +2,33 @@ import logging
 
 from flask import g
 import logmatic
+from .config import app_config
+
+enable_json_logger = app_config.mwdb.enable_json_logger
 
 
 class ContextFilter(logging.Filter):
     def filter(self, record):
         record.auth_user = g.auth_user.login if g.get('auth_user') is not None else None
         record.request_id = g.request_id
+
         return True
+
+
+class InlineFormatter(logging.Formatter):
+    def format(self, record):
+        extra_list = []
+
+        for k, v in record.__dict__.items():
+            if k == "arguments":
+                v = v.to_dict()
+            if k not in logging.makeLogRecord({}).__dict__:
+                extra_list.append('{}:{}'.format(k, v))
+
+        return ' - '.join([
+            super().format(record),
+            *extra_list
+        ])
 
 
 logger = logging.getLogger('mwdb.application')
@@ -16,12 +36,18 @@ logger = logging.getLogger('mwdb.application')
 # Don't propagate to root logger
 logger.propagate = False
 
-# Setup JSON stream handler for main logger
+# Setup stream handler for main logger
 handler = logging.StreamHandler()
-handler.setFormatter(
-    logmatic.JsonFormatter(fmt="%(filename) %(funcName) %(levelname) %(lineno) %(module) %(threadName) %(message)"))
-logger.addHandler(handler)
+
+if enable_json_logger:
+    formatter = logmatic.JsonFormatter(fmt="%(filename) %(funcName) %(levelname) %(lineno) %(module) %(threadName) %(message)")
+else:
+    formatter = InlineFormatter(fmt="[%(levelname)s] %(threadName)s "
+                                    "- %(module)s.%(funcName)s:%(lineno)s"
+                                    " - %(message)s")
+handler.setFormatter(formatter)
 logger.addFilter(ContextFilter())
+logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 

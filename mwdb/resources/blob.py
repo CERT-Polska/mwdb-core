@@ -10,7 +10,7 @@ from mwdb.schema.blob import (
     BlobListResponseSchema, BlobItemResponseSchema
 )
 
-from . import requires_capabilities, requires_authorization
+from . import requires_capabilities, requires_authorization, loads_schema
 from .object import ObjectUploader, ObjectItemResource, ObjectResource
 
 
@@ -130,11 +130,9 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                 description: Object exists yet but has different type
         """
         schema = BlobCreateRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        if obj and obj.errors:
-            return {"errors": obj.errors}, 400
-        return self.create_object(obj.data)
+        return self.create_object(obj)
 
 
 class TextBlobItemResource(ObjectItemResource, TextBlobUploader):

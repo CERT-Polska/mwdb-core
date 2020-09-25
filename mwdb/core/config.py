@@ -68,6 +68,8 @@ class MWDBConfig(Config):
     recaptcha_site_key = key(cast=str, required=False)
     recaptcha_secret = key(cast=str, required=False)
 
+    enable_json_logger = key(cast=intbool, required=False, default=False)
+
 
 class AppConfig(Config):
     mwdb = group_key(MWDBConfig)

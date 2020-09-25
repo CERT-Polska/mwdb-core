@@ -57,7 +57,7 @@ class Navigation extends Component {
             <nav className="navbar navbar-expand-lg navbar-dark">
                 <Link className="navbar-brand" to={'/'}>
                     <Extendable ident="navbarLogo">
-                        <img src={logo} alt="logo" style={{width: "64px", marginRight: "12px"}}/>
+                        <img src={logo} alt="logo" className="logo"/>
                         mwdb
                     </Extendable>
                 </Link>

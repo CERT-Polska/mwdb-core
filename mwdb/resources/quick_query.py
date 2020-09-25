@@ -5,7 +5,7 @@ from werkzeug.exceptions import NotFound
 from mwdb.model import db, QuickQuery
 from mwdb.schema.quick_query import QuickQuerySchemaBase, QuickQueryResponseSchema
 
-from . import logger, requires_authorization
+from . import logger, requires_authorization, loads_schema
 
 
 class QuickQueryResource(Resource):
@@ -34,12 +34,11 @@ class QuickQueryResource(Resource):
                 description: When query is invalid
         """
         schema = QuickQuerySchemaBase()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
+
         quick_query = QuickQuery(
-            query=obj.data["query"],
-            name=obj.data["name"],
+            query=obj["query"],
+            name=obj["name"],
             type=type,
             user_id=g.auth_user.id,
         )

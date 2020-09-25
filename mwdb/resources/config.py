@@ -17,7 +17,7 @@ from mwdb.schema.config import (
     ConfigListResponseSchema, ConfigItemResponseSchema
 )
 
-from . import requires_authorization, requires_capabilities
+from . import requires_authorization, requires_capabilities, load_schema, loads_schema
 from .object import ObjectUploader, ObjectItemResource, ObjectResource
 
 
@@ -48,12 +48,9 @@ class ConfigStatsResource(Resource):
                     schema: ConfigStatsResponseSchema
         """
         schema = ConfigStatsRequestSchema()
-        params = schema.load(request.args)
+        params = load_schema(request.args, schema)
 
-        if params.errors:
-            return {"errors": params.errors}, 400
-
-        from_time = params.data["range"]
+        from_time = params["range"]
         if from_time.endswith("h"):
             from_time = int(from_time[:-1])
         elif from_time.endswith("d"):
@@ -88,15 +85,13 @@ class ConfigUploader(ObjectUploader):
     def _get_embedded_blob(self, in_blob, share_with, metakeys):
         if isinstance(in_blob, dict):
             schema = BlobCreateSpecSchema()
-            blob_spec = schema.load(in_blob)
-            if blob_spec.errors:
-                raise BadRequest("Blob schema is not correct")
+            blob_spec = load_schema(in_blob, schema)
 
             try:
                 blob_obj, is_new = TextBlob.get_or_create(
-                    blob_spec.data["content"],
-                    blob_spec.data["blob_name"],
-                    blob_spec.data["blob_type"],
+                    blob_spec["content"],
+                    blob_spec["blob_name"],
+                    blob_spec["blob_type"],
                     parent=None,
                     share_with=share_with,
                     metakeys=metakeys
@@ -246,11 +241,9 @@ class ConfigResource(ObjectResource, ConfigUploader):
                 description: Object exists yet but has different type
         """
         schema = ConfigCreateRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        if obj and obj.errors:
-            return {"errors": obj.errors}, 400
-        return self.create_object(obj.data)
+        return self.create_object(obj)
 
 
 class ConfigItemResource(ObjectItemResource, ConfigUploader):

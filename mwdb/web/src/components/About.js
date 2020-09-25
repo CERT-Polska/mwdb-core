@@ -34,12 +34,12 @@ class About extends Component {
             <div className="align-items-center">
                 <div className="jumbotron d-flex align-items-center" style={{backgroundColor: "#101c28", color: "white"}}>
                     <View ident="about">
-                        <div className="row">
-                            <div className="col-lg-3 col-sm-6 offset-1">
-                                <img src={logo} alt="logo" width="100%"/>
+                        <div className="row justify-content-center">
+                            <div className="col-lg-2 col-sm-4 offset-2 text-center">
+                                <img src={logo} alt="logo" className="logo-about"/>
                             </div>
-                            <div className="col-lg-8 col-sm-6">
-                                <h1>mwdb</h1>
+                            <div className="col-lg-6 col-sm-4">
+                                <h1>mwdb-core</h1>
                                 <p>
                                     Powered by CERT.pl<br/>
                                     Version: {this.props.config["server_version"]}<br/>

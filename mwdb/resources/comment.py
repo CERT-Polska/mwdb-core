@@ -1,13 +1,13 @@
 from flask import request, g
 from flask_restful import Resource
 
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, BadRequest
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import db, Comment
 from mwdb.schema.comment import CommentRequestSchema, CommentItemResponseSchema
 
-from . import logger, requires_capabilities, requires_authorization, access_object
+from . import logger, requires_capabilities, requires_authorization, access_object, loads_schema
 
 
 class CommentResource(Resource):
@@ -96,17 +96,15 @@ class CommentResource(Resource):
                 description: When object doesn't exist or user doesn't have access to this object.
         """
         schema = CommentRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
 
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
         comment = Comment(
-            comment=obj.data["comment"],
+            comment=obj["comment"],
             user_id=g.auth_user.id,
             object_id=db_object.id
         )

@@ -172,14 +172,6 @@ class ConfigPresenter extends ShowObjectPresenter {
         downloadData(JSON.stringify(this.props.cfg), this.props.id, 'application/json');
     };
 
-    renderHeader() {
-        return (
-            <div className="align-self-center media-body">
-                <h5 className="mt-0">Config <span className="text-monospace">{this.props.id}</span></h5>
-            </div>
-        );
-    }
-
     get presenters() {
         return {
             ...super.presenters,

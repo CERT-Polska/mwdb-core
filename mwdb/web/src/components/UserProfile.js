@@ -142,7 +142,7 @@ class UserProfile extends Component {
                                 {
                                     this.props.userLogin === this.state.profile.login ? (
                                         <button type="button" className="btn btn-success"
-                                        onClick={this.requestPasswordChange} disabled = {this.state.pressedRequestPassword}>
+                                                onClick={this.requestPasswordChange} disabled={this.state.pressedRequestPassword}>
                                             Request new password
                                         </button>
                                     ) : (

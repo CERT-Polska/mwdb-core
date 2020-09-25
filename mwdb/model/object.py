@@ -153,9 +153,12 @@ class Object(db.Model):
         from .config import Config
         return (
             db.session.query(Config)
-                      .filter(Config.id.in_(db.session.query(relation.c.child_id)
-                                                      .filter(relation.c.parent_id == self.id)))
-                      .filter(g.auth_user.has_access_to_object(Config.id)).first())
+                      .join(relation, and_(
+                          relation.c.parent_id == self.id,
+                          relation.c.child_id == Config.id))
+                      .filter(g.auth_user.has_access_to_object(Config.id))
+                      .order_by(relation.c.creation_time.desc()).first()
+        )
 
     def add_parent(self, parent, commit=True):
         """

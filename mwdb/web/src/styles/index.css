@@ -295,3 +295,8 @@ a.blob {
 .flickerable i:active {
     color: var(--red);
 }
+
+.table-ul {
+    padding: 0;
+    list-style-position: inside;
+}

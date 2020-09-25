@@ -459,5 +459,5 @@ class UserProfileResource(Resource):
                               .filter(g.auth_user.is_member(Group.id))
                               .filter(User.login == login)).first()
         if user is None:
-            raise NotFound("User doesn't exist or you don't have capability to see his profile")
+            raise NotFound("User doesn't exist or is not a member of your group")
         return schema.dump(user)

@@ -3,9 +3,8 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom"
 import {capabilitiesList} from "./Capabilities";
 
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import api from "@mwdb-web/commons/api";
-import { View, DateString, ErrorBoundary, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
+import { View, DateString, ErrorBoundary } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "../commons/helpers";
 
 import ManageAPIKeys from './ManageAPIKeys';
@@ -49,7 +48,7 @@ class UserProfile extends Component {
             });
         } catch(error) {
             this.setState({error})
-        } 
+        }
     }
 
     componentDidMount() {
@@ -74,7 +73,7 @@ class UserProfile extends Component {
                 <table className="table table-striped table-bordered wrap-table">
                     <thead>
                         <tr>
-                            <th key="key">Attribute</th>
+                            <th key="key" className="col-2">Attribute</th>
                             <th key="value">Value</th>
                         </tr>
                     </thead>
@@ -83,22 +82,12 @@ class UserProfile extends Component {
                             <td>Login</td>
                             <td>
                                 {this.state.profile.login}
-                                <span className="ml-2">
-                                    <i data-toggle="tooltip" title="Click to search for user samples">
-                                        <Link to={makeSearchLink("uploader", this.state.profile.login)} style={{color:'black'}}>
-                                            <FontAwesomeIcon icon={"search"} size="sm" style={{cursor: "pointer"}}/>
-                                        </Link>
-                                    </i>
-                                </span>
                             </td>
                         </tr>
                         <tr className="flickerable">
                             <td>E-mail</td>
                             <td>
                                 {this.state.profile.email}
-                                <span className="ml-2">
-                                    <ActionCopyToClipboard text={this.state.profile.email}/>
-                                </span>
                             </td>
                         </tr>
                         <tr>
@@ -109,52 +98,63 @@ class UserProfile extends Component {
                             <td>Last login</td>
                             <td><DateString date={this.state.profile.logged_on}/></td>
                         </tr>
+                        {this.props.userLogin === this.state.profile.login &&
                         <tr>
                             <td>Last password set</td>
                             <td><DateString date={this.state.profile.set_password_on}/></td>
                         </tr>
-                        {this.capabilities.length > 0 &&
+                        }
+                        {(this.props.userLogin === this.state.profile.login && this.capabilities.length > 0) &&
                         <tr>
                             <td>
                                 Capabilities
                             </td>
-                            <td style={{padding: 22}}>
+                            <td>
+                                <ul className="table-ul">
                                         {
                                             this.capabilities.map(
                                                 c => <li>{capabilitiesList[c]} (inherited
                                                     from: {this.inheritedFrom(c).join(", ")})</li>)
                                         }
+                                </ul>
                             </td>
                         </tr>
                         }
-                        {this.groups.length > 0 &&
+                        {(this.props.userLogin === this.state.profile.login && this.groups.length > 0) &&
                         <tr>
                             <td>
                                 Groups
                             </td>
-                            <td style={{padding: 22}}>
+                            <td>
+                                <ul className="table-ul">
                                         {
                                              this.groups.map(g => <li>{g.name}</li>)
                                         }
+                                </ul>
                             </td>
                         </tr>
                         }
-                        {this.props.userLogin === this.state.profile.login &&
                         <tr>
                             <td style={{textAlign: 'left'}} colspan="3">
+                                {this.props.userLogin === this.state.profile.login ?
                                     <button type="button" className="btn btn-success"
                                     onClick={this.requestPasswordChange} disabled = {this.state.pressedRequestPassword}>
                                         Request new password
                                     </button>
+                                    :
+                                    <button type="button" className="btn btn-success">
+                                        <Link to={makeSearchLink("uploader", this.state.profile.login)} style={{color:'black'}}>
+                                            Search {this.state.profile.login} samples
+                                        </Link>
+                                    </button>
+                                }
                             </td>
                         </tr>
-                        }
                     </tbody>
                 </table>
                 {this.props.userLogin === this.state.profile.login &&
                 <div>
                     <h4>API keys</h4>
-
                     <ManageAPIKeys items={this.state.profile.api_keys}
                                    userLogin={this.props.userLogin}
                                    onSuccess={(success) => { this.handleUpdate(); this.setState({success}); }}

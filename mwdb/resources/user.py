@@ -20,6 +20,7 @@ from mwdb.schema.user import (
     UserListResponseSchema,
     UserSuccessResponseSchema,
     UserSetPasswordTokenResponseSchema,
+    UserOwnProfileResponseSchema,
     UserProfileResponseSchema
 )
 
@@ -449,7 +450,10 @@ class UserProfileResource(Resource):
                   application/json:
                     schema: UserProfileResponseSchema
         """
-        schema = UserProfileResponseSchema()
+        if g.auth_user.login == login:
+            schema = UserOwnProfileResponseSchema()
+        else:
+            schema = UserProfileResponseSchema()
         if g.auth_user.has_rights(Capabilities.manage_users):
             user = db.session.query(User).filter(User.login == login).first()
         else:

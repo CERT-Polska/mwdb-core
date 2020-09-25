@@ -155,7 +155,6 @@ def test_cycle_relations():
 
     session = MwdbTest()
     session.login()
-    print(session.get_sample(SampleAAA.dhash))
 
     SampleA([
         SampleAA([
@@ -301,3 +300,39 @@ def test_xref_adding():
         ], should_access=[Alice, Bob]),
         SampleC(should_access=[Alice])
     ], should_access=[Alice]).test()
+
+
+def test_uploader_share():
+    """
+    We check if uploader share is added directly instead of
+    being inherited from the parent
+    """
+    testCase = RelationTestCase()
+
+    Alice = testCase.new_user("Alice", capabilities=["adding_parents"])
+    Bob = testCase.new_user("Bob", capabilities=["adding_parents"])
+
+    SampleA = testCase.new_sample("SampleA")
+    SampleB = testCase.new_sample("SampleB")
+    SampleA.create(Alice)
+    SampleB.create(Alice, parent=SampleA)
+
+    a_shares = Alice.session().get_shares(SampleA.dhash)["shares"]
+    b_shares = Alice.session().get_shares(SampleB.dhash)["shares"]
+
+    # Look for uploader entry in SampleA shares
+    assert any([
+        (share["group_name"] == Alice.identity and
+         share["related_user_login"] == Alice.identity and
+         share["related_object_dhash"] == SampleA.dhash and
+         share["reason_type"] == "added")
+        for share in a_shares
+    ])
+    # Look for uploader entry in SampleB shares
+    assert any([
+        (share["group_name"] == Alice.identity and
+         share["related_user_login"] == Alice.identity and
+         share["related_object_dhash"] == SampleB.dhash and
+         share["reason_type"] == "added")
+        for share in b_shares
+    ])

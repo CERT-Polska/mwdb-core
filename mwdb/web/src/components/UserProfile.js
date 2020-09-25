@@ -105,7 +105,7 @@ class UserProfile extends Component {
                         </tr>
                         }
                         {
-                            this.capabilities.length > 0 &&
+                            (this.props.userLogin === this.state.profile.login && this.capabilities.length > 0) &&
                             <tr>
                                 <td>
                                     Capabilities
@@ -122,7 +122,7 @@ class UserProfile extends Component {
                             </tr>
                         }
                         {
-                            this.groups.length > 0 &&
+                            (this.props.userLogin === this.state.profile.login && this.groups.length > 0) &&
                             <tr>
                                 <td>
                                     Groups

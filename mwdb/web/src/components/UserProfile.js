@@ -78,13 +78,13 @@ class UserProfile extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr className="flickerable">
+                        <tr>
                             <td>Login</td>
                             <td>
                                 {this.state.profile.login}
                             </td>
                         </tr>
-                        <tr className="flickerable">
+                        <tr>
                             <td>E-mail</td>
                             <td>
                                 {this.state.profile.email}
@@ -108,16 +108,17 @@ class UserProfile extends Component {
                         {
                             (this.state.profile.capabilities && this.capabilities.length > 0) &&
                             <tr>
-                                <td>
-                                    Capabilities
-                                </td>
+                                <td>Capabilities</td>
                                 <td>
                                     <ul className="table-ul">
-                                            {
-                                                this.capabilities.map(
-                                                    c => <li>{capabilitiesList[c]} (inherited
-                                                        from: {this.inheritedFrom(c).join(", ")})</li>)
-                                            }
+                                        {
+                                            this.capabilities.map(c => (
+                                                <li>
+                                                    {capabilitiesList[c]} 
+                                                    (inherited from: {this.inheritedFrom(c).join(", ")})
+                                                </li>
+                                            ))
+                                        }
                                     </ul>
                                 </td>
                             </tr>
@@ -125,14 +126,12 @@ class UserProfile extends Component {
                         {
                             (this.state.profile.groups && this.groups.length > 0) &&
                             <tr>
-                                <td>
-                                    Groups
-                                </td>
+                                <td>Groups</td>
                                 <td>
                                     <ul className="table-ul">
-                                            {
-                                                 this.groups.map(g => <li>{g.name}</li>)
-                                            }
+                                        {
+                                            this.groups.map(g => <li>{g.name}</li>)
+                                        }
                                     </ul>
                                 </td>
                             </tr>

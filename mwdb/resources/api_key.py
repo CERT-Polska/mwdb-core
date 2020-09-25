@@ -10,7 +10,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.model import db, APIKey, User
 from mwdb.schema.api_key import APIKeyIdentifierBase, APIKeyTokenResponseSchema
 
-from . import logger, requires_authorization
+from . import logger, requires_authorization, load_schema
 
 
 class APIKeyIssueResource(Resource):
@@ -109,12 +109,10 @@ class APIKeyResource(Resource):
                     When API key doesn't exist or user doesn't own the key and
                     doesn't have the `manage_users` capability.
         """
-        obj = APIKeyIdentifierBase().load({"id": api_key_id})
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema({"id": api_key_id}, APIKeyIdentifierBase())
 
         try:
-            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
+            api_key = APIKey.query.filter(APIKey.id == obj["id"]).one()
         except NoResultFound:
             raise NotFound("API key doesn't exist")
 
@@ -158,12 +156,10 @@ class APIKeyResource(Resource):
                     When API key doesn't exist or user doesn't own the key and
                     doesn't have the `manage_users` capability.
         """
-        obj = APIKeyIdentifierBase().load({"id": api_key_id})
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema({"id": api_key_id}, APIKeyIdentifierBase())
 
         try:
-            api_key = APIKey.query.filter(APIKey.id == obj.data["id"]).one()
+            api_key = APIKey.query.filter(APIKey.id == obj["id"]).one()
         except NoResultFound:
             raise NotFound("API key doesn't exist")
 

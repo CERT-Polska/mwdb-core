@@ -7,7 +7,7 @@ class MetakeyKeySchema(Schema):
     key = fields.Str(required=True, allow_none=False)
 
     @pre_load
-    def sanitize_key(self, params):
+    def sanitize_key(self, params, **kwargs):
         params = dict(params)
         if params.get("key"):
             params["key"] = params["key"].lower().strip()

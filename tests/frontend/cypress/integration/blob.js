@@ -36,7 +36,6 @@ describe("Blob view test - mwdb-core", function () {
 
     cy.get("@blobId").then((blobId) => {
       cy.get('.d-none a[href*="'+blobId+'"] > div').click();
-      cy.contains("Blob " + blobId);
       cy.server().route('GET', '/api/blob/' + blobId).as('dataGetFirst');
     });
 

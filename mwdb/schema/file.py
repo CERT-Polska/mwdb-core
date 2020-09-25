@@ -12,10 +12,12 @@ from .config import ConfigItemResponseSchema
 
 
 class FileCreateRequestSchema(Schema):
-    options = fields.Nested(ObjectCreateRequestSchemaBase, missing={})
+    # BUG: https://github.com/marshmallow-code/marshmallow/issues/1042
+    options = fields.Nested(ObjectCreateRequestSchemaBase,
+                            missing=ObjectCreateRequestSchemaBase().load({}))
 
     @pre_load
-    def unpack_options(self, params):
+    def unpack_options(self, params, **kwargs):
         """
         Options are packed into JSON string that needs to be deserialized first.
         Empty string in 'options' field is treated like missing key.

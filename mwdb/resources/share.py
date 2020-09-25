@@ -12,7 +12,7 @@ from mwdb.schema.share import (
     ShareInfoResponseSchema
 )
 
-from . import access_object, logger, requires_authorization
+from . import access_object, logger, requires_authorization, loads_schema
 
 
 class ShareGroupListResource(Resource):
@@ -167,15 +167,13 @@ class ShareResource(Resource):
                 description: When object or group doesn't exist or user doesn't have access to.
         """
         schema = ShareRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
-        group_name = obj.data["group"]
+        group_name = obj["group"]
         group = db.session.query(Group).filter(Group.name == group_name)
         if not g.auth_user.has_rights(Capabilities.sharing_objects):
             group = group.filter(g.auth_user.is_member(Group.id))

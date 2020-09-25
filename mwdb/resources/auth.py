@@ -23,7 +23,7 @@ from mwdb.schema.auth import (
 )
 from mwdb.schema.user import UserSuccessResponseSchema
 
-from . import logger, requires_authorization
+from . import logger, requires_authorization, loads_schema
 
 
 def verify_recaptcha(recaptcha_token):
@@ -74,20 +74,17 @@ class LoginResource(Resource):
               description: When credentials are invalid, account is inactive or system is set into maintenance mode.
         """
         schema = AuthLoginRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         try:
-            user = User.query.filter(User.login == obj.data['login']).one()
+            user = User.query.filter(User.login == obj['login']).one()
         except NoResultFound:
             raise Forbidden('Invalid login or password.')
 
         if app_config.mwdb.enable_maintenance and user.login != app_config.mwdb.admin_login:
             raise Forbidden('Maintenance underway. Please come back later.')
 
-        if not user.verify_password(obj.data['password']):
+        if not user.verify_password(obj['password']):
             raise Forbidden('Invalid login or password.')
 
         if user.pending:
@@ -145,12 +142,9 @@ class RegisterResource(Resource):
             raise Forbidden("User registration is not enabled.")
 
         schema = AuthRegisterRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        if obj.errors:
-            return {"errors": obj.errors}, 400
-
-        login = obj.data["login"]
+        login = obj["login"]
 
         if db.session.query(exists().where(User.login == login)).scalar():
             raise Conflict("Name already exists")
@@ -158,12 +152,12 @@ class RegisterResource(Resource):
         if db.session.query(exists().where(Group.name == login)).scalar():
             raise Conflict("Name already exists")
 
-        verify_recaptcha(obj.data.get("recaptcha"))
+        verify_recaptcha(obj.get("recaptcha"))
 
         user = User.create(
             login,
-            obj.data["email"],
-            obj.data["additional_info"],
+            obj["email"],
+            obj["additional_info"],
             pending=True
         )
 
@@ -211,15 +205,13 @@ class ChangePasswordResource(Resource):
                 description: When set password token is no longer valid
         """
         schema = AuthSetPasswordRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        user = User.verify_set_password_token(obj.data["token"])
+        user = User.verify_set_password_token(obj["token"])
         if user is None:
             raise Forbidden("Set password token expired")
 
-        user.set_password(password=obj.data["password"])
+        user.set_password(password=obj["password"])
         db.session.commit()
 
         logger.info('Password changed', extra={
@@ -309,21 +301,18 @@ class RecoverPasswordResource(Resource):
               description: When SMTP server is unavailable or not properly configured on the server.
         """
         schema = AuthRecoverPasswordRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         try:
             user = User.query.filter(
-                User.login == obj.data['login'],
-                func.lower(User.email) == obj.data['email'].lower(),
+                User.login == obj['login'],
+                func.lower(User.email) == obj['email'].lower(),
                 User.pending == false()
             ).one()
         except NoResultFound:
             raise Forbidden('Invalid login or email address.')
 
-        verify_recaptcha(obj.data.get("recaptcha"))
+        verify_recaptcha(obj.get("recaptcha"))
 
         try:
             send_email_notification("recover",

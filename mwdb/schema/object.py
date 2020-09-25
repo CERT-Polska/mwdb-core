@@ -12,7 +12,7 @@ class ObjectListRequestSchema(Schema):
     older_than = fields.Str(missing=None)
 
     @validates_schema
-    def validate_key(self, data):
+    def validate_key(self, data, **kwargs):
         if data['page'] is not None and data['older_than'] is not None:
             raise ValidationError(
                 "'page' and 'older_than' can't be used simultaneously. Use 'older_than' for new code."
@@ -31,7 +31,7 @@ class ObjectCreateRequestSchemaBase(Schema):
 
 class ObjectLegacyMetakeysMixin(Schema):
     @pre_load
-    def unpack_metakeys(self, params):
+    def unpack_metakeys(self, params, **kwargs):
         """
         Metakeys are packed into JSON string that need to be deserialized first.
         Empty string in 'metakeys' field is treated like missing key.
@@ -60,7 +60,7 @@ class ObjectListResponseSchemaBase(Schema):
     __envelope_key__ = "objects"
 
     @post_dump(pass_many=True)
-    def wrap_with_envelope(self, data, many):
+    def wrap_with_envelope(self, data, many, **kwargs):
         print(data, flush=True)
         if not many:
             raise ValueError("Schema supports only lists of objects")

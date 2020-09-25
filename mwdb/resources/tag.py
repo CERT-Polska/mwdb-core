@@ -7,7 +7,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.model import db, Tag, object_tag_table, ObjectPermission
 from mwdb.schema.tag import TagListRequestSchema, TagRequestSchema, TagItemResponseSchema
 
-from . import access_object, logger, requires_capabilities, requires_authorization
+from . import access_object, logger, requires_capabilities, requires_authorization, load_schema, loads_schema
 
 
 class TagListResource(Resource):
@@ -42,9 +42,7 @@ class TagListResource(Resource):
                         $ref: '#/components/schemas/TagItemResponse'
         """
         schema = TagListRequestSchema()
-        obj = schema.load(request.args)
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema(request.args, schema)
 
         tags = (
             db.session.query(Tag.tag)
@@ -55,7 +53,7 @@ class TagListResource(Resource):
                                  g.auth_user.is_member(ObjectPermission.group_id)))
         )
 
-        tag_prefix = obj.data["query"]
+        tag_prefix = obj["query"]
         if tag_prefix:
             tags = tags.filter(Tag.tag.startswith(tag_prefix, autoescape=True))
         tags = tags.all()
@@ -155,15 +153,13 @@ class TagResource(Resource):
                 description: When object doesn't exist or user doesn't have access to this object.
         """
         schema = TagRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
-        tag_name = obj.data["tag"]
+        tag_name = obj["tag"]
         db_object.add_tag(tag_name)
 
         logger.info('Tag added', extra={
@@ -224,15 +220,13 @@ class TagResource(Resource):
         """
 
         schema = TagRequestSchema()
-        obj = schema.load(request.args)
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = load_schema(request.args, schema)
 
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
-        tag_name = obj.data["tag"]
+        tag_name = obj["tag"]
         db_object.remove_tag(tag_name)
 
         logger.info('Tag removed', extra={

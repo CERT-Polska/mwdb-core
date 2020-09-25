@@ -349,7 +349,7 @@ class GroupMemberResource(Resource):
 
         member = db.session.query(User).filter(User.login == login).first()
         if g.auth_user.login == member.login:
-            raise Forbidden("You can't remove yourself from the group, only global admin can ramoves group admins.")
+            raise Forbidden("You can't remove yourself from the group, only system admin can remove group admins.")
         if member is None:
             raise NotFound("No such user")
 
@@ -363,32 +363,3 @@ class GroupMemberResource(Resource):
         logger.info('Group member deleted', extra={'user': member.login, 'group': group.name})
         schema = GroupSuccessResponseSchema()
         return schema.dump({"name": name})
-
-
-class UserGroupsListResource(Resource):
-    @requires_authorization
-    def get(self):
-        """
-        ---
-        summary: List of user groups
-        description: |
-            Returns list of user groups and members.
-        security:
-            - bearerAuth: []
-        tags:
-            - user
-        responses:
-            200:
-                description: List of user groups
-                content:
-                  application/json:
-                    schema: GroupListResponseSchema
-        """
-        objs = (db.session.query(Group)
-                          .options(joinedload(Group.users))
-                          .filter(g.auth_user.is_member(Group.id))
-                          .filter(Group.name != "public")
-                          .filter(Group.private.is_(False))).all()
-
-        schema = GroupListResponseSchema()
-        return schema.dump({"groups": objs})

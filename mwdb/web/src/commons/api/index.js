@@ -66,6 +66,10 @@ function authProfile() {
     return axios.get("/auth/profile")
 }
 
+function authGroups() {
+    return axios.get("/auth/groups")
+}
+
 function apiKeyGetToken(key_id) {
     return axios.get(`/api_key/${key_id}`)
 }
@@ -198,10 +202,6 @@ function removeGroupMember(name, member) {
     return axios.delete(`/group/${name}/member/${member}`)
 }
 
-function getUserGroups() {
-    return axios.get("/user/group")
-}
-
 function getUsers() {
     return axios.get("/user", {timeout: null})
 }
@@ -310,6 +310,7 @@ export default {
     getServerInfo,
     authLogin,
     authProfile,
+    authGroups,
     authRefresh,
     authSetPassword,
     authRequestPasswordChange,
@@ -346,7 +347,6 @@ export default {
     getPendingUsers,
     acceptPendingUser,
     rejectPendingUser,
-    getUserGroups,
     getUsers,
     getUser,
     generateApiToken,

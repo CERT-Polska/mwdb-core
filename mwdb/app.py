@@ -22,14 +22,14 @@ from mwdb.resources.auth import (
     LoginResource, ChangePasswordResource,
     RefreshTokenResource, RegisterResource,
     RecoverPasswordResource, RequestPasswordChangeResource,
-    ValidateTokenResource, ProfileResource
+    ValidateTokenResource, ProfileResource, AuthGroupListResource
 )
 from mwdb.resources.blob import TextBlobItemResource, TextBlobResource
 from mwdb.resources.comment import CommentResource, CommentDeleteResource
 from mwdb.resources.config import ConfigItemResource, ConfigResource, ConfigStatsResource
 from mwdb.resources.download import RequestSampleDownloadResource, DownloadResource
 from mwdb.resources.file import FileItemResource, FileResource
-from mwdb.resources.group import GroupResource, GroupListResource, GroupMemberResource, UserGroupsListResource
+from mwdb.resources.group import GroupResource, GroupListResource, GroupMemberResource
 from mwdb.resources.metakey import (
     MetakeyResource, MetakeyListDefinitionResource,
     MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource,
@@ -167,6 +167,7 @@ api.add_resource(RequestPasswordChangeResource, '/auth/request_password_change')
 api.add_resource(RefreshTokenResource, "/auth/refresh")
 api.add_resource(ValidateTokenResource, "/auth/validate")
 api.add_resource(ProfileResource, "/auth/profile")
+api.add_resource(AuthGroupListResource, "auth/groups")
 api.add_resource(RegisterResource, '/auth/register')
 
 # API key endpoints
@@ -234,7 +235,6 @@ api.add_resource(UserListResource, "/user")
 api.add_resource(UserResource, "/user/<login>")
 api.add_resource(UserGetPasswordChangeTokenResource, "/user/<login>/change_password")
 api.add_resource(UserPendingResource, "/user/<login>/pending")
-api.add_resource(UserGroupsListResource, "/user/group")
 
 # Group endpoints
 api.add_resource(GroupListResource, "/group")

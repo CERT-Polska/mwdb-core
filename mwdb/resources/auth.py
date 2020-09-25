@@ -4,6 +4,7 @@ import requests
 from flask import request, g
 from flask_restful import Resource
 from sqlalchemy import exists, func
+from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import false
 from werkzeug.exceptions import Forbidden, Conflict, InternalServerError
@@ -22,6 +23,7 @@ from mwdb.schema.auth import (
     AuthProfileResponseSchema
 )
 from mwdb.schema.user import UserSuccessResponseSchema
+from mwdb.schema.group import GroupListResponseSchema
 
 from . import logger, requires_authorization, loads_schema
 
@@ -420,3 +422,32 @@ class ProfileResource(Resource):
         """
         schema = AuthProfileResponseSchema()
         return schema.dump(g.auth_user)
+
+
+class AuthGroupListResource(Resource):
+    @requires_authorization
+    def get(self):
+        """
+        ---
+        summary: List of user groups
+        description: |
+            Returns list of user groups and members.
+        security:
+            - bearerAuth: []
+        tags:
+            - user
+        responses:
+            200:
+                description: List of user groups
+                content:
+                  application/json:
+                    schema: GroupListResponseSchema
+        """
+        objs = (db.session.query(Group)
+                          .options(joinedload(Group.users))
+                          .filter(g.auth_user.is_member(Group.id))
+                          .filter(Group.name != "public")
+                          .filter(Group.private.is_(False))).all()
+
+        schema = GroupListResponseSchema()
+        return schema.dump({"groups": objs})

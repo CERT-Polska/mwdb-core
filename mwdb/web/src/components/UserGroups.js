@@ -2,10 +2,10 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import { connect } from "react-redux";
 
-import {makeSearchLink} from "@malwarefront/helpers";
+import {makeSearchLink} from "@mwdb-web/commons/helpers";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import api from "@malwarefront/api";
-import { View, HighlightText, ConfirmationModal } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { View, HighlightText, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 class UserGroupRow extends Component {
     constructor(props) {
@@ -139,7 +139,7 @@ class UserGroups extends Component {
 
     updateUserGroups = async () => {
         try {
-            let response = await api.getUserGroups()
+            let response = await api.authGroups()
             this.setState({
                 groups: response.data.groups
             });

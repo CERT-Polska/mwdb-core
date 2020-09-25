@@ -443,11 +443,11 @@ class UserProfileResource(Resource):
                 content:
                   application/json:
                     schema: UserProfileResponseSchema
+            404:
+                description: When user doesn't exist or is not a member of user's group
         """
-        if g.auth_user.login == login:
-            schema = UserOwnProfileResponseSchema()
-        else:
-            schema = UserProfileResponseSchema()
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
+
         if g.auth_user.has_rights(Capabilities.manage_users):
             user = db.session.query(User).filter(User.login == login).first()
         else:
@@ -458,4 +458,9 @@ class UserProfileResource(Resource):
                               .filter(User.login == login)).first()
         if user is None:
             raise NotFound("User doesn't exist or is not a member of your group")
+
+        if g.auth_user.login == login:
+            schema = UserOwnProfileResponseSchema()
+        else:
+            schema = UserProfileResponseSchema()
         return schema.dump(user)

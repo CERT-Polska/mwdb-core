@@ -275,10 +275,6 @@ class Object(db.Model):
             if new_cls is None:
                 raise ObjectTypeConflictError
 
-        # Add parent to object if specified
-        if parent:
-            new_cls.add_parent(parent, commit=False)
-
         # Add metakeys
         for metakey in metakeys:
             new_cls.add_metakey(metakey['key'], metakey['value'], commit=False)
@@ -290,6 +286,12 @@ class Object(db.Model):
         # Share with all groups that access all objects
         for all_access_group in Group.all_access_groups():
             new_cls.give_access(all_access_group.id, AccessType.ADDED, new_cls, g.auth_user, commit=False)
+
+        # Add parent to object if specified
+        # Inherited share entries must be added AFTER we add share entries
+        # related with upload itself
+        if parent:
+            new_cls.add_parent(parent, commit=False)
 
         return new_cls, is_new
 

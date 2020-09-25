@@ -1,17 +1,19 @@
-const { override, babelInclude, removeModuleScopePlugin, addWebpackPlugin, addWebpackModuleRule, addWebpackResolve } = require('customize-cra');
+const { override, babelInclude, removeModuleScopePlugin, addWebpackModuleRule } = require('customize-cra');
 const fs = require("fs");
 const path = require('path');
-const webpack = require('webpack');
 
-const pluginPackagePrefix = "@malwarefront-plugin";
-const pluginsIndexFile = path.join(require.resolve("@malwarefront/extensions"), '..', 'plugins.js');
+const mwdbPackageNamespace = "@mwdb-web";
+const pluginPackagePrefix = "plugin-";
+const pluginsIndexFile = path.join(require.resolve("@mwdb-web/commons"), 'extensions', '..', 'plugins.js');
 
 function findInstalledPlugins() {
     let modules = {};
-    const modulesDir = path.join(__dirname, "node_modules", pluginPackagePrefix);
+    const modulesDir = path.join(__dirname, "node_modules", mwdbPackageNamespace);
     if(!fs.existsSync(modulesDir))
         return modules;
     for(const pluginName of fs.readdirSync(modulesDir)) {
+        if(!pluginName.startsWith(pluginPackagePrefix))
+            continue;
         let realPath = path.join(modulesDir, pluginName);
         try {
             realPath = path.resolve(modulesDir, fs.readlinkSync(realPath));
@@ -19,7 +21,7 @@ function findInstalledPlugins() {
             if(e.errno != -22 /* EINVAL */)
                 throw e;
         }
-        modules[pluginPackagePrefix + "/" + pluginName] = realPath;
+        modules[mwdbPackageNamespace + "/" + pluginName] = realPath;
     }
     return modules;
 }

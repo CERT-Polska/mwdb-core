@@ -5,10 +5,10 @@ import ShowObject from "./ShowObject";
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
-import api from "@malwarefront/api";
-import { makeSearchConfigElementLink, makeSearchLink, makeSearchDateLink, downloadData } from "@malwarefront/helpers";
-import { Extension } from "@malwarefront/extensions";
-import { DataTable, DateString, ObjectLink, View, HexView, ActionCopyToClipboard } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { makeSearchConfigElementLink, makeSearchLink, makeSearchDateLink, downloadData } from "@mwdb-web/commons/helpers";
+import { Extension } from "@mwdb-web/commons/extensions";
+import { DataTable, DateString, ObjectLink, View, HexView, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter from './ShowObjectPresenter';
 
 class ConfigRow extends Component {
@@ -171,14 +171,6 @@ class ConfigPresenter extends ShowObjectPresenter {
     handleDownload = () => {
         downloadData(JSON.stringify(this.props.cfg), this.props.id, 'application/json');
     };
-
-    renderHeader() {
-        return (
-            <div className="align-self-center media-body">
-                <h5 className="mt-0">Config <span className="text-monospace">{this.props.id}</span></h5>
-            </div>
-        );
-    }
 
     get presenters() {
         return {

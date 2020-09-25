@@ -2,8 +2,8 @@ import React, {useState, useEffect} from 'react';
 import { connect } from "react-redux";
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {ConfirmationModal} from "@malwarefront/ui";
-import api from "@malwarefront/api";
+import {ConfirmationModal} from "@mwdb-web/commons/ui";
+import api from "@mwdb-web/commons/api";
 
 import QuickQueryAddModal from "./QuickQueryAddModal";
 

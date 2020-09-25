@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {Link} from "react-router-dom";
-import api from "@malwarefront/api";
-import { makeSearchLink } from "@malwarefront/helpers";
+import api from "@mwdb-web/commons/api";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
 
-import { getStyleForTag, ConfirmationModal } from "@malwarefront/ui";
+import { getStyleForTag, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export class Tag extends Component {
     static defaultProps = {

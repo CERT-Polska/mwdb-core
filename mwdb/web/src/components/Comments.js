@@ -4,8 +4,8 @@ import Pagination from "react-js-pagination";
 import { connect } from 'react-redux';
 
 import _ from 'lodash';
-import api from "@malwarefront/api";
-import { Identicon, ConfirmationModal } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 class Comment extends Component {
     render() {

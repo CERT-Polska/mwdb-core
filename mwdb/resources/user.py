@@ -22,7 +22,7 @@ from mwdb.schema.user import (
     UserSetPasswordTokenResponseSchema
 )
 
-from . import logger, requires_capabilities, requires_authorization
+from . import logger, requires_capabilities, requires_authorization, load_schema, loads_schema
 
 
 class UserListResource(Resource):
@@ -97,9 +97,7 @@ class UserPendingResource(Resource):
             500:
                 description: When SMTP server is unavailable or not properly configured on the server.
         """
-        user_login_obj = UserLoginSchemaBase().load({"login": login})
-        if user_login_obj.errors:
-            return {"errors": user_login_obj.errors}, 400
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         user = db.session.query(User).filter(User.login == login, User.pending == true()).first()
         user.pending = False
@@ -158,9 +156,7 @@ class UserPendingResource(Resource):
             500:
                 description: When SMTP server is unavailable or not properly configured on the server.
         """
-        user_login_obj = UserLoginSchemaBase().load({"login": login})
-        if user_login_obj.errors:
-            return {"errors": user_login_obj.errors}, 400
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         user = db.session.query(User).filter(User.login == login, User.pending == true()).first()
         if not user:
@@ -309,13 +305,9 @@ class UserResource(Resource):
         """
         schema = UserCreateRequestSchema()
 
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        user_login_obj = UserLoginSchemaBase().load({"login": login})
-        if user_login_obj.errors:
-            return {"errors": user_login_obj.errors}, 400
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         if db.session.query(exists().where(User.login == login)).scalar():
             raise Conflict("User exists yet")
@@ -325,13 +317,13 @@ class UserResource(Resource):
 
         user = User.create(
             login,
-            obj.data["email"],
-            obj.data["additional_info"],
+            obj["email"],
+            obj["additional_info"],
             pending=False,
-            feed_quality=obj.data["feed_quality"]
+            feed_quality=obj["feed_quality"]
         )
 
-        if obj.data["send_email"]:
+        if obj["send_email"]:
             try:
                 send_email_notification("register",
                                         "New account registered in MWDB",
@@ -390,13 +382,9 @@ class UserResource(Resource):
         """
         schema = UserUpdateRequestSchema()
 
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        user_login_obj = UserLoginSchemaBase().load({"login": login})
-        if user_login_obj.errors:
-            return {"errors": user_login_obj.errors}, 400
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         user = db.session.query(User).filter(User.login == login).first()
         if user is None:
@@ -405,25 +393,25 @@ class UserResource(Resource):
         if user.pending:
             raise Forbidden("User is pending and need to be accepted first")
 
-        email = obj.data["email"]
+        email = obj["email"]
         if email is not None:
             user.email = email
 
-        additional_info = obj.data["additional_info"]
+        additional_info = obj["additional_info"]
         if additional_info is not None:
             user.additional_info = additional_info
 
-        feed_quality = obj.data["feed_quality"]
+        feed_quality = obj["feed_quality"]
         if feed_quality is not None:
             user.feed_quality = feed_quality
 
-        disabled = obj.data["disabled"]
+        disabled = obj["disabled"]
         if disabled is not None:
             user.disabled = disabled
             user.reset_sessions()
 
         db.session.commit()
-        logger.info('User updated', extra=obj.data)
+        logger.info('User updated', extra=obj)
 
         schema = UserSuccessResponseSchema()
         return schema.dump({"login": login})

@@ -5,7 +5,7 @@ class TagSchemaBase(Schema):
     tag = fields.Str(required=True, allow_none=False)
 
     @pre_load
-    def sanitize_tag(self, params):
+    def sanitize_tag(self, params, **kwargs):
         params = dict(params)
         if params.get("tag"):
             params["tag"] = params["tag"].lower().strip()

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { connect } from "react-redux";
-import api from "@malwarefront/api";
-import { View } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { View } from "@mwdb-web/commons/ui";
 import SwaggerUI from "swagger-ui-react";
 
 

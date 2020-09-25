@@ -5,8 +5,8 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import Autocomplete from 'react-autocomplete';
 import AttributesAddModal from './AttributesAddModal';
 
-import api from "@malwarefront/api";
-import { DataTable, View } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { DataTable, View } from "@mwdb-web/commons/ui";
 
 import queryString from "query-string";
 import { connect } from "react-redux";

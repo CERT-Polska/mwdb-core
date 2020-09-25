@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux';
 
-import api from "@malwarefront/api";
-import {ConfirmationModal} from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import {ConfirmationModal} from "@mwdb-web/commons/ui";
 
 class AttributesAddModal extends Component {
     state = {

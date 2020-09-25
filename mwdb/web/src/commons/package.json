@@ -1,0 +1,26 @@
+{
+    "name": "@mwdb-web/commons",
+    "main": "index.js",
+    "private": true,
+    "version": "2.0.0-alpha3",
+    "dependencies": {
+        "axios": "0.19.2",
+        "identicon.js": "^2.3.2",
+        "history": "^4.10.1",
+        "react-modal": "^3.5.1",
+        "sha1": "^1.1.1"
+    },
+    "peerDependencies": {
+        "@fortawesome/react-fontawesome": "*",
+        "connected-react-router": "*",
+        "react": "*",
+        "react-ace": "*",
+        "react-autocomplete": "*",
+        "react-js-pagination": "*",
+        "react-redux": "*",
+        "react-router": "*",
+        "react-router-dom": "*",
+        "redux": "*",
+        "lodash": "*"
+    }
+}

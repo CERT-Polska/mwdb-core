@@ -7,8 +7,8 @@ import { connect } from "react-redux";
 
 import _ from "lodash";
 
-import api from "@malwarefront/api";
-import { Alert, MemberList } from "@malwarefront/ui";
+import api from "@mwdb-web/commons/api";
+import { Alert, MemberList } from "@mwdb-web/commons/ui";
 
 export let GroupMemberList = (props) => 
     <MemberList nameKey="login" 

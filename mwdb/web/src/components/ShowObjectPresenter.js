@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
-import api from "@malwarefront/api";
+import api from "@mwdb-web/commons/api";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-import { fromPlugin, Extendable } from "@malwarefront/extensions";
-import { capitalize } from '@malwarefront/helpers';
-import {ConfirmationModal} from "@malwarefront/ui";
+import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
+import { capitalize } from '@mwdb-web/commons/helpers';
+import {ConfirmationModal} from "@mwdb-web/commons/ui";
 
 import RelationsPlot from './RelationsPlot';
 
@@ -140,13 +140,6 @@ export default class ShowObjectPresenter extends Component {
 
         return (
             <Extendable ident="showObjectPresenter" object={this.props}>
-                <div className="card-header" style={{wordBreak: "break-all"}}>
-                    <div className="media row flex-nowrap">
-                        <Extendable ident="showObjectHeader" object={this.props}>
-                            {this.renderHeader()}
-                        </Extendable>
-                    </div>
-                </div>
                 <nav className="navbar navbar-expand-sm bg-white">
                     <ul className="nav nav-tabs mr-auto">
                         <Extendable ident="showObjectTabs" object={this.props}>

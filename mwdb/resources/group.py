@@ -16,7 +16,7 @@ from mwdb.schema.group import (
     GroupSuccessResponseSchema
 )
 
-from . import logger, requires_capabilities, requires_authorization
+from . import logger, requires_capabilities, requires_authorization, loads_schema, load_schema
 
 
 class GroupListResource(Resource):
@@ -126,20 +126,16 @@ class GroupResource(Resource):
                 description: When group exists yet
         """
         schema = GroupCreateRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        group_name_obj = GroupNameSchemaBase().load({"name": name})
-        if group_name_obj.errors:
-            return {"errors": group_name_obj.errors}, 400
+        group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
 
         if db.session.query(exists().where(Group.name == name)).scalar():
             raise Conflict("Group exists yet")
 
         group = Group(
             name=name,
-            capabilities=obj.data["capabilities"]
+            capabilities=obj["capabilities"]
         )
         db.session.add(group)
         db.session.commit()
@@ -192,25 +188,21 @@ class GroupResource(Resource):
                 description: When group doesn't exist
         """
         schema = GroupUpdateRequestSchema()
-        obj = schema.loads(request.get_data(as_text=True))
-        if obj.errors:
-            return {"errors": obj.errors}, 400
+        obj = loads_schema(request.get_data(as_text=True), schema)
 
-        group_name_obj = GroupNameSchemaBase().load({"name": name})
-        if group_name_obj.errors:
-            return {"errors": group_name_obj.errors}, 400
+        group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
 
         group = db.session.query(Group).filter(Group.name == name).first()
         if group is None:
             raise NotFound("No such group")
 
-        if obj.data["name"] is not None:
-            if obj.data["name"] != name and group.immutable:
+        if obj["name"] is not None:
+            if obj["name"] != name and group.immutable:
                 raise Forbidden("Renaming group not allowed - group is immutable")
-            group.name = obj.data["name"]
+            group.name = obj["name"]
 
-        if obj.data["capabilities"] is not None:
-            group.capabilities = obj.data["capabilities"]
+        if obj["capabilities"] is not None:
+            group.capabilities = obj["capabilities"]
 
         # Invalidate all sessions due to potentially changed capabilities
         for member in group.users:
@@ -267,13 +259,9 @@ class GroupMemberResource(Resource):
             404:
                 description: When user or group doesn't exist
         """
-        group_name_obj = GroupNameSchemaBase().load({"name": name})
-        if group_name_obj.errors:
-            return {"errors": group_name_obj.errors}, 400
+        group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
 
-        user_login_obj = UserLoginSchemaBase().load({"login": login})
-        if user_login_obj.errors:
-            return {"errors": user_login_obj.errors}, 400
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
         if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):
@@ -345,13 +333,9 @@ class GroupMemberResource(Resource):
             404:
                 description: When user or group doesn't exist
         """
-        group_name_obj = GroupNameSchemaBase().load({"name": name})
-        if group_name_obj.errors:
-            return {"errors": group_name_obj.errors}, 400
+        group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
 
-        user_login_obj = UserLoginSchemaBase().load({"login": login})
-        if user_login_obj.errors:
-            return {"errors": user_login_obj.errors}, 400
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
         if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):

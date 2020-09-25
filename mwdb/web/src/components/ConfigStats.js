@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 
-import api from "@malwarefront/api";
-import { DateString, SortedList, View } from "@malwarefront/ui"
-import { makeSearchLink } from "@malwarefront/helpers"
+import api from "@mwdb-web/commons/api";
+import { DateString, SortedList, View } from "@mwdb-web/commons/ui"
+import { makeSearchLink } from "@mwdb-web/commons/helpers"
 
 function ConfigStatsItem(props) {
     return (

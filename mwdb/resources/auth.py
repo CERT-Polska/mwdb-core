@@ -412,7 +412,7 @@ class AuthGroupListResource(Resource):
         security:
             - bearerAuth: []
         tags:
-            - user
+            - auth
         responses:
             200:
                 description: List of user groups

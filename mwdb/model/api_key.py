@@ -1,8 +1,8 @@
+import datetime
 import uuid
 
 from itsdangerous import JSONWebSignatureSerializer, SignatureExpired, BadSignature
 
-from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -16,7 +16,7 @@ class APIKey(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    issued_on = db.Column(db.DateTime, default=func.now(), nullable=False)
+    issued_on = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
     issued_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     issuer = db.relationship('User', foreign_keys=[issued_by], uselist=False)

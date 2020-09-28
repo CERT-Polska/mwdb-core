@@ -3,6 +3,7 @@ import json
 from marshmallow import Schema, fields, validates_schema, ValidationError, pre_load, post_dump
 
 from .metakey import MetakeyItemRequestSchema
+from .utils import UTCDateTime
 from .tag import TagItemResponseSchema
 
 
@@ -53,7 +54,7 @@ class ObjectListItemResponseSchema(Schema):
     id = fields.Str(attribute="dhash", required=True, allow_none=False)
     type = fields.Str(required=True, allow_none=False)
     tags = fields.Nested(TagItemResponseSchema, many=True, required=True, allow_none=False)
-    upload_time = fields.DateTime(required=True, allow_none=False)
+    upload_time = UTCDateTime(required=True, allow_none=False)
 
 
 class ObjectListResponseSchemaBase(Schema):
@@ -75,7 +76,7 @@ class ObjectItemResponseSchema(Schema):
     id = fields.Str(attribute="dhash", required=True, allow_none=False)
     type = fields.Str(required=True, allow_none=False)
     tags = fields.Nested(TagItemResponseSchema, many=True, required=True, allow_none=False)
-    upload_time = fields.DateTime(required=True, allow_none=False)
+    upload_time = UTCDateTime(required=True, allow_none=False)
 
     parents = fields.Nested(ObjectListItemResponseSchema, many=True, required=True, allow_none=False)
     children = fields.Nested(ObjectListItemResponseSchema, many=True, required=True, allow_none=False)

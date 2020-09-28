@@ -1,5 +1,7 @@
 from marshmallow import Schema, fields, validates, ValidationError
 
+from .utils import UTCDateTime
+
 
 class QuickQuerySchemaBase(Schema):
     query = fields.Str(required=True, allow_none=False)
@@ -18,4 +20,4 @@ class QuickQueryRequestSchema(QuickQuerySchemaBase):
 
 class QuickQueryResponseSchema(QuickQuerySchemaBase):
     id = fields.Int(required=True, allow_none=False)
-    timestamp = fields.DateTime(required=True, allow_none=False)
+    timestamp = UTCDateTime(required=True, allow_none=False)

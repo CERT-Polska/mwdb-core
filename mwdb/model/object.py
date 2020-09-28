@@ -16,7 +16,7 @@ relation = db.Table(
     'relation',
     db.Column('parent_id', db.Integer, db.ForeignKey('object.id'), index=True),
     db.Column('child_id', db.Integer, db.ForeignKey('object.id'), index=True),
-    db.Column('creation_time', db.DateTime, default=datetime.datetime.now),
+    db.Column('creation_time', db.DateTime, default=datetime.datetime.utcnow),
     db.Index('ix_relation_parent_child', 'parent_id', 'child_id', unique=True)
 )
 
@@ -41,7 +41,7 @@ class ObjectPermission(db.Model):
         db.Index('ix_permission_group_object', 'object_id', 'group_id', unique=True),
     )
 
-    access_time = db.Column(db.DateTime, nullable=False, index=True, default=func.now())
+    access_time = db.Column(db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow)
 
     reason_type = db.Column(db.String(32))
     related_object_id = db.Column(db.Integer, db.ForeignKey('object.id'))
@@ -120,7 +120,7 @@ class Object(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     type = db.Column(db.String(50), nullable=False)
     dhash = db.Column(db.String(64), unique=True, index=True, nullable=False)
-    upload_time = db.Column(db.DateTime, nullable=False, index=True, default=func.now())
+    upload_time = db.Column(db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow)
 
     parents = db.relationship(
         "Object", secondary=relation,
@@ -256,7 +256,7 @@ class Object(db.Model):
             new_cls = obj
             try:
                 # Try to create the requested object
-                new_cls.upload_time = datetime.datetime.now()
+                new_cls.upload_time = datetime.datetime.utcnow()
                 db.session.add(new_cls)
                 db.session.flush()
                 db.session.commit()

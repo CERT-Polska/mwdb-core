@@ -1,7 +1,5 @@
 from marshmallow import Schema, fields, validates, ValidationError
 
-from .api_key import APIKeyListItemResponseSchema
-from .group import GroupBasicResponseSchema
 from .user import UserLoginSchemaBase
 
 

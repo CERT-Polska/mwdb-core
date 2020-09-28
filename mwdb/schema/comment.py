@@ -1,5 +1,7 @@
 from marshmallow import Schema, fields, validates, ValidationError
 
+from .utils import UTCDateTime
+
 
 class CommentSchemaBase(Schema):
     comment = fields.Str(required=True, allow_none=False)
@@ -17,4 +19,4 @@ class CommentRequestSchema(CommentSchemaBase):
 class CommentItemResponseSchema(CommentSchemaBase):
     id = fields.Int(required=True, allow_none=False)
     author = fields.Str(required=True, allow_none=False, attribute="author_login")
-    timestamp = fields.DateTime(required=True, allow_none=False)
+    timestamp = UTCDateTime(required=True, allow_none=False)

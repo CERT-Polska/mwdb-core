@@ -2,6 +2,8 @@ import re
 
 from marshmallow import Schema, fields, validates, ValidationError
 
+from .utils import UTCDateTime
+
 
 class ShareRequestSchema(Schema):
     group = fields.Str(required=True, allow_none=False)
@@ -20,7 +22,7 @@ class ShareGroupListResponseSchema(Schema):
 
 class ShareItemResponseSchema(Schema):
     group_name = fields.Str(required=True, allow_none=False)
-    access_time = fields.DateTime(required=True, allow_none=False)
+    access_time = UTCDateTime(required=True, allow_none=False)
     reason_type = fields.Str(required=True, allow_none=False)
     access_reason = fields.Str(required=True, allow_none=False)  # backwards compatibility
     related_object_dhash = fields.Str(required=True, allow_none=True)

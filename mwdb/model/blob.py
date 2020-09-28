@@ -34,12 +34,12 @@ class TextBlob(Object):
             blob_name=blob_name,
             blob_size=len(content),
             blob_type=blob_type,
-            last_seen=datetime.datetime.now(),
+            last_seen=datetime.datetime.utcnow(),
             _content=content.encode("unicode_escape").decode("utf-8")
         )
         blob_obj, is_new = cls._get_or_create(blob_obj, parent=parent, metakeys=metakeys, share_with=share_with)
         # If object exists yet: we need to refresh last_seen timestamp
         if not is_new:
-            blob_obj.last_seen = datetime.datetime.now()
+            blob_obj.last_seen = datetime.datetime.utcnow()
 
         return blob_obj, is_new

@@ -74,7 +74,7 @@ class User(db.Model):
     def set_password(self, password):
         self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
         self.password_ver = os.urandom(8).hex()
-        self.set_password_on = datetime.datetime.now()
+        self.set_password_on = datetime.datetime.utcnow()
 
     def reset_sessions(self):
         # Should be also called for fresh user objects
@@ -112,9 +112,9 @@ class User(db.Model):
 
         if not pending:
             user.registered_by = g.auth_user.id
-            user.registered_on = datetime.datetime.now()
+            user.registered_on = datetime.datetime.utcnow()
         else:
-            user.requested_on = datetime.datetime.now()
+            user.requested_on = datetime.datetime.utcnow()
 
         db.session.add(user)
         if commit:

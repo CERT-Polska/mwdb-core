@@ -4,6 +4,7 @@ from marshmallow import Schema, fields, validates, ValidationError
 
 from .api_key import APIKeyListItemResponseSchema
 from .group import GroupBasicResponseSchema, GroupItemResponseSchema
+from .utils import UTCDateTime
 
 
 class UserLoginSchemaBase(Schema):
@@ -51,10 +52,10 @@ class UserItemResponseSchema(UserLoginSchemaBase):
     additional_info = fields.Str(required=True, allow_none=False)
     feed_quality = fields.Str(required=True, allow_none=False)
 
-    requested_on = fields.DateTime(required=True)
-    registered_on = fields.DateTime(required=True)
-    logged_on = fields.DateTime(required=True)
-    set_password_on = fields.DateTime(required=True)
+    requested_on = UTCDateTime(required=True)
+    registered_on = UTCDateTime(required=True)
+    logged_on = UTCDateTime(required=True)
+    set_password_on = UTCDateTime(required=True)
     registrar_login = fields.Str(required=True)
 
     disabled = fields.Boolean(required=True, allow_none=False)
@@ -68,7 +69,7 @@ class UserListItemResponseSchema(UserLoginSchemaBase):
     email = fields.Email(required=True, allow_none=False)
     additional_info = fields.Str(required=True, allow_none=False)
     feed_quality = fields.Str(required=True, allow_none=False)
-    requested_on = fields.DateTime(required=True)
+    requested_on = UTCDateTime(required=True)
     disabled = fields.Boolean(required=True, allow_none=False)
     pending = fields.Boolean(required=True, allow_none=False)
     groups = fields.Nested(GroupItemResponseSchema, many=True, required=True, allow_none=False)
@@ -89,9 +90,9 @@ class UserSuccessResponseSchema(UserLoginSchemaBase):
 class UserOwnProfileResponseSchema(UserLoginSchemaBase):
     email = fields.Email(required=True, allow_none=False)
 
-    registered_on = fields.DateTime(required=True)
-    logged_on = fields.DateTime(required=True)
-    set_password_on = fields.DateTime(required=True)
+    registered_on = UTCDateTime(required=True)
+    logged_on = UTCDateTime(required=True)
+    set_password_on = UTCDateTime(required=True)
 
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     groups = fields.Nested(GroupBasicResponseSchema, many=True, required=True, allow_none=False)
@@ -101,5 +102,5 @@ class UserOwnProfileResponseSchema(UserLoginSchemaBase):
 class UserProfileResponseSchema(UserLoginSchemaBase):
     email = fields.Email(required=True, allow_none=False)
 
-    registered_on = fields.DateTime(required=True)
-    logged_on = fields.DateTime(required=True)
+    registered_on = UTCDateTime(required=True)
+    logged_on = UTCDateTime(required=True)

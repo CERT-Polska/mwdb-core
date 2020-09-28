@@ -1,5 +1,6 @@
 from marshmallow import fields, Schema
 
+from .config import ConfigItemResponseSchema
 from .object import (
     ObjectCreateRequestSchemaBase,
     ObjectLegacyMetakeysMixin,
@@ -7,7 +8,7 @@ from .object import (
     ObjectListResponseSchemaBase,
     ObjectItemResponseSchema,
 )
-from .config import ConfigItemResponseSchema
+from .utils import UTCDateTime
 
 
 # Merge it with BlobCreateRequestSchema during legacy upload remove
@@ -29,7 +30,7 @@ class BlobListItemResponseSchema(ObjectListItemResponseSchema):
     blob_name = fields.Str(required=True, allow_none=False)
     blob_size = fields.Int(required=True, allow_none=False)
     blob_type = fields.Str(required=True, allow_none=False)
-    last_seen = fields.DateTime(required=True, allow_none=False)
+    last_seen = UTCDateTime(required=True, allow_none=False)
 
 
 class BlobListResponseSchema(ObjectListResponseSchemaBase, BlobListItemResponseSchema):
@@ -40,7 +41,7 @@ class BlobItemResponseSchema(ObjectItemResponseSchema):
     blob_name = fields.Str(required=True, allow_none=False)
     blob_size = fields.Int(required=True, allow_none=False)
     blob_type = fields.Str(required=True, allow_none=False)
-    last_seen = fields.DateTime(required=True, allow_none=False)
+    last_seen = UTCDateTime(required=True, allow_none=False)
 
     content = fields.Str(required=True, allow_none=False)
     latest_config = fields.Nested(ConfigItemResponseSchema, required=True, allow_none=True)

@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import { connect } from "react-redux";
 
-import {makeSearchLink} from "@mwdb-web/commons/helpers";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import api from "@mwdb-web/commons/api";
 import { View, HighlightText, ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -105,7 +104,7 @@ class UserGroupRow extends Component {
                     this.props.group.users.map((c, idx) =>
                             <tr className="nested d-flex">
                                 <td className="col">
-                                    <Link key={idx} to={makeSearchLink("uploader", c, false, '')}>
+                                    <Link key={idx} to={`profile/${c}`}>
                                         {c}
                                     </Link>
                                     {this.props.group.admins.includes(c) && " (admin)"}

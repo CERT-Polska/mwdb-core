@@ -22,10 +22,10 @@ export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
 
 export function getStyleForTag(tag) {
     let styleList = {
-        "primary": ["spam", "suspicious", "unwanted", "apk", "pexe", "zip", "archive", "src:", "uploader:", "feed:"],
-        "warning": ["ripped:", "contains:", "matches:"],
+        "primary": ["spam", "src:", "uploader:", "feed:"],
+        "warning": ["ripped:", "contains:", "matches:", "maybe:"],
         "success": ["static:", "dynamic:"],
-        "secondary": ["runnable:", "archive:", "dump:", "script:"]
+        "secondary": ["runnable:", "archive:", "dump:", "script:", "document:", "archive", "dump"]
     }
 
     for(let style of Object.keys(styleList)) {

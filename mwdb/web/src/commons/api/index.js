@@ -62,10 +62,6 @@ function authRecoverPassword(login, email, recaptcha) {
     return axios.post("/auth/recover_password", {login, email, recaptcha})
 }
 
-function authProfile() {
-    return axios.get("/auth/profile")
-}
-
 function authGroups() {
     return axios.get("/auth/groups")
 }
@@ -225,6 +221,10 @@ function getUser(login) {
     return axios.get(`/user/${login}`)
 }
 
+function getUserProfile(login) {
+    return axios.get(`/profile/${login}`)
+}
+
 function generateApiToken(login, expiration) {
     expiration = expiration || (3600 * 24 * 365 * 10)
     return axios.post(`/user/${login}/api_token`, { expiration })
@@ -309,7 +309,6 @@ export default {
     getServerDocs,
     getServerInfo,
     authLogin,
-    authProfile,
     authGroups,
     authRefresh,
     authSetPassword,
@@ -349,6 +348,7 @@ export default {
     rejectPendingUser,
     getUsers,
     getUser,
+    getUserProfile,
     generateApiToken,
     generateSetPasswordToken,
     setUserDisabled,

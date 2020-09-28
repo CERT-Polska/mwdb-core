@@ -153,9 +153,12 @@ class Object(db.Model):
         from .config import Config
         return (
             db.session.query(Config)
-                      .filter(Config.id.in_(db.session.query(relation.c.child_id)
-                                                      .filter(relation.c.parent_id == self.id)))
-                      .filter(g.auth_user.has_access_to_object(Config.id)).first())
+                      .join(relation, and_(
+                          relation.c.parent_id == self.id,
+                          relation.c.child_id == Config.id))
+                      .filter(g.auth_user.has_access_to_object(Config.id))
+                      .order_by(relation.c.creation_time.desc()).first()
+        )
 
     def add_parent(self, parent, commit=True):
         """
@@ -272,10 +275,6 @@ class Object(db.Model):
             if new_cls is None:
                 raise ObjectTypeConflictError
 
-        # Add parent to object if specified
-        if parent:
-            new_cls.add_parent(parent, commit=False)
-
         # Add metakeys
         for metakey in metakeys:
             new_cls.add_metakey(metakey['key'], metakey['value'], commit=False)
@@ -287,6 +286,12 @@ class Object(db.Model):
         # Share with all groups that access all objects
         for all_access_group in Group.all_access_groups():
             new_cls.give_access(all_access_group.id, AccessType.ADDED, new_cls, g.auth_user, commit=False)
+
+        # Add parent to object if specified
+        # Inherited share entries must be added AFTER we add share entries
+        # related with upload itself
+        if parent:
+            new_cls.add_parent(parent, commit=False)
 
         return new_cls, is_new
 

@@ -158,7 +158,7 @@ class Navigation extends Component {
                                         </li>
                                         <li className="nav-item">
                                             <div class="btn-group">
-                                                <Link to="/profile" className="btn btn-outline-success">Profile</Link>
+                                                <Link className="btn btn-outline-success" to={`/profile/${this.props.userLogin}`}>Profile</Link>
                                                 <a className="btn btn-outline-danger" href="#logout" onClick={this.handleLogout}>Logout</a>
                                             </div>
                                         </li>

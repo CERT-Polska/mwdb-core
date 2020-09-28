@@ -19,11 +19,11 @@ from mwdb.schema.auth import (
     AuthSetPasswordRequestSchema,
     AuthRecoverPasswordRequestSchema,
     AuthSuccessResponseSchema,
-    AuthValidateTokenResponseSchema,
-    AuthProfileResponseSchema
+    AuthValidateTokenResponseSchema
 )
-from mwdb.schema.user import UserSuccessResponseSchema
+
 from mwdb.schema.group import GroupListResponseSchema
+from mwdb.schema.user import UserSuccessResponseSchema, UserProfileResponseSchema
 
 from . import logger, requires_authorization, loads_schema
 
@@ -399,29 +399,6 @@ class ValidateTokenResource(Resource):
             "capabilities": user.capabilities,
             "groups": user.group_names
         })
-
-
-class ProfileResource(Resource):
-    @requires_authorization
-    def get(self):
-        """
-        ---
-        summary: Get profile information
-        description: |
-            Returns information about currently authenticated user
-        security:
-            - bearerAuth: []
-        tags:
-            - auth
-        responses:
-            200:
-                description: Information about authenticated user
-                content:
-                  application/json:
-                    schema: AuthProfileResponseSchema
-        """
-        schema = AuthProfileResponseSchema()
-        return schema.dump(g.auth_user)
 
 
 class AuthGroupListResource(Resource):

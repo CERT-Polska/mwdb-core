@@ -4,7 +4,7 @@ const path = require('path');
 
 const mwdbPackageNamespace = "@mwdb-web";
 const pluginPackagePrefix = "plugin-";
-const pluginsIndexFile = path.join(require.resolve("@mwdb-web/commons"), 'extensions', '..', 'plugins.js');
+const pluginsIndexFile = path.join(require.resolve("@mwdb-web/commons"), '..', 'extensions', 'plugins.js');
 
 function findInstalledPlugins() {
     let modules = {};
@@ -38,7 +38,7 @@ function getPluginLoaders(plugins) {
             imports: [
                 {
                     moduleName,
-                    name: moduleName.split("/")[1]
+                    name: moduleName.split("/")[1].slice(pluginPackagePrefix.length)
                 }
             ]
         }
@@ -47,7 +47,7 @@ function getPluginLoaders(plugins) {
         options: {
             exports: moduleNames.map((moduleName) => ({
                 syntax: 'named',
-                name: moduleName.split("/")[1]
+                name: moduleName.split("/")[1].slice(pluginPackagePrefix.length)
             }))
         }
     })

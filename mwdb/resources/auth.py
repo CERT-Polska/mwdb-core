@@ -21,9 +21,8 @@ from mwdb.schema.auth import (
     AuthSuccessResponseSchema,
     AuthValidateTokenResponseSchema
 )
-
 from mwdb.schema.group import GroupListResponseSchema
-from mwdb.schema.user import UserSuccessResponseSchema, UserProfileResponseSchema
+from mwdb.schema.user import UserSuccessResponseSchema
 
 from . import logger, requires_authorization, loads_schema
 

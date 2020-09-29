@@ -87,7 +87,6 @@ class GroupUpdate extends Component {
         }
     }
 
-
     removeMember = async (login) => {
         try {
             await api.removeGroupMember(this.props.match.params.name, login)

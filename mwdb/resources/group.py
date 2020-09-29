@@ -84,7 +84,6 @@ class GroupResource(Resource):
         if obj is None:
             raise NotFound("No such group")
         schema = GroupItemResponseSchema()
-        print(schema.dump(obj))
         return schema.dump(obj)
 
     @requires_authorization
@@ -230,7 +229,7 @@ class GroupMemberResource(Resource):
             Works only for user-defined groups (excluding private and 'public')
 
             Requires `manage_users` capability to set user as group admin or to add new user to the group.
-            If user is group_admin he is able only yo adding new users to that group.
+            If the user is group_admin, he can only delete or add other users to his group.
         security:
             - bearerAuth: []
         tags:

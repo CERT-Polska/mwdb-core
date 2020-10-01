@@ -191,11 +191,15 @@ function updateGroup(name, newName, capabilities) {
 }
 
 function addGroupMember(name, member) {
-    return axios.put(`/group/${name}/member/${member}`)
+    return axios.post(`/group/${name}/member/${member}`)
 }
 
 function removeGroupMember(name, member) {
     return axios.delete(`/group/${name}/member/${member}`)
+}
+
+function setGroupAdmin(name, member, membership) {
+    return axios.put(`/group/${name}/member/${member}`, {membership})
 }
 
 function getUsers() {
@@ -343,6 +347,7 @@ export default {
     updateGroup,
     addGroupMember,
     removeGroupMember,
+    setGroupAdmin,
     getPendingUsers,
     acceptPendingUser,
     rejectPendingUser,

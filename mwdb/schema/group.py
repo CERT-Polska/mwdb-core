@@ -48,3 +48,7 @@ class GroupListResponseSchema(Schema):
 
 class GroupSuccessResponseSchema(GroupNameSchemaBase):
     pass
+
+
+class GroupAdminMembership(Schema):
+    admin_status = fields.Boolean(required=True)

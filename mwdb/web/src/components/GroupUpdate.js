@@ -79,7 +79,7 @@ class GroupUpdate extends Component {
             await api.addGroupMember(this.props.match.params.name, login)
             this.doUpdate();
             this.setState({
-                success: "Member updated successfully",
+                success: "Member added successfully",
                 error: null
             });
         } catch(error) {
@@ -99,6 +99,19 @@ class GroupUpdate extends Component {
             this.setState({error});
         }
     };
+
+    setAdminMembership = async (login, membership) => {
+        try {
+            await api.setGroupAdmin(this.props.match.params.name, login, membership)
+            this.doUpdate();
+            this.setState({
+                success: "Membership updated successfully",
+                error: null
+            });
+        } catch(error) {
+            this.setState({error})
+        }
+    }
 
     handleGroupUpdate = async (e) => {
         e.preventDefault();
@@ -172,6 +185,7 @@ class GroupUpdate extends Component {
                 <GroupMemberList items={this.state.users}
                                  admins={this.state.admins}
                                  addMember={this.addMember}
+                                 setAdminMembership={this.setAdminMembership}
                                  removeMember={this.removeMember}
                                  newMemberItems={this.itemsFromDifferentGroups()}
                                  disabled={this.isGroupImmutable()}

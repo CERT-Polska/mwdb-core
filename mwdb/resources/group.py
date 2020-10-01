@@ -13,7 +13,8 @@ from mwdb.schema.group import (
     GroupUpdateRequestSchema,
     GroupItemResponseSchema,
     GroupListResponseSchema,
-    GroupSuccessResponseSchema
+    GroupSuccessResponseSchema,
+    GroupAdminMembership
 )
 
 from . import logger, requires_capabilities, requires_authorization, loads_schema, load_schema
@@ -226,17 +227,17 @@ class GroupResource(Resource):
 
 class GroupMemberResource(Resource):
     @requires_authorization
-    def put(self, name, login):
+    @requires_capabilities(Capabilities.manage_users)
+    def post(self, name, login):
         """
         ---
-        summary: Add a member to the specific group or set group admin membership
+        summary: Add a member to the specific group
         description: |
-            Adds new member to existing group or set group admin for specific member.
+            Adds new member to existing group
 
             Works only for user-defined groups (excluding private and 'public')
 
-            Requires `manage_users` capability to set user as group admin or to add new user to the group.
-            If the user is group_admin, he can only delete or add other users to his group.
+            Requires `manage_users` capability
         security:
             - bearerAuth: []
         tags:
@@ -275,9 +276,6 @@ class GroupMemberResource(Resource):
                       .filter(Group.name == name)
         ).first()
 
-        if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):
-            raise Forbidden("You are not permitted to manage this group")
-
         if group is None:
             raise NotFound("No such group")
 
@@ -291,13 +289,81 @@ class GroupMemberResource(Resource):
         if member.pending:
             raise Forbidden("User is pending and need to be accepted first")
 
-        if group in member.groups and g.auth_user.has_rights(Capabilities.manage_users):
-            if member.is_group_admin(group.id):
-                member.set_group_admin(group.id, False)
-            else:
-                member.set_group_admin(group.id, True)
-        else:
-            group.users.append(member)
+        group.users.append(member)
+        member.reset_sessions()
+        db.session.commit()
+
+        logger.info('Group member added', extra={'user': member.login, 'group': group.name})
+        schema = GroupSuccessResponseSchema()
+        return schema.dump({"name": name})
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def put(self, name, login):
+        """
+        ---
+        summary: Set group admin membership
+        description: |
+            Set group admin membership for specific member.
+
+            Works only for user-defined groups (excluding private and 'public')
+
+            Requires `manage_users` capability
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+            - in: path
+              name: login
+              schema:
+                type: string
+              description: Member login
+        responses:
+            200:
+                description: When member was added successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
+            400:
+                description: When request body is invalid
+            403:
+                description: When user doesn't have `manage_users` capability, group is immutable or user is pending
+            404:
+                description: When user or group doesn't exist
+        """
+        group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
+
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
+
+        membership = load_schema(request.get_data(as_text=True), GroupAdminMembership())
+
+        group = (
+            db.session.query(Group)
+                      .options(joinedload(Group.members, Member.user))
+                      .filter(Group.name == name)
+        ).first()
+
+        if group is None:
+            raise NotFound("No such group")
+
+        if group.immutable:
+            raise Forbidden("Change membership in private or public group is not allowed")
+
+        member = db.session.query(User).filter(User.login == login).first()
+        if member is None:
+            raise NotFound("No such user")
+
+        if member.pending:
+            raise Forbidden("User is pending and need to be accepted first")
+
+        member.set_group_admin(group.id, membership)
+
         member.reset_sessions()
         db.session.commit()
 

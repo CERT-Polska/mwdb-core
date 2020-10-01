@@ -43,10 +43,9 @@ class User(db.Model):
     logged_on = db.Column(db.DateTime)
     set_password_on = db.Column(db.DateTime)
 
-    memberships = db.relationship(Member, back_populates='user', lazy='selectin')
+    memberships = db.relationship(Member, back_populates='user', cascade="all, delete-orphan", lazy='selectin')
     groups = association_proxy('memberships', 'group', creator=lambda group: Member(group=group))
 
-    # groups = db.relationship('Group', secondary=member, backref='users', lazy='selectin')
     comments = db.relationship('Comment', back_populates='author')
     api_keys = db.relationship('APIKey', foreign_keys="APIKey.user_id", backref='user')
     registrar = db.relationship('User', foreign_keys="User.registered_by", remote_side=[id], uselist=False)
@@ -177,10 +176,11 @@ class User(db.Model):
         return group.group_admin
 
     def set_group_admin(self, group_id, set_admin):
-        stmt = (
-            Member.update().values(group_admin=set_admin)
-                           .where(and_(Member.user_id == self.id, Member.group_id == group_id)))
-        db.engine.execute(stmt)
+        member = (
+            db.session.query(Member)
+                      .filter(Member.user_id == self.id, Member.group_id == group_id)
+            ).first()
+        member.group_admin = set_admin
 
     def has_access_to_object(self, object_id):
         return object_id.in_(db.session.query(ObjectPermission.object_id)

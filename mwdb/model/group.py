@@ -14,7 +14,7 @@ class Group(db.Model):
     capabilities = db.Column('capabilities', ARRAY(db.Text), nullable=False, server_default='{}')
     private = db.Column(db.Boolean, nullable=False, default=False)
 
-    members = db.relationship('Member', back_populates='group')
+    members = db.relationship('Member', back_populates='group', cascade="all, delete-orphan")
     users = association_proxy('members', 'user', creator=lambda user: Member(user=user))
 
     PUBLIC_GROUP_NAME = "public"

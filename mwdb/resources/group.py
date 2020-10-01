@@ -85,7 +85,7 @@ class GroupResource(Resource):
         """
         obj = (
             db.session.query(Group)
-                      .options(joinedload(Group.users).joinedload(Group.members, Member.user))
+                      .options(joinedload(Group.members, Member.user))
                       .filter(Group.name == name)
         ).first()
         if obj is None:
@@ -274,6 +274,7 @@ class GroupMemberResource(Resource):
                       .options(joinedload(Group.members, Member.user))
                       .filter(Group.name == name)
         ).first()
+
         if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):
             raise Forbidden("You are not permitted to manage this group")
 

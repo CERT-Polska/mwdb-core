@@ -5,9 +5,9 @@ db = SQLAlchemy()
 
 # These imports must appear after "db" declaration
 
-from .user import member, User                                      # noqa: E402
+from .group import Group, Member                                    # noqa: E402
+from .user import User                                              # noqa: E402
 from .api_key import APIKey                                         # noqa: E402
-from .group import Group                                            # noqa: E402
 from .object import relation, Object, ObjectPermission              # noqa: E402
 from .file import File                                              # noqa: E402
 from .config import Config, StaticConfig                            # noqa: E402

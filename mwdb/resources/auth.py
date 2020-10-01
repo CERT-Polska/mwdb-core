@@ -9,7 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import false
 from werkzeug.exceptions import Forbidden, Conflict, InternalServerError
 
-from mwdb.model import db, User, Group
+from mwdb.model import db, User, Group, Member
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
 
@@ -420,7 +420,7 @@ class AuthGroupListResource(Resource):
                     schema: GroupListResponseSchema
         """
         objs = (db.session.query(Group)
-                          .options(joinedload(Group.users))
+                          .options(joinedload(Group.members, Member.user))
                           .filter(g.auth_user.is_member(Group.id))
                           .filter(Group.name != "public")
                           .filter(Group.private.is_(False))).all()

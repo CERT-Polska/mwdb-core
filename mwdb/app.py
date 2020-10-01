@@ -55,6 +55,7 @@ class HashConverter(BaseConverter):
 
 app.config["SQLALCHEMY_DATABASE_URI"] = app_config.mwdb.postgres_uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = app_config.mwdb.secret_key
 """
 Flask-restful tries to be smart and transforms NotFound exceptions.

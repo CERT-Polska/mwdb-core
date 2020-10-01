@@ -5,7 +5,7 @@ from sqlalchemy import exists
 from werkzeug.exceptions import NotFound, Conflict, Forbidden
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, Group, User
+from mwdb.model import db, Group, User, Member
 from mwdb.schema.user import UserLoginSchemaBase
 from mwdb.schema.group import (
     GroupNameSchemaBase,
@@ -43,7 +43,10 @@ class GroupListResource(Resource):
             403:
                 description: When user doesn't have `manage_users` capability.
         """
-        objs = db.session.query(Group).options(joinedload(Group.users)).all()
+        objs = (
+            db.session.query(Group)
+                      .options(joinedload(Group.members, Member.user))
+        ).all()
         schema = GroupListResponseSchema()
         return schema.dump({"groups": objs})
 
@@ -80,7 +83,11 @@ class GroupResource(Resource):
             404:
                 description: When group doesn't exist
         """
-        obj = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
+        obj = (
+            db.session.query(Group)
+                      .options(joinedload(Group.users).joinedload(Group.members, Member.user))
+                      .filter(Group.name == name)
+        ).first()
         if obj is None:
             raise NotFound("No such group")
         schema = GroupItemResponseSchema()
@@ -262,7 +269,11 @@ class GroupMemberResource(Resource):
 
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
-        group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
+        group = (
+            db.session.query(Group)
+                      .options(joinedload(Group.members, Member.user))
+                      .filter(Group.name == name)
+        ).first()
         if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):
             raise Forbidden("You are not permitted to manage this group")
 
@@ -336,7 +347,11 @@ class GroupMemberResource(Resource):
 
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
-        group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
+        group = (
+            db.session.query(Group)
+                      .options(joinedload(Group.members, Member.user))
+                      .filter(Group.name == name)
+        ).first()
         if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):
             raise Forbidden("You are not permitted to manage this group")
 

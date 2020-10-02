@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import api from "@mwdb-web/commons/api";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import { faFile, faTable, faScroll } from "@fortawesome/free-solid-svg-icons";
 
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { capitalize } from '@mwdb-web/commons/helpers';
@@ -109,13 +110,38 @@ export default class ShowObjectPresenter extends Component {
         }
     }
 
+    get header() {
+        const headerSpec = {
+            "file": {
+                icon: faFile,
+                header: "File details"
+            },
+            "static_config": {
+                icon: faTable,
+                header: "Config details"
+            },
+            "text_blob": {
+                icon: faScroll,
+                header: "Blob details"
+            }
+        }[this.props.type]
+        if(!headerSpec)
+            return [];
+        return (
+            <div className="card-header detailed-view-header">
+                <FontAwesomeIcon icon={headerSpec.icon}/>
+                {headerSpec.header}
+            </div>
+        )
+    }
+
     render() {
         let ObjectTab = (props) => {
             return (
                 <li className="nav-item">
                     <Link to={this.getTabLink(props.tab)}
                           className={`nav-link ${this.currentTab === props.tab ? "active" : ""}`}>
-                        { props.icon ? <FontAwesomeIcon icon={props.icon} pull="left" size="1x"/> : [] }
+                        { props.icon ? <FontAwesomeIcon icon={props.icon} size="1x"/> : [] }
                         { props.label || capitalize(props.tab) }
                     </Link>
                 </li>
@@ -129,7 +155,7 @@ export default class ShowObjectPresenter extends Component {
                           className="nav-link" 
                           onClick={() => props.action && props.action()}
                          >
-                        { props.icon ? <FontAwesomeIcon icon={props.icon} pull="left" size="1x"/> : [] }
+                        { props.icon ? <FontAwesomeIcon icon={props.icon} size="1x"/> : [] }
                         { capitalize(props.label) }
                     </Link>
                 </li>
@@ -140,6 +166,7 @@ export default class ShowObjectPresenter extends Component {
 
         return (
             <Extendable ident="showObjectPresenter" object={this.props}>
+                {this.header}
                 <nav className="navbar navbar-expand-sm bg-white">
                     <ul className="nav nav-tabs mr-auto">
                         <Extendable ident="showObjectTabs" object={this.props}>
@@ -159,15 +186,15 @@ export default class ShowObjectPresenter extends Component {
                     })
                 }
                 <ConfirmationModal buttonStyle="badge-success"
-                               confirmText="Yes"
-                               message="Are you sure you want to delete this object?"
-                               isOpen={this.state.isDeleteModalOpen}
-                               onRequestClose={() => this.setState({isDeleteModalOpen: false})}
-                               onConfirm={(ev) => {
-                                   ev.preventDefault();
-                                   this.handleDeleteObject()
-                                   this.setState({isDeleteModalOpen: false})
-                               }}/>
+                                   confirmText="Yes"
+                                   message="Are you sure you want to delete this object?"
+                                   isOpen={this.state.isDeleteModalOpen}
+                                   onRequestClose={() => this.setState({isDeleteModalOpen: false})}
+                                   onConfirm={(ev) => {
+                                       ev.preventDefault();
+                                       this.handleDeleteObject()
+                                       this.setState({isDeleteModalOpen: false})
+                                   }}/>
             </Extendable>
         );
     }

@@ -309,3 +309,8 @@ a.blob {
     padding: 0;
     list-style-position: inside;
 }
+
+/* Navigation icons */
+.nav-item svg, .detailed-view-header svg {
+    margin-right: 6pt;
+}

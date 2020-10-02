@@ -148,7 +148,10 @@ class AttributeField(BaseField):
                 f"Attribute doesn't have subfields: {'.'.join(remainder[1:])}"
             )
 
-        attribute_key = remainder[0]
+        if remainder:
+            attribute_key = remainder[0]
+        else:
+            raise UnsupportedGrammarException("Missing attribute key (meta.<key>:)")
 
         metakey_definition = (
             MetakeyDefinition.query_for_read(key=attribute_key, include_hidden=True).first()

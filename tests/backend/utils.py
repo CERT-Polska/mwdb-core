@@ -114,7 +114,7 @@ class MwdbTest(object):
         return res.json()
 
     def add_member(self, name, username):
-        res = self.session.put(self.mwdb_url + '/group/' + name + '/member/' + username)
+        res = self.session.post(self.mwdb_url + '/group/' + name + '/member/' + username)
         res.raise_for_status()
 
     def remove_member(self, name, username):

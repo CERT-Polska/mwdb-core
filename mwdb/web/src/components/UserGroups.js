@@ -12,8 +12,6 @@ class UserGroupRow extends Component {
         this.state = {
             open: false,
             isRemoveModalOpen: false,
-            isAddModalOpen: false,
-            newMember: null,
             removeUser: null,
         }
     }
@@ -22,20 +20,6 @@ class UserGroupRow extends Component {
         this.setState({
             open: !this.state.open
         })
-    }
-
-    handleValueChange = (ev) => {
-        this.setState({newMember: ev.target.value})
-    }
-
-    addMember = async (login) => {
-        try {
-            await api.addGroupMember(this.props.group.name, login);
-            this.props.groupUpdate();
-            this.props.onSuccess("Member added successfully");
-        } catch (error) {
-            this.props.onError(error);
-        }
     }
 
     removeMember = async(login) => {
@@ -49,36 +33,6 @@ class UserGroupRow extends Component {
     }
 
     render(){
-        let modal = (this.state.isAddModalOpen) ?
-            <ConfirmationModal isOpen={this.state.isAddModalOpen}
-                               buttonStyle="btn-success"
-                               confirmText="Add"
-                               onRequestClose={() => this.setState({isAddModalOpen: false, newMember: null})}
-                               onConfirm={() => {
-                                   this.addMember(this.state.newMember);
-                                   this.setState({isAddModalOpen: false});
-                               }}
-                               message={`Add new member to ${this.props.group.name}: `}
-                                >
-                <form>
-                    <div className="row pb-2">
-                        <input type="text" className="form-control"
-                               placeholder="Please enter the user login"
-                               onChange={this.handleValueChange}
-                               name="newMember"
-                               required />
-                    </div>
-                </form>
-            </ConfirmationModal>
-         :
-            <ConfirmationModal isOpen={this.state.isRemoveModalOpen}
-                               onRequestClose={() => this.setState({isRemoveModalOpen: false, removeUser: null})}
-                               onConfirm={() => {
-                                   this.removeMember(this.state.removeUser);
-                                   this.setState({isRemoveModalOpen: false, removeUser: null});
-                               }}
-                               message={`Are you sure to delete ${this.state.removeUser} user from group?`}
-                                />
         return (
             <React.Fragment>
                 <tr className="d-flex">
@@ -89,16 +43,6 @@ class UserGroupRow extends Component {
                             <HighlightText>{this.props.group.name}</HighlightText>
                         </Link>
                     </th>
-                    {this.props.isAdmin &&
-                    <td className="col">
-                        {this.props.groupAdmin &&
-                        <button type="button" className="btn btn-sm btn-success"
-                                onClick={() => this.setState({isAddModalOpen: true})}>
-                            New member
-                        </button>
-                        }
-                    </td>
-                    }
                 </tr>
                 {this.state.open && (
                     this.props.group.users.map((c, idx) =>
@@ -108,21 +52,23 @@ class UserGroupRow extends Component {
                                         {c}
                                     </Link>
                                     {this.props.group.admins.includes(c) && " (admin)"}
+                                    {this.props.isAdmin &&
+                                    <span className="ml-2" style={{cursor: "pointer"}}
+                                          onClick={() => this.setState({isRemoveModalOpen: true, removeUser: c})}>
+                                        <FontAwesomeIcon icon={"trash"} size="sm"/>
+                                    </span>}
                                 </td>
-                                {this.props.isAdmin &&
-                                <td className="col align-middle">
-                                    {this.props.groupAdmin &&
-                                    <button type="button" className="btn btn-sm btn-danger"
-                                            onClick={() => this.setState({isRemoveModalOpen: true, removeUser: c})}>
-                                        Remove member
-                                    </button>
-                                    }
-                                </td>
-                                }
                             </tr>
                     ))
                 }
-                {modal}
+                <ConfirmationModal isOpen={this.state.isRemoveModalOpen}
+                               onRequestClose={() => this.setState({isRemoveModalOpen: false, removeUser: null})}
+                               onConfirm={() => {
+                                   this.removeMember(this.state.removeUser);
+                                   this.setState({isRemoveModalOpen: false, removeUser: null});
+                               }}
+                               message={`Are you sure to delete ${this.state.removeUser} user from group?`}
+                                />
             </React.Fragment>
         );
     }
@@ -184,11 +130,6 @@ class UserGroups extends Component {
                                     <th className="col">
                                         Group name
                                     </th>
-                                    {(this.props.isAdmin || groupAdmins.includes(this.props.userLogin)) &&
-                                        <th className="col">
-                                        Actions
-                                        </th>
-                                    }
                                 </tr>
                             </thead>
                             <tbody>

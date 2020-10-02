@@ -193,7 +193,7 @@ class MemberItem extends Component {
                     <td>
                         <span>
                                 <button type="button" className="btn btn-info"
-                                        onClick={() => !this.props.disabled && this.props.setAdmin(this.props[this.props.nameKey], isAdmin)}
+                                        onClick={() => !this.props.disabled && this.props.setAdmin(this.props[this.props.nameKey], !isAdmin)}
                                         disabled={this.props.disabled}>
                                     {isAdmin ?
                                         <span>Revoke admin</span> :

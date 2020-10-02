@@ -198,8 +198,8 @@ function removeGroupMember(name, member) {
     return axios.delete(`/group/${name}/member/${member}`)
 }
 
-function setGroupAdmin(name, member, membership) {
-    return axios.put(`/group/${name}/member/${member}`, {membership})
+function setGroupAdmin(name, member, group_admin) {
+    return axios.put(`/group/${name}/member/${member}`, {group_admin})
 }
 
 function getUsers() {

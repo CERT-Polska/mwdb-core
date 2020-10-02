@@ -324,6 +324,11 @@ class GroupMemberResource(Resource):
               schema:
                 type: string
               description: Member login
+        requestBody:
+            description: Group admin membership information
+            content:
+              application/json:
+                schema: GroupAdminMembership
         responses:
             200:
                 description: When member was added successfully
@@ -341,7 +346,7 @@ class GroupMemberResource(Resource):
 
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
-        membership = load_schema(request.get_data(as_text=True), GroupAdminMembership())
+        membership = loads_schema(request.get_data(as_text=True), GroupAdminMembership())
 
         group = (
             db.session.query(Group)
@@ -362,12 +367,12 @@ class GroupMemberResource(Resource):
         if member.pending:
             raise Forbidden("User is pending and need to be accepted first")
 
-        member.set_group_admin(group.id, membership)
+        member.set_group_admin(group.id, membership["group_admin"])
 
         member.reset_sessions()
         db.session.commit()
 
-        logger.info('Group member added', extra={'user': member.login, 'group': group.name})
+        logger.info('Group member updated', extra={'user': member.login, 'group': group.name})
         schema = GroupSuccessResponseSchema()
         return schema.dump({"name": name})
 

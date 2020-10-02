@@ -6,9 +6,10 @@ from typing import List, Union, Type, Any
 from flask import g
 from luqum.tree import Range, Term
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import joinedload
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, Object, Metakey, MetakeyDefinition, Group, ObjectPermission, User
+from mwdb.model import db, Object, Metakey, MetakeyDefinition, Group, Member, ObjectPermission, User
 from mwdb.model.object import AccessType
 
 from .exceptions import FieldNotQueryableException, UnsupportedGrammarException, ObjectNotFoundException
@@ -220,11 +221,11 @@ class UploaderField(BaseField):
 
         if g.auth_user.has_rights(Capabilities.manage_users):
             uploaders = (db.session.query(User)
-                         .join(User.groups)
+                         .options(joinedload(User.memberships, Member.group))
                          .filter(Group.name == value)).all()
         else:
             uploaders = (db.session.query(User)
-                         .join(User.groups)
+                         .options(joinedload(User.memberships, Member.group))
                          .filter(g.auth_user.is_member(Group.id))
                          .filter(or_(Group.name == value, User.login == value))).all()
             # Regular users can see only uploads to its own groups

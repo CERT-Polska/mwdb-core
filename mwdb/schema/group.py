@@ -51,4 +51,4 @@ class GroupSuccessResponseSchema(GroupNameSchemaBase):
 
 
 class GroupAdminMembership(Schema):
-    admin_status = fields.Boolean(required=True)
+    group_admin = fields.Boolean(required=True)

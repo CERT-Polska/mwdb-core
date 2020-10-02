@@ -173,11 +173,14 @@ class MemberItem extends Component {
             return (
                 <tr>
                     <td>
-                        {this.props.groupName && isAdmin ?
-                            <span style={{textAlign: 'left'}}>
-                                <this.props.itemLinkClass {...this.props}/>{" (admin)"}
-                            </span>
-                            : <this.props.itemLinkClass {...this.props}/>
+                        {
+                            this.props.groupName && isAdmin ? (
+                                <span style={{textAlign: 'left'}}>
+                                    <this.props.itemLinkClass {...this.props}/>{" (admin)"}
+                                </span>
+                            ) : (
+                                <this.props.itemLinkClass {...this.props}/>
+                                )
                         }
                     </td>
                     <td>
@@ -189,19 +192,19 @@ class MemberItem extends Component {
                             </button>
                         </span>
                     </td>
-                    {this.props.groupName &&
-                    <td>
-                        <span>
-                                <button type="button" className="btn btn-info"
-                                        onClick={() => !this.props.disabled && this.props.setAdmin(this.props[this.props.nameKey], !isAdmin)}
-                                        disabled={this.props.disabled}>
-                                    {isAdmin ?
-                                        <span>Revoke admin</span> :
-                                        <span>Set as admin</span>
-                                    }
-                                </button>
-                        </span>
-                    </td>
+                    {
+                        this.props.groupName &&
+                        <td>
+                            <span>
+                                    <button type="button" className="btn btn-info"
+                                            onClick={() => !this.props.disabled && this.props.setAdmin(this.props[this.props.nameKey], !isAdmin)}
+                                            disabled={this.props.disabled}>
+                                        {
+                                            isAdmin ? <span>Revoke admin</span> : <span>Set as admin</span>
+                                        }
+                                    </button>
+                            </span>
+                        </td>
                     }
                 </tr>
             );

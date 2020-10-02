@@ -44,22 +44,26 @@ class UserGroupRow extends Component {
                         </Link>
                     </th>
                 </tr>
-                {this.state.open && (
-                    this.props.group.users.map((c, idx) =>
-                            <tr className="nested d-flex">
-                                <td className="col">
-                                    <Link key={idx} to={`profile/${c}`}>
-                                        {c}
-                                    </Link>
-                                    {this.props.group.admins.includes(c) && " (admin)"}
-                                    {this.props.isAdmin &&
-                                    <span className="ml-2" style={{cursor: "pointer"}}
-                                          onClick={() => this.setState({isRemoveModalOpen: true, removeUser: c})}>
-                                        <FontAwesomeIcon icon={"trash"} size="sm"/>
-                                    </span>}
-                                </td>
-                            </tr>
-                    ))
+                {
+                    this.state.open && (
+                        this.props.group.users.map((c, idx) =>
+                                <tr className="nested d-flex">
+                                    <td className="col">
+                                        <Link key={idx} to={`profile/${c}`}>
+                                            {c}
+                                        </Link>
+                                        {this.props.group.admins.includes(c) && " (admin)"}
+                                        {
+                                            this.props.isAdmin &&
+                                            <span className="ml-2" style={{cursor: "pointer"}}
+                                                  onClick={() => this.setState({isRemoveModalOpen: true, removeUser: c})}>
+                                                <FontAwesomeIcon icon={"trash"} size="sm"/>
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                        )
+                    )
                 }
                 <ConfirmationModal isOpen={this.state.isRemoveModalOpen}
                                onRequestClose={() => this.setState({isRemoveModalOpen: false, removeUser: null})}
@@ -123,21 +127,23 @@ class UserGroups extends Component {
         return (
             <div className="container">
                 <View error={this.state.error} success={this.state.success}>
-                    {this.state.groups.length ?
-                        <table className="table table-bordered table-striped" style={{"border":"1px"}}>
-                            <thead>
-                                <tr className="d-flex">
-                                    <th className="col">
-                                        Group name
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {UserGroupItems}
-                            </tbody>
-                        </table>
-                        :
-                        <h4 className="text-center">You are currently not a member of any group.</h4>
+                    {
+                        this.state.groups.length ? (
+                            <table className="table table-bordered table-striped" style={{"border":"1px"}}>
+                                <thead>
+                                    <tr className="d-flex">
+                                        <th className="col">
+                                            Group name
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {UserGroupItems}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <h4 className="text-center">You are currently not a member of any group.</h4>
+                        )
                     }
                 </View>
             </div>

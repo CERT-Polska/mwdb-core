@@ -35,9 +35,10 @@ class Group(db.Model):
 
     @property
     def group_admins(self):
-        admins = db.session.query(Member).filter(Member.group_id == self.id, Member.group_admin.is_(True)).all()
-        admin_ids = {a.user_id for a in admins}
-        return [u.login for u in self.users if u.id in admin_ids]
+        from .user import User
+        admins = db.session.query(User).join(User.memberships).filter(Member.group_id == self.id, Member.group_admin.is_(True)).all()
+        return [u.login for u in admins]
+
 
     @staticmethod
     def public_group():

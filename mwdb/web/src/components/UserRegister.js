@@ -133,7 +133,7 @@ class UserRegister extends Component {
                                      onChange={this.onCaptchaChange} />
                         : []
                     }
-                    <input type="submit" value="Submit" className="btn btn-primary"/>
+                    <input type="submit" value="Submit" className="btn btn-primary" disabled={this.state.success}/>
                 </form>
             </View>
         );

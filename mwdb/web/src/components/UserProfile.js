@@ -72,44 +72,44 @@ class UserProfile extends Component {
             <View ident="userProfile" error={this.state.error} success={this.state.success}>
                 <table className="table table-striped table-bordered wrap-table">
                     <thead>
-                        <tr>
+                        <tr className="d-flex">
                             <th key="key" className="col-2">Attribute</th>
-                            <th key="value">Value</th>
+                            <th key="value" className="col-10">Value</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Login</td>
-                            <td>
+                        <tr className="d-flex">
+                            <td className="col-2">Login</td>
+                            <td className="col-10">
                                 {this.state.profile.login}
                             </td>
                         </tr>
-                        <tr>
-                            <td>E-mail</td>
-                            <td>
+                        <tr className="d-flex">
+                            <td className="col-2">E-mail</td>
+                            <td className="col-10">
                                 {this.state.profile.email}
                             </td>
                         </tr>
-                        <tr>
-                            <td>Registered</td>
-                            <td><DateString date={this.state.profile.registered_on}/></td>
+                        <tr className="d-flex">
+                            <td className="col-2">Registered</td>
+                            <td className="col-10"><DateString date={this.state.profile.registered_on}/></td>
                         </tr>
-                        <tr>
-                            <td>Last login</td>
-                            <td><DateString date={this.state.profile.logged_on}/></td>
+                        <tr className="d-flex">
+                            <td className="col-2">Last login</td>
+                            <td className="col-10"><DateString date={this.state.profile.logged_on}/></td>
                         </tr>
                         {
                             this.props.userLogin === this.state.profile.login &&
-                            <tr>
-                                <td>Last password set</td>
-                                <td><DateString date={this.state.profile.set_password_on}/></td>
+                            <tr className="d-flex">
+                                <td className="col-2">Last password set</td>
+                                <td className="col-10"><DateString date={this.state.profile.set_password_on}/></td>
                             </tr>
                         }
                         {
                             (this.state.profile.capabilities && this.capabilities.length > 0) &&
-                            <tr>
-                                <td>Capabilities</td>
-                                <td>
+                            <tr className="d-flex">
+                                <td className="col-2">Capabilities</td>
+                                <td className="col-10">
                                     <ul className="table-ul">
                                         {
                                             this.capabilities.map(c => (
@@ -125,9 +125,9 @@ class UserProfile extends Component {
                         }
                         {
                             (this.state.profile.groups && this.groups.length > 0) &&
-                            <tr>
-                                <td>Groups</td>
-                                <td>
+                            <tr className="d-flex">
+                                <td className="col-2">Groups</td>
+                                <td className="col-10">
                                     <ul className="table-ul">
                                         {
                                             this.groups.map(g => <li>{g.name}</li>)
@@ -136,8 +136,8 @@ class UserProfile extends Component {
                                 </td>
                             </tr>
                         }
-                        <tr>
-                            <td style={{textAlign: 'left'}} colspan="3">
+                        <tr className="d-flex">
+                            <td style={{textAlign: 'left'}} className="col-12">
                                 {
                                     this.props.userLogin === this.state.profile.login ? (
                                         <button type="button" className="btn btn-success"

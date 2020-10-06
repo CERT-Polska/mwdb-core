@@ -52,7 +52,7 @@ class UserRegister extends Component {
 
     async registerUser() {
         try {
-            this.setState({disable : true})
+            this.setState({disable: true})
             let additional_info = `Affiliation: ${this.state.affiliation}, Job title: ${this.state.job_title}, ${this.state.job_responsibilities} ${this.state.other_info}`;
             let response = await api.registerUser(this.state.login, 
                                                   this.state.email, 
@@ -63,7 +63,7 @@ class UserRegister extends Component {
                 error: null
             });
         } catch(error) {
-            this.setState({error, disable:false});
+            this.setState({error, disable: false});
         }
     }
 

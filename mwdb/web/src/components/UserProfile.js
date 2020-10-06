@@ -137,7 +137,7 @@ class UserProfile extends Component {
                             </tr>
                         }
                         <tr className="d-flex">
-                            <td className="col-12">
+                            <td className="col-12" colspan="3">
                                 {
                                     this.props.userLogin === this.state.profile.login ? (
                                         <button type="button" className="btn btn-success"

@@ -4,7 +4,7 @@ from .relations import *
 def test_adding_config_with_inblobs():
     testCase = RelationTestCase()
 
-    Alice = testCase.new_user("Alice", capabilities=["reading_blobs", "adding_blobs"])
+    Alice = testCase.new_user("Alice", capabilities=["reading_blobs", "adding_blobs", "adding_configs"])
 
     config_json = {
         "cnc": [1, 2, 3],

@@ -189,6 +189,7 @@ class ConfigResource(ObjectResource, ConfigUploader):
         return super().get()
 
     @requires_authorization
+    @requires_capabilities(Capabilities.adding_configs)
     def post(self):
         """
         ---

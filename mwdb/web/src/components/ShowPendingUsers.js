@@ -51,14 +51,14 @@ class ShowPendingUsers extends Component {
         })
     }
 
-    handleRejectUser = (login) => {
+    handleRejectUser = (login, notification) => {
         this.setState({
             isModalOpen: true,
             modalSpec: {
                 message: `Reject an account ${login}?`,
                 action: (() => {
                     this.setState({isModalOpen: false});
-                    this.rejectUser(login);
+                    this.rejectUser(login, notification);
                 }),
                 confirmText: "Reject"
             }
@@ -78,9 +78,10 @@ class ShowPendingUsers extends Component {
         }
     }
 
-    rejectUser = async (login) => {
+    rejectUser = async (login, notification) => {
+        console.log(notification)
         try {
-            await api.rejectPendingUser(login);
+            await api.rejectPendingUser(login, notification);
             this.setState({
                 success: "Successfully rejected user",
                 error: null
@@ -154,10 +155,19 @@ function PendingUserItem(props) {
                         onClick={() => props.acceptUser(props.login)}>
                     Accept
                 </button>
-                <button type="button" className="btn btn-danger"
-                        onClick={() => props.rejectUser(props.login)}>
-                    Reject
-                </button>
+                <div className="btn-group">
+                    <button type="button" className="btn btn-danger"
+                        onClick={() => props.rejectUser(props.login, true)}>
+                        Reject
+                    </button>
+                    <button type="button" className="btn btn-danger dropdown-toggle dropdown-toggle-split"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span className="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div className="dropdown-menu dropdown-menu-right">
+                        <span className="dropdown-item" onClick={() => props.rejectUser(props.login, false)}>Reject without email</span>
+                    </div>
+                </div>
             </td>
         </tr>
     );

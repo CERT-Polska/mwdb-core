@@ -170,7 +170,7 @@ class UserPendingResource(Resource):
         db.session.delete(group)
         db.session.delete(user)
         db.session.commit()
-        if obj["notification"]:
+        if obj["send_email"]:
             try:
                 send_email_notification("rejection",
                                         "MWDB account request has been rejected",

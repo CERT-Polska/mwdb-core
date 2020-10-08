@@ -209,8 +209,8 @@ function acceptPendingUser(login) {
     return axios.post(`/user/${login}/pending`)
 }
 
-function rejectPendingUser(login, notification) {
-    return axios.delete(`/user/${login}/pending`, {params: {notification: notification}})
+function rejectPendingUser(login, send_email) {
+    return axios.delete(`/user/${login}/pending`, {params: {send_email}})
 }
 
 function getUser(login) {

@@ -84,7 +84,7 @@ class UserSetPasswordTokenResponseSchema(UserLoginSchemaBase):
 
 
 class UserRejectRequestArgsSchema(Schema):
-    notification = fields.Boolean(required=True)
+    send_email = fields.Boolean(required=True)
 
 
 class UserSuccessResponseSchema(UserLoginSchemaBase):

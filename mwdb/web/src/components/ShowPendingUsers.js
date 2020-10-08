@@ -85,7 +85,6 @@ class ShowPendingUsers extends Component {
     }
 
     rejectUser = async (login, notification) => {
-        console.log(notification)
         try {
             await api.rejectPendingUser(login, notification);
             this.setState({

@@ -52,10 +52,16 @@ class ShowPendingUsers extends Component {
     }
 
     handleRejectUser = (login, notification) => {
+        let message = notification ? (
+            `Reject an account ${login}?`
+        ) : (
+            `Reject an account ${login} without email notification?`
+        )
+
         this.setState({
             isModalOpen: true,
             modalSpec: {
-                message: `Reject an account ${login}?`,
+                message: message,
                 action: (() => {
                     this.setState({isModalOpen: false});
                     this.rejectUser(login, notification);
@@ -110,8 +116,13 @@ class ShowPendingUsers extends Component {
     }
 
     render() {
+
+        const tableOverflow = {
+            overflow: 'visible',
+        }
+
         return (
-            <View fluid ident="showPendingUsers" success={this.state.success} error={this.state.error} style={{"height": "100%"}}>
+            <View fluid ident="showPendingUsers" success={this.state.success} error={this.state.error}>
                 <ConfirmationModal isOpen={this.state.isModalOpen}
                                    onRequestClose={() => this.setState({isModalOpen: false})}
                                    onConfirm={this.state.modalSpec.action}
@@ -124,6 +135,7 @@ class ShowPendingUsers extends Component {
                            itemCount={this.items.length}
                            activePage={this.state.activePage}
                            filterValue={this.state.loginFilter}
+                           tableStyle={tableOverflow}
                            onPageChange={this.handlePageChange}
                            onFilterChange={this.handleFilterChange} />
             </View>
@@ -161,10 +173,10 @@ function PendingUserItem(props) {
                         Reject
                     </button>
                     <button type="button" className="btn btn-danger dropdown-toggle dropdown-toggle-split"
-                            data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+                            data-toggle="dropdown">
                         <span className="sr-only">Toggle Dropdown</span>
                     </button>
-                    <div className="dropdown-menu dropdown-menu-right">
+                    <div className="dropdown-menu dropdown-menu-right" >
                         <div className="dropdown-item" style={{"cursor": "pointer"}}
                               onClick={() => props.rejectUser(props.login, false)}>
                             Reject without email

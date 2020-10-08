@@ -20,6 +20,7 @@ from mwdb.schema.user import (
     UserListResponseSchema,
     UserSuccessResponseSchema,
     UserSetPasswordTokenResponseSchema,
+    UserNotificationSchema,
     UserOwnProfileResponseSchema,
     UserProfileResponseSchema
 )
@@ -160,7 +161,8 @@ class UserPendingResource(Resource):
         """
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
-        notification = request.args.get('notification') == 'true'
+        obj = load_schema(request.args, UserNotificationSchema())
+        print(obj["notification"])
         user = db.session.query(User).filter(User.login == login, User.pending == true()).first()
         if not user:
             raise NotFound("User doesn't exist or is already rejected")
@@ -169,7 +171,7 @@ class UserPendingResource(Resource):
         db.session.delete(group)
         db.session.delete(user)
         db.session.commit()
-        if notification:
+        if obj["notification"]:
             try:
                 print("reject with email")
                 send_email_notification("rejection",

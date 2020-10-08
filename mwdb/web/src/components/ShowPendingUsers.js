@@ -111,7 +111,7 @@ class ShowPendingUsers extends Component {
 
     render() {
         return (
-            <View fluid ident="showPendingUsers" success={this.state.success} error={this.state.error}>
+            <View fluid ident="showPendingUsers" success={this.state.success} error={this.state.error} style={{"height": "100%"}}>
                 <ConfirmationModal isOpen={this.state.isModalOpen}
                                    onRequestClose={() => this.setState({isModalOpen: false})}
                                    onConfirm={this.state.modalSpec.action}
@@ -161,11 +161,14 @@ function PendingUserItem(props) {
                         Reject
                     </button>
                     <button type="button" className="btn btn-danger dropdown-toggle dropdown-toggle-split"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                         <span className="sr-only">Toggle Dropdown</span>
                     </button>
                     <div className="dropdown-menu dropdown-menu-right">
-                        <span className="dropdown-item" onClick={() => props.rejectUser(props.login, false)}>Reject without email</span>
+                        <div className="dropdown-item" style={{"cursor": "pointer"}}
+                              onClick={() => props.rejectUser(props.login, false)}>
+                            Reject without email
+                        </div>
                     </div>
                 </div>
             </td>

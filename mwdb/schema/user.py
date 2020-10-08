@@ -83,6 +83,10 @@ class UserSetPasswordTokenResponseSchema(UserLoginSchemaBase):
     token = fields.Str(required=True, allow_none=False)
 
 
+class UserNotificationSchema(Schema):
+    notification = fields.Boolean(required=True)
+
+
 class UserSuccessResponseSchema(UserLoginSchemaBase):
     pass
 

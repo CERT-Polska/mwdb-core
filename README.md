@@ -10,6 +10,10 @@ Formerly known as Malwarecage.
 
 Under the hood of [mwdb.cert.pl service](https://mwdb.cert.pl) hosted by CERT.pl.
 
+## Setup & documentation
+
+If you want to learn more about setting up your own mwdb-core instance or mwdb.cert.pl service: go to the [mwdb-core documentation](https://mwdb-core.readthedocs.org/).
+
 ## Features
 
 - Storage for malware binaries and static/dynamic malware configurations
@@ -35,10 +39,6 @@ Under the hood of [mwdb.cert.pl service](https://mwdb.cert.pl) hosted by CERT.pl
 **Visualize relationship between objects**
 
 ![](docs/_static/XPiIboW.gif)
-
-## Documentation
-
-If you want to learn more about setting up your own mwdb-core instance or mwdb.cert.pl service: go to our documentation `<link here>`
 
 ## Contact
 

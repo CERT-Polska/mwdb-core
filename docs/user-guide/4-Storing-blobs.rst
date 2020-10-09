@@ -53,9 +53,9 @@ Blobs are described using the following attributes:
 How to upload blobs?
 --------------------
 
-Just like configurations, blobs are intended to be uploaded by automated systems or scripts, so they can't be added directly from MWDB UI. Similarly to `configuration upload <#How-to-upload-configuration>`_ described in previous chapter, you can push them using ``mwdb upload blob`` command or ``MWDB.upload_blob`` function or via REST API.
+Just like configurations, blobs are intended to be uploaded by automated systems or scripts, so they can't be added directly from MWDB UI. Similarly to configuration upload described in previous chapter (:ref:`How to upload configuration?`), you can push them using ``mwdb upload blob`` command or ``MWDB.upload_blob`` function or via REST API.
 
-More information about mwdblib can be found in chapter `8. Automating things using REST API and mwdblib <#9-Automating-things-using-REST-API-and-mwdblib>`_.
+More information about mwdblib can be found in chapter :ref:`8. Automating things using REST API and mwdblib`.
 
 Embedded blobs
 --------------
@@ -152,7 +152,7 @@ Or if you want to search for blob by its size:
 
 TBD
 
-For more information see `7. Advanced search based on Lucene queries <#7-Advanced-search-based-on-Lucene-queries>`_
+For more information see :ref:`7. Advanced search based on Lucene queries`.
 
 Blob diffing
 ------------

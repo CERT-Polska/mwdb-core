@@ -265,7 +265,7 @@ If you want to see objects that are uploaded by somebody from your group excludi
 
 Keep in mind that you can query only for your own groups and members of your own groups (excluding members of ``public``\ ). This limitation doesn't apply to administrators (\ ``manage_users`` capability).
 
-Read more about MWDB sharing model and capabilities in chapter `9. Sharing objects with other collaborators <9.-Sharing-objects-with-other-collaborators>`_.
+Read more about MWDB sharing model and capabilities in chapter :ref:`9. Sharing objects with other collaborators`.
 
 Parent/child subqueries
 -----------------------

@@ -3,6 +3,12 @@
 
 Tags are used for basic object classification, allowing to quickly search for interesting samples in malware feed.
 
+.. warning::
+
+   Tags can be added only if user has ``adding_tags`` capability turned on. Check your capabilities in ``Profile`` view.
+   
+   In mwdb.cert.pl you are allowed to add tags, but **you can't remove them** (``removing_tags`` is required). If you see that malware family has not been correctly recognized by mwdb.cert.pl, you can left a comment or set `maybe:<family>` tag to help us track these issues.
+
 How to use tags?
 ----------------
 
@@ -11,7 +17,7 @@ You can add new tag to the object using ``Add tag`` field on the right side of d
 
 .. image:: ../_static/QeQk8b9.gif
    :target: ../_static/QeQk8b9.gif
-   :alt: 
+   :alt: adding tag
 
 
 If you want to remove a tag - click on the ``x`` placed on the right side of the tag you want to remove.
@@ -19,7 +25,7 @@ If you want to remove a tag - click on the ``x`` placed on the right side of the
 
 .. image:: ../_static/giGaV33.gif
    :target: ../_static/giGaV33.gif
-   :alt: 
+   :alt: removing tag
 
 
 To explore other objects with the same tag, just click on the tag to navigate to the search page. There you can filter in/out other tags to make your search more specific for what you are looking for.
@@ -32,7 +38,7 @@ Tags can be added as well using ``mwdblib`` library.
 
    FILE_SHA256 = "f60d462..."
 
-   mwdb = MWDB(api_url=..., api_key=...)
+   mwdb = MWDB(api_key=..., api_url=...)
    file_object = mwdb.query_file(FILE_SHA256)
    file_object.add_tag("chthonic")
 
@@ -49,7 +55,7 @@ Simple tags are **red**. In mwdb.cert.pl they're mostly used for marking identif
 
 .. image:: ../_static/WhG5O8x.png
    :target: ../_static/WhG5O8x.png
-   :alt: 
+   :alt: formbook tag
 
 
 Tags describing the source are **blue** (\ ``src:``\ , ``uploader:``\ , ``feed:``\ ). ``feed:`` tags are most special, because you can easily filter out all external feed by choosing built-in ``Exclude feed:*`` option in Quick query bar.
@@ -57,7 +63,7 @@ Tags describing the source are **blue** (\ ``src:``\ , ``uploader:``\ , ``feed:`
 
 .. image:: ../_static/iiEs8mg.png
    :target: ../_static/iiEs8mg.png
-   :alt: 
+   :alt: feed:sample tag
 
 
 Tags indicating matched malware are **yellow** (\ ``ripped:``\ , ``contains:``\ ). In mwdb.cert.pl we mark the original sample with ``ripped:<family>`` tag. Unpacked samples or dumps originating from ``ripped`` samples are added as a child and tagged red with malware family name. 
@@ -65,7 +71,7 @@ Tags indicating matched malware are **yellow** (\ ``ripped:``\ , ``contains:``\ 
 
 .. image:: ../_static/9DasbML.png
    :target: ../_static/9DasbML.png
-   :alt: 
+   :alt: ripped:formbook tag
 
 
 .. note::
@@ -78,7 +84,7 @@ File type can be additionally classified with another group of **gray** tags (\ 
 
 .. image:: ../_static/4jYM0Kq.png
    :target: ../_static/4jYM0Kq.png
-   :alt: 
+   :alt: runnable\:win32\:exe tag
 
 
 Generic tags containing ``:`` are **cyan**. We use them to add some secondary tags fetched from feed or indicating classification result by other systems (e.g. ``yara:``\ , ``et:``\ )
@@ -86,5 +92,5 @@ Generic tags containing ``:`` are **cyan**. We use them to add some secondary ta
 
 .. image:: ../_static/FugRJW1.png
    :target: ../_static/FugRJW1.png
-   :alt: 
+   :alt: yara:win_formbook tag
 

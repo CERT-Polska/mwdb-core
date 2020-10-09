@@ -1,4 +1,3 @@
-
 1. Introduction to MWDB
 =======================
 
@@ -27,7 +26,7 @@ MWDB UI is quite rich and can be intimidating at first glance. Most things can b
 
 .. image:: ../_static/NlOUdQL.png
    :target: ../_static/NlOUdQL.png
-   :alt: 
+   :alt: navbar
 
 
 Let’s go through them shortly:
@@ -50,7 +49,7 @@ MWDB welcomes us with a list of recently uploaded samples.
 
 .. image:: ../_static/2tBs6WD.png
    :target: ../_static/2tBs6WD.png
-   :alt: 
+   :alt: recent object view
 
 
 **Recent views** allow to see basic information about latest objects in the repository and interactively explore the dataset using Lucene-based queries and clickable fields. If sample was uploaded within last 72 hours, it is additionally marked with yellowish background. Yellow color is a bit more intense if file was uploaded at least 24 hours ago.
@@ -60,7 +59,7 @@ If you simply want to find a sample with specific SHA256 hash: just paste this h
 
 .. image:: ../_static/44dwH7g.gif
    :target: ../_static/44dwH7g.gif
-   :alt: 
+   :alt: mwdb sha256 query
 
 
 ``sha256:`` has been added automatically to your query!
@@ -70,7 +69,7 @@ Interactive search is even more powerful. For example: you can filter out sample
 
 .. image:: ../_static/uRL9dt6.gif
    :target: ../_static/uRL9dt6.gif
-   :alt: 
+   :alt: mwdb tag query
 
 
 Sample view
@@ -81,7 +80,7 @@ Let's click on one of the hashes to navigate to the **detailed sample view**.
 
 .. image:: ../_static/whJxE0j.png
    :target: ../_static/whJxE0j.png
-   :alt: 
+   :alt: detailed sample view
 
 
 Here you can see all the details about file. Left side contains four tabs. The first one called **Details** presents basic file information like original file name, size, file type and hash values.
@@ -93,7 +92,7 @@ Let's come back to the tabs. The second tab is **Relations** that shows graph re
 
 .. image:: ../_static/XPiIboW.gif
    :target: ../_static/XPiIboW.gif
-   :alt: 
+   :alt: sample relations tab
 
 
 The third tab is **Preview** where you can quickly view the file contents, both in text mode and hex view.
@@ -101,7 +100,7 @@ The third tab is **Preview** where you can quickly view the file contents, both 
 
 .. image:: ../_static/WSU4UYZ.gif
    :target: ../_static/WSU4UYZ.gif
-   :alt: 
+   :alt: sample preview tab
 
 
 Finally you can download the sample file just by clicking **Download** button.

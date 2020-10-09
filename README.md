@@ -12,7 +12,7 @@ Under the hood of [mwdb.cert.pl service](https://mwdb.cert.pl) hosted by CERT.pl
 
 ## Setup & documentation
 
-If you want to learn more about setting up your own mwdb-core instance or mwdb.cert.pl service: go to the [mwdb-core documentation](https://mwdb-core.readthedocs.org/).
+If you want to learn more about setting up your own mwdb-core instance or mwdb.cert.pl service: go to the [mwdb-core documentation](https://mwdb.readthedocs.io/en/latest/).
 
 ## Features
 

@@ -9,7 +9,6 @@ In mwdb.cert.pl, we use them to group the users coming from the same organisatio
 
 Every user account is a member of at least two groups:
 
-
 * user's private group, named the same as user login, which represents the exclusive user permissions.
 * ``public`` group with permissions that apply to all users in MWDB.
 
@@ -20,7 +19,9 @@ Object access rules
 
 The basic rule of sharing model in MWDB is that **group sees only their own uploads and all descendant objects**. In that model, you have permission to see the configuration for your sample and all the information originating from that configuration. Access to parent object implies the access its to children, but not the other way around.
 
-// image
+.. image:: ../_static/sharing-diagram.png
+   :target: ../_static/sharing-diagram.png
+   :alt: Sharing diagram
 
 As an user, you need to choose which groups you represent uploading the sample. There are four options:
 
@@ -82,7 +83,9 @@ Group capabilities (superpowers)
 
 All groups can have additional permissions that applies to all members. MWDB by default is quite restrictive and regular user accounts are by default allowed only to upload samples and access the object information. That default prevents breaking the existing conventions or making potentially irreversible actions, but even in CERT.pl we don't apply such limitations for users.
 
-// image showing the capabilities
+.. image:: ../_static/capabilities.png
+   :target: ../_static/capabilities.png
+   :alt: Capabilities view
 
 By default, ``admin`` private group has enabled all capabilities. All other groups are created with all disabled.
 

@@ -504,15 +504,17 @@ If you use ``mwdb.login()`` method, you may notice a warning that is shown by th
 
 Recommended authentication way to be used in scripts is to use API key token instead of password. List of created API keys can be found on the bottom of **Profile** view (next to the Logout in navbar) in **API keys** section.
 
-// image
-
 To create a new API key, click on ``Create a new key`` button:
 
-// image
+.. image:: ../_static/api-keys.png
+   :target: ../_static/api-keys.png
+   :alt: API keys view
 
 Then click on the ``Show API token`` to get the authorization token for created API key.
 
-// image
+.. image:: ../_static/api-key-token.png
+   :target: ../_static/api-key-token.png
+   :alt: API keys token view
 
 Authorization token can be used in mwdblib via ``api_key`` argument:
 
@@ -545,10 +547,16 @@ Complete API documentation can be found under the ``/docs`` endpoint. API docume
 
 After log in, click on ``About`` in the navbar and go to the ``Docs`` page.
 
-// image with swagger
+.. image:: ../_static/mwdb-docs.png
+   :target: ../_static/mwdb-docs.png
+   :alt: MWDB docs view
 
 Use ``Try it out`` button to send the API request.
 
-// image try it out
+.. image:: ../_static/swagger-get-identifier.png
+   :target: ../_static/swagger-get-identifier.png
+   :alt: MWDB docs view - get object "Try it out"
 
-...
+.. image:: ../_static/swagger-response.png
+   :target: ../_static/swagger-response.png
+   :alt: MWDB docs view - get object response

@@ -20,6 +20,7 @@ from mwdb.schema.user import (
     UserListResponseSchema,
     UserSuccessResponseSchema,
     UserSetPasswordTokenResponseSchema,
+    UserRejectRequestArgsSchema,
     UserOwnProfileResponseSchema,
     UserProfileResponseSchema
 )
@@ -160,6 +161,7 @@ class UserPendingResource(Resource):
         """
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
+        obj = load_schema(request.args, UserRejectRequestArgsSchema())
         user = db.session.query(User).filter(User.login == login, User.pending == true()).first()
         if not user:
             raise NotFound("User doesn't exist or is already rejected")
@@ -168,19 +170,22 @@ class UserPendingResource(Resource):
         db.session.delete(group)
         db.session.delete(user)
         db.session.commit()
+        if obj["send_email"]:
+            try:
+                send_email_notification("rejection",
+                                        "MWDB account request has been rejected",
+                                        user.email,
+                                        base_url=app_config.mwdb.base_url,
+                                        login=user.login,
+                                        set_password_token=user.generate_set_password_token().decode("utf-8"))
+            except MailError:
+                logger.exception("Can't send e-mail notification")
+                raise InternalServerError("SMTP server needed to fulfill this request is not configured or unavailable.")
 
-        try:
-            send_email_notification("rejection",
-                                    "MWDB account request has been rejected",
-                                    user.email,
-                                    base_url=app_config.mwdb.base_url,
-                                    login=user.login,
-                                    set_password_token=user.generate_set_password_token().decode("utf-8"))
-        except MailError:
-            logger.exception("Can't send e-mail notification")
-            raise InternalServerError("SMTP server needed to fulfill this request is not configured or unavailable.")
+            logger.info('User rejected with notification', extra={'user': login})
+        else:
+            logger.info('User rejected without notification', extra={'user': login})
 
-        logger.info('User rejected', extra={'user': login})
         schema = UserSuccessResponseSchema()
         return schema.dump({"login": login})
 

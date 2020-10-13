@@ -51,14 +51,20 @@ class ShowPendingUsers extends Component {
         })
     }
 
-    handleRejectUser = (login) => {
+    handleRejectUser = (login, notification) => {
+        let message = notification ? (
+            `Reject an account ${login}?`
+        ) : (
+            `Reject an account ${login} without email notification?`
+        )
+
         this.setState({
             isModalOpen: true,
             modalSpec: {
-                message: `Reject an account ${login}?`,
+                message: message,
                 action: (() => {
                     this.setState({isModalOpen: false});
-                    this.rejectUser(login);
+                    this.rejectUser(login, notification);
                 }),
                 confirmText: "Reject"
             }
@@ -78,9 +84,9 @@ class ShowPendingUsers extends Component {
         }
     }
 
-    rejectUser = async (login) => {
+    rejectUser = async (login, notification) => {
         try {
-            await api.rejectPendingUser(login);
+            await api.rejectPendingUser(login, notification);
             this.setState({
                 success: "Successfully rejected user",
                 error: null
@@ -109,6 +115,11 @@ class ShowPendingUsers extends Component {
     }
 
     render() {
+
+        const tableOverflow = {
+            overflow: 'visible',
+        }
+
         return (
             <View fluid ident="showPendingUsers" success={this.state.success} error={this.state.error}>
                 <ConfirmationModal isOpen={this.state.isModalOpen}
@@ -123,6 +134,7 @@ class ShowPendingUsers extends Component {
                            itemCount={this.items.length}
                            activePage={this.state.activePage}
                            filterValue={this.state.loginFilter}
+                           tableStyle={tableOverflow}
                            onPageChange={this.handlePageChange}
                            onFilterChange={this.handleFilterChange} />
             </View>
@@ -154,10 +166,22 @@ function PendingUserItem(props) {
                         onClick={() => props.acceptUser(props.login)}>
                     Accept
                 </button>
-                <button type="button" className="btn btn-danger"
-                        onClick={() => props.rejectUser(props.login)}>
-                    Reject
-                </button>
+                <div className="btn-group">
+                    <button type="button" className="btn btn-danger"
+                        onClick={() => props.rejectUser(props.login, true)}>
+                        Reject
+                    </button>
+                    <button type="button" className="btn btn-danger dropdown-toggle dropdown-toggle-split"
+                            data-toggle="dropdown">
+                        <span className="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div className="dropdown-menu dropdown-menu-right" >
+                        <div className="dropdown-item" style={{"cursor": "pointer"}}
+                              onClick={() => props.rejectUser(props.login, false)}>
+                            Reject without email
+                        </div>
+                    </div>
+                </div>
             </td>
         </tr>
     );

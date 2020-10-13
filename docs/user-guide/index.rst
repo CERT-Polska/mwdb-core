@@ -16,4 +16,3 @@ This guide will help you to learn basic MWDB concepts step by step. It is not on
    7-Lucene-search
    8-REST-and-mwdblib
    9-Sharing-objects
-   10-Extra-features

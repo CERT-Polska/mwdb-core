@@ -257,12 +257,12 @@ class UserUpdate extends Component {
                                         c => <li>{capabilitiesList[c]} (inherited from: {this.inheritedFrom(c).join(", ")})</li>)
                                 }
                                 </ul>
-                                <Link to={`/group/${this.props.match.params.login}`}>
-                                    <button type="button" className="btn btn-primary">Set user permissions</button>
-                                </Link>
                             </React.Fragment>
                         : []
                     }
+                        <Link to={`/group/${this.props.match.params.login}`}>
+                            <button type="button" className="btn btn-primary">Set user permissions</button>
+                        </Link>
                     </div>
 
                     <h4>Groups</h4>

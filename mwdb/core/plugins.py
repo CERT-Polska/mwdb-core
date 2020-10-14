@@ -156,12 +156,12 @@ def configure_plugins():
 
 
 def get_plugin_info():
-    return [{
+    return {plugin_name: {
         "active": True,
         "author": getattr(plugin, "__author__", None),
         "version": getattr(plugin, "__version__", None),
         "description": getattr(plugin, "__doc__", None),
-    } for plugin in loaded_plugins]
+    } for plugin_name, plugin in loaded_plugins.items()}
 
 
 def call_hook(hook_name, *args, **kwargs):

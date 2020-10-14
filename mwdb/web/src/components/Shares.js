@@ -128,10 +128,6 @@ class SharesBox extends Component {
         } catch(error) { }
     }
 
-    sortShares(a,b) {
-
-    }
-
     componentDidUpdate = (prevProps) => {
         if (prevProps.id !== this.props.id)
             this.updateShares();

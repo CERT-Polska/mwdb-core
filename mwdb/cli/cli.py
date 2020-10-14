@@ -1,11 +1,12 @@
 import os
 
 import click
+import logging
 import textwrap
 
 from mwdb.core.config import app_config
 
-from .base import create_app, AppDefaultGroup, CustomFlaskGroup
+from .base import create_app, logger, AppDefaultGroup, CustomFlaskGroup
 from .configuration import create_configuration
 from .database import configure_database
 
@@ -23,6 +24,12 @@ def configure(ctx, quiet):
     Configure MWDB instance
     """
     ctx.obj.data["quiet"] = quiet
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(levelname)-5.5s [%(name)s] %(message)s"))
+    mwdb = logging.getLogger("mwdb")
+    mwdb.propagate = False
+    mwdb.addHandler(handler)
+    mwdb.setLevel(logging.INFO)
 
 
 @configure.command("basic", with_appcontext=False)
@@ -42,20 +49,24 @@ def configure_basic(ctx):
             ctx.abort()
         create_configuration()
     else:
-        click.echo("[+] Configuration already initialized... skipping")
+        logger.info("Configuration already initialized... skipping")
 
     try:
         # Load application
         app = create_app()
         with app.app_context():
+            # Configure mwdb-core database
             configure_database()
+            # Configure plugins
+            from mwdb.core.plugins import configure_plugins
+            configure_plugins()
     except Exception as e:
         import traceback
         traceback.print_exc()
         click.echo(
             textwrap.dedent(
                 f"""
-        Something went wrong during database configuration. 
+        Something went wrong during configuration. 
         
         Check if '{app_config.mwdb.postgres_uri}' PostgreSQL connection string is correct
         and database is running.

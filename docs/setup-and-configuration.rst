@@ -20,7 +20,7 @@ Optionally you can install:
 
 It's highly recommended to make a `virtualenv <https://docs.python.org/3/library/venv.html#module-venv>`_ for local MWDB installation:
 
-.. code-block::
+.. code-block:: console
 
    # Create virtual environment
    ~/mwdb$ python3 -m venv venv
@@ -35,9 +35,9 @@ It's highly recommended to make a `virtualenv <https://docs.python.org/3/library
 
    You can also setup temporary PostgreSQL database container using Docker image:
 
-   .. code-block::
+   .. code-block:: console
 
-      docker run -d --name mwdb-postgres -e POSTGRES_DB=mwdb -e POSTGRES_USER=mwdb -e POSTGRES_PASSWORD=mwdb -p 127.0.0.1:54322:5432 postgres
+      $ docker run -d --name mwdb-postgres -e POSTGRES_DB=mwdb -e POSTGRES_USER=mwdb -e POSTGRES_PASSWORD=mwdb -p 127.0.0.1:54322:5432 postgres
 
    The connection string is: ``postgresql://mwdb:mwdb@127.0.0.1:54322/mwdb``
 
@@ -46,13 +46,13 @@ Installation & Configuration
 
 The recommended installation method is pip:
 
-.. code-block::
+.. code-block:: console
 
-   pip install mwdb-core
+   $ pip install mwdb-core
 
 After installing ``mwdb-core`` package, let's start with ``mwdb-core`` command:
 
-.. code-block::
+.. code-block:: console
 
    $ mwdb-core
 
@@ -76,7 +76,7 @@ After installing ``mwdb-core`` package, let's start with ``mwdb-core`` command:
 
 Then, use ``mwdb-core configure`` to provide first configuration for your MWDB server.
 
-.. code-block::
+.. code-block:: console
 
    $ mwdb-core configure
 
@@ -125,7 +125,7 @@ Finally, you will be asked asked for admin account password that will be used on
 
 And you are done! ``run`` command will start the Flask server:
 
-.. code-block::
+.. code-block:: console
 
    $ mwdb-core run
     * Environment: production
@@ -146,13 +146,13 @@ Alternative setup using Docker Compose
 
 The most quick way setup MWDB is to just clone the repository and use Docker-Compose. We recommend this method **only for testing** because it can be a bit more difficult to install extensions and integrate with other services. MWDB instance configured that way is production-ready.
 
-.. code-block::
+.. code-block:: console
 
-    git clone https://github.com/CERT-Polska/mwdb-core.git
+    $ git clone https://github.com/CERT-Polska/mwdb-core.git
 
 After cloning repository, the first step is to go to the ``mwdb-core`` directory and generate configuration using ``./gen_vars.sh`` script.
 
-.. code-block::
+.. code-block:: console
 
    $ ./gen_vars.sh 
    Credentials for initial mwdb account:

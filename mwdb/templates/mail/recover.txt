@@ -7,8 +7,3 @@ Set password link: {base_url}/setpasswd/{set_password_token}
 If you didn't request a password change, you can ignore this message
 and continue to use your current password. Someone probably typed in
 your email address by accident.
-
-In case of any questions, feel free to contact us via our e-mail address: info@cert.pl.
-
-Regards,
-CERT.pl

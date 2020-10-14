@@ -1,8 +1,7 @@
-10. Extra features
-==================
+Extra features
+==============
 
 TBD:
-
 
 * User registration features (hosting public services with vetting)
 * Rate limiting

@@ -109,3 +109,14 @@ def is_true(flag):
     if (isinstance(flag, int) or isinstance(flag, bool)) and flag:
         return True
     return False
+
+
+def is_subdir(parent, child):
+    return (
+        os.path.commonpath([
+            os.path.abspath(parent)
+        ]) == os.path.commonpath([
+            os.path.abspath(parent),
+            os.path.abspath(child)
+        ])
+    )

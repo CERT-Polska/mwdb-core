@@ -9,14 +9,18 @@ class ShareItem extends Component {
         const fieldStyle = {
             wordBreak: 'break-all'
         };
+        let uploader = (
+            this.props.access_reason.includes(this.props.id) && this.props.access_reason.includes(this.props.group_name)
+            ) && <span className="ml-2">(uploader)</span>
 
         return (<tr>
-            <td><ObjectLink type="group" id={this.props.group_name}/></td>
+            <td><ObjectLink type="group" id={this.props.group_name}/>{uploader}</td>
             <td style={fieldStyle}><RefString
                 reason_type={this.props.reason_type}
                 related_object_dhash={this.props.related_object_dhash}
                 related_object_type={this.props.related_object_type}
-                related_user_login={this.props.related_user_login} /></td>
+                related_user_login={this.props.related_user_login} />
+            </td>
             <td><DateString date={this.props.access_time}/></td>
         </tr>)
     }
@@ -150,7 +154,7 @@ class SharesBox extends Component {
                 </thead>
                 <tbody>
                     {
-                        this.state.items.map((item, idx) => <ShareItem key={idx} {...item}/>)
+                        this.state.items.sort((a, b) => a.related_object_dhash > b.related_object_dhash).map((item, idx) => <ShareItem key={idx} id={this.props.id} {...item}/>)
                     }
                 </tbody>
             </table>

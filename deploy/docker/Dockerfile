@@ -4,24 +4,15 @@ LABEL maintainer="info@cert.pl"
 
 RUN apk add --no-cache postgresql-client postgresql-dev libmagic
 
-COPY requirements.txt /tmp/requirements.txt
+COPY requirements.txt docker/plugins/requirements-*.txt /tmp/
 RUN apk add --no-cache -t build libffi libffi-dev py3-cffi build-base python3-dev automake m4 autoconf libtool \
     && BUILD_LIB=1 pip --no-cache-dir install -r /tmp/requirements.txt \
+    && ls /tmp/requirements-*.txt | xargs -i,, pip --no-cache-dir install -r ,, \
     && apk del build
 
-# Install plugin requirements 
-# Because of Docker limitations: at least one file must exist, so original requirements.txt is appended
-
-COPY requirements.txt plugins/requirements-*.txt /tmp/
-
-RUN ls /tmp/requirements-*.txt | xargs -i,, pip --no-cache-dir install -r ,,
-
 # Copy backend files
-COPY docker/start.sh docker/uwsgi.ini docker/mwdb.ini setup.py MANIFEST.in requirements.txt /app/
+COPY docker/ setup.py MANIFEST.in requirements.txt /app/
 COPY mwdb /app/mwdb/
-
-# Copy user-controlled plugins
-COPY plugins /app/plugins
 
 # Install mwdb-core package
 RUN pip install /app

@@ -1,7 +1,7 @@
 FROM node:8 AS build
 
 COPY ./mwdb/web /app
-COPY ./plugins /plugins
+COPY ./docker/plugins /plugins
 
 RUN cd /app \
     && npm install --unsafe-perm . $(find /plugins -name 'package.json' -printf "%h\n" | sort -u) \

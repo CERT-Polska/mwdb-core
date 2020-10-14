@@ -2,6 +2,7 @@ import click
 
 from flask_migrate import upgrade
 
+from mwdb.cli.base import logger
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.model import db, User, Group
@@ -40,7 +41,7 @@ def configure_database():
     upgrade()
 
     if _is_database_initialized():
-        click.echo("[+] Database already initialized... skipping")
+        logger.info("Database already initialized... skipping")
         return
 
     if app_config.mwdb.admin_password:

@@ -5,6 +5,7 @@ import textwrap
 
 from pathlib import Path
 
+from mwdb.cli.base import logger
 from mwdb.core.config import reload_config
 from mwdb.core.util import token_hex
 from mwdb.paths import templates_dir
@@ -68,6 +69,6 @@ def create_configuration():
     with open(configuration_path, "w") as f:
         f.write(configuration)
 
-    click.echo(f"[+] Configuration stored in {configuration_path} file!")
+    logger.info("Configuration stored in %s file.", configuration_path)
     # Reload configuration including provided admin password
     reload_config()

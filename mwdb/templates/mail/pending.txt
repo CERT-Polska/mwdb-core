@@ -1,11 +1,8 @@
 Hi {login},
 
-Your MWDB account is waiting for acceptance. Please remember that all submissions are reviewed manually, so the
-approval process can take a few days before you receive access to the MWDB system.
+Your mwdb-core account is waiting for acceptance.
 
-Meanwhile, please read Terms of Use of the MWDB System: {base_url}/terms/en
+Please remember that all submissions are reviewed manually by mwdb-core administrator,
+so the approval process can take some time before you receive access to the mwdb-core system.
 
-In case of any questions, feel free to contact us via our e-mail address: info@cert.pl.
-
-Regards,
-CERT.pl
+Contact your mwdb-core administrator for details.

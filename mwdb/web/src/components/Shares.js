@@ -6,23 +6,29 @@ import { RefString, DateString, ObjectLink, ConfirmationModal } from "@mwdb-web/
 
 class ShareItem extends Component {
     render() {
-        const fieldStyle = {
+        let fieldStyle = {
             wordBreak: 'break-all'
         };
-        let uploader = (
-            this.props.access_reason.includes(this.props.id) && this.props.access_reason.includes(this.props.group_name)
-            ) && <span className="ml-2">(uploader)</span>
+        let current_object = this.props.access_reason.includes(this.props.id)
+        let uploader = this.props.access_reason.includes(this.props.group_name)
 
-        return (<tr>
-            <td><ObjectLink type="group" id={this.props.group_name}/>{uploader}</td>
-            <td style={fieldStyle}><RefString
-                reason_type={this.props.reason_type}
-                related_object_dhash={this.props.related_object_dhash}
-                related_object_type={this.props.related_object_type}
-                related_user_login={this.props.related_user_login} />
-            </td>
-            <td><DateString date={this.props.access_time}/></td>
-        </tr>)
+        if (current_object) fieldStyle.background = 'LightGray';
+
+        return (
+            <tr style={fieldStyle}>
+                <td>
+                    <ObjectLink type="group" id={this.props.group_name}/>
+                    {(current_object && uploader) && <span className="ml-2">(uploader)</span>}
+                </td>
+                <td><RefString
+                    reason_type={this.props.reason_type}
+                    related_object_dhash={this.props.related_object_dhash}
+                    related_object_type={this.props.related_object_type}
+                    related_user_login={this.props.related_user_login} />
+                </td>
+                <td><DateString date={this.props.access_time}/></td>
+            </tr>
+        )
     }
 }
 
@@ -122,6 +128,10 @@ class SharesBox extends Component {
         } catch(error) { }
     }
 
+    sortShares(a,b) {
+
+    }
+
     componentDidUpdate = (prevProps) => {
         if (prevProps.id !== this.props.id)
             this.updateShares();
@@ -154,7 +164,10 @@ class SharesBox extends Component {
                 </thead>
                 <tbody>
                     {
-                        this.state.items.sort((a, b) => a.related_object_dhash > b.related_object_dhash).map((item, idx) => <ShareItem key={idx} id={this.props.id} {...item}/>)
+                        this.state.items
+                            .sort((a, b) => a.related_object_dhash > b.related_object_dhash)
+                            .sort((a) => a.related_object_dhash === this.props.id)
+                            .map((item, idx) => <ShareItem key={idx} id={this.props.id} {...item}/>)
                     }
                 </tbody>
             </table>

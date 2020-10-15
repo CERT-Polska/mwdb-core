@@ -1,19 +1,19 @@
 import contextlib
 import functools
 import importlib
-import os
 import pkgutil
 import sys
 
 from mwdb.core.app import app, api
 from mwdb.core.config import app_config
 from mwdb.core.log import getLogger
+from mwdb.core.util import is_subdir
 from mwdb.model import Object, File, Config, TextBlob
 
 logger = getLogger()
 
 _plugin_handlers = []
-active_plugins = {}
+loaded_plugins = {}
 
 
 class PluginAppContext(object):
@@ -83,17 +83,6 @@ class PluginHookHandler(PluginHookBase):
         super().__init__(True)
 
 
-def is_subdir(parent, child):
-    return (
-        os.path.commonpath([
-            os.path.abspath(parent)
-        ]) == os.path.commonpath([
-            os.path.abspath(parent),
-            os.path.abspath(child)
-        ])
-    )
-
-
 def iter_local_plugin_modules():
     local_plugins_folder = app_config.mwdb.local_plugins_folder
     for module_info in pkgutil.iter_modules():
@@ -148,15 +137,31 @@ def load_plugins(app_context: PluginAppContext):
                 plugin = importlib.import_module(plugin_name)
                 if hasattr(plugin, "__plugin_entrypoint__"):
                     getattr(plugin, "__plugin_entrypoint__")(app_context)
-                active_plugins[plugin_name.split(".")[-1]] = {
-                    "active": True,
-                    "author": getattr(plugin, "__author__", None),
-                    "version": getattr(plugin, "__version__", None),
-                    "description": getattr(plugin, "__doc__", None),
-                }
+                loaded_plugins[plugin_name] = plugin
+                logger.info("Loaded plugin '%s'", plugin_name)
             except Exception:
-                logger.exception(f"Failed to load '{plugin_name}' plugin")
+                logger.exception(f"Failed to load '%s' plugin", plugin_name)
                 raise
+
+
+def configure_plugins():
+    for plugin_name, plugin in loaded_plugins.items():
+        try:
+            if hasattr(plugin, "__plugin_configure__"):
+                getattr(plugin, "__plugin_configure__")()
+            logger.info("Configured plugin '%s'", plugin_name)
+        except Exception:
+            logger.exception(f"Failed to configure '%s' plugin", plugin_name)
+            raise
+
+
+def get_plugin_info():
+    return {plugin_name: {
+        "active": True,
+        "author": getattr(plugin, "__author__", None),
+        "version": getattr(plugin, "__version__", None),
+        "description": getattr(plugin, "__doc__", None),
+    } for plugin_name, plugin in loaded_plugins.items()}
 
 
 def call_hook(hook_name, *args, **kwargs):

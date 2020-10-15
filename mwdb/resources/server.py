@@ -3,7 +3,7 @@ from flask_restful import Resource
 
 from mwdb.core.app import api
 from mwdb.core.config import app_config
-from mwdb.core.plugins import active_plugins
+from mwdb.core.plugins import get_plugin_info
 from mwdb.schema.server import (
     ServerPingResponseSchema,
     ServerInfoResponseSchema
@@ -55,7 +55,7 @@ class ServerInfoResource(Resource):
             "is_registration_enabled": app_config.mwdb.enable_registration,
             "recaptcha_site_key": app_config.mwdb.recaptcha_site_key,
             "base_url": app_config.mwdb.base_url,
-            "active_plugins": active_plugins
+            "active_plugins": get_plugin_info()
         })
 
 

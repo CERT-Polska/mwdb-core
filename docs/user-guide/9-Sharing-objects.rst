@@ -9,7 +9,6 @@ In mwdb.cert.pl, we use them to group the users coming from the same organisatio
 
 Every user account is a member of at least two groups:
 
-
 * user's private group, named the same as user login, which represents the exclusive user permissions.
 * ``public`` group with permissions that apply to all users in MWDB.
 
@@ -20,7 +19,9 @@ Object access rules
 
 The basic rule of sharing model in MWDB is that **group sees only their own uploads and all descendant objects**. In that model, you have permission to see the configuration for your sample and all the information originating from that configuration. Access to parent object implies the access its to children, but not the other way around.
 
-// image
+.. image:: ../_static/sharing-diagram.png
+   :target: ../_static/sharing-diagram.png
+   :alt: Sharing diagram
 
 As an user, you need to choose which groups you represent uploading the sample. There are four options:
 
@@ -30,15 +31,29 @@ As an user, you need to choose which groups you represent uploading the sample. 
 * **Everybody** - in that case, object is shared with ``public`` group, which means that everybody will have access to the uploaded object and all its descendants.
 * **Only me** - your object will be shared only with your group.
 
-Note that all options share the uploaded object with your private group. In addition, your object will be always shared with special ``everything`` group, which is described later.
+Note that all options share the uploaded object with your private group. In addition, your object will be **always** shared with special ``everything`` group described later.
 
-// image with upload screen
+.. image:: ../_static/upload-share-with.png
+   :target: ../_static/upload-share-with.png
+   :alt: Upload sharing options
+
+.. note::
+
+  If you are not a member of any additional group, you will see only **Everybody** and **Only me** (default) options
 
 Current object access rules are visible in ``Shares`` box. Entries with the same identifier as currently watched object are originating from the upload of that object. Others are inherited from the parents
 
-// image example
+.. image:: ../_static/shares.png
+   :target: ../_static/shares.png
+   :alt: Upload sharing options
 
-In example presented above: ``<describe the example>``
+In example presented above:
+
+* **karton** added blob (blue colored) with config as a parent
+* **certpl-systems** group has access to blob because Karton is a member of that group. Uploader (Karton) decided to share uploaded object with all groups.
+* **Alice** has access to blob because she added the original archive (green colored) before
+* **public** group has access because Alice decided that she want to share archive with everybody
+* **Chris** added Remcos sample (red colored) directly one day later, so he has got additional exclusive access to the blob. If archive was not added to the `public` group
 
 Who is who? User visibility rules
 ---------------------------------
@@ -70,19 +85,83 @@ Even if you upload sample to mwdb.cert.pl with ``Only me`` option, you are shari
     ``everything`` group can be renamed. To make the ``everything`` group more friendly for other people in your organization, you can use your organization name instead.
 
 
-How to add new user?
---------------------
+How to add new user/group?
+--------------------------
 
-TBD
+Users and groups can be managed by administrator using ``Manage users`` and ``Manage groups`` views in ``Admin`` menu.
 
-Tell about Feed quality
+Create a new user
+~~~~~~~~~~~~~~~~~
+
+.. warning::
+
+  **Be careful!** User accounts can't be renamed nor removed in current version of mwdb-core.
+
+To create a new user, go to ``Admin``/``Manage users`` and click on ``Register user`` button.
+
+.. image:: ../_static/admin-register-user.png
+   :target: ../_static/admin-register-user.png
+   :alt: Register user button
+
+.. image:: ../_static/create-user-form.png
+   :target: ../_static/create-user-form.png
+   :alt: Create user form
+
+Then fill the form with the following information:
+
+* **Login** and **E-mail** that will be used for authentication, password recovery etc.
+* **Additional info** (optional) to store additional description of user account
+* **Feed quality** which is useful for plugins to determine if user account is associated with automatic feed (low) or human user (high, default).
+
+By default - MWDB sends an e-mail to the new user with set password link, but if you have not configured SMTP service: disable **Send e-mail with set password link** first.
+
+After clicking on ``Submit``, you will see a confirmation message with hyperlink to user profile.
+
+.. image:: ../_static/user-create-confirmation.png
+   :target: ../_static/user-create-confirmation.png
+   :alt: Create user form
+
+Using user profile, you can add user to additional groups and generate set password link. Go to the bottom of the page and click on the ``Change password`` button.
+
+.. image:: ../_static/change-password.png
+   :target: ../_static/change-password.png
+   :alt: Change password
+
+Pass that link to the user to let him set a new password for an account.
+
+Create a new group
+~~~~~~~~~~~~~~~~~~
+
+.. warning::
+
+  **Be careful!** Groups can't be removed in current version of mwdb-core.
+
+To create a new group, go to ``Admin``/``Manage groups`` and click on ``Create group`` button.
+
+.. image:: ../_static/admin-register-group.png
+   :target: ../_static/admin-register-group.png
+   :alt: Register group button
+
+.. image:: ../_static/create-group-form.png
+   :target: ../_static/create-group-form.png
+   :alt: Create group form
+
+Set name for a new group. After clicking on ``Submit``, you will see a confirmation message with hyperlink to group settings.
+
+.. image:: ../_static/new-group.png
+   :target: ../_static/new-group.png
+   :alt: Create group form
+
+In group settings view, you can add members to the new group.
 
 Group capabilities (superpowers)
 --------------------------------
 
 All groups can have additional permissions that applies to all members. MWDB by default is quite restrictive and regular user accounts are by default allowed only to upload samples and access the object information. That default prevents breaking the existing conventions or making potentially irreversible actions, but even in CERT.pl we don't apply such limitations for users.
 
-// image showing the capabilities
+.. image:: ../_static/capabilities.png
+   :target: ../_static/capabilities.png
+   :alt: Capabilities view
 
 By default, ``admin`` private group has enabled all capabilities. All other groups are created with all disabled.
 

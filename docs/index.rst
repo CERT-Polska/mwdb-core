@@ -21,6 +21,7 @@ Features
    setup-and-configuration
    user-guide/index
    integration-guide
+   extra-features
    developer-guide
 
 Indices and tables

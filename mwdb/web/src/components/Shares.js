@@ -12,7 +12,7 @@ class ShareItem extends Component {
         let current_object = this.props.access_reason.includes(this.props.id)
         let uploader = this.props.access_reason.includes(this.props.group_name)
 
-        if (current_object) fieldStyle.background = 'LightGray';
+        if (!current_object) fieldStyle.background = 'LightGray';
 
         return (
             <tr style={fieldStyle}>
@@ -162,7 +162,7 @@ class SharesBox extends Component {
                     {
                         this.state.items
                             .sort((a, b) => a.related_object_dhash > b.related_object_dhash)
-                            .sort((a) => a.related_object_dhash === this.props.id)
+                            .sort((a) => a.related_object_dhash !== this.props.id)
                             .map((item, idx) => <ShareItem key={idx} id={this.props.id} {...item}/>)
                     }
                 </tbody>

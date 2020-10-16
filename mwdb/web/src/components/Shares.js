@@ -9,10 +9,10 @@ class ShareItem extends Component {
         let fieldStyle = {
             wordBreak: 'break-all'
         };
-        let current_object = this.props.access_reason.includes(this.props.id)
-        let uploader = this.props.access_reason.includes(this.props.group_name)
+        const isCurrentObject = this.props.related_object_dhash == this.props.id
+        const isUploader = this.props.related_user_login == this.props.group_name
 
-        if (!current_object) fieldStyle.background = 'LightGray';
+        if (!current_object) fieldStyle.backgroundColor = 'lightgray';
 
         return (
             <tr style={fieldStyle}>
@@ -161,8 +161,23 @@ class SharesBox extends Component {
                 <tbody>
                     {
                         this.state.items
-                            .sort((a, b) => a.related_object_dhash > b.related_object_dhash)
-                            .sort((a) => a.related_object_dhash !== this.props.id)
+                            .sort((a, b) => {
+                                if(a.related_object_dhash !== b.related_object_dhash)
+                                {
+                                    // Current object should be on top
+                                    if(b.related_object_dhash === this.props.id) return 1;
+                                    if(a.related_object_dhash === this.props.id) return -1;
+                                    // Inherited entries order by dhash
+                                    if(a.related_object_dhash > b.related_object_dhash) return 1;
+                                    if(a.related_object_dhash < b.related_object_dhash) return -1;
+                                }
+                                const a_time = Date.parse(a.access_time);
+                                const b_time = Date.parse(b.access_time);
+                                // The same dhash order by time
+                                if(a_time > b_time) return 1;
+                                if(a_time < b_time) return -1;
+                                return 0;
+                            })
                             .map((item, idx) => <ShareItem key={idx} id={this.props.id} {...item}/>)
                     }
                 </tbody>

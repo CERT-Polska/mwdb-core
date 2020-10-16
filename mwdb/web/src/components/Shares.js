@@ -12,13 +12,13 @@ class ShareItem extends Component {
         const isCurrentObject = this.props.related_object_dhash == this.props.id
         const isUploader = this.props.related_user_login == this.props.group_name
 
-        if (!current_object) fieldStyle.backgroundColor = 'lightgray';
+        if (!isCurrentObject) fieldStyle.backgroundColor = 'lightgray';
 
         return (
             <tr style={fieldStyle}>
                 <td>
                     <ObjectLink type="group" id={this.props.group_name}/>
-                    {(current_object && uploader) && <span className="ml-2">(uploader)</span>}
+                    {(isCurrentObject && isUploader) && <span className="ml-2">(uploader)</span>}
                 </td>
                 <td><RefString
                     reason_type={this.props.reason_type}

@@ -21,7 +21,8 @@ export function joinActions(currentActions, newActions) {
 
 export default class ShowObjectPresenter extends Component {
     state = {
-        isDeleteModalOpen: false
+        isDeleteModalOpen: false,
+        disableModalButton: false
     }
     defaultTab = "details"
 
@@ -45,6 +46,7 @@ export default class ShowObjectPresenter extends Component {
     handleDeleteObject = async () => {
             try {
                 await api.removeObject(this.props.id)
+                this.setState({isDeleteModalOpen: false})
                 if (this.props.type === "file") {
                     this.props.history.push("/")
                 } else if (this.props.type === "text_blob") {
@@ -189,11 +191,12 @@ export default class ShowObjectPresenter extends Component {
                                    confirmText="Yes"
                                    message="Are you sure you want to delete this object?"
                                    isOpen={this.state.isDeleteModalOpen}
+                                   disabled={this.state.disableModalButton}
                                    onRequestClose={() => this.setState({isDeleteModalOpen: false})}
                                    onConfirm={(ev) => {
                                        ev.preventDefault();
                                        this.handleDeleteObject()
-                                       this.setState({isDeleteModalOpen: false})
+                                       this.setState({disableModalButton: true})
                                    }}/>
             </Extendable>
         );

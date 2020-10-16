@@ -9,8 +9,8 @@ class ShareItem extends Component {
         let fieldStyle = {
             wordBreak: 'break-all'
         };
-        const isCurrentObject = this.props.related_object_dhash == this.props.id
-        const isUploader = this.props.related_user_login == this.props.group_name
+        const isCurrentObject = this.props.related_object_dhash === this.props.id
+        const isUploader = this.props.related_user_login === this.props.group_name
 
         if (!isCurrentObject) fieldStyle.backgroundColor = 'lightgray';
 

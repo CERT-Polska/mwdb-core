@@ -35,10 +35,10 @@ export default function ConfirmationModal(props) {
             }
             <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-dismiss="modal"
-                        onClick={props.onRequestClose}>{props.cancelText || "Close"}
+                        onClick={props.onRequestClose} disabled={props.disabled}>{props.cancelText || "Close"}
                 </button>
                 <button type="button" className={`btn ${props.buttonStyle || "btn-danger"}`} data-dismiss="modal"
-                        onClick={props.onConfirm}>{props.confirmText || "Yes"}
+                        onClick={props.onConfirm} disabled={props.disabled}>{props.confirmText || "Yes"}
                 </button>
             </div>
         </Modal>

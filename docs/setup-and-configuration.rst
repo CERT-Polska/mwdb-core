@@ -168,6 +168,8 @@ Then build images via ``docker-compose build`` and run MWDB via ``docker-compose
 
 Your MWDB instance will be available on default HTTP port (80): http://127.0.0.1/
 
+If you want to use Docker Compose for MWDB development, check out :ref:`Developer guide`.
+
 Alternative setup using uwsgi + nginx
 -------------------------------------
 

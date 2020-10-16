@@ -1,7 +1,7 @@
 4. Storing human-readable data (blobs)
 ======================================
 
-Blob object is represantation of unstructured, human-readable (text) data. Simply everything that is non-binary and unparsed.
+Blob object is a represantation of unstructured, human-readable (text) data. Simply everything that is non-binary and unparsed.
 
 
 .. image:: ../_static/QkOPEFj.png
@@ -22,7 +22,7 @@ The good examples are:
 * injects fetched from C&C for banking malware
 * mail templates for spam bots
 * lists of peers fetched from C&C for P2P botnets
-* raw static configurations if malware already keeps them structured (e.g. in XML format)
+* raw static configurations if malware keeps them structured (e.g. in XML format)
 
 .. note::
 

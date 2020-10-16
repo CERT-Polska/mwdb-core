@@ -41,7 +41,7 @@ Note that all options share the uploaded object with your private group. In addi
 
   If you are not a member of any additional group, you will see only **Everybody** and **Only me** (default) options
 
-Current object access rules are visible in ``Shares`` box. Entries with the same identifier as currently watched object are originating from the upload of that object. Others are inherited from the parents
+Current object access rules are visible in ``Shares`` box. Entries with the same identifier as currently watched object are originating from the upload of that object. Others are marked with gray background and they are inherited from the parent objects.
 
 .. image:: ../_static/shares.png
    :target: ../_static/shares.png

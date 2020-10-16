@@ -166,4 +166,6 @@ After applying above modifications to ``__init__.py``, let's restart ``mwdb-core
     [INFO] Thread-12 - __init__.on_reuploaded_file:19 - Hello again evil.exe
     [INFO] Thread-12 - object.create_object:88 - File added - dhash:9e302844386835ef50bec3017e2c60705ab6bf33e4849e58e3af19a605b46d00 - is_new:False
 
-Webhooks can be used to automatically analyze the uploaded file in sandbox. The good example is mwdb-drakvuf-plugin which implements webhook that sends all uploaded files to the `Drakvuf Sandbox <https://github.com/CERT-Polska/drakvuf-sandbox>`_ for analysis.
+Webhooks can be used to automatically analyze the uploaded file in sandbox. The good example is `mwdb-plugin-drakvuf <https://github.com/CERT-Polska/mwdb-plugin-drakvuf>`_ which implements webhook that sends all uploaded files to the `Drakvuf Sandbox <https://github.com/CERT-Polska/drakvuf-sandbox>`_ for analysis.
+
+Check out `mwdb-plugin-drakvuf <https://github.com/CERT-Polska/mwdb-plugin-drakvuf>`_ on Github!

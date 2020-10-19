@@ -38,7 +38,7 @@ Let’s go through them shortly:
 * **Upload**\ : can be used to upload your own samples to the system
 * **Admin**\ : accessible only for administrators, allows to manage your MWDB instance (e.g. create new users and groups)
 * **Search**\ : untyped search, which returns all types of objects at once, but is hard-limited to 10.000 records. For most cases: we recommend Quick search field placed above Recent views.
-* **Statistics**\ : a summary of the malware configurations that were uploaded recently. You can use this view in mwdb.cert.pl service to determine if we support the family or not, or when did we last see a speciemen of the family you’re interested in.
+* **Statistics**\ : a summary of the malware configurations that were uploaded recently. You can use this view in mwdb.cert.pl service to determine if we support the malware family or when did we last see a speciemen of the family you’re interested in.
 * **About**\ : various links about MWDB version and REST API documentation.
 
 Recent objects view
@@ -85,7 +85,7 @@ Let's click on one of the hashes to navigate to the **detailed sample view**.
 
 Here you can see all the details about file. Left side contains four tabs. The first one called **Details** presents basic file information like original file name, size, file type and hash values.
 
-On the right side of view you can see tags, relations with other objects, attributes containing some extra information and finally: the comments section. All of these things will be described in details in further chapters of this guide.
+On the right side of view you can see tags, relations with other objects, attributes containing some extra information and the comments section. All of these things will be described in details in further chapters of this guide.
 
 Let's come back to the tabs. The second tab is **Relations** that shows graph representation of relations with other objects. You can expand next levels of graph by clicking on nodes.
 
@@ -95,7 +95,7 @@ Let's come back to the tabs. The second tab is **Relations** that shows graph re
    :alt: sample relations tab
 
 
-The third tab is **Preview** where you can quickly view the file contents, both in text mode and hex view.
+The third tab is **Preview** where you can quickly view the file contents, both in text mode or hex view.
 
 
 .. image:: ../_static/WSU4UYZ.gif
@@ -107,4 +107,4 @@ Finally you can download the sample file just by clicking **Download** button.
 
 The fourth tab called **Static config** is optional and shows only if there are some configurations related with sample.
 
-This is only an overview of the most basic MWDB functions. Follow this guide to learn in details how to effectively navigate in repository, upload new objects and define relationships between them.
+This is only an overview of the most basic MWDB functions. Follow this guide to learn in details how to effectively use the repository, upload new objects and define relationships between them.

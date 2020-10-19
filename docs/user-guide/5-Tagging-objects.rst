@@ -1,11 +1,11 @@
 5. Tagging objects
 ==================
 
-Tags are used for basic object classification, allowing to quickly search for interesting samples in malware feed.
+Tags are used for basic object classification, allowing to quickly search for interesting samples in a malware feed.
 
 .. warning::
 
-   Tags can be added only if user has ``adding_tags`` capability turned on. Check your capabilities in ``Profile`` view.
+   Tags can be added only if user has the ``adding_tags`` capability turned on. Check your capabilities in ``Profile`` view.
    
    In mwdb.cert.pl you are allowed to add tags, but **you can't remove them** (``removing_tags`` is required). If you see that malware family has not been correctly recognized by mwdb.cert.pl, you can left a comment or set `maybe:<family>` tag to help us track these issues.
 

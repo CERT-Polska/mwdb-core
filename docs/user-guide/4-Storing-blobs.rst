@@ -1,7 +1,7 @@
 4. Storing human-readable data (blobs)
 ======================================
 
-Blob object is represantation of unstructured, human-readable (text) data. Simply everything that is non-binary and unparsed.
+Blob object is a represantation of unstructured, human-readable (text) data. Simply everything that is non-binary and unparsed.
 
 
 .. image:: ../_static/QkOPEFj.png
@@ -12,9 +12,9 @@ Blob object is represantation of unstructured, human-readable (text) data. Simpl
 What is blob in MWDB?
 ---------------------
 
-Usually "Blob" stands for "Binary Large Object", but in MWDB the meaning is different. Blob in MWDB repository represents **various data stored in unstructured form** that instead of being parsed, have been only simply formatted to be human-readable.
+Usually "Blob" stands for "Binary Large Object", but in MWDB the meaning is different. Blob represents **various data stored in unstructured form** that are only simply formatted to be human-readable.
 
-The second use case of blobs are data that are part of configuration, but are **too big to be conveniently represented** as a part of JSON structure.
+Blobs can also store data that are part of configuration, but are **too big to be conveniently represented** by JSON value.
 
 The good examples are:
 
@@ -22,11 +22,11 @@ The good examples are:
 * injects fetched from C&C for banking malware
 * mail templates for spam bots
 * lists of peers fetched from C&C for P2P botnets
-* raw static configurations if malware already keeps them structured (e.g. in XML format)
+* raw static configurations if malware keeps them structured (e.g. in XML format)
 
 .. note::
 
-   Although blobs are meant to be only slightly pre-processed, it's important to eliminate things that are originating from specific execution in sandbox and not specific for malware operations themselves e.g. **random nonces, memory pointers and other noise**. This will help you to avoid duplications.
+   Before storing blob, filter out things that are originating from specific execution in sandbox and are not specific for malware operations themselves e.g. **random nonces, memory pointers and other noise**. This will help you to avoid duplications.
 
 
 Blob attributes
@@ -51,7 +51,7 @@ Blobs are described using the following attributes:
 How to upload blobs?
 --------------------
 
-Just like configurations, blobs are intended to be uploaded by automated systems or scripts, so they can't be added directly from MWDB UI. Similarly to configuration upload described in previous chapter (:ref:`How to upload configuration?`), you can push them using ``mwdb upload blob`` command or `MWDB.upload_blob <https://mwdblib.readthedocs.io/en/latest/mwdblib.html#mwdblib.MWDB.upload_blob>`_ function or via REST API.
+Just like configurations, blobs are intended to be uploaded by automated systems or scripts, so they can't be added directly from MWDB UI. Similarly to the configuration upload described in previous chapter (:ref:`How to upload configuration?`), you can push them using ``mwdb upload blob`` command or `MWDB.upload_blob <https://mwdblib.readthedocs.io/en/latest/mwdblib.html#mwdblib.MWDB.upload_blob>`_ function or via REST API.
 
 More information about mwdblib can be found in chapter :ref:`8. Automating things using REST API and mwdblib`.
 
@@ -78,7 +78,7 @@ Let's assume we have a key called ``raw_cfg`` that contains long string with who
        "raw_cfg": "<really long string with contents>"
    }
 
-If you want to upload the ``raw_cfg`` contents as a blob object and put only a reference in the original ``raw_cfg`` key - wrap contents with ``in-blob`` structure like below:
+If you want to upload the ``raw_cfg`` contents as a blob object, wrap contents with ``in-blob`` structure like below. Blob reference will be placed under the original (``raw_cfg``) key.
 
 .. code-block:: json
 
@@ -114,7 +114,7 @@ If you want to upload the ``raw_cfg`` contents as a blob object and put only a r
    :alt: in-blob config preview
 
 
-All upload ``options`` passed to the upload request (excluding ``parent``\ ) apply to the added blobs If you want to set attribute along with configuration upload, attribute will be added to all blob objects as well.
+All upload ``options`` passed to the upload request (excluding ``parent``\ ) apply to the added blobs. If you want to set attribute along with configuration upload, attribute will be added to all blob objects as well.
 
 Embedding already uploaded blob
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -174,7 +174,7 @@ Just like configurations, relationships between blobs and other object types hav
 Config → Blob relations
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Blobs usually represent data that are:
+Config → Blob relationship usually represent data that are:
 
 * dynamically fetched based on static configuration
 * part of static configuration (previously described in "Embedded blobs" section)
@@ -189,6 +189,6 @@ Sometimes we are able to parse the dynamically fetched content from C&C, but the
 * unstructured, but more complete blobs
 * more easy to process (structured), but limited configurations
 
-In that case we can upload configuration representing parsed blob as a child of that blob.
+In that case we can upload configuration that represents parsed blob as a child of that blob.
 
-Just like for File → Config relations, MWDB has special support for that type of relationship and presents **the latest configuration** for a given blob along with other blob information.
+Just like File → Config relations, MWDB has special support for that type of relationship and presents **the latest configuration** for a given blob along with other blob information.

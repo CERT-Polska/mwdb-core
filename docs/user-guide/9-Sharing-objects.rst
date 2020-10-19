@@ -5,7 +5,7 @@ Access control to the objects and features in MWDB is based on **groups**.
 
 For MWDB users: group is a workspace, that allows to share the same view of uploaded objects across the various users. For MWDB administrators: group is also a way to give a specific set of permissions, depending on the role and level of trust.
 
-In mwdb.cert.pl, we use them to group the users coming from the same organisation, to make them share their uploads and insights with other co-workers or keep the information to be accessible only within trusted group of people.
+In mwdb.cert.pl, we use them to group the users collaborating within the same organisation, to make them share their uploads and insights with other workmates or keep the information to be accessible only within trusted group of people.
 
 Every user account is a member of at least two groups:
 
@@ -17,7 +17,7 @@ Users' permissions are the sum of permissions of their groups.
 Object access rules
 -------------------
 
-The basic rule of sharing model in MWDB is that **group sees only their own uploads and all descendant objects**. In that model, you have permission to see the configuration for your sample and all the information originating from that configuration. Access to parent object implies the access its to children, but not the other way around.
+The basic rule of sharing model in MWDB is that **group sees only their own uploads and all descendant objects**. In that model, you have permission to see the configuration for your sample and all the information derived from that configuration. Access to parent object implies the access to its children, but not the other way around.
 
 .. image:: ../_static/sharing-diagram.png
    :target: ../_static/sharing-diagram.png
@@ -26,7 +26,7 @@ The basic rule of sharing model in MWDB is that **group sees only their own uplo
 As an user, you need to choose which groups you represent uploading the sample. There are four options:
 
 
-* **All my groups** - the default option, which shares uploaded object with all groups, excluding ``public``. That will share the object with all workspaces you belong to and your own private group. It means that even if you lose access to the workspace, you will still have access to your own uploads.
+* **All my groups** - the default option, which shares uploaded object with all groups you belong to, excluding ``public``. That will share the object with all your workspaces to and your own private group. It means that even if you lose access to the workspace, you will still have access to your own uploads.
 * **Single group...** - allows to share an object exclusively with chosen group and your own private group.
 * **Everybody** - in that case, object is shared with ``public`` group, which means that everybody will have access to the uploaded object and all its descendants.
 * **Only me** - your object will be shared only with your group.
@@ -41,7 +41,7 @@ Note that all options share the uploaded object with your private group. In addi
 
   If you are not a member of any additional group, you will see only **Everybody** and **Only me** (default) options
 
-Current object access rules are visible in ``Shares`` box. Entries with the same identifier as currently watched object are originating from the upload of that object. Others are inherited from the parents
+Current object access rules are visible in ``Shares`` box. Entries with the same identifier as currently watched object are originating from the upload of that object. Others are marked with gray background and they are inherited from the parent objects.
 
 .. image:: ../_static/shares.png
    :target: ../_static/shares.png

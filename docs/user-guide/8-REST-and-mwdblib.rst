@@ -374,7 +374,7 @@ Sometimes you may need to flush the cache to fetch the refreshed state of object
 Command-line interface (CLI)
 ----------------------------
 
-MWDB library is providing optional command line interface, which can be used to interact with MWDB repository.
+MWDB library provides optional command line interface, which can be used to interact with MWDB repository.
 
 Command-line interface requires extra ``mwdblib[cli]`` dependencies that can be installed using ``pip``
 
@@ -545,7 +545,7 @@ Most API endpoints require authentication. Authorization token must be passed us
 
 Complete API documentation can be found under the ``/docs`` endpoint. API documentation is based on `Swagger client <https://swagger.io/>`_ and you can interact with API directly from that page.
 
-After log in, click on ``About`` in the navbar and go to the ``Docs`` page.
+After logging in, click on ``About`` in the navbar and go to the ``Docs`` page.
 
 .. image:: ../_static/mwdb-docs.png
    :target: ../_static/mwdb-docs.png

@@ -1,7 +1,7 @@
 7. Advanced search based on Lucene queries
 ==========================================
 
-MWDB comes with powerful search engine based on Lucene query syntax subset.
+MWDB comes with a powerful search engine based on Lucene query syntax subset.
 
 Query syntax: fields
 --------------------
@@ -96,7 +96,7 @@ Query syntax: timestamps
 
 With timestamps you can search for objects within certain time range.
 
-If you want to find samples that were uploaded from the beginning of September till 28th:
+If you want to find samples that were uploaded from the beginning of September till the 28th:
 
 .. code-block::
 

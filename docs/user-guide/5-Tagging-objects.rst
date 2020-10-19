@@ -79,7 +79,7 @@ Tags indicating matched malware are **yellow** (\ ``ripped:``\ , ``contains:``\ 
    If you want to get only samples that are marked as malicious with high confidence - use ``Only ripped:*`` button in Quick query bar.
 
 
-File type can be additionally classified with another group of **gray** tags (\ ``runnable:``\ , ``archive:``\ , ``dump:``\ , ``script:``\ ).
+File types can be additionally classified with another group of **gray** tags (\ ``runnable:``\ , ``archive:``\ , ``dump:``\ , ``script:``\ ).
 
 
 .. image:: ../_static/4jYM0Kq.png

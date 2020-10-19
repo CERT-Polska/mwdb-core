@@ -26,7 +26,7 @@ The good examples are:
 
 .. note::
 
-   Before storing blob, filter out things that are originating from specific execution in sandbox and are not specific for malware operations themselves e.g. **random nonces, memory pointers and other noise**. This will help you to avoid duplications.
+   Before storing a blob, filter out things that are originating from specific execution in sandbox and are not specific for malware operations themselves e.g. **random nonces, memory pointers and other noise**. This will help you to avoid duplications.
 
 
 Blob attributes
@@ -179,7 +179,7 @@ Config → Blob relationship usually represent data that are:
 * dynamically fetched based on static configuration
 * part of static configuration (previously described in "Embedded blobs" section)
 
-Bankers are parametrized by dynamic configuration containing injects. Spam botnets are fetching spam templates. All of these text-like things can be stored as text blobs bound to related static configuration.
+Bankers are parametrized by dynamic configuration containing injects. Spam botnets fetch spam templates. All of these text-like things can be stored as text blobs bound to related static configuration.
 
 Blob → Config relations
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -187,7 +187,7 @@ Blob → Config relations
 Sometimes we are able to parse the dynamically fetched content from C&C, but the process is lossy and we want to store it in both forms: 
 
 * unstructured, but more complete blobs
-* more easy to process (structured), but limited configurations
+* easier to process (structured), but limited configurations
 
 In that case we can upload configuration that represents parsed blob as a child of that blob.
 

@@ -33,12 +33,12 @@ Let’s go through them shortly:
 
 
 * **Samples**\ : list of recently uploaded files. The files are tagged and can be queried easily.
-* **Configs**\ : configs are structured data (in a JSON format), usually statically extracted from the samples. You can store there things like encryption keys or C&C servers used by samples there.
-* **Blobs**\ : blobs are unstructured text files, usually configuration or injects downloaded from C&C server (sometimes also plaintext data from the binary, like ransom notes).
+* **Configs**\ : configs are structured data (in a JSON format), usually statically extracted from the samples. You can store things like encryption keys or C&C servers used by samples there.
+* **Blobs**\ : blobs are unstructured text files, usually configuration or webinjects downloaded from C&C server (sometimes also plaintext data from the binary, like ransom notes).
 * **Upload**\ : can be used to upload your own samples to the system
 * **Admin**\ : accessible only for administrators, allows to manage your MWDB instance (e.g. create new users and groups)
 * **Search**\ : untyped search, which returns all types of objects at once, but is hard-limited to 10.000 records. For most cases: we recommend Quick search field placed above Recent views.
-* **Statistics**\ : a summary of the malware configurations that were uploaded recently. You can use this view in mwdb.cert.pl service to determine if we support the malware family or when did we last see a speciemen of the family you’re interested in.
+* **Statistics**\ : a summary of the malware configurations that were uploaded recently. You can use this view in mwdb.cert.pl service to determine if we support a specific malware family or when did we last see a speciemen of the family you’re interested in.
 * **About**\ : various links about MWDB version and REST API documentation.
 
 Recent objects view

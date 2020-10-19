@@ -5,7 +5,7 @@ Access control to the objects and features in MWDB is based on **groups**.
 
 For MWDB users: group is a workspace, that allows to share the same view of uploaded objects across the various users. For MWDB administrators: group is also a way to give a specific set of permissions, depending on the role and level of trust.
 
-In mwdb.cert.pl, we use them to group the users collaborating within the same organisation, to make them share their uploads and insights with other workmates or keep the information to be accessible only within trusted group of people.
+In mwdb.cert.pl, we use them to group the users collaborating within the same organisation, to allow them to share their uploads and insights with other workmates or keep the information to be accessible only within trusted group of people.
 
 Every user account is a member of at least two groups:
 
@@ -53,12 +53,12 @@ In example presented above:
 * **certpl-systems** group has access to blob because Karton is a member of that group. Uploader (Karton) decided to share uploaded object with all groups.
 * **Alice** has access to blob because she added the original archive (green colored) before
 * **public** group has access because Alice decided that she want to share archive with everybody
-* **Chris** added Remcos sample (red colored) directly one day later, so he has got additional exclusive access to the blob. If archive was not added to the `public` group
+* **Chris** added Remcos sample (red colored) directly one day later, so he has got additional exclusive access to the blob. If the archive was not added to the `public` group he would still have access.
 
 Who is who? User visibility rules
 ---------------------------------
 
-Regular users are able to see only its own groups. It means that they’re able only to see these users that are members of their groups.
+Regular users are able to see only their own groups. It means that they’re able to only see these users that are members of their groups.
 
 Joining the group, you are allowed to:
 
@@ -127,7 +127,7 @@ Using user profile, you can add user to additional groups and generate set passw
    :target: ../_static/change-password.png
    :alt: Change password
 
-Pass that link to the user to let him set a new password for an account.
+Pass that link to the user to let them set a new password for an account.
 
 Create a new group
 ~~~~~~~~~~~~~~~~~~
@@ -157,7 +157,7 @@ In group settings view, you can add members to the new group.
 Group capabilities (superpowers)
 --------------------------------
 
-All groups can have additional permissions that applies to all members. MWDB by default is quite restrictive and regular user accounts are by default allowed only to upload samples and access the object information. That default prevents breaking the existing conventions or making potentially irreversible actions, but even in CERT.pl we don't apply such limitations for users.
+All groups can have additional permissions that apply to all members. MWDB by default is quite restrictive and regular user accounts are allowed only to upload samples and access the object information. That default prevents breaking the existing conventions or making potentially irreversible actions, but even in CERT.pl we don't apply such limitations for users.
 
 .. image:: ../_static/capabilities.png
    :target: ../_static/capabilities.png
@@ -171,7 +171,7 @@ Each capability has its own name and the administration page shows only the frie
 * 
   **manage_users - Managing users and groups (system administration)**
 
-  Allows to access all users and groups in MWDB. Rules described in *Who is who?* doesn't apply to users with that permission. Enables user to create new user accounts, new groups and change their capabilities and membership.
+  Allows to access all users and groups in MWDB. Rules described in *Who is who?* don't apply to users with that permission. Enables user to create new user accounts, new groups and change their capabilities and membership.
 
 * 
   **share_queried_objects - Query for all objects in system**
@@ -186,12 +186,12 @@ Each capability has its own name and the administration page shows only the frie
 * 
   **sharing_objects - Can share objects with all groups in system**
 
-  Implies the access to the list of all group names, but without access to the membership information and management features. Allow to share object with arbitrary group in MWDB.
+  Implies the access to the list of all group names, but without access to the membership information and management features. Allows to share object with arbitrary group in MWDB.
 
 * 
   **adding_tags - Can add tags**
 
-  Allows to tag objects. This feature is disabled by default, as you may want to have only tags from automated analysis.
+  Allows to tag objects. This feature is disabled by default, as you may want to have only tags from automated analyses.
 
 * 
   **removing_tags - Can remove tags**

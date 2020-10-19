@@ -15,10 +15,10 @@ For production environments, you need to install:
 Optionally you can install:
 
 
-* **Docker engine and Docker-Compose** if you want to use Docker-based setup (https://docs.docker.com/engine/install/)
+* **Docker engine and Docker-Compose** if you want to use the Docker-based setup (https://docs.docker.com/engine/install/)
 * **Redis database** needed by extra features like rate-limiting (https://redis.io/topics/quickstart)
 
-It's highly recommended to make a `virtualenv <https://docs.python.org/3/library/venv.html#module-venv>`_ for local MWDB installation:
+It's highly recommended to create a fresh `virtualenv <https://docs.python.org/3/library/venv.html#module-venv>`_ for local MWDB installation:
 
 .. code-block:: console
 
@@ -31,7 +31,7 @@ It's highly recommended to make a `virtualenv <https://docs.python.org/3/library
    (venv) ~/mwdb$
 
 .. note::
-   If you are a bit overwhelmed with setting up PostgreSQL database and you are looking for quick setup method just for testing: make sure you have Docker and Docker-Compose installed and go to the `Alternative setup using Docker-Compose <#Alternative-setup-using-Docker-Compose>`_.
+   If you are a bit overwhelmed by setting up PostgreSQL database and you are looking for quick setup method just for testing: first make sure you have Docker and Docker-Compose installed and go to the `Alternative setup using Docker-Compose <#Alternative-setup-using-Docker-Compose>`_.
 
    You can also setup temporary PostgreSQL database container using Docker image:
 
@@ -89,7 +89,7 @@ Then, use ``mwdb-core configure`` to provide first configuration for your MWDB s
 
 For first installation we recommend to install everything in current folder via ``3`` option. If you want to install MWDB system-wide or locally for user: choose ``1`` or ``2``. 
 
-Then, type connection string for PostgreSQL database. Database must be online and reachable at the time of configuration. After that, you will be asked for path for uploads and instance base URL. If default value is just ok, press Enter:
+Then, input the connection string for PostgreSQL database. The database must be online and reachable at the time of configuration. After that, you will be asked for path for uploads and instance base URL. If the default value is ok, press Enter:
 
 .. code-block::
 
@@ -115,7 +115,7 @@ After storing the configuration, the ``configure`` command will initialize datab
    Provide password for Malwarecage 'admin' account:
    Repeat password:
 
-Finally, you will be asked asked for admin account password that will be used on first login.
+Finally, you will be asked asked for the admin account password that will be used as the management account.
 
 .. code-block::
 
@@ -144,7 +144,7 @@ Your MWDB instance will be available on port 5000 (use ``--port`` to change that
 Alternative setup using Docker Compose
 --------------------------------------
 
-The most quick way setup MWDB is to just clone the repository and use Docker-Compose. We recommend this method **only for testing** because it can be a bit more difficult to install extensions and integrate with other services. MWDB instance configured that way is production-ready.
+The quickest way setup MWDB is to just clone the repository and use Docker-Compose. We recommend this method **only for testing** because it can be a bit more difficult to install extensions and integrate with other services.
 
 .. code-block:: console
 

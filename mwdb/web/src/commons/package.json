@@ -2,7 +2,7 @@
     "name": "@mwdb-web/commons",
     "main": "index.js",
     "private": true,
-    "version": "2.0.0-alpha4",
+    "version": "2.0.0-rc1",
     "dependencies": {
         "axios": "0.19.2",
         "identicon.js": "^2.3.2",

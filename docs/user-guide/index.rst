@@ -1,7 +1,7 @@
 User guide
 ==========
 
-This guide will help you to learn basic MWDB concepts step by step. It is not only limited to the potential use-cases of your own mwdb-core instance, but is also recommended for mwdb.cert.pl service users who want improve their skills in exploring MWDB database.
+This guide will help you to learn basic MWDB concepts step by step. It is not only limited to the potential use-cases of your own mwdb-core instance, but also recommended for mwdb.cert.pl service users who want improve their skills in exploring MWDB database.
 
 .. toctree::
    :maxdepth: 2

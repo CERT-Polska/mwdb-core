@@ -143,9 +143,9 @@ Remember that exclusive range is not allowed for date-time field so this is not 
 Basic search fields
 -------------------
 
-Fields are representing the object properties and can be **typed** (specific for object type) or **untyped** (generic, used by all object types).
+Fields represent the object properties and can be **typed** (specific for object type) or **untyped** (generic, used by all object types).
 
-Usage depends on the search context. If you're querying ``Recent files`` tab, query engine assumes that object type is ``file``. If you're using ``Search`` tab, you need to add appropriate type prefix to typed fields.
+Usage depends on the search context. If you're querying ``Recent files`` tab, query engine assumes that object type is ``file``. If you're using ``Search`` tab, you need to add appropriate type prefix to the typed fields.
 
 In simple words: `name:` field in `Recent files\ ``must be replaced by``\ file.name:\ ``field in``\ Search`.
 
@@ -263,7 +263,7 @@ If you want to see objects that are uploaded by somebody from your group excludi
 
    uploader:<group name> AND NOT uploader:<your login>
 
-Keep in mind that you can query only for your own groups and members of your own groups (excluding members of ``public``\ ). This limitation doesn't apply to administrators (\ ``manage_users`` capability).
+Keep in mind that you can query only for query only for objects uploaded by you or members of your own groups (excluding members of the ``public`` group). This limitation doesn't apply to administrators (``manage_users`` capability).
 
 Read more about MWDB sharing model and capabilities in chapter :ref:`9. Sharing objects with other collaborators`.
 
@@ -278,7 +278,7 @@ If you want to search for samples that have ripped configuration for Emotet fami
 
    child:(config.family:emotet)
 
-If you want to search for configs that have sample as their parent with file size greater than 1000, go to ``Configs`` and type:
+If you want to search for configs that have a sample as their parent with file size greater than 1000, go to ``Configs`` and type:
 
 .. code-block::
 

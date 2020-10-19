@@ -1,5 +1,5 @@
-Welcome to mwdb-core documentation!
-=====================================
+Welcome to MWDB Core documentation!
+===================================
 
 Malware repository for automated malware collection and analysis systems. You can use it to index and share your collection of malware and extracted configurations, providing convenient, unified interface for your malware analysis pipeline.
   

@@ -12,7 +12,8 @@ postgres_password.txt
 mwdb-vars.env
 postgres-vars.env
 .mypy_cache/
-/plugins
+docker/plugins/
+docker/mail_templates/
 tests/frontend/cypress/videos/
 tests/frontend/cypress/screenshots/
 build/

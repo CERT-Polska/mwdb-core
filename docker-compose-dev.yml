@@ -22,7 +22,7 @@ services:
       MWDB_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
       MWDB_ENABLE_REGISTRATION: 1
     volumes:
-      - "./mail_templates:/app/mail_templates"
+      - "./docker/mail_templates:/app/mail_templates"
       - "./mwdb:/app/mwdb"
   mwdb-web:
     depends_on:

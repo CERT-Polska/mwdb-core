@@ -38,7 +38,7 @@ Development environment is configured to use `Mailhog <https://github.com/mailho
 
 Mailhog provides very convenient webmail collecting all outgoing e-mails which are available here: http://127.0.0.1:8025
 
-You may also add any external SMTP server using the following enviornment variables:
+You may also add any external SMTP server using the following environment variables:
 
 .. code-block::
 
@@ -107,4 +107,3 @@ If you need to write change on your own e.g. because you need to migrate data in
 
    Alembic migrations generated inside container will be owned by root.
    If you have problem with permissions, use ``chown`` inside container to change the owner to your local UID.
-

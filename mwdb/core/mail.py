@@ -68,7 +68,7 @@ def send_email_notification(kind, subject, recipient_email, **params):
                 s.starttls()
  
             if username and password:
-                s.login(username,password)
+                s.login(username, password)
 
             s.send_message(message)
     except Exception as e:

@@ -38,6 +38,15 @@ Development environment is configured to use `Mailhog <https://github.com/mailho
 
 Mailhog provides very convenient webmail collecting all outgoing e-mails which are available here: http://127.0.0.1:8025
 
+You may also add any external SMTP server using the following enviornment variables:
+
+.. code-block::
+    MWDB_MAIL_SMTP = "smtp_server:port"
+    MWDB_MAIL_FROM = "name@example.com"
+    MWDB_MAIL_USERNAME = "your_username" # optional
+    MWDB_MAIL_PASSWORD = "your_password" # optional
+    MWDB_MAIL_TLS = 1 # Enables StartTLS, optional, defaults to 0
+
 Auto generating Alembic migrations
 ----------------------------------
 

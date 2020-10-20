@@ -41,6 +41,7 @@ Mailhog provides very convenient webmail collecting all outgoing e-mails which a
 You may also add any external SMTP server using the following enviornment variables:
 
 .. code-block::
+
     MWDB_MAIL_SMTP = "smtp_server:port"
     MWDB_MAIL_FROM = "name@example.com"
     MWDB_MAIL_USERNAME = "your_username" # optional

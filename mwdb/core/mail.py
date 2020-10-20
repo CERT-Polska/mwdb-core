@@ -69,6 +69,7 @@ def send_email_notification(kind, subject, recipient_email, **params):
  
             if username and password:
                 s.login(username,password)
-                s.send_message(message)
+
+            s.send_message(message)
     except Exception as e:
         raise MailError("Sending mail notification failed") from e

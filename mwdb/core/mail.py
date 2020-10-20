@@ -57,8 +57,19 @@ def send_email_notification(kind, subject, recipient_email, **params):
     else:
         smtp_host = mail_smtp
         smtp_port = 25
+    
+    username = app_config.mwdb.mail_username
+    password = app_config.mwdb.mail_password
+    tls = app_config.mwdb.mail_tls
+
     try:
         with smtplib.SMTP(smtp_host, int(smtp_port), timeout=3) as s:
+            if tls:
+                s.starttls()
+ 
+            if username and password:
+                s.login(username, password)
+
             s.send_message(message)
     except Exception as e:
         raise MailError("Sending mail notification failed") from e

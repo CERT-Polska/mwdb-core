@@ -64,6 +64,9 @@ class MWDBConfig(Config):
     mail_smtp = key(cast=str, required=False)
     mail_from = key(cast=str, required=False, default="noreply@mwdb")
     mail_templates_folder = key(cast=path, required=False, default=mail_templates_dir)
+    mail_username = key(cast=str, required=False)
+    mail_password = key(cast=str, required=False)
+    mail_tls = key(cast=intbool, required=False, default=False)
 
     recaptcha_site_key = key(cast=str, required=False)
     recaptcha_secret = key(cast=str, required=False)

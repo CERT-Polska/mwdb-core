@@ -1,7 +1,3 @@
-**This is a pre-release version.** You're welcome to try it, but if you want a smooth installation experience and stable interface you should wait for the official release instead.
-
-We're working hard to deliver all of these things as soon as possible. Stay tuned and [follow our Twitter](https://twitter.com/CERT_Polska_en)!
-
 # MWDB Core
 
 Malware repository component for automated malware collection/analysis systems. 

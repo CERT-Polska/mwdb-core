@@ -257,8 +257,8 @@ class JSONField(BaseField):
         if asterisk:
             json_path = ".".join(remainder).replace("*", "[*]")
             return func.jsonb_path_exists(self.column,
-                                          '$.$json_path ? (@ == $value)',
-                                          json.dumps({"json_path": json_path, "value": value}))
+                                          f'$.{json_path} ? (@ == $value)',
+                                          json.dumps({"value": value}))
 
         if expression.has_wildcard():
             return column_to_query.like(value)

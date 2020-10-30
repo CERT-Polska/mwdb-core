@@ -5,7 +5,8 @@ from typing import List, Union, Type, Any
 
 from flask import g
 from luqum.tree import Range, Term
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
+import json
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import db, Object, Metakey, MetakeyDefinition, Group, ObjectPermission, User
@@ -252,6 +253,12 @@ class JSONField(BaseField):
         column_to_query = self.column[remainder].astext
 
         value = get_term_value(expression)
+        asterisk = [string for string in remainder if string.endswith('*')]
+        if asterisk:
+            json_path = ".".join(remainder).replace("*", "[*]")
+            return func.jsonb_path_exists(self.column,
+                                          '$.$json_path ? (@ == $value)',
+                                          json.dumps({"json_path": json_path, "value": value}))
 
         if expression.has_wildcard():
             return column_to_query.like(value)

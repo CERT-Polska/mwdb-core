@@ -1,4 +1,4 @@
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from mwdb.core.util import config_encode, config_decode, config_dhash
@@ -13,7 +13,7 @@ class Config(Object):
     id = db.Column(db.Integer, db.ForeignKey('object.id'), primary_key=True)
     family = db.Column(db.String(32), nullable=False, index=True)
     config_type = db.Column(db.String(32), index=True, nullable=False, server_default="static")
-    _cfg = db.Column("cfg", JSON, nullable=False)
+    _cfg = db.Column("cfg", JSONB, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': __tablename__,

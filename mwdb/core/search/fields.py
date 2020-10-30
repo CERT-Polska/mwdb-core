@@ -5,8 +5,8 @@ from typing import List, Union, Type, Any
 
 from flask import g
 from luqum.tree import Range, Term
-from sqlalchemy import and_, or_, func
-import json
+from sqlalchemy import and_, or_, func, Text, cast, exists, column, select
+from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import db, Object, Metakey, MetakeyDefinition, Group, ObjectPermission, User
@@ -250,20 +250,52 @@ class UploaderField(BaseField):
 
 class JSONField(BaseField):
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        column_to_query = self.column[remainder].astext
-
         value = get_term_value(expression)
-        asterisk = [string for string in remainder if string.endswith('*')]
-        if asterisk:
-            json_path = ".".join(remainder).replace("*", "[*]")
-            return func.jsonb_path_exists(self.column,
-                                          f'$.{json_path} ? (@ == $value)',
-                                          json.dumps({"value": value}))
 
+        def jsonpath_escape(field):
+            # Escapes field to be correctly represented in jsonpath
+            asterisk = ""
+            # Escape all double quotes
+            field = field.replace('"', '\\"')
+            if field.endswith("*"):
+                # If asterisk is escaped: remove the escape
+                if field[-2] == "\\" and field[-3] != "\\":
+                    # aaaa\* -> "aaaa*"
+                    field = field[:-2] + "*"
+                else:
+                    # aaaa* -> "aaaa"[*]
+                    asterisk = "[*]"
+                    field = field[:-1]
+            return f'"{field}"{asterisk}'
+
+        """
+        Target query:
+            select cfg from static_config 
+            where ... exists(
+                select 1 
+                from jsonb_path_query(cfg, '$."indirect"."strings"[*]."a"') as json_element 
+                where json_element  #>> '{}' like '2'
+            );
+        """
+        json_path = ".".join(["$"] + [jsonpath_escape(field) for field in remainder])
+        # Make aliased function call
+        json_elements = (
+            func.jsonb_path_query(self.column, json_path)
+                .alias("json_element")
+        )
+        # Use #>>'{}' to extract value as text
+        json_element = (
+            column('json_element').operate(
+                JSONPATH_ASTEXT, '{}', result_type=Text
+            )
+        )
         if expression.has_wildcard():
-            return column_to_query.like(value)
+            condition = json_element.like(value)
         else:
-            return column_to_query == value
+            condition = json_element == value
+        return exists(select([1]).
+                      select_from(json_elements).
+                      where(condition))
 
 
 class DatetimeField(BaseField):

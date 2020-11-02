@@ -231,9 +231,26 @@ If we want to be more specific and look for ``google.com`` only inside "urls" ke
 
    cfg.urls:*google.com*
 
-.. note::
+If you want to search for elements contained in an array, simply use * at the end of the field where it is nested.
 
-   Currently we don't support exact search for elements contained in arrays. In that case, use wildcard approach presented above.
+For example, let's use the following configuration.
+
+.. code-block:: json
+
+   {
+       "field": {
+           "array": [1, 2, 3]
+      }
+   }
+
+In this case, to find the object, we can use array search to check if the nested array contains a specific value:
+
+.. code-block::
+
+   cfg.field.array*:1
+
+Searching in this way applies to both numbers and strings contained in the array.
+
 
 
 Group access queries (\ ``shared:`` and ``uploader:``\ )

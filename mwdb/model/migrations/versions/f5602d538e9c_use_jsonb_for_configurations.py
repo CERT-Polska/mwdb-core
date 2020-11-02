@@ -1,4 +1,4 @@
-"""empty message
+"""Use JSONB for configurations
 
 Revision ID: f5602d538e9c
 Revises: e2d99ffcb8ce

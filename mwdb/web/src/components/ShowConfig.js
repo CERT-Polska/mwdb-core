@@ -6,7 +6,7 @@ import ShowObject from "./ShowObject";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
 import api from "@mwdb-web/commons/api";
-import { makeSearchConfigElementLink, makeSearchLink, makeSearchDateLink, downloadData } from "@mwdb-web/commons/helpers";
+import { makeSearchLink, makeSearchDateLink, downloadData } from "@mwdb-web/commons/helpers";
 import { Extension } from "@mwdb-web/commons/extensions";
 import { DataTable, DateString, ObjectLink, View, HexView, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter from './ShowObjectPresenter';
@@ -28,23 +28,11 @@ class ConfigRow extends Component {
             this.state.value = <ObjectLink type="blob" id={this.props.value["in-blob"]} className="blob" />
         } else {
             this.state.raw = this.state.value = String(this.props.value)
-            if (this.props.path === null) {
-                // Approximate search for nested array fields (array searching not supported)
-                if(this.state.name >>> 0 === parseFloat(this.state.name))
-                {
-                    // Is key an integer? (Array element)
-                    this.state.value = <Link to={`${(makeSearchConfigElementLink(this.props.value))}`}>{this.state.value}</Link>
-                } else {
-                    // If not - it is object element
-                    this.state.value = <Link to={`${(makeSearchConfigElementLink(this.state.name, this.props.value))}`}>{this.state.value}</Link>
-                }
-            } else {
-                // Known path - direct config searching
-                this.state.value = (
-                    <Link to={`${(makeSearchLink(`cfg.${this.props.path.join('.')}`, this.props.value, false, "configs"))}`}>
-                        {this.state.value}
-                    </Link>)
-            }
+            this.state.value = (
+                <Link to={`${(makeSearchLink(`cfg.${this.props.path.join('.')}`, this.props.value, false, "configs"))}`}>
+                    {this.state.value}
+                </Link>
+            )
         }
     }
 
@@ -143,12 +131,25 @@ export class ConfigTable extends Component {
                         <td id="config_family"><a href={makeSearchLink("type", this.props.config_type, false, "configs")}>{this.props.config_type}</a></td>
                     </tr>
                 </TopLevel>
-                {this.configKeys().map((object) => <ConfigRow name={object} key={object} 
-                                                              value={this.props.cfg[object]} 
-                                                              parentExpanded={this.props.parentExpanded}
-                                                              path={Array.isArray(this.props.cfg) || !this.props.path
-                                                                    ? null : this.props.path.concat([object]) }
-                                                              indent={indentLevel} />)}
+                {this.configKeys().map(
+                    (configKey) => {
+                        const path = (
+                            Array.isArray(this.props.cfg)
+                            // If Array: add the asterisk to the last element
+                            ? [
+                                ...this.props.path.slice(0, -1),
+                                this.props.path[this.props.path.length - 1] + "*"
+                            ]
+                            // Else: just add next key to the path
+                            : this.props.path.concat([configKey])
+                        )
+                        return <ConfigRow name={configKey} key={configKey} 
+                                          value={this.props.cfg[configKey]} 
+                                          parentExpanded={this.props.parentExpanded}
+                                          path={path}
+                                          indent={indentLevel} />;
+                    })
+                }
                 <TopLevel>
                     <tr key="config-upload-time">
                         <th>Upload time</th>

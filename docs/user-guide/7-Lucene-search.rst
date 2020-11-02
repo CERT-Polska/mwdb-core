@@ -251,6 +251,12 @@ In this case, to find the object, we can use array search to check if the nested
 
 Searching in this way applies to both numbers and strings contained in the array.
 
+If you search by more than one value contained in an array, just type:
+
+.. code-block::
+
+   cfg.field.array*:"*1, 2*"
+
 
 
 Group access queries (\ ``shared:`` and ``uploader:``\ )

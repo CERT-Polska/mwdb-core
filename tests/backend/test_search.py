@@ -192,7 +192,10 @@ def test_search_json():
     found_objs = test.search(f'config.cfg:*{value}*')
     assert len(found_objs) == 1
 
-    found_objs = test.search(f'config.cfg.array*:10')
+    found_objs = test.search(f'config.cfg.array*:1')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.array:"*1, 2*"')
     assert len(found_objs) == 1
 
     found_objs = test.search(f'config.cfg.list.dict_in_list*:{value}')

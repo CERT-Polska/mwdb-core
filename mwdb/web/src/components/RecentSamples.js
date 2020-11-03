@@ -3,6 +3,7 @@ import React from 'react';
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
 import { TagList} from './Tag';
 import { DateString, Identicon, ObjectLink } from "@mwdb-web/commons/ui";
+import { humanFileSize } from "@mwdb-web/commons/helpers"
 
 export function RecentFileRow(props) {
     const identicon = (
@@ -42,8 +43,8 @@ export function RecentFileRow(props) {
             </td>
             <td className="col-lg-3 col-6">
                 {/* All modes */}
-                <RecentInnerRow labelWidth="3rem" label="Size" value={props.file_size} copyable />
-                <RecentInnerRow labelWidth="3rem" label="Type" value={props.file_type} copyable />
+                <RecentInnerRow labelWidth="3rem" label="Size" value={humanFileSize(props.file_size)} copyable />
+                <RecentInnerRow labelWidth="3rem" label="Type" value={humanFileSize(props.file_type)} copyable />
                 {/* Shrink mode */}
                 <RecentInnerRow narrowOnly noEllipsis>
                     {tags}

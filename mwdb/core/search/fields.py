@@ -258,11 +258,14 @@ class JSONField(BaseField):
             field = field.replace('"', '\\"')
             # Find trailing non-escaped asterisks
             asterisk_r = re.search(r"(?<!\\)([*]+)$", field)
-            asterisk_levels = len(asterisk_r.group(0)) if asterisk_r else 0
-            field = field[:-asterisk_levels]
-            asterisks = asterisk_levels * "[*]"
+            if not asterisk_r:
+                asterisks = ""
+            else:
+                asterisk_levels = len(asterisk_r.group(0))
+                field = field[:-asterisk_levels]
+                asterisks = asterisk_levels * "[*]"
             # Unescape all escaped asterisks
-            field = re.sub(r"\\[*]", "*", field)
+            field = re.sub(r"(?<!\\)\\[*]", "*", field)
             return f'"{field}"{asterisks}'
 
         """

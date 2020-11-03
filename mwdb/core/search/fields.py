@@ -84,16 +84,30 @@ class IntegerField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
+
+        units = {"B": 1, "KB": 1024, "MB": 1048576, "GB": 1073741824}
+
+        def parse_size(size):
+            size = size.upper()
+            if not re.match(r' ', size):
+                size = re.sub(r'([KMGT]?B)', r' \1', size)
+            number, unit = [string.strip() for string in size.split()]
+            return int(float(number) * units[unit])
+
         if isinstance(expression, Range):
             low_value = expression.low.value
             high_value = expression.high.value
 
             low_value_digit_or_asterisk = low_value == "*" or low_value.isdigit()
             high_value_digit_or_asterisk = high_value == "*" or high_value.isdigit()
-
-            if not low_value_digit_or_asterisk or not high_value_digit_or_asterisk:
+            try:
+                if not low_value_digit_or_asterisk:
+                    low_value = parse_size(low_value)
+                if not high_value_digit_or_asterisk:
+                    high_value = parse_size(high_value)
+            except:
                 raise UnsupportedGrammarException(
-                    "Field supports only integer values or *"
+                    "Invalid file size value"
                 )
             low_condition = (
                 self.column >= low_value
@@ -114,12 +128,17 @@ class IntegerField(BaseField):
                 return high_condition
 
             return and_(low_condition, high_condition)
+
         else:
-            if not expression.value.isdigit():
-                raise UnsupportedGrammarException(
-                    "Field supports only integer values"
-                )
-            return self.column == expression.value
+            target_value = expression.value
+            if not target_value.isdigit():
+                try:
+                    target_value = parse_size(target_value)
+                except:
+                    raise UnsupportedGrammarException(
+                        "Invalid file size value"
+                    )
+            return self.column == target_value
 
 
 class ListField(BaseField):

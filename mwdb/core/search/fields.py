@@ -253,20 +253,20 @@ class JSONField(BaseField):
         value = get_term_value(expression)
 
         def jsonpath_escape(field):
-            # Escapes field to be correctly represented in jsonpath
-            asterisk = ""
+            """Escapes field to be correctly represented in jsonpath"""
             # Escape all double quotes
             field = field.replace('"', '\\"')
-            if field.endswith("*"):
-                # If asterisk is escaped: remove the escape
-                if field[-2] == "\\" and field[-3] != "\\":
-                    # aaaa\* -> "aaaa*"
-                    field = field[:-2] + "*"
-                else:
-                    # aaaa* -> "aaaa"[*]
-                    asterisk = "[*]"
-                    field = field[:-1]
-            return f'"{field}"{asterisk}'
+            # Find trailing non-escaped asterisks
+            asterisk_r = re.search(r"(?<!\\)(?:\\\\)*([*]+)$", field)
+            if not asterisk_r:
+                asterisks = ""
+            else:
+                asterisk_levels = len(asterisk_r.group(0))
+                field = field[:-asterisk_levels]
+                asterisks = asterisk_levels * "[*]"
+            # Unescape all escaped asterisks
+            field = re.sub(r"(?<!\\)(?:\\\\)*(\\[*])", "*", field)
+            return f'"{field}"{asterisks}'
 
         """
         Target query:

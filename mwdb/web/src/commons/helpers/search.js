@@ -33,12 +33,6 @@ export function makeSearchLink(field, input, noEscape, endpoint){
     return `/${endpoint === undefined ? "search" : endpoint}?q=`+encodeSearchQuery(prefix + input);
 };
 
-export function makeSearchConfigElementLink(element, value) {
-    if(value !== undefined)
-        return makeSearchLink("cfg", `*"${element}": ${escapeSearchValue(value)}*`, false, "configs")
-    return makeSearchLink("cfg", `*${escapeSearchValue(element)}*`, false, "configs")
-}
-
 export function makeSearchRangeLink(field, from, to, endpoint) {
     return makeSearchLink(field, `[${escapeSearchValue(from)} TO ${escapeSearchValue(to)}]`, true, endpoint)
 }

@@ -174,6 +174,9 @@ def test_search_json():
         },
         "array": [
             1, 2, 3
+        ],
+        "array*array": [
+            1, [2, 3]
         ]
     })
 
@@ -206,6 +209,15 @@ def test_search_json():
 
     found_objs = test.search('config.cfg:"*\\"dict_in_list\\": \\"xxx\\"*"')
     assert len(found_objs) == 0
+
+    found_objs = test.search('config.cfg.array\\*array*:1')
+    assert len(found_objs) == 1
+
+    found_objs = test.search('config.cfg.array\\*array*:2')
+    assert len(found_objs) == 0
+
+    found_objs = test.search('config.cfg.array\\*array**:2')
+    assert len(found_objs) == 1
 
 
 def test_search_file_size_unbounded():

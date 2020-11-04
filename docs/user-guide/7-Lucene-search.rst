@@ -91,6 +91,23 @@ This syntax is still not very convenient, so we have introduced shorter syntax i
    size:>=500000
    size:">=500000"
 
+Mwdb supports human-readable file size so instead of specifying the number of bytes, we can refer to larger units like kB, MB and GB.
+
+.. code-block::
+
+   size:>=500kB
+   size:>=0.5MB
+
+.. warning::
+
+   Remember that converting a file size from bytes to human-readable form does not always match with the conversion the other way around.
+
+   For example 1 kb equals 1024 bytes, rounding 1026 bytes to the second decimal number 1026 bytes will also give 1 kb (1.002 kb)
+
+   So do not be surprised if you enter ``size:1kB`` in the search engine and a sample of this size is not found, because in bytes this size may differ slightly.
+
+   For this reason, searching for a size from an object view always redirects to the query in bytes.
+
 Query syntax: timestamps
 ------------------------
 

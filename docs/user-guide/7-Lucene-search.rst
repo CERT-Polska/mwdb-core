@@ -102,7 +102,7 @@ Mwdb supports human-readable file size so instead of specifying the number of by
 
    Remember that converting a file size from bytes to human-readable form does not always match with the conversion the other way around.
 
-   For example 1 kb equals 1024 bytes, rounding 1026 bytes to the second decimal number 1026 bytes will also give 1 kb (1.002 kb)
+   For example 1 kB equals 1024 bytes, rounding 1026 bytes to the second decimal number 1026 bytes will also give 1 kb (1.002 kB).
 
    So do not be surprised if you enter ``size:1kB`` in the search engine and a sample of this size is not found, because in bytes this size may differ slightly.
 

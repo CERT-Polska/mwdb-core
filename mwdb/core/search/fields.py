@@ -85,30 +85,24 @@ class IntegerField(BaseField):
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
 
-        units = {"B": 1, "KB": 1024, "MB": 1048576, "GB": 1073741824}
+        units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
         def parse_size(size):
-            size = size.upper()
-            if not re.match(r' ', size):
-                size = re.sub(r'([KMGT]?B)', r' \1', size)
-            number, unit = [string.strip() for string in size.split()]
-            return int(float(number) * units[unit])
+            if size == "*" or size.isdigit():
+                return size
+            else:
+                size = re.match("(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper())
+                if size is None:
+                    raise UnsupportedGrammarException(
+                        "Invalid size value"
+                    )
+                number, unit = size.groups()
+                return int(float(number) * units[unit])
 
         if isinstance(expression, Range):
-            low_value = expression.low.value
-            high_value = expression.high.value
+            low_value = parse_size(expression.low.value)
+            high_value = parse_size(expression.high.value)
 
-            low_value_digit_or_asterisk = low_value == "*" or low_value.isdigit()
-            high_value_digit_or_asterisk = high_value == "*" or high_value.isdigit()
-            try:
-                if not low_value_digit_or_asterisk:
-                    low_value = parse_size(low_value)
-                if not high_value_digit_or_asterisk:
-                    high_value = parse_size(high_value)
-            except:
-                raise UnsupportedGrammarException(
-                    "Invalid file size value"
-                )
             low_condition = (
                 self.column >= low_value
                 if expression.include_low
@@ -130,14 +124,7 @@ class IntegerField(BaseField):
             return and_(low_condition, high_condition)
 
         else:
-            target_value = expression.value
-            if not target_value.isdigit():
-                try:
-                    target_value = parse_size(target_value)
-                except:
-                    raise UnsupportedGrammarException(
-                        "Invalid file size value"
-                    )
+            target_value = parse_size(expression.value)
             return self.column == target_value
 
 

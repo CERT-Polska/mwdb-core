@@ -88,7 +88,7 @@ class SizeField(BaseField):
         units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
         def parse_size(size):
-            if size == "*" or size.isdigit():
+            if size.isdigit():
                 return size
             else:
                 size = re.match("(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper())
@@ -100,8 +100,13 @@ class SizeField(BaseField):
                 return int(float(number) * units[unit])
 
         if isinstance(expression, Range):
-            low_value = parse_size(expression.low.value)
-            high_value = parse_size(expression.high.value)
+            low_value = expression.low.value
+            high_value = expression.high.value
+
+            if low_value != "*":
+                low_value = parse_size(low_value)
+            if high_value != "*":
+                high_value = parse_size(high_value)
 
             low_condition = (
                 self.column >= low_value

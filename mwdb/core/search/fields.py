@@ -76,7 +76,7 @@ class StringField(BaseField):
             return self.column == value
 
 
-class IntegerField(BaseField):
+class SizeField(BaseField):
     accepts_range = True
 
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:

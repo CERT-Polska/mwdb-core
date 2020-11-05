@@ -1,7 +1,5 @@
 from datetime import datetime
 
-import redis
-
 from flask import request, g
 from flask_migrate import Migrate
 from werkzeug.exceptions import Forbidden
@@ -10,7 +8,7 @@ from werkzeug.routing import BaseConverter
 from mwdb.core.app import app, api
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.core.log import getLogger
+from mwdb.core.log import getLogger, setup_logger
 from mwdb.core.plugins import PluginAppContext, load_plugins
 from mwdb.core.rate_limit import rate_limit
 from mwdb.core.static import static_blueprint
@@ -240,6 +238,8 @@ api.add_resource(UserPendingResource, "/user/<login>/pending")
 api.add_resource(GroupListResource, "/group")
 api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
+
+setup_logger()
 
 # Load plugins
 plugin_context = PluginAppContext()

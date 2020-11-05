@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import tempfile
 
+from mwdb.cli.base import logger
 from mwdb.core.plugins import discover_plugins
 from mwdb.paths import web_package_dir
 
@@ -30,7 +31,7 @@ def npm_build_web(target_dir):
 
     with tempfile.TemporaryDirectory() as context_dirname:
         # Copy files to context directory
-        click.echo(f"[*] Creating build context", err=True)
+        logger.info("Creating build context...")
         for path in config_paths:
             src = os.path.join(web_package_dir, path)
             dst = os.path.join(context_dirname, path)
@@ -42,28 +43,28 @@ def npm_build_web(target_dir):
                 raise RuntimeError("Critical error: expected file {} doesn't exist".format(path))
 
         # Run npm install for web core
-        click.echo(f"[*] Installing dependencies", err=True)
+        logger.info("Installing dependencies")
         if subprocess.call("npm install", shell=True, cwd=context_dirname):
             raise BuildWebError("'npm install' command failed")
 
         # Run npm install for plugins
         for plugin, web_plugin_path in discover_web_plugins():
-            click.echo(f"[*] Installing web plugin '{plugin}'", err=True)
+            logger.info("Installing web plugin '%s'", plugin)
             if subprocess.call(f"npm install {web_plugin_path}", shell=True, cwd=context_dirname):
                 raise BuildWebError(f"'npm install {web_plugin_path}' command failed")
 
         # Run npm run build
-        click.echo(f"[*] Building web application", err=True)
+        logger.info("Building web application")
         if subprocess.call("npm run build", shell=True, cwd=context_dirname):
             raise BuildWebError(f"'npm run build' command failed")
 
         if os.path.exists(target_dir):
-            click.echo(f"[*] Target {target_dir} exists, removing...", err=True)
+            logger.info("Target %s exists, removing", target_dir)
             shutil.rmtree(target_dir)
 
-        click.echo(f"[*] Collecting artifacts to {target_dir}", err=True)
+        logger.info("Collecting artifacts to %s", target_dir)
         shutil.move(
             os.path.join(context_dirname, "build"),
             target_dir
         )
-        click.echo(f"[+] Done!", err=True)
+        logger.info("Web application built successfully!")

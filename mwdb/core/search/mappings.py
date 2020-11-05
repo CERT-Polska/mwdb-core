@@ -3,7 +3,7 @@ from typing import Dict, Type, Tuple, List
 from mwdb.model import File, Object, Config, TextBlob, Tag, Comment
 
 from .exceptions import MultipleObjectsQueryException, FieldNotQueryableException
-from .fields import BaseField, StringField, IntegerField, ListField, AttributeField, ShareField, UploaderField, \
+from .fields import BaseField, StringField, SizeField, ListField, AttributeField, ShareField, UploaderField, \
     JSONField, DatetimeField, RelationField
 
 object_mapping: Dict[str, Type[Object]] = {
@@ -28,7 +28,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
     },
     File.__name__: {
         "name": StringField(File.file_name),
-        "size": IntegerField(File.file_size),
+        "size": SizeField(File.file_size),
         "type": StringField(File.file_type),
         "md5": StringField(File.md5),
         "sha1": StringField(File.sha1),
@@ -44,7 +44,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
     },
     TextBlob.__name__: {
         "name": StringField(TextBlob.blob_name),
-        "size": IntegerField(TextBlob.blob_size),
+        "size": SizeField(TextBlob.blob_size),
         "type": StringField(TextBlob.blob_type),
         "content": StringField(TextBlob._content),
         "first_seen": DatetimeField(TextBlob.upload_time),

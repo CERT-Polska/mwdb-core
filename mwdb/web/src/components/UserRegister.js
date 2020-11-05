@@ -22,6 +22,7 @@ class UserRegister extends Component {
             other_info: '',
             success: false,
             dirty: false,
+            disable: false,
             error: null,
             groups: [],
             group: "-1",
@@ -51,6 +52,7 @@ class UserRegister extends Component {
 
     async registerUser() {
         try {
+            this.setState({disable: true})
             let additional_info = `Affiliation: ${this.state.affiliation}, Job title: ${this.state.job_title}, ${this.state.job_responsibilities} ${this.state.other_info}`;
             let response = await api.registerUser(this.state.login, 
                                                   this.state.email, 
@@ -61,7 +63,7 @@ class UserRegister extends Component {
                 error: null
             });
         } catch(error) {
-            this.setState({error});
+            this.setState({error, disable: false});
         }
     }
 
@@ -88,7 +90,7 @@ class UserRegister extends Component {
                         <label>Login</label>
                         <input type="text" name="login" value={this.state.login} onChange={this.handleInputChange}
                                className="form-control" required pattern="[A-Za-z0-9_-]{1,32}"
-                               disabled={this.state.success}/>
+                               disabled={this.state.disable}/>
                         <div class="form-hint">Login must contain only letters, digits, '_' and '-' characters, max 32 characters allowed.
                         </div>
                     </div>
@@ -96,35 +98,35 @@ class UserRegister extends Component {
                         <label>Business e-mail</label>
                         <input type="email" name="email" value={this.state.email}
                                onChange={this.handleInputChange} className="form-control" required
-                               disabled={this.state.success}/>
+                               disabled={this.state.disable}/>
                     </div>
                     <b>Additional information:</b>
                     <div className="form-group">
                         <label>Affiliation</label>
                         <input type="text" name="affiliation" value={this.state.affiliation}
                                onChange={this.handleInputChange} className="form-control" required
-                               disabled={this.state.success}/>
+                               disabled={this.state.disable}/>
                         <div class="form-hint">Provide name of company or university</div>
                     </div>
                     <div className="form-group">
                         <label>Job Title</label>
                         <input type="text" name="job_title" value={this.state.job_title}
                                onChange={this.handleInputChange} className="form-control" required
-                               disabled={this.state.success}/>
+                               disabled={this.state.disable}/>
                         <div class="form-hint">Provide your job title</div>
                     </div>
                     <div className="form-group">
                         <label>Job Responsibilities</label>
                         <input type="text" name="job_responsibilities" value={this.state.job_responsibilities}
                                onChange={this.handleInputChange} className="form-control" required
-                               disabled={this.state.success}/>
+                               disabled={this.state.disable}/>
                         <div class="form-hint">Provide your job responsibilities and experience in the field of malware analysis</div>
                     </div>
                     <div className="form-group">
                         <label>Other information</label>
                         <textarea type="text" name="other_info" value={this.state.other_info}
                                   onChange={this.handleInputChange} className="form-control" required
-                                  disabled={this.state.success}/>
+                                  disabled={this.state.disable}/>
                         <div class="form-hint">Provide additional information e.g. Twitter handle, invitation info, blog URL etc.</div>
                     </div>
                     {
@@ -133,7 +135,7 @@ class UserRegister extends Component {
                                      onChange={this.onCaptchaChange} />
                         : []
                     }
-                    <input type="submit" value="Submit" className="btn btn-primary"/>
+                    <input type="submit" value="Submit" className="btn btn-primary" disabled={this.state.disable}/>
                 </form>
             </View>
         );

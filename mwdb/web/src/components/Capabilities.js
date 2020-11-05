@@ -15,6 +15,7 @@ export let capabilitiesList = {
     "adding_all_attributes": "Can add all attributes to object",
     "managing_attributes": "Can define new attributes and manage them",
     "removing_attributes": "Can remove attribute from objects",
+    "adding_configs": "Can upload configs",
     "adding_blobs": "Can upload text blobs",
     "unlimited_requests": "API requests are not rate-limited for this group",
     "removing_objects": "Can remove objects",

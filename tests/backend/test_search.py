@@ -90,7 +90,8 @@ def test_search_size():
     assert len(found_objs) > 0
     found_objs = test.search(f'file.size:[1336 TO 1337]')
     assert len(found_objs) > 0
-
+    found_objs = test.search(f'file.size:[1.30kb TO 1.31kb]')
+    assert len(found_objs) > 0
 
 def test_search_comment():
     test = MwdbTest()
@@ -171,7 +172,13 @@ def test_search_json():
         ],
         "dict": {
             "field": value
-        }
+        },
+        "array": [
+            1, 2, 3
+        ],
+        "array*array": [
+            1, [2, 3]
+        ]
     })
 
     found_objs = test.search(f'config.cfg.plain:{value}')
@@ -189,11 +196,29 @@ def test_search_json():
     found_objs = test.search(f'config.cfg:*{value}*')
     assert len(found_objs) == 1
 
+    found_objs = test.search(f'config.cfg.array*:1')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.array:"*1, 2*"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.list.dict_in_list*:{value}')
+    assert len(found_objs) == 1
+
     found_objs = test.search(f'config.cfg:"*\\"dict_in_list\\": \\"{value}\\"*"')
     assert len(found_objs) == 1
 
     found_objs = test.search('config.cfg:"*\\"dict_in_list\\": \\"xxx\\"*"')
     assert len(found_objs) == 0
+
+    found_objs = test.search('config.cfg.array\\*array*:1')
+    assert len(found_objs) == 1
+
+    found_objs = test.search('config.cfg.array\\*array*:2')
+    assert len(found_objs) == 0
+
+    found_objs = test.search('config.cfg.array\\*array**:2')
+    assert len(found_objs) == 1
 
 
 def test_search_file_size_unbounded():

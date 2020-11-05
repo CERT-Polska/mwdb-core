@@ -1,9 +1,13 @@
+import logging
+import textwrap
+
 import click
 from click_default_group import DefaultGroup
 from flask.cli import AppGroup, FlaskGroup, NoAppException, ScriptInfo, with_appcontext
-import textwrap
 
 from mwdb.core.config import app_config
+
+logger = logging.getLogger("mwdb.configure")
 
 
 def create_app():

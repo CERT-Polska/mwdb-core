@@ -119,6 +119,8 @@ class ConfigUploader(ObjectUploader):
                     blob_obj = self._get_embedded_blob(second["in-blob"], share_with, metakeys)
                     config[first]["in-blob"] = blob_obj.dhash
                     blobs.append(blob_obj)
+                elif isinstance(second, dict) and ("in-blob" in list(second.keys())):
+                    raise BadRequest("'in-blob' should be the only key")
 
             obj, is_new = Config.get_or_create(
                 config,
@@ -187,6 +189,7 @@ class ConfigResource(ObjectResource, ConfigUploader):
         return super().get()
 
     @requires_authorization
+    @requires_capabilities(Capabilities.adding_configs)
     def post(self):
         """
         ---

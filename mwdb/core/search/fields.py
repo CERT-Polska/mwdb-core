@@ -5,7 +5,8 @@ from typing import List, Union, Type, Any
 
 from flask import g
 from luqum.tree import Range, Term
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func, Text, cast, exists, column, select
+from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 from sqlalchemy.orm import joinedload
 
 from mwdb.core.capabilities import Capabilities
@@ -76,7 +77,7 @@ class StringField(BaseField):
             return self.column == value
 
 
-class IntegerField(BaseField):
+class SizeField(BaseField):
     accepts_range = True
 
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
@@ -84,17 +85,30 @@ class IntegerField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
+
+        units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
+
+        def parse_size(size):
+            if size.isdigit():
+                return size
+            else:
+                size = re.match(r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper())
+                if size is None:
+                    raise UnsupportedGrammarException(
+                        "Invalid size value"
+                    )
+                number, unit = size.groups()
+                return int(float(number) * units[unit])
+
         if isinstance(expression, Range):
             low_value = expression.low.value
             high_value = expression.high.value
 
-            low_value_digit_or_asterisk = low_value == "*" or low_value.isdigit()
-            high_value_digit_or_asterisk = high_value == "*" or high_value.isdigit()
+            if low_value != "*":
+                low_value = parse_size(low_value)
+            if high_value != "*":
+                high_value = parse_size(high_value)
 
-            if not low_value_digit_or_asterisk or not high_value_digit_or_asterisk:
-                raise UnsupportedGrammarException(
-                    "Field supports only integer values or *"
-                )
             low_condition = (
                 self.column >= low_value
                 if expression.include_low
@@ -115,11 +129,8 @@ class IntegerField(BaseField):
 
             return and_(low_condition, high_condition)
         else:
-            if not expression.value.isdigit():
-                raise UnsupportedGrammarException(
-                    "Field supports only integer values"
-                )
-            return self.column == expression.value
+            target_value = parse_size(expression.value)
+            return self.column == target_value
 
 
 class ListField(BaseField):
@@ -250,14 +261,52 @@ class UploaderField(BaseField):
 
 class JSONField(BaseField):
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        column_to_query = self.column[remainder].astext
-
         value = get_term_value(expression)
 
+        def jsonpath_escape(field):
+            """Escapes field to be correctly represented in jsonpath"""
+            # Escape all double quotes
+            field = field.replace('"', '\\"')
+            # Find trailing non-escaped asterisks
+            asterisk_r = re.search(r"(?<!\\)(?:\\\\)*([*]+)$", field)
+            if not asterisk_r:
+                asterisks = ""
+            else:
+                asterisk_levels = len(asterisk_r.group(0))
+                field = field[:-asterisk_levels]
+                asterisks = asterisk_levels * "[*]"
+            # Unescape all escaped asterisks
+            field = re.sub(r"(?<!\\)(?:\\\\)*(\\[*])", "*", field)
+            return f'"{field}"{asterisks}'
+
+        """
+        Target query:
+            select cfg from static_config 
+            where ... exists(
+                select 1 
+                from jsonb_path_query(cfg, '$."indirect"."strings"[*]."a"') as json_element 
+                where json_element  #>> '{}' like '2'
+            );
+        """
+        json_path = ".".join(["$"] + [jsonpath_escape(field) for field in remainder])
+        # Make aliased function call
+        json_elements = (
+            func.jsonb_path_query(self.column, json_path)
+                .alias("json_element")
+        )
+        # Use #>>'{}' to extract value as text
+        json_element = (
+            column('json_element').operate(
+                JSONPATH_ASTEXT, '{}', result_type=Text
+            )
+        )
         if expression.has_wildcard():
-            return column_to_query.like(value)
+            condition = json_element.like(value)
         else:
-            return column_to_query == value
+            condition = json_element == value
+        return exists(select([1]).
+                      select_from(json_elements).
+                      where(condition))
 
 
 class DatetimeField(BaseField):

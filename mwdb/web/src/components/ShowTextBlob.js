@@ -5,7 +5,7 @@ import ShowObject from "./ShowObject";
 import {ConfigTable} from "./ShowConfig";
 
 import api from "@mwdb-web/commons/api";
-import { makeSearchLink, makeSearchDateLink, downloadData } from '@mwdb-web/commons/helpers';
+import { makeSearchLink, makeSearchDateLink, downloadData, humanFileSize } from '@mwdb-web/commons/helpers';
 import { DataTable, View, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
@@ -21,7 +21,7 @@ function TextBlobDetails(props) {
             </tr>
             <tr>
                 <th>Blob size</th>
-                <td id="blob_size"><Link to={makeSearchLink("size", props.blob_size, false, "blobs")}>{props.blob_size}</Link>
+                <td id="blob_size"><Link to={makeSearchLink("size", props.blob_size, false, "blobs")}>{humanFileSize(props.blob_size)}</Link>
                 </td>
             </tr>
             <tr>

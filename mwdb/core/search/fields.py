@@ -76,7 +76,7 @@ class StringField(BaseField):
             return self.column == value
 
 
-class IntegerField(BaseField):
+class SizeField(BaseField):
     accepts_range = True
 
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
@@ -84,17 +84,30 @@ class IntegerField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
+
+        units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
+
+        def parse_size(size):
+            if size.isdigit():
+                return size
+            else:
+                size = re.match(r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper())
+                if size is None:
+                    raise UnsupportedGrammarException(
+                        "Invalid size value"
+                    )
+                number, unit = size.groups()
+                return int(float(number) * units[unit])
+
         if isinstance(expression, Range):
             low_value = expression.low.value
             high_value = expression.high.value
 
-            low_value_digit_or_asterisk = low_value == "*" or low_value.isdigit()
-            high_value_digit_or_asterisk = high_value == "*" or high_value.isdigit()
+            if low_value != "*":
+                low_value = parse_size(low_value)
+            if high_value != "*":
+                high_value = parse_size(high_value)
 
-            if not low_value_digit_or_asterisk or not high_value_digit_or_asterisk:
-                raise UnsupportedGrammarException(
-                    "Field supports only integer values or *"
-                )
             low_condition = (
                 self.column >= low_value
                 if expression.include_low
@@ -115,11 +128,8 @@ class IntegerField(BaseField):
 
             return and_(low_condition, high_condition)
         else:
-            if not expression.value.isdigit():
-                raise UnsupportedGrammarException(
-                    "Field supports only integer values"
-                )
-            return self.column == expression.value
+            target_value = parse_size(expression.value)
+            return self.column == target_value
 
 
 class ListField(BaseField):

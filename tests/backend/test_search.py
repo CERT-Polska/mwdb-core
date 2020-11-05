@@ -90,7 +90,8 @@ def test_search_size():
     assert len(found_objs) > 0
     found_objs = test.search(f'file.size:[1336 TO 1337]')
     assert len(found_objs) > 0
-
+    found_objs = test.search(f'file.size:[1.30kb TO 1.31kb]')
+    assert len(found_objs) > 0
 
 def test_search_comment():
     test = MwdbTest()

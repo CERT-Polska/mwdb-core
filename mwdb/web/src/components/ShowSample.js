@@ -5,7 +5,7 @@ import ShowObject from "./ShowObject";
 import {ConfigTable} from "./ShowConfig";
 
 import api from "@mwdb-web/commons/api";
-import {makeSearchLink, makeSearchDateLink} from "@mwdb-web/commons/helpers";
+import {makeSearchLink, makeSearchDateLink, humanFileSize} from "@mwdb-web/commons/helpers";
 import { Extendable } from "@mwdb-web/commons/extensions";
 import { DataTable, DateString, Hash, View, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
@@ -29,7 +29,7 @@ function SampleDetails(props) {
                 <tr className="flickerable">
                     <th>File size</th>
                     <td id="file_size">
-                        <Link to={makeSearchLink("size", props.file_size, false, '')}>{props.file_size}</Link>
+                        <Link to={makeSearchLink("size", props.file_size, false, '')}>{humanFileSize(props.file_size)}</Link>
                         <span className="ml-2">
                             <ActionCopyToClipboard text={props.file_size} tooltipMessage="Copy file size to clipboard"/>
                         </span>

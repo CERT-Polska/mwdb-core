@@ -31,7 +31,7 @@ function SampleDetails(props) {
                     <td id="file_size">
                         <Link to={makeSearchLink("size", props.file_size, false, '')}>{humanFileSize(props.file_size)}</Link>
                         <span className="ml-2">
-                            <ActionCopyToClipboard text={humanFileSize(props.file_size)} tooltipMessage="Copy file size to clipboard"/>
+                            <ActionCopyToClipboard text={props.file_size} tooltipMessage="Copy file size to clipboard"/>
                         </span>
                     </td>
                 </tr>

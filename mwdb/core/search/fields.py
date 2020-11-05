@@ -91,7 +91,7 @@ class SizeField(BaseField):
             if size.isdigit():
                 return size
             else:
-                size = re.match("(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper())
+                size = re.match(r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper())
                 if size is None:
                     raise UnsupportedGrammarException(
                         "Invalid size value"

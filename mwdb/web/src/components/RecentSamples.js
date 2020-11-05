@@ -43,7 +43,9 @@ export function RecentFileRow(props) {
             </td>
             <td className="col-lg-3 col-6">
                 {/* All modes */}
-                <RecentInnerRow labelWidth="3rem" label="Size" value={props.file_size} children={humanFileSize(props.file_size)} copyable />
+                <RecentInnerRow labelWidth="3rem" label="Size" value={props.file_size} copyable >
+                    {humanFileSize(props.file_size)}
+                </RecentInnerRow>
                 <RecentInnerRow labelWidth="3rem" label="Type" value={props.file_type} copyable />
                 {/* Shrink mode */}
                 <RecentInnerRow narrowOnly noEllipsis>

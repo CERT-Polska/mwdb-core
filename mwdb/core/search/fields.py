@@ -122,7 +122,6 @@ class SizeField(BaseField):
                 return high_condition
 
             return and_(low_condition, high_condition)
-
         else:
             target_value = parse_size(expression.value)
             return self.column == target_value

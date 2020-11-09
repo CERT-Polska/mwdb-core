@@ -36,35 +36,33 @@ class UserGroupRow extends Component {
         return (
             <React.Fragment>
                 <tr className="d-flex">
-                    <th className="col-8">
-                        {/*<FontAwesomeIcon icon={this.state.open ? "minus" : "plus"} size="sm"/>*/}
-                        {/*{" "}*/}
-                        <Link to={`/group/${this.props.group.name}`}>
-                            <HighlightText>{this.props.group.name}</HighlightText>
-                        </Link>
-                    </th>
-                    <th className="col-4" style={{cursor: 'pointer'}} onClick={this._toggle.bind(this)}>
-                        <spam>
-                            {
-                                this.state.open ? "Collapse " : "Expand "
-                            }
-                        </spam>
+                    <th className="col" style={{cursor: 'pointer'}} onClick={this._toggle.bind(this)}>
                         <FontAwesomeIcon icon={this.state.open ? "minus" : "plus"} size="sm"/>
+                        {" "}
+                        {
+                            this.props.isAdmin ? (
+                                <Link to={`/group/${this.props.group.name}`}>
+                                    <HighlightText>{this.props.group.name}</HighlightText>
+                                </Link>
+                            ) : (
+                                <HighlightText>{this.props.group.name}</HighlightText>
+                            )
+                        }
                     </th>
                 </tr>
                 {
                     this.state.open && (
                         this.props.group.users.sort().map((c, idx) =>
                                 <tr className="nested d-flex">
-                                    <td className={this.props.groupAdmin ? "col-8" : "col"}>
+                                    <td className="col">
                                         <Link key={idx} to={`profile/${c}`}>
                                             {c}
                                         </Link>
                                         {this.props.group.admins.includes(c) && " (admin)"}
                                     </td>
                                     {
-                                        this.props.isAdmin &&
-                                        <td className="col-4">
+                                        this.props.groupAdmin &&
+                                        <td className="col">
                                             <button type="button" className="btn btn-sm btn-danger"
                                                     onClick={() => this.setState({isRemoveModalOpen: true, removeUser: c})}>
                                                 Remove member
@@ -130,7 +128,7 @@ class UserGroups extends Component {
                           groupUpdate={this.updateUserGroups}
                           onError={this.handleError}
                           onSuccess={this.handleSuccess}
-                          isAdmin={this.props.isAdmin || groupAdmins.length > 0}
+                          isAdmin={this.props.isAdmin}
                           groupAdmin={this.props.isAdmin || v.admins.includes(this.props.userLogin)}/>
         )
 
@@ -142,12 +140,15 @@ class UserGroups extends Component {
                             <table className="table table-bordered table-striped" style={{"border":"1px"}}>
                                 <thead>
                                     <tr className="d-flex">
-                                        <th className="col-8">
+                                        <th className="col">
                                             Group name
                                         </th>
-                                        <th className="col-4">
-                                            Actions
-                                        </th>
+                                        {
+                                            (this.props.isAdmin || groupAdmins.includes(this.props.userLogin)) &&
+                                                <th className="col">
+                                                    Actions
+                                                </th>
+                                        }
                                     </tr>
                                 </thead>
                                 <tbody>

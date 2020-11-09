@@ -36,31 +36,43 @@ class UserGroupRow extends Component {
         return (
             <React.Fragment>
                 <tr className="d-flex">
-                    <th className="col" style={{cursor: 'pointer'}} onClick={this._toggle.bind(this)}>
-                        <FontAwesomeIcon icon={this.state.open ? "minus" : "plus"} size="sm"/>
-                        {" "}
+                    <th className="col-8">
+                        {/*<FontAwesomeIcon icon={this.state.open ? "minus" : "plus"} size="sm"/>*/}
+                        {/*{" "}*/}
                         <Link to={`/group/${this.props.group.name}`}>
                             <HighlightText>{this.props.group.name}</HighlightText>
                         </Link>
                     </th>
+                    <th className="col-4" style={{cursor: 'pointer'}} onClick={this._toggle.bind(this)}>
+                        <spam>
+                            {
+                                this.state.open ? "Collapse " : "Expand "
+
+                            }
+                        </spam>
+                        <FontAwesomeIcon icon={this.state.open ? "minus" : "plus"} size="sm"/>
+                    </th>
                 </tr>
                 {
                     this.state.open && (
-                        this.props.group.users.map((c, idx) =>
+                        this.props.group.users.sort().map((c, idx) =>
                                 <tr className="nested d-flex">
-                                    <td className="col">
+                                    <td className={this.props.groupAdmin ? "col-8" : "col"}>
                                         <Link key={idx} to={`profile/${c}`}>
                                             {c}
                                         </Link>
                                         {this.props.group.admins.includes(c) && " (admin)"}
-                                        {
-                                            this.props.isAdmin &&
-                                            <span className="ml-2" style={{cursor: "pointer"}}
-                                                  onClick={() => this.setState({isRemoveModalOpen: true, removeUser: c})}>
-                                                <FontAwesomeIcon icon={"trash"} size="sm"/>
-                                            </span>
-                                        }
                                     </td>
+                                    {
+                                        this.props.isAdmin &&
+                                        <td className="col-4">
+
+                                            <button type="button" className="btn btn-sm btn-danger"
+                                                    onClick={() => this.setState({isRemoveModalOpen: true, removeUser: c})}>
+                                                Remove member
+                                            </button>
+                                        </td>
+                                    }
                                 </tr>
                         )
                     )
@@ -132,8 +144,11 @@ class UserGroups extends Component {
                             <table className="table table-bordered table-striped" style={{"border":"1px"}}>
                                 <thead>
                                     <tr className="d-flex">
-                                        <th className="col">
+                                        <th className="col-8">
                                             Group name
+                                        </th>
+                                        <th className="col-4">
+                                            Actions
                                         </th>
                                     </tr>
                                 </thead>

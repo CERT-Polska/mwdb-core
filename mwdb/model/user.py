@@ -7,18 +7,13 @@ from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadS
 from sqlalchemy import and_
 
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from mwdb.core.config import app_config
 
 from . import db
+from .group import Member
 from .object import ObjectPermission
-
-
-member = db.Table(
-    'member', db.metadata,
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('group_id', db.Integer, db.ForeignKey('group.id'))
-)
 
 
 class User(db.Model):
@@ -48,7 +43,9 @@ class User(db.Model):
     logged_on = db.Column(db.DateTime)
     set_password_on = db.Column(db.DateTime)
 
-    groups = db.relationship('Group', secondary=member, backref='users', lazy='selectin')
+    memberships = db.relationship(Member, back_populates='user', cascade="all, delete-orphan", lazy='selectin')
+    groups = association_proxy('memberships', 'group', creator=lambda group: Member(group=group))
+
     comments = db.relationship('Comment', back_populates='author')
     api_keys = db.relationship('APIKey', foreign_keys="APIKey.user_id", backref='user')
     registrar = db.relationship('User', foreign_keys="User.registered_by", remote_side=[id], uselist=False)
@@ -167,9 +164,23 @@ class User(db.Model):
         return User._verify_token(token, ["version_uid"])
 
     def is_member(self, group_id):
-        groups = db.session.query(member.c.group_id) \
-            .filter(member.c.user_id == self.id)
+        groups = db.session.query(Member.group_id) \
+            .filter(Member.user_id == self.id)
         return group_id.in_(groups)
+
+    def is_group_admin(self, group_id):
+        group = (
+            db.session.query(Member)
+                      .filter(Member.user_id == self.id, Member.group_id == group_id)
+                 ).first()
+        return group.group_admin
+
+    def set_group_admin(self, group_id, set_admin):
+        member = (
+            db.session.query(Member)
+                      .filter(Member.user_id == self.id, Member.group_id == group_id)
+            ).first()
+        member.group_admin = set_admin
 
     def has_access_to_object(self, object_id):
         return object_id.in_(db.session.query(ObjectPermission.object_id)

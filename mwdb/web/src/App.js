@@ -22,6 +22,7 @@ import ShowGroups from "./components/ShowGroups";
 import UserCreate from "./components/UserCreate";
 import UserRegister from "./components/UserRegister";
 import UserUpdate from "./components/UserUpdate";
+import UserGroups from "./components/UserGroups"
 import GroupRegister from "./components/GroupRegister";
 import GroupUpdate from "./components/GroupUpdate";
 import UserSetPassword from "./components/UserSetPassword";
@@ -119,6 +120,7 @@ class App extends Component {
                                     <AdministrativeRoute exact path="/users" component={ShowUsers} />
                                     <AdministrativeRoute exact path="/users/pending" component={ShowPendingUsers} />
                                     <AdministrativeRoute exact path="/users/new" component={UserCreate} />
+                                    <AuthenticatedRoute exact path="/user_groups" component={UserGroups} />
                                     <AdministrativeRoute exact path="/groups" component={ShowGroups} />
                                     <AdministrativeRoute exact path="/groups/new" component={GroupRegister} />
                                     <AdministrativeRoute exact path="/group/:name" component={GroupUpdate} />

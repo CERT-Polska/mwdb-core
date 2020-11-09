@@ -1,16 +1,17 @@
-from flask import request
+from flask import request, g
 from flask_restful import Resource
 from sqlalchemy.orm import joinedload
 from sqlalchemy import exists
 from werkzeug.exceptions import NotFound, Conflict, Forbidden
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, Group, User
+from mwdb.model import db, Group, User, Member
 from mwdb.schema.user import UserLoginSchemaBase
 from mwdb.schema.group import (
     GroupNameSchemaBase,
     GroupCreateRequestSchema,
     GroupUpdateRequestSchema,
+    GroupMemberUpdateRequestSchema,
     GroupItemResponseSchema,
     GroupListResponseSchema,
     GroupSuccessResponseSchema
@@ -43,7 +44,10 @@ class GroupListResource(Resource):
             403:
                 description: When user doesn't have `manage_users` capability.
         """
-        objs = db.session.query(Group).options(joinedload(Group.users)).all()
+        objs = (
+            db.session.query(Group)
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
+        ).all()
         schema = GroupListResponseSchema()
         return schema.dump({"groups": objs})
 
@@ -80,7 +84,11 @@ class GroupResource(Resource):
             404:
                 description: When group doesn't exist
         """
-        obj = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
+        obj = (
+            db.session.query(Group)
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
+                      .filter(Group.name == name)
+        ).first()
         if obj is None:
             raise NotFound("No such group")
         schema = GroupItemResponseSchema()
@@ -220,16 +228,16 @@ class GroupResource(Resource):
 class GroupMemberResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
-    def put(self, name, login):
+    def post(self, name, login):
         """
         ---
-        summary: Add a member to the specified group
+        summary: Add a member to the specific group
         description: |
-            Adds new member to existing group.
+            Adds new member to existing group
 
             Works only for user-defined groups (excluding private and 'public')
 
-            Requires `manage_users` capability.
+            Requires `manage_users` capability
         security:
             - bearerAuth: []
         tags:
@@ -262,19 +270,24 @@ class GroupMemberResource(Resource):
 
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
+        group = (
+            db.session.query(Group)
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
+                      .filter(Group.name == name)
+        ).first()
+
+        if group is None:
+            raise NotFound("No such group")
+
+        if group.immutable:
+            raise Forbidden("Adding members to private or public group is not allowed")
+
         member = db.session.query(User).filter(User.login == login).first()
         if member is None:
             raise NotFound("No such user")
 
         if member.pending:
             raise Forbidden("User is pending and need to be accepted first")
-
-        group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
-        if group is None:
-            raise NotFound("No such group")
-
-        if group.immutable:
-            raise Forbidden("Adding members to private or public group is not allowed")
 
         group.users.append(member)
         member.reset_sessions()
@@ -286,6 +299,84 @@ class GroupMemberResource(Resource):
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
+    def put(self, name, login):
+        """
+        ---
+        summary: Update group membership
+        description: |
+            Updates group membership for specific member e.g. to set admin role.
+
+            Works only for user-defined groups (excluding private and 'public')
+
+            Requires `manage_users` capability
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+            - in: path
+              name: login
+              schema:
+                type: string
+              description: Member login
+        requestBody:
+            description: Group membership information
+            content:
+              application/json:
+                schema: GroupMemberUpdateRequestSchema
+        responses:
+            200:
+                description: When member was added successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
+            400:
+                description: When request body is invalid
+            403:
+                description: When user doesn't have `manage_users` capability, group is immutable or user is pending
+            404:
+                description: When user or group doesn't exist
+        """
+        group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
+
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
+
+        membership = loads_schema(request.get_data(as_text=True), GroupMemberUpdateRequestSchema())
+
+        group = (
+            db.session.query(Group)
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
+                      .filter(Group.name == name)
+        ).first()
+
+        if group is None:
+            raise NotFound("No such group")
+
+        if group.immutable:
+            raise Forbidden("Change membership in private or public group is not allowed")
+
+        member = db.session.query(User).filter(User.login == login).first()
+        if member is None:
+            raise NotFound("No such user")
+
+        if member.pending:
+            raise Forbidden("User is pending and need to be accepted first")
+
+        member.set_group_admin(group.id, membership["group_admin"])
+
+        member.reset_sessions()
+        db.session.commit()
+
+        logger.info('Group member updated', extra={'user': member.login, 'group': group.name})
+        schema = GroupSuccessResponseSchema()
+        return schema.dump({"name": name})
+
+    @requires_authorization
     def delete(self, name, login):
         """
         ---
@@ -295,7 +386,7 @@ class GroupMemberResource(Resource):
 
             Works only for user-defined groups (excluding private and 'public')
 
-            Requires `manage_users` capability.
+            Requires `manage_users` capability or group_admin membership.
         security:
             - bearerAuth: []
         tags:
@@ -328,19 +419,28 @@ class GroupMemberResource(Resource):
 
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
-        member = db.session.query(User).filter(User.login == login).first()
-        if member is None:
-            raise NotFound("No such user")
+        group = (
+            db.session.query(Group)
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
+                      .filter(Group.name == name)
+        ).first()
+        if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):
+            raise Forbidden("You are not permitted to manage this group")
 
-        if member.pending:
-            raise Forbidden("User is pending and need to be accepted first")
-
-        group = db.session.query(Group).options(joinedload(Group.users)).filter(Group.name == name).first()
         if group is None:
             raise NotFound("No such group")
 
         if group.immutable:
             raise Forbidden("Removing members from private or public group is not allowed")
+
+        member = db.session.query(User).filter(User.login == login).first()
+        if g.auth_user.login == member.login:
+            raise Forbidden("You can't remove yourself from the group, only system admin can remove group admins.")
+        if member is None:
+            raise NotFound("No such user")
+
+        if member.pending:
+            raise Forbidden("User is pending and need to be accepted first")
 
         group.users.remove(member)
         member.reset_sessions()

@@ -62,6 +62,10 @@ function authRecoverPassword(login, email, recaptcha) {
     return axios.post("/auth/recover_password", {login, email, recaptcha})
 }
 
+function authGroups() {
+    return axios.get("/auth/groups")
+}
+
 function apiKeyGetToken(key_id) {
     return axios.get(`/api_key/${key_id}`)
 }
@@ -187,11 +191,15 @@ function updateGroup(name, newName, capabilities) {
 }
 
 function addGroupMember(name, member) {
-    return axios.put(`/group/${name}/member/${member}`)
+    return axios.post(`/group/${name}/member/${member}`)
 }
 
 function removeGroupMember(name, member) {
     return axios.delete(`/group/${name}/member/${member}`)
+}
+
+function setGroupAdmin(name, member, group_admin) {
+    return axios.put(`/group/${name}/member/${member}`, {group_admin})
 }
 
 function getUsers() {
@@ -305,6 +313,7 @@ export default {
     getServerDocs,
     getServerInfo,
     authLogin,
+    authGroups,
     authRefresh,
     authSetPassword,
     authRequestPasswordChange,
@@ -338,6 +347,7 @@ export default {
     updateGroup,
     addGroupMember,
     removeGroupMember,
+    setGroupAdmin,
     getPendingUsers,
     acceptPendingUser,
     rejectPendingUser,

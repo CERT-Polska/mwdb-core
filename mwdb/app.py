@@ -20,7 +20,7 @@ from mwdb.resources.auth import (
     LoginResource, ChangePasswordResource,
     RefreshTokenResource, RegisterResource,
     RecoverPasswordResource, RequestPasswordChangeResource,
-    ValidateTokenResource
+    ValidateTokenResource, AuthGroupListResource
 )
 from mwdb.resources.blob import TextBlobItemResource, TextBlobResource
 from mwdb.resources.comment import CommentResource, CommentDeleteResource
@@ -164,6 +164,7 @@ api.add_resource(RecoverPasswordResource, '/auth/recover_password')
 api.add_resource(RequestPasswordChangeResource, '/auth/request_password_change')
 api.add_resource(RefreshTokenResource, "/auth/refresh")
 api.add_resource(ValidateTokenResource, "/auth/validate")
+api.add_resource(AuthGroupListResource, "/auth/groups")
 api.add_resource(RegisterResource, '/auth/register')
 
 # API key endpoints

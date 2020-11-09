@@ -3,6 +3,7 @@ import datetime
 from flask import request, g
 from flask_restful import Resource
 from sqlalchemy import exists
+from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import true
 
@@ -11,7 +12,7 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound, InternalServerErr
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
-from mwdb.model import db, User, Group
+from mwdb.model import db, User, Group, Member
 from mwdb.schema.user import (
     UserLoginSchemaBase,
     UserCreateRequestSchema,
@@ -457,7 +458,7 @@ class UserProfileResource(Resource):
             user = db.session.query(User).filter(User.login == login).first()
         else:
             user = (db.session.query(User)
-                              .join(User.groups)
+                              .options(joinedload(User.memberships, Member.group))
                               .filter(Group.name != "public")
                               .filter(g.auth_user.is_member(Group.id))
                               .filter(User.login == login)).first()

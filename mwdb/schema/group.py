@@ -30,6 +30,10 @@ class GroupUpdateRequestSchema(Schema):
             )
 
 
+class GroupMemberUpdateRequestSchema(Schema):
+    group_admin = fields.Boolean(required=True)
+
+
 class GroupBasicResponseSchema(GroupNameSchemaBase):
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     private = fields.Boolean(required=True)
@@ -39,6 +43,7 @@ class GroupItemResponseSchema(GroupNameSchemaBase):
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     private = fields.Boolean(required=True)
     users = fields.List(fields.Str(), attribute="user_logins", required=True, allow_none=False)
+    admins = fields.List(fields.Str(), attribute="group_admins", required=True, allow_none=False)
 
 
 class GroupListResponseSchema(Schema):

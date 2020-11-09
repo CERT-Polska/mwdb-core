@@ -122,6 +122,9 @@ class Navigation extends Component {
                                     <li className="nav-item">
                                         <Link className="nav-link" to={'/search'}>Search</Link>
                                     </li>
+                                    <li>
+                                        <Link className="nav-link" to="/user_groups">Groups</Link>
+                                    </li>
                                     <li className="nav-item">
                                         <Link className="nav-link" to={'/configs/stats'}>Statistics</Link>
                                     </li>

@@ -47,7 +47,6 @@ class UserGroupRow extends Component {
                         <spam>
                             {
                                 this.state.open ? "Collapse " : "Expand "
-
                             }
                         </spam>
                         <FontAwesomeIcon icon={this.state.open ? "minus" : "plus"} size="sm"/>
@@ -66,7 +65,6 @@ class UserGroupRow extends Component {
                                     {
                                         this.props.isAdmin &&
                                         <td className="col-4">
-
                                             <button type="button" className="btn btn-sm btn-danger"
                                                     onClick={() => this.setState({isRemoveModalOpen: true, removeUser: c})}>
                                                 Remove member

@@ -46,7 +46,7 @@ class GroupListResource(Resource):
         """
         objs = (
             db.session.query(Group)
-                      .options(joinedload(Group.members, Member.user))
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
         ).all()
         schema = GroupListResponseSchema()
         return schema.dump({"groups": objs})
@@ -86,7 +86,7 @@ class GroupResource(Resource):
         """
         obj = (
             db.session.query(Group)
-                      .options(joinedload(Group.members, Member.user))
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
                       .filter(Group.name == name)
         ).first()
         if obj is None:
@@ -272,7 +272,7 @@ class GroupMemberResource(Resource):
 
         group = (
             db.session.query(Group)
-                      .options(joinedload(Group.members, Member.user))
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
                       .filter(Group.name == name)
         ).first()
 
@@ -350,7 +350,7 @@ class GroupMemberResource(Resource):
 
         group = (
             db.session.query(Group)
-                      .options(joinedload(Group.members, Member.user))
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
                       .filter(Group.name == name)
         ).first()
 
@@ -421,7 +421,7 @@ class GroupMemberResource(Resource):
 
         group = (
             db.session.query(Group)
-                      .options(joinedload(Group.members, Member.user))
+                      .options(joinedload(Group.members), joinedload(Group.members, Member.user))
                       .filter(Group.name == name)
         ).first()
         if not (g.auth_user.has_rights(Capabilities.manage_users) or g.auth_user.is_group_admin(group.id)):

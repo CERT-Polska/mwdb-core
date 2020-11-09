@@ -35,13 +35,7 @@ class Group(db.Model):
 
     @property
     def group_admins(self):
-        from .user import User
-        admins = (
-            db.session.query(User)
-                      .join(User.memberships)
-                      .filter(Member.group_id == self.id, Member.group_admin.is_(True))
-        ).all()
-        return [u.login for u in admins]
+        return [member.user.login for member in self.members if member.group_admin]
 
     @staticmethod
     def public_group():

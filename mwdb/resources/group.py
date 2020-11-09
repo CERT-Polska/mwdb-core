@@ -11,10 +11,10 @@ from mwdb.schema.group import (
     GroupNameSchemaBase,
     GroupCreateRequestSchema,
     GroupUpdateRequestSchema,
+    GroupMemberUpdateRequestSchema,
     GroupItemResponseSchema,
     GroupListResponseSchema,
-    GroupSuccessResponseSchema,
-    GroupAdminMembership
+    GroupSuccessResponseSchema
 )
 
 from . import logger, requires_capabilities, requires_authorization, loads_schema, load_schema
@@ -302,9 +302,9 @@ class GroupMemberResource(Resource):
     def put(self, name, login):
         """
         ---
-        summary: Set group admin membership
+        summary: Update group membership
         description: |
-            Set group admin membership for specific member.
+            Updates group membership for specific member e.g. to set admin role.
 
             Works only for user-defined groups (excluding private and 'public')
 
@@ -325,10 +325,10 @@ class GroupMemberResource(Resource):
                 type: string
               description: Member login
         requestBody:
-            description: Group admin membership information
+            description: Group membership information
             content:
               application/json:
-                schema: GroupAdminMembership
+                schema: GroupMemberUpdateRequestSchema
         responses:
             200:
                 description: When member was added successfully
@@ -346,7 +346,7 @@ class GroupMemberResource(Resource):
 
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
-        membership = loads_schema(request.get_data(as_text=True), GroupAdminMembership())
+        membership = loads_schema(request.get_data(as_text=True), GroupMemberUpdateRequestSchema())
 
         group = (
             db.session.query(Group)

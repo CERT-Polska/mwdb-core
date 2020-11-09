@@ -32,7 +32,7 @@ class UserGroupRow extends Component {
         }
     }
 
-    render(){
+    render() {
         return (
             <React.Fragment>
                 <tr className="d-flex">
@@ -118,19 +118,16 @@ class UserGroups extends Component {
     }
 
     render() {
-
-        let groupAdmins = []
-        this.state.groups.filter((v) => v.admins.includes(this.props.userLogin)).map((v) => groupAdmins.push(...v.admins))
-
-        let UserGroupItems = this.state.groups.sort((a, b) => a.name > b.name).map((v) =>
-            <UserGroupRow key={v}
-                          group={v}
-                          groupUpdate={this.updateUserGroups}
-                          onError={this.handleError}
-                          onSuccess={this.handleSuccess}
-                          isAdmin={this.props.isAdmin}
-                          groupAdmin={this.props.isAdmin || v.admins.includes(this.props.userLogin)}/>
-        )
+        const userGroupItems = (
+            this.state.groups.sort((a, b) => a.name > b.name).map((v) =>
+                <UserGroupRow key={v}
+                            group={v}
+                            groupUpdate={this.updateUserGroups}
+                            onError={this.handleError}
+                            onSuccess={this.handleSuccess}
+                            isAdmin={this.props.isAdmin}
+                            groupAdmin={this.props.isAdmin || v.admins.includes(this.props.userLogin)}/>
+        ))
 
         return (
             <div className="container">
@@ -144,15 +141,15 @@ class UserGroups extends Component {
                                             Group name
                                         </th>
                                         {
-                                            (this.props.isAdmin || groupAdmins.includes(this.props.userLogin)) &&
-                                                <th className="col">
-                                                    Actions
-                                                </th>
+                                            (this.props.isAdmin || this.state.groups.some(group => group.admins.includes(this.props.userLogin))) &&
+                                            <th className="col">
+                                                Actions
+                                            </th>
                                         }
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {UserGroupItems}
+                                    {userGroupItems}
                                 </tbody>
                             </table>
                         ) : (

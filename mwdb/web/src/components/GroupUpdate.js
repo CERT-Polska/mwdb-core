@@ -47,7 +47,7 @@ class GroupUpdate extends Component {
                     _.toPairs(response.data).reduce((p, c) => p.concat([c], [["original_"+c[0], c[1]]]), [])
                 ))
             }
-            state.admins = response.data.admins.map(c => (c));
+            state.admins = response.data.admins;
             state.users = response.data.users.map(c => ({login: c}));
             this.setState(state);
         } catch(error) {

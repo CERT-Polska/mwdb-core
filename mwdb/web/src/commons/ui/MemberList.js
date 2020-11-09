@@ -180,7 +180,7 @@ class MemberItem extends Component {
                                 </span>
                             ) : (
                                 <this.props.itemLinkClass {...this.props}/>
-                                )
+                            )
                         }
                     </td>
                     <td>

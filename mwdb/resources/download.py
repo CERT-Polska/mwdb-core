@@ -1,8 +1,12 @@
+import boto3
+from botocore.client import Config as BotoConfig
 from flask import send_file
 from flask_restful import Resource
+import io
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.app import api
+from mwdb.core.config import app_config, StorageProviderType
 from mwdb.model import File
 from mwdb.schema.download import DownloadURLResponseSchema
 
@@ -41,7 +45,23 @@ class DownloadResource(Resource):
         file_obj = File.get_by_download_token(access_token)
         if not file_obj:
             raise Forbidden('Download token expired, please re-request download.')
-        return send_file(file_obj.get_path(), attachment_filename=file_obj.sha256, as_attachment=True)
+
+        if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
+            s3 = boto3.resource('s3',
+                endpoint_url=app_config.mwdb.blob_storage_endpoint,
+                aws_access_key_id=app_config.mwdb.blob_storage_access_key,
+                aws_secret_access_key=app_config.mwdb.blob_storage_secret_key,
+                config=BotoConfig(signature_version='s3v4'),
+                region_name=app_config.mwdb.blob_storage_region_name)
+
+            file_to_send = io.BytesIO()
+            s3_object = s3.Bucket(app_config.mwdb.blob_storage_bucket_name).Object(file_obj.get_path())
+            s3_object.download_fileobj(file_to_send)
+            file_to_send.seek(0)
+        else:
+            file_to_send = file_obj.get_path()
+
+        return send_file(file_to_send, attachment_filename=file_obj.sha256, as_attachment=True)
 
 
 class RequestSampleDownloadResource(Resource):

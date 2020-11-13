@@ -29,12 +29,15 @@ class StorageProviderType(Enum):
     BLOB = "BLOB"
 
 
-def storage_provider_from_str(v) -> Optional[StorageProviderType]:
+def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
     if not v:
         return None
     
     v = v.upper()
-    if v not in StorageProviderType._value2member_map_:
+    try:
+        return StorageProviderType[v]
+    except KeyError:
+        raise ValueError(f"Blob Storage Provider {v} doesn't exist")
         raise ValueError(f"Blob Storage Provider {v} doesn't exist")
     return StorageProviderType[v]
 
@@ -68,7 +71,7 @@ class MWDBConfig(Config):
     blob_storage_access_key = key(cast=str, required=False)
     # Blob Storage Secret Key
     blob_storage_secret_key = key(cast=str, required=False)
-    # Blob Storage Region Name (If you're using S3 compatible storage set this to 'us-east-1')
+    # Blob Storage Region Name (For example, 'us-east-1')
     blob_storage_region_name = key(cast=str, required=False)
     # Blob Storage Bucket Name
     blob_storage_bucket_name = key(cast=str, required=False)

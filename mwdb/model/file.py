@@ -76,9 +76,7 @@ class File(Object):
 
         if is_new:
             file.stream.seek(0, os.SEEK_SET)
-            print(app_config.mwdb.storage_provider)
             if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
-                print(file_obj.get_path())
                 s3 = boto3.resource('s3',
                     endpoint_url=app_config.mwdb.blob_storage_endpoint,
                     aws_access_key_id=app_config.mwdb.blob_storage_access_key,
@@ -92,7 +90,7 @@ class File(Object):
         return file_obj, is_new
 
     def get_path(self):
-        # Some S3 "compatible" implementations don't suppose an initial slash
+        # Some S3 "compatible" implementations don't support an initial slash
         # so if you want to upload into the root you need a blank path
         upload_path = app_config.mwdb.uploads_folder or ""
         sample_sha256 = self.sha256.lower()

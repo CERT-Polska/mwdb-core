@@ -16,6 +16,13 @@ from .group import Member
 from .object import ObjectPermission
 
 
+favorites = db.Table(
+    'favorites',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), index=True),
+    db.Column('object_id', db.Integer, db.ForeignKey('object.id'), index=True),
+)
+
+
 class User(db.Model):
     __tablename__ = 'user'
 
@@ -43,6 +50,7 @@ class User(db.Model):
     logged_on = db.Column(db.DateTime)
     set_password_on = db.Column(db.DateTime)
 
+    favorites = db.relationship('Object', secondary=favorites, backref='users', lazy='selectin')
     memberships = db.relationship(Member, back_populates='user', cascade="all, delete-orphan", lazy='selectin')
     groups = association_proxy('memberships', 'group', creator=lambda group: Member(group=group))
 

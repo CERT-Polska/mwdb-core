@@ -56,3 +56,11 @@ class AuthSuccessResponseSchema(UserLoginSchemaBase):
 class AuthValidateTokenResponseSchema(UserLoginSchemaBase):
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     groups = fields.List(fields.Str(), required=True, allow_none=False)
+
+
+class AuthFavoritesResponseSchema(Schema):
+    favorites = fields.List(fields.Str(), required=True, allow_none=False)
+
+
+class AuthFavoritesRequestSchema(Schema):
+    object_id = fields.Str(attribute="dhash", required=True, allow_none=False)

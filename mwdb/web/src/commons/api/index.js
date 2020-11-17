@@ -66,6 +66,18 @@ function authGroups() {
     return axios.get("/auth/groups")
 }
 
+function authGetFavorites() {
+    return axios.get("auth/favorites")
+}
+
+function authAddFavorite(object_id) {
+    return axios.post("auth/favorites", {object_id})
+}
+
+function authRemoveFavorite(object_id) {
+    return axios.delete("auth/favorites", {params: {object_id}})
+}
+
 function apiKeyGetToken(key_id) {
     return axios.get(`/api_key/${key_id}`)
 }
@@ -314,6 +326,9 @@ export default {
     getServerInfo,
     authLogin,
     authGroups,
+    authGetFavorites,
+    authAddFavorite,
+    authRemoveFavorite,
     authRefresh,
     authSetPassword,
     authRequestPasswordChange,

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import api from "@mwdb-web/commons/api";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import { faFile, faTable, faScroll } from "@fortawesome/free-solid-svg-icons";
+import { faFile, faTable, faScroll} from "@fortawesome/free-solid-svg-icons";
 
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { capitalize } from '@mwdb-web/commons/helpers';
@@ -22,7 +22,8 @@ export function joinActions(currentActions, newActions) {
 export default class ShowObjectPresenter extends Component {
     state = {
         isDeleteModalOpen: false,
-        disableModalButton: false
+        disableModalButton: false,
+        favorites: []
     }
     defaultTab = "details"
 
@@ -59,6 +60,38 @@ export default class ShowObjectPresenter extends Component {
             }
     }
 
+    getFavoritesObject = async () => {
+        try {
+            let response = await api.authGetFavorites()
+            this.setState({favorites: response.data.favorites})
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    addFavoriteObject = async () => {
+        try {
+            await api.authAddFavorite(this.props.id)
+            this.setState({favorites: [...this.state.favorites,this.props.id]})
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    removeFavoriteObject = async () => {
+        try {
+            await api.authRemoveFavorite(this.props.id)
+            let index = this.state.favorites.indexOf(this.props.id)
+            this.setState({favorites : this.state.favorites.filter((_, i) => i !== index)})
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    componentDidMount() {
+        this.getFavoritesObject();
+    }
+
     /* Overridable */
     get tabs() {
         let tabs = [
@@ -79,9 +112,15 @@ export default class ShowObjectPresenter extends Component {
     /* Overridable */
     get actions() {
         let nodes = queryString.parse(this.props.history.location.search, {arrayFormat: 'bracket'}).node || [];
+
+        let follow = this.state.favorites.includes(this.props.id) ?
+            {label: "Unfollow", icon: "thumbtack", action: (() => this.removeFavoriteObject())} :
+            {label: "Follow", icon: "thumbtack", action: (() => this.addFavoriteObject())}
+
         let actions = {
             details: [
-                {label: "Download", icon: "download", action: (() => this.handleDownload())}
+                follow,
+                {label: "Download", icon: "download", action: (() => this.handleDownload())},
             ],
             relations: [
                 {label: "zoom", icon: "search", link: "/relations?node[]=" + [this.props.id, ...nodes].join("&node[]=")}

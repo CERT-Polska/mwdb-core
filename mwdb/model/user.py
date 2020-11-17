@@ -73,6 +73,10 @@ class User(db.Model):
     def capabilities(self):
         return set.union(*[set(group.capabilities) for group in self.groups])
 
+    @property
+    def favorites_objects(self):
+        return [favorite.dhash for favorite in self.favorites]
+
     def has_rights(self, perms):
         return perms in self.capabilities
 

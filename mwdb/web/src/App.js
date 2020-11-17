@@ -36,7 +36,7 @@ import UserPasswordRecover from './components/UserPasswordRecover';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faTimes, faUpload, faDownload, faPlus, faMinus, faRandom, 
          faExchangeAlt, faBan, faSearch, faToggleOn, faToggleOff, faSort, faSortUp, faSortDown, faProjectDiagram, faFile, faFileImage, faFilePdf,
-         faFingerprint, faBoxes, faTrash, faCopy } from '@fortawesome/free-solid-svg-icons'
+         faFingerprint, faBoxes, faTrash, faCopy, faThumbtack} from '@fortawesome/free-solid-svg-icons'
 
 import { configActions } from '@mwdb-web/commons/config';
 import { Extension } from "@mwdb-web/commons/extensions";
@@ -66,7 +66,8 @@ library.add(faFilePdf);
 library.add(faFingerprint);
 library.add(faBoxes);
 library.add(faTrash);
-library.add(faCopy)
+library.add(faCopy);
+library.add(faThumbtack)
 
 class App extends Component {
     componentDidMount() {

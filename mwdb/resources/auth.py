@@ -26,7 +26,7 @@ from mwdb.schema.auth import (
 from mwdb.schema.group import GroupListResponseSchema
 from mwdb.schema.user import UserSuccessResponseSchema
 
-from . import logger, requires_authorization, loads_schema
+from . import logger, requires_authorization, load_schema, loads_schema
 
 
 def verify_recaptcha(recaptcha_token):
@@ -109,7 +109,7 @@ class LoginResource(Resource):
             "login": user.login,
             "token": auth_token,
             "capabilities": user.capabilities,
-            "groups": user.group_names
+            "groups": user.group_names,
         })
 
 
@@ -454,9 +454,8 @@ class AuthFavoritesResource(Resource):
                              .options(joinedload(User.favorites))
                              .filter(User.id == g.auth_user.id)).first()
 
-        favorites = [favorite.dhash for favorite in user.favorites]
         schema = AuthFavoritesResponseSchema()
-        return schema.dump({'favorites': favorites})
+        return schema.dump({'favorites': user.favorites_objects})
 
     @requires_authorization
     def post(self):
@@ -542,7 +541,7 @@ class AuthFavoritesResource(Resource):
         """
         schema = AuthFavoritesRequestSchema()
 
-        obj = loads_schema(request.get_data(as_text=True), schema)
+        obj = load_schema(request.args, schema)
 
         user = db.session.query(User).options(joinedload(User.favorites)).filter(User.id == g.auth_user.id).first()
 
@@ -556,7 +555,7 @@ class AuthFavoritesResource(Resource):
         if favorite_object is None:
             raise NotFound("Can't found current object")
 
-        if favorite_object in user.favorites:
+        if favorite_object not in user.favorites:
             raise Conflict("Object has not been saved as a favorite")
 
         user.favorites.remove(favorite_object)

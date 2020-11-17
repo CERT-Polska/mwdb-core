@@ -1,12 +1,11 @@
-import boto3
-from botocore.client import Config as BotoConfig
-from flask import send_file
+from flask import send_file, Response, stream_with_context
 from flask_restful import Resource
 import io
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.app import api
 from mwdb.core.config import app_config, StorageProviderType
+from mwdb.core.util import get_minio_client
 from mwdb.model import File
 from mwdb.schema.download import DownloadURLResponseSchema
 
@@ -47,21 +46,32 @@ class DownloadResource(Resource):
             raise Forbidden('Download token expired, please re-request download.')
 
         if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
-            s3 = boto3.resource('s3',
-                endpoint_url=app_config.mwdb.blob_storage_endpoint,
-                aws_access_key_id=app_config.mwdb.blob_storage_access_key,
-                aws_secret_access_key=app_config.mwdb.blob_storage_secret_key,
-                config=BotoConfig(signature_version='s3v4'),
-                region_name=app_config.mwdb.blob_storage_region_name)
+            try:
+                resp = get_minio_client(
+                    app_config.mwdb.blob_storage_endpoint,
+                    app_config.mwdb.blob_storage_access_key,
+                    app_config.mwdb.blob_storage_secret_key,
+                    app_config.mwdb.blob_storage_region_name,
+                    app_config.mwdb.blob_storage_secure,
+                ).get_object(app_config.mwdb.blob_storage_bucket_name, file_obj.get_path())
+                
+                def chunker(r):
+                    for chunk in r.stream(1024*256):
+                        print("chunker")
+                        print(len(chunk))
+                        yield chunk
 
-            file_to_send = io.BytesIO()
-            s3_object = s3.Bucket(app_config.mwdb.blob_storage_bucket_name).Object(file_obj.get_path())
-            s3_object.download_fileobj(file_to_send)
-            file_to_send.seek(0)
+                return Response(
+                    chunker(resp),
+                    content_type='application/octet-stream',
+                    headers={"Content-disposition":"attachment; filename={}".format(file_obj.sha256)}
+                )
+            finally:
+                resp.close()
+                resp.release_conn()
         else:
             file_to_send = file_obj.get_path()
-
-        return send_file(file_to_send, attachment_filename=file_obj.sha256, as_attachment=True)
+            return send_file(file_to_send, attachment_filename=file_obj.sha256, as_attachment=True)
 
 
 class RequestSampleDownloadResource(Resource):

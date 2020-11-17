@@ -1,14 +1,12 @@
 import os
 import hashlib
 
-import boto3
-from botocore.client import Config as BotoConfig
 from sqlalchemy import or_
 from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadSignature
 from werkzeug.utils import secure_filename
 
 from mwdb.core.config import app_config, StorageProviderType
-from mwdb.core.util import calc_hash, calc_crc32, calc_magic, calc_ssdeep
+from mwdb.core.util import calc_hash, calc_crc32, calc_magic, calc_ssdeep, get_minio_client
 
 from . import db
 from .object import Object
@@ -77,21 +75,20 @@ class File(Object):
         if is_new:
             file.stream.seek(0, os.SEEK_SET)
             if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
-                s3 = boto3.resource('s3',
-                    endpoint_url=app_config.mwdb.blob_storage_endpoint,
-                    aws_access_key_id=app_config.mwdb.blob_storage_access_key,
-                    aws_secret_access_key=app_config.mwdb.blob_storage_secret_key,
-                    config=BotoConfig(signature_version='s3v4'),
-                    region_name=app_config.mwdb.blob_storage_region_name)
-                s3.Bucket(app_config.mwdb.blob_storage_bucket_name).upload_fileobj(file, file_obj.get_path())
+                get_minio_client(
+                    app_config.mwdb.blob_storage_endpoint,
+                    app_config.mwdb.blob_storage_access_key,
+                    app_config.mwdb.blob_storage_secret_key,
+                    app_config.mwdb.blob_storage_region_name,
+                    app_config.mwdb.blob_storage_secure,
+                ).put_object(app_config.mwdb.blob_storage_bucket_name, file_obj.get_path(), file, file_size)
             else:
                 file.save(file_obj.get_path())
 
         return file_obj, is_new
 
     def get_path(self):
-        # Some S3 "compatible" implementations don't support an initial slash
-        # so if you want to upload into the root you need a blank path
+        # upload_path must not be None
         upload_path = app_config.mwdb.uploads_folder or ""
         sample_sha256 = self.sha256.lower()
         

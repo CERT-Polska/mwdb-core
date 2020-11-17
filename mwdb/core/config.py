@@ -67,6 +67,8 @@ class MWDBConfig(Config):
     hash_pathing = key(cast=intbool, required=False, default=True)
     # S3 compatible blob storage endpoint 
     blob_storage_endpoint = key(cast=str, required=False)
+    # Blob Storage Transport Level Security
+    blob_storage_secure = key(cast=intbool, required=False, default=False)
     # Blob Storage Access Key
     blob_storage_access_key = key(cast=str, required=False)
     # Blob Storage Secret Key

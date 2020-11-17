@@ -17,6 +17,8 @@ from flask_restful import abort
 from flask_sqlalchemy import Pagination
 import hashlib
 
+from minio import Minio
+
 
 def config_dhash(obj):
     if isinstance(obj, list):
@@ -119,4 +121,16 @@ def is_subdir(parent, child):
             os.path.abspath(parent),
             os.path.abspath(child)
         ])
+    )
+
+
+def get_minio_client(endpoint: str, access_key: str, secret_key: str, region: str, secure: bool) -> Minio:
+    if endpoint is None or access_key is None or secret_key is None:
+        raise Exception("Attempting to get Minio client without a endpoint/access_key/secret_key set")
+    return Minio(
+        endpoint=endpoint,
+        access_key=access_key,
+        secret_key=secret_key,
+        secure=secure,
+        region=region,
     )

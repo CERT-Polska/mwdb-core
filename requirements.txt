@@ -20,4 +20,4 @@ click==6.7
 click-default-group==1.2.2
 PyYAML==5.3.1
 redis==3.2.1
-boto3==1.16.14
+minio==6.0.0

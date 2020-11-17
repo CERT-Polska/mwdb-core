@@ -60,7 +60,7 @@ class MWDBConfig(Config):
     flask_config_file = key(cast=path, required=False)
 
     # Which storage provider to use (options: disk or blob)
-    storage_provider = key(cast=storage_provider_from_str, required=False, default=StorageProviderType.DISK)
+    storage_provider = key(cast=storage_provider_from_str, required=False, default="disk")
     # Folder for uploads
     uploads_folder = key(cast=path, required=False)
     # Should we break up the uploads into different folders for example: uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08

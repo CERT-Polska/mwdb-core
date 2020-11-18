@@ -143,13 +143,37 @@ class ListField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
-
         value = get_term_value(expression)
 
         if expression.has_wildcard():
             return self.column.any(self.value_column.like(value))
         else:
             return self.column.any(self.value_column == value)
+
+
+class FavoritesField(BaseField):
+    accepts_subquery = True
+
+    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
+        if remainder:
+            raise FieldNotQueryableException(
+                f"Field doesn't have subfields: {'.'.join(remainder)}"
+            )
+        value = get_term_value(expression)
+
+        user = (db.session.query(User)
+                          .options(joinedload(User.memberships, Member.group))
+                          .options(joinedload(User.favorites))
+                          .filter(g.auth_user.is_member(Group.id))
+                          .filter(User.login == value)).first()
+        if user is None:
+            raise ObjectNotFoundException(f"No such user: {value}")
+
+        favorites_id = [favorite.id for favorite in user.favorites]
+
+        return self.column.any(
+            ObjectPermission.related_object_id.in_(favorites_id)
+        )
 
 
 class AttributeField(BaseField):

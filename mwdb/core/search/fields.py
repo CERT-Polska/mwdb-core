@@ -152,8 +152,6 @@ class ListField(BaseField):
 
 
 class FavoritesField(BaseField):
-    accepts_subquery = True
-
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
         if remainder:
             raise FieldNotQueryableException(

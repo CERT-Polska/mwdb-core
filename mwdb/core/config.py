@@ -38,7 +38,6 @@ def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
         return StorageProviderType[v]
     except KeyError:
         raise ValueError(f"Blob Storage Provider {v} doesn't exist")
-        raise ValueError(f"Blob Storage Provider {v} doesn't exist")
     return StorageProviderType[v]
 
 

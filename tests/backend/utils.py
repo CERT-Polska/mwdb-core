@@ -2,6 +2,8 @@ import json
 import os
 import time
 import uuid
+import random
+import string
 
 import requests
 import logging
@@ -17,6 +19,9 @@ def base62uuid():
     uuid4_as_int = int(uuid4_as_hex, 16)
     return converter.encode(uuid4_as_int)
 
+
+def rand_string(size=20):
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=size))
 
 def random_name():
     return base62uuid()

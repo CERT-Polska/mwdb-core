@@ -24,9 +24,6 @@ def test_read(mwdb):
     sample.open()
     a = sample.read(32)
     b = sample.read(32)
-    print(a)
-    print(expected[0:31])
-    print(b)
-    print(expected[32:63])
+    sample.close()
     assert a == expected[0:31]
     assert b == expected[32:63]

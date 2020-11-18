@@ -102,14 +102,10 @@ class File(Object):
         return os.path.join(upload_path, sample_sha256)
 
     # File API
-    _file_handle = None
     # Open the file
     def open(self):
-        if self._file_handle is not None:
-            raise Exception("File already open")
-
         if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
-            self._file_handle = get_minio_client(
+            return get_minio_client(
                 app_config.mwdb.blob_storage_endpoint,
                 app_config.mwdb.blob_storage_access_key,
                 app_config.mwdb.blob_storage_secret_key,
@@ -117,19 +113,19 @@ class File(Object):
                 app_config.mwdb.blob_storage_secure,
             ).get_object(app_config.mwdb.blob_storage_bucket_name, self._calculate_path())
         else:
-            self._file_handle = open(self._calculate_path(), 'rb')
+            return open(self._calculate_path(), 'rb')
 
     # Read bytes from the file
-    def read(self, amount=-1):
-        if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
-            return self._file_handle.read(amount)
-        else:
-            return self._file_handle.read(amount)
+    def read(self):
+        try:
+            fh = self.open()
+            return fh.read()
+        finally:
+            File.close(fh)
 
     # Iterate over bytes in the file
     def iterate(self, chunk_size=1024*256):
-        if self._file_handle is None:
-            self.open()
+        fh = self.open()
         try:
             if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
                 for chunk in self._file_handle.stream(chunk_size):
@@ -142,18 +138,14 @@ class File(Object):
                     else:
                         return
         finally:
-            self.close()
+            File.close(fh)
 
-    # Close the file
-    def close(self):
-        if self._file_handle is None:
-            return
-
-        self._file_handle.close()
+    # Close a file
+    @staticmethod
+    def close(fh):
+        fh.close()
         if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
-            self._file_handle.release_conn()
-
-        _file_handle = None
+            fh.release_conn()
 
     def generate_download_token(self):
         serializer = TimedJSONWebSignatureSerializer(app_config.mwdb.secret_key, expires_in=60)

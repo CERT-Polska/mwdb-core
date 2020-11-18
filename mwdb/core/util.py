@@ -126,7 +126,7 @@ def is_subdir(parent, child):
 
 def get_minio_client(endpoint: str, access_key: str, secret_key: str, region: str, secure: bool) -> Minio:
     if endpoint is None or access_key is None or secret_key is None:
-        raise Exception("Attempting to get Minio client without a endpoint/access_key/secret_key set")
+        raise RuntimeError("Attempting to get Minio client without a endpoint/access_key/secret_key set")
     return Minio(
         endpoint=endpoint,
         access_key=access_key,

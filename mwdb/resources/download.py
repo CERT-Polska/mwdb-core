@@ -48,7 +48,7 @@ class DownloadResource(Resource):
         return Response(
             file_obj.iterate(),
             content_type='application/octet-stream',
-            headers={"Content-disposition":"attachment; filename={}".format(file_obj.sha256)}
+            headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"}
         )
 
 

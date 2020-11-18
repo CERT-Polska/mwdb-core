@@ -46,29 +46,25 @@ class DownloadResource(Resource):
             raise Forbidden('Download token expired, please re-request download.')
 
         if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
-            try:
-                resp = get_minio_client(
-                    app_config.mwdb.blob_storage_endpoint,
-                    app_config.mwdb.blob_storage_access_key,
-                    app_config.mwdb.blob_storage_secret_key,
-                    app_config.mwdb.blob_storage_region_name,
-                    app_config.mwdb.blob_storage_secure,
-                ).get_object(app_config.mwdb.blob_storage_bucket_name, file_obj.get_path())
-                
-                def chunker(r):
-                    for chunk in r.stream(1024*256):
-                        print("chunker")
-                        print(len(chunk))
-                        yield chunk
+            resp = get_minio_client(
+                app_config.mwdb.blob_storage_endpoint,
+                app_config.mwdb.blob_storage_access_key,
+                app_config.mwdb.blob_storage_secret_key,
+                app_config.mwdb.blob_storage_region_name,
+                app_config.mwdb.blob_storage_secure,
+            ).get_object(app_config.mwdb.blob_storage_bucket_name, file_obj.get_path())
+            
+            def response_chunker(r):
+                for chunk in r.stream(1024*256):
+                    yield chunk
+                r.close()
+                r.release_conn()
 
-                return Response(
-                    chunker(resp),
-                    content_type='application/octet-stream',
-                    headers={"Content-disposition":"attachment; filename={}".format(file_obj.sha256)}
-                )
-            finally:
-                resp.close()
-                resp.release_conn()
+            return Response(
+                response_chunker(resp),
+                content_type='application/octet-stream',
+                headers={"Content-disposition":"attachment; filename={}".format(file_obj.sha256)}
+            )
         else:
             file_to_send = file_obj.get_path()
             return send_file(file_to_send, attachment_filename=file_obj.sha256, as_attachment=True)

@@ -5,8 +5,8 @@ from sqlalchemy import or_
 from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadSignature
 from werkzeug.utils import secure_filename
 
-from mwdb.core.config import app_config
-from mwdb.core.util import calc_hash, calc_crc32, calc_magic, calc_ssdeep
+from mwdb.core.config import app_config, StorageProviderType
+from mwdb.core.util import calc_hash, calc_crc32, calc_magic, calc_ssdeep, get_minio_client
 
 from . import db
 from .object import Object
@@ -74,17 +74,78 @@ class File(Object):
 
         if is_new:
             file.stream.seek(0, os.SEEK_SET)
-            file.save(file_obj.get_path())
+            if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
+                get_minio_client(
+                    app_config.mwdb.blob_storage_endpoint,
+                    app_config.mwdb.blob_storage_access_key,
+                    app_config.mwdb.blob_storage_secret_key,
+                    app_config.mwdb.blob_storage_region_name,
+                    app_config.mwdb.blob_storage_secure,
+                ).put_object(app_config.mwdb.blob_storage_bucket_name, file_obj._calculate_path(), file, file_size)
+            else:
+                file.save(file_obj._calculate_path())
 
         return file_obj, is_new
 
-    def get_path(self):
-        upload_root = app_config.mwdb.uploads_folder
+    def _calculate_path(self):
+        # upload_path must not be None
+        upload_path = app_config.mwdb.uploads_folder or ""
         sample_sha256 = self.sha256.lower()
-        # example: uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
-        subdir_path = os.path.abspath(os.path.join(upload_root, *list(sample_sha256)[0:4]))
-        os.makedirs(subdir_path, mode=0o755, exist_ok=True)
-        return os.path.join(subdir_path, sample_sha256)
+        
+        if app_config.mwdb.hash_pathing:
+            # example: uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+            upload_path = os.path.join(upload_path, *list(sample_sha256)[0:4])
+    
+        if app_config.mwdb.storage_provider == StorageProviderType.DISK:
+            upload_path = os.path.abspath(upload_path)
+            os.makedirs(upload_path, mode=0o755, exist_ok=True)
+        return os.path.join(upload_path, sample_sha256)
+
+    # File API
+    # Open the file
+    def open(self):
+        if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
+            return get_minio_client(
+                app_config.mwdb.blob_storage_endpoint,
+                app_config.mwdb.blob_storage_access_key,
+                app_config.mwdb.blob_storage_secret_key,
+                app_config.mwdb.blob_storage_region_name,
+                app_config.mwdb.blob_storage_secure,
+            ).get_object(app_config.mwdb.blob_storage_bucket_name, self._calculate_path())
+        else:
+            return open(self._calculate_path(), 'rb')
+
+    # Read bytes from the file
+    def read(self):
+        try:
+            fh = self.open()
+            return fh.read()
+        finally:
+            File.close(fh)
+
+    # Iterate over bytes in the file
+    def iterate(self, chunk_size=1024*256):
+        fh = self.open()
+        try:
+            if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
+                for chunk in fh.stream(chunk_size):
+                    yield chunk
+            else:
+                while True:
+                    chunk = fh.read(chunk_size)
+                    if chunk:
+                        yield chunk
+                    else:
+                        return
+        finally:
+            File.close(fh)
+
+    # Close a file
+    @staticmethod
+    def close(fh):
+        fh.close()
+        if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
+            fh.release_conn()
 
     def generate_download_token(self):
         serializer = TimedJSONWebSignatureSerializer(app_config.mwdb.secret_key, expires_in=60)

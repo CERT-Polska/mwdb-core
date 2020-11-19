@@ -1,15 +1,10 @@
-import random
-import string
-
 import pytest
 import requests
 from dateutil.parser import parse
 
-from .utils import MwdbTest
+from .utils import MwdbTest, rand_string
 
 
-def rand_string():
-    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=20))
 
 
 @pytest.fixture(scope="session", autouse=True)

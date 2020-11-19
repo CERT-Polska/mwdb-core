@@ -11,6 +11,7 @@ import {ConfirmationModal} from "@mwdb-web/commons/ui";
 import RelationsPlot from './RelationsPlot';
 
 import queryString from "query-string";
+import { GlobalContext } from "../context"
 
 export function joinActions(currentActions, newActions) {
     let actions = {...currentActions};
@@ -20,12 +21,14 @@ export function joinActions(currentActions, newActions) {
 }
 
 export default class ShowObjectPresenter extends Component {
+    defaultTab = "details"
+
+    static contextType = GlobalContext
+
     state = {
         isDeleteModalOpen: false,
         disableModalButton: false,
-        favorite: false,
     }
-    defaultTab = "details"
 
     getTabLink(tab, subtab) {
         let pathElements = this.props.history.location.pathname.split("/");
@@ -60,19 +63,10 @@ export default class ShowObjectPresenter extends Component {
             }
     }
 
-    isFavoriteObject = async () => {
-        try {
-            let response = await api.authGetFavorite(this.props.id)
-            this.setState({favorite: response.data.favorite})
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     addFavoriteObject = async () => {
         try {
             await api.authAddFavorite(this.props.id)
-            this.setState({favorite: true})
+            this.context.update({ favorite: true })
         } catch (error) {
             console.log(error)
         }
@@ -81,17 +75,16 @@ export default class ShowObjectPresenter extends Component {
     removeFavoriteObject = async () => {
         try {
             await api.authRemoveFavorite(this.props.id)
-            let index = this.state.favorite.indexOf(this.props.id)
-            this.setState({favorite : false})
+            this.context.update({ favorite: false })
         } catch (error) {
             console.log(error)
         }
     }
 
     componentDidMount() {
-        if (this.props.id) {
-            this.isFavoriteObject();
-        }
+        // if (this.props.id) {
+        //     this.isFavoriteObject();
+        // }
 
     }
 
@@ -116,9 +109,13 @@ export default class ShowObjectPresenter extends Component {
     get actions() {
         let nodes = queryString.parse(this.props.history.location.search, {arrayFormat: 'bracket'}).node || [];
 
+        let favorite = this.context.favorite ?
+            {label: "Unfavorite", icon: "star", action: (() => this.removeFavoriteObject())} :
+            {label: "Favorite", icon: ["far","star"], action: (() => this.addFavoriteObject())}
+
         let actions = {
             details: [
-                {label: "Favorites", icon: "star", action: (() => this.addFavoriteObject()), message: "Remove from favorites"},
+                favorite,
                 {label: "Download", icon: "download", action: (() => this.handleDownload())},
             ],
             relations: [
@@ -176,6 +173,7 @@ export default class ShowObjectPresenter extends Component {
     }
 
     render() {
+        console.log(this.context)
         let ObjectTab = (props) => {
             return (
                 <li className="nav-item">

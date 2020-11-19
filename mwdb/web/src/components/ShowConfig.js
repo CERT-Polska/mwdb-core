@@ -10,6 +10,7 @@ import { makeSearchLink, makeSearchDateLink, downloadData } from "@mwdb-web/comm
 import { Extension } from "@mwdb-web/commons/extensions";
 import { DataTable, DateString, ObjectLink, View, HexView, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter from './ShowObjectPresenter';
+import { GlobalContext } from "../context"
 
 class ConfigRow extends Component {
     constructor(props){
@@ -200,12 +201,24 @@ class ShowConfig extends Component {
         }
     };
 
+    static contextType = GlobalContext;
+
+    isFavoriteObject = async (id) => {
+        try {
+            let response = await api.authGetFavorite(id)
+            this.context.update({ favorite: response.data.favorite })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     updateConfig = async () => {
         try {
             let response = await api.getObject("config", this.props.match.params.hash)
             this.setState({
                 config: response.data
             });
+            this.isFavoriteObject(response.data.id)
         } catch(error) {
             this.setState({error})
         }

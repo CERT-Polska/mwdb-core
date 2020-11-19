@@ -36,7 +36,9 @@ import UserPasswordRecover from './components/UserPasswordRecover';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faTimes, faUpload, faDownload, faPlus, faMinus, faRandom, 
          faExchangeAlt, faBan, faSearch, faToggleOn, faToggleOff, faSort, faSortUp, faSortDown, faProjectDiagram, faFile, faFileImage, faFilePdf,
-         faFingerprint, faBoxes, faTrash, faCopy, faThumbtack} from '@fortawesome/free-solid-svg-icons'
+         faFingerprint, faBoxes, faTrash, faCopy, faThumbtack, faStar} from '@fortawesome/free-solid-svg-icons'
+
+import { faStar as farStar } from '@fortawesome/free-regular-svg-icons'
 
 import { configActions } from '@mwdb-web/commons/config';
 import { Extension } from "@mwdb-web/commons/extensions";
@@ -44,6 +46,7 @@ import history from "@mwdb-web/commons/history";
 import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
 import ShowPendingUsers from './components/ShowPendingUsers';
 import Docs from './components/Docs';
+import {GlobalProvider} from "./context";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -68,6 +71,8 @@ library.add(faBoxes);
 library.add(faTrash);
 library.add(faCopy);
 library.add(faThumbtack)
+library.add(faStar)
+library.add(farStar)
 
 class App extends Component {
     componentDidMount() {
@@ -88,6 +93,7 @@ class App extends Component {
         )
 
         return (
+            <GlobalProvider>
             <ConnectedRouter history={history}>
                 <div className="App">
                     <Navigation />
@@ -139,6 +145,7 @@ class App extends Component {
                     </div>
                 </div>
             </ConnectedRouter>
+                </GlobalProvider>
         );
     }
 }

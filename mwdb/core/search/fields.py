@@ -158,17 +158,17 @@ class FavoritesField(BaseField):
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
         value = get_term_value(expression)
-
-        user = (db.session.query(User)
-                          .options(joinedload(User.memberships, Member.group))
-                          .options(joinedload(User.favorites))
-                          .filter(g.auth_user.is_member(Group.id))
-                          .filter(User.login == value)).first()
+        if g.auth_user.has_rights(Capabilities.manage_users):
+            user = db.session.query(User).filter(User.login == value).first()
+        else:
+            user = (db.session.query(User)
+                              .options(joinedload(User.memberships, Member.group))
+                              .filter(User.login == value)
+                              .filter(g.auth_user.is_member(Group.id))).first()
         if user is None:
             raise ObjectNotFoundException(f"No such user: {value}")
 
         favorites_id = [favorite.id for favorite in user.favorites]
-
         return self.column.any(
             ObjectPermission.related_object_id.in_(favorites_id)
         )

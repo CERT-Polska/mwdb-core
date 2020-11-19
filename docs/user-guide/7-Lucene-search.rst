@@ -210,6 +210,7 @@ Special fields
 There are also other fields that have special meaning. They will be described in further sections of this chapter.
 
 
+* ``favorites:<string>``
 * ``shared:<string>``
 * ``uploader:<string>``
 * ``parent:<subquery>``
@@ -274,6 +275,20 @@ If you search by more than one value contained in an array, just type:
 
    cfg.field.array*:"*1, 2*"
 
+Favorites field (\ ``favorites:``\ )
+------------------------------------------------------------
+
+Typing the field ``favorites:`` you can search for user objects marked as followed in object view.
+
+.. code-block::
+
+   favorites:<user login>
+
+The above query returns the favorite objects of specific user.
+
+.. warning::
+
+    Remember that you can only search for your favorite objects or members favorites of groups you belong to.
 
 
 Group access queries (\ ``shared:`` and ``uploader:``\ )

@@ -450,12 +450,21 @@ class AuthFavoritesResource(Resource):
                   application/json:
                     schema: AuthFavoritesResponseSchema
         """
+
+        schema = AuthFavoritesRequestSchema()
+        print("PRINT")
+        print(request.args.__dict__)
+
+        obj = load_schema(request.args, schema)
+
         user = (db.session.query(User)
-                             .options(joinedload(User.favorites))
-                             .filter(User.id == g.auth_user.id)).first()
+                          .options(joinedload(User.favorites))
+                          .filter(User.id == g.auth_user.id)).first()
+
+        favorite = obj["dhash"] in user.favorites_objects
 
         schema = AuthFavoritesResponseSchema()
-        return schema.dump({'favorites': user.favorites_objects})
+        return schema.dump({'favorite': favorite})
 
     @requires_authorization
     def post(self):

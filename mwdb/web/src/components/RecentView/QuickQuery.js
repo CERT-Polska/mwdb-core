@@ -81,6 +81,10 @@ function QuickQuery(props) {
                         label="Exclude public"
                         color="secondary"
                         onClick={(ev) => {ev.preventDefault(); props.addToQuery("NOT shared", "public")}} />,
+        <QuickQueryItem key="favorites"
+                        label="Favorites"
+                        color="info"
+                        onClick={(ev) => {ev.preventDefault(); props.addToQuery("favorites", props.userLogin)}} />,
         <QuickQueryItem key="exclude-feed"
                         label="Exclude feed:*"
                         color="primary"

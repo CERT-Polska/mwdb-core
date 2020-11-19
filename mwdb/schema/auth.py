@@ -59,7 +59,7 @@ class AuthValidateTokenResponseSchema(UserLoginSchemaBase):
 
 
 class AuthFavoritesResponseSchema(Schema):
-    favorites = fields.List(fields.Str(), required=True, allow_none=False)
+    favorite = fields.Boolean(required=True, allow_none=False)
 
 
 class AuthFavoritesRequestSchema(Schema):

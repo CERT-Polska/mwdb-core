@@ -23,7 +23,7 @@ export default class ShowObjectPresenter extends Component {
     state = {
         isDeleteModalOpen: false,
         disableModalButton: false,
-        favorites: []
+        favorite: false,
     }
     defaultTab = "details"
 
@@ -60,10 +60,10 @@ export default class ShowObjectPresenter extends Component {
             }
     }
 
-    getFavoritesObject = async () => {
+    isFavoriteObject = async () => {
         try {
-            let response = await api.authGetFavorites()
-            this.setState({favorites: response.data.favorites})
+            let response = await api.authGetFavorite(this.props.id)
+            this.setState({favorite: response.data.favorite})
         } catch (error) {
             console.log(error)
         }
@@ -72,7 +72,7 @@ export default class ShowObjectPresenter extends Component {
     addFavoriteObject = async () => {
         try {
             await api.authAddFavorite(this.props.id)
-            this.setState({favorites: [...this.state.favorites,this.props.id]})
+            this.setState({favorite: true})
         } catch (error) {
             console.log(error)
         }
@@ -81,15 +81,18 @@ export default class ShowObjectPresenter extends Component {
     removeFavoriteObject = async () => {
         try {
             await api.authRemoveFavorite(this.props.id)
-            let index = this.state.favorites.indexOf(this.props.id)
-            this.setState({favorites : this.state.favorites.filter((_, i) => i !== index)})
+            let index = this.state.favorite.indexOf(this.props.id)
+            this.setState({favorite : false})
         } catch (error) {
             console.log(error)
         }
     }
 
     componentDidMount() {
-        this.getFavoritesObject();
+        if (this.props.id) {
+            this.isFavoriteObject();
+        }
+
     }
 
     /* Overridable */
@@ -113,13 +116,9 @@ export default class ShowObjectPresenter extends Component {
     get actions() {
         let nodes = queryString.parse(this.props.history.location.search, {arrayFormat: 'bracket'}).node || [];
 
-        let follow = this.state.favorites.includes(this.props.id) ?
-            {label: "Unfollow", icon: "thumbtack", action: (() => this.removeFavoriteObject())} :
-            {label: "Follow", icon: "thumbtack", action: (() => this.addFavoriteObject())}
-
         let actions = {
             details: [
-                follow,
+                {label: "Favorites", icon: "star", action: (() => this.addFavoriteObject()), message: "Remove from favorites"},
                 {label: "Download", icon: "download", action: (() => this.handleDownload())},
             ],
             relations: [

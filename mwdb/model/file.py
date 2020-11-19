@@ -128,11 +128,11 @@ class File(Object):
         fh = self.open()
         try:
             if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
-                for chunk in self._file_handle.stream(chunk_size):
+                for chunk in fh.stream(chunk_size):
                     yield chunk
             else:
                 while True:
-                    chunk = self._file_handle.read(chunk_size)
+                    chunk = fh.read(chunk_size)
                     if chunk:
                         yield chunk
                     else:

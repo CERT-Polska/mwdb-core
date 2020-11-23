@@ -17,7 +17,7 @@ export class GlobalProvider extends Component {
 	}
 
 	componentDidUpdate(prevProps) {
-    	if(this.props != prevProps) {
+    	if(this.props !== prevProps) {
     		this.setState({favorites: this.props.favorites});
     	}
     }

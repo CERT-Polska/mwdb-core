@@ -12,6 +12,6 @@ import "swagger-ui-react/swagger-ui.css"
 
 ReactDOM.render((
   <Provider store={store}>
-          <App />
+      <App />
   </Provider>
 ), document.getElementById('root'));

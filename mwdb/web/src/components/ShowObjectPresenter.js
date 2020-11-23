@@ -27,7 +27,7 @@ export default class ShowObjectPresenter extends Component {
 
     state = {
         isDeleteModalOpen: false,
-        disableModalButton: false,
+        disableModalButton: false
     }
 
     getTabLink(tab, subtab) {
@@ -103,7 +103,7 @@ export default class ShowObjectPresenter extends Component {
     get actions() {
         let nodes = queryString.parse(this.props.history.location.search, {arrayFormat: 'bracket'}).node || [];
 
-        let favorite = this.context.favorite ?
+        let favorite = this.context.favorites.includes(this.props.id) ?
             {label: "Unfavorite", icon: "star", action: (() => this.removeFavoriteObject())} :
             {label: "Favorite", icon: ["far","star"], action: (() => this.addFavoriteObject())}
 
@@ -167,7 +167,6 @@ export default class ShowObjectPresenter extends Component {
     }
 
     render() {
-        console.log(this.context)
         let ObjectTab = (props) => {
             return (
                 <li className="nav-item">

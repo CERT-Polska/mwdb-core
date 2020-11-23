@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import {GlobalContext} from "./index";
-import { connect } from "react-redux";
-
+import api from "../api"
 
 export class GlobalProvider extends Component {
     constructor(props) {
@@ -17,8 +16,20 @@ export class GlobalProvider extends Component {
 		this.setState(values)
 	}
 
+	getFavorites = async () => {
+    	try {
+    		const response = await api.authGetFavorites()
+			this.setState({favorites: response.data.favorites})
+		} catch(error) {
+    		console.log(error)
+		}
+	}
+
+	componentDidMount() {
+    	this.getFavorites()
+	}
+
 	render() {
-    	console.log(this.props.favorites)
         return (
             <GlobalContext.Provider value={this.state}>
                 {this.props.children}
@@ -27,12 +38,3 @@ export class GlobalProvider extends Component {
     }
 }
 
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        favorites: state.auth.loggedUser ? state.auth.loggedUser.favorites : [],
-    }
-}
-
-export default connect(mapStateToProps)(GlobalProvider);

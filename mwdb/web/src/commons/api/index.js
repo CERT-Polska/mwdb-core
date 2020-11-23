@@ -66,8 +66,8 @@ function authGroups() {
     return axios.get("/auth/groups")
 }
 
-function authGetFavorite(object_id) {
-    return axios.get("auth/favorite", {params: {object_id}})
+function authGetFavorites(object_id) {
+    return axios.get("auth/favorite")
 }
 
 function authAddFavorite(object_id) {
@@ -326,7 +326,7 @@ export default {
     getServerInfo,
     authLogin,
     authGroups,
-    authGetFavorite,
+    authGetFavorites,
     authAddFavorite,
     authRemoveFavorite,
     authRefresh,

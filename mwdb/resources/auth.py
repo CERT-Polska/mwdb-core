@@ -105,11 +105,14 @@ class LoginResource(Resource):
             "login": user.login
         })
         schema = AuthSuccessResponseSchema()
+        print("user.favorites_objects")
+        print(user.favorites_objects)
         return schema.dump({
             "login": user.login,
             "token": auth_token,
             "capabilities": user.capabilities,
             "groups": user.group_names,
+            "favorites": user.favorites_objects
         })
 
 
@@ -369,7 +372,8 @@ class RefreshTokenResource(Resource):
             "login": user.login,
             "token": user.generate_session_token(),
             "capabilities": user.capabilities,
-            "groups": user.group_names
+            "groups": user.group_names,
+            "favorites": user.favorites_objects
         })
 
 
@@ -450,21 +454,11 @@ class AuthFavoritesResource(Resource):
                   application/json:
                     schema: AuthFavoritesResponseSchema
         """
-
-        schema = AuthFavoritesRequestSchema()
-        print("PRINT")
-        print(request.args.__dict__)
-
-        obj = load_schema(request.args, schema)
-
-        user = (db.session.query(User)
-                          .options(joinedload(User.favorites))
-                          .filter(User.id == g.auth_user.id)).first()
-
-        favorite = obj["dhash"] in user.favorites_objects
+        user = g.auth_user
+        favorites = user.favorites_objects
 
         schema = AuthFavoritesResponseSchema()
-        return schema.dump({'favorite': favorite})
+        return schema.dump({'favorites': favorites})
 
     @requires_authorization
     def post(self):
@@ -499,26 +493,22 @@ class AuthFavoritesResource(Resource):
 
         obj = loads_schema(request.get_data(as_text=True), schema)
 
-        user = db.session.query(User).options(joinedload(User.favorites)).filter(User.id == g.auth_user.id).first()
-
+        user = g.auth_user
         if user is None:
             raise NotFound("Can't reference to the current user")
 
         object_id = obj["dhash"]
         target_object = db.session.query(Object).filter(Object.dhash == object_id).first()
-
         if target_object is None:
             raise NotFound("Can't found current object")
 
         if target_object in user.favorites:
             raise Conflict("Object is already added as favorite")
 
-        print("OBJ")
-        print(obj)
         user.favorites.append(target_object)
         db.session.commit()
 
-        logger.info('Favorite object added', extra={'user': user.login, 'object_id': object_id})
+        logger.info('Object added to favorites', extra={'user': user.login, 'object_id': object_id})
         return schema.dump({'user': user.login, 'object_id': object_id})
 
     @requires_authorization
@@ -532,11 +522,12 @@ class AuthFavoritesResource(Resource):
             - bearerAuth: []
         tags:
             - auth
-        requestBody:
-            description: Object identifier
-            content:
-              application/json:
-                schema: AuthFavoritesRequestSchema
+        parameters:
+            - in: query
+              name: identifier
+              schema:
+                type: string
+              description: Object identifier
         responses:
             200:
                 description: Delete favorite object
@@ -547,20 +538,19 @@ class AuthFavoritesResource(Resource):
                 description: When request body is invalid
             404:
                 description: When user or object doesn't exist.
+            409:
+                description: When object is not in user favorites.
         """
         schema = AuthFavoritesRequestSchema()
 
         obj = load_schema(request.args, schema)
 
-        user = db.session.query(User).options(joinedload(User.favorites)).filter(User.id == g.auth_user.id).first()
-
+        user = g.auth_user
         if user is None:
             raise NotFound("Can't reference to the current user")
 
         object_id = obj["dhash"]
-
         favorite_object = db.session.query(Object).filter(Object.dhash == object_id).first()
-
         if favorite_object is None:
             raise NotFound("Can't found current object")
 
@@ -570,5 +560,5 @@ class AuthFavoritesResource(Resource):
         user.favorites.remove(favorite_object)
         db.session.commit()
 
-        logger.info('Favorite object deleted', extra={'user': user.login, 'object_id': object_id})
+        logger.info('Object removed from favorites', extra={'user': user.login, 'object_id': object_id})
         return schema.dump({'user': user.login, 'object_id': object_id})

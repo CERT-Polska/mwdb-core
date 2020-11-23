@@ -11,7 +11,7 @@ import {ConfirmationModal} from "@mwdb-web/commons/ui";
 import RelationsPlot from './RelationsPlot';
 
 import queryString from "query-string";
-import { GlobalContext } from "../context"
+import { GlobalContext } from "../commons/context"
 
 export function joinActions(currentActions, newActions) {
     let actions = {...currentActions};
@@ -66,7 +66,7 @@ export default class ShowObjectPresenter extends Component {
     addFavoriteObject = async () => {
         try {
             await api.authAddFavorite(this.props.id)
-            this.context.update({ favorite: true })
+            this.context.update({favorites: [...this.context.favorites,this.props.id]})
         } catch (error) {
             console.log(error)
         }
@@ -75,17 +75,11 @@ export default class ShowObjectPresenter extends Component {
     removeFavoriteObject = async () => {
         try {
             await api.authRemoveFavorite(this.props.id)
-            this.context.update({ favorite: false })
+            let index = this.context.favorites.indexOf(this.props.id)
+            this.context.update({favorites : this.context.favorites.filter((_, i) => i !== index)})
         } catch (error) {
             console.log(error)
         }
-    }
-
-    componentDidMount() {
-        // if (this.props.id) {
-        //     this.isFavoriteObject();
-        // }
-
     }
 
     /* Overridable */

@@ -9,7 +9,6 @@ import { makeSearchLink, makeSearchDateLink, downloadData, humanFileSize } from 
 import { DataTable, View, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
-import { GlobalContext } from "../context"
 
 function TextBlobDetails(props) {
     return (
@@ -110,22 +109,10 @@ class ShowTextBlob extends Component {
         }
     };
 
-    static contextType = GlobalContext;
-
-    isFavoriteObject = async (id) => {
-        try {
-            let response = await api.authGetFavorite(id)
-            this.context.update({ favorite: response.data.favorite })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     updateTextBlob = async () => {
         try {
             let response = await api.getObject("blob", this.props.match.params.hash);
             this.setState({blob: response.data, error: null});
-            this.isFavoriteObject(response.data.id)
         } catch(error) {
             this.setState({error});
         }

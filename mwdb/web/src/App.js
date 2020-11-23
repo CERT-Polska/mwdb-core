@@ -46,7 +46,7 @@ import history from "@mwdb-web/commons/history";
 import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
 import ShowPendingUsers from './components/ShowPendingUsers';
 import Docs from './components/Docs';
-import {GlobalProvider} from "./context";
+import { GlobalProvider } from "./commons/context/provider";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -80,6 +80,7 @@ class App extends Component {
     }
 
     render() {
+        console.log(this.props.favorites)
         const AuthenticatedRoute = (args) => (
             <ProtectedRoute condition={this.props.isAuthenticated} {...args} />
         )
@@ -145,7 +146,7 @@ class App extends Component {
                     </div>
                 </div>
             </ConnectedRouter>
-                </GlobalProvider>
+            </GlobalProvider>
         );
     }
 }
@@ -161,6 +162,7 @@ function mapStateToProps(state, ownProps)
         isAdmin: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("manage_users") >= 0,
         isAttributeManager: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("managing_attributes") >= 0,
         isRegistrationEnabled: state.config.config && state.config.config["is_registration_enabled"],
+        favorites: state.auth.loggedUser ? state.auth.loggedUser.favorites : [],
         userLogin: state.auth.loggedUser && state.auth.loggedUser.login,
     }
 }

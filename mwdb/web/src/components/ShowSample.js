@@ -10,7 +10,6 @@ import { Extendable } from "@mwdb-web/commons/extensions";
 import { DataTable, DateString, Hash, View, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
 import ShowSamplePreview from "./ShowSamplePreview";
-import { GlobalContext } from "../context"
 
 function SampleDetails(props) {
     return (
@@ -184,24 +183,12 @@ export default class ShowSample extends Component {
         }
     };
 
-    static contextType = GlobalContext;
-
-    isFavoriteObject = async (id) => {
-        try {
-            let response = await api.authGetFavorite(id)
-            this.context.update({ favorite: response.data.favorite })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     updateSample = async () => {
         try {
             let response = await api.getObject("file", this.props.match.params.hash)
             this.setState({
                 file: response.data
             });
-            this.isFavoriteObject(response.data.id);
         } catch(error) {
             this.setState({error});
         }

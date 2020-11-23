@@ -45,7 +45,7 @@ import history from "@mwdb-web/commons/history";
 import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
 import ShowPendingUsers from './components/ShowPendingUsers';
 import Docs from './components/Docs';
-import { GlobalProvider } from "./commons/context/provider";
+import { GlobalProvider } from "./commons/context";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -90,10 +90,9 @@ class App extends Component {
         const AttributeRoute = (args) => (
             <ProtectedRoute condition={this.props.isAttributeManager} {...args} />
         )
-
         return (
             <ConnectedRouter history={history}>
-                <GlobalProvider>
+                <GlobalProvider favorites ={this.props.favorites}>
                     <div className="App">
                         <Navigation />
 
@@ -156,6 +155,7 @@ function mapStateToProps(state, ownProps)
         error: state.config.error,
         config: state.config.config,
         capabilities: state.auth.loggedUser ? state.auth.loggedUser.capabilities : [],
+        favorites: state.auth.loggedUser ? state.auth.loggedUser.favorites : [],
         isAuthenticated: !!state.auth.loggedUser,
         isAdmin: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("manage_users") >= 0,
         isAttributeManager: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("managing_attributes") >= 0,

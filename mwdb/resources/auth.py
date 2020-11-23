@@ -112,6 +112,7 @@ class LoginResource(Resource):
             "token": auth_token,
             "capabilities": user.capabilities,
             "groups": user.group_names,
+            "favorites": user.favorites_objects
         })
 
 
@@ -372,6 +373,7 @@ class RefreshTokenResource(Resource):
             "token": user.generate_session_token(),
             "capabilities": user.capabilities,
             "groups": user.group_names,
+            "favorites": user.favorites_objects
         })
 
 

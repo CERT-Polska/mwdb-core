@@ -51,11 +51,13 @@ class AuthSuccessResponseSchema(UserLoginSchemaBase):
     token = fields.Str(required=True, allow_none=False)
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     groups = fields.List(fields.Str(), required=True, allow_none=False)
+    favorites = fields.List(fields.Str(), required=True, allow_none=False)
 
 
 class AuthValidateTokenResponseSchema(UserLoginSchemaBase):
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     groups = fields.List(fields.Str(), required=True, allow_none=False)
+    favorites = fields.List(fields.Str(), required=True, allow_none=False)
 
 
 class AuthFavoritesResponseSchema(Schema):

@@ -26,7 +26,7 @@ def path(v) -> Optional[str]:
 
 class StorageProviderType(Enum):
     DISK = "DISK"
-    BLOB = "BLOB"
+    S3 = "S3"
 
 
 def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
@@ -37,7 +37,7 @@ def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
     try:
         return StorageProviderType[v]
     except KeyError:
-        raise ValueError(f"Blob Storage Provider {v} doesn't exist")
+        raise ValueError(f"S3 Storage Provider {v} doesn't exist")
 
 
 @section("mwdb")
@@ -57,25 +57,25 @@ class MWDBConfig(Config):
     # Flask additional settings file (optional)
     flask_config_file = key(cast=path, required=False)
 
-    # Which storage provider to use (options: disk or blob)
+    # Which storage provider to use (options: disk or s3)
     storage_provider = key(cast=storage_provider_from_str, required=False, default="disk")
     # Folder for uploads
     uploads_folder = key(cast=path, required=False)
     # Should we break up the uploads into different folders for example:
     # uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
     hash_pathing = key(cast=intbool, required=False, default=True)
-    # S3 compatible blob storage endpoint 
-    blob_storage_endpoint = key(cast=str, required=False)
-    # Blob Storage Transport Level Security
-    blob_storage_secure = key(cast=intbool, required=False, default=False)
-    # Blob Storage Access Key
-    blob_storage_access_key = key(cast=str, required=False)
-    # Blob Storage Secret Key
-    blob_storage_secret_key = key(cast=str, required=False)
-    # Blob Storage Region Name (For example, 'us-east-1')
-    blob_storage_region_name = key(cast=str, required=False)
-    # Blob Storage Bucket Name
-    blob_storage_bucket_name = key(cast=str, required=False)
+    # S3 compatible storage endpoint
+    s3_storage_endpoint = key(cast=str, required=False)
+    # Use TLS with S3 storage
+    s3_storage_secure = key(cast=intbool, required=False, default=False)
+    # S3 storage Access Key
+    s3_storage_access_key = key(cast=str, required=False)
+    # S3 storage Secret Key
+    s3_storage_secret_key = key(cast=str, required=False)
+    # S3 storage Region Name (For example, 'us-east-1')
+    s3_storage_region_name = key(cast=str, required=False)
+    # S3 storage Bucket Name
+    s3_storage_bucket_name = key(cast=str, required=False)
 
     # Administrator account login
     admin_login = key(cast=str, required=False, default="admin")

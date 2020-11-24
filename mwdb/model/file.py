@@ -74,14 +74,14 @@ class File(Object):
 
         if is_new:
             file.stream.seek(0, os.SEEK_SET)
-            if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
+            if app_config.mwdb.storage_provider == StorageProviderType.S3:
                 get_minio_client(
-                    app_config.mwdb.blob_storage_endpoint,
-                    app_config.mwdb.blob_storage_access_key,
-                    app_config.mwdb.blob_storage_secret_key,
-                    app_config.mwdb.blob_storage_region_name,
-                    app_config.mwdb.blob_storage_secure,
-                ).put_object(app_config.mwdb.blob_storage_bucket_name, file_obj._calculate_path(), file, file_size)
+                    app_config.mwdb.s3_storage_endpoint,
+                    app_config.mwdb.s3_storage_access_key,
+                    app_config.mwdb.s3_storage_secret_key,
+                    app_config.mwdb.s3_storage_region_name,
+                    app_config.mwdb.s3_storage_secure,
+                ).put_object(app_config.mwdb.s3_storage_bucket_name, file_obj._calculate_path(), file, file_size)
             else:
                 file.save(file_obj._calculate_path())
 
@@ -105,14 +105,14 @@ class File(Object):
         """
         Opens the file stream with contents
         """
-        if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
+        if app_config.mwdb.storage_provider == StorageProviderType.S3:
             return get_minio_client(
-                app_config.mwdb.blob_storage_endpoint,
-                app_config.mwdb.blob_storage_access_key,
-                app_config.mwdb.blob_storage_secret_key,
-                app_config.mwdb.blob_storage_region_name,
-                app_config.mwdb.blob_storage_secure,
-            ).get_object(app_config.mwdb.blob_storage_bucket_name, self._calculate_path())
+                app_config.mwdb.s3_storage_endpoint,
+                app_config.mwdb.s3_storage_access_key,
+                app_config.mwdb.s3_storage_secret_key,
+                app_config.mwdb.s3_storage_region_name,
+                app_config.mwdb.s3_storage_secure,
+            ).get_object(app_config.mwdb.s3_storage_bucket_name, self._calculate_path())
         else:
             return open(self._calculate_path(), 'rb')
 
@@ -132,7 +132,7 @@ class File(Object):
         """
         fh = self.open()
         try:
-            if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
+            if app_config.mwdb.storage_provider == StorageProviderType.S3:
                 for chunk in fh.stream(chunk_size):
                     yield chunk
             else:
@@ -151,7 +151,7 @@ class File(Object):
         Closes file stream opened by File.open
         """
         fh.close()
-        if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
+        if app_config.mwdb.storage_provider == StorageProviderType.S3:
             fh.release_conn()
 
     def generate_download_token(self):

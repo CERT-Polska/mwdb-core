@@ -179,24 +179,24 @@ By default, all files uploaded to mwdb-core are stored using local file system (
 It's the most simple and universal way, but not sufficient if our scale requires distributed storage or cloud-based infrastructure.
 In that case we can use solutions like `MinIO <https://min.io/>`_ or another S3-compatible object-based storage.
 
-If you want to store files using object (blob) storage, open the ``mwdb.ini`` file and set the following keys:
+If you want to store files using object storage, open the ``mwdb.ini`` file and set the following keys:
 
 .. code-block::
 
-    storage_provider = blob
+    storage_provider = s3
     hash_pathing = 0
-    blob_storage_endpoint = <storage endpoint>
-    blob_storage_access_key = <storage access key>
-    blob_storage_secret_key = <storage secret key>
-    blob_storage_bucket_name = <storage bucket name>
+    s3_storage_endpoint = <storage endpoint>
+    s3_storage_access_key = <storage access key>
+    s3_storage_secret_key = <storage secret key>
+    s3_storage_bucket_name = <storage bucket name>
 
     # optional (for AWS S3)
-    blob_storage_region_name = <AWS S3 region name>
+    s3_storage_region_name = <AWS S3 region name>
     # optional (for TLS)
-    blob_storage_secure = 1
+    s3_storage_secure = 1
 
 
-If you use Docker-based setup, all the configuration can be set using environment variables (e.g. ``MWDB_STORAGE_PROVIDER=blob``).
+If you use Docker-based setup, all the configuration can be set using environment variables (e.g. ``MWDB_STORAGE_PROVIDER=s3``).
 
 Advanced configuration
 ----------------------
@@ -238,14 +238,14 @@ Plugin settings:
 Storage settings:
 
 
-* ``storage_provider`` (disk or blob) - If you want to use blob storage instead of local file system, set this option to ``blob``. Default is ``disk``.
-* ``hash_pathing`` (0 or 1) - Should we break up the uploads into different folders. If you use blob storage, recommended option is ``0`` (default: ``1``).
-* ``blob_storage_endpoint`` (string) - S3 API endpoint for blob storage. Required if you use blob storage.
-* ``blob_storage_access_key`` (string) - S3 API access key for blob storage. Required if you use blob storage.
-* ``blob_storage_secret_key`` (string) - S3 API secret key for blob storage. Required if you use blob storage.
-* ``blob_storage_bucket_name`` (string) - S3 API bucket name for blob storage. Required if you use blob storage.
-* ``blob_storage_region_name`` (string) - Blob storage region name. Used mainly with AWS S3 storage.
-* ``blob_storage_secure`` (0 or 1) - Use TLS for blob storage connection (default is ``0``).
+* ``storage_provider`` (disk or s3) - If you want to use S3-compatible object storage instead of local file system, set this option to ``s3``. Default is ``disk``.
+* ``hash_pathing`` (0 or 1) - Should we break up the uploads into different folders. If you use S3-compatible storage, recommended option is ``0`` (default: ``1``).
+* ``s3_storage_endpoint`` (string) - S3 API endpoint for object storage. Required if you use S3-compatible storage.
+* ``s3_storage_access_key`` (string) - S3 API access key for object storage. Required if you use S3-compatible storage.
+* ``s3_storage_secret_key`` (string) - S3 API secret key for object storage. Required if you use S3-compatible storage.
+* ``s3_storage_bucket_name`` (string) - S3 API bucket name for object storage. Required if you use S3-compatible storage.
+* ``s3_storage_region_name`` (string, optional) - S3 API storage region name. Used mainly with AWS S3 storage (default is None).
+* ``s3_storage_secure`` (0 or 1) - Use TLS for S3 API connection (default is ``0``).
 
 Extra features:
 

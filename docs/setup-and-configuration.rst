@@ -175,8 +175,8 @@ Storing files in S3 Compatible storage (MinIO, AWS S3)
 
 .. versionadded:: 2.1.0
 
-By default, all files uploaded to mwdb-core are stored using local file system (under path provided in ``uploads_folder`` configuration key).
-It's the most simple and universal way, but not sufficient if our scale requires distributed storage or cloud-based infrastructure.
+By default, all files uploaded to mwdb-core are stored in the local file system (under path provided in ``uploads_folder`` configuration key).
+It's the most universal and simplest way, but not sufficient if our scale requires distributed storage or cloud-based infrastructure.
 In that case we can use solutions like `MinIO <https://min.io/>`_ or another S3-compatible object-based storage.
 
 If you want to store files using object storage, open the ``mwdb.ini`` file and set the following keys:

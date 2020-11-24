@@ -38,7 +38,6 @@ def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
         return StorageProviderType[v]
     except KeyError:
         raise ValueError(f"Blob Storage Provider {v} doesn't exist")
-    return StorageProviderType[v]
 
 
 @section("mwdb")
@@ -62,7 +61,8 @@ class MWDBConfig(Config):
     storage_provider = key(cast=storage_provider_from_str, required=False, default="disk")
     # Folder for uploads
     uploads_folder = key(cast=path, required=False)
-    # Should we break up the uploads into different folders for example: uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+    # Should we break up the uploads into different folders for example:
+    # uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
     hash_pathing = key(cast=intbool, required=False, default=True)
     # S3 compatible blob storage endpoint 
     blob_storage_endpoint = key(cast=str, required=False)

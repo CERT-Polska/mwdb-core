@@ -101,9 +101,10 @@ class File(Object):
             os.makedirs(upload_path, mode=0o755, exist_ok=True)
         return os.path.join(upload_path, sample_sha256)
 
-    # File API
-    # Open the file
     def open(self):
+        """
+        Opens the file stream with contents
+        """
         if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
             return get_minio_client(
                 app_config.mwdb.blob_storage_endpoint,
@@ -115,16 +116,20 @@ class File(Object):
         else:
             return open(self._calculate_path(), 'rb')
 
-    # Read bytes from the file
     def read(self):
+        """
+        Reads all bytes from the file
+        """
+        fh = self.open()
         try:
-            fh = self.open()
             return fh.read()
         finally:
             File.close(fh)
 
-    # Iterate over bytes in the file
     def iterate(self, chunk_size=1024*256):
+        """
+        Iterates over bytes in the file contents
+        """
         fh = self.open()
         try:
             if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
@@ -140,9 +145,11 @@ class File(Object):
         finally:
             File.close(fh)
 
-    # Close a file
     @staticmethod
     def close(fh):
+        """
+        Closes file stream opened by File.open
+        """
         fh.close()
         if app_config.mwdb.storage_provider == StorageProviderType.BLOB:
             fh.release_conn()

@@ -143,6 +143,7 @@ class ListField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
+
         value = get_term_value(expression)
 
         if expression.has_wildcard():
@@ -157,6 +158,7 @@ class FavoritesField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
+
         value = get_term_value(expression)
         if g.auth_user.has_rights(Capabilities.manage_users):
             user = db.session.query(User).filter(User.login == value).first()

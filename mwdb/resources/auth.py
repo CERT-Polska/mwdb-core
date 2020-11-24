@@ -105,8 +105,6 @@ class LoginResource(Resource):
             "login": user.login
         })
         schema = AuthSuccessResponseSchema()
-        print("user.favorites_objects")
-        print(user.favorites_objects)
         return schema.dump({
             "login": user.login,
             "token": auth_token,

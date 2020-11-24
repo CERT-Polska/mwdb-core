@@ -37,7 +37,7 @@ def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
     try:
         return StorageProviderType[v]
     except KeyError:
-        raise ValueError(f"S3 Storage Provider {v} doesn't exist")
+        raise ValueError(f"Storage provider {v} doesn't exist")
 
 
 @section("mwdb")

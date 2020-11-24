@@ -170,6 +170,34 @@ Your MWDB instance will be available on default HTTP port (80): http://127.0.0.1
 
 If you want to use Docker Compose for MWDB development, check out :ref:`Developer guide`.
 
+Storing files in S3 Compatible storage (MinIO, AWS S3)
+----------------------------------------------------------
+
+.. versionadded:: 2.1.0
+
+By default, all files uploaded to mwdb-core are stored using local file system (under path provided in ``uploads_folder`` configuration key).
+It's the most simple and universal way, but not sufficient if our scale requires distributed storage or cloud-based infrastructure.
+In that case we can use solutions like `MinIO <https://min.io/>`_ or another S3-compatible object-based storage.
+
+If you want to store files using object (blob) storage, open the ``mwdb.ini`` file and set the following keys:
+
+.. code-block::
+
+    storage_provider = blob
+    hash_pathing = 0
+    blob_storage_endpoint = <storage endpoint>
+    blob_storage_access_key = <storage access key>
+    blob_storage_secret_key = <storage secret key>
+    blob_storage_bucket_name = <storage bucket name>
+
+    # optional (for AWS S3)
+    blob_storage_region_name = <AWS S3 region name>
+    # optional (for TLS)
+    blob_storage_secure = 1
+
+
+If you use Docker-based setup, all the configuration can be set using environment variables (e.g. ``MWDB_STORAGE_PROVIDER=blob``).
+
 Advanced configuration
 ----------------------
 
@@ -206,6 +234,18 @@ Plugin settings:
 * ``plugins`` (list of strings, separated by commas) - List of installed plugin module names to be loaded, separated by commas
 * ``local_plugins_folder`` (string) - Directory that will be added to ``sys.path`` for plugin imports. Useful if you want to import local plugins that are not redistributable packages.
 * ``local_plugins_autodiscover`` (0 or 1) - Autodiscover plugins contained in ``local_plugins_folder`` so you don't need to list them all manually in ``plugins``. Default is ``0``.
+
+Storage settings:
+
+
+* ``storage_provider`` (disk or blob) - If you want to use blob storage instead of local file system, set this option to ``blob``. Default is ``disk``.
+* ``hash_pathing`` (0 or 1) - Should we break up the uploads into different folders. If you use blob storage, recommended option is ``0`` (default: ``1``).
+* ``blob_storage_endpoint`` (string) - S3 API endpoint for blob storage. Required if you use blob storage.
+* ``blob_storage_access_key`` (string) - S3 API access key for blob storage. Required if you use blob storage.
+* ``blob_storage_secret_key`` (string) - S3 API secret key for blob storage. Required if you use blob storage.
+* ``blob_storage_bucket_name`` (string) - S3 API bucket name for blob storage. Required if you use blob storage.
+* ``blob_storage_region_name`` (string) - Blob storage region name. Used mainly with AWS S3 storage.
+* ``blob_storage_secure`` (0 or 1) - Use TLS for blob storage connection (default is ``0``).
 
 Extra features:
 

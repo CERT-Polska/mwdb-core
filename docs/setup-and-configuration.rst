@@ -9,7 +9,7 @@ MWDB was tested on Debian-based systems, but should work as well on other Linux 
 For production environments, you need to install:
 
 
-* **PostgreSQL database** (https://www.postgresql.org/download/linux/debian/)
+* **PostgreSQL database** (minimum supported version: 12, https://www.postgresql.org/download/linux/debian/)
 * **python-ssdeep library dependencies for Python 3** (https://python-ssdeep.readthedocs.io/en/latest/installation.html#id9) 
 
 Optionally you can install:
@@ -170,6 +170,34 @@ Your MWDB instance will be available on default HTTP port (80): http://127.0.0.1
 
 If you want to use Docker Compose for MWDB development, check out :ref:`Developer guide`.
 
+Storing files in S3 Compatible storage (MinIO, AWS S3)
+----------------------------------------------------------
+
+.. versionadded:: 2.1.0
+
+By default, all files uploaded to mwdb-core are stored in the local file system (under path provided in ``uploads_folder`` configuration key).
+It's the most universal and simplest way, but not sufficient if our scale requires distributed storage or cloud-based infrastructure.
+In that case we can use solutions like `MinIO <https://min.io/>`_ or another S3-compatible object-based storage.
+
+If you want to store files using object storage, open the ``mwdb.ini`` file and set the following keys:
+
+.. code-block::
+
+    storage_provider = s3
+    hash_pathing = 0
+    s3_storage_endpoint = <storage endpoint>
+    s3_storage_access_key = <storage access key>
+    s3_storage_secret_key = <storage secret key>
+    s3_storage_bucket_name = <storage bucket name>
+
+    # optional (for AWS S3)
+    s3_storage_region_name = <AWS S3 region name>
+    # optional (for TLS)
+    s3_storage_secure = 1
+
+
+If you use Docker-based setup, all the configuration can be set using environment variables (e.g. ``MWDB_STORAGE_PROVIDER=s3``).
+
 Advanced configuration
 ----------------------
 
@@ -206,6 +234,18 @@ Plugin settings:
 * ``plugins`` (list of strings, separated by commas) - List of installed plugin module names to be loaded, separated by commas
 * ``local_plugins_folder`` (string) - Directory that will be added to ``sys.path`` for plugin imports. Useful if you want to import local plugins that are not redistributable packages.
 * ``local_plugins_autodiscover`` (0 or 1) - Autodiscover plugins contained in ``local_plugins_folder`` so you don't need to list them all manually in ``plugins``. Default is ``0``.
+
+Storage settings:
+
+
+* ``storage_provider`` (disk or s3) - If you want to use S3-compatible object storage instead of local file system, set this option to ``s3``. Default is ``disk``.
+* ``hash_pathing`` (0 or 1) - Should we break up the uploads into different folders. If you use S3-compatible storage, recommended option is ``0`` (default: ``1``).
+* ``s3_storage_endpoint`` (string) - S3 API endpoint for object storage. Required if you use S3-compatible storage.
+* ``s3_storage_access_key`` (string) - S3 API access key for object storage. Required if you use S3-compatible storage.
+* ``s3_storage_secret_key`` (string) - S3 API secret key for object storage. Required if you use S3-compatible storage.
+* ``s3_storage_bucket_name`` (string) - S3 API bucket name for object storage. Required if you use S3-compatible storage.
+* ``s3_storage_region_name`` (string, optional) - S3 API storage region name. Used mainly with AWS S3 storage (default is None).
+* ``s3_storage_secure`` (0 or 1) - Use TLS for S3 API connection (default is ``0``).
 
 Extra features:
 

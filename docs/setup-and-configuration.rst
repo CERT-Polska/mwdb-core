@@ -9,7 +9,7 @@ MWDB was tested on Debian-based systems, but should work as well on other Linux 
 For production environments, you need to install:
 
 
-* **PostgreSQL database** (https://www.postgresql.org/download/linux/debian/)
+* **PostgreSQL database** (minimum supported version: 12, https://www.postgresql.org/download/linux/debian/)
 * **python-ssdeep library dependencies for Python 3** (https://python-ssdeep.readthedocs.io/en/latest/installation.html#id9) 
 
 Optionally you can install:

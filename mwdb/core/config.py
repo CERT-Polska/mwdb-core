@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from typing import List, Optional
 from .typedconfig import Config, group_key, key, section
 from .typedconfig.source import EnvironmentConfigSource, IniFileConfigSource
@@ -23,14 +24,28 @@ def path(v) -> Optional[str]:
     return v
 
 
+class StorageProviderType(Enum):
+    DISK = "DISK"
+    S3 = "S3"
+
+
+def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
+    if not v:
+        return None
+    
+    v = v.upper()
+    try:
+        return StorageProviderType[v]
+    except KeyError:
+        raise ValueError(f"Storage provider {v} doesn't exist")
+
+
 @section("mwdb")
 class MWDBConfig(Config):
     # PostgreSQL database URI
     postgres_uri = key(cast=str, required=True)
     # Flask secret key
     secret_key = key(cast=str, required=True)
-    # Folder for uploads
-    uploads_folder = key(cast=path, required=True)
     # Redis database URI
     redis_uri = key(cast=str, required=False, default=None)
     # Serve web application
@@ -41,6 +56,26 @@ class MWDBConfig(Config):
     base_url = key(cast=str, required=False, default="http://127.0.0.1")
     # Flask additional settings file (optional)
     flask_config_file = key(cast=path, required=False)
+
+    # Which storage provider to use (options: disk or s3)
+    storage_provider = key(cast=storage_provider_from_str, required=False, default="disk")
+    # Folder for uploads
+    uploads_folder = key(cast=path, required=False)
+    # Should we break up the uploads into different folders for example:
+    # uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+    hash_pathing = key(cast=intbool, required=False, default=True)
+    # S3 compatible storage endpoint
+    s3_storage_endpoint = key(cast=str, required=False)
+    # Use TLS with S3 storage
+    s3_storage_secure = key(cast=intbool, required=False, default=False)
+    # S3 storage Access Key
+    s3_storage_access_key = key(cast=str, required=False)
+    # S3 storage Secret Key
+    s3_storage_secret_key = key(cast=str, required=False)
+    # S3 storage Region Name (For example, 'us-east-1')
+    s3_storage_region_name = key(cast=str, required=False)
+    # S3 storage Bucket Name
+    s3_storage_bucket_name = key(cast=str, required=False)
 
     # Administrator account login
     admin_login = key(cast=str, required=False, default="admin")

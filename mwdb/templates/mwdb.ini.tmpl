@@ -45,6 +45,33 @@ base_url = {{ base_url }}
 ## flask.cfg file path with additional Flask configuration (default: unset)
 # flask_config_file = ./flask.cfg
 
+### Storage settings
+
+## Store files using local file system ('disk', default) or S3-compatible ('s3') storage
+# storage_provider = s3
+
+## Should we break up the uploads into different folders (default: 1)
+## uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+# hash_pathing = 0
+
+## S3-compatible storage endpoint (required by storage_provider=s3)
+# s3_storage_endpoint =
+
+## S3-compatible storage Access Key (required by storage_provider=s3)
+# s3_storage_access_key =
+
+## S3-compatible storage Secret Key (required by storage_provider=s3)
+# s3_storage_secret_key =
+
+## S3-compatible storage Bucket Name (required by storage_provider=s3)
+# s3_storage_bucket_name =
+
+## S3-compatible storage Region Name
+# s3_storage_region_name =
+
+## Use TLS with S3 API (default: 0)
+# s3_storage_secure = 1
+
 ### Extra features
 
 # Set enable_rate_limit to 1 to turn on rate limiting (default: 0)

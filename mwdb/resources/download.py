@@ -1,8 +1,11 @@
-from flask import send_file
+from flask import send_file, Response, stream_with_context
 from flask_restful import Resource
+import io
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.app import api
+from mwdb.core.config import app_config, StorageProviderType
+from mwdb.core.util import get_minio_client
 from mwdb.model import File
 from mwdb.schema.download import DownloadURLResponseSchema
 
@@ -41,7 +44,12 @@ class DownloadResource(Resource):
         file_obj = File.get_by_download_token(access_token)
         if not file_obj:
             raise Forbidden('Download token expired, please re-request download.')
-        return send_file(file_obj.get_path(), attachment_filename=file_obj.sha256, as_attachment=True)
+
+        return Response(
+            file_obj.iterate(),
+            content_type='application/octet-stream',
+            headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"}
+        )
 
 
 class RequestSampleDownloadResource(Resource):

@@ -160,13 +160,15 @@ class FavoritesField(BaseField):
             )
 
         value = get_term_value(expression)
-        if g.auth_user.has_rights(Capabilities.manage_users):
-            user = db.session.query(User).filter(User.login == value).first()
+
+        if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.login != value:
+            raise ObjectNotFoundException("Only the mwdb admin can search for other users favorites")
+
+        if g.auth_user.login == value:
+            user = g.auth_user
         else:
-            user = (db.session.query(User)
-                              .options(joinedload(User.memberships, Member.group))
-                              .filter(User.login == value)
-                              .filter(g.auth_user.is_member(Group.id))).first()
+            user = db.session.query(User).filter(User.login == value).first()
+
         if user is None:
             raise ObjectNotFoundException(f"No such user: {value}")
 

@@ -278,7 +278,7 @@ If you search by more than one value contained in an array, just type:
 Favorites field (\ ``favorites:``\ )
 ------------------------------------------------------------
 
-Typing the field ``favorites:`` you can search for user objects marked as followed in object view.
+Typing the field ``favorites:`` you can search for your objects marked as favorite in object view.
 
 .. code-block::
 
@@ -288,7 +288,9 @@ The above query returns the favorite objects of specific user.
 
 .. warning::
 
-    Remember that you can only search for your favorite objects or members favorites of groups you belong to.
+    Remember that you can only search for your own favorites objects.
+
+    Only system administrator with "manage_users" capabilities can search for other users favorites.
 
 
 Group access queries (\ ``shared:`` and ``uploader:``\ )

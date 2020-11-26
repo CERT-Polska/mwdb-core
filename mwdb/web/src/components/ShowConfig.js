@@ -230,7 +230,7 @@ class ShowConfig extends Component {
 
     render() {
         return (
-            <View fluid ident="showConfig" error={this.state.error}>
+            <View fluid ident="showConfig" error={this.context.objectError} success={this.context.objectSuccess}>
                 <ShowObject object={this.state.config} 
                             objectPresenterComponent={ConnectedConfigPresenter}
                             searchEndpoint='configs'

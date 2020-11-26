@@ -136,7 +136,7 @@ class ShowTextBlob extends Component {
 
     render() {
         return (
-            <View fluid ident="showTextBlob" error={this.state.error}>
+            <View fluid ident="showTextBlob" error={this.context.objectError} success={this.context.objectSuccess}>
                 <ShowObject object={this.state.blob} 
                             objectPresenterComponent={ConnectedTextBlobPresenter}
                             searchEndpoint="blobs"

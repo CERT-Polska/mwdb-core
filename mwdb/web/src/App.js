@@ -43,9 +43,9 @@ import { configActions } from '@mwdb-web/commons/config';
 import { Extension } from "@mwdb-web/commons/extensions";
 import history from "@mwdb-web/commons/history";
 import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
+import { GlobalProvider } from "@mwdb-web/commons/context";
 import ShowPendingUsers from './components/ShowPendingUsers';
 import Docs from './components/Docs';
-import { GlobalProvider } from "./commons/context";
 
 library.add(faTimes);
 library.add(faUpload);

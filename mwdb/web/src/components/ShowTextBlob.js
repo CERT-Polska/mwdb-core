@@ -8,6 +8,7 @@ import api from "@mwdb-web/commons/api";
 import { makeSearchLink, makeSearchDateLink, downloadData, humanFileSize } from '@mwdb-web/commons/helpers';
 import { DataTable, View, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
+import { GlobalContext } from "@mwdb-web/commons/context";
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
 
 function TextBlobDetails(props) {
@@ -103,18 +104,24 @@ let ConnectedTextBlobPresenter = connect(mapStateToProps)(TextBlobPresenter);
 
 class ShowTextBlob extends Component {
     state = {
-        error: null,
         blob: {
             children: []
         }
     };
 
+    static contextType = GlobalContext
+
     updateTextBlob = async () => {
         try {
             let response = await api.getObject("blob", this.props.match.params.hash);
             this.setState({blob: response.data, error: null});
+            this.context.update(
+                {
+                    objectError: null,
+                    objectSuccess: null,
+                });
         } catch(error) {
-            this.setState({error});
+            this.context.update({objectError: error});
         }
     }
 

@@ -10,6 +10,7 @@ import { makeSearchLink, makeSearchDateLink, downloadData } from "@mwdb-web/comm
 import { Extension } from "@mwdb-web/commons/extensions";
 import { DataTable, DateString, ObjectLink, View, HexView, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter from './ShowObjectPresenter';
+import { GlobalContext } from "@mwdb-web/commons/context";
 
 class ConfigRow extends Component {
     constructor(props){
@@ -200,14 +201,21 @@ class ShowConfig extends Component {
         }
     };
 
+    static contextType = GlobalContext
+
     updateConfig = async () => {
         try {
             let response = await api.getObject("config", this.props.match.params.hash)
             this.setState({
                 config: response.data
             });
+            this.context.update(
+                {
+                    objectError: null,
+                    objectSuccess: null,
+                });
         } catch(error) {
-            this.setState({error})
+            this.context.update({objectError: error});
         }
     }
 

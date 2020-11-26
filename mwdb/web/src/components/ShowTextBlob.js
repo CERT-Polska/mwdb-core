@@ -130,7 +130,7 @@ class ShowTextBlob extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (prevProps !== this.props)
+        if (prevProps && prevProps.match.params.hash !== this.props.match.params.hash)
             this.updateTextBlob();
     };
 

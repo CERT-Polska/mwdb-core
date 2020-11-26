@@ -92,7 +92,7 @@ class App extends Component {
         )
         return (
             <ConnectedRouter history={history}>
-                <GlobalProvider favorites ={this.props.favorites}>
+                <GlobalProvider {...this.props}>
                     <div className="App">
                         <Navigation />
 

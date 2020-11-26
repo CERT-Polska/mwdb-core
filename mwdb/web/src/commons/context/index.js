@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import api from "../api"
 
 export const GlobalContext = React.createContext();
 
@@ -7,15 +8,30 @@ export class GlobalProvider extends Component {
 		super(props)
 		this.updateState = this.updateState.bind(this)
 		this.state = {
-			favorites: this.props.favorites,
+			favorites: [],
 			objectSuccess: null,
 			objectError: null,
-			update: this.updateState
+			update: this.updateState,
 		}
 	}
 
 	updateState(values) {
 		this.setState(values)
+	}
+
+	getFavorites = async () => {
+		try {
+    		const response = await api.authGetFavorites();
+			this.setState({favorites: response.data.favorites});
+    	} catch(error) {
+    		console.log(error)
+		}
+	}
+
+	componentDidMount() {
+		if (this.props.isAuthenticated){
+			this.getFavorites();
+		}
 	}
 
 	componentDidUpdate(prevProps) {

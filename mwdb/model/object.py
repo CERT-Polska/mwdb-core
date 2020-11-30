@@ -20,6 +20,13 @@ relation = db.Table(
     db.Index('ix_relation_parent_child', 'parent_id', 'child_id', unique=True)
 )
 
+favorites = db.Table(
+    'favorites',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), index=True),
+    db.Column('object_id', db.Integer, db.ForeignKey('object.id'), index=True),
+    db.Index('ix_favorites_object_user', 'object_id', 'user_id', unique=True),
+)
+
 
 class AccessType:
     ADDED = "added"
@@ -140,6 +147,8 @@ class Object(db.Model):
     meta = db.relationship('Metakey', backref='object', lazy=True, cascade="save-update, merge, delete")
     comments = db.relationship('Comment', backref='object', lazy='dynamic', cascade="save-update, merge, delete")
     tags = db.relationship('Tag', secondary=object_tag_table, back_populates='objects', lazy='joined')
+
+    followers = db.relationship('User', secondary=favorites, back_populates='favorites', lazy='joined')
 
     shares = db.relationship('ObjectPermission', lazy='dynamic',
                              foreign_keys=[ObjectPermission.object_id],
@@ -497,3 +506,9 @@ class Object(db.Model):
                       .order_by(ObjectPermission.access_time.desc())
         ).all()
         return shares
+
+    def is_favorite_object(self, user):
+        if user in self.followers:
+            return True
+        else:
+            return False

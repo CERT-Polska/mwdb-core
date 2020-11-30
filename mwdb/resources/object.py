@@ -3,7 +3,7 @@ import json
 from flask import request, g
 from flask_restful import Resource
 from luqum.parser import ParseError
-from werkzeug.exceptions import Forbidden, BadRequest, MethodNotAllowed, NotFound
+from werkzeug.exceptions import Forbidden, BadRequest, MethodNotAllowed, NotFound, Conflict
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
@@ -12,7 +12,8 @@ from mwdb.model import db, Object, Group, MetakeyDefinition
 from mwdb.schema.object import (
     ObjectListRequestSchema, ObjectListResponseSchema,
     ObjectItemResponseSchema,
-    ObjectCountRequestSchema, ObjectCountResponseSchema
+    ObjectCountRequestSchema, ObjectCountResponseSchema,
+    ObjectFavoriteResponseSchema
 )
 
 from . import logger, requires_authorization, requires_capabilities, get_type_from_str, load_schema
@@ -339,3 +340,129 @@ class ObjectCountResource(Resource):
 
         schema = ObjectCountResponseSchema()
         return schema.dump({"count": result})
+
+
+class ObjectFavoriteResource(Resource):
+    @requires_authorization
+    def get(self, identifier):
+        """
+        ---
+        summary: Get information if object is favorite
+        description: |
+            Returns information if object is favorite
+        security:
+            - bearerAuth: []
+        tags:
+            - object
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Object identifier
+        responses:
+            200:
+                description: List of user favorites objects
+                content:
+                  application/json:
+                    schema: ObjectFavoriteResponseSchema
+        """
+        user = g.auth_user
+        if user is None:
+            raise NotFound("Can't reference to the current user")
+
+        favorite_object = db.session.query(Object).filter(Object.dhash == identifier).first()
+        is_favorite = favorite_object.is_favorite_object(user)
+
+        schema = ObjectFavoriteResponseSchema()
+        return schema.dump({'favorite': is_favorite})
+
+    @requires_authorization
+    def post(self, identifier):
+        """
+        ---
+        summary: Add favorite object
+        description: |
+            Add an existing object as a favorite for the user.
+        security:
+            - bearerAuth: []
+        tags:
+            - object
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Object identifier
+        responses:
+            200:
+                description: Add favorite object
+            400:
+                description: When request body is invalid
+            404:
+                description: When user or object doesn't exist.
+            409:
+                description: When object is already added as favorite.
+        """
+
+        user = g.auth_user
+        if user is None:
+            raise NotFound("Can't reference to the current user")
+
+        favorite_object = db.session.query(Object).filter(Object.dhash == identifier).first()
+
+        if favorite_object is None:
+            raise NotFound("Can't found current object")
+
+        if favorite_object.is_favorite_object(user):
+            raise Conflict("Object is already added as a favorite")
+
+        favorite_object.followers.append(user)
+        db.session.commit()
+
+        logger.info('Object added to favorites', extra={'user': user.login, 'object_id': identifier})
+
+    @requires_authorization
+    def delete(self, identifier):
+        """
+        ---
+        summary: Delete favorite object
+        description: |
+            Delete an existing object as a favorite for the user.
+        security:
+            - bearerAuth: []
+        tags:
+            - object
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Object identifier
+        responses:
+            200:
+                description: Delete favorite object
+            400:
+                description: When request body is invalid
+            404:
+                description: When user or object doesn't exist.
+            409:
+                description: When object is not in user favorites.
+        """
+
+        user = g.auth_user
+        if user is None:
+            raise NotFound("Can't reference to the current user")
+
+        favorite_object = db.session.query(Object).filter(Object.dhash == identifier).first()
+
+        if favorite_object is None:
+            raise NotFound("Can't found current object")
+
+        if not favorite_object.is_favorite_object(user):
+            raise Conflict("Object is not added as a favorite")
+
+        favorite_object.followers.remove(user)
+        db.session.commit()
+
+        logger.info('Object removed from favorites', extra={'user': user.login, 'object_id': identifier})

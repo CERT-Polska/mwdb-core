@@ -19,14 +19,12 @@ from mwdb.schema.auth import (
     AuthSetPasswordRequestSchema,
     AuthRecoverPasswordRequestSchema,
     AuthSuccessResponseSchema,
-    AuthValidateTokenResponseSchema,
-    AuthFavoritesResponseSchema,
-    AuthFavoritesRequestSchema,
+    AuthValidateTokenResponseSchema
 )
 from mwdb.schema.group import GroupListResponseSchema
 from mwdb.schema.user import UserSuccessResponseSchema
 
-from . import logger, requires_authorization, load_schema, loads_schema
+from . import logger, requires_authorization, loads_schema
 
 
 def verify_recaptcha(recaptcha_token):
@@ -110,7 +108,7 @@ class LoginResource(Resource):
             "token": auth_token,
             "capabilities": user.capabilities,
             "groups": user.group_names,
-            "favorites": user.favorites_objects
+            # "favorites": user.favorites_objects
         })
 
 
@@ -371,7 +369,7 @@ class RefreshTokenResource(Resource):
             "token": user.generate_session_token(),
             "capabilities": user.capabilities,
             "groups": user.group_names,
-            "favorites": user.favorites_objects
+            # "favorites": user.favorites_objects
         })
 
 
@@ -431,132 +429,3 @@ class AuthGroupListResource(Resource):
 
         schema = GroupListResponseSchema()
         return schema.dump({"groups": objs})
-
-
-class AuthFavoritesResource(Resource):
-    @requires_authorization
-    def get(self):
-        """
-        ---
-        summary: List of user favorites objects
-        description: |
-            Returns list of user favorites objects.
-        security:
-            - bearerAuth: []
-        tags:
-            - auth
-        responses:
-            200:
-                description: List of user favorites objects
-                content:
-                  application/json:
-                    schema: AuthFavoritesResponseSchema
-        """
-        user = g.auth_user
-        favorites = user.favorites_objects
-
-        schema = AuthFavoritesResponseSchema()
-        return schema.dump({'favorites': favorites})
-
-    @requires_authorization
-    def post(self):
-        """
-        ---
-        summary: Add favorite object
-        description: |
-            Add an existing object as a favorite for the user.
-        security:
-            - bearerAuth: []
-        tags:
-            - auth
-        requestBody:
-            description: Object identifier
-            content:
-              application/json:
-                schema: AuthFavoritesRequestSchema
-        responses:
-            200:
-                description: Add favorite object
-                content:
-                  application/json:
-                    schema: AuthFavoritesResponseSchema
-            400:
-                description: When request body is invalid
-            404:
-                description: When user or object doesn't exist.
-            409:
-                description: When object is already added as favorite.
-        """
-        schema = AuthFavoritesRequestSchema()
-
-        obj = loads_schema(request.get_data(as_text=True), schema)
-
-        user = g.auth_user
-        if user is None:
-            raise NotFound("Can't reference to the current user")
-
-        object_id = obj["dhash"]
-        target_object = db.session.query(Object).filter(Object.dhash == object_id).first()
-        if target_object is None:
-            raise NotFound("Can't found current object")
-
-        if target_object in user.favorites:
-            raise Conflict("Object is already added as favorite")
-
-        user.favorites.append(target_object)
-        db.session.commit()
-
-        logger.info('Object added to favorites', extra={'user': user.login, 'object_id': object_id})
-        return schema.dump({'user': user.login, 'object_id': object_id})
-
-    @requires_authorization
-    def delete(self):
-        """
-        ---
-        summary: Delete favorite object
-        description: |
-            Delete an existing object as a favorite for the user.
-        security:
-            - bearerAuth: []
-        tags:
-            - auth
-        parameters:
-            - in: query
-              name: identifier
-              schema:
-                type: string
-              description: Object identifier
-        responses:
-            200:
-                description: Delete favorite object
-                content:
-                  application/json:
-                    schema: AuthFavoritesResponseSchema
-            400:
-                description: When request body is invalid
-            404:
-                description: When user or object doesn't exist.
-            409:
-                description: When object is not in user favorites.
-        """
-        schema = AuthFavoritesRequestSchema()
-
-        obj = load_schema(request.args, schema)
-
-        user = g.auth_user
-        if user is None:
-            raise NotFound("Can't reference to the current user")
-
-        object_id = obj["dhash"]
-        favorite_object = db.session.query(Object).filter(Object.dhash == object_id).first()
-        if favorite_object is None:
-            raise NotFound("Can't found current object")
-
-        if favorite_object not in user.favorites:
-            raise Conflict("Object has not been saved as a favorite")
-
-        user.favorites.remove(favorite_object)
-        db.session.commit()
-
-        logger.info('Object removed from favorites', extra={'user': user.login, 'object_id': object_id})
-        return schema.dump({'user': user.login, 'object_id': object_id})

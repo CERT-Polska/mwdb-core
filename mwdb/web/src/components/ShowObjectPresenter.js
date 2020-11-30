@@ -65,12 +65,8 @@ export default class ShowObjectPresenter extends Component {
 
     addFavoriteObject = async () => {
         try {
-            await api.authAddFavorite(this.props.id)
-            this.context.update(
-                {
-                    favorites: [...this.context.favorites,this.props.id],
-                    objectSuccess: "Object successfully added to favorites",
-                })
+            await api.addObjectFavorite(this.props.id)
+            this.context.update({favorite: true})
         } catch (error) {
             this.context.update({objectError: error})
         }
@@ -78,13 +74,8 @@ export default class ShowObjectPresenter extends Component {
 
     removeFavoriteObject = async () => {
         try {
-            await api.authRemoveFavorite(this.props.id)
-            let index = this.context.favorites.indexOf(this.props.id)
-            this.context.update(
-                {
-                    favorites: this.context.favorites.filter((_, i) => i !== index),
-                    objectSuccess: "Object successfully removed from favorites",
-                })
+            await api.removeObjectFavorite(this.props.id)
+            this.context.update({favorite: false})
         } catch (error) {
             this.context.update({objectError: error})
         }
@@ -111,7 +102,7 @@ export default class ShowObjectPresenter extends Component {
     get actions() {
         let nodes = queryString.parse(this.props.history.location.search, {arrayFormat: 'bracket'}).node || [];
 
-        let favorite = this.context.favorites.includes(this.props.id) ?
+        let favorite = this.context.favorite ?
             {label: "Unfavorite", icon: "star", action: (() => this.removeFavoriteObject())} :
             {label: "Favorite", icon: ["far","star"], action: (() => this.addFavoriteObject())}
 

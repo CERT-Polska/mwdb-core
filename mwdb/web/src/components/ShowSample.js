@@ -186,12 +186,22 @@ export default class ShowSample extends Component {
 
     static contextType = GlobalContext
 
+    isFavoriteObject = async (id) => {
+        try {
+            let response = await api.getObjectFavorite(id)
+            this.context.update({ favorite: response.data.favorite });
+        } catch (error) {
+            this.context.update({objectError: error});
+        }
+    }
+
     updateSample = async () => {
         try {
             let response = await api.getObject("file", this.props.match.params.hash)
             this.setState({
                 file: response.data
             });
+            this.isFavoriteObject(this.props.match.params.hash);
             this.context.update(
                 {
                     objectError: null,

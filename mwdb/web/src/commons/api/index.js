@@ -66,18 +66,6 @@ function authGroups() {
     return axios.get("/auth/groups")
 }
 
-function authGetFavorites() {
-    return axios.get("auth/favorite")
-}
-
-function authAddFavorite(identifier) {
-    return axios.post("auth/favorite", {identifier})
-}
-
-function authRemoveFavorite(identifier) {
-    return axios.delete("auth/favorite", {params: {identifier}})
-}
-
 function apiKeyGetToken(key_id) {
     return axios.get(`/api_key/${key_id}`)
 }
@@ -164,6 +152,18 @@ function removeObjectMetakey(type, id, key, value) {
     return axios.delete(`/${type}/${id}/meta`, {
         params: { key: key, value: value }
     })
+}
+
+function getObjectFavorite(id) {
+    return axios.get(`/object/${id}/favorite`)
+}
+
+function addObjectFavorite(id) {
+    return axios.post(`/object/${id}/favorite`)
+}
+
+function removeObjectFavorite(id) {
+    return axios.delete(`/object/${id}/favorite`)
 }
 
 function shareObjectWith(id, group) {
@@ -326,9 +326,6 @@ export default {
     getServerInfo,
     authLogin,
     authGroups,
-    authGetFavorites,
-    authAddFavorite,
-    authRemoveFavorite,
     authRefresh,
     authSetPassword,
     authRequestPasswordChange,
@@ -351,6 +348,9 @@ export default {
     removeObjectComment,
     addObjectMetakey,
     removeObjectMetakey,
+    getObjectFavorite,
+    addObjectFavorite,
+    removeObjectFavorite,
     shareObjectWith,
     search,
     getQuickQueries,

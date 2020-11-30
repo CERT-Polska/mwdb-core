@@ -92,7 +92,7 @@ class App extends Component {
         )
         return (
             <ConnectedRouter history={history}>
-                <GlobalProvider {...this.props}>
+                <GlobalProvider>
                     <div className="App">
                         <Navigation />
 
@@ -155,7 +155,6 @@ function mapStateToProps(state, ownProps)
         error: state.config.error,
         config: state.config.config,
         capabilities: state.auth.loggedUser ? state.auth.loggedUser.capabilities : [],
-        favorites: state.auth.loggedUser ? state.auth.loggedUser.favorites : [],
         isAuthenticated: !!state.auth.loggedUser,
         isAdmin: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("manage_users") >= 0,
         isAttributeManager: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("managing_attributes") >= 0,

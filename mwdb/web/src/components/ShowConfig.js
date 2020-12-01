@@ -218,12 +218,12 @@ class ShowConfig extends Component {
             this.setState({
                 config: response.data
             });
-            this.isFavoriteObject(this.props.match.params.hash)
             this.context.update(
                 {
                     objectError: null,
                     objectSuccess: null,
                 });
+            this.isFavoriteObject(this.props.match.params.hash)
         } catch(error) {
             this.context.update({objectError: error});
         }

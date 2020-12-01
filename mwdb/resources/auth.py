@@ -7,9 +7,9 @@ from sqlalchemy import exists, func
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import false
-from werkzeug.exceptions import Forbidden, Conflict, InternalServerError, NotFound
+from werkzeug.exceptions import Forbidden, Conflict, InternalServerError
 
-from mwdb.model import db, User, Group, Member, Object
+from mwdb.model import db, User, Group, Member
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
 
@@ -107,8 +107,7 @@ class LoginResource(Resource):
             "login": user.login,
             "token": auth_token,
             "capabilities": user.capabilities,
-            "groups": user.group_names,
-            # "favorites": user.favorites_objects
+            "groups": user.group_names
         })
 
 
@@ -368,8 +367,7 @@ class RefreshTokenResource(Resource):
             "login": user.login,
             "token": user.generate_session_token(),
             "capabilities": user.capabilities,
-            "groups": user.group_names,
-            # "favorites": user.favorites_objects
+            "groups": user.group_names
         })
 
 

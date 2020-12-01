@@ -11,9 +11,8 @@ from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import db, Object, Group, MetakeyDefinition
 from mwdb.schema.object import (
     ObjectListRequestSchema, ObjectListResponseSchema,
-    ObjectItemResponseSchema,
-    ObjectCountRequestSchema, ObjectCountResponseSchema,
-    ObjectFavoriteResponseSchema
+    ObjectItemResponseSchema, ObjectCountRequestSchema,
+    ObjectCountResponseSchema, ObjectFavoriteResponseSchema
 )
 
 from . import logger, requires_authorization, requires_capabilities, get_type_from_str, load_schema

@@ -125,12 +125,12 @@ class ShowTextBlob extends Component {
         try {
             let response = await api.getObject("blob", this.props.match.params.hash);
             this.setState({blob: response.data, error: null});
-            this.isFavoriteObject(this.props.match.params.hash);
             this.context.update(
                 {
                     objectError: null,
                     objectSuccess: null,
                 });
+            this.isFavoriteObject(this.props.match.params.hash);
         } catch(error) {
             this.context.update({objectError: error});
         }

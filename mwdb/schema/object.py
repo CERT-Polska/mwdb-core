@@ -88,7 +88,3 @@ class ObjectCountResponseSchema(Schema):
 
 class ObjectFavoriteResponseSchema(Schema):
     favorite = fields.Boolean(required=True, allow_none=False)
-
-
-class ObjectFavoriteRequestSchema(Schema):
-    identifier = fields.Str(attribute="dhash", required=True, allow_none=False)

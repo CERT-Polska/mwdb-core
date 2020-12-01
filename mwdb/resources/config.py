@@ -287,6 +287,7 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
         return super().get(identifier)
 
     @requires_authorization
+    @requires_capabilities(Capabilities.adding_configs)
     def put(self, identifier):
         """
         ---

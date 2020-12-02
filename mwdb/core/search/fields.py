@@ -158,6 +158,10 @@ class FavoritesField(BaseField):
             raise FieldNotQueryableException(
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
+        if expression.has_wildcard():
+            raise UnsupportedGrammarException(
+                f"Wildcards are not allowed for shared field"
+            )
 
         value = get_term_value(expression)
 

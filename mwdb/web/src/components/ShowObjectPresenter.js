@@ -7,11 +7,11 @@ import { faFile, faTable, faScroll} from "@fortawesome/free-solid-svg-icons";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { capitalize } from '@mwdb-web/commons/helpers';
 import {ConfirmationModal} from "@mwdb-web/commons/ui";
+import { GlobalContext } from "@mwdb-web/commons/context"
 
 import RelationsPlot from './RelationsPlot';
 
 import queryString from "query-string";
-import { GlobalContext } from "@mwdb-web/commons/context"
 
 export function joinActions(currentActions, newActions) {
     let actions = {...currentActions};
@@ -66,7 +66,7 @@ export default class ShowObjectPresenter extends Component {
     addFavoriteObject = async () => {
         try {
             await api.addObjectFavorite(this.props.id)
-            this.context.update({favorite: true})
+            this.context.update({objectFavorite: true})
         } catch (error) {
             this.context.update({objectError: error})
         }
@@ -75,7 +75,7 @@ export default class ShowObjectPresenter extends Component {
     removeFavoriteObject = async () => {
         try {
             await api.removeObjectFavorite(this.props.id)
-            this.context.update({favorite: false})
+            this.context.update({objectFavorite: false})
         } catch (error) {
             this.context.update({objectError: error})
         }
@@ -102,7 +102,7 @@ export default class ShowObjectPresenter extends Component {
     get actions() {
         let nodes = queryString.parse(this.props.history.location.search, {arrayFormat: 'bracket'}).node || [];
 
-        let favorite = this.context.favorite ?
+        let favorite = this.context.objectFavorite ?
             {label: "Unfavorite", icon: "star", action: (() => this.removeFavoriteObject())} :
             {label: "Favorite", icon: ["far","star"], action: (() => this.addFavoriteObject())}
 

@@ -154,10 +154,6 @@ function removeObjectMetakey(type, id, key, value) {
     })
 }
 
-function getObjectFavorite(id) {
-    return axios.get(`/object/${id}/favorite`)
-}
-
 function addObjectFavorite(id) {
     return axios.post(`/object/${id}/favorite`)
 }
@@ -348,7 +344,6 @@ export default {
     removeObjectComment,
     addObjectMetakey,
     removeObjectMetakey,
-    getObjectFavorite,
     addObjectFavorite,
     removeObjectFavorite,
     shareObjectWith,

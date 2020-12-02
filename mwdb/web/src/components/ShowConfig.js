@@ -203,15 +203,6 @@ class ShowConfig extends Component {
 
     static contextType = GlobalContext
 
-    isFavoriteObject = async (id) => {
-        try {
-            let response = await api.getObjectFavorite(id)
-            this.context.update({ favorite: response.data.favorite });
-        } catch (error) {
-            this.context.update({objectError: error});
-        }
-    }
-
     updateConfig = async () => {
         try {
             let response = await api.getObject("config", this.props.match.params.hash)
@@ -220,10 +211,10 @@ class ShowConfig extends Component {
             });
             this.context.update(
                 {
+                    objectFavorite: response.data.favorite,
                     objectError: null,
                     objectSuccess: null,
                 });
-            this.isFavoriteObject(this.props.match.params.hash)
         } catch(error) {
             this.context.update({objectError: error});
         }

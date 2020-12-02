@@ -213,13 +213,13 @@ export default class ShowSample extends Component {
 
     render() {
         return (
-                <View fluid ident="showSample" error={this.context.objectError} success={this.context.objectSuccess}>
-                    <ShowObject object={this.state.file}
-                                objectPresenterComponent={ConnectedSamplePresenter}
-                                searchEndpoint=''
-                                onObjectUpdate={this.updateSample}
-                                history={this.props.history} />
-                </View>
+            <View fluid ident="showSample" error={this.context.objectError} success={this.context.objectSuccess}>
+                <ShowObject object={this.state.file}
+                            objectPresenterComponent={ConnectedSamplePresenter}
+                            searchEndpoint=''
+                            onObjectUpdate={this.updateSample}
+                            history={this.props.history} />
+            </View>
         );
     }
 }

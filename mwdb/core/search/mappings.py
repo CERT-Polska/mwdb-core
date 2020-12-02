@@ -25,7 +25,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "upload_time": DatetimeField(Object.upload_time),
         "parent": RelationField(Object.parents),
         "child": RelationField(Object.children),
-        "favorites": FavoritesField(Object.related_shares)
+        "favorites": FavoritesField(Object.followers)
     },
     File.__name__: {
         "name": StringField(File.file_name),

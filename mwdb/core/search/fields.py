@@ -176,10 +176,7 @@ class FavoritesField(BaseField):
         if user is None:
             raise ObjectNotFoundException(f"No such user: {value}")
 
-        favorites_id = [favorite.id for favorite in user.favorites]
-        return self.column.any(
-            ObjectPermission.related_object_id.in_(favorites_id)
-        )
+        return self.column.any(User.login == user)
 
 
 class AttributeField(BaseField):

@@ -77,6 +77,7 @@ class ObjectItemResponseSchema(Schema):
     type = fields.Str(required=True, allow_none=False)
     tags = fields.Nested(TagItemResponseSchema, many=True, required=True, allow_none=False)
     upload_time = UTCDateTime(required=True, allow_none=False)
+    favorite = fields.Boolean(required=True, allow_none=False)
 
     parents = fields.Nested(ObjectListItemResponseSchema, many=True, required=True, allow_none=False)
     children = fields.Nested(ObjectListItemResponseSchema, many=True, required=True, allow_none=False)
@@ -84,7 +85,3 @@ class ObjectItemResponseSchema(Schema):
 
 class ObjectCountResponseSchema(Schema):
     count = fields.Int()
-
-
-class ObjectFavoriteResponseSchema(Schema):
-    favorite = fields.Boolean(required=True, allow_none=False)

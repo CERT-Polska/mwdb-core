@@ -12,7 +12,7 @@ from mwdb.model import db, Object, Group, MetakeyDefinition
 from mwdb.schema.object import (
     ObjectListRequestSchema, ObjectListResponseSchema,
     ObjectItemResponseSchema, ObjectCountRequestSchema,
-    ObjectCountResponseSchema, ObjectFavoriteResponseSchema
+    ObjectCountResponseSchema
 )
 
 from . import logger, requires_authorization, requires_capabilities, get_type_from_str, load_schema
@@ -343,40 +343,6 @@ class ObjectCountResource(Resource):
 
 class ObjectFavoriteResource(Resource):
     @requires_authorization
-    def get(self, identifier):
-        """
-        ---
-        summary: Get information if object is favorite
-        description: |
-            Returns information if object is favorite
-        security:
-            - bearerAuth: []
-        tags:
-            - object
-        parameters:
-            - in: path
-              name: identifier
-              schema:
-                type: string
-              description: Object identifier
-        responses:
-            200:
-                description: List of user favorites objects
-                content:
-                  application/json:
-                    schema: ObjectFavoriteResponseSchema
-        """
-        user = g.auth_user
-        if user is None:
-            raise NotFound("Can't reference to the current user")
-
-        favorite_object = db.session.query(Object).filter(Object.dhash == identifier).first()
-        is_favorite = favorite_object.is_favorite_object(user)
-
-        schema = ObjectFavoriteResponseSchema()
-        return schema.dump({'favorite': is_favorite})
-
-    @requires_authorization
     def post(self, identifier):
         """
         ---
@@ -399,21 +365,19 @@ class ObjectFavoriteResource(Resource):
             400:
                 description: When request body is invalid
             404:
-                description: When user or object doesn't exist.
+                description: When object doesn't exist.
             409:
                 description: When object is already added as favorite.
         """
 
         user = g.auth_user
-        if user is None:
-            raise NotFound("Can't reference to the current user")
 
-        favorite_object = db.session.query(Object).filter(Object.dhash == identifier).first()
+        favorite_object = Object.access(identifier)
 
         if favorite_object is None:
-            raise NotFound("Can't found current object")
+            raise NotFound("Object not found")
 
-        if favorite_object.is_favorite_object(user):
+        if favorite_object.favorite:
             raise Conflict("Object is already added as a favorite")
 
         favorite_object.followers.append(user)
@@ -444,21 +408,19 @@ class ObjectFavoriteResource(Resource):
             400:
                 description: When request body is invalid
             404:
-                description: When user or object doesn't exist.
+                description: When object doesn't exist.
             409:
                 description: When object is not in user favorites.
         """
 
         user = g.auth_user
-        if user is None:
-            raise NotFound("Can't reference to the current user")
 
-        favorite_object = db.session.query(Object).filter(Object.dhash == identifier).first()
+        favorite_object = Object.access(identifier)
 
         if favorite_object is None:
-            raise NotFound("Can't found current object")
+            raise NotFound("Object not found")
 
-        if not favorite_object.is_favorite_object(user):
+        if not favorite_object.favorite:
             raise Conflict("Object is not added as a favorite")
 
         favorite_object.followers.remove(user)

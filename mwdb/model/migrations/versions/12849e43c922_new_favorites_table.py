@@ -1,4 +1,4 @@
-"""new_favorites_table
+"""New favorites table added
 
 Revision ID: 12849e43c922
 Revises: e3241d250d0c

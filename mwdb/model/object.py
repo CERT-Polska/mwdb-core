@@ -169,6 +169,10 @@ class Object(db.Model):
                       .order_by(relation.c.creation_time.desc()).first()
         )
 
+    @property
+    def favorite(self):
+        return g.auth_user in self.followers
+
     def add_parent(self, parent, commit=True):
         """
         Adding parent with permission inheritance
@@ -506,9 +510,3 @@ class Object(db.Model):
                       .order_by(ObjectPermission.access_time.desc())
         ).all()
         return shares
-
-    def is_favorite_object(self, user):
-        if user in self.followers:
-            return True
-        else:
-            return False

@@ -176,7 +176,7 @@ class FavoritesField(BaseField):
         if user is None:
             raise ObjectNotFoundException(f"No such user: {value}")
 
-        return self.column.any(User.login == user)
+        return self.column.any(User.login == user.login)
 
 
 class AttributeField(BaseField):

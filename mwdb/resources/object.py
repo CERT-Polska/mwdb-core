@@ -415,7 +415,7 @@ class ObjectFavoriteResource(Resource):
         if favorite_object is None:
             raise NotFound("Object not found")
 
-        if favorite_object.favorite:
+        if not favorite_object.favorite:
             logger.info('Object is not marked as a favorite', extra={'user': user.login, 'object_id': identifier})
         else:
             favorite_object.followers.remove(user)

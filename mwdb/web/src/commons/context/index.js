@@ -7,9 +7,14 @@ export class GlobalProvider extends Component {
 		super(props)
 		this.updateState = this.updateState.bind(this)
 		this.state = {
-			objectFavorite: false,
-			objectSuccess: null,
-			objectError: null,
+			// objectFavorite: false,
+			// objectSuccess: null,
+			// objectError: null,
+			object: {
+				favorite: false,
+				success: null,
+				error: null,
+			},
 			update: this.updateState,
 		}
 	}

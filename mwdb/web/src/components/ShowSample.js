@@ -193,12 +193,20 @@ export default class ShowSample extends Component {
             });
             this.context.update(
                 {
-                    objectFavorite: response.data.favorite,
-                    objectError: null,
-                    objectSuccess: null,
+                    object: {
+                        favorite: response.data.favorite,
+                        error: null,
+                        success: null,
+                    }
                 });
         } catch(error) {
-            this.context.update({objectError: error});
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         }
     }
 
@@ -212,8 +220,9 @@ export default class ShowSample extends Component {
     };
 
     render() {
+        console.log(this.context)
         return (
-            <View fluid ident="showSample" error={this.context.objectError} success={this.context.objectSuccess}>
+            <View fluid ident="showSample" error={this.context.object.error} success={this.context.object.success}>
                 <ShowObject object={this.state.file}
                             objectPresenterComponent={ConnectedSamplePresenter}
                             searchEndpoint=''

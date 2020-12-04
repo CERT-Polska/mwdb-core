@@ -211,12 +211,20 @@ class ShowConfig extends Component {
             });
             this.context.update(
                 {
-                    objectFavorite: response.data.favorite,
-                    objectError: null,
-                    objectSuccess: null,
+                    object: {
+                        favorite: response.data.favorite,
+                        error: null,
+                        success: null,
+                    }
                 });
         } catch(error) {
-            this.context.update({objectError: error});
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         }
     }
 
@@ -231,7 +239,7 @@ class ShowConfig extends Component {
 
     render() {
         return (
-            <View fluid ident="showConfig" error={this.context.objectError} success={this.context.objectSuccess}>
+            <View fluid ident="showConfig" error={this.context.object.error} success={this.context.object.success}>
                 <ShowObject object={this.state.config} 
                             objectPresenterComponent={ConnectedConfigPresenter}
                             searchEndpoint='configs'

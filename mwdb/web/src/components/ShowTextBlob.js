@@ -119,12 +119,20 @@ class ShowTextBlob extends Component {
             });
             this.context.update(
                 {
-                    objectFavorite: response.data.favorite,
-                    objectError: null,
-                    objectSuccess: null,
+                    object: {
+                        favorite: response.data.favorite,
+                        error: null,
+                        success: null,
+                    }
                 });
         } catch(error) {
-            this.context.update({objectError: error});
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         }
     }
 
@@ -139,7 +147,7 @@ class ShowTextBlob extends Component {
 
     render() {
         return (
-            <View fluid ident="showTextBlob" error={this.context.objectError} success={this.context.objectSuccess}>
+            <View fluid ident="showTextBlob" error={this.context.object.error} success={this.context.object.success}>
                 <ShowObject object={this.state.blob} 
                             objectPresenterComponent={ConnectedTextBlobPresenter}
                             searchEndpoint="blobs"

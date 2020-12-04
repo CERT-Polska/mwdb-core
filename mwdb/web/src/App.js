@@ -36,7 +36,7 @@ import UserPasswordRecover from './components/UserPasswordRecover';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faTimes, faUpload, faDownload, faPlus, faMinus, faRandom, 
          faExchangeAlt, faBan, faSearch, faToggleOn, faToggleOff, faSort, faSortUp, faSortDown, faProjectDiagram, faFile, faFileImage, faFilePdf,
-         faFingerprint, faBoxes, faTrash, faCopy, faThumbtack, faStar} from '@fortawesome/free-solid-svg-icons'
+         faFingerprint, faBoxes, faTrash, faCopy, faThumbtack, faStar } from '@fortawesome/free-solid-svg-icons'
 import { faStar as farStar } from '@fortawesome/free-regular-svg-icons'
 
 import { configActions } from '@mwdb-web/commons/config';

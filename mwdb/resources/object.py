@@ -3,7 +3,7 @@ import json
 from flask import request, g
 from flask_restful import Resource
 from luqum.parser import ParseError
-from werkzeug.exceptions import Forbidden, BadRequest, MethodNotAllowed, NotFound, Conflict
+from werkzeug.exceptions import Forbidden, BadRequest, MethodNotAllowed, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
@@ -343,12 +343,12 @@ class ObjectCountResource(Resource):
 
 class ObjectFavoriteResource(Resource):
     @requires_authorization
-    def post(self, identifier):
+    def put(self, identifier):
         """
         ---
-        summary: Add favorite object
+        summary: Mark favorite object
         description: |
-            Add an existing object as a favorite for the user.
+            Mark an object as a favorite for the user.
         security:
             - bearerAuth: []
         tags:
@@ -361,13 +361,11 @@ class ObjectFavoriteResource(Resource):
               description: Object identifier
         responses:
             200:
-                description: Add favorite object
+                description: Unmark favorite object
             400:
                 description: When request body is invalid
             404:
                 description: When object doesn't exist.
-            409:
-                description: When object is already added as favorite.
         """
 
         user = g.auth_user
@@ -378,20 +376,19 @@ class ObjectFavoriteResource(Resource):
             raise NotFound("Object not found")
 
         if favorite_object.favorite:
-            raise Conflict("Object is already added as a favorite")
-
-        favorite_object.followers.append(user)
-        db.session.commit()
-
-        logger.info('Object added to favorites', extra={'user': user.login, 'object_id': identifier})
+            logger.info('Object is already marked as a favorite', extra={'user': user.login, 'object_id': identifier})
+        else:
+            favorite_object.followers.append(user)
+            db.session.commit()
+            logger.info('Object marked as favorite', extra={'user': user.login, 'object_id': identifier})
 
     @requires_authorization
     def delete(self, identifier):
         """
         ---
-        summary: Delete favorite object
+        summary: Unmark favorite object
         description: |
-            Delete an existing object as a favorite for the user.
+            Unmark an object as a favorite for the user.
         security:
             - bearerAuth: []
         tags:
@@ -404,13 +401,11 @@ class ObjectFavoriteResource(Resource):
               description: Object identifier
         responses:
             200:
-                description: Delete favorite object
+                description: Unmark favorite object
             400:
                 description: When request body is invalid
             404:
                 description: When object doesn't exist.
-            409:
-                description: When object is not in user favorites.
         """
 
         user = g.auth_user
@@ -420,10 +415,9 @@ class ObjectFavoriteResource(Resource):
         if favorite_object is None:
             raise NotFound("Object not found")
 
-        if not favorite_object.favorite:
-            raise Conflict("Object is not added as a favorite")
-
-        favorite_object.followers.remove(user)
-        db.session.commit()
-
-        logger.info('Object removed from favorites', extra={'user': user.login, 'object_id': identifier})
+        if favorite_object.favorite:
+            logger.info('Object is not marked as a favorite', extra={'user': user.login, 'object_id': identifier})
+        else:
+            favorite_object.followers.remove(user)
+            db.session.commit()
+            logger.info('Object unmarked as favorite', extra={'user': user.login, 'object_id': identifier})

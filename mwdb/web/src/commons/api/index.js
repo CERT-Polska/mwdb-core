@@ -155,7 +155,7 @@ function removeObjectMetakey(type, id, key, value) {
 }
 
 function addObjectFavorite(id) {
-    return axios.post(`/object/${id}/favorite`)
+    return axios.put(`/object/${id}/favorite`)
 }
 
 function removeObjectFavorite(id) {

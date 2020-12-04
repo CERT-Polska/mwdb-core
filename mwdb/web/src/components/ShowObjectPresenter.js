@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import api from "@mwdb-web/commons/api";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import { faFile, faTable, faScroll} from "@fortawesome/free-solid-svg-icons";
+import { faFile, faTable, faScroll } from "@fortawesome/free-solid-svg-icons";
 
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { capitalize } from '@mwdb-web/commons/helpers';

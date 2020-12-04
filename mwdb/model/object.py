@@ -22,8 +22,8 @@ relation = db.Table(
 
 favorites = db.Table(
     'favorites',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), index=True),
-    db.Column('object_id', db.Integer, db.ForeignKey('object.id'), index=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), index=True, nullable=False),
+    db.Column('object_id', db.Integer, db.ForeignKey('object.id'), index=True, nullable=False),
     db.Index('ix_favorites_object_user', 'object_id', 'user_id', unique=True),
 )
 

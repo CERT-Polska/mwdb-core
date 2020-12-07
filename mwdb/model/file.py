@@ -1,8 +1,9 @@
-import os
 import hashlib
+import os
+import tempfile
 
-from sqlalchemy import or_
 from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadSignature
+from sqlalchemy import or_
 from werkzeug.utils import secure_filename
 
 from mwdb.core.config import app_config, StorageProviderType
@@ -54,37 +55,53 @@ class File(Object):
         if file_size == 0:
             raise EmptyFileError
 
-        sha256 = calc_hash(file.stream, hashlib.sha256(), lambda h: h.hexdigest())
-        file_obj = File(
-            dhash=sha256,
-            file_name=secure_filename(file.filename),
-            file_size=file_size,
-            file_type=calc_magic(file.stream),
-            crc32=calc_crc32(file.stream),
-            md5=calc_hash(file.stream, hashlib.md5(), lambda h: h.hexdigest()),
-            sha1=calc_hash(file.stream, hashlib.sha1(), lambda h: h.hexdigest()),
-            sha256=sha256,
-            sha512=calc_hash(file.stream, hashlib.sha512(), lambda h: h.hexdigest()),
-            ssdeep=calc_ssdeep(file.stream)
-        )
+        # python-magic and some plugins are unable to handle the stream object
+        # and can only consume the buffer or path.
+        # The hack is to additionally store the file in named temporary file
+        # so path can be used by consumers.
+        temp_file = tempfile.NamedTemporaryFile()
 
-        file_obj, is_new = cls._get_or_create(
-            file_obj, parent=parent, metakeys=metakeys, share_with=share_with
-        )
-
-        if is_new:
+        try:
+            # Initially store the contents in temporary file
             file.stream.seek(0, os.SEEK_SET)
-            if app_config.mwdb.storage_provider == StorageProviderType.S3:
-                get_minio_client(
-                    app_config.mwdb.s3_storage_endpoint,
-                    app_config.mwdb.s3_storage_access_key,
-                    app_config.mwdb.s3_storage_secret_key,
-                    app_config.mwdb.s3_storage_region_name,
-                    app_config.mwdb.s3_storage_secure,
-                ).put_object(app_config.mwdb.s3_storage_bucket_name, file_obj._calculate_path(), file, file_size)
-            else:
-                file.save(file_obj._calculate_path())
+            file.save(temp_file)
 
+            sha256 = calc_hash(file.stream, hashlib.sha256(), lambda h: h.hexdigest())
+            file_obj = File(
+                dhash=sha256,
+                file_name=secure_filename(file.filename),
+                file_size=file_size,
+                file_type=calc_magic(temp_file.name),
+                crc32=calc_crc32(file.stream),
+                md5=calc_hash(file.stream, hashlib.md5(), lambda h: h.hexdigest()),
+                sha1=calc_hash(file.stream, hashlib.sha1(), lambda h: h.hexdigest()),
+                sha256=sha256,
+                sha512=calc_hash(file.stream, hashlib.sha512(), lambda h: h.hexdigest()),
+                ssdeep=calc_ssdeep(file.stream)
+            )
+
+            file_obj, is_new = cls._get_or_create(
+                file_obj, parent=parent, metakeys=metakeys, share_with=share_with
+            )
+
+            if is_new:
+                file.stream.seek(0, os.SEEK_SET)
+                if app_config.mwdb.storage_provider == StorageProviderType.S3:
+                    get_minio_client(
+                        app_config.mwdb.s3_storage_endpoint,
+                        app_config.mwdb.s3_storage_access_key,
+                        app_config.mwdb.s3_storage_secret_key,
+                        app_config.mwdb.s3_storage_region_name,
+                        app_config.mwdb.s3_storage_secure,
+                    ).put_object(app_config.mwdb.s3_storage_bucket_name, file_obj._calculate_path(), file, file_size)
+                else:
+                    file.save(file_obj._calculate_path())
+        except:
+            # In case of failure: clean-up the temporary file
+            temp_file.close()
+            raise
+        # Pass the reference to temporary file via file_obj
+        file_obj.temp_file = temp_file
         return file_obj, is_new
 
     def _calculate_path(self):
@@ -100,6 +117,19 @@ class File(Object):
             upload_path = os.path.abspath(upload_path)
             os.makedirs(upload_path, mode=0o755, exist_ok=True)
         return os.path.join(upload_path, sample_sha256)
+
+    def get_path(self):
+        """
+        Get the path to the contents.
+
+        Use that only for 'on_created_file' and 'on_reuploaded_file' hooks.
+        If you want to get the contents of arbitrary file stored in mwdb-core,
+        use open/iterate methods.
+        """
+        temp_file = getattr(self, "temp_file", None)
+        if not temp_file:
+            raise ValueError("Path is only available for the just uploaded file.")
+        return temp_file.name
 
     def open(self):
         """
@@ -153,6 +183,16 @@ class File(Object):
         fh.close()
         if app_config.mwdb.storage_provider == StorageProviderType.S3:
             fh.release_conn()
+
+    def release_after_upload(self):
+        """
+        Release resources acquired by upload.
+
+        Currently used only by File to close NamedTemporaryFile.
+        """
+        temp_file = getattr(self, "temp_file", None)
+        if temp_file:
+            temp_file.close()
 
     def generate_download_token(self):
         serializer = TimedJSONWebSignatureSerializer(app_config.mwdb.secret_key, expires_in=60)

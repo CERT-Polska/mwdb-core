@@ -58,9 +58,8 @@ def calc_hash(stream, hash_obj, digest_cb):
     return digest_cb(hash_obj)
 
 
-def calc_magic(stream):
-    stream.seek(0, os.SEEK_SET)
-    return magic.from_buffer(stream.read())
+def calc_magic(filename):
+    return magic.from_file(filename)
 
 
 def calc_ssdeep(stream):

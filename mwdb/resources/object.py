@@ -76,14 +76,17 @@ class ObjectUploader:
 
         item, is_new = self._create_object(params, parent_object, share_with, metakeys)
 
-        db.session.commit()
+        try:
+            db.session.commit()
 
-        if is_new:
-            hooks.on_created_object(item)
-            self.on_created(item)
-        else:
-            hooks.on_reuploaded_object(item)
-            self.on_reuploaded(item)
+            if is_new:
+                hooks.on_created_object(item)
+                self.on_created(item)
+            else:
+                hooks.on_reuploaded_object(item)
+                self.on_reuploaded(item)
+        finally:
+            item.release_after_upload()
 
         logger.info(f'{self.ObjectType.__name__} added', extra={
             'dhash': item.dhash,
@@ -236,6 +239,7 @@ class ObjectItemResource(Resource, ObjectUploader):
 
     @requires_authorization
     def post(self, identifier):
+        # Deprecated
         if self.ObjectType is Object:
             raise MethodNotAllowed()
 
@@ -246,6 +250,7 @@ class ObjectItemResource(Resource, ObjectUploader):
 
     @requires_authorization
     def put(self, identifier):
+        # Deprecated
         return self.post(identifier)
 
     @requires_authorization

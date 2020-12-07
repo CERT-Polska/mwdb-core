@@ -362,6 +362,14 @@ class Object(db.Model):
         # Well.. I've tried
         return None
 
+    def release_after_upload(self):
+        """
+        Release resources acquired by upload.
+
+        Currently used only by File to close NamedTemporaryFile.
+        """
+        return
+
     def get_tags(self):
         """
         Get object tags

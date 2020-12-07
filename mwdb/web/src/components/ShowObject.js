@@ -16,7 +16,8 @@ export default class ShowObject extends Component {
                         <div className="col-md-7">
                             <Extendable ident="showObjectLeftColumn" object={this.props.object}>
                                 <div className="card">
-                                    <ObjectPresenter {...this.props.object} history={this.props.history} />
+                                    <ObjectPresenter {...this.props.object} history={this.props.history}
+                                                     onObjectUpdate={this.props.onObjectUpdate}/>
                                 </div>
                                 { this.props.children }
                                 <ShareBox id={this.props.object.id} />

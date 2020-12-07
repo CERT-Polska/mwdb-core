@@ -103,7 +103,7 @@ The third tab is **Preview** where you can quickly view the file contents, both 
    :alt: sample preview tab
 
 
-Finally you can download the sample file just by clicking **Download** button.
+Finally you can download the sample file just by clicking **Download** button or mark it as **Favorite** so that you can easily find it in the search engine.
 
 The fourth tab called **Static config** is optional and shows only if there are some configurations related with sample.
 

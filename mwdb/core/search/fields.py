@@ -152,6 +152,33 @@ class ListField(BaseField):
             return self.column.any(self.value_column == value)
 
 
+class FavoritesField(BaseField):
+    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
+        if remainder:
+            raise FieldNotQueryableException(
+                f"Field doesn't have subfields: {'.'.join(remainder)}"
+            )
+        if expression.has_wildcard():
+            raise UnsupportedGrammarException(
+                f"Wildcards are not allowed for shared field"
+            )
+
+        value = get_term_value(expression)
+
+        if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.login != value:
+            raise ObjectNotFoundException("Only the mwdb admin can search for other users favorites")
+
+        if g.auth_user.login == value:
+            user = g.auth_user
+        else:
+            user = db.session.query(User).filter(User.login == value).first()
+
+        if user is None:
+            raise ObjectNotFoundException(f"No such user: {value}")
+
+        return self.column.any(User.id == user.id)
+
+
 class AttributeField(BaseField):
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
         if len(remainder) > 1:

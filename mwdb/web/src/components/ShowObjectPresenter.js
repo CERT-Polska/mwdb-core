@@ -7,6 +7,7 @@ import { faFile, faTable, faScroll } from "@fortawesome/free-solid-svg-icons";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { capitalize } from '@mwdb-web/commons/helpers';
 import {ConfirmationModal} from "@mwdb-web/commons/ui";
+import { GlobalContext } from "@mwdb-web/commons/context"
 
 import RelationsPlot from './RelationsPlot';
 
@@ -20,11 +21,14 @@ export function joinActions(currentActions, newActions) {
 }
 
 export default class ShowObjectPresenter extends Component {
+    defaultTab = "details"
+
+    static contextType = GlobalContext
+
     state = {
         isDeleteModalOpen: false,
         disableModalButton: false
     }
-    defaultTab = "details"
 
     getTabLink(tab, subtab) {
         let pathElements = this.props.history.location.pathname.split("/");
@@ -59,6 +63,48 @@ export default class ShowObjectPresenter extends Component {
             }
     }
 
+    addFavoriteObject = async () => {
+        try {
+            await api.addObjectFavorite(this.props.id)
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        favorite: true,
+                    }
+                });
+        } catch (error) {
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
+        }
+    }
+
+    removeFavoriteObject = async () => {
+        try {
+            await api.removeObjectFavorite(this.props.id)
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        favorite: false,
+                    }
+                });
+        } catch (error) {
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
+        }
+    }
+
     /* Overridable */
     get tabs() {
         let tabs = [
@@ -79,9 +125,15 @@ export default class ShowObjectPresenter extends Component {
     /* Overridable */
     get actions() {
         let nodes = queryString.parse(this.props.history.location.search, {arrayFormat: 'bracket'}).node || [];
+
+        let favorite = this.context.object.favorite ?
+            {label: "Unfavorite", icon: "star", action: (() => this.removeFavoriteObject())} :
+            {label: "Favorite", icon: ["far","star"], action: (() => this.addFavoriteObject())}
+
         let actions = {
             details: [
-                {label: "Download", icon: "download", action: (() => this.handleDownload())}
+                favorite,
+                {label: "Download", icon: "download", action: (() => this.handleDownload())},
             ],
             relations: [
                 {label: "zoom", icon: "search", link: "/relations?node[]=" + [this.props.id, ...nodes].join("&node[]=")}

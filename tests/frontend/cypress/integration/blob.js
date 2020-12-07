@@ -52,9 +52,6 @@ describe("Blob view test - mwdb-core", function () {
     cy.contains("inject");
     cy.contains("First seen");
     cy.contains("Last seen");
-    
-    //waiting for XHR request after clicking on Details tab due to flaky tests
-    cy.wait('@dataGetFirst').its('status').should('be', 200);
 
     cy.get("a.nav-link").contains("Relations").click()
     cy.get("g[class='node expanded-node']");

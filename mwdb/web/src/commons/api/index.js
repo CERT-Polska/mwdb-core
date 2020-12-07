@@ -154,6 +154,14 @@ function removeObjectMetakey(type, id, key, value) {
     })
 }
 
+function addObjectFavorite(id) {
+    return axios.put(`/object/${id}/favorite`)
+}
+
+function removeObjectFavorite(id) {
+    return axios.delete(`/object/${id}/favorite`)
+}
+
 function shareObjectWith(id, group) {
     return axios.put(`/object/${id}/share`, {group})
 }
@@ -336,6 +344,8 @@ export default {
     removeObjectComment,
     addObjectMetakey,
     removeObjectMetakey,
+    addObjectFavorite,
+    removeObjectFavorite,
     shareObjectWith,
     search,
     getQuickQueries,

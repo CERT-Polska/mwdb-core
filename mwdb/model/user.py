@@ -13,7 +13,7 @@ from mwdb.core.config import app_config
 
 from . import db
 from .group import Member
-from .object import ObjectPermission
+from .object import ObjectPermission, favorites
 
 
 class User(db.Model):
@@ -45,6 +45,7 @@ class User(db.Model):
 
     memberships = db.relationship(Member, back_populates='user', cascade="all, delete-orphan", lazy='selectin')
     groups = association_proxy('memberships', 'group', creator=lambda group: Member(group=group))
+    favorites = db.relationship('Object', secondary=favorites, back_populates='followers', lazy='joined')
 
     comments = db.relationship('Comment', back_populates='author')
     api_keys = db.relationship('APIKey', foreign_keys="APIKey.user_id", backref='user')

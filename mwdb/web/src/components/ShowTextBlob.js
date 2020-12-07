@@ -8,6 +8,7 @@ import api from "@mwdb-web/commons/api";
 import { makeSearchLink, makeSearchDateLink, downloadData, humanFileSize } from '@mwdb-web/commons/helpers';
 import { DataTable, View, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
+import { GlobalContext } from "@mwdb-web/commons/context";
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
 
 function TextBlobDetails(props) {
@@ -103,18 +104,35 @@ let ConnectedTextBlobPresenter = connect(mapStateToProps)(TextBlobPresenter);
 
 class ShowTextBlob extends Component {
     state = {
-        error: null,
         blob: {
             children: []
         }
     };
 
+    static contextType = GlobalContext
+
     updateTextBlob = async () => {
         try {
             let response = await api.getObject("blob", this.props.match.params.hash);
-            this.setState({blob: response.data, error: null});
+            this.setState({
+                    blob: response.data
+            });
+            this.context.update(
+                {
+                    object: {
+                        favorite: response.data.favorite,
+                        error: null,
+                        success: null,
+                    }
+                });
         } catch(error) {
-            this.setState({error});
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         }
     }
 
@@ -123,13 +141,13 @@ class ShowTextBlob extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (prevProps !== this.props)
+        if (prevProps && prevProps.match.params.hash !== this.props.match.params.hash)
             this.updateTextBlob();
     };
 
     render() {
         return (
-            <View fluid ident="showTextBlob" error={this.state.error}>
+            <View fluid ident="showTextBlob" error={this.context.object.error} success={this.context.object.success}>
                 <ShowObject object={this.state.blob} 
                             objectPresenterComponent={ConnectedTextBlobPresenter}
                             searchEndpoint="blobs"

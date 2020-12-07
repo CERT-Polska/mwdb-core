@@ -33,7 +33,7 @@ from mwdb.resources.metakey import (
     MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource,
     MetakeyPermissionResource
 )
-from mwdb.resources.object import ObjectItemResource, ObjectResource, ObjectCountResource
+from mwdb.resources.object import ObjectItemResource, ObjectResource, ObjectCountResource, ObjectFavoriteResource
 from mwdb.resources.quick_query import QuickQueryResource, QuickQueryItemResource
 from mwdb.resources.relations import RelationsResource, ObjectChildResource
 from mwdb.resources.server import PingResource, ServerInfoResource, ServerDocsResource
@@ -174,6 +174,7 @@ api.add_resource(APIKeyResource, "/api_key/<api_key_id>")
 # Object endpoints
 api.add_resource(ObjectResource, '/object')
 api.add_resource(ObjectItemResource, '/object/<hash64:identifier>')
+api.add_resource(ObjectFavoriteResource, '/object/<hash64:identifier>/favorite')
 
 # Count endpoint
 api.add_resource(ObjectCountResource, '/<any(file, config, blob, object):type>/count')

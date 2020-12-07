@@ -8,6 +8,7 @@ import api from "@mwdb-web/commons/api";
 import {makeSearchLink, makeSearchDateLink, humanFileSize} from "@mwdb-web/commons/helpers";
 import { Extendable } from "@mwdb-web/commons/extensions";
 import { DataTable, DateString, Hash, View, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
+import { GlobalContext } from "@mwdb-web/commons/context"
 import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
 import ShowSamplePreview from "./ShowSamplePreview";
 
@@ -177,11 +178,12 @@ let ConnectedSamplePresenter = connect(mapStateToProps)(SamplePresenter);
 
 export default class ShowSample extends Component {
     state = {
-        error: null,
         file: {
             children: []
         }
     };
+
+    static contextType = GlobalContext
 
     updateSample = async () => {
         try {
@@ -189,8 +191,22 @@ export default class ShowSample extends Component {
             this.setState({
                 file: response.data
             });
+            this.context.update(
+                {
+                    object: {
+                        favorite: response.data.favorite,
+                        error: null,
+                        success: null,
+                    }
+                });
         } catch(error) {
-            this.setState({error});
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         }
     }
 
@@ -204,9 +220,10 @@ export default class ShowSample extends Component {
     };
 
     render() {
+        console.log(this.context)
         return (
-            <View fluid ident="showSample" error={this.state.error}>
-                <ShowObject object={this.state.file} 
+            <View fluid ident="showSample" error={this.context.object.error} success={this.context.object.success}>
+                <ShowObject object={this.state.file}
                             objectPresenterComponent={ConnectedSamplePresenter}
                             searchEndpoint=''
                             onObjectUpdate={this.updateSample}

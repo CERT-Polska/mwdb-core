@@ -10,6 +10,7 @@ import { makeSearchLink, makeSearchDateLink, downloadData } from "@mwdb-web/comm
 import { Extension } from "@mwdb-web/commons/extensions";
 import { DataTable, DateString, ObjectLink, View, HexView, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import ShowObjectPresenter from './ShowObjectPresenter';
+import { GlobalContext } from "@mwdb-web/commons/context";
 
 class ConfigRow extends Component {
     constructor(props){
@@ -200,14 +201,30 @@ class ShowConfig extends Component {
         }
     };
 
+    static contextType = GlobalContext
+
     updateConfig = async () => {
         try {
             let response = await api.getObject("config", this.props.match.params.hash)
             this.setState({
                 config: response.data
             });
+            this.context.update(
+                {
+                    object: {
+                        favorite: response.data.favorite,
+                        error: null,
+                        success: null,
+                    }
+                });
         } catch(error) {
-            this.setState({error})
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         }
     }
 
@@ -222,7 +239,7 @@ class ShowConfig extends Component {
 
     render() {
         return (
-            <View fluid ident="showConfig" error={this.state.error}>
+            <View fluid ident="showConfig" error={this.context.object.error} success={this.context.object.success}>
                 <ShowObject object={this.state.config} 
                             objectPresenterComponent={ConnectedConfigPresenter}
                             searchEndpoint='configs'

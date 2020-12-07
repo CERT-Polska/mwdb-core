@@ -11,8 +11,8 @@ from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import db, Object, Group, MetakeyDefinition
 from mwdb.schema.object import (
     ObjectListRequestSchema, ObjectListResponseSchema,
-    ObjectItemResponseSchema,
-    ObjectCountRequestSchema, ObjectCountResponseSchema
+    ObjectItemResponseSchema, ObjectCountRequestSchema,
+    ObjectCountResponseSchema
 )
 
 from . import logger, requires_authorization, requires_capabilities, get_type_from_str, load_schema
@@ -339,3 +339,85 @@ class ObjectCountResource(Resource):
 
         schema = ObjectCountResponseSchema()
         return schema.dump({"count": result})
+
+
+class ObjectFavoriteResource(Resource):
+    @requires_authorization
+    def put(self, identifier):
+        """
+        ---
+        summary: Mark favorite object
+        description: |
+            Mark an object as a favorite for the user.
+        security:
+            - bearerAuth: []
+        tags:
+            - object
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Object identifier
+        responses:
+            200:
+                description: Unmark favorite object
+            400:
+                description: When request body is invalid
+            404:
+                description: When object doesn't exist.
+        """
+
+        user = g.auth_user
+
+        favorite_object = Object.access(identifier)
+
+        if favorite_object is None:
+            raise NotFound("Object not found")
+
+        if favorite_object.favorite:
+            logger.info('Object is already marked as a favorite', extra={'user': user.login, 'object_id': identifier})
+        else:
+            favorite_object.followers.append(user)
+            db.session.commit()
+            logger.info('Object marked as favorite', extra={'user': user.login, 'object_id': identifier})
+
+    @requires_authorization
+    def delete(self, identifier):
+        """
+        ---
+        summary: Unmark favorite object
+        description: |
+            Unmark an object as a favorite for the user.
+        security:
+            - bearerAuth: []
+        tags:
+            - object
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Object identifier
+        responses:
+            200:
+                description: Unmark favorite object
+            400:
+                description: When request body is invalid
+            404:
+                description: When object doesn't exist.
+        """
+
+        user = g.auth_user
+
+        favorite_object = Object.access(identifier)
+
+        if favorite_object is None:
+            raise NotFound("Object not found")
+
+        if not favorite_object.favorite:
+            logger.info('Object is not marked as a favorite', extra={'user': user.login, 'object_id': identifier})
+        else:
+            favorite_object.followers.remove(user)
+            db.session.commit()
+            logger.info('Object unmarked as favorite', extra={'user': user.login, 'object_id': identifier})

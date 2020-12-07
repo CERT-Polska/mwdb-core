@@ -36,12 +36,14 @@ import UserPasswordRecover from './components/UserPasswordRecover';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faTimes, faUpload, faDownload, faPlus, faMinus, faRandom, 
          faExchangeAlt, faBan, faSearch, faToggleOn, faToggleOff, faSort, faSortUp, faSortDown, faProjectDiagram, faFile, faFileImage, faFilePdf,
-         faFingerprint, faBoxes, faTrash, faCopy } from '@fortawesome/free-solid-svg-icons'
+         faFingerprint, faBoxes, faTrash, faCopy, faThumbtack, faStar } from '@fortawesome/free-solid-svg-icons'
+import { faStar as farStar } from '@fortawesome/free-regular-svg-icons'
 
 import { configActions } from '@mwdb-web/commons/config';
 import { Extension } from "@mwdb-web/commons/extensions";
 import history from "@mwdb-web/commons/history";
 import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
+import { GlobalProvider } from "@mwdb-web/commons/context";
 import ShowPendingUsers from './components/ShowPendingUsers';
 import Docs from './components/Docs';
 
@@ -66,7 +68,10 @@ library.add(faFilePdf);
 library.add(faFingerprint);
 library.add(faBoxes);
 library.add(faTrash);
-library.add(faCopy)
+library.add(faCopy);
+library.add(faThumbtack);
+library.add(faStar);
+library.add(farStar);
 
 class App extends Component {
     componentDidMount() {
@@ -85,58 +90,59 @@ class App extends Component {
         const AttributeRoute = (args) => (
             <ProtectedRoute condition={this.props.isAttributeManager} {...args} />
         )
-
         return (
             <ConnectedRouter history={history}>
-                <div className="App">
-                    <Navigation />
+                <GlobalProvider>
+                    <div className="App">
+                        <Navigation />
 
-                    <div className="content">
-                        <View fluid ident="main" style={{"padding": "0"}} {...this.props}>
-                            {
-                                this.props.config !== null
-                                ? <Switch>
-                                    <Route exact path='/login' component={UserLogin} />
-                                    {
-                                        this.props.isRegistrationEnabled
-                                        ? <Route exact path="/register" component={UserRegister} />
-                                        : []
-                                    }
-                                    <Route exact path='/recover_password' component={UserPasswordRecover} /> 
-                                    <Route exact path='/setpasswd/:token' component={UserSetPassword} />
-                                    <AuthenticatedRoute exact path='/' component={RecentSamples} />
-                                    <AuthenticatedRoute exact path='/about' component={About} />
-                                    <AuthenticatedRoute exact path='/docs' component={Docs} />
-                                    <AuthenticatedRoute exact path='/profile/:login' component={UserProfile} />
-                                    <AuthenticatedRoute exact path='/configs' component={RecentConfigs} />
-                                    <AuthenticatedRoute exact path='/configs/stats' component={ConfigStats} />
-                                    <AuthenticatedRoute exact path='/upload' component={Upload} />
-                                    <AuthenticatedRoute path='/sample/:hash' component={ShowSample} />
-                                    <AuthenticatedRoute path='/config/:hash' component={ShowConfig} />
-                                    <AuthenticatedRoute path='/search' component={Search} />
-                                    <AuthenticatedRoute path='/search_help' component={SearchHelp} />
-                                    <AuthenticatedRoute path='/relations' component={RelationsPlot} />
-                                    <AdministrativeRoute exact path="/user/:login" component={UserUpdate} />
-                                    <AdministrativeRoute exact path="/users" component={ShowUsers} />
-                                    <AdministrativeRoute exact path="/users/pending" component={ShowPendingUsers} />
-                                    <AdministrativeRoute exact path="/users/new" component={UserCreate} />
-                                    <AuthenticatedRoute exact path="/user_groups" component={UserGroups} />
-                                    <AdministrativeRoute exact path="/groups" component={ShowGroups} />
-                                    <AdministrativeRoute exact path="/groups/new" component={GroupRegister} />
-                                    <AdministrativeRoute exact path="/group/:name" component={GroupUpdate} />
-                                    <AttributeRoute exact path="/attribute/:metakey" component={AttributeUpdate}/>
-                                    <AttributeRoute exact path="/attributes" component={ManageAttributes}/>
-                                    <AttributeRoute exact path="/attributes/new" component={AttributeDefine}/>
-                                    <AuthenticatedRoute exact path='/blobs' component={RecentBlobs} />
-                                    <AuthenticatedRoute path='/blob/:hash' component={ShowTextBlob} />
-                                    <AuthenticatedRoute path='/diff/:current/:previous' component={DiffTextBlob} />
-                                    <Extension ident="routes" {...this.props}/>
-                                </Switch>
-                                : []
-                            }
-                        </View>
+                        <div className="content">
+                            <View fluid ident="main" style={{"padding": "0"}} {...this.props}>
+                                {
+                                    this.props.config !== null
+                                    ? <Switch>
+                                        <Route exact path='/login' component={UserLogin} />
+                                        {
+                                            this.props.isRegistrationEnabled
+                                            ? <Route exact path="/register" component={UserRegister} />
+                                            : []
+                                        }
+                                        <Route exact path='/recover_password' component={UserPasswordRecover} />
+                                        <Route exact path='/setpasswd/:token' component={UserSetPassword} />
+                                        <AuthenticatedRoute exact path='/' component={RecentSamples} />
+                                        <AuthenticatedRoute exact path='/about' component={About} />
+                                        <AuthenticatedRoute exact path='/docs' component={Docs} />
+                                        <AuthenticatedRoute exact path='/profile/:login' component={UserProfile} />
+                                        <AuthenticatedRoute exact path='/configs' component={RecentConfigs} />
+                                        <AuthenticatedRoute exact path='/configs/stats' component={ConfigStats} />
+                                        <AuthenticatedRoute exact path='/upload' component={Upload} />
+                                        <AuthenticatedRoute path='/sample/:hash' component={ShowSample} />
+                                        <AuthenticatedRoute path='/config/:hash' component={ShowConfig} />
+                                        <AuthenticatedRoute path='/search' component={Search} />
+                                        <AuthenticatedRoute path='/search_help' component={SearchHelp} />
+                                        <AuthenticatedRoute path='/relations' component={RelationsPlot} />
+                                        <AdministrativeRoute exact path="/user/:login" component={UserUpdate} />
+                                        <AdministrativeRoute exact path="/users" component={ShowUsers} />
+                                        <AdministrativeRoute exact path="/users/pending" component={ShowPendingUsers} />
+                                        <AdministrativeRoute exact path="/users/new" component={UserCreate} />
+                                        <AuthenticatedRoute exact path="/user_groups" component={UserGroups} />
+                                        <AdministrativeRoute exact path="/groups" component={ShowGroups} />
+                                        <AdministrativeRoute exact path="/groups/new" component={GroupRegister} />
+                                        <AdministrativeRoute exact path="/group/:name" component={GroupUpdate} />
+                                        <AttributeRoute exact path="/attribute/:metakey" component={AttributeUpdate}/>
+                                        <AttributeRoute exact path="/attributes" component={ManageAttributes}/>
+                                        <AttributeRoute exact path="/attributes/new" component={AttributeDefine}/>
+                                        <AuthenticatedRoute exact path='/blobs' component={RecentBlobs} />
+                                        <AuthenticatedRoute path='/blob/:hash' component={ShowTextBlob} />
+                                        <AuthenticatedRoute path='/diff/:current/:previous' component={DiffTextBlob} />
+                                        <Extension ident="routes" {...this.props}/>
+                                    </Switch>
+                                    : []
+                                }
+                            </View>
+                        </div>
                     </div>
-                </div>
+                </GlobalProvider>
             </ConnectedRouter>
         );
     }

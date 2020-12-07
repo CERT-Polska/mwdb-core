@@ -4,7 +4,7 @@ from mwdb.model import File, Object, Config, TextBlob, Tag, Comment
 
 from .exceptions import MultipleObjectsQueryException, FieldNotQueryableException
 from .fields import BaseField, StringField, SizeField, ListField, AttributeField, ShareField, UploaderField, \
-    JSONField, DatetimeField, RelationField
+    JSONField, DatetimeField, RelationField, FavoritesField
 
 object_mapping: Dict[str, Type[Object]] = {
     "file": File,
@@ -24,7 +24,8 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "uploader": UploaderField(Object.related_shares),
         "upload_time": DatetimeField(Object.upload_time),
         "parent": RelationField(Object.parents),
-        "child": RelationField(Object.children)
+        "child": RelationField(Object.children),
+        "favorites": FavoritesField(Object.followers)
     },
     File.__name__: {
         "name": StringField(File.file_name),

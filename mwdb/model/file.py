@@ -192,9 +192,8 @@ class File(Object):
         """
         fh = self.open()
         try:
-            if app_config.mwdb.storage_provider == StorageProviderType.S3:
-                for chunk in fh.stream(chunk_size):
-                    yield chunk
+            if hasattr(fh, "stream"):
+                yield from fh.stream(chunk_size)
             else:
                 while True:
                     chunk = fh.read(chunk_size)

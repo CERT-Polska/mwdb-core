@@ -1,3 +1,4 @@
+import io
 import os
 
 try:
@@ -58,9 +59,33 @@ def calc_hash(stream, hash_obj, digest_cb):
     return digest_cb(hash_obj)
 
 
+def get_fd_path(stream):
+    """
+    Return Unix path for file-like stream. Hack for libraries
+    not supporting the stream or file descriptor input.
+    """
+    try:
+        return f"/proc/self/fd/{stream.fileno()}"
+    except io.UnsupportedOperation:
+        return None
+
+
 def calc_magic(stream):
-    stream.seek(0, os.SEEK_SET)
-    return magic.from_buffer(stream.read())
+    # Missing python-magic features:
+    # - magic_descriptor (https://github.com/ahupp/python-magic/pull/227)
+    # - direct support for symlink flag
+    magic_cookie = magic.magic_open(magic.MAGIC_SYMLINK)
+    magic.magic_load(magic_cookie, None)
+    try:
+        fd_path = get_fd_path(stream)
+        if fd_path:
+            return magic.maybe_decode(magic.magic_file(magic_cookie, fd_path))
+        else:
+            # Handle BytesIO in-memory streams
+            stream.seek(0, os.SEEK_SET)
+            return magic.maybe_decode(magic.magic_buffer(magic_cookie, stream.read()))
+    finally:
+        magic.magic_close(magic_cookie)
 
 
 def calc_ssdeep(stream):

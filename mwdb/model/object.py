@@ -362,6 +362,14 @@ class Object(db.Model):
         # Well.. I've tried
         return None
 
+    def release_after_upload(self):
+        """
+        Release additional resources used by uploaded file.
+
+        For objects other than File it's just no-op.
+        """
+        return
+
     def get_tags(self):
         """
         Get object tags

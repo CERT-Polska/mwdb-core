@@ -93,7 +93,10 @@ class File(Object):
                         app_config.mwdb.s3_storage_secret_key,
                         app_config.mwdb.s3_storage_region_name,
                         app_config.mwdb.s3_storage_secure,
-                    ).put_object(app_config.mwdb.s3_storage_bucket_name, file_obj._calculate_path(), file, file_size)
+                    ).put_object(app_config.mwdb.s3_storage_bucket_name,
+                                 file_obj._calculate_path(),
+                                 file.stream,
+                                 file_size)
                 else:
                     file.save(file_obj._calculate_path())
         except:

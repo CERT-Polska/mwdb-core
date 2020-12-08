@@ -62,7 +62,7 @@ def calc_hash(stream, hash_obj, digest_cb):
 def get_fd_path(stream):
     """
     Return Unix path for file-like stream. Hack for libraries
-    not supporting the stream or file descriptor input.
+    that does not support a stream or file descriptor input.
     """
     try:
         return f"/proc/self/fd/{stream.fileno()}"
@@ -86,6 +86,7 @@ def calc_magic(stream):
             return magic.maybe_decode(magic.magic_buffer(magic_cookie, stream.read()))
     finally:
         magic.magic_close(magic_cookie)
+    return None
 
 
 def calc_ssdeep(stream):

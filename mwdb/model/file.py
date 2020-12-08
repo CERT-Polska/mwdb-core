@@ -140,16 +140,17 @@ class File(Object):
         if type(self.upload_stream.name) is str:
             return self.upload_stream.name
 
-        try:
-            return get_fd_path(self.upload_stream)
-        except OSError:
-            # If not a file (BytesIO), copy contents to the named temporary file
-            tmpfile = tempfile.NamedTemporaryFile()
-            self.upload_stream.seek(0, os.SEEK_SET)
-            tmpfile.write(self.upload_stream.read())
-            self.upload_stream.close()
-            self.upload_stream = tmpfile
-            return self.upload_stream.name
+        fd_path = get_fd_path(self.upload_stream)
+        if fd_path:
+            return fd_path
+
+        # If not a file (BytesIO), copy contents to the named temporary file
+        tmpfile = tempfile.NamedTemporaryFile()
+        self.upload_stream.seek(0, os.SEEK_SET)
+        tmpfile.write(self.upload_stream.read())
+        self.upload_stream.close()
+        self.upload_stream = tmpfile
+        return self.upload_stream.name
 
     def open(self):
         """

@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 import api from "@mwdb-web/commons/api";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { GlobalContext } from "@mwdb-web/commons/context";
 
 class Comment extends Component {
     render() {
@@ -52,6 +53,8 @@ class CommentBox extends Component {
         modalIsOpen: false
     }
 
+    static contextType = GlobalContext;
+
     openModal(comment_id) {
         this.setState({modalIsOpen: true, commentToRemove: comment_id});
     };
@@ -68,7 +71,15 @@ class CommentBox extends Component {
             this.setState({
                 comments: response.data
             });
-        } catch(error) { }
+        } catch(error) {
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
+        }
     };
 
     componentDidUpdate(prevProps) {
@@ -84,7 +95,15 @@ class CommentBox extends Component {
         try {
             await api.addObjectComment(this.props.id, comment)
             this.updateComments();
-        } catch(error) { }
+        } catch(error) {
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
+        }
     };
 
     handleRemoveComment = (comment_id) => {
@@ -96,7 +115,13 @@ class CommentBox extends Component {
             await api.removeObjectComment(this.props.id, comment_id)
             this.updateComments();
         } catch(error) {
-
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         } finally {
             this.closeModal();
         }

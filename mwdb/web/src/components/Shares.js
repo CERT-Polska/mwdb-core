@@ -110,7 +110,15 @@ class SharesBox extends Component {
                 groups: response.data.groups,
                 items: response.data.shares
             });
-        } catch(error) { }
+        } catch(error) {
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
+        }
     };
 
     handleShare = (group) => {
@@ -125,7 +133,15 @@ class SharesBox extends Component {
             this.setState({isModalOpen: false})
             await api.shareObjectWith(this.props.id, group)
             this.updateShares();
-        } catch(error) { }
+        } catch(error) {
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
+        }
     }
 
     componentDidUpdate = (prevProps) => {

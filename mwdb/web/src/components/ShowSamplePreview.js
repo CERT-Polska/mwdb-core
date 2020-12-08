@@ -16,6 +16,7 @@ class ShowSamplePreview extends Component {
             responseEncoding: 'binary'
         })
         this.setState({content: fileContentResponse.data})
+
     }
 
     componentDidMount() {

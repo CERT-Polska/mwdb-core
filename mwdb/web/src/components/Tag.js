@@ -1,12 +1,13 @@
 import React, {Component} from 'react';
 import Autocomplete from 'react-autocomplete';
 import { connect } from 'react-redux';
+import {Link} from "react-router-dom";
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {Link} from "react-router-dom";
-import api from "@mwdb-web/commons/api";
-import { makeSearchLink } from "@mwdb-web/commons/helpers";
 
+import api from "@mwdb-web/commons/api";
+import { GlobalContext } from "@mwdb-web/commons/context";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { getStyleForTag, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export class Tag extends Component {
@@ -49,6 +50,8 @@ class TagForm extends Component {
         tags: []
     }
 
+    static contextType = GlobalContext;
+
     handleSubmit = (e) => {
         e.preventDefault();
         if (!this.state.text) {
@@ -70,7 +73,13 @@ class TagForm extends Component {
                 tags: response.data.map(t => t.tag),
             });
         } catch(error) {
-
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         }
     };
 
@@ -145,6 +154,8 @@ class TagBox extends Component {
         tagToRemove: ""
     }
 
+    static contextType = GlobalContext;
+
     openModal = (tag) => {
         this.setState({modalIsOpen: true, tagToRemove: tag});
     };
@@ -161,7 +172,13 @@ class TagBox extends Component {
             let tags = response.data;
             this.setState({tags});
         } catch(error) {
-
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         }
     };
 
@@ -179,7 +196,13 @@ class TagBox extends Component {
             await api.addObjectTag(this.props.id, tag)
             this.updateTags();
         } catch(error) {
-
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         }
     };
 
@@ -192,7 +215,13 @@ class TagBox extends Component {
             await api.removeObjectTag(this.props.id, tag)
             this.updateTags();
         } catch(error) {
-
+            this.context.update(
+                {
+                    object: {
+                        ...this.context.object,
+                        error: error,
+                    }
+                });
         } finally {
             this.closeModal()
         }

@@ -1,6 +1,7 @@
 import hashlib
 import io
 import os
+import shutil
 import tempfile
 
 from sqlalchemy import or_
@@ -51,6 +52,11 @@ class File(Object):
 
     @property
     def upload_stream(self):
+        """
+        Stream with file contents if file is uploaded in current request.
+
+        In that case, we don't need to download it from object storage.
+        """
         return getattr(self, "_upload_stream", None)
 
     @upload_stream.setter
@@ -147,7 +153,7 @@ class File(Object):
         # If not a file (BytesIO), copy contents to the named temporary file
         tmpfile = tempfile.NamedTemporaryFile()
         self.upload_stream.seek(0, os.SEEK_SET)
-        tmpfile.write(self.upload_stream.read())
+        shutil.copyfileobj(self.upload_stream, tmpfile)
         self.upload_stream.close()
         self.upload_stream = tmpfile
         return self.upload_stream.name
@@ -176,6 +182,10 @@ class File(Object):
             ).get_object(app_config.mwdb.s3_storage_bucket_name, self._calculate_path())
         elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
             return open(self._calculate_path(), 'rb')
+        else:
+            raise RuntimeError(
+                f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
+            )
 
     def read(self):
         """

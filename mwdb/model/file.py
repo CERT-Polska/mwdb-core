@@ -53,7 +53,7 @@ class File(Object):
     @property
     def upload_stream(self):
         """
-        Stream with file contents if file is uploaded in current request.
+        Stream with file contents if a file is uploaded in current request.
 
         In that case, we don't need to download it from object storage.
         """

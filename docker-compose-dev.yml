@@ -2,6 +2,16 @@
 
 version: "3.3"
 services:
+  minio:
+    image: minio/minio
+    command: server /data
+    volumes:
+      - /tmp/minio:/data
+    ports:
+      - "127.0.0.1:9000:9000"
+    environment:
+      - MINIO_ACCESS_KEY=mwdb-test-access
+      - MINIO_SECRET_KEY=mwdb-test-key
   mwdb:
     build:
       context: .
@@ -9,6 +19,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - minio
     restart: on-failure
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
@@ -21,6 +32,13 @@ services:
       MWDB_RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
       MWDB_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
       MWDB_ENABLE_REGISTRATION: 1
+      # Uncomment if you want to test S3 functions
+      # MWDB_STORAGE_PROVIDER: s3
+      # MWDB_HASH_PATHING: 0
+      # MWDB_S3_STORAGE_ENDPOINT: "minio:9000"
+      # MWDB_S3_STORAGE_ACCESS_KEY: "mwdb-test-access"
+      # MWDB_S3_STORAGE_SECRET_KEY: "mwdb-test-key"
+      # MWDB_S3_STORAGE_BUCKET_NAME: "mwdb"
     volumes:
       - "./docker/mail_templates:/app/mail_templates"
       - "./mwdb:/app/mwdb"

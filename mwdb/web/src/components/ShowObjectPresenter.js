@@ -7,7 +7,7 @@ import { faFile, faTable, faScroll } from "@fortawesome/free-solid-svg-icons";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { capitalize } from '@mwdb-web/commons/helpers';
 import {ConfirmationModal} from "@mwdb-web/commons/ui";
-import { GlobalContext } from "@mwdb-web/commons/context"
+import { GlobalContext } from "@mwdb-web/commons/context";
 
 import RelationsPlot from './RelationsPlot';
 
@@ -58,8 +58,10 @@ export default class ShowObjectPresenter extends Component {
                 } else {
                     this.props.history.push("/configs")
                 }
-            } catch (error) {
-                console.log(error)
+            } catch(error) {
+                this.context.update({
+                    objectError: error,
+                });
             }
     }
 
@@ -69,7 +71,7 @@ export default class ShowObjectPresenter extends Component {
             this.context.update({
                 objectFavorite: true,
             });
-        } catch (error) {
+        } catch(error) {
             this.context.update({
                 objectError: error,
             });
@@ -82,7 +84,7 @@ export default class ShowObjectPresenter extends Component {
             this.context.update({
                 objectFavorite: false,
             });
-        } catch (error) {
+        } catch(error) {
             this.context.update({
                 objectError: error,
             });

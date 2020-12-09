@@ -66,42 +66,26 @@ export default class ShowObjectPresenter extends Component {
     addFavoriteObject = async () => {
         try {
             await api.addObjectFavorite(this.props.id)
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        favorite: true,
-                    }
-                });
+            this.context.update({
+                objectFavorite: true,
+            });
         } catch (error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     }
 
     removeFavoriteObject = async () => {
         try {
             await api.removeObjectFavorite(this.props.id)
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        favorite: false,
-                    }
-                });
+            this.context.update({
+                objectFavorite: false,
+            });
         } catch (error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     }
 
@@ -126,7 +110,7 @@ export default class ShowObjectPresenter extends Component {
     get actions() {
         let nodes = queryString.parse(this.props.history.location.search, {arrayFormat: 'bracket'}).node || [];
 
-        let favorite = this.context.object.favorite ?
+        let favorite = this.context.objectFavorite ?
             {label: "Unfavorite", icon: "star", action: (() => this.removeFavoriteObject())} :
             {label: "Favorite", icon: ["far","star"], action: (() => this.addFavoriteObject())}
 

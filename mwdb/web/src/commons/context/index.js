@@ -7,12 +7,8 @@ export class GlobalProvider extends Component {
         super(props)
         this.updateState = this.updateState.bind(this)
         this.state = {
-            object: {
-                favorite: false,
-                success: null,
-                error: null,
-            },
-            update: this.updateState,
+            objectFavorite: false,
+            objectError: null
         }
     }
 
@@ -22,7 +18,10 @@ export class GlobalProvider extends Component {
 
     render() {
         return (
-            <GlobalContext.Provider value={this.state}>
+            <GlobalContext.Provider value={{
+                ...this.state,
+                update: this.updateState
+            }}>
                 {this.props.children}
             </GlobalContext.Provider>
         )

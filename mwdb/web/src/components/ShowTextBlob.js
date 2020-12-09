@@ -120,7 +120,6 @@ class ShowTextBlob extends Component {
             this.context.update({
                 objectFavorite: response.data.favorite,
                 objectError: null,
-                objectSuccess: null,
             });
         } catch(error) {
             this.context.update({
@@ -140,7 +139,7 @@ class ShowTextBlob extends Component {
 
     render() {
         return (
-            <View fluid ident="showTextBlob" error={this.context.objectError} success={this.context.objectSuccess}>
+            <View fluid ident="showTextBlob" error={this.context.objectError}>
                 <ShowObject object={this.state.blob} 
                             objectPresenterComponent={ConnectedTextBlobPresenter}
                             searchEndpoint="blobs"

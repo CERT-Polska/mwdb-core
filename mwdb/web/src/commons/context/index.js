@@ -8,7 +8,6 @@ export class GlobalProvider extends Component {
         this.updateState = this.updateState.bind(this)
         this.state = {
             objectFavorite: false,
-            objectSuccess: null,
             objectError: null
         }
     }

@@ -212,7 +212,6 @@ class ShowConfig extends Component {
             this.context.update({
                 objectFavorite: response.data.favorite,
                 objectError: null,
-                objectSuccess: null,
             });
         } catch(error) {
             this.context.update({
@@ -232,7 +231,7 @@ class ShowConfig extends Component {
 
     render() {
         return (
-            <View fluid ident="showConfig" error={this.context.objectError} success={this.context.objectSuccess}>
+            <View fluid ident="showConfig" error={this.context.objectError}>
                 <ShowObject object={this.state.config} 
                             objectPresenterComponent={ConnectedConfigPresenter}
                             searchEndpoint='configs'

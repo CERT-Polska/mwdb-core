@@ -194,7 +194,6 @@ export default class ShowSample extends Component {
             this.context.update({
                 objectFavorite: response.data.favorite,
                 objectError: null,
-                objectSuccess: null,
             });
         } catch(error) {
             this.context.update({
@@ -214,7 +213,7 @@ export default class ShowSample extends Component {
 
     render() {
         return (
-            <View fluid ident="showSample" error={this.context.objectError} success={this.context.objectSuccess}>
+            <View fluid ident="showSample" error={this.context.objectError}>
                 <ShowObject object={this.state.file}
                             objectPresenterComponent={ConnectedSamplePresenter}
                             searchEndpoint=''

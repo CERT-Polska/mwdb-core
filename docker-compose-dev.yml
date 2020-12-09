@@ -32,12 +32,13 @@ services:
       MWDB_RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
       MWDB_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
       MWDB_ENABLE_REGISTRATION: 1
-      MWDB_STORAGE_PROVIDER: s3
-      MWDB_HASH_PATHING: 0
-      MWDB_S3_STORAGE_ENDPOINT: "minio:9000"
-      MWDB_S3_STORAGE_ACCESS_KEY: "mwdb-test-access"
-      MWDB_S3_STORAGE_SECRET_KEY: "mwdb-test-key"
-      MWDB_S3_STORAGE_BUCKET_NAME: "mwdb"
+      # Uncomment if you want to test S3 functions
+      # MWDB_STORAGE_PROVIDER: s3
+      # MWDB_HASH_PATHING: 0
+      # MWDB_S3_STORAGE_ENDPOINT: "minio:9000"
+      # MWDB_S3_STORAGE_ACCESS_KEY: "mwdb-test-access"
+      # MWDB_S3_STORAGE_SECRET_KEY: "mwdb-test-key"
+      # MWDB_S3_STORAGE_BUCKET_NAME: "mwdb"
     volumes:
       - "./docker/mail_templates:/app/mail_templates"
       - "./mwdb:/app/mwdb"

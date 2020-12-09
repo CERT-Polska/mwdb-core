@@ -115,24 +115,17 @@ class ShowTextBlob extends Component {
         try {
             let response = await api.getObject("blob", this.props.match.params.hash);
             this.setState({
-                    blob: response.data
+                blob: response.data
             });
-            this.context.update(
-                {
-                    object: {
-                        favorite: response.data.favorite,
-                        error: null,
-                        success: null,
-                    }
-                });
+            this.context.update({
+                objectFavorite: response.data.favorite,
+                objectError: null,
+                objectSuccess: null,
+            });
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error
+            });
         }
     }
 
@@ -147,7 +140,7 @@ class ShowTextBlob extends Component {
 
     render() {
         return (
-            <View fluid ident="showTextBlob" error={this.context.object.error} success={this.context.object.success}>
+            <View fluid ident="showTextBlob" error={this.context.objectError} success={this.context.objectSuccess}>
                 <ShowObject object={this.state.blob} 
                             objectPresenterComponent={ConnectedTextBlobPresenter}
                             searchEndpoint="blobs"

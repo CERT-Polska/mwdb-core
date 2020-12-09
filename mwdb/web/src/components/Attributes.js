@@ -38,14 +38,10 @@ class DefaultAttributeRenderer extends Component {
                 isAttributeDeleteModalOpen: false,
                 attributeToRemove: null
             })
-        } catch (error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+        } catch(error) {
+            this.context.update({
+                objectError: error,
+            });
         }
     }
 
@@ -149,13 +145,9 @@ class ObjectAttributes extends Component {
                 attributes: aggregated
             });
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     }
 
@@ -165,13 +157,9 @@ class ObjectAttributes extends Component {
             await this.updateAttributes();
             this.props.onRequestModalClose();
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     }
 

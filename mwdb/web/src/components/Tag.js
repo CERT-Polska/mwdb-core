@@ -73,13 +73,9 @@ class TagForm extends Component {
                 tags: response.data.map(t => t.tag),
             });
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     };
 
@@ -172,13 +168,9 @@ class TagBox extends Component {
             let tags = response.data;
             this.setState({tags});
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     };
 
@@ -196,13 +188,9 @@ class TagBox extends Component {
             await api.addObjectTag(this.props.id, tag)
             this.updateTags();
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     };
 
@@ -215,13 +203,9 @@ class TagBox extends Component {
             await api.removeObjectTag(this.props.id, tag)
             this.updateTags();
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         } finally {
             this.closeModal()
         }

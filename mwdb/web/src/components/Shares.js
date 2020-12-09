@@ -111,13 +111,9 @@ class SharesBox extends Component {
                 items: response.data.shares
             });
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     };
 
@@ -134,13 +130,9 @@ class SharesBox extends Component {
             await api.shareObjectWith(this.props.id, group)
             this.updateShares();
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     }
 

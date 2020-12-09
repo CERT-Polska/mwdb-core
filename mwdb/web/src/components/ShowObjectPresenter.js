@@ -58,14 +58,10 @@ export default class ShowObjectPresenter extends Component {
                 } else {
                     this.props.history.push("/configs")
                 }
-            } catch (error) {
-                this.context.update(
-                    {
-                        object: {
-                            ...this.context.object,
-                            error: error,
-                        }
-                    });
+            } catch(error) {
+                this.context.update({
+                    objectError: error,
+                });
             }
     }
 
@@ -75,7 +71,7 @@ export default class ShowObjectPresenter extends Component {
             this.context.update({
                 objectFavorite: true,
             });
-        } catch (error) {
+        } catch(error) {
             this.context.update({
                 objectError: error,
             });
@@ -88,7 +84,7 @@ export default class ShowObjectPresenter extends Component {
             this.context.update({
                 objectFavorite: false,
             });
-        } catch (error) {
+        } catch(error) {
             this.context.update({
                 objectError: error,
             });

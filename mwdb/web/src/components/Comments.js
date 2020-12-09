@@ -72,13 +72,9 @@ class CommentBox extends Component {
                 comments: response.data
             });
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     };
 
@@ -96,13 +92,9 @@ class CommentBox extends Component {
             await api.addObjectComment(this.props.id, comment)
             this.updateComments();
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         }
     };
 
@@ -115,13 +107,9 @@ class CommentBox extends Component {
             await api.removeObjectComment(this.props.id, comment_id)
             this.updateComments();
         } catch(error) {
-            this.context.update(
-                {
-                    object: {
-                        ...this.context.object,
-                        error: error,
-                    }
-                });
+            this.context.update({
+                objectError: error,
+            });
         } finally {
             this.closeModal();
         }

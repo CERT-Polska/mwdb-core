@@ -143,7 +143,7 @@ class File(Object):
         if not self.upload_stream:
             raise ValueError("Can't retrieve local path for this file")
 
-        if type(self.upload_stream.name) is str:
+        if isinstance(self.upload_stream.name, str) or isinstance(self.upload_stream, bytes):
             return self.upload_stream.name
 
         fd_path = get_fd_path(self.upload_stream)
@@ -171,7 +171,9 @@ class File(Object):
                 return io.BytesIO(self.upload_stream.getbuffer())
             else:
                 dupfd = os.dup(self.upload_stream.fileno())
-                return os.fdopen(dupfd, "rb")
+                stream = os.fdopen(dupfd, "rb")
+                stream.seek(0, os.SEEK_SET)
+                return stream
         if app_config.mwdb.storage_provider == StorageProviderType.S3:
             return get_minio_client(
                 app_config.mwdb.s3_storage_endpoint,

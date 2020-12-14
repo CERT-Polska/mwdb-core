@@ -91,6 +91,8 @@ class MWDBConfig(Config):
     # Auto-discover plugins contained in local_plugins_folder
     local_plugins_autodiscover = key(cast=intbool, required=False, default=False)
 
+    remotes = key(cast=list_of_str, required=False, default="")
+
     enable_rate_limit = key(cast=intbool, required=False, default=False)
     enable_registration = key(cast=intbool, required=False, default=False)
     enable_maintenance = key(cast=intbool, required=False, default=False)

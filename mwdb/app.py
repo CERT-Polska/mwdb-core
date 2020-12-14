@@ -44,6 +44,7 @@ from mwdb.resources.user import (
     UserResource, UserListResource, UserPendingResource,
     UserGetPasswordChangeTokenResource, UserProfileResource
 )
+from mwdb.resources.remotes import APIRemotesListResource
 
 
 class HashConverter(BaseConverter):
@@ -239,6 +240,9 @@ api.add_resource(UserPendingResource, "/user/<login>/pending")
 api.add_resource(GroupListResource, "/group")
 api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
+
+#Remotes enspoints
+api.add_resource(APIRemotesListResource, "/remote")
 
 setup_logger()
 

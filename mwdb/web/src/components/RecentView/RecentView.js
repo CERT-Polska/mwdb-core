@@ -108,7 +108,6 @@ export default function RecentView(props) {
             props.type,
             submittedQuery
         ).then((response) => {
-            console.log(response)
             setObjectCount(response.data["count"]);
         }).catch((error) => {
             if(cancelled)

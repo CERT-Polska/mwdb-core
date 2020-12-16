@@ -54,6 +54,8 @@ export default function RecentView(props) {
     // Query error shown under the query bar
     let [queryError, setQueryError] = useState(null);
 
+    let [objectCount, setObjectCount] = useState(null)
+
     const isLocked = (
         !queryError && submittedQuery !== currentQuery
     )
@@ -102,6 +104,17 @@ export default function RecentView(props) {
                 return;
             setQueryError(error);
         })
+        api.getObjectCount(
+            props.type,
+            submittedQuery
+        ).then((response) => {
+            console.log(response)
+            setObjectCount(response.data["count"]);
+        }).catch((error) => {
+            if(cancelled)
+                return;
+            setQueryError(error);
+        })
         return () => { cancelled = true; }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [submittedQuery])
@@ -130,6 +143,16 @@ export default function RecentView(props) {
         ) : []
     )
 
+    const objectCountMessage = (
+        (submittedQuery && objectCount) ?
+            <div className="form-hint">
+                {
+                    objectCount
+                }
+                {" results found"}
+            </div> : []
+    )
+
     return (
         <View fluid ident="RecentObjects" error={error}>
             <div className="table-responsive">
@@ -151,7 +174,7 @@ export default function RecentView(props) {
                         </div>
                     </div>
                     <div className="input-group">
-                        {queryErrorMessage}
+                        {queryError ? queryErrorMessage : objectCountMessage}
                         <QuickQuery type={props.type} query={currentQuery}
                                     canAddQuickQuery={canAddQuickQuery}
                                     submitQuery={q => submitQuery(q)}

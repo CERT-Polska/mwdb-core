@@ -62,7 +62,6 @@ class ObjectListResponseSchemaBase(Schema):
 
     @post_dump(pass_many=True)
     def wrap_with_envelope(self, data, many, **kwargs):
-        print(data, flush=True)
         if not many:
             raise ValueError("Schema supports only lists of objects")
         return {self.__envelope_key__: data}

@@ -88,13 +88,15 @@ services:
       - mwdb1
     build:
       context: .
-      dockerfile: deploy/docker/Dockerfile-web
+      dockerfile: deploy/docker/Dockerfile-web-dev
     image: certpl/mwdb1-web
     ports:
-      - "8085:80"
+      - "8085:3000"
     restart: on-failure
     environment:
-      - PROXY_BACKEND_URL:"http://mwdb1.:8080"
+      PROXY_BACKEND_URL: "http://mwdb1.:8080"
+      HOST: 0.0.0.0
+      REACT_APP_API_URL: "/api/"
   postgres1:
     image: postgres
     restart: always

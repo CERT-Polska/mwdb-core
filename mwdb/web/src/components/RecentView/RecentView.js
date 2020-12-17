@@ -54,7 +54,7 @@ export default function RecentView(props) {
     // Query error shown under the query bar
     let [queryError, setQueryError] = useState(null);
 
-    let [objectCount, setObjectCount] = useState(null)
+    let [objectCount, setObjectCount] = useState(null);
 
     const isLocked = (
         !queryError && submittedQuery !== currentQuery

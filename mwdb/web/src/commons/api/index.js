@@ -88,6 +88,12 @@ function getObjectList(type, older_than, query) {
     })
 }
 
+function getObjectCount(type, query) {
+    return axios.get(`/${type}/count`, {
+        params: { query }
+    })
+}
+
 function getTags(query) {
     return axios.get(`/tag`, {
         params: {query}
@@ -331,6 +337,7 @@ export default {
     apiKeyRemove,
     getObject,
     getObjectList,
+    getObjectCount,
     getTags,
     getShareInfo,
     getObjectTags,

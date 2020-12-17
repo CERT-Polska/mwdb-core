@@ -90,24 +90,14 @@ export default function RecentView(props) {
         if(submittedQuery === currentQuery)
             return;
         // Make preflight query to check if query is correct
-        api.getObjectList(
-            props.type, 
-            null, // no pivot, load first page
-            submittedQuery
-        ).then(() => {
-            if(cancelled)
-                return;
-            // If ok: commit query
-            setCurrentQuery(submittedQuery);
-        }).catch((error) => {
-            if(cancelled)
-                return;
-            setQueryError(error);
-        })
         api.getObjectCount(
             props.type,
             submittedQuery
         ).then((response) => {
+            if(cancelled)
+                return;
+            // If ok: commit query
+            setCurrentQuery(submittedQuery);
             setObjectCount(response.data["count"]);
         }).catch((error) => {
             if(cancelled)
@@ -151,7 +141,6 @@ export default function RecentView(props) {
                 {" results found"}
             </div> : []
     )
-
     return (
         <View fluid ident="RecentObjects" error={error}>
             <div className="table-responsive">

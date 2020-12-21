@@ -170,6 +170,23 @@ Your MWDB instance will be available on default HTTP port (80): http://127.0.0.1
 
 If you want to use Docker Compose for MWDB development, check out :ref:`Developer guide`.
 
+Upgrade mwdb-core to latest version
+-----------------------------------
+
+For standalone installation (pip-based), upgrade mwdb-core package to the latest version.
+
+.. code-block:: console
+
+   $ pip install -U mwdb-core
+
+Then apply required database migrations using ``mwdb-core configure``.
+
+.. code-block:: console
+
+   $ mwdb-core configure
+
+If you use Docker-based environment, just pull the latest changes from repository and rebuild the images. Database migrations will be applied as a part of container startup.
+
 Storing files in S3 Compatible storage (MinIO, AWS S3)
 ----------------------------------------------------------
 

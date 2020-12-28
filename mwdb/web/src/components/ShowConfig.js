@@ -113,7 +113,8 @@ export class ConfigTable extends Component {
     }
 
     render() {
-        let indentLevel = this.props.indent || 0
+        const indentLevel = this.props.indent || 0
+        const currentPath = this.props.path || []
 
         function TopLevel(props) {
             return !indentLevel ? props.children : []
@@ -138,11 +139,11 @@ export class ConfigTable extends Component {
                             Array.isArray(this.props.cfg)
                             // If Array: add the asterisk to the last element
                             ? [
-                                ...this.props.path.slice(0, -1),
-                                this.props.path[this.props.path.length - 1] + "*"
+                                ...currentPath.slice(0, -1),
+                                currentPath[currentPath.length - 1] + "*"
                             ]
                             // Else: just add next key to the path
-                            : this.props.path.concat([configKey])
+                            : currentPath.concat([configKey])
                         )
                         return <ConfigRow name={configKey} key={configKey} 
                                           value={this.props.cfg[configKey]} 
@@ -177,7 +178,7 @@ class ConfigPresenter extends ShowObjectPresenter {
     get presenters() {
         return {
             ...super.presenters,
-            details: (props => <ConfigTable {...props} path={[]} />),
+            details: (props => <ConfigTable {...props} />),
             preview: (props => <HexView content={JSON.stringify(props.cfg, null, 4)} mode="raw" json/>)
         }
     }

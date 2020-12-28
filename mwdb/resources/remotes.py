@@ -1,18 +1,13 @@
 from flask_restful import Resource
 import urllib3
+from werkzeug.exceptions import BadRequest, Conflict
 from mwdb.core.config import app_config
 from mwdb.schema.remotes import APIRemotesListResponseSchema
-import json
-from mwdb.resources.object import ObjectResource, ObjectUploader
-from mwdb.resources.file import FileUploader
-import os
+from mwdb.model import File
+from mwdb.model.file import EmptyFileError
 from mwdb.model.object import ObjectTypeConflictError
-from mwdb.resources.config import ConfigUploader
-from mwdb.resources.blob import TextBlobUploader
-from mwdb.schema.file import FileCreateRequestSchema
-from mwdb.schema.config import ConfigCreateRequestSchema
-from mwdb.schema.blob import BlobCreateRequestSchema
-from . import requires_authorization, load_schema
+import json
+from tempfile import SpooledTemporaryFile
 
 
 class APIRemotesListResource(Resource):
@@ -36,22 +31,7 @@ class APIRemotesListResource(Resource):
         return schema.dump({"remotes": remotes})
 
 
-# class RemoteFileUploader(ObjectUploader):
-#     def _create_object(self, spec, parent, share_with, metakeys):
-#         try:
-#             return File.get_or_create(
-#                 request.files["file"],
-#                 parent=parent,
-#                 share_with=share_with,
-#                 metakeys=metakeys
-#             )
-#         except ObjectTypeConflictError:
-#             raise Conflict("Object already exists and is not a file")
-#         except EmptyFileError:
-#             raise BadRequest("File cannot be empty")
-
-
-class APiRemotesFilePullResource(FileUploader, ObjectResource):
+class APiRemotesFilePullResource(Resource):
     session = urllib3.PoolManager()
 
     # @requires_authorization
@@ -79,13 +59,33 @@ class APiRemotesFilePullResource(FileUploader, ObjectResource):
         """
         remote_url = app_config.get_key(f"remote:{remote_name}", "url")
         api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
+        response = self.session.request("GET", f"{remote_url}/api/file/{identifier}",
+                                        preload_content=False,
+                                        headers={'Authorization': 'Bearer {}'.format(api_key)})
+
+        data = response.read()
+        file_name = json.loads(data.decode('utf-8'))['file_name']
+
         response = self.session.request("POST", f"{remote_url}/api/request/sample/{identifier}",
                                         preload_content=False,
                                         headers={'Authorization': 'Bearer {}'.format(api_key)})
         data = response.read()
 
-        obj_json = json.loads(data.decode('utf-8'))
-        response = self.session.request("GET", f"{remote_url}/api/{obj_json['url']}",
+        download_url = json.loads(data.decode('utf-8'))['url']
+        response = self.session.request("GET", f"{remote_url}/api/{download_url}",
                                         preload_content=False,
                                         headers={'Authorization': 'Bearer {}'.format(api_key)})
-        obj = response.read()
+        file_stream = SpooledTemporaryFile()
+        file_stream.write(response.read())
+        file_stream.seek(0)
+        try:
+            return File.get_or_create(
+                file_name,
+                file_stream
+            )
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a file")
+        except EmptyFileError:
+            raise BadRequest("File cannot be empty")
+        finally:
+            file_stream.close()

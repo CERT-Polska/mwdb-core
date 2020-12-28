@@ -44,8 +44,10 @@ from mwdb.resources.user import (
     UserResource, UserListResource, UserPendingResource,
     UserGetPasswordChangeTokenResource, UserProfileResource
 )
-from mwdb.resources.remotes import APIRemotesListResource, APiRemotesFilePullResource
-
+from mwdb.resources.remotes import (
+    APIRemotesListResource, APiRemotesFilePullResource,
+    APiRemotesConfigPullResource, APiRemotesTextBlobPullResource
+)
 
 class HashConverter(BaseConverter):
     # MD5/SHA1/SHA256/SHA512 (32,40,64,128)
@@ -244,7 +246,8 @@ api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
 #Remotes enspoints
 api.add_resource(APIRemotesListResource, "/remote")
 api.add_resource(APiRemotesFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>")
-
+api.add_resource(APiRemotesConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>")
+api.add_resource(APiRemotesTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>")
 setup_logger()
 
 # Load plugins

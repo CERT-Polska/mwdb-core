@@ -105,16 +105,8 @@ class File(Object):
                     file_size
                 )
             else:
-                close_dst = False
-                dst = file_obj._calculate_path()
-                if isinstance(dst, str):
-                    dst = open(dst, "wb")
-                    close_dst = True
-                try:
-                    copyfileobj(file_stream, dst)  # type: ignore
-                finally:
-                    if close_dst:
-                        dst.close()
+                with open(file_obj._calculate_path(), "wb") as f:
+                    copyfileobj(file_stream, f)
 
         file_obj.upload_stream = file_stream
         return file_obj, is_new

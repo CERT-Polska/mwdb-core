@@ -1,13 +1,16 @@
 from flask_restful import Resource
 import urllib3
+from mwdb.core.plugins import hooks
 from werkzeug.exceptions import BadRequest, Conflict
 from mwdb.core.config import app_config
 from mwdb.schema.remotes import APIRemotesListResponseSchema
-from mwdb.model import File
+from mwdb.model import db, File
 from mwdb.model.file import EmptyFileError
 from mwdb.model.object import ObjectTypeConflictError
+from mwdb.schema.file import FileItemResponseSchema
 import json
 from tempfile import SpooledTemporaryFile
+from . import logger, requires_authorization
 
 
 class APIRemotesListResource(Resource):
@@ -33,6 +36,9 @@ class APIRemotesListResource(Resource):
 
 class APiRemotesFilePullResource(Resource):
     session = urllib3.PoolManager()
+    ObjectType = File
+    on_created = hooks.on_created_file
+    on_reuploaded = hooks.on_reuploaded_file
 
     # @requires_authorization
     def post(self, remote_name, identifier):
@@ -79,7 +85,7 @@ class APiRemotesFilePullResource(Resource):
         file_stream.write(response.read())
         file_stream.seek(0)
         try:
-            return File.get_or_create(
+            item, is_new = File.get_or_create(
                 file_name,
                 file_stream
             )
@@ -89,3 +95,22 @@ class APiRemotesFilePullResource(Resource):
             raise BadRequest("File cannot be empty")
         finally:
             file_stream.close()
+
+        try:
+            db.session.commit()
+
+            if is_new:
+                hooks.on_created_object(item)
+                self.on_created(item)
+            else:
+                hooks.on_reuploaded_object(item)
+                self.on_reuploaded(item)
+        finally:
+            item.release_after_upload()
+
+        logger.info(f'{self.ObjectType.__name__} added', extra={
+            'dhash': item.dhash,
+            'is_new': is_new
+        })
+        schema = FileItemResponseSchema()
+        return schema.dump(item)

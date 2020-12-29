@@ -2,7 +2,7 @@ from flask_restful import Resource
 from flask import g
 import urllib3
 from mwdb.core.plugins import hooks
-from werkzeug.exceptions import BadRequest, Conflict , NotFound, Forbidden
+from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.schema.remotes import APIRemotesListResponseSchema
@@ -17,7 +17,7 @@ from tempfile import SpooledTemporaryFile
 from . import logger, requires_authorization
 
 
-class APIRemotesListResource(Resource):
+class APIRemoteListResource(Resource):
     # @requires_authorization
     def get(self):
         """
@@ -28,19 +28,50 @@ class APIRemotesListResource(Resource):
         tags:
             - api_remote
         responses:
-            description: List of user configured remotes
-            content:
-              application/json:
-                schema: GroupListResponseSchema
+            200:
+                description: List of user configured remotes
+                content:
+                  application/json:
+                    schema: GroupListResponseSchema
         """
         remotes = app_config.mwdb.remotes
         schema = APIRemotesListResponseSchema()
         return schema.dump({"remotes": remotes})
 
 
-class APiRemotesFilePullResource(Resource):
+class APiRemotePullResource(Resource):
     session = urllib3.PoolManager()
+    ObjectType = None
+    ItemResponseSchema = None
+
+    on_created = None
+    on_reuploaded = None
+
+    def create_pulled_object(self, item, is_new):
+        try:
+            db.session.commit()
+
+            if is_new:
+                hooks.on_created_object(item)
+                self.on_created(item)
+            else:
+                hooks.on_reuploaded_object(item)
+                self.on_reuploaded(item)
+        finally:
+            item.release_after_upload()
+
+        logger.info(f'{self.ObjectType.__name__} added', extra={
+            'dhash': item.dhash,
+            'is_new': is_new
+        })
+        schema = self.ItemResponseSchema()
+        return schema.dump(item)
+
+
+class APiRemoteFilePullResource(APiRemotePullResource):
     ObjectType = File
+    ItemResponseSchema = FileItemResponseSchema
+
     on_created = hooks.on_created_file
     on_reuploaded = hooks.on_reuploaded_file
 
@@ -48,9 +79,9 @@ class APiRemotesFilePullResource(Resource):
     def post(self, remote_name, identifier):
         """
         ---
-        summary: Pulls object from remote to local instance
+        summary: Pulls file from remote to local instance
         description: |
-            Pulls object from the remote instance to the local instance
+            Pulls file from the remote instance to the local instance
         tags:
             - api_remote
         parameters:
@@ -70,7 +101,12 @@ class APiRemotesFilePullResource(Resource):
                 content:
                   application/json:
                     schema: FileItemResponseSchema
+            404:
+                description: When the search name of the remote instance is not figured in the application config
         """
+        if remote_name not in app_config.mwdb.remotes:
+            raise NotFound("Can't find saved remote mwdb instance with this name.")
+
         remote_url = app_config.get_key(f"remote:{remote_name}", "url")
         api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
         response = self.session.request("GET", f"{remote_url}/api/file/{identifier}",
@@ -104,31 +140,15 @@ class APiRemotesFilePullResource(Resource):
         finally:
             file_stream.close()
 
-        try:
-            db.session.commit()
-
-            if is_new:
-                hooks.on_created_object(item)
-                self.on_created(item)
-            else:
-                hooks.on_reuploaded_object(item)
-                self.on_reuploaded(item)
-        finally:
-            item.release_after_upload()
-
-        logger.info(f'{self.ObjectType.__name__} added', extra={
-            'dhash': item.dhash,
-            'is_new': is_new
-        })
-        schema = FileItemResponseSchema()
-        return schema.dump(item)
+        return self.create_pulled_object(item, is_new)
 
 
-class APiRemotesConfigPullResource(Resource):
-    session = urllib3.PoolManager()
+class APiRemoteConfigPullResource(APiRemotePullResource):
     ObjectType = Config
-    on_created = hooks.on_created_file
-    on_reuploaded = hooks.on_reuploaded_file
+    ItemResponseSchema = ConfigItemResponseSchema
+
+    on_created = hooks.on_created_config
+    on_reuploaded = hooks.on_reuploaded_config
 
     # @requires_authorization
     def post(self, remote_name, identifier):
@@ -156,7 +176,12 @@ class APiRemotesConfigPullResource(Resource):
                 content:
                   application/json:
                     schema: ConfigItemResponseSchema
+            404:
+                description: When the search name of the remote instance is not figured in the application config
         """
+        if remote_name not in app_config.mwdb.remotes:
+            raise NotFound("Can't find saved remote mwdb instance with this name.")
+
         remote_url = app_config.get_key(f"remote:{remote_name}", "url")
         api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
         response = self.session.request("GET", f"{remote_url}/api/config/{identifier}",
@@ -195,31 +220,15 @@ class APiRemotesConfigPullResource(Resource):
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")
 
-        try:
-            db.session.commit()
-
-            if is_new:
-                hooks.on_created_object(item)
-                self.on_created(item)
-            else:
-                hooks.on_reuploaded_object(item)
-                self.on_reuploaded(item)
-        finally:
-            item.release_after_upload()
-
-        logger.info(f'{self.ObjectType.__name__} added', extra={
-            'dhash': item.dhash,
-            'is_new': is_new
-        })
-        schema = ConfigItemResponseSchema()
-        return schema.dump(item)
+        return self.create_pulled_object(item, is_new)
 
 
-class APiRemotesTextBlobPullResource(Resource):
-    session = urllib3.PoolManager()
+class APiRemoteTextBlobPullResource(APiRemotePullResource):
     ObjectType = TextBlob
-    on_created = hooks.on_created_file
-    on_reuploaded = hooks.on_reuploaded_file
+    ItemResponseSchema = BlobItemResponseSchema
+
+    on_created = hooks.on_created_text_blob
+    on_reuploaded = hooks.on_reuploaded_text_blob
 
     # @requires_authorization
     def post(self, remote_name, identifier):
@@ -247,7 +256,12 @@ class APiRemotesTextBlobPullResource(Resource):
                 content:
                   application/json:
                     schema: BlobItemResponseSchema
+            404:
+                description: When the search name of the remote instance is not figured in the application config
         """
+        if remote_name not in app_config.mwdb.remotes:
+            raise NotFound("Can't find saved remote mwdb instance with this name.")
+
         remote_url = app_config.get_key(f"remote:{remote_name}", "url")
         api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
         response = self.session.request("GET", f"{remote_url}/api/blob/{identifier}",
@@ -266,21 +280,4 @@ class APiRemotesTextBlobPullResource(Resource):
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")
 
-        try:
-            db.session.commit()
-
-            if is_new:
-                hooks.on_created_object(item)
-                self.on_created(item)
-            else:
-                hooks.on_reuploaded_object(item)
-                self.on_reuploaded(item)
-        finally:
-            item.release_after_upload()
-
-        logger.info(f'{self.ObjectType.__name__} added', extra={
-            'dhash': item.dhash,
-            'is_new': is_new
-        })
-        schema = BlobItemResponseSchema()
-        return schema.dump(item)
+        return self.create_pulled_object(item, is_new)

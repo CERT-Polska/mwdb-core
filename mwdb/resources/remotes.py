@@ -103,6 +103,8 @@ class APiRemoteFilePullResource(APiRemotePullResource):
                     schema: FileItemResponseSchema
             404:
                 description: When the search name of the remote instance is not figured in the application config
+            409:
+                description: Object exists yet but has different type
         """
         if remote_name not in app_config.mwdb.remotes:
             raise NotFound("Can't find saved remote mwdb instance with this name.")
@@ -130,8 +132,9 @@ class APiRemoteFilePullResource(APiRemotePullResource):
         file_stream.seek(0)
         try:
             item, is_new = File.get_or_create(
-                file_name,
-                file_stream
+                file_name=file_name,
+                file_stream=file_stream,
+                share_with=g.auth_user.login
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a file")
@@ -176,8 +179,12 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
                 content:
                   application/json:
                     schema: ConfigItemResponseSchema
+            403:
+                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
             404:
                 description: When the search name of the remote instance is not figured in the application config
+            409:
+                description: Object exists yet but has different type
         """
         if remote_name not in app_config.mwdb.remotes:
             raise NotFound("Can't find saved remote mwdb instance with this name.")
@@ -209,9 +216,10 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
                     raise BadRequest("'in-blob' should be the only key")
 
             item, is_new = Config.get_or_create(
-                spec["cfg"],
-                spec["family"],
-                spec["config_type"],
+                cfg=spec["cfg"],
+                family=spec["family"],
+                config_type=spec["config_type"],
+                share_with=g.auth_user.login
             )
             
             for blob in blobs:
@@ -258,6 +266,8 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
                     schema: BlobItemResponseSchema
             404:
                 description: When the search name of the remote instance is not figured in the application config
+            409:
+                description: Object exists yet but has different type
         """
         if remote_name not in app_config.mwdb.remotes:
             raise NotFound("Can't find saved remote mwdb instance with this name.")
@@ -273,9 +283,10 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
         try:
 
             item, is_new = TextBlob.get_or_create(
-                spec["content"],
-                spec["blob_name"],
-                spec["blob_type"],
+                content=spec["content"],
+                blob_name=spec["blob_name"],
+                blob_type=spec["blob_type"],
+                share_with=g.auth_user.login
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")

@@ -1,18 +1,16 @@
 from flask_restful import Resource
 from flask import g
-import urllib3
+import requests
 from mwdb.core.plugins import hooks
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.schema.remotes import APIRemotesListResponseSchema
 from mwdb.model import db, File, Config, TextBlob
-from mwdb.model.file import EmptyFileError
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import FileItemResponseSchema
 from mwdb.schema.config import ConfigItemResponseSchema
 from mwdb.schema.blob import BlobItemResponseSchema
-import json
 from tempfile import SpooledTemporaryFile
 from . import logger, requires_authorization
 
@@ -40,12 +38,20 @@ class APIRemoteListResource(Resource):
 
 
 class APiRemotePullResource(Resource):
-    session = urllib3.PoolManager()
+    session = requests.Session()
     ObjectType = None
     ItemResponseSchema = None
 
     on_created = None
     on_reuploaded = None
+
+    def get_remote_api_data(self, remote_name):
+        if remote_name not in app_config.mwdb.remotes:
+            raise NotFound("Can't find saved remote mwdb instance with this name.")
+
+        remote_url = app_config.get_key(f"remote:{remote_name}", "url")
+        api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
+        return remote_url, api_key
 
     def create_pulled_object(self, item, is_new):
         try:
@@ -106,42 +112,32 @@ class APiRemoteFilePullResource(APiRemotePullResource):
             409:
                 description: Object exists yet but has different type
         """
-        if remote_name not in app_config.mwdb.remotes:
-            raise NotFound("Can't find saved remote mwdb instance with this name.")
-
-        remote_url = app_config.get_key(f"remote:{remote_name}", "url")
-        api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
+        remote_url, api_key = self.get_remote_api_data(remote_name)
         response = self.session.request("GET", f"{remote_url}/api/file/{identifier}",
-                                        preload_content=False,
                                         headers={'Authorization': 'Bearer {}'.format(api_key)})
-
-        data = response.read()
-        file_name = json.loads(data.decode('utf-8'))['file_name']
+        file_name = response.json()['file_name']
 
         response = self.session.request("POST", f"{remote_url}/api/request/sample/{identifier}",
-                                        preload_content=False,
                                         headers={'Authorization': 'Bearer {}'.format(api_key)})
-        data = response.read()
+        download_url = response.json()['url']
 
-        download_url = json.loads(data.decode('utf-8'))['url']
         response = self.session.request("GET", f"{remote_url}/api/{download_url}",
-                                        preload_content=False,
-                                        headers={'Authorization': 'Bearer {}'.format(api_key)})
-        file_stream = SpooledTemporaryFile()
-        file_stream.write(response.read())
-        file_stream.seek(0)
-        try:
-            item, is_new = File.get_or_create(
-                file_name=file_name,
-                file_stream=file_stream,
-                share_with=g.auth_user.login
-            )
-        except ObjectTypeConflictError:
-            raise Conflict("Object already exists and is not a file")
-        except EmptyFileError:
-            raise BadRequest("File cannot be empty")
-        finally:
-            file_stream.close()
+                                        headers={'Authorization': 'Bearer {}'.format(api_key)},
+                                        stream=True)
+
+        with SpooledTemporaryFile() as file_stream:
+            # for chunk in response.iter_content(chunk_size=64):
+            #     file_stream.write(chunk)
+            file_stream.write(response.raw.read())
+            file_stream.seek(0)
+            try:
+                item, is_new = File.get_or_create(
+                    file_name=file_name,
+                    file_stream=file_stream,
+                    # share_with=g.auth_user.login
+                )
+            except ObjectTypeConflictError:
+                raise Conflict("Object already exists and is not a file")
 
         return self.create_pulled_object(item, is_new)
 
@@ -186,17 +182,10 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
             409:
                 description: Object exists yet but has different type
         """
-        if remote_name not in app_config.mwdb.remotes:
-            raise NotFound("Can't find saved remote mwdb instance with this name.")
-
-        remote_url = app_config.get_key(f"remote:{remote_name}", "url")
-        api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
+        remote_url, api_key = self.get_remote_api_data(remote_name)
         response = self.session.request("GET", f"{remote_url}/api/config/{identifier}",
-                                        preload_content=False,
                                         headers={'Authorization': 'Bearer {}'.format(api_key)})
-
-        data = response.read()
-        spec = json.loads(data.decode('utf-8'))
+        spec = response.json()
         try:
             config = dict(spec["cfg"])
             blobs = []
@@ -219,7 +208,7 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
                 cfg=spec["cfg"],
                 family=spec["family"],
                 config_type=spec["config_type"],
-                share_with=g.auth_user.login
+                # share_with=g.auth_user.login
             )
             
             for blob in blobs:
@@ -269,24 +258,16 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
             409:
                 description: Object exists yet but has different type
         """
-        if remote_name not in app_config.mwdb.remotes:
-            raise NotFound("Can't find saved remote mwdb instance with this name.")
-
-        remote_url = app_config.get_key(f"remote:{remote_name}", "url")
-        api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
+        remote_url, api_key = self.get_remote_api_data(remote_name)
         response = self.session.request("GET", f"{remote_url}/api/blob/{identifier}",
-                                        preload_content=False,
                                         headers={'Authorization': 'Bearer {}'.format(api_key)})
-
-        data = response.read()
-        spec = json.loads(data.decode('utf-8'))
+        spec = response.json()
         try:
-
             item, is_new = TextBlob.get_or_create(
                 content=spec["content"],
                 blob_name=spec["blob_name"],
                 blob_type=spec["blob_type"],
-                share_with=g.auth_user.login
+                # share_with=g.auth_user.login
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")

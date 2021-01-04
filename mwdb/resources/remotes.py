@@ -6,7 +6,7 @@ from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.schema.remotes import APIRemotesListResponseSchema
-from mwdb.model import db, File, Config, TextBlob
+from mwdb.model import db, File, Config, TextBlob, Group
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import FileItemResponseSchema
 from mwdb.schema.config import ConfigItemResponseSchema
@@ -16,13 +16,15 @@ from . import logger, requires_authorization
 
 
 class APIRemoteListResource(Resource):
-    # @requires_authorization
+    @requires_authorization
     def get(self):
         """
         ---
         summary: Get list of configured remote names
         description: |
             Return a list of available remote names
+        security:
+            - bearerAuth: []
         tags:
             - api_remote
         responses:
@@ -81,13 +83,15 @@ class APiRemoteFilePullResource(APiRemotePullResource):
     on_created = hooks.on_created_file
     on_reuploaded = hooks.on_reuploaded_file
 
-    # @requires_authorization
+    @requires_authorization
     def post(self, remote_name, identifier):
         """
         ---
         summary: Pulls file from remote to local instance
         description: |
             Pulls file from the remote instance to the local instance
+        security:
+            - bearerAuth: []
         tags:
             - api_remote
         parameters:
@@ -134,7 +138,7 @@ class APiRemoteFilePullResource(APiRemotePullResource):
                 item, is_new = File.get_or_create(
                     file_name=file_name,
                     file_stream=file_stream,
-                    # share_with=g.auth_user.login
+                    share_with=[Group.get_by_name(g.auth_user.login)]
                 )
             except ObjectTypeConflictError:
                 raise Conflict("Object already exists and is not a file")
@@ -149,13 +153,15 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
     on_created = hooks.on_created_config
     on_reuploaded = hooks.on_reuploaded_config
 
-    # @requires_authorization
+    @requires_authorization
     def post(self, remote_name, identifier):
         """
         ---
         summary: Pulls config from remote to local instance
         description: |
             Pulls config from the remote instance to the local instance
+        security:
+            - bearerAuth: []
         tags:
             - api_remote
         parameters:
@@ -208,7 +214,7 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
                 cfg=spec["cfg"],
                 family=spec["family"],
                 config_type=spec["config_type"],
-                # share_with=g.auth_user.login
+                share_with=[Group.get_by_name(g.auth_user.login)]
             )
             
             for blob in blobs:
@@ -234,6 +240,8 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
         summary: Pulls text blob from remote to local instance
         description: |
             Pulls text blob from the remote instance to the local instance
+        security:
+            - bearerAuth: []
         tags:
             - api_remote
         parameters:
@@ -267,7 +275,7 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
                 content=spec["content"],
                 blob_name=spec["blob_name"],
                 blob_type=spec["blob_type"],
-                # share_with=g.auth_user.login
+                share_with=[Group.get_by_name(g.auth_user.login)]
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")

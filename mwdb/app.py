@@ -249,6 +249,7 @@ api.add_resource(APIRemoteListResource, "/remote")
 api.add_resource(APiRemoteFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>")
 api.add_resource(APiRemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>")
 api.add_resource(APiRemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>")
+
 setup_logger()
 
 # Load plugins

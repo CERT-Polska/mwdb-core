@@ -1,6 +1,7 @@
 from flask_restful import Resource
 from flask import g
 import requests
+import json
 from mwdb.core.plugins import hooks
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden
 from mwdb.core.capabilities import Capabilities
@@ -12,7 +13,7 @@ from mwdb.schema.file import FileItemResponseSchema
 from mwdb.schema.config import ConfigItemResponseSchema
 from mwdb.schema.blob import BlobItemResponseSchema
 from tempfile import SpooledTemporaryFile
-from . import logger, requires_authorization
+from . import access_object, logger, requires_authorization
 
 
 class APIRemoteListResource(Resource):
@@ -233,7 +234,7 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
     on_created = hooks.on_created_text_blob
     on_reuploaded = hooks.on_reuploaded_text_blob
 
-    # @requires_authorization
+    @requires_authorization
     def post(self, remote_name, identifier):
         """
         ---
@@ -281,3 +282,56 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
             raise Conflict("Object already exists and is not a config")
 
         return self.create_pulled_object(item, is_new)
+
+
+class APiRemoteFilePushResource(APiRemotePullResource):
+    @requires_authorization
+    def post(self, remote_name, identifier):
+        """
+        ---
+        summary: Push file from local to remote instance
+        description: |
+            Pulls file from the local instance to the remote instance
+        security:
+            - bearerAuth: []
+        tags:
+            - api_remote
+        parameters:
+            - in: path
+              name: remote_name
+              description: name of remote
+              schema:
+                type: string
+            - in: path
+              name: identifier
+              description: Object identifier (SHA256/SHA512/SHA1/MD5)
+              schema:
+                type: string
+        responses:
+            200:
+                description: Information about pushed fie
+                content:
+                  application/json:
+                    schema: FileItemResponseSchema
+            404:
+                description: When the search name of the remote instance is not figured in the application config
+                             or object doesn't exist
+        """
+        db_object = access_object('file', identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
+
+        remote_url, api_key = self.get_remote_api_data(remote_name)
+        self.session.request("POST", f"{remote_url}/api/file",
+                             headers={'Authorization': 'Bearer {}'.format(api_key)},
+                             files={'file': (db_object.file_name, db_object.read()),
+                                    'options': (None, json.dumps({
+                                        'parent': None,
+                                        'metakeys': [],
+                                        'upload_as': g.auth_user.login
+                                    }))}
+                             )
+        logger.info(f'{db_object.type} pushed remote', extra={
+            'dhash': db_object.dhash,
+            'remote_name': remote_name
+        })

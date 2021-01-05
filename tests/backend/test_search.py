@@ -363,13 +363,13 @@ def test_uploader_query():
         result["id"] for result in
         Alice.session().search(f"uploader:{Alice.identity}")
     ]
-    assert sorted(results) == sorted([FileA.identity, FileC.identity])
+    assert sorted(results) == sorted([FileA.dhash, FileC.dhash])
     # Bob looks for own files
     results = [
         result["id"] for result in
         Bob.session().search(f"uploader:{Bob.identity}")
     ]
-    assert sorted(results) == sorted([FileB.identity])
+    assert sorted(results) == sorted([FileB.dhash])
     # Alice looks for files uploaded by Bob
     results = Alice.session().search(f"uploader:{Bob.identity}")
     assert len(results) == 0
@@ -378,4 +378,4 @@ def test_uploader_query():
         result["id"] for result in
         Bob.session().search(f"uploader:{Alice.identity}")
     ]
-    assert sorted(results) == sorted([FileC.identity])
+    assert sorted(results) == sorted([FileC.dhash])

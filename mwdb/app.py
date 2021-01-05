@@ -47,7 +47,8 @@ from mwdb.resources.user import (
 from mwdb.resources.remotes import (
     APIRemoteListResource, APiRemoteFilePullResource,
     APiRemoteConfigPullResource, APiRemoteTextBlobPullResource,
-    APiRemoteFilePushResource
+    APiRemoteFilePushResource, APiRemoteConfigPushResource,
+    APiRemoteTextBlobPushResource
 )
 
 
@@ -251,6 +252,8 @@ api.add_resource(APiRemoteFilePullResource, "/remote/<remote_name>/pull/file/<ha
 api.add_resource(APiRemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>")
 api.add_resource(APiRemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>")
 api.add_resource(APiRemoteFilePushResource, "/remote/<remote_name>/push/file/<hash64:identifier>")
+api.add_resource(APiRemoteConfigPushResource, "/remote/<remote_name>/push/config/<hash64:identifier>")
+api.add_resource(APiRemoteTextBlobPushResource, "/remote/<remote_name>/push/blob/<hash64:identifier>")
 
 setup_logger()
 

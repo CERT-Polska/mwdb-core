@@ -291,7 +291,7 @@ class APiRemoteFilePushResource(APiRemotePullResource):
         ---
         summary: Push file from local to remote instance
         description: |
-            Pulls file from the local instance to the remote instance
+            Push file from the local instance to the remote instance
         security:
             - bearerAuth: []
         tags:
@@ -322,16 +322,137 @@ class APiRemoteFilePushResource(APiRemotePullResource):
             raise NotFound("Object not found")
 
         remote_url, api_key = self.get_remote_api_data(remote_name)
-        self.session.request("POST", f"{remote_url}/api/file",
-                             headers={'Authorization': 'Bearer {}'.format(api_key)},
-                             files={'file': (db_object.file_name, db_object.read()),
-                                    'options': (None, json.dumps({
-                                        'parent': None,
-                                        'metakeys': [],
-                                        'upload_as': g.auth_user.login
-                                    }))}
-                             )
-        logger.info(f'{db_object.type} pushed remote', extra={
-            'dhash': db_object.dhash,
-            'remote_name': remote_name
-        })
+        response = self.session.request("POST", f"{remote_url}/api/file",
+                                        headers={'Authorization': 'Bearer {}'.format(api_key)},
+                                        files={'file': (db_object.file_name, db_object.read()),
+                                               'options': (None, json.dumps({
+                                                   'parent': None,
+                                                   'metakeys': [],
+                                                   'upload_as': g.auth_user.login
+                                               }))}
+                                        )
+        if response.status_code == 200:
+            logger.info(f'{db_object.type} pushed remote', extra={
+                'dhash': db_object.dhash,
+                'remote_name': remote_name
+            })
+            schema = FileItemResponseSchema()
+            return schema.dump(response.text)
+        else:
+            return response.text
+
+
+class APiRemoteConfigPushResource(APiRemotePullResource):
+    @requires_authorization
+    def post(self, remote_name, identifier):
+        """
+        ---
+        summary: Push config from local to remote instance
+        description: |
+            Push config from the local instance to the remote instance
+        security:
+            - bearerAuth: []
+        tags:
+            - api_remote
+        parameters:
+            - in: path
+              name: remote_name
+              description: name of remote
+              schema:
+                type: string
+            - in: path
+              name: identifier
+              description: Object identifier (SHA256/SHA512/SHA1/MD5)
+              schema:
+                type: string
+        responses:
+            200:
+                description: Information about pushed config
+                content:
+                  application/json:
+                    schema: ConfigItemResponseSchema
+            404:
+                description: When the search name of the remote instance is not figured in the application config
+                             or object doesn't exist
+        """
+        db_object = access_object('config', identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
+
+        remote_url, api_key = self.get_remote_api_data(remote_name)
+        params = {
+            "family": db_object.family,
+            "cfg": db_object.cfg,
+            "config_type": db_object.config_type
+        }
+        response = self.session.request("POST", f"{remote_url}/api/config",
+                                        headers={'Authorization': 'Bearer {}'.format(api_key)},
+                                        json=params
+                                        )
+        if response.status_code == 200:
+            logger.info(f'{db_object.type} pushed remote', extra={
+                'dhash': db_object.dhash,
+                'remote_name': remote_name
+            })
+            schema = ConfigItemResponseSchema()
+            return schema.dump(response.text)
+        else:
+            return response.text
+
+
+class APiRemoteTextBlobPushResource(APiRemotePullResource):
+    @requires_authorization
+    def post(self, remote_name, identifier):
+        """
+        ---
+        summary: Push text blob from local to remote instance
+        description: |
+            Push text blob from the local instance to the remote instance
+        security:
+            - bearerAuth: []
+        tags:
+            - api_remote
+        parameters:
+            - in: path
+              name: remote_name
+              description: name of remote
+              schema:
+                type: string
+            - in: path
+              name: identifier
+              description: Object identifier (SHA256/SHA512/SHA1/MD5)
+              schema:
+                type: string
+        responses:
+            200:
+                description: Information about pushed text blob
+                content:
+                  application/json:
+                    schema: BlobItemResponseSchema
+            404:
+                description: When the search name of the remote instance is not figured in the application config
+                             or object doesn't exist
+        """
+        db_object = access_object('blob', identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
+
+        remote_url, api_key = self.get_remote_api_data(remote_name)
+        params = {
+            "blob_name": db_object.blob_name,
+            "blob_type": db_object.blob_type,
+            "content": db_object.content
+        }
+        response = self.session.request("POST", f"{remote_url}/api/blob",
+                                        headers={'Authorization': 'Bearer {}'.format(api_key)},
+                                        json=params
+                                        )
+        if response.status_code == 200:
+            logger.info(f'{db_object.type} pushed remote', extra={
+                'dhash': db_object.dhash,
+                'remote_name': remote_name
+            })
+            schema = BlobItemResponseSchema()
+            return schema.dump(response.text)
+        else:
+            return response.text

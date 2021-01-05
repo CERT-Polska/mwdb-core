@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 
+export const ShowObjectContext = React.createContext();
+
 export const GlobalContext = React.createContext();
 
 export class GlobalProvider extends Component {

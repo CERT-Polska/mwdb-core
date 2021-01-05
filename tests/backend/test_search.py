@@ -331,3 +331,51 @@ def test_child_mixed():
 
     found_objs = test.search(f'child:(config.cfg.config.field:test AND child:(file.size:7500 AND tag:{tag}))')
     assert len(found_objs) == 1 and found_objs[0]["id"] == sample["id"]
+
+
+def test_uploader_query():
+    admin_session = MwdbTest()
+    admin_session.login()
+
+    testCase = RelationTestCase()
+
+    Alice = testCase.new_user("Alice")
+    Bob = testCase.new_user("Bob")
+
+    Workgroup = testCase.new_group("Workgroup")
+
+    # Alice and Bob are in Workgroup
+    Workgroup.add_member(Alice)
+    Workgroup.add_member(Bob)
+
+    # FileA is created by Alice and shared with nobody else
+    FileA = testCase.new_sample("File")
+    FileA.create(Alice, upload_as=Alice.identity)
+    # FileB is created by Bob and shared with nobody else
+    FileB = testCase.new_sample("File")
+    FileB.create(Bob, upload_as=Bob.identity)
+    # FileC is created by Alice and shared with Public
+    FileC = testCase.new_sample("File")
+    FileC.create(Alice, upload_as="public")
+
+    # Alice looks for own files
+    results = [
+        result["id"] for result in
+        Alice.session().search(f"uploader:{Alice.identity}")
+    ]
+    assert sorted(results) == sorted([FileA.dhash, FileC.dhash])
+    # Bob looks for own files
+    results = [
+        result["id"] for result in
+        Bob.session().search(f"uploader:{Bob.identity}")
+    ]
+    assert sorted(results) == sorted([FileB.dhash])
+    # Alice looks for files uploaded by Bob
+    results = Alice.session().search(f"uploader:{Bob.identity}")
+    assert len(results) == 0
+    # Bob looks for files uploaded by Alice
+    results = [
+        result["id"] for result in
+        Bob.session().search(f"uploader:{Alice.identity}")
+    ]
+    assert sorted(results) == sorted([FileC.dhash])

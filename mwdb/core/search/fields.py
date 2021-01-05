@@ -262,12 +262,17 @@ class UploaderField(BaseField):
 
         if g.auth_user.has_rights(Capabilities.manage_users):
             uploaders = (db.session.query(User)
-                         .options(joinedload(User.memberships, Member.group))
+                         .join(User.memberships)
+                         .join(Member.group)
                          .filter(Group.name == value)).all()
         else:
             uploaders = (db.session.query(User)
-                         .options(joinedload(User.memberships, Member.group))
-                         .filter(g.auth_user.is_member(Group.id))
+                         .join(User.memberships)
+                         .join(Member.group)
+                         .filter(and_(
+                            g.auth_user.is_member(Group.id),
+                            Group.name != "public"
+                         ))
                          .filter(or_(Group.name == value, User.login == value))).all()
             # Regular users can see only uploads to its own groups
             condition = and_(

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-export const ShowObjectContext = React.createContext();
+export const ObjectContext = React.createContext();
 
 export const GlobalContext = React.createContext();
 

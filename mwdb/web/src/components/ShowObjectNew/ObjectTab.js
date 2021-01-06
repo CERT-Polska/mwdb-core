@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,10 +11,18 @@ export const useTabContext = () => useContext(TabContext);
 export function ObjectTab(props) {
     const context = useTabContext();
 
+    useEffect(() => {
+        if(context.tab !== props.tab)
+            return;
+        context.setComponent(props.component || (() => []))
+        context.setActions(props.actions || [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [context.tab])
+
     return ( 
         <li className="nav-item">
             <Link to={context.getTabLink(props.tab)}
-                  className={`nav-link ${context.currentTab === props.tab ? "active" : ""}`}>
+                  className={`nav-link ${context.tab === props.tab ? "active" : ""}`}>
                 { props.icon ? <FontAwesomeIcon icon={props.icon} size="1x"/> : [] }
                 { props.label || capitalize(props.tab) }
             </Link>

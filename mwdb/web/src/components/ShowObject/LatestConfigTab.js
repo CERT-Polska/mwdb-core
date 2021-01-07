@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-import { ConfigTable } from "../ShowConfig";
+import ConfigTable from "../ConfigTable";
 
 import { ObjectAction, ObjectTab } from "./ObjectTab";
 import { ObjectContext } from "@mwdb-web/commons/context";
@@ -31,7 +31,7 @@ export default function LatestConfigTab(props) {
                 />
             }
             component={
-                () => <ConfigTable {...context.object.latest_config} />
+                () => <ConfigTable object={context.object.latest_config} />
             }
         />
     )   

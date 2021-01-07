@@ -10,7 +10,7 @@ import RecentConfigs from './components/RecentConfigs';
 import RecentSamples from './components/RecentSamples';
 import ConfigStats from './components/ConfigStats';
 import RecentBlobs from './components/RecentBlobs';
-import ShowSample from './components/ShowSampleNew';
+import ShowSample from './components/ShowSample';
 import ShowConfig from './components/ShowConfig';
 import ShowTextBlob from './components/ShowTextBlob';
 import DiffTextBlob from './components/DiffTextBlob';

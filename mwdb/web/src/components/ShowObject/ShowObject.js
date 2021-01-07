@@ -79,7 +79,7 @@ export default function ShowObject(props) {
                                         </ObjectBox>
                                     </Extendable>
                                 </div>
-                                <ShareBox />
+                                <ShareBox {...objectState.object}/>
                             </Extendable>
                         </div>
                         <div className="col-md-5">

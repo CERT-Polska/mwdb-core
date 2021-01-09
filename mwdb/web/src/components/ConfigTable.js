@@ -14,10 +14,11 @@ export function ConfigRow(props) {
     const key = props.configKey;
     const value = props.value;
     const path = props.path;
+    const indent = props.indent;
     const [expanded, setExpanded] = useState(false);
 
     const isObject = value && typeof value === 'object';
-    const isEmbeddedBlob = isObject && Object.keys(value).length == 1 && Object.keys(value)[0] === "in-blob";
+    const isEmbeddedBlob = isObject && Object.keys(value).length === 1 && Object.keys(value)[0] === "in-blob";
     const isRegularObject = isObject && !isEmbeddedBlob;
 
     useEffect(() => {
@@ -102,7 +103,7 @@ export function ConfigRows(props) {
         configKeys = configKeys.sort()
     
     // Return ordered list of ConfigRow with calculated path
-    return configKeys.map(
+    const rows = configKeys.map(
         (configKey) => {
             const path = (
                 Array.isArray(config)
@@ -121,13 +122,21 @@ export function ConfigRows(props) {
                               indent={indent} />
         }
     )
+
+    if(indent > 0)
+        return (
+            <DataTable indent={indent}>
+                {rows}
+            </DataTable>
+        )
+    return rows;
 }
 
 export default function ConfigTable(props) {
     const object = props.object;
 
     return (
-        <DataTable indent={indentLevel}>
+        <DataTable>
             <Extendable ident="showConfigDetails">
                 <tr key="config-family">
                     <th>Family</th>

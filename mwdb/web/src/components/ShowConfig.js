@@ -19,7 +19,7 @@ function ConfigPreview() {
     return <HexView content={JSON.stringify(context.object.cfg, null, 4)} mode="raw" json />
 }
 
-export default function ShowConfig() {
+export default function ShowConfig(props) {
     async function downloadTextBlob(object) {
         downloadData(JSON.stringify(object.cfg), object.id, 'application/json');
     }

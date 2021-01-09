@@ -4,9 +4,11 @@ import Pagination from "react-js-pagination";
 import { connect } from 'react-redux';
 
 import _ from 'lodash';
+
 import api from "@mwdb-web/commons/api";
+import { ObjectContext } from "@mwdb-web/commons/context";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
-import { GlobalContext } from "@mwdb-web/commons/context";
+
 
 class Comment extends Component {
     render() {
@@ -53,7 +55,7 @@ class CommentBox extends Component {
         modalIsOpen: false
     }
 
-    static contextType = GlobalContext;
+    static contextType = ObjectContext;
 
     openModal(comment_id) {
         this.setState({modalIsOpen: true, commentToRemove: comment_id});
@@ -72,9 +74,7 @@ class CommentBox extends Component {
                 comments: response.data
             });
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     };
 
@@ -92,9 +92,7 @@ class CommentBox extends Component {
             await api.addObjectComment(this.props.id, comment)
             this.updateComments();
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     };
 
@@ -107,9 +105,7 @@ class CommentBox extends Component {
             await api.removeObjectComment(this.props.id, comment_id)
             this.updateComments();
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         } finally {
             this.closeModal();
         }

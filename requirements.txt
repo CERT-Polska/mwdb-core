@@ -21,4 +21,3 @@ click-default-group==1.2.2
 PyYAML==5.3.1
 redis==3.2.1
 minio==6.0.0
-urllib3==1.22

@@ -2,11 +2,11 @@ from flask_restful import Resource
 from flask import g
 import requests
 from mwdb.core.plugins import hooks
-from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden, InternalServerError
+from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.schema.remotes import APIRemotesListResponseSchema
-from mwdb.model import db, File, Config, TextBlob, Group
+from mwdb.model import db, File, Config, TextBlob
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import FileItemResponseSchema
 from mwdb.schema.config import ConfigItemResponseSchema
@@ -49,13 +49,13 @@ def get_remote_api_data(remote_name):
 
 
 def map_remote_api_error(response):
-    if response.code == 200:
+    if response.status_code == 200:
         return None
-    elif response.code == 404:
+    elif response.status_code == 404:
         raise NotFound("Remote object not found")
-    elif response.code == 403:
+    elif response.status_code == 403:
         raise Forbidden("You are not permitted to perform this action on remote instance")
-    elif response.code == 409:
+    elif response.status_code == 409:
         raise Conflict("Remote object already exists in remote instance and has different type")
     else:
         raise response.raise_for_status()
@@ -153,7 +153,8 @@ class APiRemoteFilePullResource(APiRemotePullResource):
             try:
                 item, is_new = File.get_or_create(
                     file_name=file_name,
-                    file_stream=file_stream
+                    file_stream=file_stream,
+                    share_with=[group for group in g.auth_user.groups if group.name != "public"]
                 )
             except ObjectTypeConflictError:
                 raise Conflict("Object already exists and is not a file")
@@ -230,7 +231,8 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
             item, is_new = Config.get_or_create(
                 cfg=spec["cfg"],
                 family=spec["family"],
-                config_type=spec["config_type"]
+                config_type=spec["config_type"],
+                share_with=[group for group in g.auth_user.groups if group.name != "public"]
             )
             
             for blob in blobs:
@@ -292,7 +294,8 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
             item, is_new = TextBlob.get_or_create(
                 content=spec["content"],
                 blob_name=spec["blob_name"],
-                blob_type=spec["blob_type"]
+                blob_type=spec["blob_type"],
+                share_with=[group for group in g.auth_user.groups if group.name != "public"]
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")

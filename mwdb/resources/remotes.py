@@ -1,7 +1,6 @@
 from flask_restful import Resource
 from flask import g
 import requests
-import json
 from mwdb.core.plugins import hooks
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden, InternalServerError
 from mwdb.core.capabilities import Capabilities
@@ -49,21 +48,20 @@ def get_remote_api_data(remote_name):
     return remote_url, api_key
 
 
-def map_remote_api_error(code):
-    if code == 200:
+def map_remote_api_error(response):
+    if response.code == 200:
         return None
-    elif code == 404:
+    elif response.code == 404:
         raise NotFound("Remote object not found")
-    elif code == 403:
+    elif response.code == 403:
         raise Forbidden("You are not permitted to perform this action on remote instance")
-    elif code == 409:
+    elif response.code == 409:
         raise Conflict("Remote object already exists in remote instance and has different type")
     else:
-        raise InternalServerError("Internal Server Error")
+        raise response.raise_for_status()
 
 
 class APiRemotePullResource(Resource):
-    session = requests.Session()
     ObjectType = None
     ItemResponseSchema = None
 
@@ -132,20 +130,21 @@ class APiRemoteFilePullResource(APiRemotePullResource):
                 description: Object exists yet but has different type
         """
         remote_url, api_key = get_remote_api_data(remote_name)
-        response = self.session.get(f"{remote_url}/api/file/{identifier}",
-                                        headers={'Authorization': 'Bearer {}'.format(api_key)})
-        map_remote_api_error(response.status_code)
+        session = requests.Session()
+        response = session.get(f"{remote_url}/api/file/{identifier}",
+                               headers={'Authorization': 'Bearer {}'.format(api_key)})
+        map_remote_api_error(response)
         file_name = response.json()['file_name']
 
-        response = self.session.request("POST", f"{remote_url}/api/request/sample/{identifier}",
-                                        headers={'Authorization': 'Bearer {}'.format(api_key)})
-        map_remote_api_error(response.status_code)
+        response = session.post(f"{remote_url}/api/request/sample/{identifier}",
+                                headers={'Authorization': 'Bearer {}'.format(api_key)})
+        map_remote_api_error(response)
         download_url = response.json()['url']
 
-        response = self.session.request("GET", f"{remote_url}/api/{download_url}",
-                                        headers={'Authorization': 'Bearer {}'.format(api_key)},
-                                        stream=True)
-        map_remote_api_error(response.status_code)
+        response = session.get(f"{remote_url}/api/{download_url}",
+                               headers={'Authorization': 'Bearer {}'.format(api_key)},
+                               stream=True)
+        map_remote_api_error(response)
 
         with SpooledTemporaryFile() as file_stream:
             for chunk in response.iter_content(chunk_size=2**16):
@@ -154,8 +153,7 @@ class APiRemoteFilePullResource(APiRemotePullResource):
             try:
                 item, is_new = File.get_or_create(
                     file_name=file_name,
-                    file_stream=file_stream,
-                    share_with=[Group.get_by_name(g.auth_user.login)]
+                    file_stream=file_stream
                 )
             except ObjectTypeConflictError:
                 raise Conflict("Object already exists and is not a file")
@@ -180,7 +178,7 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
         security:
             - bearerAuth: []
         tags:
-            - api_remote
+            - remotes
         parameters:
             - in: path
               name: remote_name
@@ -206,9 +204,10 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
                 description: Object exists yet but has different type
         """
         remote_url, api_key = get_remote_api_data(remote_name)
-        response = self.session.request("GET", f"{remote_url}/api/config/{identifier}",
-                                        headers={'Authorization': 'Bearer {}'.format(api_key)})
-        map_remote_api_error(response.status_code)
+        session = requests.Session()
+        response = session.get(f"{remote_url}/api/config/{identifier}",
+                               headers={'Authorization': 'Bearer {}'.format(api_key)})
+        map_remote_api_error(response)
         spec = response.json()
         try:
             config = dict(spec["cfg"])
@@ -231,8 +230,7 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
             item, is_new = Config.get_or_create(
                 cfg=spec["cfg"],
                 family=spec["family"],
-                config_type=spec["config_type"],
-                share_with=[Group.get_by_name(g.auth_user.login)]
+                config_type=spec["config_type"]
             )
             
             for blob in blobs:
@@ -261,7 +259,7 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
         security:
             - bearerAuth: []
         tags:
-            - api_remote
+            - remotes
         parameters:
             - in: path
               name: remote_name
@@ -285,16 +283,16 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
                 description: Object exists yet but has different type
         """
         remote_url, api_key = get_remote_api_data(remote_name)
-        response = self.session.request("GET", f"{remote_url}/api/blob/{identifier}",
-                                        headers={'Authorization': 'Bearer {}'.format(api_key)})
-        map_remote_api_error(response.status_code)
+        session = requests.Session()
+        response = session.get(f"{remote_url}/api/blob/{identifier}",
+                               headers={'Authorization': 'Bearer {}'.format(api_key)})
+        map_remote_api_error(response)
         spec = response.json()
         try:
             item, is_new = TextBlob.get_or_create(
                 content=spec["content"],
                 blob_name=spec["blob_name"],
-                blob_type=spec["blob_type"],
-                share_with=[Group.get_by_name(g.auth_user.login)]
+                blob_type=spec["blob_type"]
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")
@@ -313,7 +311,7 @@ class APiRemoteFilePushResource(APiRemotePullResource):
         security:
             - bearerAuth: []
         tags:
-            - api_remote
+            - remotes
         parameters:
             - in: path
               name: remote_name
@@ -337,16 +335,12 @@ class APiRemoteFilePushResource(APiRemotePullResource):
             raise NotFound("Object not found")
 
         remote_url, api_key = get_remote_api_data(remote_name)
-        response = self.session.request("POST", f"{remote_url}/api/file",
-                                        headers={'Authorization': 'Bearer {}'.format(api_key)},
-                                        files={'file': (db_object.file_name, db_object.open()),
-                                               'options': (None, json.dumps({
-                                                   'parent': None,
-                                                   'metakeys': [],
-                                                   'upload_as': g.auth_user.login
-                                               }))}
-                                        )
-        map_remote_api_error(response.status_code)
+        session = requests.Session()
+        response = session.post(f"{remote_url}/api/file",
+                                headers={'Authorization': 'Bearer {}'.format(api_key)},
+                                files={'file': (db_object.file_name, db_object.open())}
+                                )
+        map_remote_api_error(response)
         logger.info(f'{db_object.type} pushed remote', extra={
             'dhash': db_object.dhash,
             'remote_name': remote_name
@@ -365,7 +359,7 @@ class APiRemoteConfigPushResource(APiRemotePullResource):
         security:
             - bearerAuth: []
         tags:
-            - api_remote
+            - remotes
         parameters:
             - in: path
               name: remote_name
@@ -389,16 +383,17 @@ class APiRemoteConfigPushResource(APiRemotePullResource):
             raise NotFound("Object not found")
 
         remote_url, api_key = get_remote_api_data(remote_name)
+        session = requests.Session()
         params = {
             "family": db_object.family,
             "cfg": db_object.cfg,
             "config_type": db_object.config_type
         }
-        response = self.session.request("POST", f"{remote_url}/api/config",
-                                        headers={'Authorization': 'Bearer {}'.format(api_key)},
-                                        json=params
-                                        )
-        map_remote_api_error(response.status_code)
+        response = session.post(f"{remote_url}/api/config",
+                                headers={'Authorization': 'Bearer {}'.format(api_key)},
+                                json=params
+                                )
+        map_remote_api_error(response)
         logger.info(f'{db_object.type} pushed remote', extra={
             'dhash': db_object.dhash,
             'remote_name': remote_name
@@ -417,7 +412,7 @@ class APiRemoteTextBlobPushResource(APiRemotePullResource):
         security:
             - bearerAuth: []
         tags:
-            - api_remote
+            - remotes
         parameters:
             - in: path
               name: remote_name
@@ -441,16 +436,17 @@ class APiRemoteTextBlobPushResource(APiRemotePullResource):
             raise NotFound("Object not found")
 
         remote_url, api_key = get_remote_api_data(remote_name)
+        session = requests.Session()
         params = {
             "blob_name": db_object.blob_name,
             "blob_type": db_object.blob_type,
             "content": db_object.content
         }
-        response = self.session.request("POST", f"{remote_url}/api/blob",
-                                        headers={'Authorization': 'Bearer {}'.format(api_key)},
-                                        json=params
-                                        )
-        map_remote_api_error(response.status_code)
+        response = session.post(f"{remote_url}/api/blob",
+                                headers={'Authorization': 'Bearer {}'.format(api_key)},
+                                json=params
+                                )
+        map_remote_api_error(response)
         logger.info(f'{db_object.type} pushed remote', extra={
             'dhash': db_object.dhash,
             'remote_name': remote_name

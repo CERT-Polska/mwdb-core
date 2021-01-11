@@ -27,13 +27,13 @@ class APIRemoteListResource(Resource):
         security:
             - bearerAuth: []
         tags:
-            - api_remote
+            - remotes
         responses:
             200:
                 description: List of user configured remotes
                 content:
                   application/json:
-                    schema: GroupListResponseSchema
+                    schema: APIRemotesListResponseSchema
         """
         remotes = app_config.mwdb.remotes
         schema = APIRemotesListResponseSchema()
@@ -42,7 +42,7 @@ class APIRemoteListResource(Resource):
 
 def get_remote_api_data(remote_name):
     if remote_name not in app_config.mwdb.remotes:
-        raise NotFound("Can't find saved remote mwdb instance with this name.")
+        raise NotFound("Unknown remote instance name")
 
     remote_url = app_config.get_key(f"remote:{remote_name}", "url")
     api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
@@ -57,7 +57,7 @@ def map_remote_api_error(code):
     elif code == 403:
         raise Forbidden("You are not permitted to perform this action on remote instance")
     elif code == 409:
-        raise Conflict("Remote object already exists in remote instance and is different type")
+        raise Conflict("Remote object already exists in remote instance and has different type")
     else:
         raise InternalServerError("Internal Server Error")
 
@@ -108,11 +108,11 @@ class APiRemoteFilePullResource(APiRemotePullResource):
         security:
             - bearerAuth: []
         tags:
-            - api_remote
+            - remotes
         parameters:
             - in: path
               name: remote_name
-              description: name of remote
+              description: Name of remote instance
               schema:
                 type: string
             - in: path
@@ -122,17 +122,17 @@ class APiRemoteFilePullResource(APiRemotePullResource):
                 type: string
         responses:
             200:
-                description: Information about uploaded config
+                description: Information about pulled file
                 content:
                   application/json:
                     schema: FileItemResponseSchema
             404:
-                description: When the search name of the remote instance is not figured in the application config
+                description: When the name of the remote instance is not figured in the application config
             409:
                 description: Object exists yet but has different type
         """
         remote_url, api_key = get_remote_api_data(remote_name)
-        response = self.session.request("GET", f"{remote_url}/api/file/{identifier}",
+        response = self.session.get(f"{remote_url}/api/file/{identifier}",
                                         headers={'Authorization': 'Bearer {}'.format(api_key)})
         map_remote_api_error(response.status_code)
         file_name = response.json()['file_name']
@@ -148,9 +148,8 @@ class APiRemoteFilePullResource(APiRemotePullResource):
         map_remote_api_error(response.status_code)
 
         with SpooledTemporaryFile() as file_stream:
-            # for chunk in response.iter_content(chunk_size=64):
-            #     file_stream.write(chunk)
-            file_stream.write(response.raw.read())
+            for chunk in response.iter_content(chunk_size=2**16):
+                file_stream.write(chunk)
             file_stream.seek(0)
             try:
                 item, is_new = File.get_or_create(

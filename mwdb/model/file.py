@@ -3,7 +3,6 @@ import io
 import os
 import shutil
 import tempfile
-from shutil import copyfileobj
 
 from sqlalchemy import or_
 from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadSignature
@@ -106,7 +105,7 @@ class File(Object):
                 )
             else:
                 with open(file_obj._calculate_path(), "wb") as f:
-                    copyfileobj(file_stream, f)
+                    shutil.copyfileobj(file_stream, f)
 
         file_obj.upload_stream = file_stream
         return file_obj, is_new

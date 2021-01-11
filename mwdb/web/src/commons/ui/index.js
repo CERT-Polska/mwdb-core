@@ -18,6 +18,8 @@ export { default as SortedList } from "./SortedList";
 export { default as View } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
 
+export { TabContext, useTabContext, ObjectTab, ObjectAction } from "./ObjectTab";
+
 
 
 export function getStyleForTag(tag) {

@@ -3,10 +3,9 @@ import React, { useContext } from "react";
 import { faStar } from '@fortawesome/free-solid-svg-icons'
 import { faStar as farStar } from '@fortawesome/free-regular-svg-icons'
 
-import { ObjectAction } from "./ObjectTab";
-
 import api from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
+import { ObjectAction } from "@mwdb-web/commons/ui";
 
 
 export default function FavoriteAction(props) {

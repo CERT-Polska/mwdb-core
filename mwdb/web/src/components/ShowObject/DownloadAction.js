@@ -2,9 +2,8 @@ import React, { useContext } from "react";
 
 import { faDownload } from '@fortawesome/free-solid-svg-icons'
 
-import { ObjectAction } from "./ObjectTab";
-
 import { ObjectContext } from "@mwdb-web/commons/context";
+import { ObjectAction } from  "@mwdb-web/commons/ui";
 
 
 export default function DownloadAction(props) {

@@ -2,8 +2,8 @@ import React, { useContext } from "react";
 
 import ConfigTable from "../ConfigTable";
 
-import { ObjectAction, ObjectTab } from "./ObjectTab";
 import { ObjectContext } from "@mwdb-web/commons/context";
+import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
 
 
 export default function LatestConfigTab(props) {

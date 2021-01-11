@@ -6,8 +6,8 @@ import { faProjectDiagram, faSearch } from '@fortawesome/free-solid-svg-icons'
 
 import RelationsPlot from '../RelationsPlot';
 
-import { ObjectAction, ObjectTab } from "./ObjectTab";
 import { ObjectContext } from "@mwdb-web/commons/context";
+import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
 
 export default function RelationsTab() {
     const context = useContext(ObjectContext);

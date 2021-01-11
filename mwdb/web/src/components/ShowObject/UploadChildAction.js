@@ -3,9 +3,8 @@ import { connect } from "react-redux";
 
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
-import { ObjectAction } from "./ObjectTab";
-
 import { ObjectContext } from "@mwdb-web/commons/context";
+import { ObjectAction } from "@mwdb-web/commons/ui";
 
 
 function RemoveAction(props) {

@@ -75,11 +75,13 @@ export default function ShowObject(props) {
                                             {props.headerCaption}
                                         </div>
                                         <ObjectBox defaultTab={props.defaultTab || "details"}>
-                                            {props.children}
+                                            <Extendable ident="showObjectTabs">
+                                                {props.children}
+                                            </Extendable>
                                         </ObjectBox>
                                     </Extendable>
                                 </div>
-                                <ShareBox {...objectState.object}/>
+                                <ShareBox id={objectState.object.id}/>
                             </Extendable>
                         </div>
                         <div className="col-md-5">

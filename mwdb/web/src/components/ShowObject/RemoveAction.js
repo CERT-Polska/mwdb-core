@@ -4,11 +4,9 @@ import { useHistory } from 'react-router';
 
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 
-import { ObjectAction } from "./ObjectTab";
-
 import api from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
-import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { ObjectAction, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 
 

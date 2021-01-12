@@ -42,7 +42,7 @@ class RemoteListResource(Resource):
 class RemoteAPI:
     def __init__(self, remote_name):
         if remote_name not in app_config.mwdb.remotes:
-            raise NotFound("Unknown remote instance name")
+            raise NotFound(f"Unknown remote instance name ('{remote_name}')")
 
         self.remote_url = app_config.get_key(f"remote:{remote_name}", "url")
         self.api_key = app_config.get_key(f"remote:{remote_name}", "api_key")

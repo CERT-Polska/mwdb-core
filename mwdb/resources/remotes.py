@@ -64,7 +64,6 @@ def map_remote_api_error(response):
 class RemoteAPIResource(Resource):
     def do_request(self, method, remote_name, remote_path):
         remote_url, api_key = get_remote_api_data(remote_name)
-        logger.info(remote_path)
         session = requests.Session()
         response = session.request(method, f"{remote_url}/api/{remote_path}",
                                    headers={'Authorization': 'Bearer {}'.format(api_key)})

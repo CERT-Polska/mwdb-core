@@ -5,7 +5,7 @@ from mwdb.core.plugins import hooks
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.schema.remotes import APIRemotesListResponseSchema
+from mwdb.schema.remotes import RemotesListResponseSchema
 from mwdb.model import db, File, Config, TextBlob
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import FileItemResponseSchema
@@ -15,7 +15,7 @@ from tempfile import SpooledTemporaryFile
 from . import access_object, logger, requires_authorization
 
 
-class APIRemoteListResource(Resource):
+class RemoteListResource(Resource):
     @requires_authorization
     def get(self):
         """
@@ -32,10 +32,10 @@ class APIRemoteListResource(Resource):
                 description: List of user configured remotes
                 content:
                   application/json:
-                    schema: APIRemotesListResponseSchema
+                    schema: RemotesListResponseSchema
         """
         remotes = app_config.mwdb.remotes
-        schema = APIRemotesListResponseSchema()
+        schema = RemotesListResponseSchema()
         return schema.dump({"remotes": remotes})
 
 
@@ -61,7 +61,7 @@ def map_remote_api_error(response):
         response.raise_for_status()
 
 
-class APiRemotePullResource(Resource):
+class RemotePullResource(Resource):
     ObjectType = None
     ItemResponseSchema = None
 
@@ -89,7 +89,7 @@ class APiRemotePullResource(Resource):
         return schema.dump(item)
 
 
-class APiRemoteFilePullResource(APiRemotePullResource):
+class RemoteFilePullResource(RemotePullResource):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema
 
@@ -157,12 +157,12 @@ class APiRemoteFilePullResource(APiRemotePullResource):
                     share_with=[group for group in g.auth_user.groups if group.name != "public"]
                 )
             except ObjectTypeConflictError:
-                raise Conflict("Object already exists and is not a file")
+                raise Conflict("Object already exists locally and is not a file")
 
         return self.create_pulled_object(item, is_new)
 
 
-class APiRemoteConfigPullResource(APiRemotePullResource):
+class RemoteConfigPullResource(RemotePullResource):
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
 
@@ -183,7 +183,7 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
         parameters:
             - in: path
               name: remote_name
-              description: name of remote
+              description: Name of remote instance
               schema:
                 type: string
             - in: path
@@ -200,7 +200,7 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
             403:
                 description: No permissions to perform additional operations (e.g. adding parent, metakeys)
             404:
-                description: When the search name of the remote instance is not figured in the application config
+                description: When the name of the remote instance is not figured in the application config
             409:
                 description: Object exists yet but has different type
         """
@@ -218,10 +218,11 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
                     if not g.auth_user.has_rights(Capabilities.adding_blobs):
                         raise Forbidden("You are not permitted to add blob objects")
                     in_blob = second["in-blob"]
-                    if isinstance(in_blob, str):
-                        blob_obj = TextBlob.access(in_blob)
-                        if not blob_obj:
-                            raise NotFound(f"Blob {in_blob} doesn't exist")
+                    if not isinstance(in_blob, str):
+                        raise BadRequest("'in-blob' is not a correct blob reference")
+                    blob_obj = TextBlob.access(in_blob)
+                    if not blob_obj:
+                        raise NotFound(f"Blob {in_blob} is referenced by config but doesn't exist locally")
                     blobs.append(blob_obj)
                     config[first]["in-blob"] = blob_obj.dhash
 
@@ -244,7 +245,7 @@ class APiRemoteConfigPullResource(APiRemotePullResource):
         return self.create_pulled_object(item, is_new)
 
 
-class APiRemoteTextBlobPullResource(APiRemotePullResource):
+class RemoteTextBlobPullResource(RemotePullResource):
     ObjectType = TextBlob
     ItemResponseSchema = BlobItemResponseSchema
 
@@ -265,7 +266,7 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
         parameters:
             - in: path
               name: remote_name
-              description: name of remote
+              description: Name of remote instance
               schema:
                 type: string
             - in: path
@@ -280,7 +281,7 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
                   application/json:
                     schema: BlobItemResponseSchema
             404:
-                description: When the search name of the remote instance is not figured in the application config
+                description: When the name of the remote instance is not figured in the application config
             409:
                 description: Object exists yet but has different type
         """
@@ -303,7 +304,7 @@ class APiRemoteTextBlobPullResource(APiRemotePullResource):
         return self.create_pulled_object(item, is_new)
 
 
-class APiRemoteFilePushResource(APiRemotePullResource):
+class RemoteFilePushResource(RemotePullResource):
     @requires_authorization
     def post(self, remote_name, identifier):
         """
@@ -318,7 +319,7 @@ class APiRemoteFilePushResource(APiRemotePullResource):
         parameters:
             - in: path
               name: remote_name
-              description: name of remote
+              description: Name of remote instance
               schema:
                 type: string
             - in: path
@@ -330,7 +331,7 @@ class APiRemoteFilePushResource(APiRemotePullResource):
             200:
                 description: Information about pushed fie
             404:
-                description: When the search name of the remote instance is not figured in the application config
+                description: When the name of the remote instance is not figured in the application config
                              or object doesn't exist
         """
         db_object = access_object('file', identifier)
@@ -351,7 +352,7 @@ class APiRemoteFilePushResource(APiRemotePullResource):
         return response.json()
 
 
-class APiRemoteConfigPushResource(APiRemotePullResource):
+class RemoteConfigPushResource(RemotePullResource):
     @requires_authorization
     def post(self, remote_name, identifier):
         """
@@ -366,7 +367,7 @@ class APiRemoteConfigPushResource(APiRemotePullResource):
         parameters:
             - in: path
               name: remote_name
-              description: name of remote
+              description: Name of remote instance
               schema:
                 type: string
             - in: path
@@ -378,7 +379,7 @@ class APiRemoteConfigPushResource(APiRemotePullResource):
             200:
                 description: Information about pushed config
             404:
-                description: When the search name of the remote instance is not figured in the application config
+                description: When the name of the remote instance is not figured in the application config
                              or object doesn't exist
         """
         db_object = access_object('config', identifier)
@@ -404,7 +405,7 @@ class APiRemoteConfigPushResource(APiRemotePullResource):
         return response.json()
 
 
-class APiRemoteTextBlobPushResource(APiRemotePullResource):
+class RemoteTextBlobPushResource(RemotePullResource):
     @requires_authorization
     def post(self, remote_name, identifier):
         """
@@ -419,7 +420,7 @@ class APiRemoteTextBlobPushResource(APiRemotePullResource):
         parameters:
             - in: path
               name: remote_name
-              description: name of remote
+              description: Name of remote instance
               schema:
                 type: string
             - in: path
@@ -431,7 +432,7 @@ class APiRemoteTextBlobPushResource(APiRemotePullResource):
             200:
                 description: Information about pushed text blob
             404:
-                description: When the search name of the remote instance is not figured in the application config
+                description: When the name of the remote instance is not figured in the application config
                              or object doesn't exist
         """
         db_object = access_object('blob', identifier)

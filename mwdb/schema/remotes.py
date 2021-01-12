@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields
 
 
-class APIRemotesListResponseSchema(Schema):
+class RemotesListResponseSchema(Schema):
     remotes = fields.List(fields.Str())

@@ -45,10 +45,10 @@ from mwdb.resources.user import (
     UserGetPasswordChangeTokenResource, UserProfileResource
 )
 from mwdb.resources.remotes import (
-    APIRemoteListResource, APiRemoteFilePullResource,
-    APiRemoteConfigPullResource, APiRemoteTextBlobPullResource,
-    APiRemoteFilePushResource, APiRemoteConfigPushResource,
-    APiRemoteTextBlobPushResource
+    RemoteListResource, RemoteFilePullResource,
+    RemoteConfigPullResource, RemoteTextBlobPullResource,
+    RemoteFilePushResource, RemoteConfigPushResource,
+    RemoteTextBlobPushResource
 )
 
 
@@ -247,13 +247,13 @@ api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
 
 #Remotes enspoints
-api.add_resource(APIRemoteListResource, "/remote")
-api.add_resource(APiRemoteFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>")
-api.add_resource(APiRemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>")
-api.add_resource(APiRemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>")
-api.add_resource(APiRemoteFilePushResource, "/remote/<remote_name>/push/file/<hash64:identifier>")
-api.add_resource(APiRemoteConfigPushResource, "/remote/<remote_name>/push/config/<hash64:identifier>")
-api.add_resource(APiRemoteTextBlobPushResource, "/remote/<remote_name>/push/blob/<hash64:identifier>")
+api.add_resource(RemoteListResource, "/remote")
+api.add_resource(RemoteFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>")
+api.add_resource(RemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>")
+api.add_resource(RemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>")
+api.add_resource(RemoteFilePushResource, "/remote/<remote_name>/push/file/<hash64:identifier>")
+api.add_resource(RemoteConfigPushResource, "/remote/<remote_name>/push/config/<hash64:identifier>")
+api.add_resource(RemoteTextBlobPushResource, "/remote/<remote_name>/push/blob/<hash64:identifier>")
 
 setup_logger()
 

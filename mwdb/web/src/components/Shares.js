@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Autocomplete from 'react-autocomplete';
 
 import api from "@mwdb-web/commons/api";
+import { ObjectContext } from "@mwdb-web/commons/context";
 import { RefString, DateString, ObjectLink, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 class ShareItem extends Component {
@@ -101,6 +102,8 @@ class SharesBox extends Component {
         isModalOpen: false
     }
 
+    static contextType = ObjectContext;
+
     updateShares = async () => {
         if(typeof this.props.id === 'undefined')
             return;
@@ -111,9 +114,7 @@ class SharesBox extends Component {
                 items: response.data.shares
             });
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     };
 
@@ -130,13 +131,15 @@ class SharesBox extends Component {
             await api.shareObjectWith(this.props.id, group)
             this.updateShares();
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     }
 
-    componentDidUpdate = (prevProps) => {
+    componentDidMount() {
+        this.updateShares();
+    }
+
+    componentDidUpdate(prevProps) {
         if (prevProps.id !== this.props.id)
             this.updateShares();
     };

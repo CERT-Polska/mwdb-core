@@ -6,7 +6,7 @@ import {Link} from "react-router-dom";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
 import api from "@mwdb-web/commons/api";
-import { GlobalContext } from "@mwdb-web/commons/context";
+import { ObjectContext } from "@mwdb-web/commons/context";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { getStyleForTag, ConfirmationModal } from "@mwdb-web/commons/ui";
 
@@ -50,7 +50,7 @@ class TagForm extends Component {
         tags: []
     }
 
-    static contextType = GlobalContext;
+    static contextType = ObjectContext;
 
     handleSubmit = (e) => {
         e.preventDefault();
@@ -73,9 +73,7 @@ class TagForm extends Component {
                 tags: response.data.map(t => t.tag),
             });
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     };
 
@@ -150,7 +148,7 @@ class TagBox extends Component {
         tagToRemove: ""
     }
 
-    static contextType = GlobalContext;
+    static contextType = ObjectContext;
 
     openModal = (tag) => {
         this.setState({modalIsOpen: true, tagToRemove: tag});
@@ -168,9 +166,7 @@ class TagBox extends Component {
             let tags = response.data;
             this.setState({tags});
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     };
 
@@ -188,9 +184,7 @@ class TagBox extends Component {
             await api.addObjectTag(this.props.id, tag)
             this.updateTags();
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     };
 
@@ -203,9 +197,7 @@ class TagBox extends Component {
             await api.removeObjectTag(this.props.id, tag)
             this.updateTags();
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         } finally {
             this.closeModal()
         }

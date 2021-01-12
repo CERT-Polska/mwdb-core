@@ -2,7 +2,9 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {TagList} from './Tag';
+
 import api from "@mwdb-web/commons/api";
+import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectLink, ActionCopyToClipboard } from '@mwdb-web/commons/ui';
 import RelationsAddModal from "./RelationsAddModal";
 
@@ -12,13 +14,15 @@ class RelationsBox extends Component {
         modalError: ""
     }
 
+    static contextType = ObjectContext;
+
     addObjectRelations = async (relation, value) => {
         try {
             if (relation === "child")
                 await api.addObjectRelation(this.props.id, value)
             else if (relation === "parent")
                 await api.addObjectRelation(value, this.props.id)
-            this.props.onObjectUpdate();
+            this.context.updateObject();
             this.setState({isAttributeAddModalOpen: false});
         } catch(error) {
             if(error.response && error.response.status === 404)
@@ -120,7 +124,7 @@ class MultiRelationsBox extends Component {
                 children: filterByType(props.children)
             }
             if(filteredElements.parents.length + filteredElements.children.length > 0)
-                return <RelationsBox {...filteredElements} header={props.header} id={this.props.id} onObjectUpdate={this.props.onObjectUpdate}/>
+                return <RelationsBox {...filteredElements} header={props.header} id={this.props.id}/>
             else
                 return <div/>
         }
@@ -135,7 +139,7 @@ class MultiRelationsBox extends Component {
                     <TypedRelationsBox header="Related configs" type="static_config" {...{parents, children}}/>
                     <TypedRelationsBox header="Related blobs" type="text_blob" {...{parents, children}}/>
                 </div> :
-                <RelationsBox className={className} id={this.props.id} onObjectUpdate={this.props.onObjectUpdate}/>
+                <RelationsBox className={className} id={this.props.id}/>
         )
     }
 }

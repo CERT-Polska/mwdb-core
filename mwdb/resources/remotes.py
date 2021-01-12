@@ -58,7 +58,7 @@ def map_remote_api_error(response):
     elif response.status_code == 409:
         raise Conflict("Remote object already exists in remote instance and has different type")
     else:
-        raise response.raise_for_status()
+        response.raise_for_status()
 
 
 class APiRemotePullResource(Resource):

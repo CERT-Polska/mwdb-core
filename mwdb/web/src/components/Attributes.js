@@ -2,10 +2,11 @@ import React, {Component} from 'react';
 import { connect } from "react-redux";
 import AttributesAddModal from './AttributesAddModal';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+
 import api from "@mwdb-web/commons/api";
+import { ObjectContext } from "@mwdb-web/commons/context";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { DataTable, ConfirmationModal, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
-import { GlobalContext } from "@mwdb-web/commons/context";
 
 let attributeRenderers = {}
 
@@ -20,7 +21,7 @@ class DefaultAttributeRenderer extends Component {
         attributeToRemove: null
     }
 
-    static contextType = GlobalContext;
+    static contextType = ObjectContext;
 
     get isCollapsible() {
         return this.props.values.length > 3
@@ -39,9 +40,7 @@ class DefaultAttributeRenderer extends Component {
                 attributeToRemove: null
             })
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     }
 
@@ -125,7 +124,7 @@ let ConnectedDefaultAttributeRenderer = connect(mapStateToProps)(DefaultAttribut
 class ObjectAttributes extends Component {
     state = {}
 
-    static contextType = GlobalContext;
+    static contextType = ObjectContext;
 
     updateAttributes = async () => {
         if (typeof this.props.object.id === 'undefined')
@@ -145,9 +144,7 @@ class ObjectAttributes extends Component {
                 attributes: aggregated
             });
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     }
 
@@ -157,9 +154,7 @@ class ObjectAttributes extends Component {
             await this.updateAttributes();
             this.props.onRequestModalClose();
         } catch(error) {
-            this.context.update({
-                objectError: error,
-            });
+            this.context.setObjectError(error);
         }
     }
 

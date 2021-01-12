@@ -1,153 +1,110 @@
-import React, {Component} from 'react';
-import { connect } from "react-redux";
+import React, { useContext } from 'react';
 import { Link } from "react-router-dom";
-import ShowObject from "./ShowObject";
-import {ConfigTable} from "./ShowConfig";
 
-import api from "@mwdb-web/commons/api";
+import { ShowObject, ObjectTab, ObjectContext, LatestConfigTab, RelationsTab,
+    DownloadAction, FavoriteAction, RemoveAction, ObjectAction } from './ShowObject';
+
+import { faScroll, faFingerprint, faRandom, faSearch } from '@fortawesome/free-solid-svg-icons'
+
 import { makeSearchLink, makeSearchDateLink, downloadData, humanFileSize } from '@mwdb-web/commons/helpers';
-import { DataTable, View, DateString, HexView } from "@mwdb-web/commons/ui";
+import { DataTable, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
-import { GlobalContext } from "@mwdb-web/commons/context";
-import ShowObjectPresenter, {joinActions} from './ShowObjectPresenter';
 
-function TextBlobDetails(props) {
+
+function TextBlobDetails() {
+    const context = useContext(ObjectContext);
     return (
         <DataTable>
-            <Extendable ident="showTextBlobDetails" object={props}>
+            <Extendable ident="showTextBlobDetails">
             <tr>
                 <th>Blob name</th>
-                <td id="blob_name"><Link to={makeSearchLink("name", props.blob_name, false, "blobs")}>{props.blob_name}</Link>
+                <td id="blob_name"><Link to={makeSearchLink("name", context.object.blob_name, false, "blobs")}>{context.object.blob_name}</Link>
                 </td>
             </tr>
             <tr>
                 <th>Blob size</th>
-                <td id="blob_size"><Link to={makeSearchLink("size", props.blob_size, false, "blobs")}>{humanFileSize(props.blob_size)}</Link>
+                <td id="blob_size"><Link to={makeSearchLink("size", context.object.blob_size, false, "blobs")}>{humanFileSize(context.object.blob_size)}</Link>
                 </td>
             </tr>
             <tr>
                 <th>Blob type</th>
-                <td id="blob_type"><Link to={makeSearchLink("type", props.blob_type, false, "blobs")}>{props.blob_type}</Link>
+                <td id="blob_type"><Link to={makeSearchLink("type", context.object.blob_type, false, "blobs")}>{context.object.blob_type}</Link>
                 </td>
             </tr>
-            
             <tr>
                 <th>First seen</th>
                 <td id="upload_time"> {
-                    props.upload_time
-                        ? <Link to={makeSearchDateLink("upload_time", props.upload_time, "blobs")}><DateString date={props.upload_time}/></Link>
+                    context.object.upload_time
+                        ? <Link to={makeSearchDateLink("upload_time", context.object.upload_time, "blobs")}><DateString date={context.object.upload_time}/></Link>
                         : []
                 }</td>
             </tr>
             <tr>
                 <th>Last seen</th>
                 <td id="last_seen"> {
-                    props.last_seen
-                        ? <Link to={makeSearchDateLink("last_seen", props.last_seen, "blobs")}><DateString date={props.last_seen}/></Link>
+                    context.object.last_seen
+                        ? <Link to={makeSearchDateLink("last_seen", context.object.last_seen, "blobs")}><DateString date={context.object.last_seen}/></Link>
                         : []
                 }</td>
             </tr>
             </Extendable>
-        </DataTable>);
+        </DataTable>
+    );
 }
 
-class TextBlobPresenter extends ShowObjectPresenter {
-    defaultTab = "preview"
-
-    handleDownload = () => {
-        downloadData(this.props.content, this.props.id, 'text/plain');
-    };
-
-    get presenters() {
-        return {
-            ...super.presenters,
-            details: (props => <TextBlobDetails {...props} path={[]} />),
-            preview: (props => <HexView content={props.content} mode="raw" showInvisibles/>),
-            config: (props => props.latest_config ? <ConfigTable {...props.latest_config} /> : [])
-        }
-    }
-
-    get tabs() {
-        let tabs = super.tabs;
-        if(this.props.latest_config)
-            tabs = tabs.concat([{tab:"config", label: "Parsed blob"}])
-        return tabs;
-    }
-
-    get actions() {
-        let blobActions = {
-            details: [
-                {label: "Diff with", icon: "random", link: `/blobs?diff=${this.props.id}`}
-            ],
-            preview: [
-                {label: "Diff with", icon: "random", link: `/blobs?diff=${this.props.id}`},
-            ]
-        }
-        if(this.props.latest_config)
-            blobActions['config'] = [
-                {label: "Go to config", link: `/config/${this.props.latest_config.id}`}
-            ]
-        return joinActions(super.actions, blobActions);
-    }
+function TextBlobPreview() {
+    const context = useContext(ObjectContext);
+    return <HexView content={context.object.content} mode="raw" showInvisibles/>
 }
 
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        canDeleteObject: state.auth.loggedUser.capabilities.includes("removing_objects"),
-        router: state.router
-    }
+function BlobDiffAction() {
+    const context = useContext(ObjectContext);
+    return (
+        <ObjectAction
+            label="Diff with"
+            icon={faRandom}
+            link={`/blobs?diff=${context.object.id}`}
+        />
+    )
 }
 
-let ConnectedTextBlobPresenter = connect(mapStateToProps)(TextBlobPresenter);
-
-class ShowTextBlob extends Component {
-    state = {
-        blob: {
-            children: []
-        }
-    };
-
-    static contextType = GlobalContext
-
-    updateTextBlob = async () => {
-        try {
-            let response = await api.getObject("blob", this.props.match.params.hash);
-            this.setState({
-                blob: response.data
-            });
-            this.context.update({
-                objectFavorite: response.data.favorite,
-                objectError: null,
-            });
-        } catch(error) {
-            this.context.update({
-                objectError: error
-            });
-        }
+export default function ShowTextBlob(props) {
+    async function downloadTextBlob(object) {
+        downloadData(object.content, object.id, 'text/plain');
     }
 
-    componentDidMount() {
-        this.updateTextBlob()
-    }
-
-    componentDidUpdate(prevProps) {
-        if (prevProps && prevProps.match.params.hash !== this.props.match.params.hash)
-            this.updateTextBlob();
-    };
-
-    render() {
-        return (
-            <View fluid ident="showTextBlob" error={this.context.objectError}>
-                <ShowObject object={this.state.blob} 
-                            objectPresenterComponent={ConnectedTextBlobPresenter}
-                            searchEndpoint="blobs"
-                            onObjectUpdate={this.updateTextBlob}
-                            history={this.props.history}/>
-            </View>
-        );
-    }
+    return (
+        <ShowObject 
+            ident="showTextBlob"
+            objectType="blob"
+            objectId={props.match.params.hash}
+            searchEndpoint="/blobs"
+            headerIcon={faScroll}
+            headerCaption="Blob details"
+            defaultTab="preview"
+        >
+            <ObjectTab 
+                tab="details"
+                icon={faFingerprint}
+                component={TextBlobDetails}
+                actions={[
+                    <RemoveAction/>,
+                    <BlobDiffAction/>,
+                    <FavoriteAction/>,
+                    <DownloadAction download={downloadTextBlob}/>,
+                ]}
+            />
+            <RelationsTab />
+            <ObjectTab 
+                tab="preview"
+                icon={faSearch}
+                component={TextBlobPreview}
+                actions={[
+                    <BlobDiffAction/>,
+                    <DownloadAction download={downloadTextBlob}/>
+                ]}
+            />
+            <LatestConfigTab label="Parsed blob"/>
+        </ShowObject>
+    )
 }
-
-export default ShowTextBlob;

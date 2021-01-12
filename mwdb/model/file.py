@@ -64,24 +64,24 @@ class File(Object):
         setattr(self, "_upload_stream", stream)
 
     @classmethod
-    def get_or_create(cls, file, parent=None, metakeys=None, share_with=None):
-        file.stream.seek(0, os.SEEK_END)
-        file_size = file.tell()
+    def get_or_create(cls, file_name, file_stream, parent=None, metakeys=None, share_with=None):
+        file_stream.seek(0, os.SEEK_END)
+        file_size = file_stream.tell()
         if file_size == 0:
             raise EmptyFileError
 
-        sha256 = calc_hash(file.stream, hashlib.sha256(), lambda h: h.hexdigest())
+        sha256 = calc_hash(file_stream, hashlib.sha256(), lambda h: h.hexdigest())
         file_obj = File(
             dhash=sha256,
-            file_name=secure_filename(file.filename),
+            file_name=secure_filename(file_name),
             file_size=file_size,
-            file_type=calc_magic(file.stream),
-            crc32=calc_crc32(file.stream),
-            md5=calc_hash(file.stream, hashlib.md5(), lambda h: h.hexdigest()),
-            sha1=calc_hash(file.stream, hashlib.sha1(), lambda h: h.hexdigest()),
+            file_type=calc_magic(file_stream),
+            crc32=calc_crc32(file_stream),
+            md5=calc_hash(file_stream, hashlib.md5(), lambda h: h.hexdigest()),
+            sha1=calc_hash(file_stream, hashlib.sha1(), lambda h: h.hexdigest()),
             sha256=sha256,
-            sha512=calc_hash(file.stream, hashlib.sha512(), lambda h: h.hexdigest()),
-            ssdeep=calc_ssdeep(file.stream)
+            sha512=calc_hash(file_stream, hashlib.sha512(), lambda h: h.hexdigest()),
+            ssdeep=calc_ssdeep(file_stream)
         )
 
         file_obj, is_new = cls._get_or_create(
@@ -89,7 +89,7 @@ class File(Object):
         )
 
         if is_new:
-            file.stream.seek(0, os.SEEK_SET)
+            file_stream.seek(0, os.SEEK_SET)
             if app_config.mwdb.storage_provider == StorageProviderType.S3:
                 get_minio_client(
                     app_config.mwdb.s3_storage_endpoint,
@@ -100,13 +100,14 @@ class File(Object):
                 ).put_object(
                     app_config.mwdb.s3_storage_bucket_name,
                     file_obj._calculate_path(),
-                    file.stream,
+                    file_stream,
                     file_size
                 )
             else:
-                file.save(file_obj._calculate_path())
+                with open(file_obj._calculate_path(), "wb") as f:
+                    shutil.copyfileobj(file_stream, f)
 
-        file_obj.upload_stream = file.stream
+        file_obj.upload_stream = file_stream
         return file_obj, is_new
 
     def _calculate_path(self):

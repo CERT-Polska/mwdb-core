@@ -20,7 +20,8 @@ class FileUploader(ObjectUploader):
     def _create_object(self, spec, parent, share_with, metakeys):
         try:
             return File.get_or_create(
-                request.files["file"],
+                request.files["file"].filename,
+                request.files["file"].stream,
                 parent=parent,
                 share_with=share_with,
                 metakeys=metakeys

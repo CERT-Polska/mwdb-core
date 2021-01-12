@@ -44,6 +44,12 @@ from mwdb.resources.user import (
     UserResource, UserListResource, UserPendingResource,
     UserGetPasswordChangeTokenResource, UserProfileResource
 )
+from mwdb.resources.remotes import (
+    RemoteListResource, RemoteFilePullResource,
+    RemoteConfigPullResource, RemoteTextBlobPullResource,
+    RemoteFilePushResource, RemoteConfigPushResource,
+    RemoteTextBlobPushResource
+)
 
 
 class HashConverter(BaseConverter):
@@ -239,6 +245,15 @@ api.add_resource(UserPendingResource, "/user/<login>/pending")
 api.add_resource(GroupListResource, "/group")
 api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
+
+#Remotes enspoints
+api.add_resource(RemoteListResource, "/remote")
+api.add_resource(RemoteFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>")
+api.add_resource(RemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>")
+api.add_resource(RemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>")
+api.add_resource(RemoteFilePushResource, "/remote/<remote_name>/push/file/<hash64:identifier>")
+api.add_resource(RemoteConfigPushResource, "/remote/<remote_name>/push/config/<hash64:identifier>")
+api.add_resource(RemoteTextBlobPushResource, "/remote/<remote_name>/push/blob/<hash64:identifier>")
 
 setup_logger()
 

@@ -156,7 +156,7 @@ class RemoteFilePullResource(RemotePullResource):
                 description: Object exists yet but has different type
         """
         remote = RemoteAPI(remote_name)
-        response = remote.request("GET", "file/{identifier}")
+        response = remote.request("GET", f"file/{identifier}")
         file_name = response['file_name']
 
         response = remote.request("POST", f"request/sample/{identifier}")

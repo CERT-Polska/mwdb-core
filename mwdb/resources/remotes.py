@@ -39,36 +39,40 @@ class RemoteListResource(Resource):
         return schema.dump({"remotes": remotes})
 
 
-def get_remote_api_data(remote_name):
-    if remote_name not in app_config.mwdb.remotes:
-        raise NotFound("Unknown remote instance name")
+class RemoteAPI:
+    def __init__(self, remote_name):
+        if remote_name not in app_config.mwdb.remotes:
+            raise NotFound("Unknown remote instance name")
 
-    remote_url = app_config.get_key(f"remote:{remote_name}", "url")
-    api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
-    return remote_url, api_key
+        self.remote_url = app_config.get_key(f"remote:{remote_name}", "url")
+        self.api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
+        self.session = requests.Session()
 
+    @staticmethod
+    def map_remote_api_error(response):
+        if response.status_code == 200:
+            return None
+        elif response.status_code == 404:
+            raise NotFound("Remote object not found")
+        elif response.status_code == 403:
+            raise Forbidden("You are not permitted to perform this action on remote instance")
+        elif response.status_code == 409:
+            raise Conflict("Remote object already exists in remote instance and has different type")
+        else:
+            response.raise_for_status()
 
-def map_remote_api_error(response):
-    if response.status_code == 200:
-        return None
-    elif response.status_code == 404:
-        raise NotFound("Remote object not found")
-    elif response.status_code == 403:
-        raise Forbidden("You are not permitted to perform this action on remote instance")
-    elif response.status_code == 409:
-        raise Conflict("Remote object already exists in remote instance and has different type")
-    else:
-        response.raise_for_status()
+    def request(self, method, path, *args, raw=False, **kwargs):
+        response = self.session.request(method, f"{self.remote_url}/api/{path}", *args,
+                                        headers={'Authorization': f'Bearer {self.api_key}'}, **kwargs)
+        self.map_remote_api_error(response)
+        return response if raw else response.json()
 
 
 class RemoteAPIResource(Resource):
     def do_request(self, method, remote_name, remote_path):
-        remote_url, api_key = get_remote_api_data(remote_name)
-        session = requests.Session()
-        response = session.request(method, f"{remote_url}/api/{remote_path}",
-                                   headers={'Authorization': 'Bearer {}'.format(api_key)})
-        map_remote_api_error(response)
-        return response.json()
+        remote = RemoteAPI(remote_name)
+        response = remote.request(method, remote_path)
+        return response
 
     def get(self, *args, **kwargs):
         return self.do_request("get", *args, **kwargs)
@@ -151,23 +155,14 @@ class RemoteFilePullResource(RemotePullResource):
             409:
                 description: Object exists yet but has different type
         """
-        remote_url, api_key = get_remote_api_data(remote_name)
-        session = requests.Session()
-        response = session.get(f"{remote_url}/api/file/{identifier}",
-                               headers={'Authorization': 'Bearer {}'.format(api_key)})
-        map_remote_api_error(response)
-        file_name = response.json()['file_name']
+        remote = RemoteAPI(remote_name)
+        response = remote.request("GET", "file/{identifier}")
+        file_name = response['file_name']
 
-        response = session.post(f"{remote_url}/api/request/sample/{identifier}",
-                                headers={'Authorization': 'Bearer {}'.format(api_key)})
-        map_remote_api_error(response)
-        download_url = response.json()['url']
+        response = remote.request("POST", f"request/sample/{identifier}")
+        download_url = response['url']
 
-        response = session.get(f"{remote_url}/api/{download_url}",
-                               headers={'Authorization': 'Bearer {}'.format(api_key)},
-                               stream=True)
-        map_remote_api_error(response)
-
+        response = remote.request("GET", download_url, raw=True, stream=True)
         with SpooledTemporaryFile() as file_stream:
             for chunk in response.iter_content(chunk_size=2**16):
                 file_stream.write(chunk)
@@ -226,12 +221,8 @@ class RemoteConfigPullResource(RemotePullResource):
             409:
                 description: Object exists yet but has different type
         """
-        remote_url, api_key = get_remote_api_data(remote_name)
-        session = requests.Session()
-        response = session.get(f"{remote_url}/api/config/{identifier}",
-                               headers={'Authorization': 'Bearer {}'.format(api_key)})
-        map_remote_api_error(response)
-        spec = response.json()
+        remote = RemoteAPI(remote_name)
+        spec = remote.request("GET", f"config/{identifier}")
         try:
             config = dict(spec["cfg"])
             blobs = []
@@ -307,12 +298,8 @@ class RemoteTextBlobPullResource(RemotePullResource):
             409:
                 description: Object exists yet but has different type
         """
-        remote_url, api_key = get_remote_api_data(remote_name)
-        session = requests.Session()
-        response = session.get(f"{remote_url}/api/blob/{identifier}",
-                               headers={'Authorization': 'Bearer {}'.format(api_key)})
-        map_remote_api_error(response)
-        spec = response.json()
+        remote = RemoteAPI(remote_name)
+        spec = remote.request("GET", f"blob/{identifier}")
         try:
             item, is_new = TextBlob.get_or_create(
                 content=spec["content"],
@@ -360,18 +347,14 @@ class RemoteFilePushResource(RemotePullResource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        remote_url, api_key = get_remote_api_data(remote_name)
-        session = requests.Session()
-        response = session.post(f"{remote_url}/api/file",
-                                headers={'Authorization': 'Bearer {}'.format(api_key)},
-                                files={'file': (db_object.file_name, db_object.open())}
-                                )
-        map_remote_api_error(response)
+        remote = RemoteAPI(remote_name)
+        response = remote.request("POST", "file",
+                                  files={'file': (db_object.file_name, db_object.open())})
         logger.info(f'{db_object.type} pushed remote', extra={
             'dhash': db_object.dhash,
             'remote_name': remote_name
         })
-        return response.json()
+        return response
 
 
 class RemoteConfigPushResource(RemotePullResource):
@@ -408,23 +391,18 @@ class RemoteConfigPushResource(RemotePullResource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        remote_url, api_key = get_remote_api_data(remote_name)
-        session = requests.Session()
+        remote = RemoteAPI(remote_name)
         params = {
             "family": db_object.family,
             "cfg": db_object.cfg,
             "config_type": db_object.config_type
         }
-        response = session.post(f"{remote_url}/api/config",
-                                headers={'Authorization': 'Bearer {}'.format(api_key)},
-                                json=params
-                                )
-        map_remote_api_error(response)
+        response = remote.request("POST", "config", json=params)
         logger.info(f'{db_object.type} pushed remote', extra={
             'dhash': db_object.dhash,
             'remote_name': remote_name
         })
-        return response.json()
+        return response
 
 
 class RemoteTextBlobPushResource(RemotePullResource):
@@ -461,20 +439,15 @@ class RemoteTextBlobPushResource(RemotePullResource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        remote_url, api_key = get_remote_api_data(remote_name)
-        session = requests.Session()
+        remote = RemoteAPI(remote_name)
         params = {
             "blob_name": db_object.blob_name,
             "blob_type": db_object.blob_type,
             "content": db_object.content
         }
-        response = session.post(f"{remote_url}/api/blob",
-                                headers={'Authorization': 'Bearer {}'.format(api_key)},
-                                json=params
-                                )
-        map_remote_api_error(response)
+        response = remote.request("POST", f"blob", json=params)
         logger.info(f'{db_object.type} pushed remote', extra={
             'dhash': db_object.dhash,
             'remote_name': remote_name
         })
-        return response.json()
+        return response

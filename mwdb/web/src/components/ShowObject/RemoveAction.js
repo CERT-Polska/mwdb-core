@@ -9,7 +9,6 @@ import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 
-
 function RemoveAction(props) {
     const context = useContext(ObjectContext);
     const history = useHistory();

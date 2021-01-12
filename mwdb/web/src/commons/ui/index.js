@@ -21,7 +21,6 @@ export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
 export { TabContext, useTabContext, ObjectTab, ObjectAction } from "./ObjectTab";
 
 
-
 export function getStyleForTag(tag) {
     let styleList = {
         "primary": ["spam", "src:", "uploader:", "feed:"],

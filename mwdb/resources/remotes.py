@@ -61,6 +61,29 @@ def map_remote_api_error(response):
         response.raise_for_status()
 
 
+class RemoteAPIResource(Resource):
+    def do_request(self, method, remote_name, remote_path):
+        remote_url, api_key = get_remote_api_data(remote_name)
+        logger.info(remote_path)
+        session = requests.Session()
+        response = session.request(method, f"{remote_url}/api/{remote_path}",
+                                   headers={'Authorization': 'Bearer {}'.format(api_key)})
+        map_remote_api_error(response)
+        return response.json()
+
+    def get(self, *args, **kwargs):
+        return self.do_request("get", *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        return self.do_request("post", *args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        return self.do_request("put", *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return self.do_request("delete", *args, **kwargs)
+
+
 class RemotePullResource(Resource):
     ObjectType = None
     ItemResponseSchema = None

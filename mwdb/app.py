@@ -36,6 +36,13 @@ from mwdb.resources.metakey import (
 from mwdb.resources.object import ObjectItemResource, ObjectResource, ObjectCountResource, ObjectFavoriteResource
 from mwdb.resources.quick_query import QuickQueryResource, QuickQueryItemResource
 from mwdb.resources.relations import RelationsResource, ObjectChildResource
+from mwdb.resources.remotes import (
+    RemoteListResource, RemoteAPIResource,
+    RemoteFilePullResource,
+    RemoteConfigPullResource, RemoteTextBlobPullResource,
+    RemoteFilePushResource,
+    RemoteConfigPushResource, RemoteTextBlobPushResource
+)
 from mwdb.resources.server import PingResource, ServerInfoResource, ServerDocsResource
 from mwdb.resources.search import SearchResource
 from mwdb.resources.share import ShareGroupListResource, ShareResource
@@ -43,12 +50,6 @@ from mwdb.resources.tag import TagResource, TagListResource
 from mwdb.resources.user import (
     UserResource, UserListResource, UserPendingResource,
     UserGetPasswordChangeTokenResource, UserProfileResource
-)
-from mwdb.resources.remotes import (
-    RemoteListResource, RemoteFilePullResource,
-    RemoteConfigPullResource, RemoteTextBlobPullResource,
-    RemoteFilePushResource, RemoteConfigPushResource,
-    RemoteTextBlobPushResource
 )
 
 
@@ -246,8 +247,9 @@ api.add_resource(GroupListResource, "/group")
 api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
 
-#Remotes enspoints
+# Remote endpoints
 api.add_resource(RemoteListResource, "/remote")
+api.add_resource(RemoteAPIResource, "/remote/<remote_name>/api/<path:remote_path>")
 api.add_resource(RemoteFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>")
 api.add_resource(RemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>")
 api.add_resource(RemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>")

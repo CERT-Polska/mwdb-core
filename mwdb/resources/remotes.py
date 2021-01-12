@@ -445,7 +445,7 @@ class RemoteTextBlobPushResource(RemotePullResource):
             "blob_type": db_object.blob_type,
             "content": db_object.content
         }
-        response = remote.request("POST", f"blob", json=params)
+        response = remote.request("POST", "blob", json=params)
         logger.info(f'{db_object.type} pushed remote', extra={
             'dhash': db_object.dhash,
             'remote_name': remote_name

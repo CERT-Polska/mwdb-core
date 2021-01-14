@@ -1,51 +1,35 @@
-import React, {Component} from 'react';
-import { connect } from "react-redux";
-import api from "@mwdb-web/commons/api";
-import { View } from "@mwdb-web/commons/ui";
+import React, { useContext, useEffect, useState } from 'react';
 import SwaggerUI from "swagger-ui-react";
 
+import api from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { View } from "@mwdb-web/commons/ui";
 
-class Docs extends Component {
-    state = {}
-    
-    async componentDidMount() 
-    {
-        let spec = await api.getServerDocs();
-        /*
-            Server variables doesn't work well in swagger-ui-react.
-            And hey... we probably don't want to make it customizable here
-        */
+export default function Docs() {
+    const auth = useContext(AuthContext);
+    const [ apiSpec, setApiSpec ] = useState({})
+
+    useEffect(() => {
+        const spec = await api.getServerDocs();
+        
+        // Server variables delivered with spec doesn't work well in swagger-ui-react
         spec.data["servers"] = [{
             "url": new URL("/", document.baseURI).href,
             "description": 'MWDB API endpoint',
         }]
-        this.setState({
-            spec: spec.data
-        });
-    }
+        setApiSpec(spec.data);
+    }, [])
 
-    render() {
-        return (
-            <View ident="docs">
-                <SwaggerUI spec={this.state.spec}
-                           url=""
-                           docExpansion='list'
-                           onComplete={swagger => {
-                              swagger.preauthorizeApiKey('bearerAuth', this.props.userToken);
-                           }}/>
-            </View>
-        );
-    }
+    return (
+        <View ident="docs">
+            <SwaggerUI 
+                spec={apiSpec}
+                url=""
+                docExpansion='list'
+                onComplete={swagger => {
+                    swagger.preauthorizeApiKey('bearerAuth', auth.user.token);
+                }}
+            />
+        </View>
+    )
 }
-
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        userToken: state.auth.loggedUser && state.auth.loggedUser.token
-    }
-}
-
-
-export default connect( mapStateToProps )(Docs);

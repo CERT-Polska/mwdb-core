@@ -12,15 +12,12 @@
     },
     "peerDependencies": {
         "@fortawesome/react-fontawesome": "*",
-        "connected-react-router": "*",
         "react": "*",
         "react-ace": "*",
         "react-autocomplete": "*",
         "react-js-pagination": "*",
-        "react-redux": "*",
         "react-router": "*",
         "react-router-dom": "*",
-        "redux": "*",
         "lodash": "*"
     }
 }

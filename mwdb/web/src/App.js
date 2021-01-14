@@ -1,8 +1,5 @@
-import React, {Component} from 'react';
-import { ConnectedRouter } from "connected-react-router";
-import { bindActionCreators } from 'redux';
+import React, { useContext } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { connect } from "react-redux";
 
 import About from './components/About';
 import Navigation from './components/Navigation';
@@ -32,6 +29,8 @@ import AttributeUpdate from './components/AttributeUpdate';
 import Search, { SearchHelp } from "./components/Search";
 import RelationsPlot from './components/RelationsPlot';
 import UserPasswordRecover from './components/UserPasswordRecover';
+import ShowPendingUsers from './components/ShowPendingUsers';
+import Docs from './components/Docs';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faTimes, faUpload, faDownload, faPlus, faMinus, faRandom, 
@@ -39,12 +38,10 @@ import { faTimes, faUpload, faDownload, faPlus, faMinus, faRandom,
          faFingerprint, faBoxes, faTrash, faCopy, faThumbtack, faStar } from '@fortawesome/free-solid-svg-icons'
 import { faStar as farStar } from '@fortawesome/free-regular-svg-icons'
 
-import { configActions } from '@mwdb-web/commons/config';
+import { AuthContext } from '@mwdb-web/commons/auth';
+import { ConfigContext } from '@mwdb-web/commons/config';
 import { Extension } from "@mwdb-web/commons/extensions";
-import history from "@mwdb-web/commons/history";
 import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
-import ShowPendingUsers from './components/ShowPendingUsers';
-import Docs from './components/Docs';
 
 library.add(faTimes);
 library.add(faUpload);
@@ -72,97 +69,74 @@ library.add(faThumbtack);
 library.add(faStar);
 library.add(farStar);
 
-class App extends Component {
-    componentDidMount() {
-        this.props.configActions.init();
-    }
+export default function App() {
+    const auth = useContext(AuthContext);
+    const config = useContext(ConfigContext);
 
-    render() {
-        const AuthenticatedRoute = (args) => (
-            <ProtectedRoute condition={this.props.isAuthenticated} {...args} />
+    const AuthenticatedRoute = (args) => (
+        <ProtectedRoute condition={auth.isAuthenticated} {...args} />
+    )
+
+    const AdministrativeRoute = (args) => (
+        <ProtectedRoute condition={auth.isAdmin} {...args} />
+    )
+
+    const AttributeRoute = (args) => (
+        <ProtectedRoute condition={auth.hasCapability("managing_attributes")} {...args} />
+    )
+    
+    const Main = (
+        config.config
+        ? () => (
+            <Switch>
+                <Route exact path='/login' component={UserLogin} />
+                {
+                    config.config["is_registration_enabled"]
+                    ? <Route exact path="/register" component={UserRegister} />
+                    : []
+                }
+                <Route exact path='/recover_password' component={UserPasswordRecover} />
+                <Route exact path='/setpasswd/:token' component={UserSetPassword} />
+                <AuthenticatedRoute exact path='/' component={RecentSamples} />
+                <AuthenticatedRoute exact path='/configs' component={RecentConfigs} />
+                <AuthenticatedRoute exact path='/blobs' component={RecentBlobs} />
+                <AuthenticatedRoute exact path='/upload' component={Upload} />
+                <AuthenticatedRoute path='/search' component={Search} />
+                <AuthenticatedRoute path='/search_help' component={SearchHelp} />
+                <AuthenticatedRoute exact path='/configs/stats' component={ConfigStats} />
+                <AuthenticatedRoute exact path='/about' component={About} />
+                <AuthenticatedRoute exact path='/docs' component={Docs} />
+                <AuthenticatedRoute exact path='/profile/:login' component={UserProfile} />
+                <AuthenticatedRoute path='/sample/:hash' component={ShowSample} />
+                <AuthenticatedRoute path='/config/:hash' component={ShowConfig} />
+                <AuthenticatedRoute path='/blob/:hash' component={ShowTextBlob} />
+                <AuthenticatedRoute path='/diff/:current/:previous' component={DiffTextBlob} />
+                <AuthenticatedRoute path='/relations' component={RelationsPlot} />
+                <AuthenticatedRoute exact path="/user_groups" component={UserGroups} />
+                <AdministrativeRoute exact path="/user/:login" component={UserUpdate} />
+                <AdministrativeRoute exact path="/users" component={ShowUsers} />
+                <AdministrativeRoute exact path="/users/pending" component={ShowPendingUsers} />
+                <AdministrativeRoute exact path="/users/new" component={UserCreate} />
+                <AdministrativeRoute exact path="/groups" component={ShowGroups} />
+                <AdministrativeRoute exact path="/groups/new" component={GroupRegister} />
+                <AdministrativeRoute exact path="/group/:name" component={GroupUpdate} />
+                <AttributeRoute exact path="/attribute/:metakey" component={AttributeUpdate}/>
+                <AttributeRoute exact path="/attributes" component={ManageAttributes}/>
+                <AttributeRoute exact path="/attributes/new" component={AttributeDefine}/>
+                <Extension ident="routes"/>
+            </Switch>
         )
+        : () => []
+    )
 
-        const AdministrativeRoute = (args) => (
-            <ProtectedRoute condition={this.props.isAdmin} {...args} />
-        )
-
-        const AttributeRoute = (args) => (
-            <ProtectedRoute condition={this.props.isAttributeManager} {...args} />
-        )
-        return (
-            <ConnectedRouter history={history}>
-                <div className="App">
-                    <Navigation />
-                    <div className="content">
-                        <View fluid ident="main" style={{"padding": "0"}} {...this.props}>
-                            {
-                                this.props.config !== null
-                                ? <Switch>
-                                    <Route exact path='/login' component={UserLogin} />
-                                    {
-                                        this.props.isRegistrationEnabled
-                                        ? <Route exact path="/register" component={UserRegister} />
-                                        : []
-                                    }
-                                    <Route exact path='/recover_password' component={UserPasswordRecover} />
-                                    <Route exact path='/setpasswd/:token' component={UserSetPassword} />
-                                    <AuthenticatedRoute exact path='/' component={RecentSamples} />
-                                    <AuthenticatedRoute exact path='/about' component={About} />
-                                    <AuthenticatedRoute exact path='/docs' component={Docs} />
-                                    <AuthenticatedRoute exact path='/profile/:login' component={UserProfile} />
-                                    <AuthenticatedRoute exact path='/configs' component={RecentConfigs} />
-                                    <AuthenticatedRoute exact path='/configs/stats' component={ConfigStats} />
-                                    <AuthenticatedRoute exact path='/upload' component={Upload} />
-                                    <AuthenticatedRoute path='/sample/:hash' component={ShowSample} />
-                                    <AuthenticatedRoute path='/config/:hash' component={ShowConfig} />
-                                    <AuthenticatedRoute path='/search' component={Search} />
-                                    <AuthenticatedRoute path='/search_help' component={SearchHelp} />
-                                    <AuthenticatedRoute path='/relations' component={RelationsPlot} />
-                                    <AdministrativeRoute exact path="/user/:login" component={UserUpdate} />
-                                    <AdministrativeRoute exact path="/users" component={ShowUsers} />
-                                    <AdministrativeRoute exact path="/users/pending" component={ShowPendingUsers} />
-                                    <AdministrativeRoute exact path="/users/new" component={UserCreate} />
-                                    <AuthenticatedRoute exact path="/user_groups" component={UserGroups} />
-                                    <AdministrativeRoute exact path="/groups" component={ShowGroups} />
-                                    <AdministrativeRoute exact path="/groups/new" component={GroupRegister} />
-                                    <AdministrativeRoute exact path="/group/:name" component={GroupUpdate} />
-                                    <AttributeRoute exact path="/attribute/:metakey" component={AttributeUpdate}/>
-                                    <AttributeRoute exact path="/attributes" component={ManageAttributes}/>
-                                    <AttributeRoute exact path="/attributes/new" component={AttributeDefine}/>
-                                    <AuthenticatedRoute exact path='/blobs' component={RecentBlobs} />
-                                    <AuthenticatedRoute path='/blob/:hash' component={ShowTextBlob} />
-                                    <AuthenticatedRoute path='/diff/:current/:previous' component={DiffTextBlob} />
-                                    <Extension ident="routes" {...this.props}/>
-                                </Switch>
-                                : []
-                            }
-                        </View>
-                    </div>
-                </div>
-            </ConnectedRouter>
-        );
-    }
+    return (
+        <div className="App">
+            <Navigation />
+            <div className="content">
+                <View fluid ident="main" style={{"padding": "0"}} error={config.configError}>
+                    <Main/>
+                </View>
+            </div>
+        </div>
+    )
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        error: state.config.error,
-        config: state.config.config,
-        capabilities: state.auth.loggedUser ? state.auth.loggedUser.capabilities : [],
-        isAuthenticated: !!state.auth.loggedUser,
-        isAdmin: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("manage_users") >= 0,
-        isAttributeManager: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("managing_attributes") >= 0,
-        isRegistrationEnabled: state.config.config && state.config.config["is_registration_enabled"],
-        userLogin: state.auth.loggedUser && state.auth.loggedUser.login,
-    }
-}
-
-function mapDispatchToProps(dispatch) {
-    return {
-        configActions: bindActionCreators(configActions, dispatch)
-    }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);

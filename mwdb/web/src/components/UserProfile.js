@@ -1,19 +1,22 @@
 import React, {Component} from 'react';
-import { connect } from "react-redux";
 import { Link } from "react-router-dom"
 import {capabilitiesList} from "./Capabilities";
 
 import api from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { View, DateString, ErrorBoundary } from "@mwdb-web/commons/ui";
-import { makeSearchLink } from "../commons/helpers";
+
 
 import ManageAPIKeys from './ManageAPIKeys';
 
-class UserProfile extends Component {
+export default class UserProfile extends Component {
     state = {
         pressedRequestPassword: false,
         error: false
     }
+
+    static contextType = AuthContext;
 
     get capabilities() {
         return [...this.state.profile.groups.reduce((p, c) => new Set([...p, ...c.capabilities]), new Set())]
@@ -99,7 +102,7 @@ class UserProfile extends Component {
                             <td className="col-10"><DateString date={this.state.profile.logged_on}/></td>
                         </tr>
                         {
-                            this.props.userLogin === this.state.profile.login &&
+                            this.context.user.login === this.state.profile.login &&
                             <tr className="d-flex">
                                 <td className="col-2">Last password set</td>
                                 <td className="col-10"><DateString date={this.state.profile.set_password_on}/></td>
@@ -139,7 +142,7 @@ class UserProfile extends Component {
                         <tr className="d-flex">
                             <td className="col-12" colspan="3">
                                 {
-                                    this.props.userLogin === this.state.profile.login ? (
+                                    this.context.user.login === this.state.profile.login ? (
                                         <button type="button" className="btn btn-success"
                                                 onClick={this.requestPasswordChange} disabled={this.state.pressedRequestPassword}>
                                             Request new password
@@ -157,11 +160,11 @@ class UserProfile extends Component {
                     </tbody>
                 </table>
                 {
-                    this.props.userLogin === this.state.profile.login &&
+                    this.context.user.login === this.state.profile.login &&
                     <div>
                         <h4>API keys</h4>
                         <ManageAPIKeys items={this.state.profile.api_keys}
-                                       userLogin={this.props.userLogin}
+                                       userLogin={this.context.user.login}
                                        onSuccess={(success) => { this.handleUpdate(); this.setState({success}); }}
                                        onError={(error) => this.setState({error})} />
                     </div>
@@ -170,13 +173,3 @@ class UserProfile extends Component {
         )
     }
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        userLogin: state.auth.loggedUser && state.auth.loggedUser.login
-    }
-}
-
-export default connect(mapStateToProps)(UserProfile);

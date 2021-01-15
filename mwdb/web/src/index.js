@@ -12,11 +12,11 @@ import './styles/index.css';
 import "swagger-ui-react/swagger-ui.css"
 
 ReactDOM.render((
-  <ConfigProvider>
-    <AuthProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </AuthProvider>
-  </ConfigProvider>
+  <BrowserRouter>
+    <ConfigProvider>
+      <AuthProvider>
+          <App />        
+      </AuthProvider>
+    </ConfigProvider>
+  </BrowserRouter>
 ), document.getElementById('root'));

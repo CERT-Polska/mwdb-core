@@ -1,11 +1,11 @@
-import React, {Component} from 'react';
+import React, {Component, useContext} from 'react';
 import Autocomplete from 'react-autocomplete';
-import { connect } from 'react-redux';
 import {Link} from "react-router-dom";
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
 import api from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { getStyleForTag, ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -233,12 +233,16 @@ class TagBox extends Component {
     };
 }
 
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        canRemoveTags: state.auth.loggedUser.capabilities.includes("removing_tags"),
-        canAddTags: state.auth.loggedUser.capabilities.includes("adding_tags"),
-    }
+function ConnectedTagBox(props) {
+    // TODO: Use AuthContext in TagBox while rewriting to React Hooks
+    const auth = useContext(AuthContext);
+    const canRemoveTags = auth.hasCapability("removing_tags");
+    const canAddTags = auth.hasCapability("adding_tags");
+    return <TagBox {...{
+        canRemoveTags,
+        canAddTags,
+        ...props
+    }}/>
 }
-export default connect(mapStateToProps)(TagBox);
+
+export default ConnectedTagBox;

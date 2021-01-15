@@ -1,10 +1,12 @@
-import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
-import { connect } from "react-redux";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+
 import api from "@mwdb-web/commons/api";
+import { AuthContext } from '@mwdb-web/commons/auth';
 import { View, HighlightText, ConfirmationModal } from "@mwdb-web/commons/ui";
+
 
 class UserGroupRow extends Component {
     constructor(props) {
@@ -15,6 +17,8 @@ class UserGroupRow extends Component {
             removeUser: null,
         }
     }
+
+    static contextType = AuthContext;
 
     _toggle() {
         this.setState({
@@ -40,7 +44,7 @@ class UserGroupRow extends Component {
                         <FontAwesomeIcon icon={this.state.open ? "minus" : "plus"} size="sm"/>
                         {" "}
                         {
-                            this.props.isAdmin ? (
+                            this.context.isAdmin ? (
                                 <Link to={`/group/${this.props.group.name}`}>
                                     <HighlightText>{this.props.group.name}</HighlightText>
                                 </Link>
@@ -87,12 +91,14 @@ class UserGroupRow extends Component {
 }
 
 
-class UserGroups extends Component {
+export default class UserGroups extends Component {
     state = {
         groups: [],
         error: null,
         success: null
     }
+
+    static contextType = AuthContext;
 
     updateUserGroups = async () => {
         try {
@@ -125,8 +131,8 @@ class UserGroups extends Component {
                             groupUpdate={this.updateUserGroups}
                             onError={this.handleError}
                             onSuccess={this.handleSuccess}
-                            isAdmin={this.props.isAdmin}
-                            groupAdmin={this.props.isAdmin || v.admins.includes(this.props.userLogin)}/>
+                            isAdmin={this.context.isAdmin}
+                            groupAdmin={this.context.isAdmin || v.admins.includes(this.context.user.login)}/>
         ))
 
         return (
@@ -141,7 +147,7 @@ class UserGroups extends Component {
                                             Group name
                                         </th>
                                         {
-                                            (this.props.isAdmin || this.state.groups.some(group => group.admins.includes(this.props.userLogin))) &&
+                                            (this.context.isAdmin || this.state.groups.some(group => group.admins.includes(this.context.user.login))) &&
                                             <th className="col">
                                                 Actions
                                             </th>
@@ -161,14 +167,3 @@ class UserGroups extends Component {
         );
     }
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        isAdmin: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("manage_users") >= 0,
-        userLogin: state.auth.loggedUser && state.auth.loggedUser.login,
-    }
-}
-
-export default connect(mapStateToProps)(UserGroups);

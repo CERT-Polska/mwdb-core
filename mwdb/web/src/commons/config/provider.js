@@ -26,7 +26,7 @@ export function ConfigProvider(props) {
         try {
             const response = await api.getServerInfo();
             setServerConfig({
-                type: updateConfig,
+                type: configUpdate,
                 config: response.data
             })
         } catch(error) {

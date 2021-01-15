@@ -9,7 +9,7 @@ export default function Docs() {
     const auth = useContext(AuthContext);
     const [ apiSpec, setApiSpec ] = useState({})
 
-    useEffect(() => {
+    async function updateSpec() {
         const spec = await api.getServerDocs();
         
         // Server variables delivered with spec doesn't work well in swagger-ui-react
@@ -18,6 +18,10 @@ export default function Docs() {
             "description": 'MWDB API endpoint',
         }]
         setApiSpec(spec.data);
+    }
+
+    useEffect(() => {
+        updateSpec();
     }, [])
 
     return (

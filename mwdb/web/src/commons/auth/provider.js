@@ -11,7 +11,7 @@ function isSessionValid(authSession) {
     if(!authSession || !authSession.token)
         // Token is missing
         return false;
-    if(JSON.parse(atob(authSession.split(".")[0])).exp <= new Date() / 1000)
+    if(JSON.parse(atob(authSession.token.split(".")[0])).exp <= new Date() / 1000)
         // Token expired
         return false;
     if(!authSession.login || !authSession.groups || !authSession.capabilities)
@@ -58,7 +58,7 @@ export function AuthProvider(props) {
             : {success: "User logged out successfully."}
         )
         setAuthSession(null);
-        history.push("/logout", {
+        history.push("/login", {
             prevLocation: history.location,
             ...logoutReason
         });
@@ -89,6 +89,7 @@ export function AuthProvider(props) {
         return () => {
             api.axios.interceptors.response.eject(interceptor)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // Synchronize current session data with local storage
@@ -97,6 +98,7 @@ export function AuthProvider(props) {
             localStorage.setItem(localStorageAuthKey, JSON.stringify(authSession));
         else
             localStorage.removeItem(localStorageAuthKey);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [authSession]);
 
     return (

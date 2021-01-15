@@ -14,3 +14,4 @@ class ServerInfoResponseSchema(Schema):
     base_url = fields.Str(required=True, allow_none=False)
     # Dict() supporting keys and values is added to marshmallow 3.x
     active_plugins = fields.Dict(required=True, allow_none=False)
+    remotes = fields.List(fields.Str(), required=True, allow_none=False)

@@ -1,8 +1,10 @@
 import React, { useContext } from 'react';
 import { Link } from "react-router-dom";
 
-import { ShowObject, ObjectTab, ObjectContext, LatestConfigTab, RelationsTab,
-    DownloadAction, FavoriteAction, RemoveAction, ObjectAction } from './ShowObject';
+import {
+    ShowObject, ObjectTab, ObjectContext, LatestConfigTab, RelationsTab,
+    DownloadAction, FavoriteAction, RemoveAction, ObjectAction, PushAction
+} from './ShowObject';
 
 import { faScroll, faFingerprint, faRandom, faSearch } from '@fortawesome/free-solid-svg-icons'
 
@@ -89,6 +91,7 @@ export default function ShowTextBlob(props) {
                 component={TextBlobDetails}
                 actions={[
                     <RemoveAction/>,
+                    <PushAction/>,
                     <BlobDiffAction/>,
                     <FavoriteAction/>,
                     <DownloadAction download={downloadTextBlob}/>,

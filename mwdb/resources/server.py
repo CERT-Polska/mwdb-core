@@ -55,7 +55,8 @@ class ServerInfoResource(Resource):
             "is_registration_enabled": app_config.mwdb.enable_registration,
             "recaptcha_site_key": app_config.mwdb.recaptcha_site_key,
             "base_url": app_config.mwdb.base_url,
-            "active_plugins": get_plugin_info()
+            "active_plugins": get_plugin_info(),
+            "remotes": app_config.mwdb.remotes
         })
 
 

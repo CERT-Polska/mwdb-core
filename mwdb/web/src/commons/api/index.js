@@ -313,6 +313,15 @@ function uploadFile(file, parent, upload_as, metakeys) {
     return axios.post(`/file`, formData, {"timeout": 60*1000})
 }
 
+function getRemoteNames(){
+    return axios.get("/remote")
+}
+
+function pushObjectRemote(remote, type, identifier){
+    return axios.post(`remote/${remote}/push/${type}/${identifier}`)
+}
+
+
 function getConfigStats(fromTime) {
     return axios.get("/config/stats", {
         params: {
@@ -386,6 +395,8 @@ export default {
     deleteMetakeyPermission,
     requestFileDownload,
     uploadFile,
+    getRemoteNames,
+    pushObjectRemote,
     getConfigStats,
     getObjectRelations,
     addObjectRelation

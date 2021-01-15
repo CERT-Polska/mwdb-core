@@ -14,11 +14,11 @@ function PushAction(props) {
     const [remoteName, setRemoteName] = useState("");
 
     async function pushRemote() {
-        let type = context.object.type;
-        if (type !== "file") {
-            type = type.split("_")
-            type = type[1]
-        }
+        let type = ({
+            "file": "file",
+            "static_config": "config",
+            "text_blob": "blob"
+        })[context.object.type]
         try {
             await api.pushObjectRemote(remoteName, type, context.object.id)
         } catch(error) {

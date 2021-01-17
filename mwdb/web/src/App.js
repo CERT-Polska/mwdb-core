@@ -69,25 +69,28 @@ library.add(faThumbtack);
 library.add(faStar);
 library.add(farStar);
 
-export default function App() {
+function AuthenticatedRoute(args) {
     const auth = useContext(AuthContext);
+    return <ProtectedRoute condition={auth.isAuthenticated} {...args} />
+}
+
+function AdministrativeRoute(args) {
+    const auth = useContext(AuthContext);
+    return <ProtectedRoute condition={auth.isAdmin} {...args} />
+}
+
+function AttributeRoute(args) {
+    const auth = useContext(AuthContext);
+    return <ProtectedRoute condition={auth.hasCapability("managing_attributes")} {...args} />
+}
+
+
+export default function App() {
     const config = useContext(ConfigContext);
-
-    const AuthenticatedRoute = (args) => (
-        <ProtectedRoute condition={auth.isAuthenticated} {...args} />
-    )
-
-    const AdministrativeRoute = (args) => (
-        <ProtectedRoute condition={auth.isAdmin} {...args} />
-    )
-
-    const AttributeRoute = (args) => (
-        <ProtectedRoute condition={auth.hasCapability("managing_attributes")} {...args} />
-    )
     
-    const Main = (
+    const main = (
         config.config
-        ? () => (
+        ? (
             <Switch>
                 <Route exact path='/login' component={UserLogin} />
                 {
@@ -126,7 +129,7 @@ export default function App() {
                 <Extension ident="routes"/>
             </Switch>
         )
-        : () => []
+        : []
     )
 
     return (
@@ -134,7 +137,7 @@ export default function App() {
             <Navigation />
             <div className="content">
                 <View fluid ident="main" style={{"padding": "0"}} error={config.configError}>
-                    <Main/>
+                    {main}
                 </View>
             </div>
         </div>

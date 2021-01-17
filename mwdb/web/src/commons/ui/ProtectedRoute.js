@@ -7,8 +7,7 @@ import { AuthContext } from "../auth"
 
 export default function ProtectedRoute(props) {
     const auth = useContext(AuthContext);
-
-    let routeRender = (renderProps) => {
+    function routeRender(renderProps) {
         if(!auth.isAuthenticated)
         {
             auth.logout("You need to authenticate before accessing this page");
@@ -20,7 +19,6 @@ export default function ProtectedRoute(props) {
             : <ErrorBoundary error="You don't have permission to see that page" />
         )
     }
-
     return <Route {...props} 
                   component={undefined}
                   render={routeRender} />

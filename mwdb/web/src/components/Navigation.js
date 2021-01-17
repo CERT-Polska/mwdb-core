@@ -62,9 +62,9 @@ export default function Navigation() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
 
-    const NavItems = (
+    const navItems = (
         config.config
-        ? () => (
+        ? (
             <Extendable ident="navbar">
                 {
                     !auth.isAuthenticated && config.config["is_registration_enabled"] ? (
@@ -134,7 +134,7 @@ export default function Navigation() {
                                 ...fromPlugin("navdropdownExtras")
                             ]} />
             </Extendable>
-        ) : () => []
+        ) : []
     )
 
     return (
@@ -150,7 +150,7 @@ export default function Navigation() {
             </button>
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav mr-auto">
-                    <NavItems />
+                    {navItems}
                 </ul>
                 <div className="my-2 my-lg-0">
                     <ul className="navbar-nav">

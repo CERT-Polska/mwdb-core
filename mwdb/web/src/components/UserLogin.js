@@ -15,14 +15,16 @@ export default function UserLogin(props) {
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState(null);
     
-    const error = loginError || history.location.state.error;
-    const success = !error && history.location.state.success;
+    const locationState = history.location.state || {}
+    const error = loginError || locationState.error;
+    const success = !error && locationState.success;
     
     async function tryLogin() {
         try {
             const response = await api.authLogin(login, password);
+            const prevLocation = locationState.prevLocation || "/"
             auth.updateSession(response.data);
-            history.push(history.location.state.prevLocation);
+            history.push(prevLocation);
         } catch(error) {
             setLoginError(error);
         }

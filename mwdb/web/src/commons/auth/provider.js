@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useHistory } from 'react-router';
 
 import api from "../api";
@@ -39,8 +39,10 @@ function setTokenForAPI(token)
 }
 
 export function AuthProvider(props) {
-    const [authSession, setAuthSession] = useState(getStoredAuthSession());
     const history = useHistory();
+    const [authSession, setAuthSession] = useState(getStoredAuthSession());
+    const refreshTimer = useRef(null);
+    const isAuthenticated = !!authSession;
 
     function updateSession(session) {
         // Sets new session data in session state
@@ -49,6 +51,11 @@ export function AuthProvider(props) {
             throw new Error("Provided session state is not valid")
         setTokenForAPI(session.token);
         setAuthSession(session);
+    }
+
+    async function refreshSession() {
+        const response = await api.authRefresh();
+        updateSession(response.data);
     }
 
     function logout(error) {
@@ -65,13 +72,13 @@ export function AuthProvider(props) {
     }
 
     function hasCapability(capability) {
-        return authSession && authSession.capabilities.indexOf(capability) >= 0
+        return isAuthenticated && authSession.capabilities.indexOf(capability) >= 0
     }
 
     // Effect for 401 Not authenticated to clear session data
     useEffect(() => {
         // Initialize Authorization header on mount
-        setTokenForAPI(authSession && authSession.token);
+        setTokenForAPI(isAuthenticated && authSession.token);
         // Set 401 Not Authenticated interceptor when AuthProvider is mounted
         const interceptor = (
             api.axios.interceptors.response.use(
@@ -92,14 +99,38 @@ export function AuthProvider(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    useEffect(() => {
+        function setRefreshTimer() {
+            console.log("setTimer");
+            if(refreshTimer.current)
+                return;
+            console.log(refreshTimer.current);
+            refreshTimer.current = setInterval(refreshSession, 60000);
+            refreshSession();
+        }
+
+        function clearRefreshTimer() {
+            console.log("clearTimer");
+            if(!refreshTimer.current)
+                return;
+            clearInterval(refreshTimer.current)
+            refreshTimer.current = null;
+        }
+
+        // Set timer if user is logged in, clear otherwise
+        (isAuthenticated ? setRefreshTimer : clearRefreshTimer)();
+        return clearRefreshTimer;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated])
+
     // Synchronize current session data with local storage
     useEffect(() => {
-        if(authSession)
+        if(isAuthenticated)
             localStorage.setItem(localStorageAuthKey, JSON.stringify(authSession));
         else
             localStorage.removeItem(localStorageAuthKey);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [authSession]);
+    }, [isAuthenticated]);
 
     return (
         <AuthContext.Provider value={{
@@ -107,6 +138,7 @@ export function AuthProvider(props) {
             isAuthenticated: !!authSession,
             isAdmin: hasCapability("manage_users"),
             hasCapability,
+            refreshSession,
             updateSession,
             logout
         }}>

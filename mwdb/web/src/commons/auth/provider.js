@@ -101,16 +101,13 @@ export function AuthProvider(props) {
 
     useEffect(() => {
         function setRefreshTimer() {
-            console.log("setTimer");
             if(refreshTimer.current)
                 return;
-            console.log(refreshTimer.current);
             refreshTimer.current = setInterval(refreshSession, 60000);
             refreshSession();
         }
 
         function clearRefreshTimer() {
-            console.log("clearTimer");
             if(!refreshTimer.current)
                 return;
             clearInterval(refreshTimer.current)

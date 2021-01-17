@@ -164,7 +164,7 @@ export default function Navigation() {
                                         </span>
                                     </li>
                                     <li className="nav-item">
-                                        <div class="btn-group">
+                                        <div className="btn-group">
                                             <Link className="btn btn-outline-success" to={`/profile/${auth.user.login}`}>Profile</Link>
                                             <a className="btn btn-outline-danger" href="#logout" onClick={(ev) => { ev.preventDefault(); auth.logout(); }}>Logout</a>
                                         </div>

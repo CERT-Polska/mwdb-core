@@ -16,11 +16,13 @@ function PullRemote(props) {
 
     async function pullRemote() {
         try {
-            await api.pullObjectRemote(remoteName,objectType,objectIdentifier);
-            if (objectType === "file")
-                history.push(`/sample/${objectIdentifier}`);
-            else
-                history.push(`/${objectType}/${objectIdentifier}`);
+            let response = await api.pullObjectRemote(remoteName,objectType,objectIdentifier);
+            let type = ({
+            "file": "sample",
+            "static_config": "config",
+            "text_blob": "blob"
+            })[response.data.type]
+            history.push(`/${type}/${objectIdentifier}`);
         } catch (error) {
             setDisabledPullButton(false);
             setError(error);
@@ -36,7 +38,7 @@ function PullRemote(props) {
                             <label className="input-group-text">Remote name</label>
                         </div>
                         <select className="custom-select" value={remoteName}
-                                onChange={(e) => setRemoteName(e.target.value)}>
+                                onChange={(ev) => setRemoteName(ev.target.value)}>
                             <option value="" hidden>Select the remote instance name</option>
                                 {
                                     props.remotes.sort().map(name =>
@@ -50,7 +52,7 @@ function PullRemote(props) {
                                 <label className="input-group-text">Object type</label>
                             </div>
                             <select className="custom-select" value={objectType}
-                                    onChange={(e) => setObjectType(e.target.value)}>
+                                    onChange={(ev) => setObjectType(ev.target.value)}>
                                 <option value="object">Object</option>
                                 <option value="file">File</option>
                                 <option value="config">Config</option>
@@ -65,7 +67,7 @@ function PullRemote(props) {
                             <input className="form-control" type="text" style={{fontSize: "medium"}}
                                     placeholder="Type object identifier..."
                                     value={objectIdentifier}
-                                    onChange={(e) => setObjectIdentifier(e.target.value)}/>
+                                    onChange={(ev) => setObjectIdentifier(ev.target.value)}/>
                         </div>
                     </div>
                 </div>

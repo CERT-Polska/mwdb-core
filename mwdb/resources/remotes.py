@@ -1,5 +1,6 @@
 from flask_restful import Resource
-from flask import g, redirect
+from flask import g, redirect, url_for
+from mwdb.core.app import api
 import requests
 from mwdb.core.plugins import hooks
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden
@@ -121,7 +122,12 @@ class RemoteObjectPullResource(RemotePullResource):
         remote = RemoteAPI(remote_name)
         response = remote.request("GET", f"object/{identifier}")
         object_type = response["type"]
-        return redirect(f"api/remote/{remote_name}/pull/{object_type}/{identifier}", code=302)
+        resource = {
+            "file": RemoteFilePullResource,
+            "static_config": RemoteConfigPullResource,
+            "text_blob": RemoteTextBlobPullResource
+        }
+        return redirect(url_for(resource[object_type], remote_name=remote_name, identifier=identifier), code=307)
 
 
 class RemoteFilePullResource(RemotePullResource):

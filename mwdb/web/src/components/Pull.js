@@ -16,7 +16,7 @@ function PullRemote(props) {
 
     async function pullRemote() {
         try {
-            let response = await api.pullObjectRemote(remoteName,objectType,objectIdentifier);
+            let response = await api.pullObjectRemote(remoteName, objectType, objectIdentifier);
             let type = ({
             "file": "sample",
             "static_config": "config",

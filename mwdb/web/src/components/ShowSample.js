@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 
 import { ShowObject, ObjectTab, ObjectContext, useTabContext, LatestConfigTab, RelationsTab,
-    DownloadAction, FavoriteAction, UploadChildAction, RemoveAction, ObjectAction } from './ShowObject';
+    DownloadAction, FavoriteAction, PushAction, UploadChildAction, RemoveAction, ObjectAction } from './ShowObject';
 
 import { faFile, faFingerprint, faSearch } from '@fortawesome/free-solid-svg-icons'
 
@@ -180,6 +180,7 @@ export default function ShowSample(props) {
                 component={SampleDetails}
                 actions={[
                     <RemoveAction/>,
+                    <PushAction/>,
                     <UploadChildAction/>,
                     <FavoriteAction/>,
                     <DownloadAction download={downloadSample}/>,

@@ -3,8 +3,10 @@ import React, { useContext } from 'react';
 import { faFingerprint, faSearch, faTable } from '@fortawesome/free-solid-svg-icons'
 
 import ConfigTable from "./ConfigTable";
-import { ShowObject, ObjectTab, ObjectContext, RelationsTab, DownloadAction, 
-    FavoriteAction, RemoveAction } from './ShowObject';
+import {
+    ShowObject, ObjectTab, ObjectContext, RelationsTab, DownloadAction,
+    FavoriteAction, RemoveAction, PushAction
+} from './ShowObject';
 
 import { downloadData } from "@mwdb-web/commons/helpers";
 import { HexView } from "@mwdb-web/commons/ui";
@@ -39,6 +41,7 @@ export default function ShowConfig(props) {
                 component={ConfigDetails}
                 actions={[
                     <RemoveAction/>,
+                    <PushAction/>,
                     <FavoriteAction/>,
                     <DownloadAction download={downloadTextBlob}/>,
                 ]}

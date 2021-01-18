@@ -321,6 +321,9 @@ function pushObjectRemote(remote, type, identifier){
     return axios.post(`remote/${remote}/push/${type}/${identifier}`)
 }
 
+function pullObjectRemote(remote, type, identifier){
+    return axios.post(`remote/${remote}/pull/${type}/${identifier}`)
+}
 
 function getConfigStats(fromTime) {
     return axios.get("/config/stats", {
@@ -397,6 +400,7 @@ export default {
     uploadFile,
     getRemoteNames,
     pushObjectRemote,
+    pullObjectRemote,
     getConfigStats,
     getObjectRelations,
     addObjectRelation

@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask import g, redirect, url_for
+from flask import g
 import requests
 from mwdb.core.plugins import hooks
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden

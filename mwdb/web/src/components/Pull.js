@@ -10,7 +10,6 @@ function PullRemote(props) {
     const history = useHistory();
     const [remoteName, setRemoteName] = useState("");
     const [objectIdentifier, setObjectIdentifier] = useState("");
-    const [objectType, setObjectType] = useState("object");
     const [error, setError] = useState(null)
     const [disabledPullButton, setDisabledPullButton] = useState(false)
 
@@ -22,12 +21,8 @@ function PullRemote(props) {
                 "static_config": "config",
                 "text_blob": "blob"
             })
-            if (objectType === "object") {
-                response = await api.getApiRemote(remoteName, `object/${objectIdentifier}`)
-                response = await api.pullObjectRemote(remoteName, type[response.data.type], objectIdentifier);
-            } else {
-                response = await api.pullObjectRemote(remoteName, objectType, objectIdentifier);
-            }
+            response = await api.getApiRemote(remoteName, `object/${objectIdentifier}`);
+            response = await api.pullObjectRemote(remoteName, type[response.data.type], objectIdentifier);
             type["file"] = "sample";
             history.push(`/${type[response.data.type]}/${objectIdentifier}`);
         } catch (error) {
@@ -53,18 +48,6 @@ function PullRemote(props) {
                                     )
                                 }
                         </select>
-                    </div>
-                    <div className="input-group mb-3">
-                            <div className="input-group-prepend">
-                                <label className="input-group-text">Object type</label>
-                            </div>
-                            <select className="custom-select" value={objectType}
-                                    onChange={(ev) => setObjectType(ev.target.value)}>
-                                <option value="object">Object</option>
-                                <option value="file">File</option>
-                                <option value="config">Config</option>
-                                <option value="blob">Blob</option>
-                            </select>
                     </div>
                     <div className="input-group-prepend">
                         <div className="input-group mb-3">

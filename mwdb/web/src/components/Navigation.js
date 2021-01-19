@@ -11,7 +11,7 @@ import logo from "../assets/logo.png"
 import { NavDropdown } from '@mwdb-web/commons/ui';
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 
-import { faFile, faTable, faScroll, faUpload , faGlobe} from "@fortawesome/free-solid-svg-icons";
+import { faFile, faTable, faScroll, faUpload, faGlobe} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 class Navigation extends Component {

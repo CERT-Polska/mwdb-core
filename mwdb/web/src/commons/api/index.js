@@ -325,8 +325,8 @@ function pullObjectRemote(remote, type, identifier){
     return axios.post(`remote/${remote}/pull/${type}/${identifier}`)
 }
 
-function getApiRemote(remote, path) {
-    return axios.get(`/remote/${remote}/api/${path}`)
+function getObjectRemote(remote, identifier) {
+    return axios.get(`remote/${remote}/api/object/${identifier}`)
 }
 
 function getConfigStats(fromTime) {
@@ -405,7 +405,7 @@ export default {
     getRemoteNames,
     pushObjectRemote,
     pullObjectRemote,
-    getApiRemote,
+    getObjectRemote,
     getConfigStats,
     getObjectRelations,
     addObjectRelation

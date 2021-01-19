@@ -15,16 +15,19 @@ function PullRemote(props) {
 
     async function pullRemote() {
         try {
-            let response;
-            let type = ({
+            const objectData = await api.getObjectRemote(remoteName, objectIdentifier);
+            const objectType = ({
                 "file": "file",
                 "static_config": "config",
                 "text_blob": "blob"
-            })
-            response = await api.getApiRemote(remoteName, `object/${objectIdentifier}`);
-            response = await api.pullObjectRemote(remoteName, type[response.data.type], objectIdentifier);
-            type["file"] = "sample";
-            history.push(`/${type[response.data.type]}/${objectIdentifier}`);
+            })[objectData.data.type]
+            const response = await api.pullObjectRemote(remoteName, objectType, objectIdentifier);
+            const viewType = ({
+                "file": "sample",
+                "static_config": "config",
+                "text_blob": "blob"
+            })[response.data.type];
+            history.push(`/${viewType}/${objectIdentifier}`);
         } catch (error) {
             setDisabledPullButton(false);
             setError(error);
@@ -33,14 +36,20 @@ function PullRemote(props) {
 
     return (
         <View error={error}>
-            <form>
+            <form onSubmit={
+                (e) => {
+                    e.preventDefault();
+                    pullRemote();
+                    setDisabledPullButton(true);
+                }
+            }>
                 <div className="form-group">
                     <div className="input-group mb-3">
                         <div className="input-group-prepend">
                             <label className="input-group-text">Remote name</label>
                         </div>
                         <select className="custom-select" value={remoteName}
-                                onChange={(ev) => setRemoteName(ev.target.value)}>
+                                onChange={(ev) => setRemoteName(ev.target.value)} required>
                             <option value="" hidden>Select the remote instance name</option>
                                 {
                                     props.remotes.sort().map(name =>
@@ -57,19 +66,13 @@ function PullRemote(props) {
                             <input className="form-control" type="text" style={{fontSize: "medium"}}
                                     placeholder="Type object identifier..."
                                     value={objectIdentifier}
-                                    onChange={(ev) => setObjectIdentifier(ev.target.value)}/>
+                                    onChange={(ev) => setObjectIdentifier(ev.target.value)}
+                                    required/>
                         </div>
                     </div>
                 </div>
-                <input value="Pull from remote" className="btn btn-success" type="button"
-                       onClick={
-                           (e) => {
-                               e.preventDefault();
-                               pullRemote();
-                               setDisabledPullButton(true);
-                           }
-                       }
-                       disabled = {disabledPullButton} />
+                <input value="Pull from remote" className="btn btn-success" type="submit"
+                       disabled={disabledPullButton} />
             </form>
         </View>
     )

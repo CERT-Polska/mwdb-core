@@ -94,7 +94,7 @@ class Navigation extends Component {
                                     {
                                         this.props.remotes.length ? (
                                             <li className="nav-item">
-                                                <Link className="nav-link" to={'/pull'}><FontAwesomeIcon className="navbar-icon" icon={faGlobe} />Pull</Link>
+                                                <Link className="nav-link" to="/pull"><FontAwesomeIcon className="navbar-icon" icon={faGlobe} />Pull</Link>
                                             </li>
                                         ) : []
                                     }
@@ -187,7 +187,7 @@ function mapStateToProps(state, ownProps)
         ...ownProps,
         error: state.config.error,
         config: state.config.config,
-        remotes: state.config.config ? state.config.config["remotes"] : [],
+        remotes: state.config.config ? state.config.config.remotes : [],
         capabilities: state.auth.loggedUser && state.auth.loggedUser.capabilities,
         isAuthenticated: !!state.auth.loggedUser,
         isAdmin: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("manage_users") >= 0,

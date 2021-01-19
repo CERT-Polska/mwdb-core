@@ -38,7 +38,7 @@ from mwdb.resources.quick_query import QuickQueryResource, QuickQueryItemResourc
 from mwdb.resources.relations import RelationsResource, ObjectChildResource
 from mwdb.resources.remotes import (
     RemoteListResource, RemoteAPIResource,
-    RemoteObjectPullResource, RemoteFilePullResource,
+    RemoteFilePullResource,
     RemoteConfigPullResource, RemoteTextBlobPullResource,
     RemoteFilePushResource,
     RemoteConfigPushResource, RemoteTextBlobPushResource
@@ -250,7 +250,6 @@ api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
 # Remote endpoints
 api.add_resource(RemoteListResource, "/remote")
 api.add_resource(RemoteAPIResource, "/remote/<remote_name>/api/<path:remote_path>")
-api.add_resource(RemoteObjectPullResource, "/remote/<remote_name>/pull/object/<hash64:identifier>")
 api.add_resource(RemoteFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>")
 api.add_resource(RemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>")
 api.add_resource(RemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>")

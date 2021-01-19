@@ -16,13 +16,20 @@ function PullRemote(props) {
 
     async function pullRemote() {
         try {
-            let response = await api.pullObjectRemote(remoteName, objectType, objectIdentifier);
+            let response;
             let type = ({
-            "file": "sample",
-            "static_config": "config",
-            "text_blob": "blob"
-            })[response.data.type]
-            history.push(`/${type}/${objectIdentifier}`);
+                "file": "file",
+                "static_config": "config",
+                "text_blob": "blob"
+            })
+            if (objectType === "object") {
+                response = await api.getApiRemote(remoteName, `object/${objectIdentifier}`)
+                response = await api.pullObjectRemote(remoteName, type[response.data.type], objectIdentifier);
+            } else {
+                response = await api.pullObjectRemote(remoteName, objectType, objectIdentifier);
+            }
+            type["file"] = "sample";
+            history.push(`/${type[response.data.type]}/${objectIdentifier}`);
         } catch (error) {
             setDisabledPullButton(false);
             setError(error);

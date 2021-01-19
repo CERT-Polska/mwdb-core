@@ -115,21 +115,6 @@ class RemotePullResource(Resource):
         return schema.dump(item)
 
 
-class RemoteObjectPullResource(Resource):
-    @requires_authorization
-    def post(self, remote_name, identifier):
-        remote = RemoteAPI(remote_name)
-        response = remote.request("GET", f"object/{identifier}")
-        object_type = response["type"]
-        resource = {
-            "file": 'remotefilepullresource',
-            "static_config": 'remoteconfigpullresource',
-            "text_blob": 'remotetextblobpullresource'
-        }
-        return redirect(url_for(f'api.{resource[object_type]}', remote_name=remote_name, identifier=identifier),
-                        code=307)
-
-
 class RemoteFilePullResource(RemotePullResource):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema

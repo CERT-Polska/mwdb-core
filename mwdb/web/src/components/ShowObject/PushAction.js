@@ -52,7 +52,7 @@ function PushAction(props) {
             >
                 <form onSubmit={pushRemote}>
                     <select className="form-control" value={remoteName}
-                            onChange={(e) => setRemoteName(e.currentTarget.value)}>
+                            onChange={(e) => setRemoteName(e.target.value)}>
                         <option value="" hidden>Select the remote instance name</option>
                         {
                             props.remotes.sort().map(name =>

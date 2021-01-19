@@ -15,6 +15,7 @@ import ShowConfig from './components/ShowConfig';
 import ShowTextBlob from './components/ShowTextBlob';
 import DiffTextBlob from './components/DiffTextBlob';
 import Upload from './components/Upload';
+import PullRemote from "./components/Pull";
 import UserLogin from './components/UserLogin';
 import UserProfile from './components/UserProfile';
 import ShowUsers from "./components/ShowUsers";
@@ -113,6 +114,7 @@ class App extends Component {
                                     <AuthenticatedRoute exact path='/configs' component={RecentConfigs} />
                                     <AuthenticatedRoute exact path='/configs/stats' component={ConfigStats} />
                                     <AuthenticatedRoute exact path='/upload' component={Upload} />
+                                    <AuthenticatedRoute exact path='/pull' component={PullRemote} />
                                     <AuthenticatedRoute path='/sample/:hash' component={ShowSample} />
                                     <AuthenticatedRoute path='/config/:hash' component={ShowConfig} />
                                     <AuthenticatedRoute path='/search' component={Search} />

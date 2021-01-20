@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext} from 'react';
+import React, {useState, useContext, useLayoutEffect} from 'react';
 import readableTime from 'readable-timestamp';
 import Pagination from "react-js-pagination";
 import { connect } from 'react-redux';
@@ -137,9 +137,9 @@ function CommentBox (props) {
         }
     }
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateComments();
-    }, [context.object.id])
+    })
 
     return (
         <div className={`card card-default ${props.className || ''}`}>

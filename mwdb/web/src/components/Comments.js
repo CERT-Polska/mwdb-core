@@ -39,7 +39,6 @@ function Comment(props) {
                 <small>{readableTime(new Date(props.timestamp))}</small>
             </p>
         </li>
-
     );
 }
 
@@ -69,7 +68,7 @@ function CommentList(props) {
     );
 }
 
-function CommentForm (props){
+function CommentForm(props) {
     const [text, setText] = useState("")
     return (
         <form className="commentForm"
@@ -93,7 +92,7 @@ function CommentForm (props){
     );
 }
 
-function CommentBox (props) {
+function CommentBox(props) {
     const context = useContext(ObjectContext);
     const itemsCountPerPage = 5;
     const [comments, setComments] = useState([])
@@ -110,7 +109,7 @@ function CommentBox (props) {
         }
     }
 
-    async function submitComment(comment){
+    async function submitComment(comment) {
         if (comment) {
             try {
                 await api.addObjectComment(context.object.id, comment)
@@ -132,7 +131,7 @@ function CommentBox (props) {
         }
     }
 
-    function handleRemoveComment(comment_id){
+    function handleRemoveComment(comment_id) {
         setDeleteModalOpen(true)
         setCommentToRemove(comment_id)
     }
@@ -144,7 +143,7 @@ function CommentBox (props) {
     }, [getComments])
 
     return (
-        <div className={`card card-default ${props.className || ''}`}>
+        <div className="card card-default">
             <ConfirmationModal isOpen={isDeleteModalOpen}
                                onRequestClose={() => setDeleteModalOpen(false)}
                                onConfirm={() => {removeComment(commentToRemove)}}

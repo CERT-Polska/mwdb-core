@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
 
-import { faFile, faTable, faScroll, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { faFile, faTable, faScroll, faUpload, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
@@ -35,7 +35,7 @@ function AdminDropdown() {
     }, [])
 
     return (
-        <NavDropdown 
+        <NavDropdown
             title="Admin"
             elements={[
                 <Link key="pending-users" className="dropdown-item" to="/users/pending">
@@ -52,7 +52,7 @@ function AdminDropdown() {
                 <Link key="users" className="dropdown-item" to="/users">Manage users</Link>,
                 <Link key="groups" className="dropdown-item" to="/groups">Manage groups</Link>,
                 ...fromPlugin("navdropdownAdmin")
-            ]} 
+            ]}
             badge={pendingUsersCount}
         />
     )
@@ -90,12 +90,19 @@ export default function Navigation() {
                             <li className="nav-item">
                                 <Link className="nav-link" to={'/upload'}><FontAwesomeIcon className="navbar-icon" icon={faUpload} />Upload</Link>
                             </li>
+                            {
+                                config.config.remotes.length ? (
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/pull"><FontAwesomeIcon className="navbar-icon" icon={faGlobe} />Pull</Link>
+                                    </li>
+                                ) : []
+                            }
                         </Extendable>
                     ) : []
                 }
                 {
                     auth.isAdmin
-                    ? <AdminDropdown /> 
+                    ? <AdminDropdown />
                     : []
                 }
                 {

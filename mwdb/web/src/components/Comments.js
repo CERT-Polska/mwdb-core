@@ -17,7 +17,7 @@ function Comment(props) {
                 <Identicon data={props.author} size="45" />
             </div>
             <div className="media-body" >
-                 <h4 className="media-heading user_name">{props.author}</h4>
+                <h4 className="media-heading user_name">{props.author}</h4>
                 <span>
                 {
                     _.flatMap(props.comment.split("\n"),
@@ -43,9 +43,8 @@ function Comment(props) {
 }
 
 function CommentList(props) {
-    let commentNodes = props.data
-        .map((comment, index) => {
-        return (
+    const commentNodes = props.data
+        .map((comment, index) => (
             <Comment id={comment.id}
                      comment={comment.comment}
                      author={comment.author}
@@ -53,16 +52,15 @@ function CommentList(props) {
                      removeComment={props.removeComment}
                      key={index}
             />
-            );
-        });
+        ));
     return (
         <div className="commentList">
             {
                 commentNodes.length > 0 ?
-                <ul className="list-group list-group-flush">
+                ? <ul className="list-group list-group-flush">
                     {commentNodes}
                 </ul>
-                    : <div className="text-muted">No comments to display</div>
+                : <div className="text-muted">No comments to display</div>
             }
         </div>
     );
@@ -147,7 +145,7 @@ function CommentBox(props) {
             <ConfirmationModal isOpen={isDeleteModalOpen}
                                onRequestClose={() => setDeleteModalOpen(false)}
                                onConfirm={() => {removeComment(commentToRemove)}}
-                               message={`Remove the comment?`}
+                               message="Remove the comment?"
                                confirmText="Remove"/>
             <div className="card-header">Comments</div>
             <div className="card-body">

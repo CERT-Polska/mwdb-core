@@ -35,6 +35,8 @@ function PullRemote(props) {
         }
     }
 
+    const remotes = config.config.remotes;
+
     return (
         <View error={error}>
             <form onSubmit={
@@ -53,7 +55,7 @@ function PullRemote(props) {
                                 onChange={(ev) => setRemoteName(ev.target.value)} required>
                             <option value="" hidden>Select the remote instance name</option>
                                 {
-                                    config.config.remotes.sort().map(name =>
+                                    remotes.sort().map(name =>
                                         <option key={name} value={name}>{name}</option>
                                     )
                                 }

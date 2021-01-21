@@ -63,7 +63,7 @@ export default function About() {
                     </table>
                 </div>
             :
-                <p style={{textAlign: "center"}}>No plugins are installed. Visit our <a href="https://github.com/CERT-Polska/mwdb-core/wiki">documentation</a> to learn about MWDB plugins and how they can be used and installed.</p>
+                <p style={{textAlign: "center"}}>No plugins are installed. Visit our <a href="https://mwdb.readthedocs.io/">documentation</a> to learn about MWDB plugins and how they can be used and installed.</p>
             }
         </div>
     );

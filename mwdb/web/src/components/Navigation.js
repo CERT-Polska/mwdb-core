@@ -14,7 +14,11 @@ import logo from "../assets/logo.png"
 
 
 function AdminDropdown() {
+    const auth = useContext(AuthContext);
     const [pendingUsersCount, setPendingUsersCount] = useState(null);
+
+    const isAdmin = auth.isAdmin;
+    const isAttributeManager = auth.hasCapability("managing_attributes");
 
     async function updatePendingUsersCount() {
         try {
@@ -27,33 +31,47 @@ function AdminDropdown() {
     }
 
     useEffect(() => {
+        if(!isAdmin)
+            return;
         let timer = setInterval(updatePendingUsersCount, 15000);
         updatePendingUsersCount();
         return () => {
             clearInterval(timer);
         }
-    }, [])
+    }, [isAdmin])
+
+    if(!isAdmin && !isAttributeManager)
+        return [];
+
+    const adminItems = isAdmin ? [
+        <Link key="pending-users" className="dropdown-item" to="/users/pending">
+            Pending users
+            {
+                pendingUsersCount
+                ? (
+                    <span className="badge badge-pill badge-warning">
+                        {pendingUsersCount}
+                    </span>
+                ) : []
+            }
+        </Link>,
+        <Link key="users" className="dropdown-item" to="/users">Manage users</Link>,
+        <Link key="groups" className="dropdown-item" to="/groups">Manage groups</Link>
+    ] : [];
+
+    const attributeItems = isAttributeManager ? [
+        <Link key="attributes" className="dropdown-item" to="/attributes">Manage attributes</Link>
+    ] : [];
 
     return (
         <NavDropdown
             title="Admin"
             elements={[
-                <Link key="pending-users" className="dropdown-item" to="/users/pending">
-                    Pending users
-                    {
-                        pendingUsersCount
-                        ? (
-                            <span className="badge badge-pill badge-warning">
-                                {pendingUsersCount}
-                            </span>
-                        ) : []
-                    }
-                </Link>,
-                <Link key="users" className="dropdown-item" to="/users">Manage users</Link>,
-                <Link key="groups" className="dropdown-item" to="/groups">Manage groups</Link>,
+                ...adminItems,
+                ...attributeItems,
                 ...fromPlugin("navdropdownAdmin")
             ]}
-            badge={pendingUsersCount}
+            badge={isAdmin ? pendingUsersCount : null}
         />
     )
 }
@@ -100,19 +118,7 @@ export default function Navigation() {
                         </Extendable>
                     ) : []
                 }
-                {
-                    auth.isAdmin
-                    ? <AdminDropdown />
-                    : []
-                }
-                {
-                    auth.hasCapability("managing_attributes")
-                    ? (
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/attributes">Attributes</Link>
-                        </li>
-                    ) : []
-                }
+                <AdminDropdown />
                 {
                     auth.isAuthenticated ? (
                         <React.Fragment>

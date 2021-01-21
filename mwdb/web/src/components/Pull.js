@@ -6,7 +6,7 @@ import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 
 
-function PullRemote(props) {
+export default function PullRemote(props) {
     const config = useContext(ConfigContext);
     const history = useHistory();
     const [remoteName, setRemoteName] = useState("");

@@ -1,4 +1,4 @@
-import React, {useState, useContext, useLayoutEffect} from 'react';
+import React, {useState, useContext, useEffect, useCallback} from 'react';
 import readableTime from 'readable-timestamp';
 import Pagination from "react-js-pagination";
 import { connect } from 'react-redux';
@@ -29,7 +29,7 @@ function Comment(props) {
                 </span>
                 <p>
                     {
-                        props.removable &&
+                        props.removeComment &&
                         <button className="btn btn-link p-0 remove-comment-link"
                                 onClick={() => props.removeComment(props.id)}>Remove</button>
                     }
@@ -53,7 +53,7 @@ function CommentList(props) {
                      timestamp={comment.timestamp}
                      removeComment={props.removeComment}
                      key={index}
-                     removable={props.canRemoveComments}/>
+            />
             );
         });
     return (
@@ -76,7 +76,7 @@ function CommentForm (props){
               onSubmit={
                   (ev) => {
                       ev.preventDefault();
-                      props.onCommentSubmit(text);
+                      props.submitComment(text);
                       setText("");
                   }
               }>
@@ -110,7 +110,7 @@ function CommentBox (props) {
         }
     }
 
-    async function handleCommentSubmit(comment){
+    async function submitComment(comment){
         if (comment) {
             try {
                 await api.addObjectComment(context.object.id, comment)
@@ -119,11 +119,6 @@ function CommentBox (props) {
                 context.setObjectError(error);
             }
         }
-    }
-
-    function handleRemoveComment(comment_id){
-        setDeleteModalOpen(true)
-        setCommentToRemove(comment_id)
     }
 
     async function removeComment(comment_id) {
@@ -137,9 +132,16 @@ function CommentBox (props) {
         }
     }
 
-    useLayoutEffect(() => {
-        updateComments();
-    })
+    function handleRemoveComment(comment_id){
+        setDeleteModalOpen(true)
+        setCommentToRemove(comment_id)
+    }
+
+    const getComments = useCallback(updateComments, [])
+
+    useEffect(() => {
+        getComments();
+    }, [getComments])
 
     return (
         <div className={`card card-default ${props.className || ''}`}>
@@ -151,8 +153,7 @@ function CommentBox (props) {
             <div className="card-header">Comments</div>
             <div className="card-body">
                 <CommentList
-                    canRemoveComments={props.canRemoveComments}
-                    removeComment={handleRemoveComment}
+                    removeComment={props.canRemoveComments ? handleRemoveComment : null}
                     data={comments
                     .sort(function (a, b) {
                         return new Date(b.timestamp) - new Date(a.timestamp);
@@ -163,13 +164,13 @@ function CommentBox (props) {
             {
                 comments.length > itemsCountPerPage &&
                 <Pagination activePage={activePage}
-                        itemsCountPerPage={itemsCountPerPage} totalItemsCount={comments.length}
-                        pageRangeDisplayed={5} onChange={setActivePage}
-                        itemClass="page-item" linkClass="page-link"/>
+                            itemsCountPerPage={itemsCountPerPage} totalItemsCount={comments.length}
+                            pageRangeDisplayed={5} onChange={setActivePage}
+                            itemClass="page-item" linkClass="page-link"/>
             }
             {
                 props.canAddComments &&
-                <CommentForm onCommentSubmit={handleCommentSubmit} />
+                <CommentForm submitComment={submitComment} />
             }
         </div>
     );

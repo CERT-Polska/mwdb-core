@@ -56,11 +56,13 @@ function CommentList(props) {
     return (
         <div className="commentList">
             {
-                commentNodes.length > 0 ?
-                ? <ul className="list-group list-group-flush">
-                    {commentNodes}
-                </ul>
-                : <div className="text-muted">No comments to display</div>
+                commentNodes.length > 0 ? (
+                    <ul className="list-group list-group-flush">
+                        {commentNodes}
+                    </ul>
+                    ) : (
+                        <div className="text-muted">No comments to display</div>
+                )
             }
         </div>
     );
@@ -80,7 +82,8 @@ function CommentForm(props) {
             <div className="input-group">
                 <textarea className="form-control" placeholder="Say something..."
                           value={text}
-                          onChange={ev => setText(ev.target.value)}/>
+                          onChange={ev => setText(ev.target.value)}
+                          onKeyDown={evt => evt.ctrlKey && evt.keyCode === 13 && props.submitComment(text)}/>
                 <div className="input-group-append">
                     <input className="btn btn-outline-primary" type="submit" value="Post" />
                 </div>

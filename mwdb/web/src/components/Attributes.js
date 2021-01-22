@@ -54,7 +54,7 @@ function DefaultAttributeRenderer(props) {
                     ? <FontAwesomeIcon icon={collapsed ? "plus" : "minus"} size="sm"/>
                     : []
                 }{" "}
-                {this.props.label}
+                {props.label}
             </th>
             <td className="flickerable">
                 { visibleValues.map(attr => (

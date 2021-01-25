@@ -90,7 +90,7 @@ export default function ShowObject(props) {
                                 <MultiRelationsBox id={objectState.object.id} parents={objectState.object.parents} children={objectState.object.children}
                                                 onObjectUpdate={objectState.updateObject}/>
                                 <AttributesBox {...objectState.object}/>
-                                <CommentBox id={objectState.object.id}/>
+                                <CommentBox />
                             </Extendable>
                         </div>
                     </div>

@@ -2,9 +2,6 @@ import React, {Component} from 'react';
 import Capabilities from "./Capabilities";
 import {UserLink} from "./ShowUsers";
 
-import { push } from "connected-react-router";
-import { connect } from "react-redux";
-
 import _ from "lodash";
 
 import api from "@mwdb-web/commons/api";
@@ -15,8 +12,7 @@ export let GroupMemberList = (props) =>
                 itemLinkClass={UserLink}
                 {...props}/>
 
-
-class GroupUpdate extends Component {
+export default class GroupUpdate extends Component {
     state = {
         error: null,
         loginFilter: '',
@@ -115,10 +111,11 @@ class GroupUpdate extends Component {
 
     handleGroupUpdate = async (e) => {
         e.preventDefault();
+        const groupName = this.props.match.params.name;
         try {
-            await api.updateGroup(this.props.match.params.name, this.state.name, this.state.capabilities)
-            if(this.state.name !== this.props.match.params.name) {
-                this.props.redirectToGroup(this.state.name);
+            await api.updateGroup(groupName, this.state.name, this.state.capabilities)
+            if(this.state.name !== groupName) {
+                this.props.history.push(`/group/${groupName}`);
                 return;
             }
             this.doUpdate();
@@ -194,11 +191,3 @@ class GroupUpdate extends Component {
         );
     }
 }
-
-function mapDispatchToProps(dispatch) {
-    return {
-        redirectToGroup: (name) => dispatch(push(`/group/${name}`))
-    }
-}
-
-export default connect( null, mapDispatchToProps )(GroupUpdate);

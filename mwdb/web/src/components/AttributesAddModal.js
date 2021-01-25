@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
-import { connect } from 'react-redux';
 
 import api from "@mwdb-web/commons/api";
+import { AuthContext } from '@mwdb-web/commons/auth';
 import {ConfirmationModal} from "@mwdb-web/commons/ui";
 
-class AttributesAddModal extends Component {
+export default class AttributesAddModal extends Component {
     state = {
         attributes: [],
         attributeKey: "",
@@ -12,6 +12,8 @@ class AttributesAddModal extends Component {
     }
 
     attributesForm = React.createRef();
+
+    static contextType = AuthContext;
 
     handleSubmit = (event) => {
         if(event)
@@ -72,7 +74,7 @@ class AttributesAddModal extends Component {
                                onRequestClose={this.props.onRequestClose}
                                onConfirm={this.handleSubmit}>
                 {
-                    !this.props.canAddMetakeys && !Object.keys(this.state.attributes).length
+                    !this.context.hasCapability("adding_all_attributes") && !Object.keys(this.state.attributes).length
                     ? <div>Sorry, there are no attributes you can set at this moment.</div>
                     : (
                         <form ref={this.attributesForm} onSubmit={this.handleSubmit}>
@@ -107,13 +109,3 @@ class AttributesAddModal extends Component {
         )
     }
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        canAddMetakeys: state.auth.loggedUser.capabilities.includes("adding_all_attributes"),
-    }
-}
-
-export default connect(mapStateToProps)(AttributesAddModal);

@@ -1,12 +1,13 @@
-import React, {useState} from 'react'
-import { connect } from 'react-redux'
+import React, { useContext, useState } from 'react'
 import { useHistory } from 'react-router';
 
 import api from "@mwdb-web/commons/api";
+import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 
 
-function PullRemote(props) {
+export default function PullRemote(props) {
+    const config = useContext(ConfigContext);
     const history = useHistory();
     const [remoteName, setRemoteName] = useState("");
     const [objectIdentifier, setObjectIdentifier] = useState("");
@@ -34,6 +35,8 @@ function PullRemote(props) {
         }
     }
 
+    const remotes = config.config.remotes;
+
     return (
         <View error={error}>
             <form onSubmit={
@@ -52,7 +55,7 @@ function PullRemote(props) {
                                 onChange={(ev) => setRemoteName(ev.target.value)} required>
                             <option value="" hidden>Select the remote instance name</option>
                                 {
-                                    props.remotes.sort().map(name =>
+                                    remotes.sort().map(name =>
                                         <option key={name} value={name}>{name}</option>
                                     )
                                 }
@@ -77,12 +80,3 @@ function PullRemote(props) {
         </View>
     )
 }
-
-function mapStateToProps(state, ownProps) {
-    return {
-        ...ownProps,
-        remotes: state.config.config["remotes"],
-    }
-}
-
-export default connect(mapStateToProps)(PullRemote);

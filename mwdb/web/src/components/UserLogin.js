@@ -1,73 +1,59 @@
-import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
+import React, {useContext, useState} from 'react';
+import { useHistory } from 'react-router';
+import { Link } from 'react-router-dom';
 
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
-import { authActions } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import api from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/extensions";
 import { View } from "@mwdb-web/commons/ui";
 
+export default function UserLogin(props) {
+    const auth = useContext(AuthContext);
+    const history = useHistory();
 
-class UserLogin extends Component {
-    state = {
-        login: '',
-        password: ''
-    };
-
-    handleInputChange = (event) => {
-        const target = event.target;
-        const value = target.type === 'checkbox' ? target.checked : target.value;
-        const name = target.name;
-
-        this.setState({
-            [name]: value
-        });
+    const [login, setLogin] = useState('');
+    const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState(null);
+    
+    const locationState = history.location.state || {}
+    const error = loginError || locationState.error;
+    const success = !error && locationState.success;
+    
+    async function tryLogin() {
+        try {
+            const response = await api.authLogin(login, password);
+            const prevLocation = locationState.prevLocation || "/"
+            auth.updateSession(response.data);
+            history.push(prevLocation);
+        } catch(error) {
+            setLoginError(error);
+        }
     }
 
-    handleSubmit = (event) => {
-        event.preventDefault();
-        this.props.auth.login(this.state.login, this.state.password, this.props.prevLocation);
-    }
-
-    render() {
-        let {error, success} = this.props.location.state || {};
-        return (
-            <View ident="userLogin" error={error} success={success}>
-                <h2>Login</h2>
-                <form onSubmit={this.handleSubmit}>
-                    <Extension ident="userLoginNote" />
-                    <div className="form-group">
-                        <label>Login</label>
-                        <input type="text" name="login" value={this.state.login} onChange={this.handleInputChange}
-                               className="form-control" required/>
-                    </div>
-                    <div className="form-group">
-                        <label>Password</label>
-                        <input type="password" name="password" value={this.state.password}
-                               onChange={this.handleInputChange} className="form-control" required/>
-                    </div>
-                    <nav className="form-group">
-                        <Link to={'/recover_password'}>
+    return (
+        <View ident="userLogin" error={error} success={success}>
+            <h2>Login</h2>
+            <form onSubmit={(ev) => { ev.preventDefault(); tryLogin(); }}>
+                <Extension ident="userLoginNote" />
+                <div className="form-group">
+                    <label>Login</label>
+                    <input type="text" name="login" 
+                           value={login} onChange={(ev) => setLogin(ev.target.value)}
+                           className="form-control" required />
+                </div>
+                <div className="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password"
+                           value={password} onChange={(ev) => setPassword(ev.target.value)}
+                           className="form-control" required />
+                </div>
+                <nav className="form-group">
+                    <Link to='/recover_password'>
                         Forgot password?
-                        </Link>
-                    </nav>
-                    <input type="submit" value="Submit" className="btn btn-primary"/>
-                </form>
-            </View>
-        );
-    }
+                    </Link>
+                </nav>
+                <input type="submit" value="Submit" className="btn btn-primary"/>
+            </form>
+        </View>
+    )
 }
-
-function mapStateToProps(state) {
-    return {
-        prevLocation: state.auth.prevLocation
-    }
-}
-
-function mapDispatchToProps(dispatch) {
-    return {
-        auth: bindActionCreators(authActions, dispatch)
-    }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(UserLogin);

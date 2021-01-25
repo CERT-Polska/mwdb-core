@@ -1,11 +1,11 @@
-import React, {useState, useContext, useEffect, useCallback} from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import readableTime from 'readable-timestamp';
 import Pagination from "react-js-pagination";
-import { connect } from 'react-redux';
 
 import _ from 'lodash';
 
 import api from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
 
@@ -98,9 +98,14 @@ function CommentForm(props) {
     );
 }
 
-function CommentBox(props) {
+function CommentBox() {
+    const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const itemsCountPerPage = 5;
+
+    const canRemoveComments = auth.hasCapability("removing_comments");
+    const canAddComments = auth.hasCapability("adding_comments");
+
     const [comments, setComments] = useState([])
     const [activePage, setActivePage] = useState(1)
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -158,7 +163,7 @@ function CommentBox(props) {
             <div className="card-header">Comments</div>
             <div className="card-body">
                 <CommentList
-                    removeComment={props.canRemoveComments ? handleRemoveComment : null}
+                    removeComment={canRemoveComments ? handleRemoveComment : null}
                     data={comments
                     .sort(function (a, b) {
                         return new Date(b.timestamp) - new Date(a.timestamp);
@@ -174,20 +179,11 @@ function CommentBox(props) {
                             itemClass="page-item" linkClass="page-link"/>
             }
             {
-                props.canAddComments &&
+                canAddComments &&
                 <CommentForm submitComment={submitComment} />
             }
         </div>
     );
 }
 
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        canRemoveComments: state.auth.loggedUser.capabilities.includes("removing_comments"),
-        canAddComments: state.auth.loggedUser.capabilities.includes("adding_comments"),
-    }
-}
-
-export default connect(mapStateToProps)(CommentBox);
+export default CommentBox;

@@ -1,17 +1,19 @@
 import React, { useContext, useState } from "react";
-import { connect } from "react-redux";
 import { useHistory } from 'react-router';
 
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 
 import api from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 
-function RemoveAction(props) {
+export default function RemoveAction() {
+    const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const history = useHistory();
+
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
 
@@ -28,7 +30,7 @@ function RemoveAction(props) {
     }
 
     // If user can't remove objects: don't show the action
-    if(!props.canDeleteObject)
+    if(!auth.hasCapability("removing_objects"))
         return [];
 
     return (
@@ -55,13 +57,3 @@ function RemoveAction(props) {
         </React.Fragment>
     )
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        canDeleteObject: state.auth.loggedUser.capabilities.includes("removing_objects"),
-    }
-}
-
-export default connect(mapStateToProps)(RemoveAction);

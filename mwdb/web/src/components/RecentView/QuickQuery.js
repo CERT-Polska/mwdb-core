@@ -1,9 +1,10 @@
-import React, {useState, useEffect} from 'react';
-import { connect } from "react-redux";
+import React, { useState, useEffect, useContext } from 'react';
 
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {ConfirmationModal} from "@mwdb-web/commons/ui";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import api from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 import QuickQueryAddModal from "./QuickQueryAddModal";
 
@@ -36,12 +37,14 @@ function UploaderQueryItem(props) {
     )
 }
 
-function QuickQuery(props) {
-    let [addModalOpen, setAddModalOpen] = useState(false);
-    let [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    let [idToRemove, setIdToRemove] = useState(null);
-    let [queries, setQueries] = useState([]);
-    let [modalError, setModalError] = useState(null);
+export default function QuickQuery(props) {
+    const auth = useContext(AuthContext);
+
+    const [addModalOpen, setAddModalOpen] = useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [idToRemove, setIdToRemove] = useState(null);
+    const [queries, setQueries] = useState([]);
+    const [modalError, setModalError] = useState(null);
 
     const updateQueries = async () => {
         try {
@@ -76,7 +79,7 @@ function QuickQuery(props) {
 
     const predefinedQueryBadges = [
         <UploaderQueryItem key="uploaded-by-me"
-                           onClick={(ev) => {ev.preventDefault(); props.addToQuery("uploader", props.userLogin)}} />,
+                           onClick={(ev) => {ev.preventDefault(); props.addToQuery("uploader", auth.user.login)}} />,
         <QuickQueryItem key="exclude-public"
                         label="Exclude public"
                         color="secondary"
@@ -84,7 +87,7 @@ function QuickQuery(props) {
         <QuickQueryItem key="favorites"
                         label="Favorites"
                         color="info"
-                        onClick={(ev) => {ev.preventDefault(); props.addToQuery("favorites", props.userLogin)}} />,
+                        onClick={(ev) => {ev.preventDefault(); props.addToQuery("favorites", auth.user.login)}} />,
         <QuickQueryItem key="exclude-feed"
                         label="Exclude feed:*"
                         color="primary"
@@ -161,7 +164,3 @@ function QuickQuery(props) {
         </div>
     )
 }
-
-export default connect(
-    (state, ownProps) => ({...ownProps, userLogin: state.auth.loggedUser.login})
-)(QuickQuery);

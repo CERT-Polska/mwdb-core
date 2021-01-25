@@ -1,14 +1,17 @@
 import React, {Component} from 'react';
-import { View } from "@mwdb-web/commons/ui";
-import { connect } from 'react-redux';
-import api from "@mwdb-web/commons/api";
 import ReCAPTCHA from "react-google-recaptcha";
 
-class UserPasswordRecover extends Component {
+import api from "@mwdb-web/commons/api";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { View } from "@mwdb-web/commons/ui";
+
+export default class UserPasswordRecover extends Component {
     constructor(props) {
         super(props);
         this.state = this.initialState;
     }
+
+    static contextType = ConfigContext;
 
     get initialState() {
         return {
@@ -83,9 +86,9 @@ class UserPasswordRecover extends Component {
                         <label>Please enter the information above to recover your password.</label>
                     </div>
                     {
-                        this.props.config["recaptcha_site_key"]
+                        this.context.config["recaptcha_site_key"]
                         ? <ReCAPTCHA 
-                            sitekey={this.props.config["recaptcha_site_key"]}
+                            sitekey={this.context.config["recaptcha_site_key"]}
                             onChange={this.onCaptchaChange} />
                         : []
                     }
@@ -95,13 +98,3 @@ class UserPasswordRecover extends Component {
         );
     }
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        config: state.config.config,
-    }
-}
-
-export default connect ( mapStateToProps )(UserPasswordRecover);

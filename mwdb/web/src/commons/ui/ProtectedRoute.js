@@ -1,18 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Route } from "react-router-dom";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
 
 import ErrorBoundary from "./ErrorBoundary";
 
-import { authActions } from "../auth";
-import history from "../history";
+import { AuthContext } from "../auth"
 
-function ProtectedRoute(props) {
-    let routeRender = (renderProps) => {
-        if(!props.isAuthenticated)
+export default function ProtectedRoute(props) {
+    const auth = useContext(AuthContext);
+    function routeRender(renderProps) {
+        if(!auth.isAuthenticated)
         {
-            props.auth.logout({error: "You need to authenticate before accessing this page."}, history.location);
+            auth.logout("You need to authenticate before accessing this page");
             return [];
         }
         return (
@@ -21,24 +19,7 @@ function ProtectedRoute(props) {
             : <ErrorBoundary error="You don't have permission to see that page" />
         )
     }
-
     return <Route {...props} 
                   component={undefined}
                   render={routeRender} />
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        isAuthenticated: !!state.auth.loggedUser
-    }
-}
-
-function mapDispatchToProps(dispatch) {
-    return {
-        auth: bindActionCreators(authActions, dispatch)
-    }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(ProtectedRoute);

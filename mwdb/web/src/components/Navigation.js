@@ -1,206 +1,194 @@
-import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
-import {withRouter} from 'react-router-dom';
+import React, {useContext, useEffect, useState} from 'react';
+import { Link } from 'react-router-dom';
 
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
-import api from "@mwdb-web/commons/api";
-import { authActions } from "@mwdb-web/commons/auth";
-
-import logo from "../assets/logo.png"
-import { NavDropdown } from '@mwdb-web/commons/ui';
-import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
-
-import { faFile, faTable, faScroll, faUpload, faGlobe} from "@fortawesome/free-solid-svg-icons";
+import { faFile, faTable, faScroll, faUpload, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-class Navigation extends Component {
-    pendingRefreshTimer = null;
+import api from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
+import { NavDropdown } from '@mwdb-web/commons/ui';
 
-    state = {
-        pendingUsersCount: undefined
-    }
+import logo from "../assets/logo.png"
 
-    async updatePendingUsersCount() {
-        if(this.props.isAdmin)
-        {
-            try {
-                let response = await api.getPendingUsers()
-                this.setState({pendingUsersCount: response.data.users.length});
-            } catch(error) {}
+
+function AdminDropdown() {
+    const auth = useContext(AuthContext);
+    const [pendingUsersCount, setPendingUsersCount] = useState(null);
+
+    const isAdmin = auth.isAdmin;
+    const isAttributeManager = auth.hasCapability("managing_attributes");
+
+    async function updatePendingUsersCount() {
+        try {
+            let response = await api.getPendingUsers()
+            setPendingUsersCount(response.data.users.length);
+        } catch(error) {
+            console.error(error);
+            setPendingUsersCount("?");
         }
     }
 
-    componentDidMount() {
-        if(!this.pendingRefreshTimer)
-        {
-            this.pendingRefreshTimer = setInterval(() => this.updatePendingUsersCount(), 60000);
-            this.updatePendingUsersCount();
+    useEffect(() => {
+        if(!isAdmin)
+            return;
+        let timer = setInterval(updatePendingUsersCount, 15000);
+        updatePendingUsersCount();
+        return () => {
+            clearInterval(timer);
         }
-    }
+    }, [isAdmin])
 
-    componentWillUnmount() {
-        if(this.pendingRefreshTimer)
-        {
-            clearInterval(this.pendingRefreshTimer);
-            this.pendingRefreshTimer = null;
-        }
-    }
+    if(!isAdmin && !isAttributeManager)
+        return [];
 
-    handleLogout = (event) => {
-        event.preventDefault();
-        this.props.auth.logout({success: "User logged out successfully."});
-    }
+    const adminItems = isAdmin ? [
+        <Link key="pending-users" className="dropdown-item" to="/users/pending">
+            Pending users
+            {
+                pendingUsersCount
+                ? (
+                    <span className="badge badge-pill badge-warning">
+                        {pendingUsersCount}
+                    </span>
+                ) : []
+            }
+        </Link>,
+        <Link key="users" className="dropdown-item" to="/users">Manage users</Link>,
+        <Link key="groups" className="dropdown-item" to="/groups">Manage groups</Link>
+    ] : [];
 
-    render() {
-        return (
-            <nav className="navbar navbar-expand-lg navbar-dark">
-                <Link className="navbar-brand" to={'/'}>
-                    <Extendable ident="navbarLogo">
-                        <img src={logo} alt="logo" className="logo"/>
-                        mwdb
-                    </Extendable>
-                </Link>
-                <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul className="navbar-nav mr-auto">
-                        <Extendable ident="navbar" extProps={this.props}>
-                        {
-                            !this.props.isAuthenticated && this.props.isRegistrationEnabled ? (
-                                <React.Fragment>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to={'/register'}>Register user</Link>
-                                    </li>
-                                </React.Fragment>
-                            ) : []
-                        }
-                        {
-                            this.props.isAuthenticated ? (
-                                <Extendable ident="navbarAuthenticated" extProps={this.props}>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to={'/'}><FontAwesomeIcon className="navbar-icon" icon={faFile} />Samples</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to={'/configs'}><FontAwesomeIcon className="navbar-icon" icon={faTable} />Configs</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to={'/blobs'}><FontAwesomeIcon className="navbar-icon" icon={faScroll} />Blobs</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to={'/upload'}><FontAwesomeIcon className="navbar-icon" icon={faUpload} />Upload</Link>
-                                    </li>
-                                    {
-                                        this.props.remotes.length ? (
-                                            <li className="nav-item">
-                                                <Link className="nav-link" to="/pull"><FontAwesomeIcon className="navbar-icon" icon={faGlobe} />Pull</Link>
-                                            </li>
-                                        ) : []
-                                    }
-                                </Extendable>
-                            ) : []
-                        }
-                        <NavDropdown title="Admin"
-                                     elements={[
-                                        ...(this.props.isAdmin ? [
-                                            <Link key="pending-users" className="dropdown-item" to="/users/pending">
-                                                Pending users
-                                                {
-                                                    this.state.pendingUsersCount
-                                                    ? <span className="badge badge-pill badge-warning">
-                                                        {this.state.pendingUsersCount}
-                                                      </span>
-                                                    : []
-                                                }
-                                            </Link>,
-                                            <Link key="users" className="dropdown-item" to="/users">Manage users</Link>,
-                                            <Link key="groups" className="dropdown-item" to="/groups">Manage groups</Link>
-                                        ] : []),
-                                        ...(this.props.isAttributeManager ? [
-                                            <Link key="attributes" className="dropdown-item" to="/attributes">Manage attributes</Link>
-                                        ] : []),
-                                        ...fromPlugin("navdropdownAdmin")
-                                     ]} 
-                                     badge={this.state.pendingUsersCount}/>
-                        {
-                            this.props.isAuthenticated ? (
-                                <React.Fragment>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to={'/search'}>Search</Link>
-                                    </li>
-                                    <li>
-                                        <Link className="nav-link" to="/user_groups">Groups</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to={'/configs/stats'}>Statistics</Link>
-                                    </li>
-                                </React.Fragment>
-                            ) : []
-                        }
-                        <NavDropdown title="About"
-                                     elements={[
-                                        ...(this.props.isAuthenticated ? [
-                                            <Link key="about" className="dropdown-item" to="/about">About mwdb</Link>,
-                                            <Link key="docs" className="dropdown-item" to="/docs">Docs</Link>
-                                        ] : []),
-                                        ...fromPlugin("navdropdownAbout")
-                                     ]} />
-                        <NavDropdown title="Extras"
-                                     elements={[
-                                         ...fromPlugin("navdropdownExtras")
-                                     ]} />
-                        </Extendable>
-                    </ul>
-                    <div className="my-2 my-lg-0">
-                        <ul className="navbar-nav">
-                            <Extendable ident="navbarRight" extProps={this.props}>
+    const attributeItems = isAttributeManager ? [
+        <Link key="attributes" className="dropdown-item" to="/attributes">Manage attributes</Link>
+    ] : [];
+
+    return (
+        <NavDropdown
+            title="Admin"
+            elements={[
+                ...adminItems,
+                ...attributeItems,
+                ...fromPlugin("navdropdownAdmin")
+            ]}
+            badge={isAdmin ? pendingUsersCount : null}
+        />
+    )
+}
+
+export default function Navigation() {
+    const auth = useContext(AuthContext);
+    const config = useContext(ConfigContext);
+
+    const navItems = (
+        config.config
+        ? (
+            <Extendable ident="navbar">
+                {
+                    !auth.isAuthenticated && config.config["is_registration_enabled"] ? (
+                        <React.Fragment>
+                            <li className="nav-item">
+                                <Link className="nav-link" to={'/register'}>Register user</Link>
+                            </li>
+                        </React.Fragment>
+                    ) : []
+                }
+                {
+                    auth.isAuthenticated ? (
+                        <Extendable ident="navbarAuthenticated">
+                            <li className="nav-item">
+                                <Link className="nav-link" to={'/'}><FontAwesomeIcon className="navbar-icon" icon={faFile} />Samples</Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link className="nav-link" to={'/configs'}><FontAwesomeIcon className="navbar-icon" icon={faTable} />Configs</Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link className="nav-link" to={'/blobs'}><FontAwesomeIcon className="navbar-icon" icon={faScroll} />Blobs</Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link className="nav-link" to={'/upload'}><FontAwesomeIcon className="navbar-icon" icon={faUpload} />Upload</Link>
+                            </li>
                             {
-                                this.props.isAuthenticated ? (
-                                    <React.Fragment>
-                                        <li className="nav-item">
-                                            <span className="navbar-text" style={{marginRight: "1rem"}}>
-                                                Logged as: <b>{this.props.userLogin}</b>
-                                            </span>
-                                        </li>
-                                        <li className="nav-item">
-                                            <div class="btn-group">
-                                                <Link className="btn btn-outline-success" to={`/profile/${this.props.userLogin}`}>Profile</Link>
-                                                <a className="btn btn-outline-danger" href="#logout" onClick={this.handleLogout}>Logout</a>
-                                            </div>
-                                        </li>
-                                    </React.Fragment>
+                                config.config.remotes.length ? (
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/pull"><FontAwesomeIcon className="navbar-icon" icon={faGlobe} />Pull</Link>
+                                    </li>
                                 ) : []
                             }
-                            </Extendable>
-                        </ul>
-                    </div>
+                        </Extendable>
+                    ) : []
+                }
+                <AdminDropdown />
+                {
+                    auth.isAuthenticated ? (
+                        <React.Fragment>
+                            <li className="nav-item">
+                                <Link className="nav-link" to={'/search'}>Search</Link>
+                            </li>
+                            <li>
+                                <Link className="nav-link" to="/user_groups">Groups</Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link className="nav-link" to={'/configs/stats'}>Statistics</Link>
+                            </li>
+                        </React.Fragment>
+                    ) : []
+                }
+                <NavDropdown title="About"
+                            elements={[
+                                ...(auth.isAuthenticated ? [
+                                    <Link key="about" className="dropdown-item" to="/about">About mwdb</Link>,
+                                    <Link key="docs" className="dropdown-item" to="/docs">Docs</Link>
+                                ] : []),
+                                ...fromPlugin("navdropdownAbout")
+                            ]} />
+                <NavDropdown title="Extras"
+                            elements={[
+                                ...fromPlugin("navdropdownExtras")
+                            ]} />
+            </Extendable>
+        ) : []
+    )
+
+    return (
+        <nav className="navbar navbar-expand-lg navbar-dark">
+            <Link className="navbar-brand" to={'/'}>
+                <Extendable ident="navbarLogo">
+                    <img src={logo} alt="logo" className="logo"/>
+                    mwdb
+                </Extendable>
+            </Link>
+            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                <span className="navbar-toggler-icon"></span>
+            </button>
+            <div className="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul className="navbar-nav mr-auto">
+                    {navItems}
+                </ul>
+                <div className="my-2 my-lg-0">
+                    <ul className="navbar-nav">
+                        <Extendable ident="navbarRight">
+                        {
+                            auth.isAuthenticated ? (
+                                <React.Fragment>
+                                    <li className="nav-item">
+                                        <span className="navbar-text" style={{marginRight: "1rem"}}>
+                                            Logged as: <b>{auth.user.login}</b>
+                                        </span>
+                                    </li>
+                                    <li className="nav-item">
+                                        <div className="btn-group">
+                                            <Link className="btn btn-outline-success" to={`/profile/${auth.user.login}`}>Profile</Link>
+                                            <a className="btn btn-outline-danger" href="#logout" onClick={(ev) => { ev.preventDefault(); auth.logout(); }}>Logout</a>
+                                        </div>
+                                    </li>
+                                </React.Fragment>
+                            ) : []
+                        }
+                        </Extendable>
+                    </ul>
                 </div>
-            </nav>
-        )
-    }
+            </div>
+        </nav>
+    )
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        error: state.config.error,
-        config: state.config.config,
-        remotes: state.config.config ? state.config.config.remotes : [],
-        capabilities: state.auth.loggedUser && state.auth.loggedUser.capabilities,
-        isAuthenticated: !!state.auth.loggedUser,
-        isAdmin: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("manage_users") >= 0,
-        isAttributeManager: state.auth.loggedUser && state.auth.loggedUser.capabilities.indexOf("managing_attributes") >= 0,
-        isRegistrationEnabled: state.config.config && state.config.config["is_registration_enabled"],
-        userLogin: state.auth.loggedUser && state.auth.loggedUser.login
-    }
-}
-
-function mapDispatchToProps(dispatch) {
-    return {
-        auth: bindActionCreators(authActions, dispatch)
-    }
-}
-
-export default connect( mapStateToProps, mapDispatchToProps )(withRouter(Navigation));

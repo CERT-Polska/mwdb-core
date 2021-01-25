@@ -1,17 +1,18 @@
 import React, { useContext } from "react";
-import { connect } from "react-redux";
 
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 
 
-function RemoveAction(props) {
+export default function RemoveAction() {
+    const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
 
     // If user can't add parents: don't show the action
-    if(!props.canAddParent)
+    if(!auth.hasCapability("adding_parents"))
         return [];
 
     return (
@@ -22,13 +23,3 @@ function RemoveAction(props) {
         />
     )
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        canAddParent: state.auth.loggedUser.capabilities.includes("adding_parents")
-    }
-}
-
-export default connect(mapStateToProps)(RemoveAction);

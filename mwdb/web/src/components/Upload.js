@@ -1,17 +1,17 @@
 import React, {Component} from 'react';
-import Dropzone from 'react-dropzone';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-
 import Autocomplete from 'react-autocomplete';
+import Dropzone from 'react-dropzone';
+import queryString from "query-string";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import AttributesAddModal from './AttributesAddModal';
 
 import api from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { DataTable, View } from "@mwdb-web/commons/ui";
 
-import queryString from "query-string";
-import { connect } from "react-redux";
 
-class Upload extends Component {
+export default class Upload extends Component {
     state = {
         files: null,
         error: null,
@@ -23,6 +23,8 @@ class Upload extends Component {
         attributes: [],
         isAttributeModalOpen: false
     }
+    
+    static contextType = AuthContext;
 
     get parentFromQuery() {
         return queryString.parse(this.props.location.search)["parent"]
@@ -45,7 +47,7 @@ class Upload extends Component {
             let response = await api.getShareInfo()
             let groups = response.data.groups;
             groups.splice(groups.indexOf("public"), 1)
-            groups.splice(groups.indexOf(this.props.login), 1)
+            groups.splice(groups.indexOf(this.context.user.login), 1)
             this.setState({groups: groups, shareWith: groups.length > 0 ? "default" : "private"});
         } catch(error) {
             this.setState({error});
@@ -72,7 +74,7 @@ class Upload extends Component {
         if(this.state.shareWith === "public")
             return "public";
         if(this.state.shareWith === "private")
-            return this.props.login;
+            return this.context.user.login;
         if(this.state.shareWith === "single")
             return this.state.group;
     }
@@ -155,7 +157,7 @@ class Upload extends Component {
                     </Dropzone>
                     <div className="form-group">
                         {
-                            this.props.canAddParent ?
+                            this.context.hasCapability("adding_parents") ?
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label className="input-group-text">Parent</label>
@@ -260,15 +262,3 @@ class Upload extends Component {
         );
     }
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        login: state.auth.loggedUser.login,
-        canAddParent: state.auth.loggedUser.capabilities.includes("adding_parents")
-    }
-}
-
-
-export default connect(mapStateToProps)(Upload);

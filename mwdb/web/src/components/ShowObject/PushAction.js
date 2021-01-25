@@ -1,14 +1,15 @@
 import React, { useContext, useState } from "react";
-import { connect } from "react-redux";
 
 import { faGlobe } from '@fortawesome/free-solid-svg-icons'
 
 import api from "@mwdb-web/commons/api";
+import { ConfigContext } from "@mwdb-web/commons/config";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from  "@mwdb-web/commons/ui";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
-function PushAction(props) {
+export default function PushAction() {
+    const config = useContext(ConfigContext);
     const context = useContext(ObjectContext);
     const [isPushModalOpen, setPushModalOpen] = useState(false);
     const [remoteName, setRemoteName] = useState("");
@@ -26,7 +27,9 @@ function PushAction(props) {
         }
     }
 
-    if(!props.remotes.length)
+    const remotes = config.config.remotes;
+
+    if(!remotes || !remotes.length)
         return [];
 
     return (
@@ -55,7 +58,7 @@ function PushAction(props) {
                             onChange={(e) => setRemoteName(e.target.value)}>
                         <option value="" hidden>Select the remote instance name</option>
                         {
-                            props.remotes.sort().map(name =>
+                            remotes.sort().map(name =>
                                 <option key={name} value={name}>{name}</option>
                             )
                         }
@@ -65,13 +68,3 @@ function PushAction(props) {
         </React.Fragment>
     )
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        remotes: state.config.config["remotes"],
-    }
-}
-
-export default connect(mapStateToProps)(PushAction);

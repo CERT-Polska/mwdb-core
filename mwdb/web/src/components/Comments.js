@@ -1,11 +1,11 @@
-import React, {Component} from 'react';
+import React, { Component, useContext } from 'react';
 import readableTime from 'readable-timestamp';
 import Pagination from "react-js-pagination";
-import { connect } from 'react-redux';
 
 import _ from 'lodash';
 
 import api from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
 
@@ -221,13 +221,16 @@ class CommentForm extends Component {
     }
 }
 
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        canRemoveComments: state.auth.loggedUser.capabilities.includes("removing_comments"),
-        canAddComments: state.auth.loggedUser.capabilities.includes("adding_comments"),
-    }
+function ConnectedCommentBox(props) {
+    // TODO: Use AuthContext in CommentBox while rewriting to React Hooks
+    const auth = useContext(AuthContext);
+    const canRemoveComments = auth.hasCapability("removing_comments");
+    const canAddComments = auth.hasCapability("adding_comments");
+    return <CommentBox {...{
+        canRemoveComments,
+        canAddComments,
+        ...props
+    }}/>
 }
 
-export default connect(mapStateToProps)(CommentBox);
+export default ConnectedCommentBox;

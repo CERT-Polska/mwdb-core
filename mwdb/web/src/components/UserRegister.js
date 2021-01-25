@@ -1,12 +1,15 @@
 import React, {Component} from 'react';
 import { Link } from 'react-router-dom';
-import { connect } from 'react-redux';
 import ReCAPTCHA from "react-google-recaptcha";
 
-import { View } from "@mwdb-web/commons/ui";
 import api from "@mwdb-web/commons/api";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { View } from "@mwdb-web/commons/ui";
 
-class UserRegister extends Component {
+
+export default class UserRegister extends Component {
+    static contextType = ConfigContext;
+
     constructor(props) {
         super(props);
         this.state = this.initialState;
@@ -130,8 +133,8 @@ class UserRegister extends Component {
                         <div class="form-hint">Provide additional information e.g. Twitter handle, invitation info, blog URL etc.</div>
                     </div>
                     {
-                        this.props.config["recaptcha_site_key"]
-                        ? <ReCAPTCHA sitekey={this.props.config["recaptcha_site_key"]}
+                        this.context.config["recaptcha_site_key"]
+                        ? <ReCAPTCHA sitekey={this.context.config["recaptcha_site_key"]}
                                      onChange={this.onCaptchaChange} />
                         : []
                     }
@@ -141,14 +144,3 @@ class UserRegister extends Component {
         );
     }
 }
-
-function mapStateToProps(state, ownProps)
-{
-    return {
-        ...ownProps,
-        config: state.config.config,
-    }
-}
-
-
-export default connect( mapStateToProps )(UserRegister);

@@ -1,6 +1,0 @@
-const LOGIN_REQUEST = Symbol("LOGIN_REQUEST");
-const LOGIN_SUCCESS = Symbol("LOGIN_SUCCESS");
-const LOGIN_FAILURE = Symbol("LOGIN_FAILURE");
-const LOGOUT = Symbol("LOGOUT");
-
-export default { LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT };

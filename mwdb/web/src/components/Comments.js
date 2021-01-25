@@ -70,20 +70,25 @@ function CommentList(props) {
 
 function CommentForm(props) {
     const [text, setText] = useState("")
+
+    function submitForm(){
+        props.submitComment(text);
+        setText("");
+    }
+
     return (
         <form className="commentForm"
               onSubmit={
                   (ev) => {
                       ev.preventDefault();
-                      props.submitComment(text);
-                      setText("");
+                      submitForm();
                   }
               }>
             <div className="input-group">
                 <textarea className="form-control" placeholder="Say something..."
                           value={text}
                           onChange={ev => setText(ev.target.value)}
-                          onKeyDown={evt => evt.ctrlKey && evt.keyCode === 13 && props.submitComment(text)}/>
+                          onKeyDown={evt => evt.ctrlKey && evt.keyCode === 13 && submitForm()}/>
                 <div className="input-group-append">
                     <input className="btn btn-outline-primary" type="submit" value="Post" />
                 </div>

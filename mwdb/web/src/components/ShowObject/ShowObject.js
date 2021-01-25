@@ -2,10 +2,10 @@ import React, {useEffect, useReducer} from 'react';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-import ObjectBox from './ObjectBox';
+import ObjectBox from './Views/ObjectBox';
 // todo: all boxes need to be rewritten to independent components
 import MultiRelationsBox from '../Relations';
-import CommentBox from '../Comments';
+import CommentBox from './Views/CommentBox';
 import TagBox from '../Tag';
 import ShareBox from "../Shares";
 import AttributesBox from "../AttributesBox"

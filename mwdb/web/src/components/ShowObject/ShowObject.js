@@ -8,7 +8,7 @@ import MultiRelationsBox from '../Relations';
 import CommentBox from './Views/CommentBox';
 import TagBox from '../Tag';
 import ShareBox from "../Shares";
-import AttributesBox from "../AttributesBox"
+import AttributesBox from "./Views/AttributesBox"
 
 import api from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";

@@ -1,14 +1,10 @@
-import React, {Component, useContext} from 'react';
-import Autocomplete from 'react-autocomplete';
+import React, {Component} from 'react';
 import {Link} from "react-router-dom";
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
-import api from "@mwdb-web/commons/api";
-import { AuthContext } from "@mwdb-web/commons/auth";
-import { ObjectContext } from "@mwdb-web/commons/context";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { getStyleForTag, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { getStyleForTag } from "@mwdb-web/commons/ui";
 
 export class Tag extends Component {
     static defaultProps = {
@@ -44,91 +40,6 @@ export class Tag extends Component {
     };
 }
 
-class TagForm extends Component {
-    state = {
-        text: "",
-        tags: []
-    }
-
-    static contextType = ObjectContext;
-
-    handleSubmit = (e) => {
-        e.preventDefault();
-        if (!this.state.text) {
-            return;
-        }
-
-        this.props.onTagSubmit(this.state.text);
-        this.setState({
-            text: "",
-            tags: []
-        });
-    };
-
-    async updateInputValue(value) {
-        try {
-            this.setState({text: value});
-            let response = await api.getTags(value);
-            this.setState({
-                tags: response.data.map(t => t.tag),
-            });
-        } catch(error) {
-            this.context.setObjectError(error);
-        }
-    };
-
-    get tagItems() {
-        let typed = this.state.text.trim();
-        if(!typed || typed === "")
-            return [];
-        return this.state.tags;
-    }
-
-    render() {
-        return (
-            <form className="tagForm" onSubmit={this.handleSubmit}>
-                <Autocomplete
-                    value={this.state.text}
-                    inputProps={{id: 'tags-autocomplete'}}
-                    getItemValue={(item) => item}
-                    shouldItemRender={(item, value) => {
-                        return (item.toLowerCase().indexOf(value.toLowerCase()) !== -1);
-                    }}
-                    items={this.tagItems}
-                    onChange={event => this.updateInputValue(event.target.value)}
-                    onSelect={value => this.updateInputValue(value)}
-                    renderInput={(props) =>
-                        <div className="input-group">
-                            <input {...props} className="form-control" type="text" placeholder="Add tag"/>
-                            <div className="input-group-append">
-                                <input className="btn btn-outline-primary" type="submit" value="Add"/>
-                            </div>
-                        </div>
-                    }
-                    wrapperStyle={{display:"block"}}
-                    renderMenu={children =>
-                        <div className={"dropdown-menu " + (children.length !== 0 ? "show" : "")}>
-                            {
-                                children.map(c =>
-                                    <a key={c} href="#dropdown" className="dropdown-item" style={{"cursor": "pointer"}}>
-                                        {c}
-                                    </a>
-                                )
-                            }
-                        </div>
-                    }
-                    renderItem={(item, isHighlighted) => (
-                        <div className={`item ${isHighlighted ? 'item-highlighted' : ''}`}
-                             key={item}>
-                            <Tag tag={item} tagClick={ev => ev.preventDefault()}/>
-                        </div>
-                    )}
-                />
-            </form>
-        );
-    };
-}
-
 export class TagList extends Component {
     render() {
         return <React.Fragment>
@@ -140,109 +51,3 @@ export class TagList extends Component {
         </React.Fragment>
     }
 }
-
-class TagBox extends Component {
-    state = {
-        tags: [],
-        modalIsOpen: false,
-        tagToRemove: ""
-    }
-
-    static contextType = ObjectContext;
-
-    openModal = (tag) => {
-        this.setState({modalIsOpen: true, tagToRemove: tag});
-    };
-
-    closeModal = () => {
-        this.setState({modalIsOpen: false});
-    };
-
-    updateTags = async () => {
-        if (typeof this.props.id === 'undefined')
-            return;
-        try {
-            let response = await api.getObjectTags(this.props.id)
-            let tags = response.data;
-            this.setState({tags});
-        } catch(error) {
-            this.context.setObjectError(error);
-        }
-    };
-
-    componentDidUpdate = (prevProps) => {
-        if (prevProps !== this.props)
-            this.updateTags();
-    };
-
-    componentDidMount = () => {
-        this.updateTags();
-    };
-
-    handleTagSubmit = async (tag) => {
-        try {
-            await api.addObjectTag(this.props.id, tag)
-            this.updateTags();
-        } catch(error) {
-            this.context.setObjectError(error);
-        }
-    };
-
-    handleTagRemove = (ev, tag) => {
-        this.openModal(tag);
-    };
-
-    tagRemove = async (tag) => {
-        try {
-            await api.removeObjectTag(this.props.id, tag)
-            this.updateTags();
-        } catch(error) {
-            this.context.setObjectError(error);
-        } finally {
-            this.closeModal()
-        }
-    };
-
-    render() {
-        return (
-            <div className={`card card-default ${this.props.className || ''}`}>
-                <ConfirmationModal isOpen={this.state.modalIsOpen}
-                                   onRequestClose={this.closeModal}
-                                   onConfirm={(e) => this.tagRemove(this.state.tagToRemove)}
-                                   message={`Remove tag ${this.state.tagToRemove}?`}
-                                   confirmText="Remove"/>
-                <div className="card-header">
-                    Tags
-                </div>
-                <div className="card-body">
-                    {
-                        this.state.tags.length > 0
-                        ? <TagList tags={this.state.tags}
-                                   tagRemove={this.handleTagRemove}
-                                   deletable={this.props.canRemoveTags}
-                                   searchEndpoint={this.props.searchEndpoint}/>
-                        : <div className="text-muted">No tags to display</div>
-                    }
-                </div>
-                {
-                    this.props.canAddTags &&
-                    <TagForm onTagSubmit={this.handleTagSubmit}/>
-                }
-            </div>
-        );
-    };
-}
-
-function ConnectedTagBox(props) {
-    // TODO: Use AuthContext in TagBox while rewriting to React Hooks
-    const auth = useContext(AuthContext);
-    const canRemoveTags = auth.hasCapability("removing_tags");
-    const canAddTags = auth.hasCapability("adding_tags");
-    return <TagBox {...{
-        canRemoveTags,
-        canAddTags,
-        ...props
-    }}/>
-}
-
-export default ConnectedTagBox;

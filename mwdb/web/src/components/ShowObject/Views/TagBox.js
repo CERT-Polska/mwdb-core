@@ -35,6 +35,8 @@ function TagForm(props) {
         }
     }
 
+    let tagItems = (text ? tags : [])
+
     return (
         <form className="tagForm" onSubmit={handleSubmit}>
             <Autocomplete
@@ -44,7 +46,7 @@ function TagForm(props) {
                 shouldItemRender={(item, value) => {
                     return (item.toLowerCase().indexOf(value.toLowerCase()) !== -1);
                 }}
-                items={tags}
+                items={tagItems}
                 onChange={ev => updateInputValue(ev.target.value)}
                 onSelect={value => updateInputValue(value)}
                 renderInput={(props) =>

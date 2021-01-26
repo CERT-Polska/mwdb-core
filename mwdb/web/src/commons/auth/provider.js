@@ -149,7 +149,6 @@ export function AuthProvider(props) {
     useEffect(() => {
         function synchronizeSessionState() {
             const storedSession = getStoredAuthSession();
-            console.log("Got ", storedSession)
             setSession(storedSession);
         }
         window.addEventListener('storage', synchronizeSessionState)

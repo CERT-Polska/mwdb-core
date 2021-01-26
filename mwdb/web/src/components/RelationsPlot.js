@@ -7,7 +7,7 @@ import api from "@mwdb-web/commons/api";
 import { capitalize } from "@mwdb-web/commons/helpers";
 
 import DagreD3Plot from "./DagreD3Plot";
-import {Tag} from "./Tag";
+import {Tag} from "../commons/ui/Tag";
 
 function RelationsNode(props) {
     const typeMapping = {

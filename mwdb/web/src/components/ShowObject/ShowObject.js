@@ -7,7 +7,7 @@ import ObjectBox from './Views/ObjectBox';
 import MultiRelationsBox from '../Relations';
 import CommentBox from './Views/CommentBox';
 import TagBox from '../Tag';
-import ShareBox from "../Shares";
+import ShareBox from "./Views/SharesBox";
 import AttributesBox from "./Views/AttributesBox"
 
 import api from "@mwdb-web/commons/api";
@@ -81,7 +81,7 @@ export default function ShowObject(props) {
                                         </ObjectBox>
                                     </Extendable>
                                 </div>
-                                <ShareBox id={objectState.object.id}/>
+                                <ShareBox />
                             </Extendable>
                         </div>
                         <div className="col-md-5">

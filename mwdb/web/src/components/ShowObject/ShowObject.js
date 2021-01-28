@@ -4,7 +4,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import ObjectBox from './Views/ObjectBox';
 // todo: all boxes need to be rewritten to independent components
-import MultiRelationsBox from '../Relations';
+import MultiRelationsBox from './Views/RelationsBox';
 import CommentBox from './Views/CommentBox';
 import TagBox from '../Tag';
 import ShareBox from "../Shares";
@@ -87,8 +87,7 @@ export default function ShowObject(props) {
                         <div className="col-md-5">
                             <Extendable ident="showObjectRightColumn">
                                 <TagBox id={objectState.object.id} searchEndpoint={props.searchEndpoint}/>
-                                <MultiRelationsBox id={objectState.object.id} parents={objectState.object.parents} children={objectState.object.children}
-                                                onObjectUpdate={objectState.updateObject}/>
+                                <MultiRelationsBox />
                                 <AttributesBox {...objectState.object}/>
                                 <CommentBox />
                             </Extendable>

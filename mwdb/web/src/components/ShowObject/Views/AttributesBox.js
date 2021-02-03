@@ -5,7 +5,7 @@ import { Extendable } from '@mwdb-web/commons/extensions';
 import { ObjectContext } from "@mwdb-web/commons/context";
 import ObjectAttributes from "../../Attributes";
 
-export default  function AttributesBox() {
+export default function AttributesBox() {
     const context = useContext(ObjectContext);
     const [isAttributeAddModalOpen, setAttributeAddModalOpen] = useState(false)
 

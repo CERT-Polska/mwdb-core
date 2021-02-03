@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import React, {useState, useContext, useEffect, useCallback} from 'react';
 import Autocomplete from 'react-autocomplete';
 
 import api from "@mwdb-web/commons/api";
@@ -12,7 +12,7 @@ function TagForm(props) {
     const [text, setText] = useState("");
     const [tags, setTags] = useState([]);
 
-    function handleSubmit (e) {
+    function handleSubmit(e) {
         e.preventDefault();
         if (!text) {
             return;
@@ -83,7 +83,7 @@ function TagForm(props) {
 export default function TagBox() {
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
-    const [tags, setTags] = useState(context.object.tags);
+    const [tags, setTags] = useState([]);
     const [modalIsOpen, setModalIsOpen] = useState(null);
     const [tagToRemove, setTagToRemove] = useState(false);
 
@@ -121,6 +121,12 @@ export default function TagBox() {
         setModalIsOpen(true);
         setTagToRemove(tag);
     }
+
+    const getTags = useCallback(updateTags, [context.object.id])
+
+    useEffect(() => {
+        getTags();
+    }, [getTags])
 
     return (
         <div className="card card-default">

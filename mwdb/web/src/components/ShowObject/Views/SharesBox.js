@@ -119,7 +119,7 @@ function SharesBox() {
         setShareReceiver(group);
     }
 
-    const getShares = useCallback(updateShares, [])
+    const getShares = useCallback(updateShares, [context.object.id])
 
     useEffect(() => {
         getShares();

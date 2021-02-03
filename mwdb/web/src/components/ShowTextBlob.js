@@ -103,7 +103,10 @@ export default function ShowTextBlob(props) {
                 icon={faSearch}
                 component={TextBlobPreview}
                 actions={[
+                    <RemoveAction/>,
+                    <PushAction/>,
                     <BlobDiffAction/>,
+                    <FavoriteAction/>,
                     <DownloadAction download={downloadTextBlob}/>
                 ]}
             />

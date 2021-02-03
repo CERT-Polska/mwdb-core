@@ -141,7 +141,8 @@ export default class Upload extends Component {
                     <Dropzone className="dropzone-ready dropzone"
                               activeClassName="dropzone-active"
                               rejectClassName="dropzone-reject"
-                              onDrop={this.onDrop}>
+                              onDrop={this.onDrop}
+                              multiple={false}>
                         <div className="card">
                             <div className="card-body">
                                 <h5 className="card-title">

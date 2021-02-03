@@ -52,6 +52,9 @@ export default function ShowConfig(props) {
                 icon={faSearch}
                 component={ConfigPreview}
                 actions={[
+                    <RemoveAction/>,
+                    <PushAction/>,
+                    <FavoriteAction/>,
                     <DownloadAction download={downloadTextBlob}/>
                 ]}
             />

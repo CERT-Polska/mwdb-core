@@ -14,8 +14,8 @@ from .tag import object_tag_table, Tag
 
 relation = db.Table(
     'relation',
-    db.Column('parent_id', db.Integer, db.ForeignKey('object.id'), index=True),
-    db.Column('child_id', db.Integer, db.ForeignKey('object.id'), index=True),
+    db.Column('parent_id', db.Integer, db.ForeignKey('object.id'), index=True, nullable=False),
+    db.Column('child_id', db.Integer, db.ForeignKey('object.id'), index=True, nullable=False),
     db.Column('creation_time', db.DateTime, default=datetime.datetime.utcnow),
     db.Index('ix_relation_parent_child', 'parent_id', 'child_id', unique=True)
 )

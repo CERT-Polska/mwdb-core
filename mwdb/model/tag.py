@@ -4,8 +4,8 @@ from . import db
 
 
 object_tag_table = db.Table('object_tag', db.metadata,
-                            db.Column('object_id', db.Integer, db.ForeignKey('object.id'), index=True),
-                            db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), index=True),
+                            db.Column('object_id', db.Integer, db.ForeignKey('object.id'), index=True, nullable=False),
+                            db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), index=True, nullable=False),
                             db.Index('ix_object_tag_object_child', 'object_id', 'tag_id', unique=True))
 
 

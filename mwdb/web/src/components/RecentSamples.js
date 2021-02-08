@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
-import { TagList} from './Tag';
+import { TagList} from "@mwdb-web/commons/ui";
 import { DateString, Identicon, ObjectLink } from "@mwdb-web/commons/ui";
 import { humanFileSize } from "@mwdb-web/commons/helpers"
 

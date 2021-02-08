@@ -6,7 +6,7 @@ import ObjectBox from './Views/ObjectBox';
 // todo: all boxes need to be rewritten to independent components
 import MultiRelationsBox from './Views/RelationsBox';
 import CommentBox from './Views/CommentBox';
-import TagBox from '../Tag';
+import TagBox from './Views/TagBox';
 import ShareBox from "../Shares";
 import AttributesBox from "./Views/AttributesBox"
 
@@ -86,9 +86,9 @@ export default function ShowObject(props) {
                         </div>
                         <div className="col-md-5">
                             <Extendable ident="showObjectRightColumn">
-                                <TagBox id={objectState.object.id} searchEndpoint={props.searchEndpoint}/>
+                                <TagBox />
                                 <MultiRelationsBox />
-                                <AttributesBox {...objectState.object}/>
+                                <AttributesBox />
                                 <CommentBox />
                             </Extendable>
                         </div>

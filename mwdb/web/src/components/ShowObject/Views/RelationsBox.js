@@ -1,11 +1,10 @@
 import React, {useState, useContext} from 'react';
 import {Link} from 'react-router-dom';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {TagList} from '../../Tag';
 
 import api from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
-import { ObjectLink, ActionCopyToClipboard } from '@mwdb-web/commons/ui';
+import { ObjectLink, ActionCopyToClipboard, TagList } from '@mwdb-web/commons/ui';
 import RelationsAddModal from "../Actions/RelationsAddModal";
 
 function RelationsBox(props) {

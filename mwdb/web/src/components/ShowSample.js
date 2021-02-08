@@ -193,6 +193,10 @@ export default function ShowSample(props) {
                 component={SamplePreview}
                 actions={[
                     <PreviewSwitchAction />,
+                    <RemoveAction/>,
+                    <PushAction/>,
+                    <UploadChildAction/>,
+                    <FavoriteAction/>,
                     <DownloadAction download={downloadSample}/>
                 ]}
             />

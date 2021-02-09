@@ -104,13 +104,10 @@ export default function MultiRelationsBox(props) {
     const context = useContext(ObjectContext);
 
     let TypedRelationsBox = (props) => {
-        let filterByType = function(arr) { return arr.filter(e => e.type === props.type) }
-        let filteredElements = {
-            parents: filterByType(props.parents),
-            children: filterByType(props.children)
-        }
-        if(filteredElements.parents.length + filteredElements.children.length > 0)
-            return <RelationsBox {...filteredElements} header={props.header} id={context.object.id}/>
+        const parents = props.parents.filter(e => e.type === props.type);
+        const children = props.children.filter(e => e.type === props.type);
+        if(parents.length + children.length > 0)
+            return <RelationsBox header={props.header} id={context.object.id} {...{parents, children}} />
         else
             return <div/>
     }

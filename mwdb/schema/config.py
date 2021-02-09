@@ -2,10 +2,10 @@ from marshmallow import Schema, fields
 
 from .object import (
     ObjectCreateRequestSchemaBase,
+    ObjectItemResponseSchema,
     ObjectLegacyMetakeysMixin,
     ObjectListItemResponseSchema,
     ObjectListResponseSchemaBase,
-    ObjectItemResponseSchema,
 )
 
 
@@ -24,7 +24,9 @@ class ConfigCreateRequestSchema(ObjectCreateRequestSchemaBase, ConfigCreateSpecS
     pass
 
 
-class ConfigLegacyCreateRequestSchema(ConfigCreateRequestSchema, ObjectLegacyMetakeysMixin):
+class ConfigLegacyCreateRequestSchema(
+    ConfigCreateRequestSchema, ObjectLegacyMetakeysMixin
+):
     pass
 
 
@@ -33,7 +35,9 @@ class ConfigListItemResponseSchema(ObjectListItemResponseSchema):
     config_type = fields.Str(required=True, allow_none=False)
 
 
-class ConfigListResponseSchema(ObjectListResponseSchemaBase, ConfigListItemResponseSchema):
+class ConfigListResponseSchema(
+    ObjectListResponseSchemaBase, ConfigListItemResponseSchema
+):
     __envelope_key__ = "configs"
 
 
@@ -50,4 +54,6 @@ class ConfigStatsItemResponseSchema(Schema):
 
 
 class ConfigStatsResponseSchema(Schema):
-    families = fields.Nested(ConfigStatsItemResponseSchema, many=True, required=True, allow_none=False)
+    families = fields.Nested(
+        ConfigStatsItemResponseSchema, many=True, required=True, allow_none=False
+    )

@@ -1,12 +1,12 @@
+import logging
 import os
+import textwrap
 
 import click
-import logging
-import textwrap
 
 from mwdb.core.config import app_config
 
-from .base import create_app, logger, AppDefaultGroup, CustomFlaskGroup
+from .base import AppDefaultGroup, CustomFlaskGroup, create_app, logger
 from .configuration import create_configuration
 from .database import configure_database
 
@@ -40,10 +40,11 @@ def configure_basic(ctx):
     """
     try:
         app_config.read()
-    except Exception as e:
+    except Exception:
         if ctx.obj.data["quiet"]:
             click.echo(
-                "[!] Correct configuration must be provided via env vars in unattended mode!",
+                "[!] Correct configuration must be provided via env vars "
+                "in unattended mode!",
                 err=True,
             )
             ctx.abort()
@@ -59,17 +60,19 @@ def configure_basic(ctx):
             configure_database()
             # Configure plugins
             from mwdb.core.plugins import configure_plugins
+
             configure_plugins()
-    except Exception as e:
+    except Exception:
         import traceback
+
         traceback.print_exc()
         click.echo(
             textwrap.dedent(
                 f"""
-        Something went wrong during configuration. 
-        
-        Check if '{app_config.mwdb.postgres_uri}' PostgreSQL connection string is correct
-        and database is running.
+        Something went wrong during configuration.
+
+        Check if '{app_config.mwdb.postgres_uri}' PostgreSQL connection string
+        is correct and database is running.
                 """
             )
         )
@@ -78,7 +81,7 @@ def configure_basic(ctx):
             textwrap.dedent(
                 """
         MWDB configured successfully!
-        
+
         Use 'mwdb-core run' to run the server.
         """
             )
@@ -109,7 +112,9 @@ def configure_web(ctx, target_dir):
     if (
         os.path.exists(target_dir)
         and not ctx.obj.data["quiet"]
-        and not click.confirm(f"Path {target_dir} exists and will be removed. Continue?")
+        and not click.confirm(
+            f"Path {target_dir} exists and will be removed. Continue?"
+        )
     ):
         ctx.abort()
 

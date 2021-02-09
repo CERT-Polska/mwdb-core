@@ -1,16 +1,16 @@
 import uuid
-
 from datetime import datetime
+
 from flask import g
 from flask_restful import Resource
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, APIKey, User
+from mwdb.model import APIKey, User, db
 from mwdb.schema.api_key import APIKeyIdentifierBase, APIKeyTokenResponseSchema
 
-from . import logger, requires_authorization, load_schema
+from . import load_schema, logger, requires_authorization
 
 
 class APIKeyIssueResource(Resource):
@@ -22,8 +22,8 @@ class APIKeyIssueResource(Resource):
         description: |
             Creates a new API key and returns its id and token.
 
-            Requires `manage_users` capability if login doesn't match the login of currently authenticated
-            user.
+            Requires `manage_users` capability if login doesn't match the login
+            of currently authenticated user.
         security:
             - bearerAuth: []
         tags:
@@ -47,32 +47,38 @@ class APIKeyIssueResource(Resource):
                 description: |
                     If provided login doesn't exist.
         """
-        if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.login != login:
-            raise Forbidden("You don't have required capability (manage_users) to perform this action")
+        if (
+            not g.auth_user.has_rights(Capabilities.manage_users)
+            and g.auth_user.login != login
+        ):
+            raise Forbidden(
+                "You don't have required capability "
+                "(manage_users) to perform this action"
+            )
 
         try:
             api_key_owner = User.query.filter(User.login == login).one()
         except NoResultFound:
-            raise NotFound('User not found')
+            raise NotFound("User not found")
 
         api_key = APIKey(
             id=uuid.uuid4(),
             user_id=api_key_owner.id,
             issued_by=g.auth_user.id,
-            issued_on=datetime.now()
+            issued_on=datetime.now(),
         )
         db.session.add(api_key)
         db.session.commit()
 
-        logger.info('API key created', extra={
-            "id": api_key.id
-        })
-        return APIKeyTokenResponseSchema().dump({
-            "id": api_key.id,
-            "issued_on": api_key.issued_on,
-            "issuer_login": api_key.issuer_login,
-            "token": api_key.generate_token()
-        })
+        logger.info("API key created", extra={"id": api_key.id})
+        return APIKeyTokenResponseSchema().dump(
+            {
+                "id": api_key.id,
+                "issued_on": api_key.issued_on,
+                "issuer_login": api_key.issuer_login,
+                "token": api_key.generate_token(),
+            }
+        )
 
 
 class APIKeyResource(Resource):
@@ -116,15 +122,20 @@ class APIKeyResource(Resource):
         except NoResultFound:
             raise NotFound("API key doesn't exist")
 
-        if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.id != api_key.user_id:
+        if (
+            not g.auth_user.has_rights(Capabilities.manage_users)
+            and g.auth_user.id != api_key.user_id
+        ):
             raise NotFound("API key doesn't exist")
 
-        return APIKeyTokenResponseSchema().dump({
-            "id": api_key.id,
-            "issued_on": api_key.issued_on,
-            "issuer_login": api_key.issuer_login,
-            "token": api_key.generate_token()
-        })
+        return APIKeyTokenResponseSchema().dump(
+            {
+                "id": api_key.id,
+                "issued_on": api_key.issued_on,
+                "issuer_login": api_key.issuer_login,
+                "token": api_key.generate_token(),
+            }
+        )
 
     @requires_authorization
     def delete(self, api_key_id):
@@ -163,11 +174,12 @@ class APIKeyResource(Resource):
         except NoResultFound:
             raise NotFound("API key doesn't exist")
 
-        if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.id != api_key.user_id:
+        if (
+            not g.auth_user.has_rights(Capabilities.manage_users)
+            and g.auth_user.id != api_key.user_id
+        ):
             raise NotFound("API key doesn't exist")
 
         db.session.delete(api_key)
         db.session.commit()
-        logger.info('API key deleted', extra={
-            "id": api_key.id
-        })
+        logger.info("API key deleted", extra={"id": api_key.id})

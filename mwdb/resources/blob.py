@@ -6,12 +6,14 @@ from mwdb.core.plugins import hooks
 from mwdb.model import TextBlob
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import (
-    BlobLegacyCreateRequestSchema, BlobCreateRequestSchema,
-    BlobListResponseSchema, BlobItemResponseSchema
+    BlobCreateRequestSchema,
+    BlobItemResponseSchema,
+    BlobLegacyCreateRequestSchema,
+    BlobListResponseSchema,
 )
 
-from . import requires_capabilities, requires_authorization, loads_schema
-from .object import ObjectUploader, ObjectItemResource, ObjectResource
+from . import loads_schema, requires_authorization, requires_capabilities
+from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
 class TextBlobUploader(ObjectUploader):
@@ -23,7 +25,7 @@ class TextBlobUploader(ObjectUploader):
                 spec["blob_type"],
                 parent=parent,
                 share_with=share_with,
-                metakeys=metakeys
+                metakeys=metakeys,
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a blob")
@@ -43,11 +45,13 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
         ---
         summary: Search or list blobs
         description: |
-            Returns list of text blobs matching provided query, ordered from the latest one.
+            Returns list of text blobs matching provided query,
+            ordered from the latest one.
 
             Limited to 10 objects, use `older_than` parameter to fetch more.
 
-            Don't rely on maximum count of returned objects because it can be changed/parametrized in future.
+            Don't rely on maximum count of returned objects
+            because it can be changed/parametrized in future.
         security:
             - bearerAuth: []
         tags:
@@ -57,7 +61,11 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
               name: older_than
               schema:
                 type: string
-              description: Fetch objects which are older than the object specified by identifier. Used for pagination
+              description: |
+                Fetch objects which are older than the object
+                specified by identifier.
+
+                Used for pagination
               required: false
             - in: query
               name: query
@@ -72,7 +80,9 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                   application/json:
                     schema: BlobListResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occurred in Lucene query
+                description: |
+                    When wrong parameters were provided
+                    or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
@@ -123,7 +133,9 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                   application/json:
                     schema: BlobItemResponseSchema
             403:
-                description: No permissions to perform additional operations (e.g. adding metakeys)
+                description: |
+                    No permissions to perform additional operations
+                    (e.g. adding metakeys)
             404:
                 description: Specified group doesn't exist
             409:
@@ -167,7 +179,9 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
                   application/json:
                     schema: BlobItemResponseSchema
             404:
-                description: When blob doesn't exist, object is not a blob or user doesn't have access to this object.
+                description: |
+                    When blob doesn't exist, object is not a blob
+                    or user doesn't have access to this object.
         """
         return super().get(identifier)
 
@@ -201,7 +215,9 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
               multipart/form-data:
                 schema:
                   type: object
-                  description: Blob to be uploaded with additional parameters (verbose mode)
+                  description: |
+                    Blob to be uploaded with additional parameters
+                    (verbose mode)
                   properties:
                     json:
                       type: object
@@ -228,10 +244,14 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
                       type: string
                       default: '*'
                       description: |
-                        Group that object will be shared with. If user doesn't have `sharing_objects` capability,
-                        user must be a member of specified group (unless `Group doesn't exist` error will occur).
-                        If default value `*` is specified - object will be exclusively shared with all user's groups
-                        excluding `public`.
+                        Group that object will be shared with.
+
+                        If user doesn't have `sharing_objects` capability,
+                        user must be a member of specified group
+                        (unless `Group doesn't exist` error will occur).
+
+                        If default value `*` is specified - object will be
+                        exclusively shared with all user's groups excluding `public`.
                   required:
                     - json
               application/json:
@@ -243,7 +263,9 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
                   application/json:
                     schema: BlobItemResponseSchema
             403:
-                description: No permissions to perform additional operations (e.g. adding metakeys)
+                description: |
+                    No permissions to perform additional operations
+                    (e.g. adding metakeys)
             404:
                 description: Specified group doesn't exist
             409:
@@ -277,6 +299,8 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
             403:
                 description: When user doesn't have `removing_objects` capability
             404:
-                description: When blob doesn't exist, object is not a blob or user doesn't have access to this object.
+                description: |
+                    When blob doesn't exist, object is not a blob
+                    or user doesn't have access to this object.
         """
         return super().delete(identifier)

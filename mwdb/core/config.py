@@ -1,10 +1,11 @@
 import os
 from enum import Enum
 from typing import List, Optional
-from .typedconfig import Config, group_key, key, section
-from .typedconfig.source import EnvironmentConfigSource, IniFileConfigSource
 
 from mwdb.paths import mail_templates_dir
+
+from .typedconfig import Config, group_key, key, section
+from .typedconfig.source import EnvironmentConfigSource, IniFileConfigSource
 
 
 def intbool(v) -> bool:
@@ -32,7 +33,7 @@ class StorageProviderType(Enum):
 def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
     if not v:
         return None
-    
+
     v = v.upper()
     try:
         return StorageProviderType[v]
@@ -50,7 +51,8 @@ class MWDBConfig(Config):
     redis_uri = key(cast=str, required=False, default=None)
     # Serve web application
     serve_web = key(cast=intbool, required=False, default=True)
-    # Folder with web application files (if not set: served from pre-built package bundle)
+    # Folder with web application files
+    # (if not set: served from pre-built package bundle)
     web_folder = key(cast=path, required=False, default=None)
     # Base application URL, accessible for users
     base_url = key(cast=str, required=False, default="http://127.0.0.1")
@@ -58,7 +60,9 @@ class MWDBConfig(Config):
     flask_config_file = key(cast=path, required=False)
 
     # Which storage provider to use (options: disk or s3)
-    storage_provider = key(cast=storage_provider_from_str, required=False, default="disk")
+    storage_provider = key(
+        cast=storage_provider_from_str, required=False, default="disk"
+    )
     # Folder for uploads
     uploads_folder = key(cast=path, required=False)
     # Should we break up the uploads into different folders for example:
@@ -119,8 +123,10 @@ def _config_sources():
     return [
         EnvironmentConfigSource(),
         IniFileConfigSource("mwdb.ini", must_exist=False),
-        IniFileConfigSource(os.path.expanduser("~/.mwdb-core/mwdb.ini"), must_exist=False),
-        IniFileConfigSource("/etc/mwdb-core/mwdb.ini", must_exist=False)
+        IniFileConfigSource(
+            os.path.expanduser("~/.mwdb-core/mwdb.ini"), must_exist=False
+        ),
+        IniFileConfigSource("/etc/mwdb-core/mwdb.ini", must_exist=False),
     ]
 
 

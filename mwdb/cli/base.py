@@ -14,14 +14,19 @@ def create_app():
     try:
         app_config.read()
     except Exception as e:
-        click.echo(textwrap.dedent("""
+        click.echo(
+            textwrap.dedent(
+                """
         [!] Wrong MWDB configuration.
 
         Use 'mwdb-core configure' to setup your MWDB instance.
-        """))
+        """
+            )
+        )
         raise NoAppException(f"Application not configured: {str(e)}")
     # Lazy-load app here
     from mwdb import app
+
     return app.app
 
 
@@ -29,6 +34,7 @@ class AppDefaultGroup(DefaultGroup):
     """
     Reimplementation of Flask.cli.AppGroup to support DefaultGroup facilities
     """
+
     def command(self, *args, **kwargs):
         wrap_for_ctx = kwargs.pop("with_appcontext", True)
 
@@ -46,9 +52,11 @@ class AppDefaultGroup(DefaultGroup):
 
 class CustomFlaskGroup(FlaskGroup):
     """
-    Default FlaskGroup prints traceback for all exceptions that happen during list_commands,
-    even NoAppException. It looks ugly, so we decided to override this.
+    Default FlaskGroup prints traceback for all exceptions that happen
+    during list_commands, even NoAppException.
+    It looks ugly, so we decided to override this.
     """
+
     def list_commands(self, ctx):
         self._load_plugin_commands()
 
@@ -62,5 +70,6 @@ class CustomFlaskGroup(FlaskGroup):
             pass
         except Exception:
             import traceback
+
             traceback.print_exc()
         return sorted(rv)

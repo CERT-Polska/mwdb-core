@@ -1,6 +1,5 @@
 import os
 import smtplib
-
 from email.message import EmailMessage
 
 from .config import app_config
@@ -28,12 +27,12 @@ def create_message(kind, subject, recipient_email, **params) -> EmailMessage:
         html_template = None
 
     message = EmailMessage()
-    message['Subject'] = subject
-    message['From'] = app_config.mwdb.mail_from
-    message['To'] = recipient_email
+    message["Subject"] = subject
+    message["From"] = app_config.mwdb.mail_from
+    message["To"] = recipient_email
     message.set_content(template.format(**params))
     if html_template:
-        message.add_alternative(html_template.format(**params), subtype='html')
+        message.add_alternative(html_template.format(**params), subtype="html")
     return message
 
 
@@ -57,7 +56,7 @@ def send_email_notification(kind, subject, recipient_email, **params):
     else:
         smtp_host = mail_smtp
         smtp_port = 25
-    
+
     username = app_config.mwdb.mail_username
     password = app_config.mwdb.mail_password
     tls = app_config.mwdb.mail_tls
@@ -66,7 +65,7 @@ def send_email_notification(kind, subject, recipient_email, **params):
         with smtplib.SMTP(smtp_host, int(smtp_port), timeout=3) as s:
             if tls:
                 s.starttls()
- 
+
             if username and password:
                 s.login(username, password)
 

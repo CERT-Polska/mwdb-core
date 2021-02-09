@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, ValidationError, fields, validates
 
 from .user import UserLoginSchemaBase
 
@@ -18,9 +18,7 @@ class AuthRegisterRequestSchema(UserLoginSchemaBase, RecaptchaSchemaMixin):
     @validates("additional_info")
     def validate_additional_info(self, value):
         if not value:
-            raise ValidationError(
-                "Additional info can't be empty"
-            )
+            raise ValidationError("Additional info can't be empty")
 
 
 class AuthSetPasswordRequestSchema(Schema):
@@ -33,13 +31,11 @@ class AuthSetPasswordRequestSchema(Schema):
     @validates("password")
     def validate_password(self, value):
         if len(value) < self.MIN_PASSWORD_LENGTH:
-            raise ValidationError(
-                "Password is too short"
-            )
+            raise ValidationError("Password is too short")
         if len(value.encode()) > self.MAX_PASSWORD_LENGTH:
             raise ValidationError(
-                "The password should contain no more than 72 bytes of UTF-8 characters, "
-                "your password is too long."
+                "The password should contain no more than 72 bytes "
+                "of UTF-8 characters, your password is too long."
             )
 
 

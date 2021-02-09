@@ -1,13 +1,18 @@
-from flask import request, g
+from flask import g, request
 from flask_restful import Resource
-
-from werkzeug.exceptions import NotFound, BadRequest
+from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, Comment
-from mwdb.schema.comment import CommentRequestSchema, CommentItemResponseSchema
+from mwdb.model import Comment, db
+from mwdb.schema.comment import CommentItemResponseSchema, CommentRequestSchema
 
-from . import logger, requires_capabilities, requires_authorization, access_object, loads_schema
+from . import (
+    access_object,
+    loads_schema,
+    logger,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 class CommentResource(Resource):
@@ -42,7 +47,9 @@ class CommentResource(Resource):
                       type: array
                       items: CommentItemResponseSchema
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have access
+                    to this object.
         """
         db_object = access_object(type, identifier)
         if not db_object:
@@ -93,7 +100,9 @@ class CommentResource(Resource):
             403:
                 description: When user doesn't have `adding_comments` capability.
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have access
+                    to this object.
         """
         schema = CommentRequestSchema()
 
@@ -104,14 +113,12 @@ class CommentResource(Resource):
             raise NotFound("Object not found")
 
         comment = Comment(
-            comment=obj["comment"],
-            user_id=g.auth_user.id,
-            object_id=db_object.id
+            comment=obj["comment"], user_id=g.auth_user.id, object_id=db_object.id
         )
         db.session.add(comment)
         db.session.commit()
 
-        logger.info('comment added', extra={'comment': comment.object_id})
+        logger.info("comment added", extra={"comment": comment.object_id})
 
         db.session.refresh(comment)
         schema = CommentItemResponseSchema()
@@ -156,7 +163,9 @@ class CommentDeleteResource(Resource):
             403:
                 description: When user doesn't have the `removing_comments` capability.
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have access
+                    to this object.
         """
         db_object = access_object(type, identifier)
         if db_object is None:
@@ -166,5 +175,5 @@ class CommentDeleteResource(Resource):
 
         if db_comment is not None:
             db.session.delete(db_comment)
-            logger.info('comment deleted', extra={'comment': comment_id})
+            logger.info("comment deleted", extra={"comment": comment_id})
             db.session.commit()

@@ -1,23 +1,29 @@
-from flask import request, g
+from flask import g, request
 from flask_restful import Resource
-from werkzeug.exceptions import BadRequest, NotFound, Forbidden
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, Group, MetakeyDefinition, MetakeyPermission
+from mwdb.model import Group, MetakeyDefinition, MetakeyPermission, db
 from mwdb.schema.metakey import (
-    MetakeyListRequestSchema,
-    MetakeyItemRequestSchema,
-    MetakeyListResponseSchema,
     MetakeyDefinitionItemRequestArgsSchema,
     MetakeyDefinitionItemRequestBodySchema,
     MetakeyDefinitionListResponseSchema,
     MetakeyDefinitionManageItemResponseSchema,
     MetakeyDefinitionManageListResponseSchema,
+    MetakeyItemRequestSchema,
+    MetakeyListRequestSchema,
+    MetakeyListResponseSchema,
     MetakeyPermissionSetRequestArgsSchema,
     MetakeyPermissionSetRequestBodySchema,
 )
 
-from . import requires_capabilities, access_object, requires_authorization, load_schema, loads_schema
+from . import (
+    access_object,
+    load_schema,
+    loads_schema,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 class MetakeyResource(Resource):
@@ -48,7 +54,9 @@ class MetakeyResource(Resource):
               name: hidden
               schema:
                 type: int
-              description: Show hidden attributes (requires `reading_all_attributes` capability)
+              description: |
+                Show hidden attributes
+                (requires `reading_all_attributes` capability)
               required: false
         responses:
             200:
@@ -57,15 +65,21 @@ class MetakeyResource(Resource):
                   application/json:
                     schema: MetakeyListResponseSchema
             403:
-                description: When user requested hidden metakeys but doesn't have `reading_all_attributes` capability
+                description: |
+                    When user requested hidden metakeys
+                    but doesn't have `reading_all_attributes` capability
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have
+                    access to this object.
         """
         schema = MetakeyListRequestSchema()
         obj = load_schema(request.args, schema)
 
         show_hidden = obj["hidden"]
-        if show_hidden and not g.auth_user.has_rights(Capabilities.reading_all_attributes):
+        if show_hidden and not g.auth_user.has_rights(
+            Capabilities.reading_all_attributes
+        ):
             raise Forbidden("You are not permitted to read hidden metakeys")
 
         db_object = access_object(type, identifier)
@@ -84,7 +98,8 @@ class MetakeyResource(Resource):
         description: |
             Adds attribute to specified object.
 
-            User must have `set` access to the attribute key or `adding_all_attributes` capability.
+            User must have `set` access to the attribute key
+            or `adding_all_attributes` capability.
         security:
             - bearerAuth: []
         tags:
@@ -114,8 +129,11 @@ class MetakeyResource(Resource):
                     schema: MetakeyListResponseSchema
             404:
                 description: |
-                    When object doesn't exist or user doesn't have access to this object.
-                    When attribute key is not defined or user doesn't have privileges to set that one.
+                    When object doesn't exist or user doesn't have
+                    access to this object.
+
+                    When attribute key is not defined or user doesn't have
+                    privileges to set that one.
         """
         schema = MetakeyItemRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -124,11 +142,14 @@ class MetakeyResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        key = obj['key']
-        value = obj['value']
+        key = obj["key"]
+        value = obj["value"]
         is_new = db_object.add_metakey(key, value)
         if is_new is None:
-            raise NotFound(f"Metakey '{key}' is not defined or you have insufficient permissions to set it")
+            raise NotFound(
+                f"Metakey '{key}' is not defined or you have "
+                f"insufficient permissions to set it"
+            )
 
         db.session.commit()
         db.session.refresh(db_object)
@@ -179,8 +200,10 @@ class MetakeyResource(Resource):
                 description: When metakey was deleted successfully
             404:
                 description: |
-                    When object doesn't exist or user doesn't have access to this object.
-                    When attribute key is not defined or user doesn't have privileges to set that one.
+                    When object doesn't exist or user doesn't have access
+                    to this object.
+                    When attribute key is not defined or user doesn't have privileges
+                    to set that one.
         """
         schema = MetakeyItemRequestSchema()
         obj = load_schema(request.args, schema)
@@ -189,12 +212,15 @@ class MetakeyResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        key = obj['key']
-        value = obj['value']
+        key = obj["key"]
+        value = obj["value"]
 
         deleted_object = db_object.remove_metakey(key, value)
         if deleted_object is False:
-            raise NotFound(f"Metakey '{key}' is not defined or you have insufficient permissions to delete it")
+            raise NotFound(
+                f"Metakey '{key}' is not defined or you have "
+                f"insufficient permissions to delete it"
+            )
         db.session.commit()
 
 
@@ -205,7 +231,8 @@ class MetakeyListDefinitionResource(Resource):
         ---
         summary: Get list of attribute keys
         description: |
-            Returns list of attribute keys which currently authenticated user can read or set.
+            Returns list of attribute keys which currently authenticated user
+            can read or set.
         security:
             - bearerAuth: []
         tags:
@@ -262,7 +289,9 @@ class MetakeyListDefinitionManageResource(Resource):
             403:
                 description: When user doesn't have `managing_attributes` capability.
         """
-        metakeys = db.session.query(MetakeyDefinition).order_by(MetakeyDefinition.key).all()
+        metakeys = (
+            db.session.query(MetakeyDefinition).order_by(MetakeyDefinition.key).all()
+        )
         schema = MetakeyDefinitionManageListResponseSchema()
         return schema.dump({"metakeys": metakeys})
 
@@ -299,9 +328,11 @@ class MetakeyDefinitionManageResource(Resource):
             404:
                 description: When specified attribute key doesn't exist
         """
-        metakey = db.session.query(MetakeyDefinition) \
-                            .filter(MetakeyDefinition.key == key) \
-                            .first()
+        metakey = (
+            db.session.query(MetakeyDefinition)
+            .filter(MetakeyDefinition.key == key)
+            .first()
+        )
         if metakey is None:
             raise NotFound("No such metakey")
         schema = MetakeyDefinitionManageItemResponseSchema()
@@ -339,7 +370,8 @@ class MetakeyDefinitionManageResource(Resource):
                   application/json:
                     schema: MetakeyDefinitionManageItemResponseSchema
             400:
-                description: When one of attribute definition fields is missing or incorrect.
+                description: |
+                    When one of attribute definition fields is missing or incorrect.
             403:
                 description: When user doesn't have `managing_attributes` capability.
         """
@@ -349,11 +381,13 @@ class MetakeyDefinitionManageResource(Resource):
         schema = MetakeyDefinitionItemRequestBodySchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
-        metakey_definition = MetakeyDefinition(key=args_obj["key"],
-                                               url_template=obj["url_template"],
-                                               label=obj["label"],
-                                               description=obj["description"],
-                                               hidden=obj["hidden"])
+        metakey_definition = MetakeyDefinition(
+            key=args_obj["key"],
+            url_template=obj["url_template"],
+            label=obj["label"],
+            description=obj["description"],
+            hidden=obj["hidden"],
+        )
         metakey_definition = db.session.merge(metakey_definition)
         db.session.commit()
 
@@ -369,7 +403,8 @@ class MetakeyPermissionResource(Resource):
         ---
         summary: Add/modify attribute key permission
         description: |
-            Adds or modifies attribute key group permission for specified key and group name.
+            Adds or modifies attribute key group permission
+            for specified key and group name.
 
             Requires `managing_attributes` capability.
         security:
@@ -399,28 +434,30 @@ class MetakeyPermissionResource(Resource):
                   application/json:
                     schema: MetakeyDefinitionManageItemResponseSchema
             400:
-                description: When one of attribute permission fields is missing or incorrect.
+                description: |
+                    When one of attribute permission fields is missing or incorrect.
             403:
                 description: When user doesn't have `managing_attributes` capability.
             404:
                 description: When attribute key or group doesn't exist
         """
         schema = MetakeyPermissionSetRequestArgsSchema()
-        args_obj = load_schema({
-            "key": key,
-            "group_name": group_name
-        }, schema)
+        args_obj = load_schema({"key": key, "group_name": group_name}, schema)
 
         schema = MetakeyPermissionSetRequestBodySchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
-        metakey_definition = db.session.query(MetakeyDefinition).filter(
-            MetakeyDefinition.key == args_obj["key"]
-        ).first()
+        metakey_definition = (
+            db.session.query(MetakeyDefinition)
+            .filter(MetakeyDefinition.key == args_obj["key"])
+            .first()
+        )
         if metakey_definition is None:
             raise NotFound("No such metakey")
 
-        group = db.session.query(Group).filter(Group.name == args_obj["group_name"]).first()
+        group = (
+            db.session.query(Group).filter(Group.name == args_obj["group_name"]).first()
+        )
         if group is None:
             raise NotFound("No such group")
 
@@ -428,7 +465,7 @@ class MetakeyPermissionResource(Resource):
             key=args_obj["key"],
             group_id=group.id,
             can_read=obj["can_read"],
-            can_set=obj["can_set"]
+            can_set=obj["can_set"],
         )
         db.session.merge(permission)
         db.session.commit()
@@ -468,21 +505,26 @@ class MetakeyPermissionResource(Resource):
             403:
                 description: When user doesn't have `managing_attributes` capability.
             404:
-                description: When attribute key or group or group permission doesn't exist
+                description: |
+                    When attribute key or group or group permission doesn't exist
         """
         schema = MetakeyPermissionSetRequestArgsSchema()
-        args_obj = load_schema({
-            "key": key,
-            "group_name": group_name
-        }, schema)
+        args_obj = load_schema({"key": key, "group_name": group_name}, schema)
 
-        group = db.session.query(Group).filter(Group.name == args_obj["group_name"]).first()
+        group = (
+            db.session.query(Group).filter(Group.name == args_obj["group_name"]).first()
+        )
         if group is None:
             raise NotFound("No such group")
 
-        metakey_permission = db.session.query(MetakeyPermission).filter(
-            MetakeyPermission.key == args_obj["key"],
-            MetakeyPermission.group_id == group.id).first()
+        metakey_permission = (
+            db.session.query(MetakeyPermission)
+            .filter(
+                MetakeyPermission.key == args_obj["key"],
+                MetakeyPermission.group_id == group.id,
+            )
+            .first()
+        )
 
         if metakey_permission is None:
             raise NotFound("No such metakey permission")

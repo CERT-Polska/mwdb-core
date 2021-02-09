@@ -7,10 +7,11 @@ about: Create a report to help us improve
 **Environment information**
 * MWDB version (from `/about`):
 * Installation method:
-  - [ ] Generic docker-compose
-  - [ ] Dev docker-compose
-  - [ ] Native (from source)
+  - [ ] mwdb.cert.pl service
+  - [ ] From PyPi (`pip install mwdb-core`)
+  - [ ] From docker-compose
   - [ ] Other (please explain)
+* Plugins included:
 
 **Behaviour the bug (what happened?)**
 

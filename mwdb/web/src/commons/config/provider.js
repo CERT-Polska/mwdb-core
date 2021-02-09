@@ -6,34 +6,34 @@ const configUpdate = Symbol("configUpdate");
 const configError = Symbol("configError");
 
 function serverConfigReducer(state, action) {
-    switch(action.type) {
+    switch (action.type) {
         case configUpdate:
-            return { config: action.config, error: null }
+            return { config: action.config, error: null };
         case configError:
-            return { config: null, error: action.error }
+            return { config: null, error: action.error };
         default:
-            return state
+            return state;
     }
 }
 
 export function ConfigProvider(props) {
     const [serverConfig, setServerConfig] = useReducer(serverConfigReducer, {
         config: null,
-        error: null
-    })
+        error: null,
+    });
 
     async function update() {
         try {
             const response = await api.getServerInfo();
             setServerConfig({
                 type: configUpdate,
-                config: response.data
-            })
-        } catch(error) {
+                config: response.data,
+            });
+        } catch (error) {
             setServerConfig({
                 type: configError,
-                error
-            })
+                error,
+            });
         }
     }
 
@@ -42,12 +42,14 @@ export function ConfigProvider(props) {
     }, []);
 
     return (
-        <ConfigContext.Provider value={{
-            config: serverConfig.config,
-            configError: serverConfig.error,
-            update
-        }}>
+        <ConfigContext.Provider
+            value={{
+                config: serverConfig.config,
+                configError: serverConfig.error,
+                update,
+            }}
+        >
             {props.children}
         </ConfigContext.Provider>
-    )
+    );
 }

@@ -1,44 +1,54 @@
-import React, {useState, useEffect, useCallback, useContext} from 'react';
-import Autocomplete from 'react-autocomplete';
+import React, { useState, useEffect, useCallback, useContext } from "react";
+import Autocomplete from "react-autocomplete";
 
 import api from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
-import { RefString, DateString, ObjectLink, ConfirmationModal } from "@mwdb-web/commons/ui";
+import {
+    RefString,
+    DateString,
+    ObjectLink,
+    ConfirmationModal,
+} from "@mwdb-web/commons/ui";
 
 function ShareItem(props) {
-    const context = useContext(ObjectContext)
+    const context = useContext(ObjectContext);
     let fieldStyle = {
-        wordBreak: 'break-all'
+        wordBreak: "break-all",
     };
-    const isCurrentObject = props.related_object_dhash === context.object.id
-    const isUploader = props.related_user_login === props.group_name
+    const isCurrentObject = props.related_object_dhash === context.object.id;
+    const isUploader = props.related_user_login === props.group_name;
 
-    if (!isCurrentObject) fieldStyle.backgroundColor = 'lightgray';
+    if (!isCurrentObject) fieldStyle.backgroundColor = "lightgray";
 
     return (
         <tr style={fieldStyle}>
             <td>
-                <ObjectLink type="group" id={props.group_name}/>
-                {(isCurrentObject && isUploader) && <span className="ml-2">(uploader)</span>}
+                <ObjectLink type="group" id={props.group_name} />
+                {isCurrentObject && isUploader && (
+                    <span className="ml-2">(uploader)</span>
+                )}
             </td>
-            <td><RefString
-                reason_type={props.reason_type}
-                related_object_dhash={props.related_object_dhash}
-                related_object_type={props.related_object_type}
-                related_user_login={props.related_user_login} />
+            <td>
+                <RefString
+                    reason_type={props.reason_type}
+                    related_object_dhash={props.related_object_dhash}
+                    related_object_type={props.related_object_type}
+                    related_user_login={props.related_user_login}
+                />
             </td>
-            <td><DateString date={props.access_time}/></td>
+            <td>
+                <DateString date={props.access_time} />
+            </td>
         </tr>
-    )
+    );
 }
 
 function ShareForm(props) {
-    const [group, setGroup] = useState("")
+    const [group, setGroup] = useState("");
 
     function handleSubmit(e) {
         e.preventDefault();
-        if (!group)
-            return;
+        if (!group) return;
         props.onSubmit(group);
         setGroup("");
     }
@@ -46,41 +56,63 @@ function ShareForm(props) {
     return (
         <form className="tagForm" onSubmit={handleSubmit}>
             <Autocomplete
-                    value={group}
-                    inputProps={{id: 'states-autocomplete'}}
-                    getItemValue={(item) => item}
-                    shouldItemRender={(item, value) => {
-                        return (item.toLowerCase().indexOf(value.toLowerCase()) !== -1);
-                    }}
-                    items={props.groups}
-                    onChange={event => setGroup(event.target.value)}
-                    onSelect={value => setGroup(value)}
-                    renderInput={(props) =>
-                        <div className="input-group">
-                            <input {...props} className='form-control' placeholder="Share with group"/>
-                            <div className="input-group-append">
-                                <input className="btn btn-outline-primary" type="submit" value="Add"/>
-                            </div>
+                value={group}
+                inputProps={{ id: "states-autocomplete" }}
+                getItemValue={(item) => item}
+                shouldItemRender={(item, value) => {
+                    return (
+                        item.toLowerCase().indexOf(value.toLowerCase()) !== -1
+                    );
+                }}
+                items={props.groups}
+                onChange={(event) => setGroup(event.target.value)}
+                onSelect={(value) => setGroup(value)}
+                renderInput={(props) => (
+                    <div className="input-group">
+                        <input
+                            {...props}
+                            className="form-control"
+                            placeholder="Share with group"
+                        />
+                        <div className="input-group-append">
+                            <input
+                                className="btn btn-outline-primary"
+                                type="submit"
+                                value="Add"
+                            />
                         </div>
-                    }
-                    wrapperStyle={{display:"block"}}
-                    renderMenu={children =>
-                        <div className={"dropdown-menu " + (children.length !== 0 ? "show" : "")}>
-                            {
-                                children.map(c =>
-                                    <a key={c} href="#dropdown" className="dropdown-item" style={{"cursor": "pointer"}}>
-                                        {c}
-                                    </a>
-                                )
-                            }
-                        </div>
-                    }
-                    renderItem={(item, isHighlighted) => (
-                        <div
-                            className={`item ${isHighlighted ? 'item-highlighted' : ''}`}
-                            key={item}
-                        >{item}</div>
-                    )}
+                    </div>
+                )}
+                wrapperStyle={{ display: "block" }}
+                renderMenu={(children) => (
+                    <div
+                        className={
+                            "dropdown-menu " +
+                            (children.length !== 0 ? "show" : "")
+                        }
+                    >
+                        {children.map((c) => (
+                            <a
+                                key={c}
+                                href="#dropdown"
+                                className="dropdown-item"
+                                style={{ cursor: "pointer" }}
+                            >
+                                {c}
+                            </a>
+                        ))}
+                    </div>
+                )}
+                renderItem={(item, isHighlighted) => (
+                    <div
+                        className={`item ${
+                            isHighlighted ? "item-highlighted" : ""
+                        }`}
+                        key={item}
+                    >
+                        {item}
+                    </div>
+                )}
             />
         </form>
     );
@@ -96,10 +128,10 @@ function SharesBox() {
 
     async function updateShares() {
         try {
-            let response = await api.getObjectShares(context.object.id)
+            let response = await api.getObjectShares(context.object.id);
             setGroups(response.data.groups);
             setItems(response.data.shares);
-        } catch(error) {
+        } catch (error) {
             context.setObjectError(error);
         }
     }
@@ -107,9 +139,9 @@ function SharesBox() {
     async function doShare(group) {
         try {
             setIsModalOpen(false);
-            await api.shareObjectWith(context.object.id, group)
+            await api.shareObjectWith(context.object.id, group);
             updateShares();
-        } catch(error) {
+        } catch (error) {
             context.setObjectError(error);
         }
     }
@@ -119,26 +151,26 @@ function SharesBox() {
         setShareReceiver(group);
     }
 
-    const getShares = useCallback(updateShares, [context.object.id])
+    const getShares = useCallback(updateShares, [context.object.id]);
 
     useEffect(() => {
         getShares();
-    }, [getShares])
+    }, [getShares]);
 
     return (
         <div className="card card-default">
-            <ConfirmationModal isOpen={isModalOpen}
-                               onRequestClose={() => setIsModalOpen(false)}
-                               message={`Share the sample and all its descendants with ${shareReceiver}?`}
-                               onConfirm={() => doShare(shareReceiver)}
-                               confirmText="Share"
-                               buttonStyle="bg-success"/>
+            <ConfirmationModal
+                isOpen={isModalOpen}
+                onRequestClose={() => setIsModalOpen(false)}
+                message={`Share the sample and all its descendants with ${shareReceiver}?`}
+                onConfirm={() => doShare(shareReceiver)}
+                confirmText="Share"
+                buttonStyle="bg-success"
+            />
 
             <div className="card-header">
                 <div className="media">
-                    <div className="align-self-center media-body">
-                        Shares
-                    </div>
+                    <div className="align-self-center media-body">Shares</div>
                 </div>
             </div>
             <table className="table table-striped table-bordered wrap-table">
@@ -150,31 +182,48 @@ function SharesBox() {
                     </tr>
                 </thead>
                 <tbody>
-                    {
-                        items
-                            .sort((a, b) => {
-                                if(a.related_object_dhash !== b.related_object_dhash)
-                                {
-                                    // Current object should be on top
-                                    if(b.related_object_dhash === context.object.id) return 1;
-                                    if(a.related_object_dhash === context.object.id) return -1;
-                                    // Inherited entries order by dhash
-                                    if(a.related_object_dhash > b.related_object_dhash) return 1;
-                                    if(a.related_object_dhash < b.related_object_dhash) return -1;
-                                }
-                                const a_time = Date.parse(a.access_time);
-                                const b_time = Date.parse(b.access_time);
-                                // The same dhash order by time
-                                if(a_time > b_time) return 1;
-                                if(a_time < b_time) return -1;
-                                return 0;
-                            })
-                            .map((item, idx) => <ShareItem key={idx} {...item}/>)
-                    }
+                    {items
+                        .sort((a, b) => {
+                            if (
+                                a.related_object_dhash !==
+                                b.related_object_dhash
+                            ) {
+                                // Current object should be on top
+                                if (
+                                    b.related_object_dhash === context.object.id
+                                )
+                                    return 1;
+                                if (
+                                    a.related_object_dhash === context.object.id
+                                )
+                                    return -1;
+                                // Inherited entries order by dhash
+                                if (
+                                    a.related_object_dhash >
+                                    b.related_object_dhash
+                                )
+                                    return 1;
+                                if (
+                                    a.related_object_dhash <
+                                    b.related_object_dhash
+                                )
+                                    return -1;
+                            }
+                            const a_time = Date.parse(a.access_time);
+                            const b_time = Date.parse(b.access_time);
+                            // The same dhash order by time
+                            if (a_time > b_time) return 1;
+                            if (a_time < b_time) return -1;
+                            return 0;
+                        })
+                        .map((item, idx) => (
+                            <ShareItem key={idx} {...item} />
+                        ))}
                 </tbody>
             </table>
-            <ShareForm onSubmit={handleShare} groups={groups}/>
-        </div>)
+            <ShareForm onSubmit={handleShare} groups={groups} />
+        </div>
+    );
 }
 
 export default SharesBox;

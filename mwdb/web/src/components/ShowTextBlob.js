@@ -1,54 +1,123 @@
-import React, { useContext } from 'react';
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 
 import {
-    ShowObject, ObjectTab, ObjectContext, LatestConfigTab, RelationsTab,
-    DownloadAction, FavoriteAction, RemoveAction, ObjectAction, PushAction
-} from './ShowObject';
+    ShowObject,
+    ObjectTab,
+    ObjectContext,
+    LatestConfigTab,
+    RelationsTab,
+    DownloadAction,
+    FavoriteAction,
+    RemoveAction,
+    ObjectAction,
+    PushAction,
+} from "./ShowObject";
 
-import { faScroll, faFingerprint, faRandom, faSearch } from '@fortawesome/free-solid-svg-icons'
+import {
+    faScroll,
+    faFingerprint,
+    faRandom,
+    faSearch,
+} from "@fortawesome/free-solid-svg-icons";
 
-import { makeSearchLink, makeSearchDateLink, downloadData, humanFileSize } from '@mwdb-web/commons/helpers';
+import {
+    makeSearchLink,
+    makeSearchDateLink,
+    downloadData,
+    humanFileSize,
+} from "@mwdb-web/commons/helpers";
 import { DataTable, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
-
 
 function TextBlobDetails() {
     const context = useContext(ObjectContext);
     return (
         <DataTable>
             <Extendable ident="showTextBlobDetails">
-            <tr>
-                <th>Blob name</th>
-                <td id="blob_name"><Link to={makeSearchLink("name", context.object.blob_name, false, "blobs")}>{context.object.blob_name}</Link>
-                </td>
-            </tr>
-            <tr>
-                <th>Blob size</th>
-                <td id="blob_size"><Link to={makeSearchLink("size", context.object.blob_size, false, "blobs")}>{humanFileSize(context.object.blob_size)}</Link>
-                </td>
-            </tr>
-            <tr>
-                <th>Blob type</th>
-                <td id="blob_type"><Link to={makeSearchLink("type", context.object.blob_type, false, "blobs")}>{context.object.blob_type}</Link>
-                </td>
-            </tr>
-            <tr>
-                <th>First seen</th>
-                <td id="upload_time"> {
-                    context.object.upload_time
-                        ? <Link to={makeSearchDateLink("upload_time", context.object.upload_time, "blobs")}><DateString date={context.object.upload_time}/></Link>
-                        : []
-                }</td>
-            </tr>
-            <tr>
-                <th>Last seen</th>
-                <td id="last_seen"> {
-                    context.object.last_seen
-                        ? <Link to={makeSearchDateLink("last_seen", context.object.last_seen, "blobs")}><DateString date={context.object.last_seen}/></Link>
-                        : []
-                }</td>
-            </tr>
+                <tr>
+                    <th>Blob name</th>
+                    <td id="blob_name">
+                        <Link
+                            to={makeSearchLink(
+                                "name",
+                                context.object.blob_name,
+                                false,
+                                "blobs"
+                            )}
+                        >
+                            {context.object.blob_name}
+                        </Link>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Blob size</th>
+                    <td id="blob_size">
+                        <Link
+                            to={makeSearchLink(
+                                "size",
+                                context.object.blob_size,
+                                false,
+                                "blobs"
+                            )}
+                        >
+                            {humanFileSize(context.object.blob_size)}
+                        </Link>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Blob type</th>
+                    <td id="blob_type">
+                        <Link
+                            to={makeSearchLink(
+                                "type",
+                                context.object.blob_type,
+                                false,
+                                "blobs"
+                            )}
+                        >
+                            {context.object.blob_type}
+                        </Link>
+                    </td>
+                </tr>
+                <tr>
+                    <th>First seen</th>
+                    <td id="upload_time">
+                        {" "}
+                        {context.object.upload_time ? (
+                            <Link
+                                to={makeSearchDateLink(
+                                    "upload_time",
+                                    context.object.upload_time,
+                                    "blobs"
+                                )}
+                            >
+                                <DateString date={context.object.upload_time} />
+                            </Link>
+                        ) : (
+                            []
+                        )}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Last seen</th>
+                    <td id="last_seen">
+                        {" "}
+                        {context.object.last_seen ? (
+                            <Link
+                                to={makeSearchDateLink(
+                                    "last_seen",
+                                    context.object.last_seen,
+                                    "blobs"
+                                )}
+                            >
+                                <DateString date={context.object.last_seen} />
+                            </Link>
+                        ) : (
+                            []
+                        )}
+                    </td>
+                </tr>
             </Extendable>
         </DataTable>
     );
@@ -56,7 +125,9 @@ function TextBlobDetails() {
 
 function TextBlobPreview() {
     const context = useContext(ObjectContext);
-    return <HexView content={context.object.content} mode="raw" showInvisibles/>
+    return (
+        <HexView content={context.object.content} mode="raw" showInvisibles />
+    );
 }
 
 function BlobDiffAction() {
@@ -67,16 +138,16 @@ function BlobDiffAction() {
             icon={faRandom}
             link={`/blobs?diff=${context.object.id}`}
         />
-    )
+    );
 }
 
 export default function ShowTextBlob(props) {
     async function downloadTextBlob(object) {
-        downloadData(object.content, object.id, 'text/plain');
+        downloadData(object.content, object.id, "text/plain");
     }
 
     return (
-        <ShowObject 
+        <ShowObject
             ident="showTextBlob"
             objectType="blob"
             objectId={props.match.params.hash}
@@ -85,32 +156,32 @@ export default function ShowTextBlob(props) {
             headerCaption="Blob details"
             defaultTab="preview"
         >
-            <ObjectTab 
+            <ObjectTab
                 tab="details"
                 icon={faFingerprint}
                 component={TextBlobDetails}
                 actions={[
-                    <RemoveAction/>,
-                    <PushAction/>,
-                    <BlobDiffAction/>,
-                    <FavoriteAction/>,
-                    <DownloadAction download={downloadTextBlob}/>,
+                    <RemoveAction />,
+                    <PushAction />,
+                    <BlobDiffAction />,
+                    <FavoriteAction />,
+                    <DownloadAction download={downloadTextBlob} />,
                 ]}
             />
             <RelationsTab />
-            <ObjectTab 
+            <ObjectTab
                 tab="preview"
                 icon={faSearch}
                 component={TextBlobPreview}
                 actions={[
-                    <RemoveAction/>,
-                    <PushAction/>,
-                    <BlobDiffAction/>,
-                    <FavoriteAction/>,
-                    <DownloadAction download={downloadTextBlob}/>
+                    <RemoveAction />,
+                    <PushAction />,
+                    <BlobDiffAction />,
+                    <FavoriteAction />,
+                    <DownloadAction download={downloadTextBlob} />,
                 ]}
             />
-            <LatestConfigTab label="Parsed blob"/>
+            <LatestConfigTab label="Parsed blob" />
         </ShowObject>
-    )
+    );
 }

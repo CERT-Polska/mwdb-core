@@ -19,45 +19,68 @@ export { default as View } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
 
 export { Tag, TagList } from "./Tag";
-export { TabContext, useTabContext, ObjectTab, ObjectAction } from "./ObjectTab";
-
+export {
+    TabContext,
+    useTabContext,
+    ObjectTab,
+    ObjectAction,
+} from "./ObjectTab";
 
 export function getStyleForTag(tag) {
     let styleList = {
-        "primary": ["spam", "src:", "uploader:", "feed:"],
-        "warning": ["ripped:", "contains:", "matches:", "maybe:"],
-        "success": ["static:", "dynamic:"],
-        "secondary": ["runnable:", "archive:", "dump:", "script:", "document:", "archive", "dump"]
-    }
+        primary: ["spam", "src:", "uploader:", "feed:"],
+        warning: ["ripped:", "contains:", "matches:", "maybe:"],
+        success: ["static:", "dynamic:"],
+        secondary: [
+            "runnable:",
+            "archive:",
+            "dump:",
+            "script:",
+            "document:",
+            "archive",
+            "dump",
+        ],
+    };
 
-    for(let style of Object.keys(styleList)) {
-        if(styleList[style].filter(t => t.endsWith(":") ? tag.startsWith(t) : tag === t).length > 0)
-            return style
+    for (let style of Object.keys(styleList)) {
+        if (
+            styleList[style].filter((t) =>
+                t.endsWith(":") ? tag.startsWith(t) : tag === t
+            ).length > 0
+        )
+            return style;
     }
-    if(tag.indexOf(":") !== -1)
-        return "info";
+    if (tag.indexOf(":") !== -1) return "info";
     return "danger";
 }
 
 export function HighlightText(props) {
     let text = React.Children.toArray(props.children)[0].toString();
 
-    if(!props.filterValue)
-        return text;
+    if (!props.filterValue) return text;
 
-    let filteredText = props.caseSensitive ? text : text.toLowerCase()
-    let filterValue = props.caseSensitive ? props.filterValue : props.filterValue.toLowerCase()
+    let filteredText = props.caseSensitive ? text : text.toLowerCase();
+    let filterValue = props.caseSensitive
+        ? props.filterValue
+        : props.filterValue.toLowerCase();
     let elements = [];
-    
-    for(var prevIndex = 0, index = filteredText.indexOf(filterValue); 
+
+    for (
+        var prevIndex = 0, index = filteredText.indexOf(filterValue);
         index >= 0;
-        prevIndex = index + filterValue.length, index = filteredText.indexOf(filterValue, index + filterValue.length))
-    {
+        prevIndex = index + filterValue.length,
+            index = filteredText.indexOf(
+                filterValue,
+                index + filterValue.length
+            )
+    ) {
         elements = elements.concat([
             text.slice(prevIndex, index),
-            <span style={{backgroundColor: "yellow"}}>{text.slice(index, index + filterValue.length)}</span>
-        ])
+            <span style={{ backgroundColor: "yellow" }}>
+                {text.slice(index, index + filterValue.length)}
+            </span>,
+        ]);
     }
-    elements.push(text.slice(prevIndex))
+    elements.push(text.slice(prevIndex));
     return elements;
 }

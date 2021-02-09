@@ -1,8 +1,8 @@
-import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React from "react";
+import { useLocation, Link } from "react-router-dom";
 
 import queryString from "query-string";
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
 import { TagList } from "@mwdb-web/commons/ui";
@@ -12,58 +12,94 @@ export function RecentBlobRow(props) {
     let location = useLocation();
     const diffWith = queryString.parse(location.search)["diff"];
     const blobType = (
-        <a href="#query" onClick={(ev) => { 
-            ev.preventDefault(); 
-            props.addToQuery("type", props.blob_type)
-        }}>
+        <a
+            href="#query"
+            onClick={(ev) => {
+                ev.preventDefault();
+                props.addToQuery("type", props.blob_type);
+            }}
+        >
             {props.blob_type}
         </a>
-    )
-    const blobId = (
-        diffWith ? (
-            props.id === diffWith ?
-                <Hash hash={props.id} /> :
-                <Link to={`/diff/${props.id}/${diffWith}`}>
-                    <Hash hash={props.id} />
-                </Link>
+    );
+    const blobId = diffWith ? (
+        props.id === diffWith ? (
+            <Hash hash={props.id} />
         ) : (
-            <ObjectLink type="text_blob" id={props.id}/>
+            <Link to={`/diff/${props.id}/${diffWith}`}>
+                <Hash hash={props.id} />
+            </Link>
         )
-    )
-    const blobIcon = diffWith && <FontAwesomeIcon icon="random" size="x" style={{marginRight: "0.3em"}}/>;
+    ) : (
+        <ObjectLink type="text_blob" id={props.id} />
+    );
+    const blobIcon = diffWith && (
+        <FontAwesomeIcon
+            icon="random"
+            size="x"
+            style={{ marginRight: "0.3em" }}
+        />
+    );
     const tags = (
-        <TagList tags={props.tags}
-                 tagClick={(ev, tag) => { ev.preventDefault(); props.addToQuery("tag", tag) }}
-                 tagRemove={(ev, tag) => props.addToQuery("NOT tag", tag)}
-                 filterable/>
-    )
-    const firstSeen = <DateString date={props.upload_time}/>
-    const lastSeen = <DateString date={props.last_seen}/>
+        <TagList
+            tags={props.tags}
+            tagClick={(ev, tag) => {
+                ev.preventDefault();
+                props.addToQuery("tag", tag);
+            }}
+            tagRemove={(ev, tag) => props.addToQuery("NOT tag", tag)}
+            filterable
+        />
+    );
+    const firstSeen = <DateString date={props.upload_time} />;
+    const lastSeen = <DateString date={props.last_seen} />;
 
     return (
         <RecentRow firstSeen={props.upload_time}>
             <td className="col-lg-1 col-6">
                 {/* Shrinked mode */}
                 <RecentInnerRow value={props.blob_name} narrowOnly copyable />
-                <RecentInnerRow value={props.id} icon={blobIcon} narrowOnly copyable>
+                <RecentInnerRow
+                    value={props.id}
+                    icon={blobIcon}
+                    narrowOnly
+                    copyable
+                >
                     {blobId}
                 </RecentInnerRow>
                 {/* Wide mode */}
-                <RecentInnerRow value={props.blob_name} wideOnly copyable/>
+                <RecentInnerRow value={props.blob_name} wideOnly copyable />
             </td>
             <td className="col-lg-4 col-6">
                 {/* Shrinked mode */}
-                <RecentInnerRow labelWidth="3rem" label="Type" value={props.blob_type} narrowOnly copyable>
+                <RecentInnerRow
+                    labelWidth="3rem"
+                    label="Type"
+                    value={props.blob_type}
+                    narrowOnly
+                    copyable
+                >
                     {blobType}
                 </RecentInnerRow>
-                <RecentInnerRow labelWidth="3rem" label="Date" value={props.upload_time} narrowOnly noEllipsis>
+                <RecentInnerRow
+                    labelWidth="3rem"
+                    label="Date"
+                    value={props.upload_time}
+                    narrowOnly
+                    noEllipsis
+                >
                     {firstSeen}
                 </RecentInnerRow>
                 <RecentInnerRow narrowOnly noEllipsis>
                     {tags}
                 </RecentInnerRow>
                 {/* Wide mode */}
-                <RecentInnerRow value={props.id} icon={blobIcon} wideOnly copyable>
+                <RecentInnerRow
+                    value={props.id}
+                    icon={blobIcon}
+                    wideOnly
+                    copyable
+                >
                     {blobId}
                 </RecentInnerRow>
             </td>
@@ -75,9 +111,7 @@ export function RecentBlobRow(props) {
             </td>
             <td className="col-lg-2 d-none d-lg-block">
                 {/* Wide mode */}
-                <RecentInnerRow noEllipsis>
-                    {tags}
-                </RecentInnerRow>
+                <RecentInnerRow noEllipsis>{tags}</RecentInnerRow>
             </td>
             <td className="col-lg-2 d-none d-lg-block">
                 {/* Wide mode */}
@@ -92,7 +126,7 @@ export function RecentBlobRow(props) {
                 </RecentInnerRow>
             </td>
         </RecentRow>
-    )
+    );
 }
 
 export function RecentBlobHeader() {
@@ -109,7 +143,7 @@ export function RecentBlobHeader() {
             <th className="col-2 d-none d-lg-block">First seen</th>
             <th className="col-2 d-none d-lg-block">Last seen</th>
         </tr>
-    )
+    );
 }
 
 export default (props) => {
@@ -117,19 +151,21 @@ export default (props) => {
     const diffWith = queryString.parse(location.search)["diff"];
     return (
         <React.Fragment>
-            {
-                diffWith ? (
-                    <div className="alert alert-warning">
-                        Choose blob to diff with{" "}
-                        <ObjectLink type="text_blob" id={diffWith} inline />
-                    </div>
-                ) : []
-            }
-            <RecentView type="blob"
-                        rowComponent={RecentBlobRow}
-                        headerComponent={RecentBlobHeader}
-                        dhashOnly
-                        {...props}/>
+            {diffWith ? (
+                <div className="alert alert-warning">
+                    Choose blob to diff with{" "}
+                    <ObjectLink type="text_blob" id={diffWith} inline />
+                </div>
+            ) : (
+                []
+            )}
+            <RecentView
+                type="blob"
+                rowComponent={RecentBlobRow}
+                headerComponent={RecentBlobHeader}
+                dhashOnly
+                {...props}
+            />
         </React.Fragment>
-    )
-}
+    );
+};

@@ -1,42 +1,41 @@
 import React, { useContext } from "react";
 
-import { faStar } from '@fortawesome/free-solid-svg-icons'
-import { faStar as farStar } from '@fortawesome/free-regular-svg-icons'
+import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
 import api from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
-
 
 export default function FavoriteAction(props) {
     const context = useContext(ObjectContext);
 
     async function markFavoriteObject() {
         try {
-            await api.addObjectFavorite(context.object.id)
+            await api.addObjectFavorite(context.object.id);
             context.updateObject();
-        } catch(error) {
+        } catch (error) {
             context.setObjectError(error);
         }
     }
 
     async function unmarkFavoriteObject() {
         try {
-            await api.removeObjectFavorite(context.object.id)
+            await api.removeObjectFavorite(context.object.id);
             context.updateObject();
-        } catch(error) {
+        } catch (error) {
             context.setObjectError(error);
         }
     }
 
-    if(context.object.favorite)
+    if (context.object.favorite)
         return (
-            <ObjectAction 
+            <ObjectAction
                 label="Unfavorite"
                 icon={faStar}
                 action={() => unmarkFavoriteObject()}
             />
-        )
+        );
     else
         return (
             <ObjectAction
@@ -44,5 +43,5 @@ export default function FavoriteAction(props) {
                 icon={farStar}
                 action={() => markFavoriteObject()}
             />
-        )
+        );
 }

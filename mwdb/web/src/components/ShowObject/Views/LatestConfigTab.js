@@ -5,34 +5,36 @@ import ConfigTable from "../../ConfigTable";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
 
-
 export default function LatestConfigTab(props) {
     const context = useContext(ObjectContext);
 
     // Don't show tab if object doesn't have latest config
-    if(!context.object.latest_config)
-        return [];
+    if (!context.object.latest_config) return [];
 
     return (
         <ObjectTab
             tab="config"
             label={
-                <div>{props.label} {
-                    context.object.latest_config.family 
-                     ? <span class="badge badge-danger">{context.object.latest_config.family}</span>
-                     : []
-                }
+                <div>
+                    {props.label}{" "}
+                    {context.object.latest_config.family ? (
+                        <span class="badge badge-danger">
+                            {context.object.latest_config.family}
+                        </span>
+                    ) : (
+                        []
+                    )}
                 </div>
             }
             actions={
-                <ObjectAction 
+                <ObjectAction
                     label="Go to config"
-                    link={"/config/"+context.object.latest_config.id}
+                    link={"/config/" + context.object.latest_config.id}
                 />
             }
-            component={
-                () => <ConfigTable object={context.object.latest_config} />
-            }
+            component={() => (
+                <ConfigTable object={context.object.latest_config} />
+            )}
         />
-    )   
+    );
 }

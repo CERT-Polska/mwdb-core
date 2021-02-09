@@ -11,7 +11,7 @@ import { AuthContext } from "@mwdb-web/commons/auth";
 import { DataTable, View } from "@mwdb-web/commons/ui";
 
 function UploadDropzone(props) {
-    const onDrop = useCallback(acceptedFiles => props.onDrop(acceptedFiles[0]), [])
+    const onDrop = props.onDrop;
     const {
         getRootProps, 
         getInputProps,
@@ -19,7 +19,7 @@ function UploadDropzone(props) {
         isDragReject
     } = useDropzone({
         multiple: false,
-        onDrop
+        onDrop: useCallback(acceptedFiles => onDrop(acceptedFiles[0]), [onDrop])
     });
 
     const dropzoneClassName = (

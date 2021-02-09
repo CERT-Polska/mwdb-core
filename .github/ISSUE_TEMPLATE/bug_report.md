@@ -11,7 +11,7 @@ about: Create a report to help us improve
   - [ ] From PyPi (`pip install mwdb-core`)
   - [ ] From docker-compose
   - [ ] Other (please explain)
-* Plugins included:
+* Plugins installed:
 
 **Behaviour the bug (what happened?)**
 

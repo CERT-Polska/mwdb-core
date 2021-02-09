@@ -23,7 +23,22 @@ https://gist.github.com/Chaser324/ce0505fbed06b947d962).
 
 4. If possible, add a test or two to the `tests/` directory.
 
-5. TODO: autoformatter configuration
+5. Remember to autoformat your code. 
+   
+   For Python code, use formatters and linters listed below.
+   ```
+   pip install -r dev-requirements.txt
+   isort mwdb/
+   black mwdb/
+   flake8 mwdb/
+   ```
+   
+   For JS code, use Prettify.
+   ```
+   cd mwdb/web
+   npm install --only=dev
+   npx prettify --write src/
+   ```
 
 6. When you feel like you're done, commit the files:
 

@@ -1,13 +1,13 @@
-import React, {useEffect, useReducer} from 'react';
+import React, { useEffect, useReducer } from "react";
 
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import ObjectBox from './Views/ObjectBox';
-import MultiRelationsBox from './Views/RelationsBox';
-import CommentBox from './Views/CommentBox';
+import ObjectBox from "./Views/ObjectBox";
+import MultiRelationsBox from "./Views/RelationsBox";
+import CommentBox from "./Views/CommentBox";
 import ShareBox from "./Views/SharesBox";
-import TagBox from './Views/TagBox';
-import AttributesBox from "./Views/AttributesBox"
+import TagBox from "./Views/TagBox";
+import AttributesBox from "./Views/AttributesBox";
 
 import api from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
@@ -16,40 +16,47 @@ import { View } from "@mwdb-web/commons/ui";
 
 const initialObjectState = {
     object: null,
-    objectError: null
-}
+    objectError: null,
+};
 
 const objectUpdate = Symbol("objectUpdate");
 const objectError = Symbol("objectError");
 
 function objectStateReducer(state, action) {
-    switch(action.type) {
+    switch (action.type) {
         case objectUpdate:
-            return { object: action.object, objectError: null }
+            return { object: action.object, objectError: null };
         case objectError:
-            return { object: state.object, objectError: action.error}
+            return { object: state.object, objectError: action.error };
         default:
-            return state
+            return state;
     }
 }
 
 export default function ShowObject(props) {
-    const [objectState, setObjectState] = useReducer(objectStateReducer, initialObjectState)
+    const [objectState, setObjectState] = useReducer(
+        objectStateReducer,
+        initialObjectState
+    );
 
     function setObjectError(error) {
         setObjectState({
-            type: objectError, error
-        })
+            type: objectError,
+            error,
+        });
     }
 
     async function updateObject() {
         try {
-            let response = await api.getObject(props.objectType, props.objectId);
+            let response = await api.getObject(
+                props.objectType,
+                props.objectId
+            );
             setObjectState({
                 type: objectUpdate,
-                object: response.data
-            })
-        } catch(error) {
+                object: response.data,
+            });
+        } catch (error) {
             setObjectError(error);
         }
     }
@@ -57,57 +64,64 @@ export default function ShowObject(props) {
     useEffect(() => {
         updateObject();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.objectId])
+    }, [props.objectId]);
 
-    const objectLayout = (
-        objectState.object
-        ? (
-            <div className="card-body">
-                <Extendable ident="showObject">
-                    <div className="row">
-                        <div className="col-md-7">
-                            <Extendable ident="showObjectLeftColumn">
-                                <div className="card">
-                                    <Extendable ident="showObjectPresenter">
-                                        <div className="card-header detailed-view-header">
-                                            <FontAwesomeIcon icon={props.headerIcon}/>
-                                            {props.headerCaption}
-                                        </div>
-                                        <ObjectBox defaultTab={props.defaultTab || "details"}>
-                                            <Extendable ident="showObjectTabs">
-                                                {props.children}
-                                            </Extendable>
-                                        </ObjectBox>
-                                    </Extendable>
-                                </div>
-                                <ShareBox />
-                            </Extendable>
-                        </div>
-                        <div className="col-md-5">
-                            <Extendable ident="showObjectRightColumn">
-                                <TagBox />
-                                <MultiRelationsBox />
-                                <AttributesBox />
-                                <CommentBox />
-                            </Extendable>
-                        </div>
+    const objectLayout = objectState.object ? (
+        <div className="card-body">
+            <Extendable ident="showObject">
+                <div className="row">
+                    <div className="col-md-7">
+                        <Extendable ident="showObjectLeftColumn">
+                            <div className="card">
+                                <Extendable ident="showObjectPresenter">
+                                    <div className="card-header detailed-view-header">
+                                        <FontAwesomeIcon
+                                            icon={props.headerIcon}
+                                        />
+                                        {props.headerCaption}
+                                    </div>
+                                    <ObjectBox
+                                        defaultTab={
+                                            props.defaultTab || "details"
+                                        }
+                                    >
+                                        <Extendable ident="showObjectTabs">
+                                            {props.children}
+                                        </Extendable>
+                                    </ObjectBox>
+                                </Extendable>
+                            </div>
+                            <ShareBox />
+                        </Extendable>
                     </div>
-                </Extendable>
-            </div>
-        ) : []
-    )
+                    <div className="col-md-5">
+                        <Extendable ident="showObjectRightColumn">
+                            <TagBox />
+                            <MultiRelationsBox />
+                            <AttributesBox />
+                            <CommentBox />
+                        </Extendable>
+                    </div>
+                </div>
+            </Extendable>
+        </div>
+    ) : (
+        []
+    );
 
     return (
-        <ObjectContext.Provider value={{
-            object: objectState.object,
-            objectError: objectState.objectError,
-            objectType: props.objectType,
-            searchEndpoint: props.searchEndpoint,
-            updateObject,
-            setObjectError
-        }}>
+        <ObjectContext.Provider
+            value={{
+                object: objectState.object,
+                objectError: objectState.objectError,
+                objectType: props.objectType,
+                searchEndpoint: props.searchEndpoint,
+                updateObject,
+                setObjectError,
+            }}
+        >
             <View fluid ident={props.ident} error={objectState.objectError}>
-                { objectLayout }
+                {objectLayout}
             </View>
         </ObjectContext.Provider>
     );

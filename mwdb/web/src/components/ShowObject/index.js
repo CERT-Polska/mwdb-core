@@ -10,4 +10,9 @@ export { default as UploadChildAction } from "./Actions/UploadChildAction";
 export { default as PushAction } from "./Actions/PushAction";
 
 export { ObjectContext } from "@mwdb-web/commons/context";
-export { ObjectTab, ObjectAction, TabContext, useTabContext } from "@mwdb-web/commons/ui";
+export {
+    ObjectTab,
+    ObjectAction,
+    TabContext,
+    useTabContext,
+} from "@mwdb-web/commons/ui";

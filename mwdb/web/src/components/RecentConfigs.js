@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
 import { TagList } from "@mwdb-web/commons/ui";
@@ -7,29 +7,40 @@ import { DateString, ObjectLink } from "@mwdb-web/commons/ui";
 
 export function RecentConfigRow(props) {
     const family = (
-        <a href="#query" onClick={(ev) => { 
-            ev.preventDefault(); 
-            props.addToQuery("family", props.family)
-        }}>
+        <a
+            href="#query"
+            onClick={(ev) => {
+                ev.preventDefault();
+                props.addToQuery("family", props.family);
+            }}
+        >
             {props.family}
         </a>
-    )
-    const configId = <ObjectLink type="static_config" id={props.id}/>
+    );
+    const configId = <ObjectLink type="static_config" id={props.id} />;
     const configType = (
-        <a href="#query" onClick={(ev) => { 
-                ev.preventDefault(); 
-                props.addToQuery("type", props.config_type)
-            }}>
+        <a
+            href="#query"
+            onClick={(ev) => {
+                ev.preventDefault();
+                props.addToQuery("type", props.config_type);
+            }}
+        >
             {props.config_type}
         </a>
-    )
-    const uploadTime = <DateString date={props.upload_time}/>;
+    );
+    const uploadTime = <DateString date={props.upload_time} />;
     const tags = (
-        <TagList tags={props.tags}
-                 tagClick={(ev, tag) => { ev.preventDefault(); props.addToQuery("tag", tag) }}
-                 tagRemove={(ev, tag) => props.addToQuery("NOT tag", tag)}
-                 filterable/>
-    )
+        <TagList
+            tags={props.tags}
+            tagClick={(ev, tag) => {
+                ev.preventDefault();
+                props.addToQuery("tag", tag);
+            }}
+            tagRemove={(ev, tag) => props.addToQuery("NOT tag", tag)}
+            filterable
+        />
+    );
 
     return (
         <RecentRow firstSeen={props.upload_time}>
@@ -48,10 +59,22 @@ export function RecentConfigRow(props) {
             </td>
             <td className="col-lg-4 col-6">
                 {/* Shrinked mode */}
-                <RecentInnerRow labelWidth="3rem" label="Type" value={props.config_type} narrowOnly copyable>
+                <RecentInnerRow
+                    labelWidth="3rem"
+                    label="Type"
+                    value={props.config_type}
+                    narrowOnly
+                    copyable
+                >
                     {configType}
                 </RecentInnerRow>
-                <RecentInnerRow labelWidth="3rem" label="Date" value={props.upload_time} narrowOnly noEllipsis>
+                <RecentInnerRow
+                    labelWidth="3rem"
+                    label="Date"
+                    value={props.upload_time}
+                    narrowOnly
+                    noEllipsis
+                >
                     {uploadTime}
                 </RecentInnerRow>
                 <RecentInnerRow narrowOnly noEllipsis>
@@ -68,9 +91,7 @@ export function RecentConfigRow(props) {
                 </RecentInnerRow>
             </td>
             <td className="col-lg-4 d-none d-lg-block">
-                <RecentInnerRow noEllipsis>
-                    {tags}
-                </RecentInnerRow>
+                <RecentInnerRow noEllipsis>{tags}</RecentInnerRow>
             </td>
             <td className="col-lg-2 d-none d-lg-block">
                 <RecentInnerRow value={props.upload_time} noEllipsis>
@@ -78,7 +99,7 @@ export function RecentConfigRow(props) {
                 </RecentInnerRow>
             </td>
         </RecentRow>
-    )
+    );
 }
 
 export function RecentConfigHeader() {
@@ -94,13 +115,15 @@ export function RecentConfigHeader() {
             <th className="col-4 d-none d-lg-block">Tags</th>
             <th className="col-2 d-none d-lg-block">First seen</th>
         </tr>
-    )
+    );
 }
 
 export default (props) => (
-    <RecentView type="config" 
-                rowComponent={RecentConfigRow} 
-                headerComponent={RecentConfigHeader}
-                dhashOnly 
-                {...props}/>
-)
+    <RecentView
+        type="config"
+        rowComponent={RecentConfigRow}
+        headerComponent={RecentConfigHeader}
+        dhashOnly
+        {...props}
+    />
+);

@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, {Component, useCallback} from 'react';
 import Autocomplete from 'react-autocomplete';
-import Dropzone from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import queryString from "query-string";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -10,6 +10,44 @@ import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { DataTable, View } from "@mwdb-web/commons/ui";
 
+function UploadDropzone(props) {
+    const onDrop = props.onDrop;
+    const {
+        getRootProps, 
+        getInputProps,
+        isDragActive,
+        isDragReject
+    } = useDropzone({
+        multiple: false,
+        onDrop: useCallback(acceptedFiles => onDrop(acceptedFiles[0]), [onDrop])
+    });
+
+    const dropzoneClassName = (
+        isDragActive ? "dropzone-active" : (
+            isDragReject ? "dropzone-reject" : ""
+        )
+    );
+
+    return (
+        <div {...getRootProps({
+            className: `dropzone-ready dropzone ${dropzoneClassName}`,
+        })}>
+            <input {...getInputProps()} />
+            <div className="card">
+                <div className="card-body">
+                    <h5 className="card-title">
+                        <FontAwesomeIcon icon="upload" size="x"/>&nbsp;
+                        {
+                            props.file 
+                            ? <span>{props.file.name} - {props.file.size} bytes</span>
+                            : <span>Click here to upload</span>
+                        }
+                    </h5>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 export default class Upload extends Component {
     state = {
@@ -57,12 +95,6 @@ export default class Upload extends Component {
     componentDidMount() {
         this.updateGroups()
     }
-
-    onDrop = (files) => {
-        this.setState({
-            file: files[0],
-        });
-    };
 
     updateSharingMode = (event) => {
         this.setState({ shareWith: event.target.value, group: "" })
@@ -138,24 +170,7 @@ export default class Upload extends Component {
         return (
             <View ident="upload" error={this.state.error} success={this.state.success}>
                 <form>
-                    <Dropzone className="dropzone-ready dropzone"
-                              activeClassName="dropzone-active"
-                              rejectClassName="dropzone-reject"
-                              onDrop={this.onDrop}
-                              multiple={false}>
-                        <div className="card">
-                            <div className="card-body">
-                                <h5 className="card-title">
-                                    <FontAwesomeIcon icon="upload" size="x"/>&nbsp;
-                                    {
-                                        this.state.file 
-                                        ? <span>{this.state.file.name} - {this.state.file.size} bytes </span>
-                                        : <span>Click here to upload</span>
-                                    }
-                                </h5>
-                            </div>
-                        </div>
-                    </Dropzone>
+                    <UploadDropzone file={this.state.file} onDrop={file => this.setState({file})} />
                     <div className="form-group">
                         {
                             this.context.hasCapability("adding_parents") ?

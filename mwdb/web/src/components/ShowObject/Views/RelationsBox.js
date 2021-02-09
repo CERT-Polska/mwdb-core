@@ -100,28 +100,26 @@ function RelationsBox(props) {
     );
 }
 
-export default function MultiRelationsBox(props) {
+function TypedRelationsBox(props) {
+    const parents = props.parents.filter(e => e.type === props.type);
+    const children = props.children.filter(e => e.type === props.type);
+    if(parents.length + children.length > 0)
+        return <RelationsBox header={props.header} {...{parents, children}} />
+    else
+        return <div/>
+}
+
+export default function MultiRelationsBox() {
     const context = useContext(ObjectContext);
-
-    let TypedRelationsBox = (props) => {
-        const parents = props.parents.filter(e => e.type === props.type);
-        const children = props.children.filter(e => e.type === props.type);
-        if(parents.length + children.length > 0)
-            return <RelationsBox header={props.header} id={context.object.id} {...{parents, children}} />
-        else
-            return <div/>
-    }
-
     let parents = context.object.parents;
     let children = context.object.children;
-    let className = props.className || '';
     return (
         parents && children && (parents.length + children.length > 0) ?
-            <div className={className}>
+            <div>
                 <TypedRelationsBox header="Related samples" type="file" {...{parents, children}} />
-                <TypedRelationsBox header="Related configs" type="static_config" {...{parents, children}}/>
-                <TypedRelationsBox header="Related blobs" type="text_blob" {...{parents, children}}/>
+                <TypedRelationsBox header="Related configs" type="static_config" {...{parents, children}} />
+                <TypedRelationsBox header="Related blobs" type="text_blob" {...{parents, children}} />
             </div> :
-            <RelationsBox className={className} id={context.object.id}/>
+            <RelationsBox />
     )
 }

@@ -1,5 +1,5 @@
 try:
-    with open('.git/refs/heads/master', 'r') as f:
+    with open(".git/refs/heads/master", "r") as f:
         git_revision = f.read()[:8]
 except IOError:
     git_revision = ""

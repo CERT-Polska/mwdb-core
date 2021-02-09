@@ -7,6 +7,19 @@ on:
     branches:
     - master
 jobs:
+  lint_core:
+    name: Lint mwdb-core core sources
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+      - run: pip install -r dev-requirements.txt
+      - run: isort --check mwdb/
+      - run: black --check mwdb/
+      - run: flake8 mwdb/
   lint_web:
     name: Lint mwdb-core web sources
     runs-on: ubuntu-latest
@@ -20,6 +33,7 @@ jobs:
         working-directory: mwdb/web
         run: npx prettier --check src
   build_core:
+    needs: [lint_core]
     name: Build mwdb-core core image
     runs-on: ubuntu-latest
     env:

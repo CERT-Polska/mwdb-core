@@ -1,11 +1,11 @@
-from flask import request, g
+from flask import g, request
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
-from mwdb.model import db, QuickQuery
-from mwdb.schema.quick_query import QuickQuerySchemaBase, QuickQueryResponseSchema
+from mwdb.model import QuickQuery, db
+from mwdb.schema.quick_query import QuickQueryResponseSchema, QuickQuerySchemaBase
 
-from . import logger, requires_authorization, loads_schema
+from . import loads_schema, logger, requires_authorization
 
 
 class QuickQueryResource(Resource):
@@ -44,7 +44,7 @@ class QuickQueryResource(Resource):
         )
         db.session.add(quick_query)
         db.session.commit()
-        logger.info('Query saved', extra={'query': quick_query.name})
+        logger.info("Query saved", extra={"query": quick_query.name})
 
         db.session.refresh(quick_query)
         schema = QuickQueryResponseSchema()
@@ -74,7 +74,12 @@ class QuickQueryResource(Resource):
                       type: array
                       items: QuickQueryResponseSchema
         """
-        quick_queries = db.session.query(QuickQuery).filter(QuickQuery.type == type).filter(QuickQuery.user_id == g.auth_user.id).all()
+        quick_queries = (
+            db.session.query(QuickQuery)
+            .filter(QuickQuery.type == type)
+            .filter(QuickQuery.user_id == g.auth_user.id)
+            .all()
+        )
         schema = QuickQueryResponseSchema(many=True)
         return schema.dump(quick_queries)
 
@@ -100,10 +105,15 @@ class QuickQueryItemResource(Resource):
             200:
                 description: When query was successfully deleted
         """
-        quick_query = db.session.query(QuickQuery).filter(QuickQuery.id == id).filter(QuickQuery.user_id == g.auth_user.id).first()
+        quick_query = (
+            db.session.query(QuickQuery)
+            .filter(QuickQuery.id == id)
+            .filter(QuickQuery.user_id == g.auth_user.id)
+            .first()
+        )
         if quick_query is None:
             raise NotFound("Query was not found")
 
         db.session.delete(quick_query)
-        logger.info('Query deleted', extra={'query': id})
+        logger.info("Query deleted", extra={"query": id})
         db.session.commit()

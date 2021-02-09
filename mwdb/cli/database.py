@@ -1,11 +1,10 @@
 import click
-
 from flask_migrate import upgrade
 
 from mwdb.cli.base import logger
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.model import db, User, Group
+from mwdb.model import Group, User, db
 
 
 def _is_database_initialized():
@@ -19,17 +18,21 @@ def _initialize(admin_password):
     public_group = Group(name=Group.PUBLIC_GROUP_NAME, capabilities=[])
     db.session.add(public_group)
 
-    everything_group = Group(name=Group.EVERYTHING_GROUP_NAME, capabilities=[Capabilities.access_all_objects])
+    everything_group = Group(
+        name=Group.EVERYTHING_GROUP_NAME, capabilities=[Capabilities.access_all_objects]
+    )
     db.session.add(everything_group)
 
-    admin_group = Group(name=app_config.mwdb.admin_login, capabilities=Capabilities.all(), private=True)
+    admin_group = Group(
+        name=app_config.mwdb.admin_login, capabilities=Capabilities.all(), private=True
+    )
     db.session.add(admin_group)
 
     admin_user = User(
         login=app_config.mwdb.admin_login,
         email="admin@mwdb.local",
         additional_info="MWDB built-in administrator account",
-        groups=[admin_group, everything_group, public_group]
+        groups=[admin_group, everything_group, public_group],
     )
     admin_user.reset_sessions()
     admin_user.set_password(admin_password)
@@ -48,7 +51,9 @@ def configure_database():
         admin_password = app_config.mwdb.admin_password
     else:
         while True:
-            admin_password = click.prompt("Provide password for MWDB 'admin' account", hide_input=True)
+            admin_password = click.prompt(
+                "Provide password for MWDB 'admin' account", hide_input=True
+            )
             admin_repeat_password = click.prompt("Repeat password", hide_input=True)
             if admin_password == admin_repeat_password:
                 break

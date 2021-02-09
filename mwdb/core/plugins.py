@@ -4,11 +4,11 @@ import importlib
 import pkgutil
 import sys
 
-from mwdb.core.app import app, api
+from mwdb.core.app import api, app
 from mwdb.core.config import app_config
 from mwdb.core.log import getLogger
 from mwdb.core.util import is_subdir
-from mwdb.model import Object, File, Config, TextBlob
+from mwdb.model import Config, File, Object, TextBlob
 
 logger = getLogger()
 
@@ -38,6 +38,7 @@ def hook_handler_method(meth):
             meth(self, *args, **kwargs)
         else:
             call_hook(meth.__name__, *args, **kwargs)
+
     return hook_handler
 
 
@@ -103,8 +104,7 @@ def local_plugins():
             sys.path.append(app_config.mwdb.local_plugins_folder)
         if app_config.mwdb.local_plugins_autodiscover:
             plugin_list += [
-                module_info.name
-                for module_info in iter_local_plugin_modules()
+                module_info.name for module_info in iter_local_plugin_modules()
             ]
         yield plugin_list
     finally:
@@ -114,7 +114,10 @@ def local_plugins():
 def discover_plugins():
     plugins = {}
     if not app_config.mwdb.enable_plugins:
-        logger.info("Plugins will not be loaded because plugins are not enabled (enable_plugins is 0).")
+        logger.info(
+            "Plugins will not be loaded because plugins "
+            "are not enabled (enable_plugins is 0)."
+        )
         return plugins
 
     with local_plugins() as plugin_list:
@@ -128,7 +131,10 @@ def discover_plugins():
 
 def load_plugins(app_context: PluginAppContext):
     if not app_config.mwdb.enable_plugins:
-        logger.info("Plugins will not be loaded because plugins are not enabled (enable_plugins is 0).")
+        logger.info(
+            "Plugins will not be loaded because plugins "
+            "are not enabled (enable_plugins is 0)."
+        )
         return
 
     with local_plugins() as plugin_list:
@@ -140,7 +146,7 @@ def load_plugins(app_context: PluginAppContext):
                 loaded_plugins[plugin_name] = plugin
                 logger.info("Loaded plugin '%s'", plugin_name)
             except Exception:
-                logger.exception(f"Failed to load '%s' plugin", plugin_name)
+                logger.exception("Failed to load '%s' plugin", plugin_name)
                 raise
 
 
@@ -151,28 +157,35 @@ def configure_plugins():
                 getattr(plugin, "__plugin_configure__")()
             logger.info("Configured plugin '%s'", plugin_name)
         except Exception:
-            logger.exception(f"Failed to configure '%s' plugin", plugin_name)
+            logger.exception("Failed to configure '%s' plugin", plugin_name)
             raise
 
 
 def get_plugin_info():
-    return {plugin_name: {
-        "active": True,
-        "author": getattr(plugin, "__author__", None),
-        "version": getattr(plugin, "__version__", None),
-        "description": getattr(plugin, "__doc__", None),
-    } for plugin_name, plugin in loaded_plugins.items()}
+    return {
+        plugin_name: {
+            "active": True,
+            "author": getattr(plugin, "__author__", None),
+            "version": getattr(plugin, "__version__", None),
+            "description": getattr(plugin, "__doc__", None),
+        }
+        for plugin_name, plugin in loaded_plugins.items()
+    }
 
 
 def call_hook(hook_name, *args, **kwargs):
     global _plugin_handlers
 
     if not hasattr(PluginHookBase, hook_name):
-        logger.warning('Undefined hook: {}'.format(hook_name))
+        logger.warning("Undefined hook: {}".format(hook_name))
         return
 
     if not app_config.mwdb.enable_hooks:
-        logger.info('Hook {} will not be ran because enable_hooks is disabled.'.format(hook_name))
+        logger.info(
+            "Hook {} will not be ran because enable_hooks is disabled.".format(
+                hook_name
+            )
+        )
         return
 
     for hook_handler in _plugin_handlers:

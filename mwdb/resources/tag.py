@@ -1,13 +1,24 @@
-from flask import request, g
+from flask import g, request
 from flask_restful import Resource
 from sqlalchemy.sql import and_
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, Tag, object_tag_table, ObjectPermission
-from mwdb.schema.tag import TagListRequestSchema, TagRequestSchema, TagItemResponseSchema
+from mwdb.model import ObjectPermission, Tag, db, object_tag_table
+from mwdb.schema.tag import (
+    TagItemResponseSchema,
+    TagListRequestSchema,
+    TagRequestSchema,
+)
 
-from . import access_object, logger, requires_capabilities, requires_authorization, load_schema, loads_schema
+from . import (
+    access_object,
+    load_schema,
+    loads_schema,
+    logger,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 class TagListResource(Resource):
@@ -46,11 +57,15 @@ class TagListResource(Resource):
 
         tags = (
             db.session.query(Tag.tag)
-                      .distinct(Tag.tag)
-                      .join(object_tag_table, object_tag_table.c.tag_id == Tag.id)
-                      .join(ObjectPermission,
-                            and_(ObjectPermission.object_id == object_tag_table.c.object_id,
-                                 g.auth_user.is_member(ObjectPermission.group_id)))
+            .distinct(Tag.tag)
+            .join(object_tag_table, object_tag_table.c.tag_id == Tag.id)
+            .join(
+                ObjectPermission,
+                and_(
+                    ObjectPermission.object_id == object_tag_table.c.object_id,
+                    g.auth_user.is_member(ObjectPermission.group_id),
+                ),
+            )
         )
 
         tag_prefix = obj["query"]
@@ -96,7 +111,9 @@ class TagResource(Resource):
                       items:
                         $ref: '#/components/schemas/TagItemResponse'
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have
+                    access to this object.
         """
         db_object = access_object(type, identifier)
         if db_object is None:
@@ -150,7 +167,9 @@ class TagResource(Resource):
             403:
                 description: When user doesn't have `adding_tags` capability.
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have
+                    access to this object.
         """
         schema = TagRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -162,10 +181,7 @@ class TagResource(Resource):
         tag_name = obj["tag"]
         db_object.add_tag(tag_name)
 
-        logger.info('Tag added', extra={
-            'tag': tag_name,
-            'dhash': db_object.dhash
-        })
+        logger.info("Tag added", extra={"tag": tag_name, "dhash": db_object.dhash})
         db.session.refresh(db_object)
         schema = TagItemResponseSchema(many=True)
         return schema.dump(db_object.tags)
@@ -216,7 +232,9 @@ class TagResource(Resource):
             403:
                 description: When user doesn't have `removing_tags` capability.
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have
+                    access to this object.
         """
 
         schema = TagRequestSchema()
@@ -229,10 +247,7 @@ class TagResource(Resource):
         tag_name = obj["tag"]
         db_object.remove_tag(tag_name)
 
-        logger.info('Tag removed', extra={
-            'tag': tag_name,
-            'dhash': db_object.dhash
-        })
+        logger.info("Tag removed", extra={"tag": tag_name, "dhash": db_object.dhash})
         db.session.refresh(db_object)
         schema = TagItemResponseSchema(many=True)
         return schema.dump(db_object.tags)

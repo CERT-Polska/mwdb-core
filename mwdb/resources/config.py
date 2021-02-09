@@ -1,24 +1,26 @@
 from datetime import datetime, timedelta
 
-from flask import request, g
+from flask import g, request
 from flask_restful import Resource
+from sqlalchemy import func
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
-from sqlalchemy import func
-
-from mwdb.core.plugins import hooks
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.plugins import hooks
 from mwdb.model import Config, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobCreateSpecSchema
 from mwdb.schema.config import (
-    ConfigLegacyCreateRequestSchema, ConfigCreateRequestSchema,
-    ConfigStatsRequestSchema, ConfigStatsResponseSchema,
-    ConfigListResponseSchema, ConfigItemResponseSchema
+    ConfigCreateRequestSchema,
+    ConfigItemResponseSchema,
+    ConfigLegacyCreateRequestSchema,
+    ConfigListResponseSchema,
+    ConfigStatsRequestSchema,
+    ConfigStatsResponseSchema,
 )
 
-from . import requires_authorization, requires_capabilities, load_schema, loads_schema
-from .object import ObjectUploader, ObjectItemResource, ObjectResource
+from . import load_schema, loads_schema, requires_authorization, requires_capabilities
+from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
 class ConfigStatsResource(Resource):
@@ -27,7 +29,8 @@ class ConfigStatsResource(Resource):
         """
         ---
         summary: Get config statistics
-        description: Get static configuration global statistics grouped per malware family.
+        description: |
+            Get static configuration global statistics grouped per malware family.
         security:
             - bearerAuth: []
         tags:
@@ -58,23 +61,18 @@ class ConfigStatsResource(Resource):
         elif from_time != "*":
             raise BadRequest("Wrong range format")
 
-        query = (
-            db.session.query(
-                Config.family,
-                func.max(Config.upload_time).label('maxdate'),
-                func.count()
-            ).group_by(Config.family)
-        )
+        query = db.session.query(
+            Config.family, func.max(Config.upload_time).label("maxdate"), func.count()
+        ).group_by(Config.family)
 
         if from_time != "*":
-            query = query.filter(Config.upload_time > (datetime.now() - timedelta(hours=from_time)))
+            query = query.filter(
+                Config.upload_time > (datetime.now() - timedelta(hours=from_time))
+            )
 
         families = [
-            {
-                "family": family,
-                "last_upload": upload_time,
-                "count": count
-            } for family, upload_time, count in query.all()
+            {"family": family, "last_upload": upload_time, "count": count}
+            for family, upload_time, count in query.all()
         ]
 
         schema = ConfigStatsResponseSchema()
@@ -94,7 +92,7 @@ class ConfigUploader(ObjectUploader):
                     blob_spec["blob_type"],
                     parent=None,
                     share_with=share_with,
-                    metakeys=metakeys
+                    metakeys=metakeys,
                 )
             except ObjectTypeConflictError:
                 raise Conflict("Object already exists and is not a blob")
@@ -105,7 +103,9 @@ class ConfigUploader(ObjectUploader):
                 raise NotFound(f"Blob {in_blob} doesn't exist")
             return blob_obj
         else:
-            raise BadRequest("'in-blob' key must be set to blob SHA256 hash or blob specification")
+            raise BadRequest(
+                "'in-blob' key must be set to blob SHA256 hash or blob specification"
+            )
 
     def _create_object(self, spec, parent, share_with, metakeys):
         try:
@@ -116,7 +116,9 @@ class ConfigUploader(ObjectUploader):
                 if isinstance(second, dict) and list(second.keys()) == ["in-blob"]:
                     if not g.auth_user.has_rights(Capabilities.adding_blobs):
                         raise Forbidden("You are not permitted to add blob objects")
-                    blob_obj = self._get_embedded_blob(second["in-blob"], share_with, metakeys)
+                    blob_obj = self._get_embedded_blob(
+                        second["in-blob"], share_with, metakeys
+                    )
                     config[first]["in-blob"] = blob_obj.dhash
                     blobs.append(blob_obj)
                 elif isinstance(second, dict) and ("in-blob" in list(second.keys())):
@@ -128,7 +130,7 @@ class ConfigUploader(ObjectUploader):
                 spec["config_type"],
                 parent=parent,
                 share_with=share_with,
-                metakeys=metakeys
+                metakeys=metakeys,
             )
 
             for blob in blobs:
@@ -153,11 +155,13 @@ class ConfigResource(ObjectResource, ConfigUploader):
         ---
         summary: Search or list configs
         description: |
-            Returns list of configs matching provided query, ordered from the latest one.
+            Returns list of configs matching provided query,
+            ordered from the latest one.
 
             Limited to 10 objects, use `older_than` parameter to fetch more.
 
-            Don't rely on maximum count of returned objects because it can be changed/parametrized in future.
+            Don't rely on maximum count of returned objects because it
+            can be changed/parametrized in future.
         security:
             - bearerAuth: []
         tags:
@@ -167,7 +171,9 @@ class ConfigResource(ObjectResource, ConfigUploader):
               name: older_than
               schema:
                 type: string
-              description: Fetch objects which are older than the object specified by identifier. Used for pagination
+              description: |
+                Fetch objects which are older than the object specified by identifier.
+                Used for pagination
               required: false
             - in: query
               name: query
@@ -182,7 +188,9 @@ class ConfigResource(ObjectResource, ConfigUploader):
                   application/json:
                     schema: ConfigListResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occurred in Lucene query
+                description: |
+                    When wrong parameters were provided
+                    or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
@@ -233,13 +241,16 @@ class ConfigResource(ObjectResource, ConfigUploader):
                   application/json:
                     schema: ConfigItemResponseSchema
             403:
-                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
+                description: |
+                    No permissions to perform additional operations
+                    (e.g. adding parent, metakeys)
             404:
                 description: |
-                    One of attribute keys doesn't exist or user doesn't have permission to set it.
+                    One of attribute keys doesn't exist
+                    or user doesn't have permission to set it.
 
-                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
-                    with that group
+                    Specified `upload_as` group doesn't exist
+                    or user doesn't have permission to share objects with that group
             409:
                 description: Object exists yet but has different type
         """
@@ -282,7 +293,8 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
                     schema: ConfigItemResponseSchema
             404:
                 description: |
-                    When config doesn't exist, object is not a config or user doesn't have access to this object.
+                    When config doesn't exist, object is not a config
+                    or user doesn't have access to this object.
         """
         return super().get(identifier)
 
@@ -313,7 +325,9 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
               multipart/form-data:
                 schema:
                   type: object
-                  description: Configuration to be uploaded with additional parameters (verbose mode)
+                  description: |
+                    Configuration to be uploaded with additional parameters
+                    (verbose mode)
                   properties:
                     json:
                       type: object
@@ -341,10 +355,14 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
                       type: string
                       default: '*'
                       description: |
-                        Group that object will be shared with. If user doesn't have `sharing_objects` capability,
-                        user must be a member of specified group (unless `Group doesn't exist` error will occur).
-                        If default value `*` is specified - object will be exclusively shared with all user's groups
-                        excluding `public`.
+                        Group that object will be shared with.
+
+                        If user doesn't have `sharing_objects` capability,
+                        user must be a member of specified group
+                        (unless `Group doesn't exist` error will occur).
+
+                        If default value `*` is specified - object will be
+                        exclusively shared with all user's groups excluding `public`.
                   required:
                     - json
               application/json:
@@ -356,12 +374,16 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
                   application/json:
                     schema: ConfigItemResponseSchema
             403:
-                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
+                description: |
+                    No permissions to perform additional operations
+                    (e.g. adding parent, metakeys)
             404:
                 description: |
-                    One of attribute keys doesn't exist or user doesn't have permission to set it.
+                    One of attribute keys doesn't exist or
+                    user doesn't have permission to set it.
 
-                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
+                    Specified `upload_as` group doesn't exist or
+                    user doesn't have permission to share objects
                     with that group
             409:
                 description: Object exists yet but has different type
@@ -395,6 +417,7 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
                 description: When user doesn't have `removing_objects` capability
             404:
                 description: |
-                    When config doesn't exist, object is not a config or user doesn't have access to this object.
+                    When config doesn't exist, object is not a config or
+                    user doesn't have access to this object.
         """
         return super().delete(identifier)

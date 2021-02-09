@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, validates, ValidationError, pre_load
+from marshmallow import Schema, ValidationError, fields, pre_load, validates
 
 
 class TagSchemaBase(Schema):

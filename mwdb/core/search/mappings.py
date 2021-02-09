@@ -1,17 +1,28 @@
-from typing import Dict, Type, Tuple, List
+from typing import Dict, List, Tuple, Type
 
-from mwdb.model import File, Object, Config, TextBlob, Tag, Comment
+from mwdb.model import Comment, Config, File, Object, Tag, TextBlob
 
-from .exceptions import MultipleObjectsQueryException, FieldNotQueryableException
-from .fields import BaseField, StringField, SizeField, ListField, AttributeField, ShareField, UploaderField, \
-    JSONField, DatetimeField, RelationField, FavoritesField
+from .exceptions import FieldNotQueryableException, MultipleObjectsQueryException
+from .fields import (
+    AttributeField,
+    BaseField,
+    DatetimeField,
+    FavoritesField,
+    JSONField,
+    ListField,
+    RelationField,
+    ShareField,
+    SizeField,
+    StringField,
+    UploaderField,
+)
 
 object_mapping: Dict[str, Type[Object]] = {
     "file": File,
     "object": Object,
     "static": Config,
     "config": Config,
-    "blob": TextBlob
+    "blob": TextBlob,
 }
 
 field_mapping: Dict[str, Dict[str, BaseField]] = {
@@ -25,7 +36,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "upload_time": DatetimeField(Object.upload_time),
         "parent": RelationField(Object.parents),
         "child": RelationField(Object.children),
-        "favorites": FavoritesField(Object.followers)
+        "favorites": FavoritesField(Object.followers),
     },
     File.__name__: {
         "name": StringField(File.file_name),
@@ -41,7 +52,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
     Config.__name__: {
         "type": StringField(Config.config_type),
         "family": StringField(Config.family),
-        "cfg": JSONField(Config.cfg)
+        "cfg": JSONField(Config.cfg),
     },
     TextBlob.__name__: {
         "name": StringField(TextBlob.blob_name),
@@ -50,11 +61,13 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "content": StringField(TextBlob._content),
         "first_seen": DatetimeField(TextBlob.upload_time),
         "last_seen": DatetimeField(TextBlob.last_seen),
-    }
+    },
 }
 
 
-def get_field_mapper(queried_type: Type[Object], field_selector: str) -> Tuple[BaseField, List[str]]:
+def get_field_mapper(
+    queried_type: Type[Object], field_selector: str
+) -> Tuple[BaseField, List[str]]:
     field_path = field_selector.split(".")
 
     # Map object type selector

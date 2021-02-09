@@ -1,20 +1,22 @@
 import json
-from marshmallow import fields, Schema, pre_load, ValidationError
 
+from marshmallow import Schema, fields, pre_load
+
+from .config import ConfigItemResponseSchema
 from .object import (
     ObjectCreateRequestSchemaBase,
+    ObjectItemResponseSchema,
     ObjectLegacyMetakeysMixin,
     ObjectListItemResponseSchema,
     ObjectListResponseSchemaBase,
-    ObjectItemResponseSchema
 )
-from .config import ConfigItemResponseSchema
 
 
 class FileCreateRequestSchema(Schema):
     # BUG: https://github.com/marshmallow-code/marshmallow/issues/1042
-    options = fields.Nested(ObjectCreateRequestSchemaBase,
-                            missing=ObjectCreateRequestSchemaBase().load({}))
+    options = fields.Nested(
+        ObjectCreateRequestSchemaBase, missing=ObjectCreateRequestSchemaBase().load({})
+    )
 
     @pre_load
     def unpack_options(self, params, **kwargs):
@@ -31,7 +33,9 @@ class FileCreateRequestSchema(Schema):
         return params
 
 
-class FileLegacyCreateRequestSchema(ObjectCreateRequestSchemaBase, ObjectLegacyMetakeysMixin):
+class FileLegacyCreateRequestSchema(
+    ObjectCreateRequestSchemaBase, ObjectLegacyMetakeysMixin
+):
     pass
 
 
@@ -60,4 +64,6 @@ class FileItemResponseSchema(ObjectItemResponseSchema):
     crc32 = fields.Str(required=True, allow_none=False)
     ssdeep = fields.Str(required=True, allow_none=True)
 
-    latest_config = fields.Nested(ConfigItemResponseSchema, required=True, allow_none=True)
+    latest_config = fields.Nested(
+        ConfigItemResponseSchema, required=True, allow_none=True
+    )

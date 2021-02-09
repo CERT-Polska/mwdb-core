@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
 from configparser import ConfigParser
+from typing import Any, Dict, Optional
 
 
 class ConfigSource(ABC):
@@ -11,13 +11,15 @@ class ConfigSource(ABC):
 
 
 class EnvironmentConfigSource(ConfigSource):
-    def __init__(self, prefix: str=""):
+    def __init__(self, prefix: str = ""):
         self.prefix = prefix
         if len(self.prefix) > 0:
             self.prefix += "_"
 
     def get_config_value(self, section_name: str, key_name: str) -> Optional[str]:
-        return os.environ.get(f"{self.prefix.upper()}{section_name.upper()}_{key_name.upper()}", None)
+        return os.environ.get(
+            f"{self.prefix.upper()}{section_name.upper()}_{key_name.upper()}", None
+        )
 
 
 class AbstractIniConfigSource(ConfigSource):
@@ -29,14 +31,14 @@ class AbstractIniConfigSource(ConfigSource):
 
 
 class IniStringConfigSource(AbstractIniConfigSource):
-    def __init__(self, ini_string, source='<string>'):
+    def __init__(self, ini_string, source="<string>"):
         config = ConfigParser()
         config.read_string(ini_string, source=source)
         super().__init__(config)
 
 
 class IniFileConfigSource(AbstractIniConfigSource):
-    def __init__(self, filename: str, encoding: str=None, must_exist=True):
+    def __init__(self, filename: str, encoding: str = None, must_exist=True):
         self.filename = filename
         config = ConfigParser()
         if os.path.exists(self.filename):
@@ -58,10 +60,7 @@ class DictConfigSource(ConfigSource):
                 assert type(v_v) is str
         # Convert all keys to lowercase
         self._config = {
-            k.lower(): {
-                v_k.lower(): v_v
-                for v_k, v_v in v.items()
-            }
+            k.lower(): {v_k.lower(): v_v for v_k, v_v in v.items()}
             for k, v in config.items()
         }
 

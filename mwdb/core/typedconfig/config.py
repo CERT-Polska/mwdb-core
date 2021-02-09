@@ -1,13 +1,14 @@
 # This future import allows methods of Config to use Config as their return type
-from typing import TypeVar, List, Optional, Callable, Type, Union, cast
+import inspect
+from itertools import chain, dropwhile, islice
+from typing import Callable, List, Optional, Type, TypeVar, Union, cast
+
 from .provider import ConfigProvider
 from .source import ConfigSource
-from itertools import dropwhile, islice, chain
-import inspect
 
-T = TypeVar('T')
-U = TypeVar('U')
-V = TypeVar('V')
+T = TypeVar("T")
+U = TypeVar("U")
+V = TypeVar("V")
 
 
 def _propagate_to_children():
@@ -17,15 +18,19 @@ def _propagate_to_children():
             f(self, *args, **kwargs)
             for c in child_configs:
                 wrapped_f(c, *args, **kwargs)
+
         return wrapped_f
+
     return propagate_to_children
 
 
-def key(section_name: str=None,
-        key_name: str=None,
-        required: bool=True,
-        cast: Callable[[Union[T, str]], T]=None,
-        default: T=None) -> T:
+def key(
+    section_name: str = None,
+    key_name: str = None,
+    required: bool = True,
+    cast: Callable[[Union[T, str]], T] = None,
+    default: T = None,
+) -> T:
     """
     Provides a getter for a configuration key
     Parameters
@@ -42,9 +47,7 @@ def key(section_name: str=None,
     # In general, this should not store any state since the class property is shared across instances. However, the
     # property name will be the same across all instances, so when this is looked up the first time it is ok to store
     # it.
-    _mutable_state = {
-        'key_name': key_name.upper() if key_name is not None else None
-    }
+    _mutable_state = {"key_name": key_name.upper() if key_name is not None else None}
 
     @property
     def getter(self: Config) -> T:
@@ -58,11 +61,13 @@ def key(section_name: str=None,
             resolved_section_name = self._section_name
             if resolved_section_name is None:
                 raise ValueError(
-                    "Section name was not specified by the key function or the section class decorator.")
+                    "Section name was not specified by the key function or the section class decorator."
+                )
         else:
             resolved_section_name = section_name
 
-        if _mutable_state['key_name'] is None:
+        if _mutable_state["key_name"] is None:
+
             def base_dict_items(cls):
                 base = cls
                 while True:
@@ -70,23 +75,38 @@ def key(section_name: str=None,
                     base = base.__base__
                     if base is None:
                         break
-            resolved_key_name = list(islice(dropwhile(
-                lambda x: x[1] is not getter, chain.from_iterable(base_dict_items(self.__class__))), 1))[0][0]
-            _mutable_state['key_name'] = resolved_key_name.upper()
+
+            resolved_key_name = list(
+                islice(
+                    dropwhile(
+                        lambda x: x[1] is not getter,
+                        chain.from_iterable(base_dict_items(self.__class__)),
+                    ),
+                    1,
+                )
+            )[0][0]
+            _mutable_state["key_name"] = resolved_key_name.upper()
 
         # If value is cached, just use the cached value
-        cached_value = self._provider.get_from_cache(resolved_section_name, _mutable_state['key_name'])
+        cached_value = self._provider.get_from_cache(
+            resolved_section_name, _mutable_state["key_name"]
+        )
         if cached_value is not None:
             return cached_value
 
-        value = self._provider.get_key(resolved_section_name, _mutable_state['key_name'])
+        value = self._provider.get_key(
+            resolved_section_name, _mutable_state["key_name"]
+        )
 
         # If we still haven't found a config value and this parameter is required,
         # raise an exception, otherwise use the default
         if value is None:
             if required:
-                raise KeyError("Config parameter {0}.{1} not found".format(resolved_section_name,
-                                                                           _mutable_state['key_name']))
+                raise KeyError(
+                    "Config parameter {0}.{1} not found".format(
+                        resolved_section_name, _mutable_state["key_name"]
+                    )
+                )
             else:
                 value = default
         # If a casting function has been specified then cast to the required data type
@@ -95,7 +115,9 @@ def key(section_name: str=None,
 
         # Cache this for next time if still not none
         if value is not None:
-            self._provider.add_to_cache(resolved_section_name, _mutable_state['key_name'], value)
+            self._provider.add_to_cache(
+                resolved_section_name, _mutable_state["key_name"], value
+            )
 
         return value
 
@@ -120,7 +142,7 @@ def group_key(cls: Callable[[], U]) -> U:
     @property
     def wrapped_f(self):
         function_name = cls.__name__
-        attr_name = '_' + function_name
+        attr_name = "_" + function_name
         if not hasattr(self, attr_name):
             setattr(self, attr_name, cast(Type[Config], cls)(provider=self._provider))
         return getattr(self, attr_name)
@@ -129,14 +151,16 @@ def group_key(cls: Callable[[], U]) -> U:
     return wrapped_f
 
 
-def section(section_name: str) -> Callable[[Type['Config']], Type['Config']]:
+def section(section_name: str) -> Callable[[Type["Config"]], Type["Config"]]:
     def _section(cls: Type[Config]):
         class SectionConfig(cls):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, section_name=section_name, **kwargs)
+
         SectionConfig.__name__ = cls.__name__
 
         return SectionConfig
+
     return _section
 
 
@@ -144,11 +168,16 @@ class Config:
     """
     Base class for all configuration objects
     """
-    _composed_config_registration_string = '__composed_config__'
-    _config_key_registration_string = '__config_key__'
 
-    def __init__(self, section_name=None, sources: List[ConfigSource]=None,
-                 provider: Optional[ConfigProvider]=None):
+    _composed_config_registration_string = "__composed_config__"
+    _config_key_registration_string = "__config_key__"
+
+    def __init__(
+        self,
+        section_name=None,
+        sources: List[ConfigSource] = None,
+        provider: Optional[ConfigProvider] = None,
+    ):
         self._section_name = section_name
         self._provider: ConfigProvider = provider or ConfigProvider(sources=sources)
 
@@ -167,8 +196,12 @@ class Config:
         -------
         A list of strings giving the names of the registered properties/methods
         """
-        all_properties = inspect.getmembers(self.__class__, predicate=lambda x: self.is_member_registered(
-            x, Config._config_key_registration_string))
+        all_properties = inspect.getmembers(
+            self.__class__,
+            predicate=lambda x: self.is_member_registered(
+                x, Config._config_key_registration_string
+            ),
+        )
         return [f[0] for f in all_properties]
 
     @staticmethod
@@ -178,7 +211,7 @@ class Config:
         else:
             return False
 
-    def get_registered_composed_config(self) -> List['Config']:
+    def get_registered_composed_config(self) -> List["Config"]:
         """
         Gets a list of all composed configs or "sub configs",
         that is configs which are registered with the group_key function.
@@ -188,9 +221,16 @@ class Config:
         A list of Config subclasses which have been registered
         """
 
-        all_properties = inspect.getmembers(self.__class__, predicate=lambda x: self.is_member_registered(
-            x, Config._composed_config_registration_string))
-        return [getattr(self, f[0]) if isinstance(f[1], property) else f[1](self) for f in all_properties]
+        all_properties = inspect.getmembers(
+            self.__class__,
+            predicate=lambda x: self.is_member_registered(
+                x, Config._composed_config_registration_string
+            ),
+        )
+        return [
+            getattr(self, f[0]) if isinstance(f[1], property) else f[1](self)
+            for f in all_properties
+        ]
 
     @_propagate_to_children()
     def read(self):

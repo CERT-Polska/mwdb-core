@@ -1,18 +1,18 @@
-from flask import request, g
+from flask import g, request
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, Group, User
+from mwdb.model import Group, User, db
 from mwdb.model.object import AccessType
 from mwdb.schema.share import (
-    ShareRequestSchema,
     ShareGroupListResponseSchema,
+    ShareInfoResponseSchema,
     ShareListResponseSchema,
-    ShareInfoResponseSchema
+    ShareRequestSchema,
 )
 
-from . import access_object, logger, requires_authorization, loads_schema
+from . import access_object, loads_schema, logger, requires_authorization
 
 
 class ShareGroupListResource(Resource):
@@ -24,8 +24,8 @@ class ShareGroupListResource(Resource):
         description: |
             Returns list of available groups that user can share objects with.
 
-            If user doesn't have `sharing_objects` capability, list includes only groups of which
-            the user is a member.
+            If user doesn't have `sharing_objects` capability,
+            list includes only groups of which the user is a member.
         security:
             - bearerAuth: []
         tags:
@@ -40,19 +40,14 @@ class ShareGroupListResource(Resource):
         if g.auth_user.has_rights(Capabilities.sharing_objects):
             groups = db.session.query(Group.name)
         else:
-            groups = (
-                db.session.query(Group.name)
-                          .filter(g.auth_user.is_member(Group.id))
+            groups = db.session.query(Group.name).filter(
+                g.auth_user.is_member(Group.id)
             )
 
         # Filter out groups that are created for pending users
-        groups = (
-            groups.filter(
-                Group.name.notin_(
-                    db.session.query(User.login).filter(
-                        User.pending.is_(True)
-                    )
-                )
+        groups = groups.filter(
+            Group.name.notin_(
+                db.session.query(User.login).filter(User.pending.is_(True))
             )
         )
 
@@ -70,7 +65,8 @@ class ShareResource(Resource):
         description: |
             Returns list of available groups and sharing info for specified object.
 
-            If user doesn't have `sharing_objects` capability, only own groups are included.
+            If user doesn't have `sharing_objects` capability,
+            only own groups are included.
         security:
             - bearerAuth: []
         tags:
@@ -94,24 +90,21 @@ class ShareResource(Resource):
                   application/json:
                     schema: ShareInfoResponseSchema
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist
+                    or user doesn't have access to this object.
         """
         if g.auth_user.has_rights(Capabilities.sharing_objects):
             groups = db.session.query(Group.name)
         else:
-            groups = (
-                db.session.query(Group.name)
-                          .filter(g.auth_user.is_member(Group.id))
+            groups = db.session.query(Group.name).filter(
+                g.auth_user.is_member(Group.id)
             )
 
         # Filter out groups that are created for pending users
-        groups = (
-            groups.filter(
-                Group.name.notin_(
-                    db.session.query(User.login).filter(
-                        User.pending.is_(True)
-                    )
-                )
+        groups = groups.filter(
+            Group.name.notin_(
+                db.session.query(User.login).filter(User.pending.is_(True))
             )
         )
 
@@ -133,7 +126,8 @@ class ShareResource(Resource):
         description: |
             Shares object with another group.
 
-            If user doesn't have `sharing_objects` capability, it can share object only within its own groups.
+            If user doesn't have `sharing_objects` capability,
+            it can share object only within its own groups.
         security:
             - bearerAuth: []
         tags:
@@ -164,7 +158,9 @@ class ShareResource(Resource):
             400:
                 description: When request body is invalid.
             404:
-                description: When object or group doesn't exist or user doesn't have access to.
+                description: |
+                    When object or group doesn't exist
+                    or user doesn't have access to.
         """
         schema = ShareRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -185,9 +181,6 @@ class ShareResource(Resource):
         db_object.give_access(group.id, AccessType.SHARED, db_object, g.auth_user)
 
         shares = db_object.get_shares()
-        logger.info('Object shared', extra={
-            'object': db_object.dhash,
-            'group': group
-        })
+        logger.info("Object shared", extra={"object": db_object.dhash, "group": group})
         schema = ShareListResponseSchema()
         return schema.dump({"shares": shares})

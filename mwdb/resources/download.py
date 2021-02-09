@@ -1,11 +1,8 @@
-from flask import send_file, Response, stream_with_context
+from flask import Response
 from flask_restful import Resource
-import io
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.app import api
-from mwdb.core.config import app_config, StorageProviderType
-from mwdb.core.util import get_minio_client
 from mwdb.model import File
 from mwdb.schema.download import DownloadURLResponseSchema
 
@@ -43,12 +40,12 @@ class DownloadResource(Resource):
         """
         file_obj = File.get_by_download_token(access_token)
         if not file_obj:
-            raise Forbidden('Download token expired, please re-request download.')
+            raise Forbidden("Download token expired, please re-request download.")
 
         return Response(
             file_obj.iterate(),
-            content_type='application/octet-stream',
-            headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"}
+            content_type="application/octet-stream",
+            headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"},
         )
 
 
@@ -77,7 +74,9 @@ class RequestSampleDownloadResource(Resource):
                   application/json:
                     schema: DownloadURLResponseSchema
             404:
-                description: When file doesn't exist, object is not a file or user doesn't have access to this object.
+                description: |
+                    When file doesn't exist, object is not a file
+                    or user doesn't have access to this object.
         """
         file = File.access(identifier)
         if file is None:
@@ -85,5 +84,7 @@ class RequestSampleDownloadResource(Resource):
 
         download_token = file.generate_download_token()
         schema = DownloadURLResponseSchema()
-        url = api.relative_url_for(DownloadResource, access_token=download_token.decode())
+        url = api.relative_url_for(
+            DownloadResource, access_token=download_token.decode()
+        )
         return schema.dump({"url": url})

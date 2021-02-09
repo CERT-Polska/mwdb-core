@@ -1,4 +1,3 @@
-import click
 import os
 import shutil
 import subprocess
@@ -26,7 +25,7 @@ def npm_build_web(target_dir):
         "./package-lock.json",
         "./config-overrides.js",
         "./public",
-        "./src"
+        "./src",
     ]
 
     with tempfile.TemporaryDirectory() as context_dirname:
@@ -40,7 +39,9 @@ def npm_build_web(target_dir):
             elif os.path.isdir(src):
                 shutil.copytree(src, dst)
             else:
-                raise RuntimeError("Critical error: expected file {} doesn't exist".format(path))
+                raise RuntimeError(
+                    "Critical error: expected file {} doesn't exist".format(path)
+                )
 
         # Run npm install for web core
         logger.info("Installing dependencies")
@@ -50,21 +51,20 @@ def npm_build_web(target_dir):
         # Run npm install for plugins
         for plugin, web_plugin_path in discover_web_plugins():
             logger.info("Installing web plugin '%s'", plugin)
-            if subprocess.call(f"npm install {web_plugin_path}", shell=True, cwd=context_dirname):
+            if subprocess.call(
+                f"npm install {web_plugin_path}", shell=True, cwd=context_dirname
+            ):
                 raise BuildWebError(f"'npm install {web_plugin_path}' command failed")
 
         # Run npm run build
         logger.info("Building web application")
         if subprocess.call("npm run build", shell=True, cwd=context_dirname):
-            raise BuildWebError(f"'npm run build' command failed")
+            raise BuildWebError("'npm run build' command failed")
 
         if os.path.exists(target_dir):
             logger.info("Target %s exists, removing", target_dir)
             shutil.rmtree(target_dir)
 
         logger.info("Collecting artifacts to %s", target_dir)
-        shutil.move(
-            os.path.join(context_dirname, "build"),
-            target_dir
-        )
+        shutil.move(os.path.join(context_dirname, "build"), target_dir)
         logger.info("Web application built successfully!")

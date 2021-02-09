@@ -1,19 +1,20 @@
 from flask import request
 from werkzeug.exceptions import BadRequest, Conflict
 
-from mwdb.core.plugins import hooks
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.plugins import hooks
 from mwdb.model import File
 from mwdb.model.file import EmptyFileError
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import (
-    FileLegacyCreateRequestSchema, FileCreateRequestSchema,
-    FileListResponseSchema, FileItemResponseSchema
+    FileCreateRequestSchema,
+    FileItemResponseSchema,
+    FileLegacyCreateRequestSchema,
+    FileListResponseSchema,
 )
 
-from . import requires_authorization, requires_capabilities, load_schema
-
-from .object import ObjectUploader, ObjectItemResource, ObjectResource
+from . import load_schema, requires_authorization, requires_capabilities
+from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
 class FileUploader(ObjectUploader):
@@ -24,7 +25,7 @@ class FileUploader(ObjectUploader):
                 request.files["file"].stream,
                 parent=parent,
                 share_with=share_with,
-                metakeys=metakeys
+                metakeys=metakeys,
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a file")
@@ -46,11 +47,13 @@ class FileResource(ObjectResource, FileUploader):
         ---
         summary: Search or list files
         description: |
-            Returns a list of files matching provided query, ordered from the latest one.
+            Returns a list of files matching provided query,
+            ordered from the latest one.
 
             Limited to 10 objects, use `older_than` parameter to fetch more.
 
-            Don't rely on maximum count of returned objects because it can be changed/parametrized in future.
+            Don't rely on maximum count of returned objects because
+            it can be changed/parametrized in future.
         security:
             - bearerAuth: []
         tags:
@@ -60,7 +63,10 @@ class FileResource(ObjectResource, FileUploader):
               name: older_than
               schema:
                 type: string
-              description: Fetch objects which are older than the object specified by identifier. Used for pagination
+              description: |
+                Fetch objects which are older than the object specified by identifier.
+
+                Used for pagination
               required: false
             - in: query
               name: query
@@ -75,7 +81,9 @@ class FileResource(ObjectResource, FileUploader):
                   application/json:
                     schema: FileListResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occurred in Lucene query
+                description: |
+                    When wrong parameters were provided
+                    or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
@@ -125,13 +133,16 @@ class FileResource(ObjectResource, FileUploader):
                   application/json:
                     schema: FileItemResponseSchema
             403:
-                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
+                description: |
+                    No permissions to perform additional operations
+                    (e.g. adding parent, metakeys)
             404:
                 description: |
-                    One of attribute keys doesn't exist or user doesn't have permission to set it.
+                    One of attribute keys doesn't exist
+                    or user doesn't have permission to set it.
 
-                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
-                    with that group
+                    Specified `upload_as` group doesn't exist
+                    or user doesn't have permission to share objects with that group
             409:
                 description: Object exists yet but has different type
         """
@@ -173,7 +184,9 @@ class FileItemResource(ObjectItemResource, FileUploader):
                   application/json:
                     schema: FileItemResponseSchema
             404:
-                description: When file doesn't exist, object is not a file or user doesn't have access to this object.
+                description: |
+                    When file doesn't exist, object is not a file
+                    or user doesn't have access to this object.
         """
         return super().get(identifier)
 
@@ -223,10 +236,14 @@ class FileItemResource(ObjectItemResource, FileUploader):
                       type: string
                       default: '*'
                       description: |
-                        Group that object will be shared with. If user doesn't have `sharing_objects` capability,
-                        user must be a member of specified group (unless `Group doesn't exist` error will occur).
-                        If default value `*` is specified - object will be exclusively shared with all user's groups
-                        excluding `public`.
+                        Group that object will be shared with.
+
+                        If user doesn't have `sharing_objects` capability,
+                        user must be a member of specified group
+                        (unless `Group doesn't exist` error will occur).
+
+                        If default value `*` is specified - object will be
+                        exclusively shared with all user's groups excluding `public`.
                   required:
                     - file
         responses:
@@ -236,13 +253,16 @@ class FileItemResource(ObjectItemResource, FileUploader):
                   application/json:
                     schema: FileItemResponseSchema
             403:
-                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
+                description: |
+                    No permissions to perform additional operations
+                    (e.g. adding parent, metakeys)
             404:
                 description: |
-                    One of attribute keys doesn't exist or user doesn't have permission to set it.
+                    One of attribute keys doesn't exist or user doesn't have
+                    permission to set it.
 
-                    Specified `upload_as` group doesn't exist or user doesn't have permission to share objects
-                    with that group
+                    Specified `upload_as` group doesn't exist or user doesn't have
+                    permission to share objects with that group
             409:
                 description: Object exists yet but has different type
         """
@@ -274,6 +294,8 @@ class FileItemResource(ObjectItemResource, FileUploader):
             403:
                 description: When user doesn't have `removing_objects` capability
             404:
-                description: When file doesn't exist, object is not a file or user doesn't have access to this object.
+                description: |
+                    When file doesn't exist, object is not a file
+                    or user doesn't have access to this object.
         """
         return super().delete(identifier)

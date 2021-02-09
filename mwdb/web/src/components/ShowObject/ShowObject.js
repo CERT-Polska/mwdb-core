@@ -3,11 +3,10 @@ import React, {useEffect, useReducer} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import ObjectBox from './Views/ObjectBox';
-// todo: all boxes need to be rewritten to independent components
 import MultiRelationsBox from './Views/RelationsBox';
 import CommentBox from './Views/CommentBox';
+import ShareBox from "./Views/SharesBox";
 import TagBox from './Views/TagBox';
-import ShareBox from "../Shares";
 import AttributesBox from "./Views/AttributesBox"
 
 import api from "@mwdb-web/commons/api";
@@ -81,7 +80,7 @@ export default function ShowObject(props) {
                                         </ObjectBox>
                                     </Extendable>
                                 </div>
-                                <ShareBox id={objectState.object.id}/>
+                                <ShareBox />
                             </Extendable>
                         </div>
                         <div className="col-md-5">

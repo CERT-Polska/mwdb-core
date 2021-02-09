@@ -1,6 +1,6 @@
 import re
 
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, ValidationError, fields, validates
 
 from .api_key import APIKeyListItemResponseSchema
 from .group import GroupBasicResponseSchema, GroupItemResponseSchema
@@ -14,7 +14,8 @@ class UserLoginSchemaBase(Schema):
     def validate_login(self, value):
         if not re.match("^[A-Za-z0-9_-]{1,32}$", value):
             raise ValidationError(
-                "Login should contain max 32 chars and include only letters, digits, underscores and dashes"
+                "Login should contain max 32 chars and include only "
+                "letters, digits, underscores and dashes"
             )
 
 
@@ -27,9 +28,7 @@ class UserCreateRequestSchema(Schema):
     @validates("additional_info")
     def validate_additional_info(self, value):
         if not value:
-            raise ValidationError(
-                "Additional info can't be empty"
-            )
+            raise ValidationError("Additional info can't be empty")
 
 
 class UserUpdateRequestSchema(Schema):
@@ -42,9 +41,7 @@ class UserUpdateRequestSchema(Schema):
     @validates("additional_info")
     def validate_additional_info(self, value):
         if value == "":
-            raise ValidationError(
-                "Additional info can't be empty"
-            )
+            raise ValidationError("Additional info can't be empty")
 
 
 class UserItemResponseSchema(UserLoginSchemaBase):
@@ -61,8 +58,12 @@ class UserItemResponseSchema(UserLoginSchemaBase):
     disabled = fields.Boolean(required=True, allow_none=False)
     pending = fields.Boolean(required=True, allow_none=False)
 
-    groups = fields.Nested(GroupBasicResponseSchema, many=True, required=True, allow_none=False)
-    api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True, required=True, allow_none=False)
+    groups = fields.Nested(
+        GroupBasicResponseSchema, many=True, required=True, allow_none=False
+    )
+    api_keys = fields.Nested(
+        APIKeyListItemResponseSchema, many=True, required=True, allow_none=False
+    )
 
 
 class UserListItemResponseSchema(UserLoginSchemaBase):
@@ -72,11 +73,15 @@ class UserListItemResponseSchema(UserLoginSchemaBase):
     requested_on = UTCDateTime(required=True)
     disabled = fields.Boolean(required=True, allow_none=False)
     pending = fields.Boolean(required=True, allow_none=False)
-    groups = fields.Nested(GroupItemResponseSchema, many=True, required=True, allow_none=False)
+    groups = fields.Nested(
+        GroupItemResponseSchema, many=True, required=True, allow_none=False
+    )
 
 
 class UserListResponseSchema(UserLoginSchemaBase):
-    users = fields.Nested(UserListItemResponseSchema, many=True, required=True, allow_none=False)
+    users = fields.Nested(
+        UserListItemResponseSchema, many=True, required=True, allow_none=False
+    )
 
 
 class UserSetPasswordTokenResponseSchema(UserLoginSchemaBase):
@@ -99,8 +104,12 @@ class UserOwnProfileResponseSchema(UserLoginSchemaBase):
     set_password_on = UTCDateTime(required=True)
 
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
-    groups = fields.Nested(GroupBasicResponseSchema, many=True, required=True, allow_none=False)
-    api_keys = fields.Nested(APIKeyListItemResponseSchema, many=True, required=True, allow_none=False)
+    groups = fields.Nested(
+        GroupBasicResponseSchema, many=True, required=True, allow_none=False
+    )
+    api_keys = fields.Nested(
+        APIKeyListItemResponseSchema, many=True, required=True, allow_none=False
+    )
 
 
 class UserProfileResponseSchema(UserLoginSchemaBase):

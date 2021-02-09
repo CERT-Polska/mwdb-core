@@ -19,4 +19,8 @@ class Capabilities(object):
 
     @classmethod
     def all(cls):
-        return [k for k in cls.__dict__.keys() if not k.startswith("__") and type(cls.__dict__[k]) is str]
+        return [
+            k
+            for k in cls.__dict__.keys()
+            if not k.startswith("__") and type(cls.__dict__[k]) is str
+        ]

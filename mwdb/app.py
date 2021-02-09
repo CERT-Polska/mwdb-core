@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from flask import request, g
+from flask import g, request
 from flask_migrate import Migrate
 from werkzeug.exceptions import Forbidden
 from werkzeug.routing import BaseConverter
 
-from mwdb.core.app import app, api
+from mwdb.core.app import api, app
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.log import getLogger, setup_logger
@@ -13,49 +13,70 @@ from mwdb.core.plugins import PluginAppContext, load_plugins
 from mwdb.core.rate_limit import rate_limit
 from mwdb.core.static import static_blueprint
 from mwdb.core.util import token_hex
-from mwdb.model import db, User, APIKey
+from mwdb.model import APIKey, User, db
 from mwdb.paths import migrations_dir
-from mwdb.resources.api_key import APIKeyResource, APIKeyIssueResource
+from mwdb.resources.api_key import APIKeyIssueResource, APIKeyResource
 from mwdb.resources.auth import (
-    LoginResource, ChangePasswordResource,
-    RefreshTokenResource, RegisterResource,
-    RecoverPasswordResource, RequestPasswordChangeResource,
-    ValidateTokenResource, AuthGroupListResource
+    AuthGroupListResource,
+    ChangePasswordResource,
+    LoginResource,
+    RecoverPasswordResource,
+    RefreshTokenResource,
+    RegisterResource,
+    RequestPasswordChangeResource,
+    ValidateTokenResource,
 )
 from mwdb.resources.blob import TextBlobItemResource, TextBlobResource
-from mwdb.resources.comment import CommentResource, CommentDeleteResource
-from mwdb.resources.config import ConfigItemResource, ConfigResource, ConfigStatsResource
-from mwdb.resources.download import RequestSampleDownloadResource, DownloadResource
+from mwdb.resources.comment import CommentDeleteResource, CommentResource
+from mwdb.resources.config import (
+    ConfigItemResource,
+    ConfigResource,
+    ConfigStatsResource,
+)
+from mwdb.resources.download import DownloadResource, RequestSampleDownloadResource
 from mwdb.resources.file import FileItemResource, FileResource
-from mwdb.resources.group import GroupResource, GroupListResource, GroupMemberResource
+from mwdb.resources.group import GroupListResource, GroupMemberResource, GroupResource
 from mwdb.resources.metakey import (
-    MetakeyResource, MetakeyListDefinitionResource,
-    MetakeyDefinitionManageResource, MetakeyListDefinitionManageResource,
-    MetakeyPermissionResource
+    MetakeyDefinitionManageResource,
+    MetakeyListDefinitionManageResource,
+    MetakeyListDefinitionResource,
+    MetakeyPermissionResource,
+    MetakeyResource,
 )
-from mwdb.resources.object import ObjectItemResource, ObjectResource, ObjectCountResource, ObjectFavoriteResource
-from mwdb.resources.quick_query import QuickQueryResource, QuickQueryItemResource
-from mwdb.resources.relations import RelationsResource, ObjectChildResource
+from mwdb.resources.object import (
+    ObjectCountResource,
+    ObjectFavoriteResource,
+    ObjectItemResource,
+    ObjectResource,
+)
+from mwdb.resources.quick_query import QuickQueryItemResource, QuickQueryResource
+from mwdb.resources.relations import ObjectChildResource, RelationsResource
 from mwdb.resources.remotes import (
-    RemoteListResource, RemoteAPIResource,
+    RemoteAPIResource,
+    RemoteConfigPullResource,
+    RemoteConfigPushResource,
     RemoteFilePullResource,
-    RemoteConfigPullResource, RemoteTextBlobPullResource,
     RemoteFilePushResource,
-    RemoteConfigPushResource, RemoteTextBlobPushResource
+    RemoteListResource,
+    RemoteTextBlobPullResource,
+    RemoteTextBlobPushResource,
 )
-from mwdb.resources.server import PingResource, ServerInfoResource, ServerDocsResource
 from mwdb.resources.search import SearchResource
+from mwdb.resources.server import PingResource, ServerDocsResource, ServerInfoResource
 from mwdb.resources.share import ShareGroupListResource, ShareResource
-from mwdb.resources.tag import TagResource, TagListResource
+from mwdb.resources.tag import TagListResource, TagResource
 from mwdb.resources.user import (
-    UserResource, UserListResource, UserPendingResource,
-    UserGetPasswordChangeTokenResource, UserProfileResource
+    UserGetPasswordChangeTokenResource,
+    UserListResource,
+    UserPendingResource,
+    UserProfileResource,
+    UserResource,
 )
 
 
 class HashConverter(BaseConverter):
     # MD5/SHA1/SHA256/SHA512 (32,40,64,128)
-    regex = '(root|[A-Fa-f0-9]{32,128})'
+    regex = "(root|[A-Fa-f0-9]{32,128})"
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = app_config.mwdb.postgres_uri
@@ -73,7 +94,7 @@ app.config["ERROR_404_HELP"] = False
 if app_config.mwdb.flask_config_file:
     app.config.from_pyfile(app_config.mwdb.flask_config_file)
 
-app.url_map.converters['hash64'] = HashConverter
+app.url_map.converters["hash64"] = HashConverter
 
 migrate = Migrate(app, db, directory=migrations_dir)
 db.init_app(app)
@@ -93,27 +114,32 @@ def log_request(response):
     response_time = datetime.utcnow() - g.request_start_time
     response_size = response.calculate_content_length()
 
-    getLogger().info('request', extra={'path': request.path,
-                                       'arguments': request.args,
-                                       'method': request.method,
-                                       'status': response.status_code,
-                                       'response_time': response_time,
-                                       'response_size': response_size})
+    getLogger().info(
+        "request",
+        extra={
+            "path": request.path,
+            "arguments": request.args,
+            "method": request.method,
+            "status": response.status_code,
+            "response_time": response_time,
+            "response_size": response_size,
+        },
+    )
 
     return response
 
 
 @app.before_request
 def require_auth():
-    if request.method == 'OPTIONS':
+    if request.method == "OPTIONS":
         return
 
-    auth = request.headers.get('Authorization')
+    auth = request.headers.get("Authorization")
 
     g.auth_user = None
 
-    if auth and auth.startswith('Bearer '):
-        token = auth.split(' ', 1)[1]
+    if auth and auth.startswith("Bearer "):
+        token = auth.split(" ", 1)[1]
         g.auth_user = User.verify_session_token(token)
         # Not a session token? Maybe APIKey token
         if g.auth_user is None:
@@ -122,20 +148,27 @@ def require_auth():
         if g.auth_user is None:
             g.auth_user = User.verify_legacy_token(token)
             if g.auth_user is not None:
-                getLogger().warning("'%s' used legacy auth token for authentication", g.auth_user.login)
+                getLogger().warning(
+                    "'%s' used legacy auth token for authentication", g.auth_user.login
+                )
 
     if g.auth_user:
-        if app_config.mwdb.enable_maintenance and g.auth_user.login != app_config.mwdb.admin_login:
-            raise Forbidden('Maintenance underway. Please come back later.')
+        if (
+            app_config.mwdb.enable_maintenance
+            and g.auth_user.login != app_config.mwdb.admin_login
+        ):
+            raise Forbidden("Maintenance underway. Please come back later.")
 
         if g.auth_user.disabled:
             raise Forbidden("User has been disabled.")
 
-        if app_config.mwdb.enable_rate_limit and not g.auth_user.has_rights(Capabilities.unlimited_requests):
+        if app_config.mwdb.enable_rate_limit and not g.auth_user.has_rights(
+            Capabilities.unlimited_requests
+        ):
             """
             Single sample view in malwarefront generates 7 requests (6 GET, 1 POST)
             """
-            if request.method == 'GET':
+            if request.method == "GET":
                 """
                 DownloadResource is token-based and shouldn't be limited
                 """
@@ -160,80 +193,101 @@ def require_auth():
 
 
 # Server health endpoints
-api.add_resource(PingResource, '/ping')
-api.add_resource(ServerInfoResource, '/server')
-api.add_resource(ServerDocsResource, '/docs')
+api.add_resource(PingResource, "/ping")
+api.add_resource(ServerInfoResource, "/server")
+api.add_resource(ServerDocsResource, "/docs")
 
 # Authentication endpoints
-api.add_resource(LoginResource, '/auth/login')
+api.add_resource(LoginResource, "/auth/login")
 api.add_resource(ChangePasswordResource, "/auth/change_password")
-api.add_resource(RecoverPasswordResource, '/auth/recover_password')
-api.add_resource(RequestPasswordChangeResource, '/auth/request_password_change')
+api.add_resource(RecoverPasswordResource, "/auth/recover_password")
+api.add_resource(RequestPasswordChangeResource, "/auth/request_password_change")
 api.add_resource(RefreshTokenResource, "/auth/refresh")
 api.add_resource(ValidateTokenResource, "/auth/validate")
 api.add_resource(AuthGroupListResource, "/auth/groups")
-api.add_resource(RegisterResource, '/auth/register')
+api.add_resource(RegisterResource, "/auth/register")
 
 # API key endpoints
 api.add_resource(APIKeyIssueResource, "/user/<login>/api_key")
 api.add_resource(APIKeyResource, "/api_key/<api_key_id>")
 
 # Object endpoints
-api.add_resource(ObjectResource, '/object')
-api.add_resource(ObjectItemResource, '/object/<hash64:identifier>')
-api.add_resource(ObjectFavoriteResource, '/object/<hash64:identifier>/favorite')
+api.add_resource(ObjectResource, "/object")
+api.add_resource(ObjectItemResource, "/object/<hash64:identifier>")
+api.add_resource(ObjectFavoriteResource, "/object/<hash64:identifier>/favorite")
 
 # Count endpoint
-api.add_resource(ObjectCountResource, '/<any(file, config, blob, object):type>/count')
+api.add_resource(ObjectCountResource, "/<any(file, config, blob, object):type>/count")
 
 # Tag endpoints
-api.add_resource(TagListResource, '/tag')
-api.add_resource(TagResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/tag')
+api.add_resource(TagListResource, "/tag")
+api.add_resource(
+    TagResource, "/<any(file, config, blob, object):type>/<hash64:identifier>/tag"
+)
 
 # Comment endpoints
-api.add_resource(CommentResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/comment')
-api.add_resource(CommentDeleteResource,
-                 '/<any(file, config, blob, object):type>/<hash64:identifier>/comment/<int:comment_id>')
+api.add_resource(
+    CommentResource,
+    "/<any(file, config, blob, object):type>/" "<hash64:identifier>/comment",
+)
+api.add_resource(
+    CommentDeleteResource,
+    "/<any(file, config, blob, object):type>/"
+    "<hash64:identifier>/comment/<int:comment_id>",
+)
 
 # Share endpoints
-api.add_resource(ShareResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/share')
-api.add_resource(ShareGroupListResource, '/share')
+api.add_resource(
+    ShareResource, "/<any(file, config, blob, object):type>/<hash64:identifier>/share"
+)
+api.add_resource(ShareGroupListResource, "/share")
 
 # Relation endpoints
-api.add_resource(RelationsResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/relations')
-api.add_resource(ObjectChildResource,
-                 '/<any(file, config, blob, object):type>/<hash64:parent>/child/<hash64:child>')
+api.add_resource(
+    RelationsResource,
+    "/<any(file, config, blob, object):type>/<hash64:identifier>/relations",
+)
+api.add_resource(
+    ObjectChildResource,
+    "/<any(file, config, blob, object):type>/<hash64:parent>/child/<hash64:child>",
+)
 
 # File endpoints
-api.add_resource(FileResource, '/file')
-api.add_resource(FileItemResource, '/file/<hash64:identifier>')
+api.add_resource(FileResource, "/file")
+api.add_resource(FileItemResource, "/file/<hash64:identifier>")
 
 # Config endpoints
-api.add_resource(ConfigResource, '/config')
-api.add_resource(ConfigStatsResource, '/config/stats')
-api.add_resource(ConfigItemResource, '/config/<hash64:identifier>')
+api.add_resource(ConfigResource, "/config")
+api.add_resource(ConfigStatsResource, "/config/stats")
+api.add_resource(ConfigItemResource, "/config/<hash64:identifier>")
 
 # Blob endpoints
-api.add_resource(TextBlobResource, '/blob')
-api.add_resource(TextBlobItemResource, '/blob/<hash64:identifier>')
+api.add_resource(TextBlobResource, "/blob")
+api.add_resource(TextBlobItemResource, "/blob/<hash64:identifier>")
 
 # Download endpoints
-api.add_resource(RequestSampleDownloadResource, '/request/sample/<identifier>')
-api.add_resource(DownloadResource, '/download/<access_token>')
+api.add_resource(RequestSampleDownloadResource, "/request/sample/<identifier>")
+api.add_resource(DownloadResource, "/download/<access_token>")
 
 # Search endpoints
-api.add_resource(SearchResource, '/search')
+api.add_resource(SearchResource, "/search")
 
 # Quick query endpoints
-api.add_resource(QuickQueryResource, "/<any(file, config, blob, object):type>/quick_query")
+api.add_resource(
+    QuickQueryResource, "/<any(file, config, blob, object):type>/quick_query"
+)
 api.add_resource(QuickQueryItemResource, "/quick_query/<int:id>")
 
 # Metakey endpoints
-api.add_resource(MetakeyListDefinitionResource, '/meta/list/<any(read, set):access>')
-api.add_resource(MetakeyResource, '/<any(file, config, blob, object):type>/<hash64:identifier>/meta')
-api.add_resource(MetakeyListDefinitionManageResource, '/meta/manage')
-api.add_resource(MetakeyDefinitionManageResource, '/meta/manage/<key>')
-api.add_resource(MetakeyPermissionResource, '/meta/manage/<key>/permissions/<group_name>')
+api.add_resource(MetakeyListDefinitionResource, "/meta/list/<any(read, set):access>")
+api.add_resource(
+    MetakeyResource, "/<any(file, config, blob, object):type>/<hash64:identifier>/meta"
+)
+api.add_resource(MetakeyListDefinitionManageResource, "/meta/manage")
+api.add_resource(MetakeyDefinitionManageResource, "/meta/manage/<key>")
+api.add_resource(
+    MetakeyPermissionResource, "/meta/manage/<key>/permissions/<group_name>"
+)
 
 # User endpoints
 api.add_resource(UserListResource, "/user")
@@ -245,17 +299,29 @@ api.add_resource(UserPendingResource, "/user/<login>/pending")
 # Group endpoints
 api.add_resource(GroupListResource, "/group")
 api.add_resource(GroupResource, "/group/<name>")
-api.add_resource(GroupMemberResource, '/group/<name>/member/<login>')
+api.add_resource(GroupMemberResource, "/group/<name>/member/<login>")
 
 # Remote endpoints
 api.add_resource(RemoteListResource, "/remote")
 api.add_resource(RemoteAPIResource, "/remote/<remote_name>/api/<path:remote_path>")
-api.add_resource(RemoteFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>")
-api.add_resource(RemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>")
-api.add_resource(RemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>")
-api.add_resource(RemoteFilePushResource, "/remote/<remote_name>/push/file/<hash64:identifier>")
-api.add_resource(RemoteConfigPushResource, "/remote/<remote_name>/push/config/<hash64:identifier>")
-api.add_resource(RemoteTextBlobPushResource, "/remote/<remote_name>/push/blob/<hash64:identifier>")
+api.add_resource(
+    RemoteFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>"
+)
+api.add_resource(
+    RemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>"
+)
+api.add_resource(
+    RemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>"
+)
+api.add_resource(
+    RemoteFilePushResource, "/remote/<remote_name>/push/file/<hash64:identifier>"
+)
+api.add_resource(
+    RemoteConfigPushResource, "/remote/<remote_name>/push/config/<hash64:identifier>"
+)
+api.add_resource(
+    RemoteTextBlobPushResource, "/remote/<remote_name>/push/blob/<hash64:identifier>"
+)
 
 setup_logger()
 

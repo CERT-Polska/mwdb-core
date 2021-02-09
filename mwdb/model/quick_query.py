@@ -1,9 +1,10 @@
-from . import db
 import datetime
+
+from . import db
 
 
 class QuickQuery(db.Model):
-    __tablename__ = 'quick_query'
+    __tablename__ = "quick_query"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     query = db.Column(db.Text, nullable=False)
@@ -11,9 +12,9 @@ class QuickQuery(db.Model):
     name = db.Column(db.String(64), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
-    owner = db.relationship('User', lazy='joined')
+    owner = db.relationship("User", lazy="joined")
 
     @property
     def owner_login(self):

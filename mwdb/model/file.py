@@ -4,12 +4,19 @@ import os
 import shutil
 import tempfile
 
+from itsdangerous import BadSignature, SignatureExpired, TimedJSONWebSignatureSerializer
 from sqlalchemy import or_
-from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired, BadSignature
 from werkzeug.utils import secure_filename
 
-from mwdb.core.config import app_config, StorageProviderType
-from mwdb.core.util import calc_hash, calc_crc32, calc_magic, calc_ssdeep, get_minio_client, get_fd_path
+from mwdb.core.config import StorageProviderType, app_config
+from mwdb.core.util import (
+    calc_crc32,
+    calc_hash,
+    calc_magic,
+    calc_ssdeep,
+    get_fd_path,
+    get_minio_client,
+)
 
 from . import db
 from .object import Object
@@ -20,9 +27,9 @@ class EmptyFileError(ValueError):
 
 
 class File(Object):
-    __tablename__ = 'file'
+    __tablename__ = "file"
 
-    id = db.Column(db.Integer, db.ForeignKey('object.id'), primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey("object.id"), primary_key=True)
     file_name = db.Column(db.String, nullable=False, index=True)
     file_size = db.Column(db.Integer, nullable=False, index=True)
     file_type = db.Column(db.Text, nullable=False, index=True)
@@ -35,7 +42,7 @@ class File(Object):
     ssdeep = db.Column(db.String(255), nullable=True, index=True)
 
     __mapper_args__ = {
-        'polymorphic_identity': __tablename__,
+        "polymorphic_identity": __tablename__,
     }
 
     @classmethod
@@ -44,11 +51,14 @@ class File(Object):
         file = File.query.filter(File.dhash == identifier)
         if file.scalar():
             return file
-        return File.query.filter(or_(
-            File.sha1 == identifier,
-            File.sha256 == identifier,
-            File.sha512 == identifier,
-            File.md5 == identifier))
+        return File.query.filter(
+            or_(
+                File.sha1 == identifier,
+                File.sha256 == identifier,
+                File.sha512 == identifier,
+                File.md5 == identifier,
+            )
+        )
 
     @property
     def upload_stream(self):
@@ -64,7 +74,9 @@ class File(Object):
         setattr(self, "_upload_stream", stream)
 
     @classmethod
-    def get_or_create(cls, file_name, file_stream, parent=None, metakeys=None, share_with=None):
+    def get_or_create(
+        cls, file_name, file_stream, parent=None, metakeys=None, share_with=None
+    ):
         file_stream.seek(0, os.SEEK_END)
         file_size = file_stream.tell()
         if file_size == 0:
@@ -81,7 +93,7 @@ class File(Object):
             sha1=calc_hash(file_stream, hashlib.sha1(), lambda h: h.hexdigest()),
             sha256=sha256,
             sha512=calc_hash(file_stream, hashlib.sha512(), lambda h: h.hexdigest()),
-            ssdeep=calc_ssdeep(file_stream)
+            ssdeep=calc_ssdeep(file_stream),
         )
 
         file_obj, is_new = cls._get_or_create(
@@ -101,7 +113,7 @@ class File(Object):
                     app_config.mwdb.s3_storage_bucket_name,
                     file_obj._calculate_path(),
                     file_stream,
-                    file_size
+                    file_size,
                 )
             else:
                 with open(file_obj._calculate_path(), "wb") as f:
@@ -117,9 +129,9 @@ class File(Object):
             upload_path = ""
 
         sample_sha256 = self.sha256.lower()
-        
+
         if app_config.mwdb.hash_pathing:
-            # example: uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+            # example: uploads/9/f/8/6/9f86d0818...
             upload_path = os.path.join(upload_path, *list(sample_sha256)[0:4])
 
         if app_config.mwdb.storage_provider == StorageProviderType.DISK:
@@ -144,7 +156,9 @@ class File(Object):
         if not self.upload_stream:
             raise ValueError("Can't retrieve local path for this file")
 
-        if isinstance(self.upload_stream.name, str) or isinstance(self.upload_stream, bytes):
+        if isinstance(self.upload_stream.name, str) or isinstance(
+            self.upload_stream, bytes
+        ):
             return self.upload_stream.name
 
         fd_path = get_fd_path(self.upload_stream)
@@ -184,7 +198,7 @@ class File(Object):
                 app_config.mwdb.s3_storage_secure,
             ).get_object(app_config.mwdb.s3_storage_bucket_name, self._calculate_path())
         elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
-            return open(self._calculate_path(), 'rb')
+            return open(self._calculate_path(), "rb")
         else:
             raise RuntimeError(
                 f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
@@ -200,7 +214,7 @@ class File(Object):
         finally:
             File.close(fh)
 
-    def iterate(self, chunk_size=1024*256):
+    def iterate(self, chunk_size=1024 * 256):
         """
         Iterates over bytes in the file contents
         """
@@ -237,8 +251,10 @@ class File(Object):
             self.upload_stream = None
 
     def generate_download_token(self):
-        serializer = TimedJSONWebSignatureSerializer(app_config.mwdb.secret_key, expires_in=60)
-        return serializer.dumps({'identifier': self.sha256})
+        serializer = TimedJSONWebSignatureSerializer(
+            app_config.mwdb.secret_key, expires_in=60
+        )
+        return serializer.dumps({"identifier": self.sha256})
 
     @staticmethod
     def get_by_download_token(download_token):

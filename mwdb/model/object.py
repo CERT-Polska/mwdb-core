@@ -1,7 +1,7 @@
 import datetime
 
 from flask import g
-from sqlalchemy import and_, exists, func
+from sqlalchemy import and_, exists
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql.expression import true
@@ -10,21 +10,29 @@ from mwdb.core.capabilities import Capabilities
 
 from . import db
 from .metakey import Metakey, MetakeyDefinition, MetakeyPermission
-from .tag import object_tag_table, Tag
+from .tag import Tag, object_tag_table
 
 relation = db.Table(
-    'relation',
-    db.Column('parent_id', db.Integer, db.ForeignKey('object.id'), index=True, nullable=False),
-    db.Column('child_id', db.Integer, db.ForeignKey('object.id'), index=True, nullable=False),
-    db.Column('creation_time', db.DateTime, default=datetime.datetime.utcnow),
-    db.Index('ix_relation_parent_child', 'parent_id', 'child_id', unique=True)
+    "relation",
+    db.Column(
+        "parent_id", db.Integer, db.ForeignKey("object.id"), index=True, nullable=False
+    ),
+    db.Column(
+        "child_id", db.Integer, db.ForeignKey("object.id"), index=True, nullable=False
+    ),
+    db.Column("creation_time", db.DateTime, default=datetime.datetime.utcnow),
+    db.Index("ix_relation_parent_child", "parent_id", "child_id", unique=True),
 )
 
 favorites = db.Table(
-    'favorites',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), index=True, nullable=False),
-    db.Column('object_id', db.Integer, db.ForeignKey('object.id'), index=True, nullable=False),
-    db.Index('ix_favorites_object_user', 'object_id', 'user_id', unique=True),
+    "favorites",
+    db.Column(
+        "user_id", db.Integer, db.ForeignKey("user.id"), index=True, nullable=False
+    ),
+    db.Column(
+        "object_id", db.Integer, db.ForeignKey("object.id"), index=True, nullable=False
+    ),
+    db.Index("ix_favorites_object_user", "object_id", "user_id", unique=True),
 )
 
 
@@ -40,38 +48,63 @@ class ObjectTypeConflictError(Exception):
 
 
 class ObjectPermission(db.Model):
-    __tablename__ = 'permission'
+    __tablename__ = "permission"
 
-    object_id = db.Column(db.Integer, db.ForeignKey('object.id'), primary_key=True, autoincrement=False, index=True)
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), primary_key=True, autoincrement=False, index=True)
+    object_id = db.Column(
+        db.Integer,
+        db.ForeignKey("object.id"),
+        primary_key=True,
+        autoincrement=False,
+        index=True,
+    )
+    group_id = db.Column(
+        db.Integer,
+        db.ForeignKey("group.id"),
+        primary_key=True,
+        autoincrement=False,
+        index=True,
+    )
     __table_args__ = (
-        db.Index('ix_permission_group_object', 'object_id', 'group_id', unique=True),
+        db.Index("ix_permission_group_object", "object_id", "group_id", unique=True),
     )
 
-    access_time = db.Column(db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow)
+    access_time = db.Column(
+        db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow
+    )
 
     reason_type = db.Column(db.String(32))
-    related_object_id = db.Column(db.Integer, db.ForeignKey('object.id'))
-    related_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    related_object_id = db.Column(db.Integer, db.ForeignKey("object.id"))
+    related_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), index=True)
 
-    object = db.relationship('Object', foreign_keys=[object_id], lazy='joined',
-                             back_populates="shares")
-    related_object = db.relationship('Object', foreign_keys=[related_object_id], lazy='joined',
-                                     back_populates="related_shares")
-    related_user = db.relationship('User', foreign_keys=[related_user_id], lazy='joined')
+    object = db.relationship(
+        "Object", foreign_keys=[object_id], lazy="joined", back_populates="shares"
+    )
+    related_object = db.relationship(
+        "Object",
+        foreign_keys=[related_object_id],
+        lazy="joined",
+        back_populates="related_shares",
+    )
+    related_user = db.relationship(
+        "User", foreign_keys=[related_user_id], lazy="joined"
+    )
 
-    group = db.relationship('Group', foreign_keys=[group_id], lazy='joined')
+    group = db.relationship("Group", foreign_keys=[group_id], lazy="joined")
 
     @property
     def access_reason(self):
-        """TODO: This is just for backwards compatibility, remove that part in further major release"""
+        # TODO: This is just for backwards compatibility.
+        # Remove that part in further major release
         if self.reason_type == "migrated":
             return "Migrated from mwdbv1"
-        return "{reason_type} {related_object_type}:{related_object_dhash} by user:{related_user_login}".format(
-            reason_type=self.reason_type,
-            related_object_type=self.related_object_type,
-            related_object_dhash=self.related_object_dhash,
-            related_user_login=self.related_user_login
+        return (
+            "{reason_type} {related_object_type}:{related_object_dhash} "
+            "by user:{related_user_login}".format(
+                reason_type=self.reason_type,
+                related_object_type=self.related_object_type,
+                related_object_dhash=self.related_object_dhash,
+                related_user_login=self.related_user_login,
+            )
         )
 
     @property
@@ -92,81 +125,112 @@ class ObjectPermission(db.Model):
 
     @classmethod
     def create(cls, object_id, group_id, reason_type, related_object, related_user):
-        if not db.session.query(exists().where(
+        if not db.session.query(
+            exists().where(
                 and_(
                     ObjectPermission.object_id == object_id,
-                    ObjectPermission.group_id == group_id
+                    ObjectPermission.group_id == group_id,
                 )
-        )).scalar():
+            )
+        ).scalar():
             try:
-                perm = ObjectPermission(object_id=object_id,
-                                        group_id=group_id,
-                                        reason_type=reason_type,
-                                        related_object=related_object,
-                                        related_user=related_user)
+                perm = ObjectPermission(
+                    object_id=object_id,
+                    group_id=group_id,
+                    reason_type=reason_type,
+                    related_object=related_object,
+                    related_user=related_user,
+                )
                 db.session.add(perm)
                 db.session.flush()
                 # Capabilities were created right now
                 return True
             except IntegrityError:
                 db.session.rollback()
-                if not db.session.query(exists().where(
+                if not db.session.query(
+                    exists().where(
                         and_(
                             ObjectPermission.object_id == object_id,
-                            ObjectPermission.group_id == group_id
+                            ObjectPermission.group_id == group_id,
                         )
-                )).scalar():
+                    )
+                ).scalar():
                     raise
         # Capabilities exist yet
         return False
 
 
 class Object(db.Model):
-    __tablename__ = 'object'
+    __tablename__ = "object"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     type = db.Column(db.String(50), nullable=False)
     dhash = db.Column(db.String(64), unique=True, index=True, nullable=False)
-    upload_time = db.Column(db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow)
+    upload_time = db.Column(
+        db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow
+    )
 
     parents = db.relationship(
-        "Object", secondary=relation,
+        "Object",
+        secondary=relation,
         primaryjoin=(id == relation.c.child_id),
         secondaryjoin=(id == relation.c.parent_id),
         order_by=relation.c.creation_time.desc(),
-        back_populates="children"
+        back_populates="children",
     )
     children = db.relationship(
-        "Object", secondary=relation,
+        "Object",
+        secondary=relation,
         primaryjoin=(id == relation.c.parent_id),
         secondaryjoin=(id == relation.c.child_id),
         order_by=relation.c.creation_time.desc(),
-        back_populates="parents"
+        back_populates="parents",
     )
 
-    meta = db.relationship('Metakey', backref='object', lazy=True, cascade="save-update, merge, delete")
-    comments = db.relationship('Comment', backref='object', lazy='dynamic', cascade="save-update, merge, delete")
-    tags = db.relationship('Tag', secondary=object_tag_table, back_populates='objects', lazy='joined')
+    meta = db.relationship(
+        "Metakey", backref="object", lazy=True, cascade="save-update, merge, delete"
+    )
+    comments = db.relationship(
+        "Comment",
+        backref="object",
+        lazy="dynamic",
+        cascade="save-update, merge, delete",
+    )
+    tags = db.relationship(
+        "Tag", secondary=object_tag_table, back_populates="objects", lazy="joined"
+    )
 
-    followers = db.relationship('User', secondary=favorites, back_populates='favorites', lazy='joined')
+    followers = db.relationship(
+        "User", secondary=favorites, back_populates="favorites", lazy="joined"
+    )
 
-    shares = db.relationship('ObjectPermission', lazy='dynamic',
-                             foreign_keys=[ObjectPermission.object_id],
-                             back_populates="object", cascade="save-update, merge, delete")
-    related_shares = db.relationship('ObjectPermission', lazy='dynamic',
-                                     foreign_keys=[ObjectPermission.related_object_id],
-                                     back_populates="related_object")
+    shares = db.relationship(
+        "ObjectPermission",
+        lazy="dynamic",
+        foreign_keys=[ObjectPermission.object_id],
+        back_populates="object",
+        cascade="save-update, merge, delete",
+    )
+    related_shares = db.relationship(
+        "ObjectPermission",
+        lazy="dynamic",
+        foreign_keys=[ObjectPermission.related_object_id],
+        back_populates="related_object",
+    )
 
     @property
     def latest_config(self):
         from .config import Config
+
         return (
             db.session.query(Config)
-                      .join(relation, and_(
-                          relation.c.parent_id == self.id,
-                          relation.c.child_id == Config.id))
-                      .filter(g.auth_user.has_access_to_object(Config.id))
-                      .order_by(relation.c.creation_time.desc()).first()
+            .join(
+                relation,
+                and_(relation.c.parent_id == self.id, relation.c.child_id == Config.id),
+            )
+            .filter(g.auth_user.has_access_to_object(Config.id))
+            .order_by(relation.c.creation_time.desc())
+            .first()
         )
 
     @property
@@ -195,15 +259,26 @@ class Object(db.Model):
                 raise
             return False
         # Inherit permissions from parent (in the same transaction)
-        permissions = db.session.query(ObjectPermission) \
-            .filter(ObjectPermission.object_id == parent.id).all()
+        permissions = (
+            db.session.query(ObjectPermission)
+            .filter(ObjectPermission.object_id == parent.id)
+            .all()
+        )
         for perm in permissions:
-            self.give_access(perm.group_id, perm.reason_type, perm.related_object, perm.related_user, commit=False)
+            self.give_access(
+                perm.group_id,
+                perm.reason_type,
+                perm.related_object,
+                perm.related_user,
+                commit=False,
+            )
         if commit:
             db.session.commit()
         return True
 
-    def give_access(self, group_id, reason_type, related_object, related_user, commit=True):
+    def give_access(
+        self, group_id, reason_type, related_object, related_user, commit=True
+    ):
         """
         Give access to group with recursive propagation
         """
@@ -214,7 +289,9 @@ class Object(db.Model):
             if obj.id in visited:
                 continue
             visited.add(obj.id)
-            if ObjectPermission.create(obj.id, group_id, reason_type, related_object, related_user):
+            if ObjectPermission.create(
+                obj.id, group_id, reason_type, related_object, related_user
+            ):
                 """
                 If permission was just created: continue propagation
                 """
@@ -229,15 +306,19 @@ class Object(db.Model):
         Used by Object.access
         """
         return db.session.query(
-            exists().where(and_(
-                ObjectPermission.object_id == self.id,
-                user.is_member(ObjectPermission.group_id)
-            ))).scalar()
+            exists().where(
+                and_(
+                    ObjectPermission.object_id == self.id,
+                    user.is_member(ObjectPermission.group_id),
+                )
+            )
+        ).scalar()
 
     @classmethod
     def get(cls, identifier):
         """
-        Polymorphic getter for object via specified identifier (provided by API) without access check-ups.
+        Polymorphic getter for object via specified identifier(provided by API)
+        without access check-ups.
         Don't include internal (sequential) identifiers in filtering!
         Used by Object.access
         """
@@ -246,11 +327,12 @@ class Object(db.Model):
     @classmethod
     def _get_or_create(cls, obj, parent=None, metakeys=None, share_with=None):
         """
-        Polymophic get or create pattern, useful in dealing with race condition resulting in IntegrityError
-        on the dhash unique constraint.
+        Polymophic get or create pattern, useful in dealing with race condition
+        resulting in IntegrityError on the dhash unique constraint.
 
-        Pattern from here - http://rachbelaid.com/handling-race-condition-insert-with-sqlalchemy/
-        Returns tuple with object and boolean value if new object was created or not, True == new object
+        http://rachbelaid.com/handling-race-condition-insert-with-sqlalchemy/
+        Returns tuple with object and boolean value if new object was created or not,
+        True == new object
 
         We don't perform permission checks, all data needs to be validated by Resource.
         """
@@ -290,15 +372,23 @@ class Object(db.Model):
 
         # Add metakeys
         for metakey in metakeys:
-            new_cls.add_metakey(metakey['key'], metakey['value'], commit=False)
+            new_cls.add_metakey(metakey["key"], metakey["value"], commit=False)
 
         # Share with all specified groups
         for share_group in share_with:
-            new_cls.give_access(share_group.id, AccessType.ADDED, new_cls, g.auth_user, commit=False)
+            new_cls.give_access(
+                share_group.id, AccessType.ADDED, new_cls, g.auth_user, commit=False
+            )
 
         # Share with all groups that access all objects
         for all_access_group in Group.all_access_groups():
-            new_cls.give_access(all_access_group.id, AccessType.ADDED, new_cls, g.auth_user, commit=False)
+            new_cls.give_access(
+                all_access_group.id,
+                AccessType.ADDED,
+                new_cls,
+                g.auth_user,
+                commit=False,
+            )
 
         # Add parent to object if specified
         # Inherited share entries must be added AFTER we add share entries
@@ -316,7 +406,9 @@ class Object(db.Model):
         Returns None when user has no rights to specified object or object doesn't exist
 
         :param identifier: Object identifier
-        :param requestor: User requesting for object (default: currently authenticated user)
+        :param requestor: |
+            User requesting for object
+            (default: currently authenticated user)
         :return: Object instance or None
         """
         from .group import Group
@@ -332,30 +424,43 @@ class Object(db.Model):
         # In that case we want only those parents to which requestor has access.
         stmtp = (
             db.session.query(Object)
-                      .filter(Object.id.in_(
-                          db.session.query(relation.c.parent_id)
-                                    .filter(relation.c.child_id == obj.first().id)))
-                      .filter(requestor.has_access_to_object(Object.id))
+            .filter(
+                Object.id.in_(
+                    db.session.query(relation.c.parent_id).filter(
+                        relation.c.child_id == obj.first().id
+                    )
+                )
+            )
+            .filter(requestor.has_access_to_object(Object.id))
         )
         stmtp = stmtp.subquery()
 
         parent = aliased(Object, stmtp)
 
-        obj = obj.outerjoin(parent, Object.parents) \
-            .options(contains_eager(Object.parents, alias=parent)).all()[0]
+        obj = (
+            obj.outerjoin(parent, Object.parents)
+            .options(contains_eager(Object.parents, alias=parent))
+            .all()[0]
+        )
 
         # Ok, now let's check whether requestor has explicit access
         if obj.has_explicit_access(requestor):
             return obj
 
-        # If not, but has "share_queried_objects" rights: that's good moment to give_access
+        # If not, but has "share_queried_objects" rights: give_access
         if requestor.has_rights(Capabilities.share_queried_objects):
-            share_queried_groups = db.session.query(Group).filter(
-                and_(
-                    Group.capabilities.contains([Capabilities.share_queried_objects]),
-                    requestor.is_member(Group.id)
+            share_queried_groups = (
+                db.session.query(Group)
+                .filter(
+                    and_(
+                        Group.capabilities.contains(
+                            [Capabilities.share_queried_objects]
+                        ),
+                        requestor.is_member(Group.id),
+                    )
                 )
-            ).all()
+                .all()
+            )
             for group in share_queried_groups:
                 obj.give_access(group.id, AccessType.QUERIED, obj, requestor)
             return obj
@@ -375,7 +480,10 @@ class Object(db.Model):
         Get object tags
         :return: List of strings representing tags
         """
-        return [tag.tag for tag in db.session.query(Tag).filter(Tag.objects.any(id=self.id)).all()]
+        return [
+            tag.tag
+            for tag in db.session.query(Tag).filter(Tag.objects.any(id=self.id)).all()
+        ]
 
     def add_tag(self, tag_name):
         """
@@ -426,22 +534,28 @@ class Object(db.Model):
     def get_metakeys(self, as_dict=False, check_permissions=True, show_hidden=False):
         """
         Gets all object metakeys (attributes)
-        :param as_dict: Return dict object instead of list of Metakey objects (default: False)
-        :param check_permissions: Filter results including current user permissions (default: True)
+        :param as_dict: |
+            Return dict object instead of list of Metakey objects (default: False)
+        :param check_permissions: |
+            Filter results including current user permissions (default: True)
         :param show_hidden: Show hidden metakeys
         """
         metakeys = (
             db.session.query(Metakey)
-                      .filter(Metakey.object_id == self.id)
-                      .join(Metakey.template)
+            .filter(Metakey.object_id == self.id)
+            .join(Metakey.template)
         )
 
-        if check_permissions and not g.auth_user.has_rights(Capabilities.reading_all_attributes):
+        if check_permissions and not g.auth_user.has_rights(
+            Capabilities.reading_all_attributes
+        ):
             metakeys = metakeys.filter(
                 Metakey.key.in_(
                     db.session.query(MetakeyPermission.key)
-                              .filter(MetakeyPermission.can_read == true())
-                              .filter(g.auth_user.is_member(MetakeyPermission.group_id))))
+                    .filter(MetakeyPermission.can_read == true())
+                    .filter(g.auth_user.is_member(MetakeyPermission.group_id))
+                )
+            )
 
         if not show_hidden:
             metakeys = metakeys.filter(MetakeyDefinition.hidden.is_(False))
@@ -463,8 +577,7 @@ class Object(db.Model):
             metakey_definition = MetakeyDefinition.query_for_set(key).first()
         else:
             metakey_definition = (
-                db.session.query(MetakeyDefinition)
-                          .filter(MetakeyDefinition.key == key)
+                db.session.query(MetakeyDefinition).filter(MetakeyDefinition.key == key)
             ).first()
 
         if not metakey_definition:
@@ -477,15 +590,16 @@ class Object(db.Model):
             db.session.commit()
         return is_new
 
-    __mapper_args__ = {
-        'polymorphic_identity': __tablename__,
-        'polymorphic_on': type
-    }
+    __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
 
     def remove_metakey(self, key, value, check_permissions=True):
-        db_metakey = db.session.query(Metakey).filter(Metakey.key == key,
-                                                      Metakey.value == value,
-                                                      Metakey.object_id == self.id).first()
+        db_metakey = (
+            db.session.query(Metakey)
+            .filter(
+                Metakey.key == key, Metakey.value == value, Metakey.object_id == self.id
+            )
+            .first()
+        )
 
         if db_metakey is None:
             return False
@@ -507,14 +621,16 @@ class Object(db.Model):
         Gets all object shares visible for currently authenticated user
         :rtype: List[ObjectPermission]
         """
-        permission_filter = (ObjectPermission.object_id == self.id)
+        permission_filter = ObjectPermission.object_id == self.id
 
         if not g.auth_user.has_rights(Capabilities.sharing_objects):
-            permission_filter = and_(permission_filter, g.auth_user.is_member(ObjectPermission.group_id))
+            permission_filter = and_(
+                permission_filter, g.auth_user.is_member(ObjectPermission.group_id)
+            )
 
         shares = (
             db.session.query(ObjectPermission)
-                      .filter(permission_filter)
-                      .order_by(ObjectPermission.access_time.desc())
+            .filter(permission_filter)
+            .order_by(ObjectPermission.access_time.desc())
         ).all()
         return shares

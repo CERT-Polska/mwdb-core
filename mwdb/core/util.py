@@ -9,26 +9,24 @@ except ImportError:
     def token_hex(nbytes=None):
         return urandom(nbytes).hex()
 
-import magic
-import ssdeep
 
+import hashlib
 from zlib import crc32
 
+import magic
+import ssdeep
 from flask_restful import abort
 from flask_sqlalchemy import Pagination
-import hashlib
-
 from minio import Minio
 
 
 def config_dhash(obj):
     if isinstance(obj, list):
-        return config_dhash(
-            str(sorted([config_dhash(o) for o in obj])))
+        return config_dhash(str(sorted([config_dhash(o) for o in obj])))
     elif isinstance(obj, dict):
         return config_dhash([[o, config_dhash(obj[o])] for o in sorted(obj.keys())])
     else:
-        return hashlib.sha256(bytes(str(obj), 'utf-8')).hexdigest()
+        return hashlib.sha256(bytes(str(obj), "utf-8")).hexdigest()
 
 
 def traverse(obj, fn):
@@ -43,17 +41,27 @@ def traverse(obj, fn):
 
 
 def config_encode(obj):
-    return traverse(obj, lambda o: o.encode("unicode_escape").decode("utf-8") if isinstance(o, str) else o)
+    return traverse(
+        obj,
+        lambda o: o.encode("unicode_escape").decode("utf-8")
+        if isinstance(o, str)
+        else o,
+    )
 
 
 def config_decode(obj):
-    return traverse(obj, lambda o: bytes(o, "utf-8").decode("unicode_escape") if isinstance(o, str) else o)
+    return traverse(
+        obj,
+        lambda o: bytes(o, "utf-8").decode("unicode_escape")
+        if isinstance(o, str)
+        else o,
+    )
 
 
 def calc_hash(stream, hash_obj, digest_cb):
     stream.seek(0, os.SEEK_SET)
 
-    for chunk in iter(lambda: stream.read(128 * 1024), b''):
+    for chunk in iter(lambda: stream.read(128 * 1024), b""):
         hash_obj.update(chunk)
 
     return digest_cb(hash_obj)
@@ -109,9 +117,9 @@ def calc_crc32(stream):
                 break
 
     if csum is not None:
-        csum = csum & 0xffffffff
+        csum = csum & 0xFFFFFFFF
 
-    return '{:x}'.format(csum)
+    return "{:x}".format(csum)
 
 
 def paginate_fast(q, page, per_page):
@@ -140,19 +148,19 @@ def is_true(flag):
 
 
 def is_subdir(parent, child):
-    return (
-        os.path.commonpath([
-            os.path.abspath(parent)
-        ]) == os.path.commonpath([
-            os.path.abspath(parent),
-            os.path.abspath(child)
-        ])
+    return os.path.commonpath([os.path.abspath(parent)]) == os.path.commonpath(
+        [os.path.abspath(parent), os.path.abspath(child)]
     )
 
 
-def get_minio_client(endpoint: str, access_key: str, secret_key: str, region: str, secure: bool) -> Minio:
+def get_minio_client(
+    endpoint: str, access_key: str, secret_key: str, region: str, secure: bool
+) -> Minio:
     if endpoint is None or access_key is None or secret_key is None:
-        raise RuntimeError("Attempting to get Minio client without a endpoint/access_key/secret_key set")
+        raise RuntimeError(
+            "Attempting to get Minio client without an "
+            "endpoint/access_key/secret_key set"
+        )
     return Minio(
         endpoint=endpoint,
         access_key=access_key,

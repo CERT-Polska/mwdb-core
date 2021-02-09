@@ -1,7 +1,6 @@
-from flask import g
-
 from string import Template
 
+from flask import g
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.exc import IntegrityError
 
@@ -11,14 +10,19 @@ from . import db
 
 
 class Metakey(db.Model):
-    __tablename__ = 'metakey'
+    __tablename__ = "metakey"
     __table_args__ = (UniqueConstraint("object_id", "key", "value"),)
 
     id = db.Column(db.Integer, primary_key=True)
-    object_id = db.Column(db.Integer, db.ForeignKey('object.id'), nullable=False)
-    key = db.Column(db.String(64), db.ForeignKey('metakey_definition.key'), nullable=False, index=True)
+    object_id = db.Column(db.Integer, db.ForeignKey("object.id"), nullable=False)
+    key = db.Column(
+        db.String(64),
+        db.ForeignKey("metakey_definition.key"),
+        nullable=False,
+        index=True,
+    )
     value = db.Column(db.Text, nullable=False, index=True)
-    template = db.relationship('MetakeyDefinition', lazy='joined')
+    template = db.relationship("MetakeyDefinition", lazy="joined")
 
     @property
     def url(self):
@@ -38,15 +42,17 @@ class Metakey(db.Model):
     @classmethod
     def get(cls, object_id, key, value):
         return db.session.query(cls).filter(
-            (cls.object_id == object_id) & (cls.key == key) & (cls.value == value))
+            (cls.object_id == object_id) & (cls.key == key) & (cls.value == value)
+        )
 
     @classmethod
     def get_or_create(cls, obj):
         """
-        Polymophic get or create pattern, useful in dealing with race condition resulting in IntegrityError
-        on the unique constraint.
-        Pattern from here - http://rachbelaid.com/handling-race-condition-insert-with-sqlalchemy/
-        Returns tuple with object and boolean value if new object was created or not, True == new object
+        Polymophic get or create pattern, useful in dealing with race condition
+        resulting in IntegrityError on the unique constraint.
+         http://rachbelaid.com/handling-race-condition-insert-with-sqlalchemy/
+        Returns tuple with object and boolean value if new object was created or not,
+        True == new object
         """
 
         is_new = False
@@ -69,18 +75,33 @@ class Metakey(db.Model):
 
 
 class MetakeyPermission(db.Model):
-    __tablename__ = 'metakey_permission'
+    __tablename__ = "metakey_permission"
 
-    key = db.Column(db.String(64), db.ForeignKey('metakey_definition.key'), primary_key=True, index=True)
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), primary_key=True, autoincrement=False, index=True)
+    key = db.Column(
+        db.String(64),
+        db.ForeignKey("metakey_definition.key"),
+        primary_key=True,
+        index=True,
+    )
+    group_id = db.Column(
+        db.Integer,
+        db.ForeignKey("group.id"),
+        primary_key=True,
+        autoincrement=False,
+        index=True,
+    )
     __table_args__ = (
-        db.Index('ix_metakey_permission_metakey_group', 'key', 'group_id', unique=True),
+        db.Index("ix_metakey_permission_metakey_group", "key", "group_id", unique=True),
     )
     can_read = db.Column(db.Boolean, nullable=False)
     can_set = db.Column(db.Boolean, nullable=False)
-    template = db.relationship('MetakeyDefinition', foreign_keys=[key], lazy='joined',
-                               back_populates="permissions")
-    group = db.relationship('Group', foreign_keys=[group_id], lazy='joined')
+    template = db.relationship(
+        "MetakeyDefinition",
+        foreign_keys=[key],
+        lazy="joined",
+        back_populates="permissions",
+    )
+    group = db.relationship("Group", foreign_keys=[group_id], lazy="joined")
 
     @property
     def group_name(self):
@@ -88,14 +109,16 @@ class MetakeyPermission(db.Model):
 
 
 class MetakeyDefinition(db.Model):
-    __tablename__ = 'metakey_definition'
+    __tablename__ = "metakey_definition"
 
     key = db.Column(db.String(64), primary_key=True)
     label = db.Column(db.String(64), nullable=False)
     description = db.Column(db.Text, nullable=False)
     url_template = db.Column(db.Text, nullable=False)
     hidden = db.Column(db.Boolean, nullable=False, default=False)
-    permissions = db.relationship('MetakeyPermission', lazy='joined', back_populates="template")
+    permissions = db.relationship(
+        "MetakeyPermission", lazy="joined", back_populates="template"
+    )
 
     @staticmethod
     def query_for_read(key=None, include_hidden=False):
@@ -116,8 +139,8 @@ class MetakeyDefinition(db.Model):
         if not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             query = (
                 query.join(MetakeyDefinition.permissions)
-                     .filter(MetakeyPermission.can_read.is_(True))
-                     .filter(g.auth_user.is_member(MetakeyPermission.group_id))
+                .filter(MetakeyPermission.can_read.is_(True))
+                .filter(g.auth_user.is_member(MetakeyPermission.group_id))
             )
         return query
 
@@ -136,7 +159,7 @@ class MetakeyDefinition(db.Model):
         if not g.auth_user.has_rights(Capabilities.adding_all_attributes):
             query = (
                 query.join(MetakeyDefinition.permissions)
-                     .filter(MetakeyPermission.can_set.is_(True))
-                     .filter(g.auth_user.is_member(MetakeyPermission.group_id))
+                .filter(MetakeyPermission.can_set.is_(True))
+                .filter(g.auth_user.is_member(MetakeyPermission.group_id))
             )
         return query

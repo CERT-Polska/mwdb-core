@@ -18,7 +18,8 @@ class FieldNotQueryableException(SQLQueryBuilderBaseException):
 
 class MultipleObjectsQueryException(SQLQueryBuilderBaseException):
     """
-    Raised when multiple object types are queried, eg. file.file_name:something AND static.cfg:something2
+    Raised when multiple object types are queried,
+    e.g. file.file_name:something AND static.cfg:something2
     """
 
 

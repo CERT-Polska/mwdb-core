@@ -1,12 +1,12 @@
-from marshmallow import fields, Schema
+from marshmallow import Schema, fields
 
 from .config import ConfigItemResponseSchema
 from .object import (
     ObjectCreateRequestSchemaBase,
+    ObjectItemResponseSchema,
     ObjectLegacyMetakeysMixin,
     ObjectListItemResponseSchema,
     ObjectListResponseSchemaBase,
-    ObjectItemResponseSchema,
 )
 from .utils import UTCDateTime
 
@@ -44,4 +44,6 @@ class BlobItemResponseSchema(ObjectItemResponseSchema):
     last_seen = UTCDateTime(required=True, allow_none=False)
 
     content = fields.Str(required=True, allow_none=False)
-    latest_config = fields.Nested(ConfigItemResponseSchema, required=True, allow_none=True)
+    latest_config = fields.Nested(
+        ConfigItemResponseSchema, required=True, allow_none=True
+    )

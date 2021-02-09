@@ -1,19 +1,30 @@
 import re
-
 from datetime import datetime, timedelta
-from typing import List, Union, Type, Any
+from typing import Any, List, Type, Union
 
 from flask import g
 from luqum.tree import Range, Term
-from sqlalchemy import and_, or_, func, Text, cast, exists, column, select
+from sqlalchemy import Text, and_, column, exists, func, or_, select
 from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
-from sqlalchemy.orm import joinedload
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, Object, Metakey, MetakeyDefinition, Group, Member, ObjectPermission, User
+from mwdb.model import (
+    Group,
+    Member,
+    Metakey,
+    MetakeyDefinition,
+    Object,
+    ObjectPermission,
+    User,
+    db,
+)
 from mwdb.model.object import AccessType
 
-from .exceptions import FieldNotQueryableException, UnsupportedGrammarException, ObjectNotFoundException
+from .exceptions import (
+    FieldNotQueryableException,
+    ObjectNotFoundException,
+    UnsupportedGrammarException,
+)
 from .tree import Subquery
 
 Expression = Union[Range, Term]
@@ -27,22 +38,16 @@ def get_term_value(node: Term) -> str:
     :return: Unescaped value
     """
     if node.has_wildcard():
-        wildcard_map = {
-            "*": "%",
-            "?": "_"
-        }
+        wildcard_map = {"*": "%", "?": "_"}
 
         # Escape already contained SQL wildcards
         node_value = re.sub(r"([%_])", r"\\\1", node.value)
         # Transform unescaped Lucene wildcards to SQL form
         node_value = Term.WILDCARDS_PATTERN.sub(
-            lambda m: wildcard_map[m.group(0)],
-            node_value
+            lambda m: wildcard_map[m.group(0)], node_value
         )
         # Unescape Lucene escaped special characters
-        node_value = Term.WORD_ESCAPED_CHARS.sub(
-            r'\1', node_value
-        )
+        node_value = Term.WORD_ESCAPED_CHARS.sub(r"\1", node_value)
         return node_value
     else:
         return node.unescaped_value
@@ -86,7 +91,7 @@ class SizeField(BaseField):
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
 
-        units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
+        units = {"B": 1, "KB": 1024, "MB": 1024 ** 2, "GB": 1024 ** 3}
 
         def parse_size(size):
             if size.isdigit():
@@ -94,9 +99,7 @@ class SizeField(BaseField):
             else:
                 size = re.match(r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper())
                 if size is None:
-                    raise UnsupportedGrammarException(
-                        "Invalid size value"
-                    )
+                    raise UnsupportedGrammarException("Invalid size value")
                 number, unit = size.groups()
                 return int(float(number) * units[unit])
 
@@ -160,13 +163,18 @@ class FavoritesField(BaseField):
             )
         if expression.has_wildcard():
             raise UnsupportedGrammarException(
-                f"Wildcards are not allowed for shared field"
+                "Wildcards are not allowed for shared field"
             )
 
         value = get_term_value(expression)
 
-        if not g.auth_user.has_rights(Capabilities.manage_users) and g.auth_user.login != value:
-            raise ObjectNotFoundException("Only the mwdb admin can search for other users favorites")
+        if (
+            not g.auth_user.has_rights(Capabilities.manage_users)
+            and g.auth_user.login != value
+        ):
+            raise ObjectNotFoundException(
+                "Only the mwdb admin can search for other users favorites"
+            )
 
         if g.auth_user.login == value:
             user = g.auth_user
@@ -191,17 +199,21 @@ class AttributeField(BaseField):
         else:
             raise UnsupportedGrammarException("Missing attribute key (meta.<key>:)")
 
-        metakey_definition = (
-            MetakeyDefinition.query_for_read(key=attribute_key, include_hidden=True).first()
-        )
+        metakey_definition = MetakeyDefinition.query_for_read(
+            key=attribute_key, include_hidden=True
+        ).first()
 
         if metakey_definition is None:
             raise ObjectNotFoundException(f"No such attribute: {attribute_key}")
 
-        if (metakey_definition.hidden
-                and expression.has_wildcard()
-                and not g.auth_user.has_rights(Capabilities.reading_all_attributes)):
-            raise FieldNotQueryableException("Wildcards are not allowed for hidden attributes")
+        if (
+            metakey_definition.hidden
+            and expression.has_wildcard()
+            and not g.auth_user.has_rights(Capabilities.reading_all_attributes)
+        ):
+            raise FieldNotQueryableException(
+                "Wildcards are not allowed for hidden attributes"
+            )
 
         value = get_term_value(expression)
         if expression.has_wildcard():
@@ -209,9 +221,7 @@ class AttributeField(BaseField):
         else:
             value_condition = Metakey.value == value
 
-        return self.column.any(
-            and_(Metakey.key == attribute_key, value_condition)
-        )
+        return self.column.any(and_(Metakey.key == attribute_key, value_condition))
 
 
 class ShareField(BaseField):
@@ -222,7 +232,7 @@ class ShareField(BaseField):
             )
         if expression.has_wildcard():
             raise UnsupportedGrammarException(
-                f"Wildcards are not allowed for shared field"
+                "Wildcards are not allowed for shared field"
             )
 
         value = expression.unescaped_value
@@ -232,8 +242,9 @@ class ShareField(BaseField):
             raise ObjectNotFoundException(f"No such group: {value}")
 
         group_id = group.id
-        if not g.auth_user.has_rights(Capabilities.manage_users) and \
-                group_id not in [group.id for group in g.auth_user.groups]:
+        if not g.auth_user.has_rights(Capabilities.manage_users) and group_id not in [
+            group.id for group in g.auth_user.groups
+        ]:
             raise ObjectNotFoundException(f"No such group: {value}")
 
         return self.column.any(ObjectPermission.group_id == group_id)
@@ -247,47 +258,47 @@ class UploaderField(BaseField):
             )
         if expression.has_wildcard():
             raise UnsupportedGrammarException(
-                f"Wildcards are not allowed for uploader field"
+                "Wildcards are not allowed for uploader field"
             )
 
         value = expression.unescaped_value
         if value == "public":
-            raise ObjectNotFoundException("uploader:public is no-op, all uploaders are in public group")
+            raise ObjectNotFoundException(
+                "uploader:public is no-op, all uploaders are in public group"
+            )
 
-        # Look only for upload actions (reason_type=ADDED and uploaded_object=shared_object)
+        # Look only for upload actions
+        # (reason_type=ADDED and uploaded_object=shared_object)
         condition = and_(
             ObjectPermission.reason_type == AccessType.ADDED,
             ObjectPermission.related_object_id == ObjectPermission.object_id,
         )
 
         if g.auth_user.has_rights(Capabilities.manage_users):
-            uploaders = (db.session.query(User)
-                         .join(User.memberships)
-                         .join(Member.group)
-                         .filter(Group.name == value)).all()
+            uploaders = (
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
+                .filter(Group.name == value)
+            ).all()
         else:
-            uploaders = (db.session.query(User)
-                         .join(User.memberships)
-                         .join(Member.group)
-                         .filter(and_(
-                            g.auth_user.is_member(Group.id),
-                            Group.name != "public"
-                         ))
-                         .filter(or_(Group.name == value, User.login == value))).all()
+            uploaders = (
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
+                .filter(and_(g.auth_user.is_member(Group.id), Group.name != "public"))
+                .filter(or_(Group.name == value, User.login == value))
+            ).all()
             # Regular users can see only uploads to its own groups
             condition = and_(
-                condition,
-                g.auth_user.is_member(ObjectPermission.group_id)
+                condition, g.auth_user.is_member(ObjectPermission.group_id)
             )
         if not uploaders:
             raise ObjectNotFoundException(f"No such user or group: {value}")
 
         uploader_ids = [u.id for u in uploaders]
         return self.column.any(
-            and_(
-                condition,
-                ObjectPermission.related_user_id.in_(uploader_ids)
-            )
+            and_(condition, ObjectPermission.related_user_id.in_(uploader_ids))
         )
 
 
@@ -313,32 +324,28 @@ class JSONField(BaseField):
 
         """
         Target query:
-            select cfg from static_config 
+            select cfg from static_config
             where ... exists(
-                select 1 
-                from jsonb_path_query(cfg, '$."indirect"."strings"[*]."a"') as json_element 
+                select 1
+                from jsonb_path_query(cfg, '$."indirect"."strings"[*]."a"')
+                as json_element
                 where json_element  #>> '{}' like '2'
             );
         """
         json_path = ".".join(["$"] + [jsonpath_escape(field) for field in remainder])
         # Make aliased function call
-        json_elements = (
-            func.jsonb_path_query(self.column, json_path)
-                .alias("json_element")
+        json_elements = func.jsonb_path_query(self.column, json_path).alias(
+            "json_element"
         )
         # Use #>>'{}' to extract value as text
-        json_element = (
-            column('json_element').operate(
-                JSONPATH_ASTEXT, '{}', result_type=Text
-            )
+        json_element = column("json_element").operate(
+            JSONPATH_ASTEXT, "{}", result_type=Text
         )
         if expression.has_wildcard():
             condition = json_element.like(value)
         else:
             condition = json_element == value
-        return exists(select([1]).
-                      select_from(json_elements).
-                      where(condition))
+        return exists(select([1]).select_from(json_elements).where(condition))
 
 
 class DatetimeField(BaseField):
@@ -349,7 +356,7 @@ class DatetimeField(BaseField):
         formats = [
             ("%Y-%m-%d %H:%M", timedelta(minutes=1)),
             ("%Y-%m-%d %H:%M:%S", timedelta(seconds=1)),
-            ("%Y-%m-%d", timedelta(days=1))
+            ("%Y-%m-%d", timedelta(days=1)),
         ]
         date_string = date_node.value
 
@@ -360,7 +367,9 @@ class DatetimeField(BaseField):
             except ValueError:
                 continue
         else:
-            raise FieldNotQueryableException(f"Unsupported date-time format ({date_string})")
+            raise FieldNotQueryableException(
+                f"Unsupported date-time format ({date_string})"
+            )
 
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
         if remainder:
@@ -370,9 +379,13 @@ class DatetimeField(BaseField):
 
         if isinstance(expression, Range):
             if expression.high.value != "*" and not expression.include_high:
-                raise UnsupportedGrammarException("Exclusive range is not allowed for date-time field")
+                raise UnsupportedGrammarException(
+                    "Exclusive range is not allowed for date-time field"
+                )
             if expression.low.value != "*" and not expression.include_low:
-                raise UnsupportedGrammarException("Exclusive range is not allowed for date-time field")
+                raise UnsupportedGrammarException(
+                    "Exclusive range is not allowed for date-time field"
+                )
             if expression.low.value == "*" and expression.high.value == "*":
                 return True
             if expression.low.value == "*":
@@ -386,7 +399,9 @@ class DatetimeField(BaseField):
             high = self._get_date_range(expression.high)[1]
         else:
             if expression.has_wildcard():
-                raise UnsupportedGrammarException("Wildcards are not allowed for date-time field")
+                raise UnsupportedGrammarException(
+                    "Wildcards are not allowed for date-time field"
+                )
             low, high = self._get_date_range(expression)
 
         return and_(self.column >= low, self.column < high)
@@ -401,5 +416,7 @@ class RelationField(BaseField):
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
         if not isinstance(expression, Subquery):
-            raise UnsupportedGrammarException("Only subquery is allowed for relation field")
+            raise UnsupportedGrammarException(
+                "Only subquery is allowed for relation field"
+            )
         return self.column.any(Object.id.in_(expression.subquery))

@@ -1,5 +1,5 @@
-from functools import partial
 import textwrap
+from functools import partial
 
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
@@ -22,43 +22,44 @@ class Service(Api):
         # I want to log exceptions on my own
         def dont_log(*_, **__):
             pass
+
         app.log_exception = dont_log
-        if isinstance(app.handle_exception, partial) and app.handle_exception.func is self.error_router:
+        if (
+            isinstance(app.handle_exception, partial)
+            and app.handle_exception.func is self.error_router
+        ):
             # Prevent double-initialization
             return
         super()._init_app(app)
 
     def _create_spec(self):
-        spec = APISpec(title='MWDB',
-                       version=app_version,
-                       openapi_version='3.0.2',
-                       plugins=[ApispecFlaskRestful(), MarshmallowPlugin()])
+        spec = APISpec(
+            title="MWDB",
+            version=app_version,
+            openapi_version="3.0.2",
+            plugins=[ApispecFlaskRestful(), MarshmallowPlugin()],
+        )
 
-        spec.components.security_scheme('bearerAuth', {
-            'type': 'http',
-            'scheme': 'bearer',
-            'bearerFormat': 'JWT'
-        })
+        spec.components.security_scheme(
+            "bearerAuth", {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
+        )
         spec.options["info"] = {
-            "description": textwrap.dedent("""
+            "description": textwrap.dedent(
+                """
                 MWDB API documentation.
 
-                If you want to automate things, we recommend using 
-                <a href="http://github.com/CERT-Polska/mwdblib">mwdblib library</a>""")
+                If you want to automate things, we recommend using
+                <a href="http://github.com/CERT-Polska/mwdblib">mwdblib library</a>"""
+            )
         }
         spec.options["servers"] = [
             {
                 "url": "{scheme}://{host}",
-                "description": 'MWDB API endpoint',
+                "description": "MWDB API endpoint",
                 "variables": {
-                    "scheme": {
-                        "enum": ["http", "https"],
-                        "default": "https"
-                    },
-                    "host": {
-                        "default": "mwdb.cert.pl"
-                    },
-                }
+                    "scheme": {"enum": ["http", "https"], "default": "https"},
+                    "host": {"default": "mwdb.cert.pl"},
+                },
             }
         ]
         return spec
@@ -85,7 +86,7 @@ class Service(Api):
 
     def relative_url_for(self, resource, **values):
         path = self.url_for(resource, **values)
-        return path[len(self.blueprint.url_prefix):]
+        return path[len(self.blueprint.url_prefix) :]
 
     def endpoint_for(self, resource):
-        return f'{self.blueprint.name}.{resource}'
+        return f"{self.blueprint.name}.{resource}"

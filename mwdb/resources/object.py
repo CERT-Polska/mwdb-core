@@ -1,29 +1,39 @@
 import json
 
-from flask import request, g
+from flask import g, request
 from flask_restful import Resource
 from luqum.parser import ParseError
-from werkzeug.exceptions import Forbidden, BadRequest, MethodNotAllowed, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
-from mwdb.model import db, Object, Group, MetakeyDefinition
+from mwdb.model import Group, MetakeyDefinition, Object, db
 from mwdb.schema.object import (
-    ObjectListRequestSchema, ObjectListResponseSchema,
-    ObjectItemResponseSchema, ObjectCountRequestSchema,
-    ObjectCountResponseSchema
+    ObjectCountRequestSchema,
+    ObjectCountResponseSchema,
+    ObjectItemResponseSchema,
+    ObjectListRequestSchema,
+    ObjectListResponseSchema,
 )
 
-from . import logger, requires_authorization, requires_capabilities, get_type_from_str, load_schema
+from . import (
+    get_type_from_str,
+    load_schema,
+    logger,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 class ObjectUploader:
     """
     Mixin adding common object upload capabilities to resource
 
-    Merge it with ObjectsResource during retirement of ObjectResource deprecated upload methods
+    Merge it with ObjectsResource during retirement of ObjectResource
+    deprecated upload methods
     """
+
     ObjectType = None
     ItemResponseSchema = None
 
@@ -53,21 +63,27 @@ class ObjectUploader:
         for metakey in params["metakeys"]:
             key = metakey["key"]
             if not MetakeyDefinition.query_for_set(key).first():
-                raise NotFound(f"Metakey '{key}' not defined or insufficient "
-                               "permissions to set that one")
+                raise NotFound(
+                    f"Metakey '{key}' not defined or insufficient "
+                    "permissions to set that one"
+                )
 
         # Validate upload_as argument
         upload_as = params["upload_as"]
         if upload_as == "*":
             # If '*' is provided: share with all user's groups except 'public'
-            share_with = [group for group in g.auth_user.groups if group.name != "public"]
+            share_with = [
+                group for group in g.auth_user.groups if group.name != "public"
+            ]
         else:
             share_group = Group.get_by_name(upload_as)
             # Does group exist?
             if share_group is None:
                 raise NotFound(f"Group {upload_as} doesn't exist")
             # Has user access to group?
-            if share_group not in g.auth_user.groups and not g.auth_user.has_rights(Capabilities.sharing_objects):
+            if share_group not in g.auth_user.groups and not g.auth_user.has_rights(
+                Capabilities.sharing_objects
+            ):
                 raise NotFound(f"Group {upload_as} doesn't exist")
             # Is group pending?
             if share_group.pending_group is True:
@@ -88,10 +104,10 @@ class ObjectUploader:
         finally:
             item.release_after_upload()
 
-        logger.info(f'{self.ObjectType.__name__} added', extra={
-            'dhash': item.dhash,
-            'is_new': is_new
-        })
+        logger.info(
+            f"{self.ObjectType.__name__} added",
+            extra={"dhash": item.dhash, "is_new": is_new},
+        )
         schema = self.ItemResponseSchema()
         return schema.dump(item)
 
@@ -106,11 +122,13 @@ class ObjectResource(Resource):
         ---
         summary: Search or list objects
         description: |
-            Returns list of objects matching provided query, ordered from the latest one.
+            Returns list of objects matching provided query,
+            ordered from the latest one.
 
             Limited to 10 objects, use `older_than` parameter to fetch more.
 
-            Don't rely on maximum count of returned objects because it can be changed/parametrized in future.
+            Don't rely on maximum count of returned objects
+            because it can be changed/parametrized in future.
         security:
             - bearerAuth: []
         tags:
@@ -120,7 +138,11 @@ class ObjectResource(Resource):
               name: older_than
               schema:
                 type: string
-              description: Fetch objects which are older than the object specified by identifier. Used for pagination
+              description: |
+                Fetch objects which are older than the object
+                specified by identifier.
+
+                Used for pagination
               required: false
             - in: query
               name: query
@@ -135,11 +157,13 @@ class ObjectResource(Resource):
                   application/json:
                     schema: ObjectListResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occurred in Lucene query
+                description: |
+                    When wrong parameters were provided
+                    or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
         """
-        if 'page' in request.args:
+        if "page" in request.args:
             logger.warning("'%s' used legacy 'page' parameter", g.auth_user.login)
 
         obj = load_schema(request.args, ObjectListRequestSchema())
@@ -153,7 +177,9 @@ class ObjectResource(Resource):
         query = obj["query"]
         if query:
             try:
-                db_query = SQLQueryBuilder().build_query(query, queried_type=self.ObjectType)
+                db_query = SQLQueryBuilder().build_query(
+                    query, queried_type=self.ObjectType
+                )
             except SQLQueryBuilderBaseException as e:
                 raise BadRequest(str(e))
             except ParseError as e:
@@ -161,10 +187,9 @@ class ObjectResource(Resource):
         else:
             db_query = db.session.query(self.ObjectType)
 
-        db_query = (
-            db_query.filter(g.auth_user.has_access_to_object(Object.id))
-                    .order_by(Object.id.desc())
-        )
+        db_query = db_query.filter(
+            g.auth_user.has_access_to_object(Object.id)
+        ).order_by(Object.id.desc())
         if pivot_obj:
             db_query = db_query.filter(Object.id < pivot_obj.id)
         # Legacy parameter - to be removed in the future
@@ -209,7 +234,9 @@ class ObjectItemResource(Resource, ObjectUploader):
                   application/json:
                     schema: ObjectItemResponseSchema
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have access
+                    to this object.
         """
         obj = self.ObjectType.access(identifier)
         if obj is None:
@@ -225,14 +252,15 @@ class ObjectItemResource(Resource, ObjectUploader):
             # If request is application/json: all args are in JSON
             args = json.loads(request.get_data(parse_form_data=True, as_text=True))
         else:
-            if 'json' in request.form:
-                # If request is multipart/form-data: some args are in JSON and some are part of form
+            if "json" in request.form:
+                # If request is multipart/form-data:
+                # some args are in JSON and some are part of form
                 args = json.loads(request.form["json"])
             else:
                 args = {}
-            if request.form.get('metakeys'):
+            if request.form.get("metakeys"):
                 args["metakeys"] = request.form["metakeys"]
-            if request.form.get('upload_as'):
+            if request.form.get("upload_as"):
                 args["upload_as"] = request.form["upload_as"]
         args["parent"] = parent_identifier if parent_identifier != "root" else None
         return args
@@ -277,7 +305,9 @@ class ObjectItemResource(Resource, ObjectUploader):
             403:
                 description: When user doesn't have `removing_objects` capability
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have
+                    access to this object.
         """
         obj = self.ObjectType.access(identifier)
 
@@ -320,7 +350,9 @@ class ObjectCountResource(Resource):
                   application/json:
                     schema: ObjectCountResponseSchema
             400:
-                description: When wrong parameters were provided or syntax error occurred in Lucene query
+                description: |
+                    When wrong parameters were provided
+                    or syntax error occurred in Lucene query
         """
         schema = ObjectCountRequestSchema()
         obj = load_schema(request.args, schema)
@@ -328,7 +360,9 @@ class ObjectCountResource(Resource):
         query = obj["query"]
         if query:
             try:
-                db_query = SQLQueryBuilder().build_query(query, queried_type=get_type_from_str(type))
+                db_query = SQLQueryBuilder().build_query(
+                    query, queried_type=get_type_from_str(type)
+                )
             except SQLQueryBuilderBaseException as e:
                 raise BadRequest(str(e))
             except ParseError as e:
@@ -379,11 +413,17 @@ class ObjectFavoriteResource(Resource):
             raise NotFound("Object not found")
 
         if favorite_object.favorite:
-            logger.info('Object is already marked as a favorite', extra={'user': user.login, 'object_id': identifier})
+            logger.info(
+                "Object is already marked as a favorite",
+                extra={"user": user.login, "object_id": identifier},
+            )
         else:
             favorite_object.followers.append(user)
             db.session.commit()
-            logger.info('Object marked as favorite', extra={'user': user.login, 'object_id': identifier})
+            logger.info(
+                "Object marked as favorite",
+                extra={"user": user.login, "object_id": identifier},
+            )
 
     @requires_authorization
     def delete(self, identifier):
@@ -419,8 +459,14 @@ class ObjectFavoriteResource(Resource):
             raise NotFound("Object not found")
 
         if not favorite_object.favorite:
-            logger.info('Object is not marked as a favorite', extra={'user': user.login, 'object_id': identifier})
+            logger.info(
+                "Object is not marked as a favorite",
+                extra={"user": user.login, "object_id": identifier},
+            )
         else:
             favorite_object.followers.remove(user)
             db.session.commit()
-            logger.info('Object unmarked as favorite', extra={'user': user.login, 'object_id': identifier})
+            logger.info(
+                "Object unmarked as favorite",
+                extra={"user": user.login, "object_id": identifier},
+            )

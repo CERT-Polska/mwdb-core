@@ -1,6 +1,6 @@
 import re
 
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, ValidationError, fields, validates
 
 
 class GroupNameSchemaBase(Schema):
@@ -10,7 +10,8 @@ class GroupNameSchemaBase(Schema):
     def validate_name(self, name):
         if not re.match("^[A-Za-z0-9_-]{1,32}$", name):
             raise ValidationError(
-                "Group should contain max 32 chars and include only letters, digits, underscores and dashes"
+                "Group should contain max 32 chars and include only "
+                "letters, digits, underscores and dashes"
             )
 
 
@@ -26,7 +27,8 @@ class GroupUpdateRequestSchema(Schema):
     def validate_name(self, name):
         if name is not None and not re.match("^[A-Za-z0-9_-]{1,32}$", name):
             raise ValidationError(
-                "Group should contain max 32 chars and include only letters, digits, underscores and dashes"
+                "Group should contain max 32 chars and include only "
+                "letters, digits, underscores and dashes"
             )
 
 
@@ -42,12 +44,18 @@ class GroupBasicResponseSchema(GroupNameSchemaBase):
 class GroupItemResponseSchema(GroupNameSchemaBase):
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     private = fields.Boolean(required=True)
-    users = fields.List(fields.Str(), attribute="user_logins", required=True, allow_none=False)
-    admins = fields.List(fields.Str(), attribute="group_admins", required=True, allow_none=False)
+    users = fields.List(
+        fields.Str(), attribute="user_logins", required=True, allow_none=False
+    )
+    admins = fields.List(
+        fields.Str(), attribute="group_admins", required=True, allow_none=False
+    )
 
 
 class GroupListResponseSchema(Schema):
-    groups = fields.Nested(GroupItemResponseSchema, many=True, required=True, allow_none=False)
+    groups = fields.Nested(
+        GroupItemResponseSchema, many=True, required=True, allow_none=False
+    )
 
 
 class GroupSuccessResponseSchema(GroupNameSchemaBase):

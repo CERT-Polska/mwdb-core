@@ -1,32 +1,36 @@
 import datetime
 
-from flask import request, g
+from flask import g, request
 from flask_restful import Resource
 from sqlalchemy import exists
-from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import true
-
-from werkzeug.exceptions import Conflict, Forbidden, NotFound, InternalServerError
+from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
-from mwdb.model import db, User, Group, Member
+from mwdb.model import Group, Member, User, db
 from mwdb.schema.user import (
-    UserLoginSchemaBase,
     UserCreateRequestSchema,
-    UserUpdateRequestSchema,
     UserItemResponseSchema,
     UserListResponseSchema,
-    UserSuccessResponseSchema,
-    UserSetPasswordTokenResponseSchema,
-    UserRejectRequestArgsSchema,
+    UserLoginSchemaBase,
     UserOwnProfileResponseSchema,
-    UserProfileResponseSchema
+    UserProfileResponseSchema,
+    UserRejectRequestArgsSchema,
+    UserSetPasswordTokenResponseSchema,
+    UserSuccessResponseSchema,
+    UserUpdateRequestSchema,
 )
 
-from . import logger, requires_capabilities, requires_authorization, load_schema, loads_schema
+from . import (
+    load_schema,
+    loads_schema,
+    logger,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 class UserListResource(Resource):
@@ -52,7 +56,8 @@ class UserListResource(Resource):
               required: false
               description: |
                 If set to non-empty value: returns pending users.
-                Otherwise it returns only registered users excluding pending registrations.
+                Otherwise it returns only registered users excluding
+                pending registrations.
         responses:
             200:
                 description: List of users
@@ -62,7 +67,7 @@ class UserListResource(Resource):
             403:
                 description: When user doesn't have `manage_users` capability.
         """
-        pending = bool(request.args.get('pending', False))
+        pending = bool(request.args.get("pending", False))
         objs = db.session.query(User).filter(User.pending == pending).all()
         schema = UserListResponseSchema()
         return schema.dump({"users": objs})
@@ -99,30 +104,41 @@ class UserPendingResource(Resource):
             403:
                 description: When user doesn't have `manage_users` capability.
             500:
-                description: When SMTP server is unavailable or not properly configured on the server.
+                description: |
+                    When SMTP server is unavailable or not properly
+                    configured on the server.
         """
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
-        user = db.session.query(User).filter(User.login == login, User.pending == true()).first()
+        user = (
+            db.session.query(User)
+            .filter(User.login == user_login_obj["login"], User.pending == true())
+            .first()
+        )
         user.pending = False
         user.registered_on = datetime.datetime.now()
         user.registered_by = g.auth_user.id
         db.session.add(user)
 
         try:
-            send_email_notification("register",
-                                    "New account registered in MWDB",
-                                    user.email,
-                                    base_url=app_config.mwdb.base_url,
-                                    login=user.login,
-                                    set_password_token=user.generate_set_password_token().decode("utf-8"))
+            send_email_notification(
+                "register",
+                "New account registered in MWDB",
+                user.email,
+                base_url=app_config.mwdb.base_url,
+                login=user.login,
+                set_password_token=user.generate_set_password_token().decode("utf-8"),
+            )
         except MailError:
             logger.exception("Can't send e-mail notification")
-            raise InternalServerError("SMTP server needed to fulfill this request is not configured or unavailable.")
+            raise InternalServerError(
+                "SMTP server needed to fulfill this request "
+                "is not configured or unavailable."
+            )
 
         db.session.commit()
 
-        logger.info('User accepted', extra={'user': user.login})
+        logger.info("User accepted", extra={"user": user.login})
         schema = UserSuccessResponseSchema()
         return schema.dump({"login": user.login})
 
@@ -158,37 +174,60 @@ class UserPendingResource(Resource):
             404:
                 description: When user doesn't exist or is already accepted/rejected.
             500:
-                description: When SMTP server is unavailable or not properly configured on the server.
+                description: |
+                    When SMTP server is unavailable or not properly configured
+                    on the server.
         """
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         obj = load_schema(request.args, UserRejectRequestArgsSchema())
-        user = db.session.query(User).filter(User.login == login, User.pending == true()).first()
+        user = (
+            db.session.query(User)
+            .filter(User.login == user_login_obj["login"], User.pending == true())
+            .first()
+        )
         if not user:
             raise NotFound("User doesn't exist or is already rejected")
-        group = db.session.query(Group).filter(Group.name == login).first()
+        group = (
+            db.session.query(Group)
+            .filter(Group.name == user_login_obj["login"])
+            .first()
+        )
         user.groups.remove(group)
         db.session.delete(group)
         db.session.delete(user)
         db.session.commit()
         if obj["send_email"]:
             try:
-                send_email_notification("rejection",
-                                        "MWDB account request has been rejected",
-                                        user.email,
-                                        base_url=app_config.mwdb.base_url,
-                                        login=user.login,
-                                        set_password_token=user.generate_set_password_token().decode("utf-8"))
+                send_email_notification(
+                    "rejection",
+                    "MWDB account request has been rejected",
+                    user.email,
+                    base_url=app_config.mwdb.base_url,
+                    login=user.login,
+                    set_password_token=user.generate_set_password_token().decode(
+                        "utf-8"
+                    ),
+                )
             except MailError:
                 logger.exception("Can't send e-mail notification")
-                raise InternalServerError("SMTP server needed to fulfill this request is not configured or unavailable.")
+                raise InternalServerError(
+                    "SMTP server needed to fulfill this request "
+                    "is not configured or unavailable."
+                )
 
-            logger.info('User rejected with notification', extra={'user': login})
+            logger.info(
+                "User rejected with notification",
+                extra={"user": user_login_obj["login"]},
+            )
         else:
-            logger.info('User rejected without notification', extra={'user': login})
+            logger.info(
+                "User rejected without notification",
+                extra={"user": user_login_obj["login"]},
+            )
 
         schema = UserSuccessResponseSchema()
-        return schema.dump({"login": login})
+        return schema.dump({"login": user_login_obj["login"]})
 
 
 class UserGetPasswordChangeTokenResource(Resource):
@@ -230,9 +269,7 @@ class UserGetPasswordChangeTokenResource(Resource):
 
         token = user.generate_set_password_token()
 
-        logger.info("Set password token generated", extra={
-            "user": login
-        })
+        logger.info("Set password token generated", extra={"user": login})
         schema = UserSetPasswordTokenResponseSchema()
         return schema.dump({"login": login, "token": token})
 
@@ -309,7 +346,9 @@ class UserResource(Resource):
             409:
                 description: When user or group with provided name already exists.
             500:
-                description: When SMTP server is unavailable or not properly configured on the server.
+                description: |
+                    When SMTP server is unavailable or not properly configured
+                    on the server.
         """
         schema = UserCreateRequestSchema()
 
@@ -317,36 +356,46 @@ class UserResource(Resource):
 
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
-        if db.session.query(exists().where(User.login == login)).scalar():
+        if db.session.query(
+            exists().where(User.login == user_login_obj["login"])
+        ).scalar():
             raise Conflict("User exists yet")
 
-        if db.session.query(exists().where(Group.name == login)).scalar():
+        if db.session.query(
+            exists().where(Group.name == user_login_obj["login"])
+        ).scalar():
             raise Conflict("Group exists yet")
 
         user = User.create(
-            login,
+            user_login_obj["login"],
             obj["email"],
             obj["additional_info"],
             pending=False,
-            feed_quality=obj["feed_quality"]
+            feed_quality=obj["feed_quality"],
         )
 
         if obj["send_email"]:
             try:
-                send_email_notification("register",
-                                        "New account registered in MWDB",
-                                        user.email,
-                                        base_url=app_config.mwdb.base_url,
-                                        login=user.login,
-                                        set_password_token=user.generate_set_password_token().decode("utf-8"))
+                send_email_notification(
+                    "register",
+                    "New account registered in MWDB",
+                    user.email,
+                    base_url=app_config.mwdb.base_url,
+                    login=user.login,
+                    set_password_token=user.generate_set_password_token().decode(
+                        "utf-8"
+                    ),
+                )
             except MailError:
                 logger.exception("Can't send e-mail notification")
-                raise InternalServerError("SMTP server needed to fulfill this request is"
-                                          " not configured or unavailable.")
+                raise InternalServerError(
+                    "SMTP server needed to fulfill this request is"
+                    " not configured or unavailable."
+                )
 
         db.session.commit()
 
-        logger.info('User created', extra={'user': user.login})
+        logger.info("User created", extra={"user": user.login})
         schema = UserSuccessResponseSchema()
         return schema.dump({"login": user.login})
 
@@ -384,7 +433,9 @@ class UserResource(Resource):
             400:
                 description: When request body is invalid
             403:
-                description: When user doesn't have `manage_users` capability or modified user is pending.
+                description: |
+                    When user doesn't have `manage_users` capability
+                    or modified user is pending.
             404:
                 description: When user doesn't exist.
         """
@@ -394,7 +445,9 @@ class UserResource(Resource):
 
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
-        user = db.session.query(User).filter(User.login == login).first()
+        user = (
+            db.session.query(User).filter(User.login == user_login_obj["login"]).first()
+        )
         if user is None:
             raise NotFound("No such user")
 
@@ -419,10 +472,10 @@ class UserResource(Resource):
             user.reset_sessions()
 
         db.session.commit()
-        logger.info('User updated', extra=obj)
+        logger.info("User updated", extra=obj)
 
         schema = UserSuccessResponseSchema()
-        return schema.dump({"login": login})
+        return schema.dump({"login": user_login_obj["login"]})
 
 
 class UserProfileResource(Resource):
@@ -455,18 +508,24 @@ class UserProfileResource(Resource):
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         if g.auth_user.has_rights(Capabilities.manage_users):
-            user = db.session.query(User).filter(User.login == login).first()
+            user = (
+                db.session.query(User)
+                .filter(User.login == user_login_obj["login"])
+                .first()
+            )
         else:
-            user = (db.session.query(User)
-                              .join(User.memberships)
-                              .join(Member.group)
-                              .filter(Group.name != "public")
-                              .filter(g.auth_user.is_member(Group.id))
-                              .filter(User.login == login)).first()
+            user = (
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
+                .filter(Group.name != "public")
+                .filter(g.auth_user.is_member(Group.id))
+                .filter(User.login == user_login_obj["login"])
+            ).first()
         if user is None:
             raise NotFound("User doesn't exist or is not a member of your group")
 
-        if g.auth_user.login == login:
+        if g.auth_user.login == user_login_obj["login"]:
             schema = UserOwnProfileResponseSchema()
         else:
             schema = UserProfileResponseSchema()

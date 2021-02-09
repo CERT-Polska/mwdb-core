@@ -1,6 +1,6 @@
 import re
 
-from marshmallow import Schema, fields, pre_load, validates, ValidationError
+from marshmallow import Schema, ValidationError, fields, pre_load, validates
 
 
 class MetakeyKeySchema(Schema):
@@ -17,7 +17,8 @@ class MetakeyKeySchema(Schema):
     def validate_key(self, value):
         if not re.match("^[A-Za-z0-9_-]{1,32}$", value):
             raise ValidationError(
-                "Key should contain max 32 chars and include only letters, digits, underscores and dashes"
+                "Key should contain max 32 chars and include only letters, "
+                "digits, underscores and dashes"
             )
 
 

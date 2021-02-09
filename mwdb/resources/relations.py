@@ -2,10 +2,10 @@ from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import db, Object
+from mwdb.model import Object, db
 from mwdb.schema.relations import RelationsResponseSchema
 
-from . import logger, requires_authorization, requires_capabilities, access_object
+from . import access_object, logger, requires_authorization, requires_capabilities
 
 
 class RelationsResource(Resource):
@@ -41,7 +41,9 @@ class RelationsResource(Resource):
                   application/json:
                     schema: RelationsResponseSchema
             404:
-                description: When object doesn't exist or user doesn't have access to this object.
+                description: |
+                    When object doesn't exist or user doesn't have
+                    access to this object.
         """
         db_object = access_object(type, identifier)
         if db_object is None:
@@ -91,7 +93,9 @@ class ObjectChildResource(Resource):
             403:
                 description: When user doesn't have `adding_parents` capability.
             404:
-                description: When one of objects doesn't exist or user doesn't have access to object.
+                description: |
+                    When one of objects doesn't exist or user
+                    doesn't have access to object.
         """
         parent_object = access_object(type, parent)
         if parent_object is None:
@@ -104,7 +108,7 @@ class ObjectChildResource(Resource):
         child_object.add_parent(parent_object, commit=False)
 
         db.session.commit()
-        logger.info('Child added', extra={
-            'parent': parent_object.dhash,
-            'child': child_object.dhash
-        })
+        logger.info(
+            "Child added",
+            extra={"parent": parent_object.dhash, "child": child_object.dhash},
+        )

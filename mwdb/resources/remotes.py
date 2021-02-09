@@ -1,17 +1,20 @@
-from flask_restful import Resource
-from flask import g
+from tempfile import SpooledTemporaryFile
+
 import requests
-from mwdb.core.plugins import hooks
-from werkzeug.exceptions import BadRequest, Conflict, NotFound, Forbidden
+from flask import g
+from flask_restful import Resource
+from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
+
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.schema.remotes import RemotesListResponseSchema
-from mwdb.model import db, File, Config, TextBlob
+from mwdb.core.plugins import hooks
+from mwdb.model import Config, File, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
-from mwdb.schema.file import FileItemResponseSchema
-from mwdb.schema.config import ConfigItemResponseSchema
 from mwdb.schema.blob import BlobItemResponseSchema
-from tempfile import SpooledTemporaryFile
+from mwdb.schema.config import ConfigItemResponseSchema
+from mwdb.schema.file import FileItemResponseSchema
+from mwdb.schema.remotes import RemotesListResponseSchema
+
 from . import access_object, logger, requires_authorization
 
 
@@ -55,15 +58,24 @@ class RemoteAPI:
         elif response.status_code == 404:
             raise NotFound("Remote object not found")
         elif response.status_code == 403:
-            raise Forbidden("You are not permitted to perform this action on remote instance")
+            raise Forbidden(
+                "You are not permitted to perform this action on remote instance"
+            )
         elif response.status_code == 409:
-            raise Conflict("Remote object already exists in remote instance and has different type")
+            raise Conflict(
+                "Remote object already exists in remote instance and has different type"
+            )
         else:
             response.raise_for_status()
 
     def request(self, method, path, *args, raw=False, **kwargs):
-        response = self.session.request(method, f"{self.remote_url}/api/{path}", *args,
-                                        headers={'Authorization': f'Bearer {self.api_key}'}, **kwargs)
+        response = self.session.request(
+            method,
+            f"{self.remote_url}/api/{path}",
+            *args,
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            **kwargs,
+        )
         self.map_remote_api_error(response)
         return response if raw else response.json()
 
@@ -107,10 +119,10 @@ class RemotePullResource(Resource):
         finally:
             item.release_after_upload()
 
-        logger.info(f'{self.ObjectType.__name__} added', extra={
-            'dhash': item.dhash,
-            'is_new': is_new
-        })
+        logger.info(
+            f"{self.ObjectType.__name__} added",
+            extra={"dhash": item.dhash, "is_new": is_new},
+        )
         schema = self.ItemResponseSchema()
         return schema.dump(item)
 
@@ -151,27 +163,31 @@ class RemoteFilePullResource(RemotePullResource):
                   application/json:
                     schema: FileItemResponseSchema
             404:
-                description: When the name of the remote instance is not figured in the application config
+                description: |
+                    When the name of the remote instance is not figured
+                    in the application config
             409:
                 description: Object exists yet but has different type
         """
         remote = RemoteAPI(remote_name)
         response = remote.request("GET", f"file/{identifier}")
-        file_name = response['file_name']
+        file_name = response["file_name"]
 
         response = remote.request("POST", f"request/sample/{identifier}")
-        download_url = response['url']
+        download_url = response["url"]
 
         response = remote.request("GET", download_url, raw=True, stream=True)
         with SpooledTemporaryFile() as file_stream:
-            for chunk in response.iter_content(chunk_size=2**16):
+            for chunk in response.iter_content(chunk_size=2 ** 16):
                 file_stream.write(chunk)
             file_stream.seek(0)
             try:
                 item, is_new = File.get_or_create(
                     file_name=file_name,
                     file_stream=file_stream,
-                    share_with=[group for group in g.auth_user.groups if group.name != "public"]
+                    share_with=[
+                        group for group in g.auth_user.groups if group.name != "public"
+                    ],
                 )
             except ObjectTypeConflictError:
                 raise Conflict("Object already exists locally and is not a file")
@@ -215,9 +231,13 @@ class RemoteConfigPullResource(RemotePullResource):
                   application/json:
                     schema: ConfigItemResponseSchema
             403:
-                description: No permissions to perform additional operations (e.g. adding parent, metakeys)
+                description: |
+                    No permissions to perform additional operations
+                    (e.g. adding parent, metakeys)
             404:
-                description: When the name of the remote instance is not figured in the application config
+                description: |
+                    When the name of the remote instance is not figured
+                    in the application config
             409:
                 description: Object exists yet but has different type
         """
@@ -235,7 +255,10 @@ class RemoteConfigPullResource(RemotePullResource):
                         raise BadRequest("'in-blob' is not a correct blob reference")
                     blob_obj = TextBlob.access(in_blob)
                     if not blob_obj:
-                        raise NotFound(f"Blob {in_blob} is referenced by config but doesn't exist locally")
+                        raise NotFound(
+                            f"Blob {in_blob} is referenced by config "
+                            f"but doesn't exist locally"
+                        )
                     blobs.append(blob_obj)
                     config[first]["in-blob"] = blob_obj.dhash
 
@@ -246,9 +269,11 @@ class RemoteConfigPullResource(RemotePullResource):
                 cfg=spec["cfg"],
                 family=spec["family"],
                 config_type=spec["config_type"],
-                share_with=[group for group in g.auth_user.groups if group.name != "public"]
+                share_with=[
+                    group for group in g.auth_user.groups if group.name != "public"
+                ],
             )
-            
+
             for blob in blobs:
                 blob.add_parent(item, commit=False)
 
@@ -293,8 +318,9 @@ class RemoteTextBlobPullResource(RemotePullResource):
                 content:
                   application/json:
                     schema: BlobItemResponseSchema
-            404:
-                description: When the name of the remote instance is not figured in the application config
+                description: |
+                    When the name of the remote instance is not figured
+                    in the application config
             409:
                 description: Object exists yet but has different type
         """
@@ -305,7 +331,9 @@ class RemoteTextBlobPullResource(RemotePullResource):
                 content=spec["content"],
                 blob_name=spec["blob_name"],
                 blob_type=spec["blob_type"],
-                share_with=[group for group in g.auth_user.groups if group.name != "public"]
+                share_with=[
+                    group for group in g.auth_user.groups if group.name != "public"
+                ],
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")
@@ -340,20 +368,22 @@ class RemoteFilePushResource(RemotePullResource):
             200:
                 description: Information about pushed fie
             404:
-                description: When the name of the remote instance is not figured in the application config
-                             or object doesn't exist
+                description: |
+                    When the name of the remote instance is not figured
+                    in the application config or object doesn't exist
         """
-        db_object = access_object('file', identifier)
+        db_object = access_object("file", identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
         remote = RemoteAPI(remote_name)
-        response = remote.request("POST", "file",
-                                  files={'file': (db_object.file_name, db_object.open())})
-        logger.info(f'{db_object.type} pushed remote', extra={
-            'dhash': db_object.dhash,
-            'remote_name': remote_name
-        })
+        response = remote.request(
+            "POST", "file", files={"file": (db_object.file_name, db_object.open())}
+        )
+        logger.info(
+            f"{db_object.type} pushed remote",
+            extra={"dhash": db_object.dhash, "remote_name": remote_name},
+        )
         return response
 
 
@@ -384,10 +414,11 @@ class RemoteConfigPushResource(RemotePullResource):
             200:
                 description: Information about pushed config
             404:
-                description: When the name of the remote instance is not figured in the application config
-                             or object doesn't exist
+                description: |
+                    When the name of the remote instance is not figured
+                    in the application config or object doesn't exist
         """
-        db_object = access_object('config', identifier)
+        db_object = access_object("config", identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
@@ -395,13 +426,13 @@ class RemoteConfigPushResource(RemotePullResource):
         params = {
             "family": db_object.family,
             "cfg": db_object.cfg,
-            "config_type": db_object.config_type
+            "config_type": db_object.config_type,
         }
         response = remote.request("POST", "config", json=params)
-        logger.info(f'{db_object.type} pushed remote', extra={
-            'dhash': db_object.dhash,
-            'remote_name': remote_name
-        })
+        logger.info(
+            f"{db_object.type} pushed remote",
+            extra={"dhash": db_object.dhash, "remote_name": remote_name},
+        )
         return response
 
 
@@ -432,10 +463,11 @@ class RemoteTextBlobPushResource(RemotePullResource):
             200:
                 description: Information about pushed text blob
             404:
-                description: When the name of the remote instance is not figured in the application config
-                             or object doesn't exist
+                description: |
+                    When the name of the remote instance is not figured
+                    in the application config or object doesn't exist
         """
-        db_object = access_object('blob', identifier)
+        db_object = access_object("blob", identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
@@ -443,11 +475,11 @@ class RemoteTextBlobPushResource(RemotePullResource):
         params = {
             "blob_name": db_object.blob_name,
             "blob_type": db_object.blob_type,
-            "content": db_object.content
+            "content": db_object.content,
         }
         response = remote.request("POST", "blob", json=params)
-        logger.info(f'{db_object.type} pushed remote', extra={
-            'dhash': db_object.dhash,
-            'remote_name': remote_name
-        })
+        logger.info(
+            f"{db_object.type} pushed remote",
+            extra={"dhash": db_object.dhash, "remote_name": remote_name},
+        )
         return response

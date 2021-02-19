@@ -5,6 +5,7 @@ import Pagination from "react-js-pagination";
 import _ from "lodash";
 
 import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -104,6 +105,7 @@ function CommentForm(props) {
 }
 
 function CommentBox() {
+    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const itemsCountPerPage = 5;

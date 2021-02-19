@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import Autocomplete from "react-autocomplete";
 
 import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     RefString,
@@ -119,6 +120,7 @@ function ShareForm(props) {
 }
 
 function SharesBox() {
+    const api = useContext(APIContext);
     const context = useContext(ObjectContext);
 
     const [groups, setGroups] = useState([]);

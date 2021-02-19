@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useContext } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -9,7 +9,7 @@ import ShareBox from "./Views/SharesBox";
 import TagBox from "./Views/TagBox";
 import AttributesBox from "./Views/AttributesBox";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/extensions";
 import { View } from "@mwdb-web/commons/ui";
@@ -34,6 +34,7 @@ function objectStateReducer(state, action) {
 }
 
 export default function ShowObject(props) {
+    const api = useContext(APIContext);
     const [objectState, setObjectState] = useReducer(
         objectStateReducer,
         initialObjectState

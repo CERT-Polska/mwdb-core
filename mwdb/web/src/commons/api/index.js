@@ -362,6 +362,70 @@ function getConfigStats(fromTime) {
     });
 }
 
+function getRemoteObject(remote, type, id) {
+    return axios.get(`remote/${remote}/api/${type}/${id}`);
+}
+
+function getRemoteObjectList(remote, type, older_than, query) {
+    return axios.get(`remote/${remote}/api/${type}`, {
+        params: { older_than, query },
+    });
+}
+
+function getRemoteObjectCount(remote, type, query) {
+    return axios.get(`remote/${remote}/api/${type}/count`, {
+        params: { query },
+    });
+}
+
+function getRemoteObjectTags(remote, id) {
+    return axios.get(`remote/${remote}/api/object/${id}/tag`);
+}
+
+function getRemoteObjectComments(remote, id) {
+    return axios.get(`remote/${remote}/api/object/${id}/comment`);
+}
+
+function getRemoteObjectRelations(remote, id) {
+    return axios.get(`remote/${remote}/api/object/${id}/relations`);
+}
+
+function getRemoteObjectShares(remote, id) {
+    return axios.get(`/object/${id}/share`);
+}
+
+function getRemoteObjectMetakeys(remote, id) {
+    return axios.get(`remote/${remote}/api/object/${id}/meta`);
+}
+
+function addRemoteObjectFavorite(remote, id) {
+    return axios.put(`remote/${remote}/api/object/${id}/favorite`);
+}
+
+function removeRemoteObjectFavorite(remote, id) {
+    return axios.delete(`remote/${remote}/api/object/${id}/favorite`);
+}
+
+function remoteSearch(remote, query) {
+    return axios.post(`remote/${remote}/api/search`, { query });
+}
+
+function addRemoteQuickQuery(remote, type, name, query) {
+    return axios.post(`remote/${remote}/api/${type}/quick_query`, {
+        type,
+        name,
+        query,
+    });
+}
+
+function getRemoteQuickQueries(remote, type) {
+    return axios.get(`remote/${remote}/api/${type}/quick_query`);
+}
+
+function deleteRemoteQuickQuery(remote, id) {
+    return axios.delete(`remote/${remote}/api/quick_query/${id}`);
+}
+
 export default {
     axios,
     getApiForEnvironment,
@@ -434,4 +498,18 @@ export default {
     getConfigStats,
     getObjectRelations,
     addObjectRelation,
+    getRemoteObject,
+    getRemoteObjectList,
+    getRemoteObjectCount,
+    getRemoteObjectTags,
+    getRemoteObjectComments,
+    getRemoteObjectRelations,
+    getRemoteObjectShares,
+    getRemoteObjectMetakeys,
+    addRemoteObjectFavorite,
+    removeRemoteObjectFavorite,
+    remoteSearch,
+    addRemoteQuickQuery,
+    getRemoteQuickQueries,
+    deleteRemoteQuickQuery,
 };

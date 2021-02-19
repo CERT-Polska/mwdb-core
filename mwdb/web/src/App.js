@@ -7,7 +7,7 @@ import RecentConfigs from "./components/RecentConfigs";
 import RecentSamples from "./components/RecentSamples";
 import ConfigStats from "./components/ConfigStats";
 import RecentBlobs from "./components/RecentBlobs";
-import RemoteShowSample from "./components/RemoteShowSample";
+import RemoteShowSample from "./components/Remote/RemoteShowSample";
 import ShowSample from "./components/ShowSample";
 import ShowConfig from "./components/ShowConfig";
 import ShowTextBlob from "./components/ShowTextBlob";
@@ -154,7 +154,10 @@ export default function App() {
                 path="/profile/:login"
                 component={UserProfile}
             />
-            <AuthenticatedRoute path="/remote/sample/:hash" component={RemoteShowSample} />
+            <AuthenticatedRoute
+                path="/remote/sample/:hash"
+                component={RemoteShowSample}
+            />
             <AuthenticatedRoute path="/sample/:hash" component={ShowSample} />
             <AuthenticatedRoute path="/config/:hash" component={ShowConfig} />
             <AuthenticatedRoute path="/blob/:hash" component={ShowTextBlob} />

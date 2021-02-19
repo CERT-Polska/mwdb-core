@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, useCallback } from "react";
 import Autocomplete from "react-autocomplete";
 
 import api from "@mwdb-web/commons/api";
-import { useAPI } from "@mwdb-web/commons/api/provider";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -108,7 +108,7 @@ function TagForm(props) {
 }
 
 export default function TagBox() {
-    const api2 = useAPI();
+    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const [tags, setTags] = useState([]);
@@ -117,7 +117,7 @@ export default function TagBox() {
 
     async function updateTags() {
         try {
-            let response = await api2.getObjectTags(context.object.id);
+            let response = await api.getObjectTags(context.object.id);
             let tags = response.data;
             setTags(tags);
         } catch (error) {

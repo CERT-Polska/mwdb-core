@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router";
+import { useRouteMatch } from "react-router-dom";
 
 import { TabContext } from "@mwdb-web/commons/ui";
 
@@ -19,18 +20,16 @@ export default function ObjectBox(props) {
     const history = useHistory();
     const [Component, setComponent] = useComponentState(() => []);
     const [actions, setActions] = useState([]);
-
-    const tab = history.location.pathname.split("/")[3] || props.defaultTab;
-    const subTab = history.location.pathname.split("/")[4];
+    // /sample/:hash/details
+    // routePath => /sample/:hash
+    // tabPath => /details
+    const routePath = useRouteMatch().url;
+    const tabPath = history.location.pathname.slice(routePath.length);
+    const tab = tabPath.split("/")[1] || props.defaultTab;
+    const subTab = tabPath.split("/")[2];
 
     function getTabLink(tab, subtab) {
-        let pathElements = history.location.pathname.split("/");
-        let newPath = pathElements
-            .slice(0, 3)
-            .concat([tab])
-            .concat(subtab ? [subtab] : [])
-            .join("/");
-        return newPath;
+        return routePath + "/" + [tab].concat(subtab ? [subtab] : []).join("/");
     }
 
     const tabButtons = props.children;

@@ -33,11 +33,11 @@ https://gist.github.com/Chaser324/ce0505fbed06b947d962).
    flake8 mwdb/
    ```
    
-   For JS code, use Prettify.
+   For JS code, use Prettier.
    ```
    cd mwdb/web
    npm install --only=dev
-   npx prettify --write src/
+   npx prettier --write src/
    ```
 
 6. When you feel like you're done, commit the files:

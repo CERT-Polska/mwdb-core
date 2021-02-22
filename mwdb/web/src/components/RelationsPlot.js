@@ -1,9 +1,9 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect, useContext } from "react";
 import { useHistory } from "react-router";
 
 import queryString from "query-string";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { capitalize } from "@mwdb-web/commons/helpers";
 
 import DagreD3Plot from "./DagreD3Plot";
@@ -66,6 +66,7 @@ function RelationsNode(props) {
 }
 
 function RelationsPlot(props) {
+    const api = useContext(APIContext);
     const history = useHistory();
     const { hash, height } = props;
 

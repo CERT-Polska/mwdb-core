@@ -155,7 +155,7 @@ export default function App() {
                 component={UserProfile}
             />
             <AuthenticatedRoute
-                path="/remote/sample/:hash"
+                path="/remote/:remote/sample/:hash"
                 component={RemoteShowSample}
             />
             <AuthenticatedRoute path="/sample/:hash" component={ShowSample} />

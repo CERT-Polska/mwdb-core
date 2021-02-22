@@ -3,11 +3,12 @@ import React, { useContext } from "react";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 
-export default function FavoriteAction(props) {
+export default function FavoriteAction() {
+    const api = useContext(APIContext);
     const context = useContext(ObjectContext);
 
     async function markFavoriteObject() {

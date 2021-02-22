@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     ObjectLink,
@@ -12,6 +12,7 @@ import {
 import RelationsAddModal from "../Actions/RelationsAddModal";
 
 function RelationsBox(props) {
+    const api = useContext(APIContext);
     const context = useContext(ObjectContext);
     const [isAttributeAddModalOpen, setAttributeAddModalOpen] = useState(false);
     const [modalError, setModalError] = useState("");

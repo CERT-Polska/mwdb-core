@@ -22,7 +22,7 @@ import {
     faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import {
     makeSearchLink,
     makeSearchDateLink,
@@ -212,6 +212,7 @@ function SampleDetails() {
 
 function SamplePreview() {
     const [content, setContent] = useState("");
+    const api = useContext(APIContext);
     const objectContext = useContext(ObjectContext);
     const tabContext = useTabContext();
 
@@ -267,6 +268,7 @@ function PreviewSwitchAction(props) {
 }
 
 export default function ShowSample(props) {
+    const api = useContext(APIContext);
     async function downloadSample(object) {
         let response = await api.requestFileDownload(object.id);
         window.location.href =

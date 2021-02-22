@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 
 import queryString from "query-string";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import {
     encodeSearchQuery,
     decodeSearchQuery,
@@ -31,7 +31,7 @@ export default function RecentView(props) {
      *                   check if query syntax is correct and there are no other errors.
      * - queryInput:     state of query input
      */
-
+    const api = useContext(APIContext);
     const getLinkForQuery = (query) =>
         `${props.location.pathname}?${queryString.stringify({
             ...queryString.parse(props.location.search),

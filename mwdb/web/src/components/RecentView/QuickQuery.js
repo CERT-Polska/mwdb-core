@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
@@ -47,6 +47,7 @@ function UploaderQueryItem(props) {
 }
 
 export default function QuickQuery(props) {
+    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
 
     const [addModalOpen, setAddModalOpen] = useState(false);

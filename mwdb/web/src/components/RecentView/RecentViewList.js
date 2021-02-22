@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 
 export default function RecentViewList(props) {
+    const api = useContext(APIContext);
     const infiniteScroll = useRef(null);
     // Loaded object items
     let [elements, setElements] = useState([]);

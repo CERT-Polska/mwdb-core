@@ -343,15 +343,15 @@ function getRemoteNames() {
 }
 
 function pushObjectRemote(remote, type, identifier) {
-    return axios.post(`remote/${remote}/push/${type}/${identifier}`);
+    return axios.post(`/remote/${remote}/push/${type}/${identifier}`);
 }
 
 function pullObjectRemote(remote, type, identifier) {
-    return axios.post(`remote/${remote}/pull/${type}/${identifier}`);
+    return axios.post(`/remote/${remote}/pull/${type}/${identifier}`);
 }
 
 function getObjectRemote(remote, identifier) {
-    return axios.get(`remote/${remote}/api/object/${identifier}`);
+    return axios.get(`/remote/${remote}/api/object/${identifier}`);
 }
 
 function getConfigStats(fromTime) {
@@ -363,55 +363,55 @@ function getConfigStats(fromTime) {
 }
 
 function getRemoteObject(remote, type, id) {
-    return axios.get(`remote/${remote}/api/${type}/${id}`);
+    return axios.get(`/remote/${remote}/api/${type}/${id}`);
 }
 
 function getRemoteObjectList(remote, type, older_than, query) {
-    return axios.get(`remote/${remote}/api/${type}`, {
+    return axios.get(`/remote/${remote}/api/${type}`, {
         params: { older_than, query },
     });
 }
 
 function getRemoteObjectCount(remote, type, query) {
-    return axios.get(`remote/${remote}/api/${type}/count`, {
+    return axios.get(`/remote/${remote}/api/${type}/count`, {
         params: { query },
     });
 }
 
 function getRemoteObjectTags(remote, id) {
-    return axios.get(`remote/${remote}/api/object/${id}/tag`);
+    return axios.get(`/remote/${remote}/api/object/${id}/tag`);
 }
 
 function getRemoteObjectComments(remote, id) {
-    return axios.get(`remote/${remote}/api/object/${id}/comment`);
+    return axios.get(`/remote/${remote}/api/object/${id}/comment`);
 }
 
 function getRemoteObjectRelations(remote, id) {
-    return axios.get(`remote/${remote}/api/object/${id}/relations`);
+    return axios.get(`/remote/${remote}/api/object/${id}/relations`);
 }
 
 function getRemoteObjectShares(remote, id) {
-    return axios.get(`/object/${id}/share`);
+    return axios.get(`/remote/${remote}/api/object/${id}/share`);
 }
 
 function getRemoteObjectMetakeys(remote, id) {
-    return axios.get(`remote/${remote}/api/object/${id}/meta`);
+    return axios.get(`/remote/${remote}/api/object/${id}/meta`);
 }
 
 function addRemoteObjectFavorite(remote, id) {
-    return axios.put(`remote/${remote}/api/object/${id}/favorite`);
+    return axios.put(`/remote/${remote}/api/object/${id}/favorite`);
 }
 
 function removeRemoteObjectFavorite(remote, id) {
-    return axios.delete(`remote/${remote}/api/object/${id}/favorite`);
+    return axios.delete(`/remote/${remote}/api/object/${id}/favorite`);
 }
 
 function remoteSearch(remote, query) {
-    return axios.post(`remote/${remote}/api/search`, { query });
+    return axios.post(`/remote/${remote}/api/search`, { query });
 }
 
 function addRemoteQuickQuery(remote, type, name, query) {
-    return axios.post(`remote/${remote}/api/${type}/quick_query`, {
+    return axios.post(`/remote/${remote}/api/${type}/quick_query`, {
         type,
         name,
         query,
@@ -419,11 +419,11 @@ function addRemoteQuickQuery(remote, type, name, query) {
 }
 
 function getRemoteQuickQueries(remote, type) {
-    return axios.get(`remote/${remote}/api/${type}/quick_query`);
+    return axios.get(`/remote/${remote}/api/${type}/quick_query`);
 }
 
 function deleteRemoteQuickQuery(remote, id) {
-    return axios.delete(`remote/${remote}/api/quick_query/${id}`);
+    return axios.delete(`/remote/${remote}/api/quick_query/${id}`);
 }
 
 export default {

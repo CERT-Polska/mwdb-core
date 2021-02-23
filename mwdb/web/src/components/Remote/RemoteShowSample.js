@@ -6,7 +6,6 @@ import { useParams } from "react-router-dom";
 
 export default function RemoteShowSample(props) {
     let { remote } = useParams();
-    console.log(remote);
     return (
         <APIContext.Provider
             value={{

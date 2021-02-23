@@ -3,7 +3,7 @@ import re
 from marshmallow import Schema, ValidationError, fields, validates
 
 from .api_key import APIKeyListItemResponseSchema
-from .group import GroupBasicResponseSchema, GroupItemResponseSchema
+from .group import GroupBasicResponseSchema, GroupNameSchemaBase
 from .utils import UTCDateTime
 
 
@@ -74,7 +74,7 @@ class UserListItemResponseSchema(UserLoginSchemaBase):
     disabled = fields.Boolean(required=True, allow_none=False)
     pending = fields.Boolean(required=True, allow_none=False)
     groups = fields.Nested(
-        GroupItemResponseSchema, many=True, required=True, allow_none=False
+        GroupNameSchemaBase, many=True, required=True, allow_none=False
     )
 
 

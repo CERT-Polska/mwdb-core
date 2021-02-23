@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router";
+import { useRouteMatch } from "react-router-dom";
 
 import { TabContext } from "@mwdb-web/commons/ui";
-import { useParams } from "react-router-dom";
 
 function useComponentState(initialState) {
     // Functions (and components) are just called by useState and setter,
@@ -18,24 +18,18 @@ function useComponentState(initialState) {
 
 export default function ObjectBox(props) {
     const history = useHistory();
-    const { remote } = useParams();
     const [Component, setComponent] = useComponentState(() => []);
     const [actions, setActions] = useState([]);
-    let splitPoint = 0;
-    if (remote) splitPoint = 2;
-    const tab =
-        history.location.pathname.split("/")[3 + splitPoint] ||
-        props.defaultTab;
-    const subTab = history.location.pathname.split("/")[4 + splitPoint];
+    // /sample/:hash/details
+    // routePath => /sample/:hash
+    // tabPath => /details
+    const routePath = useRouteMatch().url;
+    const tabPath = history.location.pathname.slice(routePath.length);
+    const tab = tabPath.split("/")[1] || props.defaultTab;
+    const subTab = tabPath.split("/")[2];
 
     function getTabLink(tab, subtab) {
-        let pathElements = history.location.pathname.split("/");
-        let newPath = pathElements
-            .slice(0, 3 + splitPoint)
-            .concat([tab])
-            .concat(subtab ? [subtab] : [])
-            .join("/");
-        return newPath;
+        return routePath + "/" + [tab].concat(subtab ? [subtab] : []).join("/");
     }
 
     const tabButtons = props.children;

@@ -3,6 +3,7 @@ import AttributesAddModal from "./AttributesAddModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
@@ -134,7 +135,9 @@ class ObjectAttributes extends Component {
     updateAttributes = async () => {
         if (typeof this.props.object.id === "undefined") return;
         try {
-            let response = await api.getObjectMetakeys(this.props.object.id);
+            let response = await this.props.api.getObjectMetakeys(
+                this.props.object.id
+            );
             let aggregated = response.data.metakeys.reduce((agg, m) => {
                 let label = m.label || m.key;
                 return {
@@ -152,7 +155,11 @@ class ObjectAttributes extends Component {
 
     addAttribute = async (key, value) => {
         try {
-            await api.addObjectMetakey(this.props.object.id, key, value);
+            await this.props.api.addObjectMetakey(
+                this.props.object.id,
+                key,
+                value
+            );
             await this.updateAttributes();
             this.props.onRequestModalClose();
         } catch (error) {
@@ -216,4 +223,10 @@ class ObjectAttributes extends Component {
     }
 }
 
-export default ObjectAttributes;
+function ConnectedObjectAttributes(props) {
+    let auth = useContext(AuthContext);
+    let api = useContext(APIContext);
+    return <ObjectAttributes {...props} auth={auth} api={api} />;
+}
+
+export default ConnectedObjectAttributes;

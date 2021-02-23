@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Extendable } from "@mwdb-web/commons/extensions";
 import { ObjectContext } from "@mwdb-web/commons/context";
-import ObjectAttributes from "../../Attributes";
+import ConnectedObjectAttributes from "../../Attributes";
 
 export default function AttributesBox() {
     const context = useContext(ObjectContext);
@@ -26,7 +26,7 @@ export default function AttributesBox() {
                         Add
                     </Link>
                 </div>
-                <ObjectAttributes
+                <ConnectedObjectAttributes
                     object={context.object}
                     isModalOpen={isAttributeAddModalOpen}
                     onRequestModalClose={() => setAttributeAddModalOpen(false)}

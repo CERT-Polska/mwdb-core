@@ -170,7 +170,7 @@ function ObjectAttributes(props) {
         <Extendable
             ident="attributesList"
             attributes={attributes}
-            onUpdateAttributes={this.updateAttributes}
+            onUpdateAttributes={updateAttributes}
             object={context.object}
         >
             {Object.keys(attributes).length > 0 ? (

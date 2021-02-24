@@ -1,11 +1,11 @@
 import React from "react";
-import ShowSample from "../ShowSample";
+import ShowConfig from "../ShowConfig";
 import RemoteShowObject from "./RemoteShowObject";
 
-export default function RemoteShowSample(props) {
+export default function RemoteShowConfig(props) {
     return (
         <RemoteShowObject>
-            <ShowSample {...props} />
+            <ShowConfig {...props} />
         </RemoteShowObject>
     );
 }

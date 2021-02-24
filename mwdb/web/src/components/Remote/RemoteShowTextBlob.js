@@ -1,11 +1,11 @@
 import React from "react";
-import ShowSample from "../ShowSample";
+import ShowTextBlob from "../ShowTextBlob";
 import RemoteShowObject from "./RemoteShowObject";
 
-export default function RemoteShowSample(props) {
+export default function RemoteShowTextBlob(props) {
     return (
         <RemoteShowObject>
-            <ShowSample {...props} />
+            <ShowTextBlob {...props} />
         </RemoteShowObject>
     );
 }

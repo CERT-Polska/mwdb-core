@@ -178,7 +178,7 @@ export default function TagBox() {
                     <div className="text-muted">No tags to display</div>
                 )}
             </div>
-            {auth.hasCapability("adding_tags") && (
+            {auth.hasCapability("adding_tags") && !api.remote && (
                 <TagForm onTagSubmit={handleTagSubmit} />
             )}
         </div>

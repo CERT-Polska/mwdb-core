@@ -89,18 +89,22 @@ function RelationsBox(props) {
         <div className="card card-default">
             <div className="card-header">
                 {props.header || "Relations"}
-                <Link
-                    to="#"
-                    className="float-right"
-                    onClick={(ev) => {
-                        ev.preventDefault();
-                        setAttributeAddModalOpen(true);
-                        setModalError("");
-                    }}
-                >
-                    <FontAwesomeIcon icon="plus" pull="left" size="1x" />
-                    Add
-                </Link>
+                {!api.remote ? (
+                    <Link
+                        to="#"
+                        className="float-right"
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setAttributeAddModalOpen(true);
+                            setModalError("");
+                        }}
+                    >
+                        <FontAwesomeIcon icon="plus" pull="left" size="1x" />
+                        Add
+                    </Link>
+                ) : (
+                    []
+                )}
             </div>
             {parents.length + children.length > 0 ? (
                 <table

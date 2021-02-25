@@ -398,6 +398,10 @@ function getRemoteObjectMetakeys(remote, id) {
     return axios.get(`/remote/${remote}/api/object/${id}/meta`);
 }
 
+function requestRemoteFileDownload(remote, id) {
+    return axios.post(`/remote/${remote}/api/request/sample/${id}`);
+}
+
 function addRemoteObjectFavorite(remote, id) {
     return axios.put(`/remote/${remote}/api/object/${id}/favorite`);
 }
@@ -506,6 +510,7 @@ export default {
     getRemoteObjectRelations,
     getRemoteObjectShares,
     getRemoteObjectMetakeys,
+    requestRemoteFileDownload,
     addRemoteObjectFavorite,
     removeRemoteObjectFavorite,
     remoteSearch,

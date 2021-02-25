@@ -1,11 +1,11 @@
 import React from "react";
 import ShowConfig from "../ShowConfig";
-import RemoteShowObject from "./RemoteShowObject";
+import RemoteAPI from "./RemoteAPI";
 
 export default function RemoteShowConfig(props) {
     return (
-        <RemoteShowObject>
+        <RemoteAPI>
             <ShowConfig {...props} />
-        </RemoteShowObject>
+        </RemoteAPI>
     );
 }

@@ -1,11 +1,11 @@
 import React from "react";
 import ShowSample from "../ShowSample";
-import RemoteShowObject from "./RemoteShowObject";
+import RemoteAPI from "./RemoteAPI";
 
 export default function RemoteShowSample(props) {
     return (
-        <RemoteShowObject>
+        <RemoteAPI>
             <ShowSample {...props} />
-        </RemoteShowObject>
+        </RemoteAPI>
     );
 }

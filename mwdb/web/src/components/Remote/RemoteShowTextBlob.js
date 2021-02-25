@@ -1,11 +1,11 @@
 import React from "react";
 import ShowTextBlob from "../ShowTextBlob";
-import RemoteShowObject from "./RemoteShowObject";
+import RemoteAPI from "./RemoteAPI";
 
 export default function RemoteShowTextBlob(props) {
     return (
-        <RemoteShowObject>
+        <RemoteAPI>
             <ShowTextBlob {...props} />
-        </RemoteShowObject>
+        </RemoteAPI>
     );
 }

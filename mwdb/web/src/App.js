@@ -10,6 +10,9 @@ import RecentBlobs from "./components/RecentBlobs";
 import RemoteShowSample from "./components/Remote/RemoteShowSample";
 import RemoteShowConfig from "./components/Remote/RemoteShowConfig";
 import RemoteShowTextBlob from "./components/Remote/RemoteShowTextBlob";
+import RemoteRecentSamples from "./components/Remote/RemoteRecentSamples";
+import RemoteRecentConfigs from "./components/Remote/RemoteRecentConfigs";
+import RemoteRecentBlobs from "./components/Remote/RemoteRecentBlobs";
 import ShowSample from "./components/ShowSample";
 import ShowConfig from "./components/ShowConfig";
 import ShowTextBlob from "./components/ShowTextBlob";
@@ -155,6 +158,21 @@ export default function App() {
                 exact
                 path="/profile/:login"
                 component={UserProfile}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote"
+                component={RemoteRecentSamples}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote/configs"
+                component={RemoteRecentConfigs}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote/blobs"
+                component={RemoteRecentBlobs}
             />
             <AuthenticatedRoute
                 path="/remote/:remote/sample/:hash"

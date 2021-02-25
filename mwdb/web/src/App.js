@@ -7,12 +7,6 @@ import RecentConfigs from "./components/RecentConfigs";
 import RecentSamples from "./components/RecentSamples";
 import ConfigStats from "./components/ConfigStats";
 import RecentBlobs from "./components/RecentBlobs";
-import RemoteShowSample from "./components/Remote/RemoteShowSample";
-import RemoteShowConfig from "./components/Remote/RemoteShowConfig";
-import RemoteShowTextBlob from "./components/Remote/RemoteShowTextBlob";
-import RemoteRecentSamples from "./components/Remote/RemoteRecentSamples";
-import RemoteRecentConfigs from "./components/Remote/RemoteRecentConfigs";
-import RemoteRecentBlobs from "./components/Remote/RemoteRecentBlobs";
 import ShowSample from "./components/ShowSample";
 import ShowConfig from "./components/ShowConfig";
 import ShowTextBlob from "./components/ShowTextBlob";
@@ -38,6 +32,13 @@ import RelationsPlot from "./components/RelationsPlot";
 import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
 import Docs from "./components/Docs";
+import RemoteShowSample from "./components/Remote/RemoteShowSample";
+import RemoteShowConfig from "./components/Remote/RemoteShowConfig";
+import RemoteShowTextBlob from "./components/Remote/RemoteShowTextBlob";
+import RemoteRecentSamples from "./components/Remote/RemoteRecentSamples";
+import RemoteRecentConfigs from "./components/Remote/RemoteRecentConfigs";
+import RemoteRecentBlobs from "./components/Remote/RemoteRecentBlobs";
+import RemoteSearch from "./components/Remote/RemoteSearch";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -159,33 +160,6 @@ export default function App() {
                 path="/profile/:login"
                 component={UserProfile}
             />
-            <AuthenticatedRoute
-                exact
-                path="/remote/:remote"
-                component={RemoteRecentSamples}
-            />
-            <AuthenticatedRoute
-                exact
-                path="/remote/:remote/configs"
-                component={RemoteRecentConfigs}
-            />
-            <AuthenticatedRoute
-                exact
-                path="/remote/:remote/blobs"
-                component={RemoteRecentBlobs}
-            />
-            <AuthenticatedRoute
-                path="/remote/:remote/sample/:hash"
-                component={RemoteShowSample}
-            />
-            <AuthenticatedRoute
-                path="/remote/:remote/config/:hash"
-                component={RemoteShowConfig}
-            />
-            <AuthenticatedRoute
-                path="/remote/:remote/blob/:hash"
-                component={RemoteShowTextBlob}
-            />
             <AuthenticatedRoute path="/sample/:hash" component={ShowSample} />
             <AuthenticatedRoute path="/config/:hash" component={ShowConfig} />
             <AuthenticatedRoute path="/blob/:hash" component={ShowTextBlob} />
@@ -240,6 +214,37 @@ export default function App() {
                 exact
                 path="/attributes/new"
                 component={AttributeDefine}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote"
+                component={RemoteRecentSamples}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote/configs"
+                component={RemoteRecentConfigs}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote/blobs"
+                component={RemoteRecentBlobs}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/sample/:hash"
+                component={RemoteShowSample}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/config/:hash"
+                component={RemoteShowConfig}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/blob/:hash"
+                component={RemoteShowTextBlob}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/search"
+                component={RemoteSearch}
             />
             <Extension ident="routes" />
         </Switch>

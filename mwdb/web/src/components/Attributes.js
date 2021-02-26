@@ -1,8 +1,7 @@
-import React, { Component, useContext, useState } from "react";
+import React, { useContext, useState, useCallback, useEffect } from "react";
 import AttributesAddModal from "./AttributesAddModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
@@ -20,6 +19,7 @@ for (let extraRenderers of fromPlugin("attributeRenderers")) {
 }
 
 function DefaultAttributeRenderer(props) {
+    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
 
@@ -127,17 +127,16 @@ function DefaultAttributeRenderer(props) {
     );
 }
 
-class ObjectAttributes extends Component {
-    state = {};
+function ObjectAttributes(props) {
+    const api = useContext(APIContext);
+    const context = useContext(ObjectContext);
 
-    static contextType = ObjectContext;
+    const [attributes, setAttributes] = useState([]);
 
-    updateAttributes = async () => {
-        if (typeof this.props.object.id === "undefined") return;
+    async function updateAttributes() {
+        if (typeof context.object.id === "undefined") return;
         try {
-            let response = await this.props.api.getObjectMetakeys(
-                this.props.object.id
-            );
+            let response = await api.getObjectMetakeys(context.object.id);
             let aggregated = response.data.metakeys.reduce((agg, m) => {
                 let label = m.label || m.key;
                 return {
@@ -145,88 +144,70 @@ class ObjectAttributes extends Component {
                     [label]: [m].concat(agg[label] || []),
                 };
             }, {});
-            this.setState({
-                attributes: aggregated,
-            });
+            setAttributes(aggregated);
         } catch (error) {
-            this.context.setObjectError(error);
+            context.setObjectError(error);
         }
-    };
+    }
 
-    addAttribute = async (key, value) => {
+    async function addAttribute(key, value) {
         try {
-            await this.props.api.addObjectMetakey(
-                this.props.object.id,
-                key,
-                value
-            );
-            await this.updateAttributes();
-            this.props.onRequestModalClose();
+            await api.addObjectMetakey(context.object.id, key, value);
+            await updateAttributes();
+            props.onRequestModalClose();
         } catch (error) {
-            this.context.setObjectError(error);
+            context.setObjectError(error);
         }
-    };
-
-    componentDidMount() {
-        this.updateAttributes();
     }
 
-    componentDidUpdate(prevProps) {
-        if (prevProps && prevProps.object.id !== this.props.object.id)
-            this.updateAttributes();
-    }
+    const getAttributes = useCallback(updateAttributes, [context.object.id]);
 
-    render() {
-        if (!this.state.attributes) return [];
-        return (
-            <Extendable
-                ident="attributesList"
-                attributes={this.state.attributes}
-                onUpdateAttributes={this.updateAttributes}
-                object={this.props.object}
-            >
-                {Object.keys(this.state.attributes).length > 0 ? (
-                    <DataTable>
-                        {Object.keys(this.state.attributes)
-                            .sort()
-                            .map((label) => {
-                                let values = this.state.attributes[label];
-                                let key = values[0] && values[0].key;
-                                let Attribute =
-                                    attributeRenderers[key] ||
-                                    DefaultAttributeRenderer;
-                                return (
-                                    <Attribute
-                                        key={key}
-                                        label={label}
-                                        values={values}
-                                        object={this.props.object}
-                                        onUpdateAttributes={
-                                            this.updateAttributes
-                                        }
-                                    />
-                                );
-                            })}
-                    </DataTable>
-                ) : (
-                    <div className="card-body text-muted">
-                        No attributes to display
-                    </div>
-                )}
-                <AttributesAddModal
-                    isOpen={this.props.isModalOpen}
-                    onRequestClose={this.props.onRequestModalClose}
-                    onAdd={this.addAttribute}
-                />
-            </Extendable>
-        );
-    }
+    useEffect(() => {
+        getAttributes();
+    }, [getAttributes]);
+
+    if (!attributes) return [];
+
+    return (
+        <Extendable
+            ident="attributesList"
+            attributes={attributes}
+            onUpdateAttributes={updateAttributes}
+            object={context.object}
+        >
+            {Object.keys(attributes).length > 0 ? (
+                <DataTable>
+                    {Object.keys(attributes)
+                        .sort()
+                        .map((label) => {
+                            let values = attributes[label];
+                            let key = values[0] && values[0].key;
+                            let Attribute =
+                                attributeRenderers[key] ||
+                                DefaultAttributeRenderer;
+                            return (
+                                <Attribute
+                                    key={key}
+                                    label={label}
+                                    values={values}
+                                    object={context.object}
+                                    onUpdateAttributes={updateAttributes}
+                                />
+                            );
+                        })}
+                </DataTable>
+            ) : (
+                <div className="card-body text-muted">
+                    No attributes to display
+                </div>
+            )}
+            <AttributesAddModal
+                isOpen={props.isModalOpen}
+                onRequestClose={props.onRequestModalClose}
+                onAdd={addAttribute}
+            />
+        </Extendable>
+    );
 }
 
-function ConnectedObjectAttributes(props) {
-    let auth = useContext(AuthContext);
-    let api = useContext(APIContext);
-    return <ObjectAttributes {...props} auth={auth} api={api} />;
-}
-
-export default ConnectedObjectAttributes;
+export default ObjectAttributes;

@@ -414,22 +414,6 @@ function remoteSearch(remote, query) {
     return axios.post(`/remote/${remote}/api/search`, { query });
 }
 
-function addRemoteQuickQuery(remote, type, name, query) {
-    return axios.post(`/remote/${remote}/api/${type}/quick_query`, {
-        type,
-        name,
-        query,
-    });
-}
-
-function getRemoteQuickQueries(remote, type) {
-    return axios.get(`/remote/${remote}/api/${type}/quick_query`);
-}
-
-function deleteRemoteQuickQuery(remote, id) {
-    return axios.delete(`/remote/${remote}/api/quick_query/${id}`);
-}
-
 export default {
     axios,
     getApiForEnvironment,
@@ -514,7 +498,4 @@ export default {
     addRemoteObjectFavorite,
     removeRemoteObjectFavorite,
     remoteSearch,
-    addRemoteQuickQuery,
-    getRemoteQuickQueries,
-    deleteRemoteQuickQuery,
 };

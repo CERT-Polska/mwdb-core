@@ -9,9 +9,8 @@ import Hash from "./Hash";
 export default function ObjectLink(props) {
     const auth = useContext(AuthContext);
     const objectType = mapObjectType(props.type);
-    let remotePath = "";
-    let { remote } = useParams();
-    if (remote) remotePath = `/remote/${remote}`;
+    const { remote } = useParams();
+    const remotePath = remote ? `/remote/${remote}` : "";
 
     let linkElement = (
         <Link

@@ -173,15 +173,8 @@ export default function QuickQuery(props) {
         </span>
     );
 
-    // Fetch queries on mount
-    useEffect(() => {
-        updateQueries();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    return (
-        <div className="quick-query-bar">
-            Quick query: {predefinedQueryBadges}
+    const userQuickQueryBadges = !api.remote ? (
+        <React.Fragment>
             {queryBadges}
             {newQuickQueryButton}
             <ConfirmationModal
@@ -206,6 +199,21 @@ export default function QuickQuery(props) {
                     setAddModalOpen(false);
                 }}
             />
+        </React.Fragment>
+    ) : (
+        []
+    );
+
+    // Fetch queries on mount
+    useEffect(() => {
+        updateQueries();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return (
+        <div className="quick-query-bar">
+            Quick query: {predefinedQueryBadges}
+            {userQuickQueryBadges}
         </div>
     );
 }

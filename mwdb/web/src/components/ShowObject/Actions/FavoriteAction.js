@@ -29,6 +29,8 @@ export default function FavoriteAction() {
         }
     }
 
+    if (api.remote) return [];
+
     if (context.object.favorite)
         return (
             <ObjectAction

@@ -104,15 +104,19 @@ export default function QuickQuery(props) {
                 props.addToQuery("NOT shared", "public");
             }}
         />,
-        <QuickQueryItem
-            key="favorites"
-            label="Favorites"
-            color="info"
-            onClick={(ev) => {
-                ev.preventDefault();
-                props.addToQuery("favorites", auth.user.login);
-            }}
-        />,
+        !api.remote ? (
+            <QuickQueryItem
+                key="favorites"
+                label="Favorites"
+                color="info"
+                onClick={(ev) => {
+                    ev.preventDefault();
+                    props.addToQuery("favorites", auth.user.login);
+                }}
+            />
+        ) : (
+            []
+        ),
         <QuickQueryItem
             key="exclude-feed"
             label="Exclude feed:*"

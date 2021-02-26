@@ -2,9 +2,11 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { APIContext } from "@mwdb-web/commons/api/context";
 import api from "@mwdb-web/commons/api";
+import { Alert } from "../../commons/ui";
 
 export default function RemoteAPI(props) {
-    let { remote } = useParams();
+    const { remote } = useParams();
+    const message = `Remote view of ${remote}`;
     return (
         <APIContext.Provider
             value={{
@@ -24,12 +26,11 @@ export default function RemoteAPI(props) {
                     api.getRemoteObjectMetakeys(remote, id),
                 requestFileDownload: (id) =>
                     api.requestRemoteFileDownload(remote, id),
-                addObjectFavorite: (id) =>
-                    api.addRemoteObjectFavorite(remote, id),
-                removeObjectFavorite: (id) =>
-                    api.removeRemoteObjectFavorite(remote, id),
             }}
         >
+            <div className="container-fluid">
+                <Alert warning={message} />
+            </div>
             {props.children}
         </APIContext.Provider>
     );

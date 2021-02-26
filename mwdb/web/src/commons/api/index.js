@@ -402,14 +402,6 @@ function requestRemoteFileDownload(remote, id) {
     return axios.post(`/remote/${remote}/api/request/sample/${id}`);
 }
 
-function addRemoteObjectFavorite(remote, id) {
-    return axios.put(`/remote/${remote}/api/object/${id}/favorite`);
-}
-
-function removeRemoteObjectFavorite(remote, id) {
-    return axios.delete(`/remote/${remote}/api/object/${id}/favorite`);
-}
-
 function remoteSearch(remote, query) {
     return axios.post(`/remote/${remote}/api/search`, { query });
 }
@@ -495,7 +487,5 @@ export default {
     getRemoteObjectShares,
     getRemoteObjectMetakeys,
     requestRemoteFileDownload,
-    addRemoteObjectFavorite,
-    removeRemoteObjectFavorite,
     remoteSearch,
 };

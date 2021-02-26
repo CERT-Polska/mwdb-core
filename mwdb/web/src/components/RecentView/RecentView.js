@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 import queryString from "query-string";
 
@@ -32,16 +32,17 @@ export default function RecentView(props) {
      * - queryInput:     state of query input
      */
     const api = useContext(APIContext);
+    const history = useHistory();
     const getLinkForQuery = (query) =>
-        `${props.location.pathname}?${queryString.stringify({
-            ...queryString.parse(props.location.search),
+        `${history.location.pathname}?${queryString.stringify({
+            ...queryString.parse(history.location.search),
             q: encodeSearchQuery(query),
         })}`;
     const currentQuery = decodeSearchQuery(
-        (queryString.parse(props.location.search)["q"] || "").trim()
+        (queryString.parse(history.location.search)["q"] || "").trim()
     );
     const setCurrentQuery = (query) => {
-        props.history.push(getLinkForQuery(query));
+        history.push(getLinkForQuery(query));
     };
 
     // Query input state

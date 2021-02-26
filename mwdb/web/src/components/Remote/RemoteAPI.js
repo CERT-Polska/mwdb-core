@@ -13,8 +13,8 @@ export default function RemoteAPI(props) {
                 remote: remote,
                 getObjectCount: (type, older_than, query) =>
                     api.getRemoteObjectCount(remote, type, older_than, query),
-                getObjectList: (type, query) =>
-                    api.getRemoteObjectList(remote, type, query),
+                getObjectList: (type, older_than, query) =>
+                    api.getRemoteObjectList(remote, type, older_than, query),
                 getObject: (type, id) => api.getRemoteObject(remote, type, id),
                 getObjectTags: (id) => api.getRemoteObjectTags(remote, id),
                 getObjectComments: (id) =>

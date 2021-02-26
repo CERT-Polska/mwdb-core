@@ -1,7 +1,7 @@
 from tempfile import SpooledTemporaryFile
 
 import requests
-from flask import g
+from flask import g, request
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
@@ -83,20 +83,23 @@ class RemoteAPI:
 class RemoteAPIResource(Resource):
     def do_request(self, method, remote_name, remote_path):
         remote = RemoteAPI(remote_name)
-        response = remote.request(method, remote_path)
+        response = remote.request(
+            method, remote_path, params=request.args, data=request.data
+        )
         return response
 
-    def get(self, *args, **kwargs):
-        return self.do_request("get", *args, **kwargs)
+    def get(self, remote_name, remote_path):
+        print(request.args, flush=True)
+        return self.do_request("get", remote_name, remote_path)
 
-    def post(self, *args, **kwargs):
-        return self.do_request("post", *args, **kwargs)
+    def post(self, remote_name, remote_path):
+        return self.do_request("post", remote_name, remote_path)
 
-    def put(self, *args, **kwargs):
-        return self.do_request("put", *args, **kwargs)
+    def put(self, remote_name, remote_path):
+        return self.do_request("put", remote_name, remote_path)
 
-    def delete(self, *args, **kwargs):
-        return self.do_request("delete", *args, **kwargs)
+    def delete(self, remote_name, remote_path):
+        return self.do_request("delete", remote_name, remote_path)
 
 
 class RemotePullResource(Resource):

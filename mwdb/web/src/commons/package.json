@@ -4,7 +4,7 @@
     "private": true,
     "version": "2.1.2",
     "dependencies": {
-        "axios": "0.19.2",
+        "axios": "^0.21.1",
         "identicon.js": "^2.3.2",
         "history": "^4.10.1",
         "react-modal": "^3.5.1",

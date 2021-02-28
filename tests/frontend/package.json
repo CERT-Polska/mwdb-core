@@ -4,8 +4,8 @@
   "description": "Front-end tests for mwdb-core",
   "dependencies": {},
   "devDependencies": {
-    "cypress": "^4.10.0",
-    "wait-on": "^5.0.1"
+    "cypress": "^4.12.1",
+    "wait-on": "^5.2.1"
   },
   "scripts": {
     "test": "wait-on http://mwdb-web:80 && cypress run"

@@ -279,10 +279,19 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def get_download_url(self, identifier):
-        res = self.session.post(self.mwdb_url + '/request/sample/' + identifier)
+    def get_download_token(self, identifier):
+        res = self.session.post(self.mwdb_url + f'/file/${identifier}/download')
         res.raise_for_status()
-        return res.json()
+        return res.json()["token"]
+
+    def download_file(self, identifier, token=None):
+        res = self.session.get(
+            self.mwdb_url + f"/file/${identifier}/download",
+            params={
+                "token": token
+            })
+        res.raise_for_status()
+        return res.content
 
     def add_config(self, parent, family, config_json):
         res = self.session.post(self.mwdb_url + '/config', json={

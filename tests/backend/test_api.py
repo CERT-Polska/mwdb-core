@@ -5,8 +5,6 @@ from dateutil.parser import parse
 from .utils import MwdbTest, rand_string
 
 
-
-
 @pytest.fixture(scope="session", autouse=True)
 def check_operational(request):
     test = MwdbTest()
@@ -195,10 +193,13 @@ def test_download_sample():
     expected = rand_string()
     sample = test.add_sample(content=expected)
 
-    res = test.get_download_url(sample['id'])
-    download_url = test.mwdb_url + res['url']
-
-    r = requests.get(download_url)
+    token = test.get_download_token(sample['id'])
+    r = requests.get(
+        test.mwdb_url + f'/file/${sample["id"]}/download',
+        params={
+            "token": token
+        }
+    )
     r.raise_for_status()
     downloaded = r.text
 

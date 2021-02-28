@@ -3,10 +3,13 @@ import Axios from "axios";
 function getApiForEnvironment() {
     if (process.env.NODE_ENV === "development") {
         // If application is running under development server (out of Docker)
-        return process.env.REACT_APP_API_URL || "http://localhost:8080/";
+        return (
+            process.env.REACT_APP_API_URL.replace(/\/$/g, "") ||
+            "http://localhost:8080"
+        );
     }
     // Default API endpoint
-    return "/api/";
+    return "/api";
 }
 
 let axios = Axios.create({
@@ -320,8 +323,17 @@ function deleteMetakeyPermission(key, group_name) {
     return axios.delete(`/meta/manage/${key}/permissions/${group_name}`);
 }
 
-function requestFileDownload(id) {
-    return axios.post(`/request/sample/${id}`);
+function downloadFile(id) {
+    return axios.get(`/file/${id}/download`, {
+        responseType: "arraybuffer",
+        responseEncoding: "binary",
+    });
+}
+
+async function requestFileDownloadLink(id) {
+    const response = await axios.post(`/file/${id}/download`);
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/file/${id}/download?token=${response.data.token}`;
 }
 
 function uploadFile(file, parent, upload_as, metakeys) {
@@ -425,7 +437,8 @@ export default {
     addMetakeyDefinition,
     setMetakeyPermission,
     deleteMetakeyPermission,
-    requestFileDownload,
+    downloadFile,
+    requestFileDownloadLink,
     uploadFile,
     getRemoteNames,
     pushObjectRemote,

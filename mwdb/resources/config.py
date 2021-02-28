@@ -6,6 +6,8 @@ from sqlalchemy import func
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.config import app_config
+from mwdb.core.karton import send_config_to_karton
 from mwdb.core.plugins import hooks
 from mwdb.model import Config, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
@@ -80,6 +82,16 @@ class ConfigStatsResource(Resource):
 
 
 class ConfigUploader(ObjectUploader):
+    def on_created(self, object):
+        if app_config.mwdb.enable_karton:
+            metakeys = object.get_metakeys(as_dict=True, check_permissions=False)
+            if "karton" not in metakeys:
+                send_config_to_karton(object)
+        hooks.on_created_config(object)
+
+    def on_reuploaded(self, object):
+        hooks.on_reuploaded_config(object)
+
     def _get_embedded_blob(self, in_blob, share_with, metakeys):
         if isinstance(in_blob, dict):
             schema = BlobCreateSpecSchema()
@@ -145,9 +157,6 @@ class ConfigResource(ObjectResource, ConfigUploader):
     ObjectType = Config
     ListResponseSchema = ConfigListResponseSchema
     ItemResponseSchema = ConfigItemResponseSchema
-
-    on_created = hooks.on_created_config
-    on_reuploaded = hooks.on_reuploaded_config
 
     @requires_authorization
     def get(self):
@@ -263,10 +272,7 @@ class ConfigResource(ObjectResource, ConfigUploader):
 class ConfigItemResource(ObjectItemResource, ConfigUploader):
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
-
     CreateRequestSchema = ConfigLegacyCreateRequestSchema
-    on_created = hooks.on_created_config
-    on_reuploaded = hooks.on_reuploaded_config
 
     @requires_authorization
     def get(self, identifier):

@@ -37,8 +37,11 @@ class ObjectUploader:
     ObjectType = None
     ItemResponseSchema = None
 
-    on_created = None
-    on_reuploaded = None
+    def on_created(self, object):
+        raise NotImplementedError
+
+    def on_reuploaded(self, object):
+        raise NotImplementedError
 
     def _create_object(self, spec, parent, share_with, metakeys):
         raise NotImplementedError
@@ -207,8 +210,6 @@ class ObjectItemResource(Resource, ObjectUploader):
     ItemResponseSchema = ObjectItemResponseSchema
 
     CreateRequestSchema = None
-    on_created = None
-    on_reuploaded = None
 
     @requires_authorization
     def get(self, identifier):

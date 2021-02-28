@@ -2,6 +2,8 @@ from flask import request
 from werkzeug.exceptions import BadRequest, Conflict
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.config import app_config
+from mwdb.core.karton import send_file_to_karton
 from mwdb.core.plugins import hooks
 from mwdb.model import File
 from mwdb.model.file import EmptyFileError
@@ -18,6 +20,16 @@ from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
 class FileUploader(ObjectUploader):
+    def on_created(self, object):
+        if app_config.mwdb.enable_karton:
+            metakeys = object.get_metakeys(as_dict=True, check_permissions=False)
+            if "karton" not in metakeys:
+                send_file_to_karton(object)
+        hooks.on_created_file(object)
+
+    def on_reuploaded(self, object):
+        hooks.on_reuploaded_file(object)
+
     def _create_object(self, spec, parent, share_with, metakeys):
         try:
             return File.get_or_create(
@@ -37,9 +49,6 @@ class FileResource(ObjectResource, FileUploader):
     ObjectType = File
     ListResponseSchema = FileListResponseSchema
     ItemResponseSchema = FileItemResponseSchema
-
-    on_created = hooks.on_created_file
-    on_reuploaded = hooks.on_reuploaded_file
 
     @requires_authorization
     def get(self):
@@ -155,10 +164,7 @@ class FileResource(ObjectResource, FileUploader):
 class FileItemResource(ObjectItemResource, FileUploader):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema
-
     CreateRequestSchema = FileLegacyCreateRequestSchema
-    on_created = hooks.on_created_file
-    on_reuploaded = hooks.on_reuploaded_file
 
     @requires_authorization
     def get(self, identifier):

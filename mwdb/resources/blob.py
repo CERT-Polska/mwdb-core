@@ -2,6 +2,8 @@ from flask import request
 from werkzeug.exceptions import Conflict
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.config import app_config
+from mwdb.core.karton import send_blob_to_karton
 from mwdb.core.plugins import hooks
 from mwdb.model import TextBlob
 from mwdb.model.object import ObjectTypeConflictError
@@ -17,6 +19,16 @@ from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
 class TextBlobUploader(ObjectUploader):
+    def on_created(self, object):
+        if app_config.mwdb.enable_karton:
+            metakeys = object.get_metakeys(as_dict=True, check_permissions=False)
+            if "karton" not in metakeys:
+                send_blob_to_karton(object)
+        hooks.on_created_text_blob(object)
+
+    def on_reuploaded(self, object):
+        hooks.on_reuploaded_text_blob(object)
+
     def _create_object(self, spec, parent, share_with, metakeys):
         try:
             return TextBlob.get_or_create(
@@ -35,9 +47,6 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
     ObjectType = TextBlob
     ListResponseSchema = BlobListResponseSchema
     ItemResponseSchema = BlobItemResponseSchema
-
-    on_created = hooks.on_created_text_blob
-    on_reuploaded = hooks.on_reuploaded_text_blob
 
     @requires_authorization
     def get(self):
@@ -150,10 +159,7 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
 class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
     ObjectType = TextBlob
     ItemResponseSchema = BlobItemResponseSchema
-
     CreateRequestSchema = BlobLegacyCreateRequestSchema
-    on_created = hooks.on_created_text_blob
-    on_reuploaded = hooks.on_reuploaded_text_blob
 
     @requires_authorization
     def get(self, identifier):

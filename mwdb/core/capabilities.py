@@ -16,6 +16,7 @@ class Capabilities(object):
     adding_blobs = "adding_blobs"
     unlimited_requests = "unlimited_requests"
     removing_objects = "removing_objects"
+    karton_manage = "karton_manage"
 
     @classmethod
     def all(cls):

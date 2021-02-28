@@ -193,9 +193,20 @@ def test_download_sample():
     expected = rand_string()
     sample = test.add_sample(content=expected)
 
+    downloaded = test.download_file(sample['id'])
+    assert downloaded.decode() == expected
+
+
+def test_download_sample_with_token():
+    test = MwdbTest()
+    test.login()
+
+    expected = rand_string()
+    sample = test.add_sample(content=expected)
+
     token = test.get_download_token(sample['id'])
     r = requests.get(
-        test.mwdb_url + f'/file/${sample["id"]}/download',
+        test.mwdb_url + f'/file/{sample["id"]}/download',
         params={
             "token": token
         }

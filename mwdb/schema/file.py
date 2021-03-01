@@ -67,3 +67,7 @@ class FileItemResponseSchema(ObjectItemResponseSchema):
     latest_config = fields.Nested(
         ConfigItemResponseSchema, required=True, allow_none=True
     )
+
+
+class FileDownloadTokenResponseSchema(Schema):
+    token = fields.Str(required=True, allow_none=False)

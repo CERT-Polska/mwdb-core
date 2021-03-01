@@ -217,15 +217,8 @@ function SamplePreview() {
 
     async function updateSample() {
         try {
-            let fileId = objectContext.object.id;
-            let fileUrlResponse = await api.requestFileDownload(fileId);
-            let fileContentResponse = await api.axios.get(
-                fileUrlResponse.data.url,
-                {
-                    responseType: "arraybuffer",
-                    responseEncoding: "binary",
-                }
-            );
+            const fileId = objectContext.object.id;
+            const fileContentResponse = await api.downloadFile(fileId);
             setContent(fileContentResponse.data);
         } catch (e) {
             objectContext.setObjectError(e);
@@ -268,9 +261,8 @@ function PreviewSwitchAction(props) {
 
 export default function ShowSample(props) {
     async function downloadSample(object) {
-        let response = await api.requestFileDownload(object.id);
-        window.location.href =
-            api.getApiForEnvironment().replace(/\/$/g, "") + response.data.url;
+        const downloadLink = await api.requestFileDownloadLink(object.id);
+        window.location.href = downloadLink;
     }
 
     return (

@@ -410,8 +410,14 @@ function getRemoteObjectMetakeys(remote, id) {
     return axios.get(`/remote/${remote}/api/object/${id}/meta`);
 }
 
-function requestRemoteFileDownload(remote, id) {
-    return axios.post(`/remote/${remote}/api/request/sample/${id}`);
+function downloadRemoteFile(remote, id) {
+    return axios.post(`/remote/${remote}/api/file/${id}/download`);
+}
+
+async function requestRemoteFileDownloadLink(remote, id) {
+    const response = await axios.post(`/remote/${remote}/file/${id}/download`);
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/remote/${remote}/file/${id}/download?token=${response.data.token}`;
 }
 
 function remoteSearch(remote, query) {
@@ -499,6 +505,7 @@ export default {
     getRemoteObjectRelations,
     getRemoteObjectShares,
     getRemoteObjectMetakeys,
-    requestRemoteFileDownload,
+    downloadRemoteFile,
+    requestRemoteFileDownloadLink,
     remoteSearch,
 };

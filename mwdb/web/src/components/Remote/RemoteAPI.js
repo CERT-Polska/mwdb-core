@@ -24,8 +24,9 @@ export default function RemoteAPI(props) {
                 getObjectShares: (id) => api.getRemoteObjectShares(remote, id),
                 getObjectMetakeys: (id) =>
                     api.getRemoteObjectMetakeys(remote, id),
-                requestFileDownload: (id) =>
-                    api.requestRemoteFileDownload(remote, id),
+                downloadFile: (id) => api.downloadRemoteFile(remote, id),
+                requestFileDownloadLink: (id) =>
+                    api.requestRemoteFileDownloadLink(remote, id),
             }}
         >
             <div className="container-fluid">

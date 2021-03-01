@@ -175,11 +175,9 @@ class RemoteFilePullResource(RemotePullResource):
         remote = RemoteAPI(remote_name)
         response = remote.request("GET", f"file/{identifier}")
         file_name = response["file_name"]
-
-        response = remote.request("POST", f"request/sample/{identifier}")
-        download_url = response["url"]
-
-        response = remote.request("GET", download_url, raw=True, stream=True)
+        response = remote.request(
+            "GET", f"file/{identifier}/download", raw=True, stream=True
+        )
         with SpooledTemporaryFile() as file_stream:
             for chunk in response.iter_content(chunk_size=2 ** 16):
                 file_stream.write(chunk)

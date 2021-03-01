@@ -6,20 +6,19 @@ from mwdb.core.app import api
 from mwdb.model import File
 from mwdb.schema.download import DownloadURLResponseSchema
 
-from . import requires_authorization
+from . import deprecated, requires_authorization
 
 
 class DownloadResource(Resource):
+    @deprecated
     def get(self, access_token):
         """
         ---
         summary: Download file
         description: |
             Returns file contents based on provided file download token.
-        security:
-            - bearerAuth: []
         tags:
-            - download
+            - deprecated
         parameters:
             - in: path
               name: access_token
@@ -50,6 +49,7 @@ class DownloadResource(Resource):
 
 
 class RequestSampleDownloadResource(Resource):
+    @deprecated
     @requires_authorization
     def post(self, identifier):
         """
@@ -60,7 +60,7 @@ class RequestSampleDownloadResource(Resource):
         security:
             - bearerAuth: []
         tags:
-            - download
+            - deprecated
         parameters:
             - in: path
               name: identifier

@@ -34,7 +34,7 @@ from mwdb.resources.config import (
     ConfigStatsResource,
 )
 from mwdb.resources.download import DownloadResource, RequestSampleDownloadResource
-from mwdb.resources.file import FileItemResource, FileResource
+from mwdb.resources.file import FileDownloadResource, FileItemResource, FileResource
 from mwdb.resources.group import GroupListResource, GroupMemberResource, GroupResource
 from mwdb.resources.metakey import (
     MetakeyDefinitionManageResource,
@@ -255,6 +255,7 @@ api.add_resource(
 # File endpoints
 api.add_resource(FileResource, "/file")
 api.add_resource(FileItemResource, "/file/<hash64:identifier>")
+api.add_resource(FileDownloadResource, "/file/<hash64:identifier>/download")
 
 # Config endpoints
 api.add_resource(ConfigResource, "/config")

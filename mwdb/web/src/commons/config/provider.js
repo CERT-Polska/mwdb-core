@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 import api from "../api";
 import { ConfigContext } from "./context";
 
@@ -21,8 +21,6 @@ export function ConfigProvider(props) {
         config: null,
         error: null,
     });
-
-    const [remote, setRemote] = useState("");
 
     async function update() {
         try {
@@ -48,9 +46,7 @@ export function ConfigProvider(props) {
             value={{
                 config: serverConfig.config,
                 configError: serverConfig.error,
-                remote: remote,
                 update,
-                setRemote,
             }}
         >
             {props.children}

@@ -1,11 +1,17 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useRouteMatch } from "react-router-dom";
 import { APIContext } from "@mwdb-web/commons/api/context";
 import api from "@mwdb-web/commons/api";
 import { Alert } from "../../commons/ui";
 
+export function useRemote() {
+    // Returns current remote name or undefined if current view is local
+    const match = useRouteMatch("/remote/:remote");
+    return match && match.params.remote;
+}
+
 export default function RemoteAPI(props) {
-    const { remote } = useParams();
+    const remote = useRemote();
     const message = `Remote view of ${remote}`;
     return (
         <APIContext.Provider

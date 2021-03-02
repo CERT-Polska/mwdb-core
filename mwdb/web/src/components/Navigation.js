@@ -10,6 +10,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import { useRemote } from "./Remote/RemoteAPI";
+
 import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
@@ -97,23 +99,13 @@ function RemoteDropdown() {
     if (!config.config) return [];
 
     const localInstance = (
-        <Link
-            key="local"
-            className="dropdown-item"
-            to={"/"}
-            onClick={() => config.setRemote("")}
-        >
-            Local Instance
+        <Link key="local" className="dropdown-item" to={"/"}>
+            Local instance
         </Link>
     );
 
     const remoteItems = config.config.remotes.map((remote) => (
-        <Link
-            key="remote"
-            className="dropdown-item"
-            to={`/remote/${remote}`}
-            onClick={() => config.setRemote(remote)}
-        >
+        <Link key="remote" className="dropdown-item" to={`/remote/${remote}`}>
             {remote}
         </Link>
     ));
@@ -132,7 +124,8 @@ function RemoteDropdown() {
 export default function Navigation() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-    let remotePath = config.remote ? `${config.remote}` : "";
+    const remote = useRemote();
+    const remotePath = remote ? `/remote/${remote}` : "";
     const navItems = config.config ? (
         <Extendable ident="navbar">
             {!auth.isAuthenticated &&
@@ -320,7 +313,7 @@ export default function Navigation() {
                 id="navbarSupportedContent"
             >
                 <ul className="navbar-nav mr-auto">
-                    {config.remote ? remoteNavItems : navItems}
+                    {remote ? remoteNavItems : navItems}
                 </ul>
                 <div className="my-2 my-lg-0">
                     <ul className="navbar-nav">

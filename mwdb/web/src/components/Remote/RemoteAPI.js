@@ -10,6 +10,7 @@ export default function RemoteAPI(props) {
     return (
         <APIContext.Provider
             value={{
+                ...api,
                 remote: remote,
                 getObjectCount: (type, older_than, query) =>
                     api.getRemoteObjectCount(remote, type, older_than, query),

@@ -11,6 +11,7 @@ import {
     DownloadAction,
     FavoriteAction,
     PushAction,
+    PullAction,
     UploadChildAction,
     RemoveAction,
     ObjectAction,
@@ -39,6 +40,8 @@ import {
 
 function SampleDetails() {
     const context = useContext(ObjectContext);
+    const api = useContext(APIContext);
+    let remotePath = api.remote ? `remote/${api.remote}` : "";
     return (
         <DataTable>
             <Extendable ident="showSampleDetails">
@@ -50,7 +53,7 @@ function SampleDetails() {
                                 "name",
                                 context.object.file_name,
                                 false,
-                                ""
+                                remotePath
                             )}
                         >
                             {context.object.file_name}
@@ -71,7 +74,7 @@ function SampleDetails() {
                                 "size",
                                 context.object.file_size,
                                 false,
-                                ""
+                                remotePath
                             )}
                         >
                             {humanFileSize(context.object.file_size)}
@@ -92,7 +95,7 @@ function SampleDetails() {
                                 "type",
                                 context.object.file_type,
                                 false,
-                                ""
+                                remotePath
                             )}
                         >
                             {context.object.file_type}
@@ -173,7 +176,7 @@ function SampleDetails() {
                                 "ssdeep",
                                 context.object.ssdeep,
                                 false,
-                                ""
+                                remotePath
                             )}
                         >
                             {context.object.ssdeep}
@@ -195,7 +198,7 @@ function SampleDetails() {
                                 to={makeSearchDateLink(
                                     "upload_time",
                                     context.object.upload_time,
-                                    ""
+                                    remotePath
                                 )}
                             >
                                 <DateString date={context.object.upload_time} />
@@ -283,6 +286,7 @@ export default function ShowSample(props) {
                 actions={[
                     <RemoveAction />,
                     <PushAction />,
+                    <PullAction />,
                     <UploadChildAction />,
                     <FavoriteAction />,
                     <DownloadAction download={downloadSample} />,
@@ -297,6 +301,7 @@ export default function ShowSample(props) {
                     <PreviewSwitchAction />,
                     <RemoveAction />,
                     <PushAction />,
+                    <PullAction />,
                     <UploadChildAction />,
                     <FavoriteAction />,
                     <DownloadAction download={downloadSample} />,

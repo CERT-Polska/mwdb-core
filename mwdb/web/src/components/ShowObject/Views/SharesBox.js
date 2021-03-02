@@ -222,7 +222,11 @@ function SharesBox() {
                         ))}
                 </tbody>
             </table>
-            <ShareForm onSubmit={handleShare} groups={groups} />
+            {!api.remote ? (
+                <ShareForm onSubmit={handleShare} groups={groups} />
+            ) : (
+                []
+            )}
         </div>
     );
 }

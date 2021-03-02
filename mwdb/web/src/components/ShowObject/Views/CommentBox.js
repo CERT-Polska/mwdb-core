@@ -109,8 +109,9 @@ function CommentBox() {
     const context = useContext(ObjectContext);
     const itemsCountPerPage = 5;
 
-    const canRemoveComments = auth.hasCapability("removing_comments");
-    const canAddComments = auth.hasCapability("adding_comments");
+    const canRemoveComments =
+        auth.hasCapability("removing_comments") && !api.remote;
+    const canAddComments = auth.hasCapability("adding_comments") && !api.remote;
 
     const [comments, setComments] = useState([]);
     const [activePage, setActivePage] = useState(1);

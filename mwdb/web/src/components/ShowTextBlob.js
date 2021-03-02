@@ -12,6 +12,7 @@ import {
     RemoveAction,
     ObjectAction,
     PushAction,
+    PullAction,
 } from "./ShowObject";
 
 import {
@@ -29,9 +30,12 @@ import {
 } from "@mwdb-web/commons/helpers";
 import { DataTable, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
+import { APIContext } from "@mwdb-web/commons/api/context";
 
 function TextBlobDetails() {
     const context = useContext(ObjectContext);
+    const api = useContext(APIContext);
+    let remotePath = api.remote ? `remote/${api.remote}` : "";
     return (
         <DataTable>
             <Extendable ident="showTextBlobDetails">
@@ -43,7 +47,7 @@ function TextBlobDetails() {
                                 "name",
                                 context.object.blob_name,
                                 false,
-                                "blobs"
+                                `${remotePath}/blobs`
                             )}
                         >
                             {context.object.blob_name}
@@ -58,7 +62,7 @@ function TextBlobDetails() {
                                 "size",
                                 context.object.blob_size,
                                 false,
-                                "blobs"
+                                `${remotePath}/blobs`
                             )}
                         >
                             {humanFileSize(context.object.blob_size)}
@@ -73,7 +77,7 @@ function TextBlobDetails() {
                                 "type",
                                 context.object.blob_type,
                                 false,
-                                "blobs"
+                                `${remotePath}/blobs`
                             )}
                         >
                             {context.object.blob_type}
@@ -89,7 +93,7 @@ function TextBlobDetails() {
                                 to={makeSearchDateLink(
                                     "upload_time",
                                     context.object.upload_time,
-                                    "blobs"
+                                    `${remotePath}/blobs`
                                 )}
                             >
                                 <DateString date={context.object.upload_time} />
@@ -108,7 +112,7 @@ function TextBlobDetails() {
                                 to={makeSearchDateLink(
                                     "last_seen",
                                     context.object.last_seen,
-                                    "blobs"
+                                    `${remotePath}/blobs`
                                 )}
                             >
                                 <DateString date={context.object.last_seen} />
@@ -163,6 +167,7 @@ export default function ShowTextBlob(props) {
                 actions={[
                     <RemoveAction />,
                     <PushAction />,
+                    <PullAction />,
                     <BlobDiffAction />,
                     <FavoriteAction />,
                     <DownloadAction download={downloadTextBlob} />,
@@ -176,6 +181,7 @@ export default function ShowTextBlob(props) {
                 actions={[
                     <RemoveAction />,
                     <PushAction />,
+                    <PullAction />,
                     <BlobDiffAction />,
                     <FavoriteAction />,
                     <DownloadAction download={downloadTextBlob} />,

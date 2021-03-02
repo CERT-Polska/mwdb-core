@@ -92,10 +92,47 @@ function AdminDropdown() {
     );
 }
 
+function RemoteDropdown() {
+    const config = useContext(ConfigContext);
+    if (!config.config) return [];
+
+    const localInstance = (
+        <Link
+            key="local"
+            className="dropdown-item"
+            to={"/"}
+            onClick={() => config.setRemote("")}
+        >
+            Local Instance
+        </Link>
+    );
+
+    const remoteItems = config.config.remotes.map((remote) => (
+        <Link
+            key="remote"
+            className="dropdown-item"
+            to={`/remote/${remote}`}
+            onClick={() => config.setRemote(remote)}
+        >
+            {remote}
+        </Link>
+    ));
+
+    return (
+        <React.Fragment>
+            <FontAwesomeIcon className="navbar-icon" icon={faGlobe} />
+            <NavDropdown
+                title="Remote"
+                elements={[localInstance, ...remoteItems]}
+            />
+        </React.Fragment>
+    );
+}
+
 export default function Navigation() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-
+    let remotePath = config.remote ? `${config.remote}` : "";
     const navItems = config.config ? (
         <Extendable ident="navbar">
             {!auth.isAuthenticated &&
@@ -220,9 +257,51 @@ export default function Navigation() {
         []
     );
 
+    const remoteNavItems =
+        config.config && auth.isAuthenticated ? (
+            <Extendable ident="navbarAuthenticated">
+                <React.Fragment>
+                    <li className="nav-item">
+                        <Link className="nav-link" to={`${remotePath}`}>
+                            <FontAwesomeIcon
+                                className="navbar-icon"
+                                icon={faFile}
+                            />
+                            Samples
+                        </Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link className="nav-link" to={`${remotePath}/configs`}>
+                            <FontAwesomeIcon
+                                className="navbar-icon"
+                                icon={faTable}
+                            />
+                            Configs
+                        </Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link className="nav-link" to={`${remotePath}/blobs`}>
+                            <FontAwesomeIcon
+                                className="navbar-icon"
+                                icon={faScroll}
+                            />
+                            Blobs
+                        </Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link className="nav-link" to={`${remotePath}/search`}>
+                            Search
+                        </Link>
+                    </li>
+                </React.Fragment>
+            </Extendable>
+        ) : (
+            []
+        );
+    console.log(remotePath);
     return (
         <nav className="navbar navbar-expand-lg navbar-dark">
-            <Link className="navbar-brand" to={"/"}>
+            <Link className="navbar-brand" to={`${remotePath}/`}>
                 <Extendable ident="navbarLogo">
                     <img src={logo} alt="logo" className="logo" />
                     mwdb
@@ -240,7 +319,9 @@ export default function Navigation() {
                 className="collapse navbar-collapse"
                 id="navbarSupportedContent"
             >
-                <ul className="navbar-nav mr-auto">{navItems}</ul>
+                <ul className="navbar-nav mr-auto">
+                    {config.remote ? remoteNavItems : navItems}
+                </ul>
                 <div className="my-2 my-lg-0">
                     <ul className="navbar-nav">
                         <Extendable ident="navbarRight">
@@ -254,6 +335,7 @@ export default function Navigation() {
                                             Logged as: <b>{auth.user.login}</b>
                                         </span>
                                     </li>
+                                    <RemoteDropdown />
                                     <li className="nav-item">
                                         <div className="btn-group">
                                             <Link

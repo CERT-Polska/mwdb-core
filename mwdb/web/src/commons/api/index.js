@@ -420,10 +420,6 @@ async function requestRemoteFileDownloadLink(remote, id) {
     return `${baseURL}/remote/${remote}/file/${id}/download?token=${response.data.token}`;
 }
 
-function remoteSearch(remote, query) {
-    return axios.post(`/remote/${remote}/api/search`, { query });
-}
-
 export default {
     axios,
     getApiForEnvironment,
@@ -507,5 +503,4 @@ export default {
     getRemoteObjectMetakeys,
     downloadRemoteFile,
     requestRemoteFileDownloadLink,
-    remoteSearch,
 };

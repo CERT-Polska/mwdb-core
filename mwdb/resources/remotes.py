@@ -89,7 +89,6 @@ class RemoteAPIResource(Resource):
         return response
 
     def get(self, remote_name, remote_path):
-        print(request.args, flush=True)
         return self.do_request("get", remote_name, remote_path)
 
     def post(self, remote_name, remote_path):

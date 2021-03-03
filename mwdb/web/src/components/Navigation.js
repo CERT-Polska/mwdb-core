@@ -291,7 +291,7 @@ export default function Navigation() {
         ) : (
             []
         );
-    console.log(remotePath);
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark">
             <Link className="navbar-brand" to={`${remotePath}/`}>

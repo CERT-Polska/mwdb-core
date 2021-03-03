@@ -30,12 +30,12 @@ import {
 } from "@mwdb-web/commons/helpers";
 import { DataTable, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
-import { APIContext } from "@mwdb-web/commons/api/context";
+import { useRemote } from "./Remote/RemoteAPI";
 
 function TextBlobDetails() {
     const context = useContext(ObjectContext);
-    const api = useContext(APIContext);
-    let remotePath = api.remote ? `remote/${api.remote}` : "";
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}/` : "";
     return (
         <DataTable>
             <Extendable ident="showTextBlobDetails">
@@ -62,7 +62,7 @@ function TextBlobDetails() {
                                 "size",
                                 context.object.blob_size,
                                 false,
-                                `${remotePath}/blobs`
+                                `${remotePath}blobs`
                             )}
                         >
                             {humanFileSize(context.object.blob_size)}
@@ -77,7 +77,7 @@ function TextBlobDetails() {
                                 "type",
                                 context.object.blob_type,
                                 false,
-                                `${remotePath}/blobs`
+                                `${remotePath}blobs`
                             )}
                         >
                             {context.object.blob_type}
@@ -93,7 +93,7 @@ function TextBlobDetails() {
                                 to={makeSearchDateLink(
                                     "upload_time",
                                     context.object.upload_time,
-                                    `${remotePath}/blobs`
+                                    `${remotePath}blobs`
                                 )}
                             >
                                 <DateString date={context.object.upload_time} />
@@ -112,7 +112,7 @@ function TextBlobDetails() {
                                 to={makeSearchDateLink(
                                     "last_seen",
                                     context.object.last_seen,
-                                    `${remotePath}/blobs`
+                                    `${remotePath}blobs`
                                 )}
                             >
                                 <DateString date={context.object.last_seen} />
@@ -136,11 +136,13 @@ function TextBlobPreview() {
 
 function BlobDiffAction() {
     const context = useContext(ObjectContext);
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}` : "";
     return (
         <ObjectAction
             label="Diff with"
             icon={faRandom}
-            link={`/blobs?diff=${context.object.id}`}
+            link={`${remotePath}/blobs?diff=${context.object.id}`}
         />
     );
 }

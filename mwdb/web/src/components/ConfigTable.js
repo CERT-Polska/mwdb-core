@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -12,6 +12,7 @@ import {
     DateString,
     ObjectLink,
 } from "@mwdb-web/commons/ui";
+import { useRemote } from "./Remote/RemoteAPI";
 
 export function ConfigRow(props) {
     const key = props.configKey;
@@ -26,6 +27,9 @@ export function ConfigRow(props) {
         Object.keys(value).length === 1 &&
         Object.keys(value)[0] === "in-blob";
     const isRegularObject = isObject && !isEmbeddedBlob;
+
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}/` : "";
 
     useEffect(() => {
         // Automatically expand all nested objects if parent has been expanded
@@ -51,7 +55,7 @@ export function ConfigRow(props) {
                     `cfg.${path.join(".")}`,
                     value,
                     false,
-                    "configs"
+                    `${remotePath}configs`
                 )}
             >
                 {String(value)}
@@ -149,6 +153,8 @@ export function ConfigRows(props) {
 
 export default function ConfigTable(props) {
     const object = props.object;
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}/` : "";
 
     return (
         <DataTable>
@@ -161,7 +167,7 @@ export default function ConfigTable(props) {
                                 "family",
                                 object.family,
                                 false,
-                                "configs"
+                                `${remotePath}configs`
                             )}
                         >
                             {object.family}
@@ -176,7 +182,7 @@ export default function ConfigTable(props) {
                                 "type",
                                 object.config_type,
                                 false,
-                                "configs"
+                                `${remotePath}configs`
                             )}
                         >
                             {object.config_type}
@@ -192,7 +198,7 @@ export default function ConfigTable(props) {
                                 href={makeSearchDateLink(
                                     "upload_time",
                                     object.upload_time,
-                                    "configs"
+                                    `${remotePath}configs`
                                 )}
                             >
                                 <DateString date={object.upload_time} />

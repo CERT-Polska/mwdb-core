@@ -30,7 +30,7 @@ export default function RecentViewList(props) {
         setElements([]);
         setLoadedPages(0);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.query]);
+    }, [props.query, api.remote]);
 
     // Load page on request (pageToLoad != loadedPages)
     useEffect(() => {

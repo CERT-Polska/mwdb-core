@@ -137,7 +137,7 @@ function TextBlobPreview() {
 function BlobDiffAction() {
     const context = useContext(ObjectContext);
     const remote = useRemote();
-    const remotePath = remote ? `remote/${remote}` : "";
+    const remotePath = remote ? `/remote/${remote}` : "";
     return (
         <ObjectAction
             label="Diff with"

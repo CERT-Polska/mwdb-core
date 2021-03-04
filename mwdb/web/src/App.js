@@ -38,6 +38,7 @@ import RemoteShowTextBlob from "./components/Remote/RemoteShowTextBlob";
 import RemoteRecentSamples from "./components/Remote/RemoteRecentSamples";
 import RemoteRecentConfigs from "./components/Remote/RemoteRecentConfigs";
 import RemoteRecentBlobs from "./components/Remote/RemoteRecentBlobs";
+import RemoteDiffTextBlob from "./components/Remote/RemoteDiffTextBlob";
 import RemoteSearch from "./components/Remote/RemoteSearch";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -241,6 +242,10 @@ export default function App() {
             <AuthenticatedRoute
                 path="/remote/:remote/blob/:hash"
                 component={RemoteShowTextBlob}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/diff/:current/:previous"
+                component={RemoteDiffTextBlob}
             />
             <AuthenticatedRoute
                 path="/remote/:remote/search"

@@ -98,12 +98,6 @@ function RemoteDropdown() {
     const config = useContext(ConfigContext);
     if (!config.config) return [];
 
-    const localInstance = (
-        <Link key="local" className="dropdown-item" to={"/"}>
-            Local instance
-        </Link>
-    );
-
     const remoteItems = config.config.remotes.map((remote) => (
         <Link key="remote" className="dropdown-item" to={`/remote/${remote}`}>
             {remote}
@@ -113,7 +107,7 @@ function RemoteDropdown() {
     return (
         <NavDropdown
             title="Switch to remote..."
-            elements={[localInstance, ...remoteItems]}
+            elements={[...remoteItems]}
             icon={faGlobe}
         />
     );
@@ -318,33 +312,48 @@ export default function Navigation() {
                         <Extendable ident="navbarRight">
                             {auth.isAuthenticated ? (
                                 <React.Fragment>
-                                    <li className="nav-item">
-                                        <span
-                                            className="navbar-text"
-                                            style={{ marginRight: "1rem" }}
-                                        >
-                                            Logged as: <b>{auth.user.login}</b>
-                                        </span>
-                                    </li>
+                                    {!remote && (
+                                        <li className="nav-item">
+                                            <span
+                                                className="navbar-text"
+                                                style={{ marginRight: "1rem" }}
+                                            >
+                                                Logged as:{" "}
+                                                <b>{auth.user.login}</b>
+                                            </span>
+                                        </li>
+                                    )}
                                     <RemoteDropdown />
                                     <li className="nav-item">
                                         <div className="btn-group">
-                                            <Link
-                                                className="btn btn-outline-success"
-                                                to={`/profile/${auth.user.login}`}
-                                            >
-                                                Profile
-                                            </Link>
-                                            <a
-                                                className="btn btn-outline-danger"
-                                                href="#logout"
-                                                onClick={(ev) => {
-                                                    ev.preventDefault();
-                                                    auth.logout();
-                                                }}
-                                            >
-                                                Logout
-                                            </a>
+                                            {remote ? (
+                                                <Link
+                                                    className="btn btn-outline-info
+                                                   "
+                                                    to={"/"}
+                                                >
+                                                    Local instance
+                                                </Link>
+                                            ) : (
+                                                <React.Fragment>
+                                                    <Link
+                                                        className="btn btn-outline-success"
+                                                        to={`/profile/${auth.user.login}`}
+                                                    >
+                                                        Profile
+                                                    </Link>
+                                                    <a
+                                                        className="btn btn-outline-danger"
+                                                        href="#logout"
+                                                        onClick={(ev) => {
+                                                            ev.preventDefault();
+                                                            auth.logout();
+                                                        }}
+                                                    >
+                                                        Logout
+                                                    </a>
+                                                </React.Fragment>
+                                            )}
                                         </div>
                                     </li>
                                 </React.Fragment>

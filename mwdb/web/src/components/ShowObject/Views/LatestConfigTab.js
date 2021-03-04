@@ -9,7 +9,7 @@ import { useRemote } from "../../Remote/RemoteAPI";
 export default function LatestConfigTab(props) {
     const context = useContext(ObjectContext);
     const remote = useRemote();
-    const remotePath = remote ? `remote/${remote}` : "";
+    const remotePath = remote ? `/remote/${remote}` : "";
 
     // Don't show tab if object doesn't have latest config
     if (!context.object.latest_config) return [];

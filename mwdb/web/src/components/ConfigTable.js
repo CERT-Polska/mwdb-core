@@ -162,8 +162,8 @@ export default function ConfigTable(props) {
                 <tr key="config-family">
                     <th>Family</th>
                     <td id="config_family">
-                        <a
-                            href={makeSearchLink(
+                        <Link
+                            to={makeSearchLink(
                                 "family",
                                 object.family,
                                 false,
@@ -171,14 +171,14 @@ export default function ConfigTable(props) {
                             )}
                         >
                             {object.family}
-                        </a>
+                        </Link>
                     </td>
                 </tr>
                 <tr key="config-type">
                     <th>Config type</th>
                     <td id="config_family">
-                        <a
-                            href={makeSearchLink(
+                        <Link
+                            to={makeSearchLink(
                                 "type",
                                 object.config_type,
                                 false,
@@ -186,7 +186,7 @@ export default function ConfigTable(props) {
                             )}
                         >
                             {object.config_type}
-                        </a>
+                        </Link>
                     </td>
                 </tr>
                 <ConfigRows config={object.cfg} />
@@ -194,15 +194,15 @@ export default function ConfigTable(props) {
                     <th>Upload time</th>
                     <td id="upload_time">
                         {object.upload_time ? (
-                            <a
-                                href={makeSearchDateLink(
+                            <Link
+                                to={makeSearchDateLink(
                                     "upload_time",
                                     object.upload_time,
                                     `${remotePath}configs`
                                 )}
                             >
                                 <DateString date={object.upload_time} />
-                            </a>
+                            </Link>
                         ) : (
                             []
                         )}

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { useHistory } from "react-router";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
 import api from "@mwdb-web/commons/api";
@@ -29,6 +29,8 @@ export default function UserLogin(props) {
             setLoginError(error);
         }
     }
+
+    if (auth.isAuthenticated) return <Redirect to="/" />;
 
     return (
         <View ident="userLogin" error={error} success={success}>

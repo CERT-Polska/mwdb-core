@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, Redirect } from "react-router-dom";
 
 import About from "./components/About";
 import Navigation from "./components/Navigation";
@@ -72,7 +72,7 @@ import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { Extension } from "@mwdb-web/commons/extensions";
+import { fromPlugin } from "@mwdb-web/commons/extensions";
 import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
 
 library.add(faTimes);
@@ -251,7 +251,10 @@ export default function App() {
                 path="/remote/:remote/search"
                 component={RemoteSearch}
             />
-            <Extension ident="routes" />
+            {fromPlugin("routes")}
+            <Route>
+                <Redirect to="/" />
+            </Route>
         </Switch>
     ) : (
         []

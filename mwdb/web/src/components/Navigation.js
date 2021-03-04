@@ -111,13 +111,11 @@ function RemoteDropdown() {
     ));
 
     return (
-        <React.Fragment>
-            <FontAwesomeIcon className="navbar-icon" icon={faGlobe} />
-            <NavDropdown
-                title="Remote"
-                elements={[localInstance, ...remoteItems]}
-            />
-        </React.Fragment>
+        <NavDropdown
+            title="Switch to remote..."
+            elements={[localInstance, ...remoteItems]}
+            icon={faGlobe}
+        />
     );
 }
 

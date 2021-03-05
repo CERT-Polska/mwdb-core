@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
+import { Link } from "react-router-dom";
 import Autocomplete from "react-autocomplete";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
-import {
-    RefString,
-    DateString,
-    ObjectLink,
-    ConfirmationModal,
-} from "@mwdb-web/commons/ui";
+import { RefString, DateString, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
 
 function ShareItem(props) {
     const context = useContext(ObjectContext);
@@ -23,7 +20,9 @@ function ShareItem(props) {
     return (
         <tr style={fieldStyle}>
             <td>
-                <ObjectLink type="group" id={props.group_name} />
+                <Link to={makeSearchLink("uploader", props.group_name)}>
+                    {props.group_name}
+                </Link>
                 {isCurrentObject && isUploader && (
                     <span className="ml-2">(uploader)</span>
                 )}

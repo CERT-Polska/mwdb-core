@@ -134,5 +134,5 @@ app_config = AppConfig(sources=_config_sources())
 
 
 def reload_config():
-    app_config.provider._config_sources = _config_sources()
+    app_config.provider.set_sources(_config_sources())
     app_config.provider.clear_cache()

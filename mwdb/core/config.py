@@ -2,10 +2,10 @@ import os
 from enum import Enum
 from typing import List, Optional
 
-from mwdb.paths import mail_templates_dir
+from typedconfig import Config, group_key, key, section
+from typedconfig.source import EnvironmentConfigSource, IniFileConfigSource
 
-from .typedconfig import Config, group_key, key, section
-from .typedconfig.source import EnvironmentConfigSource, IniFileConfigSource
+from mwdb.paths import mail_templates_dir
 
 
 def intbool(v) -> bool:

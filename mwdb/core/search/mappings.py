@@ -1,4 +1,7 @@
-from typing import Dict, List, Tuple, Type
+import re
+from typing import Any, Dict, List, Tuple, Type
+
+from luqum.tree import Term
 
 from mwdb.model import Comment, Config, File, Object, Tag, TextBlob
 
@@ -65,6 +68,27 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
 }
 
 
+def get_default_field_condition(queried_type: Type[Object], term: Term) -> Any:
+    if queried_type is File:
+        if re.match(r"^[0-9a-fA-F]{8}$", term.unescaped_value):
+            return StringField(File.crc32).get_condition(term, [])
+        elif re.match(r"^[0-9a-fA-F]{32}$", term.unescaped_value):
+            return StringField(File.md5).get_condition(term, [])
+        elif re.match(r"^[0-9a-fA-F]{40}$", term.unescaped_value):
+            return StringField(File.sha1).get_condition(term, [])
+        elif re.match(r"^[0-9a-fA-F]{64}$", term.unescaped_value):
+            return StringField(File.sha256).get_condition(term, [])
+        elif re.match(r"^[0-9a-fA-F]{128}$", term.unescaped_value):
+            return StringField(File.sha512).get_condition(term, [])
+    elif queried_type is Config:
+        wildcarded_term = Term(value=f"*{term.value}*")
+        return JSONField(Config.cfg).get_condition(wildcarded_term, [])
+    elif queried_type is TextBlob:
+        wildcarded_term = Term(value=f"*{term.value}*")
+        return StringField(TextBlob._content).get_condition(wildcarded_term, [])
+    return None
+
+
 def get_field_mapper(
     queried_type: Type[Object], field_selector: str
 ) -> Tuple[BaseField, List[str]]:
@@ -83,6 +107,10 @@ def get_field_mapper(
         field_path = field_path[1:]
     else:
         selected_type = queried_type
+
+    # If there was only object type selector: raise exception
+    if not field_path:
+        raise FieldNotQueryableException(f"No such field: {field_selector}")
 
     # Map object field selector
     if field_path[0] in field_mapping[selected_type.__name__]:

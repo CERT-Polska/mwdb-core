@@ -7,7 +7,6 @@ import api from "@mwdb-web/commons/api";
 import {
     encodeSearchQuery,
     decodeSearchQuery,
-    queryFromHash,
     addFieldToQuery,
 } from "@mwdb-web/commons/helpers";
 import { View } from "@mwdb-web/commons/ui";
@@ -66,7 +65,6 @@ export default function RecentView(props) {
     const submitQuery = (query) => {
         // If query is already submitted: do nothing
         if (query === submittedQuery) return;
-        query = queryFromHash(query, props.dhashOnly);
         // Synchronize input
         setQueryInput(query);
         resetErrors();

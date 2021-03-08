@@ -267,8 +267,7 @@ function PreviewSwitchAction(props) {
 export default function ShowSample(props) {
     const api = useContext(APIContext);
     async function downloadSample(object) {
-        const downloadLink = await api.requestFileDownloadLink(object.id);
-        window.location.href = downloadLink;
+        window.location.href = await api.requestFileDownloadLink(object.id);
     }
 
     return (

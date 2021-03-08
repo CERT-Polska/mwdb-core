@@ -418,9 +418,11 @@ function downloadRemoteFile(remote, id) {
 }
 
 async function requestRemoteFileDownloadLink(remote, id) {
-    const response = await axios.post(`/remote/${remote}/file/${id}/download`);
+    const response = await axios.post(
+        `/remote/${remote}/api/file/${id}/download`
+    );
     const baseURL = getApiForEnvironment();
-    return `${baseURL}/remote/${remote}/file/${id}/download?token=${response.data.token}`;
+    return `${baseURL}/remote/${remote}/api/file/${id}/download?token=${response.data.token}`;
 }
 
 export default {

@@ -6,9 +6,12 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { RefString, DateString, ConfirmationModal } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { useRemote } from "../../Remote/RemoteAPI";
 
 function ShareItem(props) {
     const context = useContext(ObjectContext);
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}/` : "";
     let fieldStyle = {
         wordBreak: "break-all",
     };
@@ -20,7 +23,14 @@ function ShareItem(props) {
     return (
         <tr style={fieldStyle}>
             <td>
-                <Link to={makeSearchLink("uploader", props.group_name)}>
+                <Link
+                    to={makeSearchLink(
+                        "uploader",
+                        props.group_name,
+                        false,
+                        `${remotePath}search`
+                    )}
+                >
                     {props.group_name}
                 </Link>
                 {isCurrentObject && isUploader && (

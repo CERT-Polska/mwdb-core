@@ -411,7 +411,10 @@ function getRemoteObjectMetakeys(remote, id) {
 }
 
 function downloadRemoteFile(remote, id) {
-    return axios.post(`/remote/${remote}/api/file/${id}/download`);
+    return axios.get(`/remote/${remote}/api/file/${id}/download`, {
+        responseType: "arraybuffer",
+        responseEncoding: "binary",
+    });
 }
 
 async function requestRemoteFileDownloadLink(remote, id) {

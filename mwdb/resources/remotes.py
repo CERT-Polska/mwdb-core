@@ -1,7 +1,7 @@
 from tempfile import SpooledTemporaryFile
 
 import requests
-from flask import g, request, Response
+from flask import Response, g, request
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 

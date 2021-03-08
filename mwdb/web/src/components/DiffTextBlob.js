@@ -10,7 +10,7 @@ import "brace/theme/chrome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { ErrorBoundary } from "@mwdb-web/commons/ui";
-import { useRemote } from "./Remote/RemoteAPI";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 class DiffTextBlobContentPresenter extends Component {
     constructor(props) {

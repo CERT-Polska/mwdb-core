@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import { DateString, SortedList, View } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { useRemote } from "./Remote/RemoteAPI";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 function ConfigStatsItem(props) {
     const remote = useRemote();

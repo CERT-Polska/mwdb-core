@@ -37,7 +37,7 @@ import {
     Hash,
     HexView,
 } from "@mwdb-web/commons/ui";
-import { useRemote } from "./Remote/RemoteAPI";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 function SampleDetails() {
     const context = useContext(ObjectContext);

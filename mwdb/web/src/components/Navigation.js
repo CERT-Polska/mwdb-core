@@ -10,13 +10,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { useRemote } from "./Remote/RemoteAPI";
-
 import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { NavDropdown } from "@mwdb-web/commons/ui";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 import logo from "../assets/logo.png";
 

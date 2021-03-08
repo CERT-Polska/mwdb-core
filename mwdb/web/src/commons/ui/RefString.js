@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useRemote } from "@mwdb-web/commons/remotes";
 import ObjectLink from "./ObjectLink";
 import { makeSearchLink } from "../helpers";
-import { useRemote } from "../../components/Remote/RemoteAPI";
 
 export default function RefString(props) {
     const remote = useRemote();

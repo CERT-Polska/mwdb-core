@@ -12,7 +12,7 @@ import {
     DateString,
     ObjectLink,
 } from "@mwdb-web/commons/ui";
-import { useRemote } from "./Remote/RemoteAPI";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 export function ConfigRow(props) {
     const key = props.configKey;

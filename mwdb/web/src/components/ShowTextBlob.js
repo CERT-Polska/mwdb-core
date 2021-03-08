@@ -30,7 +30,7 @@ import {
 } from "@mwdb-web/commons/helpers";
 import { DataTable, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
-import { useRemote } from "./Remote/RemoteAPI";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 function TextBlobDetails() {
     const context = useContext(ObjectContext);

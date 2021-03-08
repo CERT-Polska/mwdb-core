@@ -6,7 +6,7 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { RefString, DateString, ConfirmationModal } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { useRemote } from "../../Remote/RemoteAPI";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 function ShareItem(props) {
     const context = useContext(ObjectContext);

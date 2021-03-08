@@ -95,7 +95,6 @@ class RemoteAPIResource(Resource):
         return self.do_request("get", remote_name, remote_path)
 
     def post(self, remote_name, remote_path):
-        print(remote_name, remote_path)
         return self.do_request("post", remote_name, remote_path)
 
     def put(self, remote_name, remote_path):

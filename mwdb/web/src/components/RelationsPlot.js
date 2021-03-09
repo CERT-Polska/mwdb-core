@@ -8,8 +8,6 @@ import { capitalize } from "@mwdb-web/commons/helpers";
 
 import DagreD3Plot from "./DagreD3Plot";
 import { Tag } from "@mwdb-web/commons/ui";
-import { useRemote } from "../commons/remotes";
-import { useParams } from "react-router-dom";
 
 function RelationsNode(props) {
     const typeMapping = {
@@ -198,7 +196,6 @@ function RelationsPlot(props) {
             height={height ? height : defaultProps.height}
             nodes={nodes.nodes}
             edges={nodes.edges}
-            remote={api.remote}
             onNodeClick={onNodeClick}
             nodeComponent={RelationsNode}
         />

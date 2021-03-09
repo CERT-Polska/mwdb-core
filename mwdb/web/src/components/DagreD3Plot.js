@@ -3,8 +3,12 @@ import ReactDOM from "react-dom";
 
 import * as dagreD3 from "dagre-d3";
 import * as d3 from "d3";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 function DagreD3Plot(props) {
+    const remote = useRemote();
+    const remotePath = remote ? `/remote/${remote}` : "";
+
     const graph = new dagreD3.graphlib.Graph().setGraph({ compound: true });
     const renderer = new dagreD3.render();
 
@@ -30,11 +34,10 @@ function DagreD3Plot(props) {
 
     const renderNodeElement = async (node) => {
         const parentNode = document.createElement("div");
-        const remote = props.remote ? `/remote/${props.remote}` : "";
         // ReactDOM.render is asynchronic - node render is deferred
         return new Promise((resolve) => {
             ReactDOM.render(
-                <NodeComponent node={node} remote={remote} />,
+                <NodeComponent node={node} remote={remotePath} />,
                 parentNode,
                 () => resolve(parentNode)
             );

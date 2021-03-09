@@ -8,6 +8,8 @@ import { capitalize } from "@mwdb-web/commons/helpers";
 
 import DagreD3Plot from "./DagreD3Plot";
 import { Tag } from "@mwdb-web/commons/ui";
+import { useRemote } from "../commons/remotes";
+import { useParams } from "react-router-dom";
 
 function RelationsNode(props) {
     const typeMapping = {
@@ -46,7 +48,9 @@ function RelationsNode(props) {
                 <div className="card-body">
                     <p className="card-text">
                         <small className="text-muted">
-                            <a href={`/${nodeType}/${props.node.id}`}>
+                            <a
+                                href={`${props.remote}/${nodeType}/${props.node.id}`}
+                            >
                                 {props.node.id.substr(0, 16)}
                             </a>
                         </small>
@@ -69,7 +73,6 @@ function RelationsPlot(props) {
     const api = useContext(APIContext);
     const history = useHistory();
     const { hash, height } = props;
-
     const defaultProps = {
         height: "900",
         width: "100%",
@@ -195,6 +198,7 @@ function RelationsPlot(props) {
             height={height ? height : defaultProps.height}
             nodes={nodes.nodes}
             edges={nodes.edges}
+            remote={api.remote}
             onNodeClick={onNodeClick}
             nodeComponent={RelationsNode}
         />

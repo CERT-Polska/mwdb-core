@@ -30,10 +30,13 @@ function DagreD3Plot(props) {
 
     const renderNodeElement = async (node) => {
         const parentNode = document.createElement("div");
+        const remote = props.remote ? `/remote/${props.remote}` : "";
         // ReactDOM.render is asynchronic - node render is deferred
         return new Promise((resolve) => {
-            ReactDOM.render(<NodeComponent node={node} />, parentNode, () =>
-                resolve(parentNode)
+            ReactDOM.render(
+                <NodeComponent node={node} remote={remote} />,
+                parentNode,
+                () => resolve(parentNode)
             );
         });
     };
@@ -152,6 +155,7 @@ function DagreD3Plot(props) {
                 ref={nodeSvg}
                 width={props.width}
                 height={props.height}
+                remote={props.remote}
             >
                 <g />
             </svg>

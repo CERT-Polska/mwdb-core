@@ -14,6 +14,7 @@ from mwdb.schema.blob import BlobItemResponseSchema
 from mwdb.schema.config import ConfigItemResponseSchema
 from mwdb.schema.file import FileItemResponseSchema
 from mwdb.schema.remotes import RemotesListResponseSchema
+from mwdb.version import app_build_version
 
 from . import access_object, logger, requires_authorization
 
@@ -50,6 +51,9 @@ class RemoteAPI:
         self.remote_url = app_config.get_key(f"remote:{remote_name}", "url")
         self.api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
         self.session = requests.Session()
+        self.session.headers["User-Agent"] = (
+            f"mwdb-core/{app_build_version} " + self.session.headers["User-Agent"]
+        )
 
     @staticmethod
     def map_remote_api_error(response):

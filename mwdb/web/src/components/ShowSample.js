@@ -11,6 +11,7 @@ import {
     DownloadAction,
     FavoriteAction,
     PushAction,
+    PullAction,
     UploadChildAction,
     RemoveAction,
     ObjectAction,
@@ -22,7 +23,7 @@ import {
     faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import {
     makeSearchLink,
     makeSearchDateLink,
@@ -36,9 +37,12 @@ import {
     Hash,
     HexView,
 } from "@mwdb-web/commons/ui";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 function SampleDetails() {
     const context = useContext(ObjectContext);
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}` : "";
     return (
         <DataTable>
             <Extendable ident="showSampleDetails">
@@ -50,7 +54,7 @@ function SampleDetails() {
                                 "name",
                                 context.object.file_name,
                                 false,
-                                ""
+                                remotePath
                             )}
                         >
                             {context.object.file_name}
@@ -71,7 +75,7 @@ function SampleDetails() {
                                 "size",
                                 context.object.file_size,
                                 false,
-                                ""
+                                remotePath
                             )}
                         >
                             {humanFileSize(context.object.file_size)}
@@ -92,7 +96,7 @@ function SampleDetails() {
                                 "type",
                                 context.object.file_type,
                                 false,
-                                ""
+                                remotePath
                             )}
                         >
                             {context.object.file_type}
@@ -173,7 +177,7 @@ function SampleDetails() {
                                 "ssdeep",
                                 context.object.ssdeep,
                                 false,
-                                ""
+                                remotePath
                             )}
                         >
                             {context.object.ssdeep}
@@ -195,7 +199,7 @@ function SampleDetails() {
                                 to={makeSearchDateLink(
                                     "upload_time",
                                     context.object.upload_time,
-                                    ""
+                                    remotePath
                                 )}
                             >
                                 <DateString date={context.object.upload_time} />
@@ -212,6 +216,7 @@ function SampleDetails() {
 
 function SamplePreview() {
     const [content, setContent] = useState("");
+    const api = useContext(APIContext);
     const objectContext = useContext(ObjectContext);
     const tabContext = useTabContext();
 
@@ -260,9 +265,9 @@ function PreviewSwitchAction(props) {
 }
 
 export default function ShowSample(props) {
+    const api = useContext(APIContext);
     async function downloadSample(object) {
-        const downloadLink = await api.requestFileDownloadLink(object.id);
-        window.location.href = downloadLink;
+        window.location.href = await api.requestFileDownloadLink(object.id);
     }
 
     return (
@@ -281,6 +286,7 @@ export default function ShowSample(props) {
                 actions={[
                     <RemoveAction />,
                     <PushAction />,
+                    <PullAction />,
                     <UploadChildAction />,
                     <FavoriteAction />,
                     <DownloadAction download={downloadSample} />,
@@ -295,6 +301,7 @@ export default function ShowSample(props) {
                     <PreviewSwitchAction />,
                     <RemoveAction />,
                     <PushAction />,
+                    <PullAction />,
                     <UploadChildAction />,
                     <FavoriteAction />,
                     <DownloadAction download={downloadSample} />,

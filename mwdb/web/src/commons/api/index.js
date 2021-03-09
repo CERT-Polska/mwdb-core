@@ -355,15 +355,15 @@ function getRemoteNames() {
 }
 
 function pushObjectRemote(remote, type, identifier) {
-    return axios.post(`remote/${remote}/push/${type}/${identifier}`);
+    return axios.post(`/remote/${remote}/push/${type}/${identifier}`);
 }
 
 function pullObjectRemote(remote, type, identifier) {
-    return axios.post(`remote/${remote}/pull/${type}/${identifier}`);
+    return axios.post(`/remote/${remote}/pull/${type}/${identifier}`);
 }
 
 function getObjectRemote(remote, identifier) {
-    return axios.get(`remote/${remote}/api/object/${identifier}`);
+    return axios.get(`/remote/${remote}/api/object/${identifier}`);
 }
 
 function getConfigStats(fromTime) {
@@ -372,6 +372,57 @@ function getConfigStats(fromTime) {
             range: fromTime,
         },
     });
+}
+
+function getRemoteObject(remote, type, id) {
+    return axios.get(`/remote/${remote}/api/${type}/${id}`);
+}
+
+function getRemoteObjectList(remote, type, older_than, query) {
+    return axios.get(`/remote/${remote}/api/${type}`, {
+        params: { older_than, query },
+    });
+}
+
+function getRemoteObjectCount(remote, type, query) {
+    return axios.get(`/remote/${remote}/api/${type}/count`, {
+        params: { query },
+    });
+}
+
+function getRemoteObjectTags(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/tag`);
+}
+
+function getRemoteObjectComments(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/comment`);
+}
+
+function getRemoteObjectRelations(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/relations`);
+}
+
+function getRemoteObjectShares(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/share`);
+}
+
+function getRemoteObjectMetakeys(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/meta`);
+}
+
+function downloadRemoteFile(remote, id) {
+    return axios.get(`/remote/${remote}/api/file/${id}/download`, {
+        responseType: "arraybuffer",
+        responseEncoding: "binary",
+    });
+}
+
+async function requestRemoteFileDownloadLink(remote, id) {
+    const response = await axios.post(
+        `/remote/${remote}/api/file/${id}/download`
+    );
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/remote/${remote}/api/file/${id}/download?token=${response.data.token}`;
 }
 
 export default {
@@ -447,4 +498,14 @@ export default {
     getConfigStats,
     getObjectRelations,
     addObjectRelation,
+    getRemoteObject,
+    getRemoteObjectList,
+    getRemoteObjectCount,
+    getRemoteObjectTags,
+    getRemoteObjectComments,
+    getRemoteObjectRelations,
+    getRemoteObjectShares,
+    getRemoteObjectMetakeys,
+    downloadRemoteFile,
+    requestRemoteFileDownloadLink,
 };

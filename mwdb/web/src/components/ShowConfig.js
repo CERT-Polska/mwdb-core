@@ -16,6 +16,7 @@ import {
     FavoriteAction,
     RemoveAction,
     PushAction,
+    PullAction,
 } from "./ShowObject";
 
 import { downloadData } from "@mwdb-web/commons/helpers";
@@ -70,6 +71,7 @@ export default function ShowConfig(props) {
                 actions={[
                     <RemoveAction />,
                     <PushAction />,
+                    <PullAction />,
                     <FavoriteAction />,
                     <DownloadAction download={downloadTextBlob} />,
                 ]}

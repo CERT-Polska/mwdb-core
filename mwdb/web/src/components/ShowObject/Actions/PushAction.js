@@ -2,13 +2,14 @@ import React, { useContext, useState } from "react";
 
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default function PushAction() {
+    const api = useContext(APIContext);
     const config = useContext(ConfigContext);
     const context = useContext(ObjectContext);
     const [isPushModalOpen, setPushModalOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function PushAction() {
 
     const remotes = config.config.remotes;
 
-    if (!remotes || !remotes.length) return [];
+    if (!remotes || !remotes.length || api.remote) return [];
 
     return (
         <React.Fragment>

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 
 export default function RecentViewList(props) {
+    const api = useContext(APIContext);
     const infiniteScroll = useRef(null);
     // Loaded object items
     let [elements, setElements] = useState([]);
@@ -29,7 +30,7 @@ export default function RecentViewList(props) {
         setElements([]);
         setLoadedPages(0);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.query]);
+    }, [props.query, api.remote]);
 
     // Load page on request (pageToLoad != loadedPages)
     useEffect(() => {

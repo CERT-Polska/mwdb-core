@@ -1,4 +1,5 @@
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function NavDropdown(props) {
     if (!props.elements.length) return <div />;
@@ -10,6 +11,7 @@ export default function NavDropdown(props) {
                 role="button"
                 data-toggle="dropdown"
             >
+                <FontAwesomeIcon className="navbar-icon" icon={props.icon} />
                 {props.title}
                 {props.badge ? (
                     <span

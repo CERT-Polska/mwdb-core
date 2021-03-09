@@ -1,13 +1,14 @@
 import React, { useState, useContext, useEffect, useCallback } from "react";
 import Autocomplete from "react-autocomplete";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { TagList, Tag } from "@mwdb-web/commons/ui";
 
 function TagForm(props) {
+    const api = useContext(APIContext);
     const context = useContext(ObjectContext);
     const [text, setText] = useState("");
     const [tags, setTags] = useState([]);
@@ -107,6 +108,7 @@ function TagForm(props) {
 }
 
 export default function TagBox() {
+    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const [tags, setTags] = useState([]);
@@ -176,7 +178,7 @@ export default function TagBox() {
                     <div className="text-muted">No tags to display</div>
                 )}
             </div>
-            {auth.hasCapability("adding_tags") && (
+            {auth.hasCapability("adding_tags") && !api.remote && (
                 <TagForm onTagSubmit={handleTagSubmit} />
             )}
         </div>

@@ -2,7 +2,7 @@ import React, { useContext, useState, useCallback, useEffect } from "react";
 import AttributesAddModal from "./AttributesAddModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
@@ -19,6 +19,7 @@ for (let extraRenderers of fromPlugin("attributeRenderers")) {
 }
 
 function DefaultAttributeRenderer(props) {
+    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
 
@@ -127,6 +128,7 @@ function DefaultAttributeRenderer(props) {
 }
 
 function ObjectAttributes(props) {
+    const api = useContext(APIContext);
     const context = useContext(ObjectContext);
 
     const [attributes, setAttributes] = useState([]);

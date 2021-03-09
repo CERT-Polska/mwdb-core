@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     ObjectLink,
@@ -12,6 +12,7 @@ import {
 import RelationsAddModal from "../Actions/RelationsAddModal";
 
 function RelationsBox(props) {
+    const api = useContext(APIContext);
     const context = useContext(ObjectContext);
     const [isAttributeAddModalOpen, setAttributeAddModalOpen] = useState(false);
     const [modalError, setModalError] = useState("");
@@ -88,18 +89,22 @@ function RelationsBox(props) {
         <div className="card card-default">
             <div className="card-header">
                 {props.header || "Relations"}
-                <Link
-                    to="#"
-                    className="float-right"
-                    onClick={(ev) => {
-                        ev.preventDefault();
-                        setAttributeAddModalOpen(true);
-                        setModalError("");
-                    }}
-                >
-                    <FontAwesomeIcon icon="plus" pull="left" size="1x" />
-                    Add
-                </Link>
+                {!api.remote ? (
+                    <Link
+                        to="#"
+                        className="float-right"
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setAttributeAddModalOpen(true);
+                            setModalError("");
+                        }}
+                    >
+                        <FontAwesomeIcon icon="plus" pull="left" size="1x" />
+                        Add
+                    </Link>
+                ) : (
+                    []
+                )}
             </div>
             {parents.length + children.length > 0 ? (
                 <table

@@ -32,6 +32,14 @@ import RelationsPlot from "./components/RelationsPlot";
 import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
 import Docs from "./components/Docs";
+import RemoteShowSample from "./components/Remote/RemoteShowSample";
+import RemoteShowConfig from "./components/Remote/RemoteShowConfig";
+import RemoteShowTextBlob from "./components/Remote/RemoteShowTextBlob";
+import RemoteRecentSamples from "./components/Remote/RemoteRecentSamples";
+import RemoteRecentConfigs from "./components/Remote/RemoteRecentConfigs";
+import RemoteRecentBlobs from "./components/Remote/RemoteRecentBlobs";
+import RemoteDiffTextBlob from "./components/Remote/RemoteDiffTextBlob";
+import RemoteSearch from "./components/Remote/RemoteSearch";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -207,6 +215,41 @@ export default function App() {
                 exact
                 path="/attributes/new"
                 component={AttributeDefine}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote"
+                component={RemoteRecentSamples}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote/configs"
+                component={RemoteRecentConfigs}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote/blobs"
+                component={RemoteRecentBlobs}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/sample/:hash"
+                component={RemoteShowSample}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/config/:hash"
+                component={RemoteShowConfig}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/blob/:hash"
+                component={RemoteShowTextBlob}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/diff/:current/:previous"
+                component={RemoteDiffTextBlob}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/search"
+                component={RemoteSearch}
             />
             {fromPlugin("routes")}
             <Route>

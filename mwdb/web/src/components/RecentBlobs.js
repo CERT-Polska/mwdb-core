@@ -7,9 +7,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
 import { TagList } from "@mwdb-web/commons/ui";
 import { DateString, ObjectLink, Hash } from "@mwdb-web/commons/ui";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 export function RecentBlobRow(props) {
     let location = useLocation();
+    const remote = useRemote();
+    const remotePath = remote ? `/remote/${remote}` : "";
     const diffWith = queryString.parse(location.search)["diff"];
     const blobType = (
         <a
@@ -26,7 +29,7 @@ export function RecentBlobRow(props) {
         props.id === diffWith ? (
             <Hash hash={props.id} />
         ) : (
-            <Link to={`/diff/${props.id}/${diffWith}`}>
+            <Link to={`${remotePath}/diff/${props.id}/${diffWith}`}>
                 <Hash hash={props.id} />
             </Link>
         )

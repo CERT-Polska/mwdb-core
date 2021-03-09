@@ -3,12 +3,13 @@ import { useHistory } from "react-router";
 
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default function RemoveAction() {
+    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const history = useHistory();
@@ -29,7 +30,7 @@ export default function RemoveAction() {
     }
 
     // If user can't remove objects: don't show the action
-    if (!auth.hasCapability("removing_objects")) return [];
+    if (!auth.hasCapability("removing_objects") || api.remote) return [];
 
     return (
         <React.Fragment>

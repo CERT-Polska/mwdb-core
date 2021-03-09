@@ -12,6 +12,7 @@ import {
     DateString,
     ObjectLink,
 } from "@mwdb-web/commons/ui";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 export function ConfigRow(props) {
     const key = props.configKey;
@@ -26,6 +27,9 @@ export function ConfigRow(props) {
         Object.keys(value).length === 1 &&
         Object.keys(value)[0] === "in-blob";
     const isRegularObject = isObject && !isEmbeddedBlob;
+
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}/` : "";
 
     useEffect(() => {
         // Automatically expand all nested objects if parent has been expanded
@@ -51,7 +55,7 @@ export function ConfigRow(props) {
                     `cfg.${path.join(".")}`,
                     value,
                     false,
-                    "configs"
+                    `${remotePath}configs`
                 )}
             >
                 {String(value)}
@@ -149,6 +153,8 @@ export function ConfigRows(props) {
 
 export default function ConfigTable(props) {
     const object = props.object;
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}/` : "";
 
     return (
         <DataTable>
@@ -156,31 +162,31 @@ export default function ConfigTable(props) {
                 <tr key="config-family">
                     <th>Family</th>
                     <td id="config_family">
-                        <a
-                            href={makeSearchLink(
+                        <Link
+                            to={makeSearchLink(
                                 "family",
                                 object.family,
                                 false,
-                                "configs"
+                                `${remotePath}configs`
                             )}
                         >
                             {object.family}
-                        </a>
+                        </Link>
                     </td>
                 </tr>
                 <tr key="config-type">
                     <th>Config type</th>
                     <td id="config_family">
-                        <a
-                            href={makeSearchLink(
+                        <Link
+                            to={makeSearchLink(
                                 "type",
                                 object.config_type,
                                 false,
-                                "configs"
+                                `${remotePath}configs`
                             )}
                         >
                             {object.config_type}
-                        </a>
+                        </Link>
                     </td>
                 </tr>
                 <ConfigRows config={object.cfg} />
@@ -188,15 +194,15 @@ export default function ConfigTable(props) {
                     <th>Upload time</th>
                     <td id="upload_time">
                         {object.upload_time ? (
-                            <a
-                                href={makeSearchDateLink(
+                            <Link
+                                to={makeSearchDateLink(
                                     "upload_time",
                                     object.upload_time,
-                                    "configs"
+                                    `${remotePath}configs`
                                 )}
                             >
                                 <DateString date={object.upload_time} />
-                            </a>
+                            </Link>
                         ) : (
                             []
                         )}

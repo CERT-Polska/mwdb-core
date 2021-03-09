@@ -1,7 +1,7 @@
 from tempfile import SpooledTemporaryFile
 
 import requests
-from flask import g
+from flask import Response, g, request
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
@@ -68,7 +68,7 @@ class RemoteAPI:
         else:
             response.raise_for_status()
 
-    def request(self, method, path, *args, raw=False, **kwargs):
+    def request(self, method, path, *args, **kwargs):
         response = self.session.request(
             method,
             f"{self.remote_url}/api/{path}",
@@ -77,26 +77,31 @@ class RemoteAPI:
             **kwargs,
         )
         self.map_remote_api_error(response)
-        return response if raw else response.json()
+        return response
 
 
 class RemoteAPIResource(Resource):
     def do_request(self, method, remote_name, remote_path):
         remote = RemoteAPI(remote_name)
-        response = remote.request(method, remote_path)
-        return response
+        response = remote.request(
+            method, remote_path, params=request.args, data=request.data, stream=True
+        )
+        return Response(
+            response.iter_content(chunk_size=2 ** 16),
+            mimetype=response.headers["content-type"],
+        )
 
-    def get(self, *args, **kwargs):
-        return self.do_request("get", *args, **kwargs)
+    def get(self, remote_name, remote_path):
+        return self.do_request("get", remote_name, remote_path)
 
-    def post(self, *args, **kwargs):
-        return self.do_request("post", *args, **kwargs)
+    def post(self, remote_name, remote_path):
+        return self.do_request("post", remote_name, remote_path)
 
-    def put(self, *args, **kwargs):
-        return self.do_request("put", *args, **kwargs)
+    def put(self, remote_name, remote_path):
+        return self.do_request("put", remote_name, remote_path)
 
-    def delete(self, *args, **kwargs):
-        return self.do_request("delete", *args, **kwargs)
+    def delete(self, remote_name, remote_path):
+        return self.do_request("delete", remote_name, remote_path)
 
 
 class RemotePullResource(Resource):
@@ -171,12 +176,8 @@ class RemoteFilePullResource(RemotePullResource):
         """
         remote = RemoteAPI(remote_name)
         response = remote.request("GET", f"file/{identifier}")
-        file_name = response["file_name"]
-
-        response = remote.request("POST", f"request/sample/{identifier}")
-        download_url = response["url"]
-
-        response = remote.request("GET", download_url, raw=True, stream=True)
+        file_name = response.json()["file_name"]
+        response = remote.request("GET", f"file/{identifier}/download", stream=True)
         with SpooledTemporaryFile() as file_stream:
             for chunk in response.iter_content(chunk_size=2 ** 16):
                 file_stream.write(chunk)

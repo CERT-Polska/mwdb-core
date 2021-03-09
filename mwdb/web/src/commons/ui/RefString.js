@@ -1,9 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useRemote } from "@mwdb-web/commons/remotes";
 import ObjectLink from "./ObjectLink";
 import { makeSearchLink } from "../helpers";
 
 export default function RefString(props) {
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}/` : "";
     const reasonText =
         props.reason_type.charAt(0).toUpperCase() +
         props.reason_type.slice(1).toLowerCase();
@@ -17,7 +20,14 @@ export default function RefString(props) {
         <span className="text-muted">(object deleted)</span>
     );
     const userLink = (
-        <Link to={makeSearchLink("uploader", props.related_user_login)}>
+        <Link
+            to={makeSearchLink(
+                "uploader",
+                props.related_user_login,
+                false,
+                `${remotePath}search`
+            )}
+        >
             {props.related_user_login}
         </Link>
     );

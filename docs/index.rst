@@ -23,6 +23,7 @@ Features
    integration-guide
    extra-features
    developer-guide
+   remotes-guide
 
 Indices and tables
 ==================

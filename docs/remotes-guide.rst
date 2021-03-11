@@ -22,7 +22,7 @@ Setting up remote instance
 In order to use the remote instance views, you need the api key associated with the account authorized within it.
 If you don't have the api key generated or don't know how to do it, check :ref:`How to use API keys?` for more information.
 
-With the api key generated already, navigate to the file ``mwdb.ini`` inside ``docker`` folder in main project directory.
+With the api key generated, navigate to the file ``mwdb.ini`` inside ``docker`` folder in main project directory.
 In this file you should add the definition of the remote instance along with the api key and its url in the form:
 
 .. code-block:: docker
@@ -33,8 +33,8 @@ In this file you should add the definition of the remote instance along with the
     url = http://mwdb.cert.pl
     api_key=ey...
 
-The remotes variable inside this file passes the list of variables to the mwdb configuration files, from which we can browse remote instances within by the local application instance.
-If we want to define more remote instances, just add more remots in the form
+The ``remotes`` variable inside this file passes the list of remotes to the mwdb configuration files, from which we can browse remote instances within by the local application instance.
+If we want to define more remote instances, just add more remotes in form
 
 .. code-block:: docker
 
@@ -97,13 +97,13 @@ Then select the instance from which you want to pull the object and enter its id
    :alt: local remote object view pull
 
 
-Similar to the pull action on an object on a remote instance, we can also push an object from a local instance to a remote instance by clicking the appropriate ``push`` button in the local object view.
+Similar to the pull object action in remote instance, we can also push an object from local instance to remote by clicking the appropriate ``push`` button in the local object view.
 
 .. image:: ../_static/remote-push.png
    :target: ../_static/remote-push.png
    :alt: remote object view push
 
-After clicking on the button, a window will appear in which you will have to select the remote instance to which you want to push the object.
+After clicking on that button, a window will appear in which you will have to select the remote instance to which you want push the object.
 
 .. image:: ../_static/remote-push-modal.png
    :target: ../_static/remote-push-modal.png
@@ -113,4 +113,3 @@ After clicking on the button, a window will appear in which you will have to sel
 
     Please note that when pushing objects onto a remote instance, we perform this action as the user to whom the api key belongs.
     For this reason, the objects will be published under his login, provided that he has permission to upload the given type of object in the selected defined remote instance.
-

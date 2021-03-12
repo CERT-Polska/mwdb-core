@@ -43,10 +43,10 @@ Remote instance view allows you to view remote samples, configs and blobs along 
 By going to the view of a specific object on a remote instance, we can read detailed information about this object
 and we're able to perform two possible actions on it:
 
-* ``Download`` to download the object from a remote instance directly to our computer
+* ``Download`` to download the object from the remote instance directly to your computer
 * ``Pull`` to pull the object into the local MWDB database
 
-Although remote view is almost identical with the local one, it's limited only to the read-only actions.
+Although remote view is almost identical with the local one, it's limited to the read-only actions.
 
 .. image:: ./_static/remote-object-pull.png
    :target: ./_static/remote-object-pull.png

@@ -320,7 +320,7 @@ If you want to see objects that are uploaded by somebody from your group excludi
 
    uploader:<group name> AND NOT uploader:<your login>
 
-Keep in mind that you can query only for query only for objects uploaded by you or members of your own groups (excluding members of the ``public`` group). This limitation doesn't apply to administrators (``manage_users`` capability).
+Keep in mind that you can query only for objects uploaded by you or members of your own groups (excluding members of the ``public`` group). This limitation doesn't apply to administrators (``manage_users`` capability).
 
 Read more about MWDB sharing model and capabilities in chapter :ref:`9. Sharing objects with other collaborators`.
 

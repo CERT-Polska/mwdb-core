@@ -17,7 +17,7 @@ Follow the sections below to learn about the most important changes.
 [New feature] Remote API feature
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There is new feature that allows to connect directly to the other MWDB Core instance (e.g. mwdb.cert.pl) to pull/push
+There is new feature that allows to connect directly to the other MWDB Core instance (e.g. mwdb.cert.pl) to pull or push
 objects and discover new objects in the remote repository. At the time of release, feature is considered **beta** so
 don't rely heavily on it. If you want to test it, we'll be glad for feedback!
 
@@ -30,7 +30,7 @@ Requests to MWDB API are mostly authenticated via Authorization header (instead 
 so there is no easy way to let a browser download a file. That's why download process looked like below:
 
 1.  ``POST /request/sample/{identifier}`` is used to get partial download URL with generated token
-2.  ``GET /api/download/{access_token`` is used to download the actual file
+2.  ``GET /api/download/{access_token}`` is used to download the actual file
 
 So we had always two HTTP requests to download the file contents. That's why in 2.2.0 you can download a file without
 intermediate token via new ``/file/{identifier}/download`` endpoint.

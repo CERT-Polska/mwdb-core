@@ -16,7 +16,7 @@ from mwdb.schema.file import FileItemResponseSchema
 from mwdb.schema.remotes import RemotesListResponseSchema
 from mwdb.version import app_build_version
 
-from . import access_object, logger, requires_authorization
+from . import logger, requires_authorization
 
 
 class RemoteListResource(Resource):

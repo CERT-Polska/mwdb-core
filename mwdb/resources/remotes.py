@@ -267,7 +267,9 @@ class RemoteConfigPullResource(RemotePullResource):
                             blob_name=blob_spec["blob_name"],
                             blob_type=blob_spec["blob_type"],
                             share_with=[
-                                group for group in g.auth_user.groups if group.name != "public"
+                                group
+                                for group in g.auth_user.groups
+                                if group.name != "public"
                             ],
                         )
                     blobs.append(blob_obj)
@@ -438,14 +440,16 @@ class RemoteConfigPushResource(RemotePullResource):
             if isinstance(second, dict) and list(second.keys()) == ["in-blob"]:
                 in_blob = second["in-blob"]
                 if not isinstance(in_blob, str):
-                    raise BadRequest("'in-blob' key doesn't contain a correct blob reference")
+                    raise BadRequest(
+                        "'in-blob' key doesn't contain a correct blob reference"
+                    )
                 embedded_blob = TextBlob.access(in_blob)
                 if not embedded_blob:
                     raise NotFound(f"Referenced blob '{in_blob}' doesn't exist")
                 second["in-blob"] = {
                     "content": embedded_blob.content,
                     "blob_name": embedded_blob.blob_name,
-                    "blob_type": embedded_blob.blob_type
+                    "blob_type": embedded_blob.blob_type,
                 }
 
         remote = RemoteAPI(remote_name)

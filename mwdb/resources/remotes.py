@@ -247,7 +247,7 @@ class RemoteConfigPullResource(RemotePullResource):
                 description: Object exists yet but has different type
         """
         remote = RemoteAPI(remote_name)
-        spec = remote.request("GET", f"config/{identifier}")
+        spec = remote.request("GET", f"config/{identifier}").json()
         try:
             config = dict(spec["cfg"])
             blobs = []
@@ -330,7 +330,7 @@ class RemoteTextBlobPullResource(RemotePullResource):
                 description: Object exists yet but has different type
         """
         remote = RemoteAPI(remote_name)
-        spec = remote.request("GET", f"blob/{identifier}")
+        spec = remote.request("GET", f"blob/{identifier}").json()
         try:
             item, is_new = TextBlob.get_or_create(
                 content=spec["content"],
@@ -384,7 +384,7 @@ class RemoteFilePushResource(RemotePullResource):
         remote = RemoteAPI(remote_name)
         response = remote.request(
             "POST", "file", files={"file": (db_object.file_name, db_object.open())}
-        )
+        ).json()
         logger.info(
             f"{db_object.type} pushed remote",
             extra={"dhash": db_object.dhash, "remote_name": remote_name},
@@ -433,7 +433,7 @@ class RemoteConfigPushResource(RemotePullResource):
             "cfg": db_object.cfg,
             "config_type": db_object.config_type,
         }
-        response = remote.request("POST", "config", json=params)
+        response = remote.request("POST", "config", json=params).json()
         logger.info(
             f"{db_object.type} pushed remote",
             extra={"dhash": db_object.dhash, "remote_name": remote_name},
@@ -482,7 +482,7 @@ class RemoteTextBlobPushResource(RemotePullResource):
             "blob_type": db_object.blob_type,
             "content": db_object.content,
         }
-        response = remote.request("POST", "blob", json=params)
+        response = remote.request("POST", "blob", json=params).json()
         logger.info(
             f"{db_object.type} pushed remote",
             extra={"dhash": db_object.dhash, "remote_name": remote_name},

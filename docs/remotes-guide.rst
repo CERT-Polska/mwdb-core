@@ -114,5 +114,3 @@ That's why it comes with few significant limitations:
 
 * Automatic synchronization of tags, attributes, relationships is not implemented yet. Push/pull feature is limited to the object itself.
 
-* Automatic pull of dependent objects is not implemented yet. That's why you can't pull config with embedded blob if the related blob was not pulled before.
-

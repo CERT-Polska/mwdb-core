@@ -1,17 +1,21 @@
 import React, { useContext, useState } from "react";
+import { useHistory, useRouteMatch } from "react-router";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
-import { ConfigContext } from "@mwdb-web/commons/config";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default function PullAction() {
     const api = useContext(APIContext);
-    const config = useContext(ConfigContext);
     const context = useContext(ObjectContext);
+    const history = useHistory();
+    const match = useRouteMatch("/remote/:remote/:type/:id");
     const [isPullModalOpen, setPullModalOpen] = useState(false);
+    const [isPullModalDisabled, setPullModalDisabled] = useState(false);
+
+    if (!api.remote) return [];
 
     async function pullRemote() {
         let type = {
@@ -20,15 +24,15 @@ export default function PullAction() {
             text_blob: "blob",
         }[context.object.type];
         try {
+            setPullModalDisabled(true);
             await api.pullObjectRemote(api.remote, type, context.object.id);
+            history.push(`/${match.params.type}/${match.params.id}`);
         } catch (error) {
             context.setObjectError(error);
+            setPullModalOpen(false);
         }
     }
 
-    const remotes = config.config.remotes;
-
-    if (!remotes.length || !api.remote) return [];
     return (
         <React.Fragment>
             <ObjectAction
@@ -42,10 +46,10 @@ export default function PullAction() {
                 message="Are you sure you want to pull this object for local instance?"
                 isOpen={isPullModalOpen}
                 onRequestClose={() => setPullModalOpen(false)}
+                disabled={isPullModalDisabled}
                 onConfirm={(ev) => {
                     ev.preventDefault();
                     pullRemote();
-                    setPullModalOpen(false);
                 }}
             />
         </React.Fragment>

@@ -7,6 +7,7 @@ import { ConfigContext } from "@mwdb-web/commons/config";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { mapObjectType } from "@mwdb-web/commons/helpers";
 
 export default function PushAction() {
     const api = useContext(APIContext);
@@ -16,11 +17,7 @@ export default function PushAction() {
     const [remoteName, setRemoteName] = useState("");
 
     async function pushRemote() {
-        let type = {
-            file: "file",
-            static_config: "config",
-            text_blob: "blob",
-        }[context.object.type];
+        let type = mapObjectType(context.object.type);
         try {
             await api.pushObjectRemote(remoteName, type, context.object.id);
         } catch (error) {

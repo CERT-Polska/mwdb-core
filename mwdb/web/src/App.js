@@ -159,7 +159,8 @@ export default function App() {
                 path="/profile/:login"
                 component={UserProfile}
             />
-            <AuthenticatedRoute path="/sample/:hash" component={ShowSample} />
+            <Redirect from="/sample/:hash" to="/file/:hash" />
+            <AuthenticatedRoute path="/file/:hash" component={ShowSample} />
             <AuthenticatedRoute path="/config/:hash" component={ShowConfig} />
             <AuthenticatedRoute path="/blob/:hash" component={ShowTextBlob} />
             <AuthenticatedRoute
@@ -230,7 +231,7 @@ export default function App() {
                 component={RemoteRecentBlobs}
             />
             <AuthenticatedRoute
-                path="/remote/:remote/sample/:hash"
+                path="/remote/:remote/file/:hash"
                 component={RemoteShowSample}
             />
             <AuthenticatedRoute

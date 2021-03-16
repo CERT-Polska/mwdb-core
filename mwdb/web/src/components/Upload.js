@@ -136,7 +136,7 @@ export default class Upload extends Component {
                 this.state.attributes
             );
             this.sha256 = response.data.sha256;
-            this.props.history.replace("/sample/" + this.sha256);
+            this.props.history.replace("/file/" + this.sha256);
         } catch (error) {
             this.setState({ error });
         }

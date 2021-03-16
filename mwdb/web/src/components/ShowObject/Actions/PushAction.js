@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useHistory, useRouteMatch } from "react-router";
+import { useHistory } from "react-router";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
@@ -14,7 +14,6 @@ export default function PushAction() {
     const config = useContext(ConfigContext);
     const context = useContext(ObjectContext);
     const history = useHistory();
-    const match = useRouteMatch("/:type/:id");
     const [isPushModalDisabled, setPushModalDisabled] = useState(false);
     const [isPushModalOpen, setPushModalOpen] = useState(false);
     const [remoteName, setRemoteName] = useState("");
@@ -28,9 +27,7 @@ export default function PushAction() {
         try {
             setPushModalDisabled(true);
             await api.pushObjectRemote(remoteName, type, context.object.id);
-            history.push(
-                `/remote/${remoteName}/${match.params.type}/${match.params.id}`
-            );
+            history.push(`/remote/${remoteName}/${type}/${context.object.id}`);
         } catch (error) {
             context.setObjectError(error);
             setPushModalOpen(false);

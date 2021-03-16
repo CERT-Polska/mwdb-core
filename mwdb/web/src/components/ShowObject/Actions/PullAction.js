@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useHistory, useRouteMatch } from "react-router";
+import { useHistory } from "react-router";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
@@ -12,7 +12,6 @@ export default function PullAction() {
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
     const history = useHistory();
-    const match = useRouteMatch("/remote/:remote/:type/:id");
     const [isPullModalOpen, setPullModalOpen] = useState(false);
     const [isPullModalDisabled, setPullModalDisabled] = useState(false);
 
@@ -23,7 +22,7 @@ export default function PullAction() {
         try {
             setPullModalDisabled(true);
             await api.pullObjectRemote(api.remote, type, context.object.id);
-            history.push(`/${match.params.type}/${match.params.id}`);
+            history.push(`/${type}/${match.params.id}`);
         } catch (error) {
             context.setObjectError(error);
             setPullModalOpen(false);

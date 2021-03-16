@@ -159,6 +159,7 @@ export default function App() {
                 path="/profile/:login"
                 component={UserProfile}
             />
+            <Redirect from="/sample/:hash" to="/file/:hash" />
             <AuthenticatedRoute path="/file/:hash" component={ShowSample} />
             <AuthenticatedRoute path="/config/:hash" component={ShowConfig} />
             <AuthenticatedRoute path="/blob/:hash" component={ShowTextBlob} />

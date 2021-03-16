@@ -59,6 +59,7 @@ export default function ShowConfig(props) {
                 actions={[
                     <RemoveAction />,
                     <PushAction />,
+                    <PullAction />,
                     <FavoriteAction />,
                     <DownloadAction download={downloadTextBlob} />,
                 ]}

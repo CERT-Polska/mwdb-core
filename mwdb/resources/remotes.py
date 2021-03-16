@@ -16,7 +16,7 @@ from mwdb.schema.file import FileItemResponseSchema
 from mwdb.schema.remotes import RemotesListResponseSchema
 from mwdb.version import app_build_version
 
-from . import access_object, logger, requires_authorization
+from . import logger, requires_authorization
 
 
 class RemoteListResource(Resource):
@@ -247,9 +247,9 @@ class RemoteConfigPullResource(RemotePullResource):
                 description: Object exists yet but has different type
         """
         remote = RemoteAPI(remote_name)
-        spec = remote.request("GET", f"config/{identifier}").json()
+        config_spec = remote.request("GET", f"config/{identifier}").json()
         try:
-            config = dict(spec["cfg"])
+            config = dict(config_spec["cfg"])
             blobs = []
             for first, second in config.items():
                 if isinstance(second, dict) and list(second.keys()) == ["in-blob"]:
@@ -260,9 +260,17 @@ class RemoteConfigPullResource(RemotePullResource):
                         raise BadRequest("'in-blob' is not a correct blob reference")
                     blob_obj = TextBlob.access(in_blob)
                     if not blob_obj:
-                        raise NotFound(
-                            f"Blob {in_blob} is referenced by config "
-                            f"but doesn't exist locally"
+                        # If blob object doesn't exist locally: pull it as well
+                        blob_spec = remote.request("GET", f"blob/{in_blob}").json()
+                        blob_obj, _ = TextBlob.get_or_create(
+                            content=blob_spec["content"],
+                            blob_name=blob_spec["blob_name"],
+                            blob_type=blob_spec["blob_type"],
+                            share_with=[
+                                group
+                                for group in g.auth_user.groups
+                                if group.name != "public"
+                            ],
                         )
                     blobs.append(blob_obj)
                     config[first]["in-blob"] = blob_obj.dhash
@@ -271,9 +279,9 @@ class RemoteConfigPullResource(RemotePullResource):
                     raise BadRequest("'in-blob' should be the only key")
 
             item, is_new = Config.get_or_create(
-                cfg=spec["cfg"],
-                family=spec["family"],
-                config_type=spec["config_type"],
+                cfg=config_spec["cfg"],
+                family=config_spec["family"],
+                config_type=config_spec["config_type"],
                 share_with=[
                     group for group in g.auth_user.groups if group.name != "public"
                 ],
@@ -281,7 +289,6 @@ class RemoteConfigPullResource(RemotePullResource):
 
             for blob in blobs:
                 blob.add_parent(item, commit=False)
-
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")
 
@@ -377,7 +384,7 @@ class RemoteFilePushResource(RemotePullResource):
                     When the name of the remote instance is not figured
                     in the application config or object doesn't exist
         """
-        db_object = access_object("file", identifier)
+        db_object = File.access(identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
@@ -423,14 +430,32 @@ class RemoteConfigPushResource(RemotePullResource):
                     When the name of the remote instance is not figured
                     in the application config or object doesn't exist
         """
-        db_object = access_object("config", identifier)
+        db_object = Config.access(identifier)
         if db_object is None:
             raise NotFound("Object not found")
+
+        config = db_object.cfg
+        # Extract in-blob references into embedded content
+        for first, second in config.items():
+            if isinstance(second, dict) and list(second.keys()) == ["in-blob"]:
+                in_blob = second["in-blob"]
+                if not isinstance(in_blob, str):
+                    raise BadRequest(
+                        "'in-blob' key doesn't contain a correct blob reference"
+                    )
+                embedded_blob = TextBlob.access(in_blob)
+                if not embedded_blob:
+                    raise NotFound(f"Referenced blob '{in_blob}' doesn't exist")
+                second["in-blob"] = {
+                    "content": embedded_blob.content,
+                    "blob_name": embedded_blob.blob_name,
+                    "blob_type": embedded_blob.blob_type,
+                }
 
         remote = RemoteAPI(remote_name)
         params = {
             "family": db_object.family,
-            "cfg": db_object.cfg,
+            "cfg": config,
             "config_type": db_object.config_type,
         }
         response = remote.request("POST", "config", json=params).json()
@@ -472,7 +497,7 @@ class RemoteTextBlobPushResource(RemotePullResource):
                     When the name of the remote instance is not figured
                     in the application config or object doesn't exist
         """
-        db_object = access_object("blob", identifier)
+        db_object = TextBlob.access(identifier)
         if db_object is None:
             raise NotFound("Object not found")
 

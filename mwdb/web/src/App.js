@@ -12,7 +12,6 @@ import ShowConfig from "./components/ShowConfig";
 import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
 import Upload from "./components/Upload";
-import PullRemote from "./components/Pull";
 import UserLogin from "./components/UserLogin";
 import UserProfile from "./components/UserProfile";
 import ShowUsers from "./components/ShowUsers";
@@ -146,7 +145,6 @@ export default function App() {
             />
             <AuthenticatedRoute exact path="/blobs" component={RecentBlobs} />
             <AuthenticatedRoute exact path="/upload" component={Upload} />
-            <AuthenticatedRoute exact path="/pull" component={PullRemote} />
             <AuthenticatedRoute path="/search" component={Search} />
             <AuthenticatedRoute path="/search_help" component={SearchHelp} />
             <AuthenticatedRoute
@@ -161,7 +159,8 @@ export default function App() {
                 path="/profile/:login"
                 component={UserProfile}
             />
-            <AuthenticatedRoute path="/sample/:hash" component={ShowSample} />
+            <Redirect from="/sample/:hash" to="/file/:hash" />
+            <AuthenticatedRoute path="/file/:hash" component={ShowSample} />
             <AuthenticatedRoute path="/config/:hash" component={ShowConfig} />
             <AuthenticatedRoute path="/blob/:hash" component={ShowTextBlob} />
             <AuthenticatedRoute
@@ -232,7 +231,7 @@ export default function App() {
                 component={RemoteRecentBlobs}
             />
             <AuthenticatedRoute
-                path="/remote/:remote/sample/:hash"
+                path="/remote/:remote/file/:hash"
                 component={RemoteShowSample}
             />
             <AuthenticatedRoute

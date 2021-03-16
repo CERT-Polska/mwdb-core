@@ -6,6 +6,7 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { mapObjectType } from "@mwdb-web/commons/helpers";
 
 export default function PullAction() {
     const api = useContext(APIContext);
@@ -18,11 +19,7 @@ export default function PullAction() {
     if (!api.remote) return [];
 
     async function pullRemote() {
-        let type = {
-            file: "file",
-            static_config: "config",
-            text_blob: "blob",
-        }[context.object.type];
+        let type = mapObjectType(context.object.type);
         try {
             setPullModalDisabled(true);
             await api.pullObjectRemote(api.remote, type, context.object.id);

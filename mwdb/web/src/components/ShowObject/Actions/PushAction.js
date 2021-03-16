@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-
+import { useHistory } from "react-router";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
@@ -13,21 +13,26 @@ export default function PushAction() {
     const api = useContext(APIContext);
     const config = useContext(ConfigContext);
     const context = useContext(ObjectContext);
+    const history = useHistory();
+    const [isPushModalDisabled, setPushModalDisabled] = useState(false);
     const [isPushModalOpen, setPushModalOpen] = useState(false);
     const [remoteName, setRemoteName] = useState("");
-
-    async function pushRemote() {
-        let type = mapObjectType(context.object.type);
-        try {
-            await api.pushObjectRemote(remoteName, type, context.object.id);
-        } catch (error) {
-            context.setObjectError(error);
-        }
-    }
 
     const remotes = config.config.remotes;
 
     if (!remotes || !remotes.length || api.remote) return [];
+
+    async function pushRemote() {
+        let type = mapObjectType(context.object.type);
+        try {
+            setPushModalDisabled(true);
+            await api.pushObjectRemote(remoteName, type, context.object.id);
+            history.push(`/remote/${remoteName}/${type}/${context.object.id}`);
+        } catch (error) {
+            context.setObjectError(error);
+            setPushModalOpen(false);
+        }
+    }
 
     return (
         <React.Fragment>
@@ -42,16 +47,17 @@ export default function PushAction() {
                 message="Select remote where you want to push"
                 isOpen={isPushModalOpen}
                 onRequestClose={() => setPushModalOpen(false)}
+                disabled={isPushModalDisabled}
                 onConfirm={(ev) => {
                     ev.preventDefault();
                     pushRemote();
-                    setPushModalOpen(false);
                 }}
             >
                 <form onSubmit={pushRemote}>
                     <select
                         className="form-control"
                         value={remoteName}
+                        disabled={isPushModalDisabled}
                         onChange={(e) => setRemoteName(e.target.value)}
                     >
                         <option value="" hidden>

@@ -22,7 +22,7 @@ export default function PullAction() {
         try {
             setPullModalDisabled(true);
             await api.pullObjectRemote(api.remote, type, context.object.id);
-            history.push(`/${type}/${match.params.id}`);
+            history.push(`/${type}/${context.object.id}`);
         } catch (error) {
             context.setObjectError(error);
             setPullModalOpen(false);

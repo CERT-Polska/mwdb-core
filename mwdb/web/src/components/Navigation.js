@@ -169,19 +169,6 @@ export default function Navigation() {
                             Upload
                         </Link>
                     </li>
-                    {config.config.remotes.length ? (
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/pull">
-                                <FontAwesomeIcon
-                                    className="navbar-icon"
-                                    icon={faGlobe}
-                                />
-                                Pull
-                            </Link>
-                        </li>
-                    ) : (
-                        []
-                    )}
                 </Extendable>
             ) : (
                 []
@@ -285,7 +272,7 @@ export default function Navigation() {
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark">
-            <Link className="navbar-brand" to={`${remotePath}/`}>
+            <Link className="navbar-brand" to="/">
                 <Extendable ident="navbarLogo">
                     <img src={logo} alt="logo" className="logo" />
                     mwdb
@@ -297,7 +284,7 @@ export default function Navigation() {
                 data-toggle="collapse"
                 data-target="#navbarSupportedContent"
             >
-                <span className="navbar-toggler-icon"></span>
+                <span className="navbar-toggler-icon" />
             </button>
             <div
                 className="collapse navbar-collapse"

@@ -30,7 +30,7 @@ export default function PullRemote(props) {
                 objectIdentifier
             );
             const viewType = {
-                file: "sample",
+                file: "file",
                 static_config: "config",
                 text_blob: "blob",
             }[response.data.type];

@@ -12,6 +12,7 @@ export default function PullAction() {
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
     const history = useHistory();
+    const [shareMode, setShareMode] = useState("*");
     const [isPullModalOpen, setPullModalOpen] = useState(false);
     const [isPullModalDisabled, setPullModalDisabled] = useState(false);
 
@@ -21,12 +22,25 @@ export default function PullAction() {
         let type = mapObjectType(context.object.type);
         try {
             setPullModalDisabled(true);
-            await api.pullObjectRemote(api.remote, type, context.object.id);
+            await api.pullObjectRemote(
+                api.remote,
+                type,
+                context.object.id,
+                shareMode
+            );
             history.push(`/${type}/${context.object.id}`);
         } catch (error) {
             context.setObjectError(error);
             setPullModalOpen(false);
         }
+    }
+
+    const remoteForm = React.createRef();
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        if (!remoteForm.current || !remoteForm.current.reportValidity()) return;
+        pullRemote();
     }
 
     return (
@@ -39,15 +53,44 @@ export default function PullAction() {
             <ConfirmationModal
                 buttonStyle="badge-success"
                 confirmText="Pull"
-                message="Are you sure you want to pull this object for local instance?"
+                message="Pull remote object"
                 isOpen={isPullModalOpen}
-                onRequestClose={() => setPullModalOpen(false)}
+                onRequestClose={() => {
+                    setPullModalOpen(false);
+                    setShareMode("");
+                }}
                 disabled={isPullModalDisabled}
                 onConfirm={(ev) => {
-                    ev.preventDefault();
-                    pullRemote();
+                    handleSubmit(ev);
                 }}
-            />
+            >
+                <form onSubmit={pullRemote} ref={remoteForm}>
+                    <div className="form-group">
+                        <label>Share with</label>
+                        <select
+                            className="form-control"
+                            value={shareMode}
+                            disabled={isPullModalDisabled}
+                            onChange={(e) => setShareMode(e.target.value)}
+                            required
+                        >
+                            <option value="*">All my groups</option>
+                            <option value="single">Single group...</option>
+                            <option value="private">Only me</option>
+                            <option value="public">Everybody</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Single group</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            disabled={shareMode !== "single"}
+                            required
+                        />
+                    </div>
+                </form>
+            </ConfirmationModal>
         </React.Fragment>
     );
 }

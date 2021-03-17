@@ -112,7 +112,7 @@ export default class Upload extends Component {
     sharingModeToUploadParam = () => {
         if (this.state.shareWith === "default") return "*";
         if (this.state.shareWith === "public") return "public";
-        if (this.state.shareWith === "private") return this.context.user.login;
+        if (this.state.shareWith === "private") return "private";
         if (this.state.shareWith === "single") return this.state.group;
     };
 

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { UserLink } from "./ShowUsers";
 
 import api from "@mwdb-web/commons/api";
-import { ErrorBoundary, PagedList, HighlightText } from "@mwdb-web/commons/ui";
+import { PagedList, HighlightText, View } from "@mwdb-web/commons/ui";
 
 class ShowGroups extends Component {
     state = {
@@ -47,28 +47,26 @@ class ShowGroups extends Component {
 
     render() {
         return (
-            <div className="container-fluid">
-                <ErrorBoundary error={this.state.error}>
-                    <Link to="/groups/new">
-                        <button type="button" className="btn btn-success">
-                            Create group
-                        </button>
-                    </Link>
-                    <PagedList
-                        listItem={GroupItem}
-                        columnNames={["Name", "Members"]}
-                        items={this.items.slice(
-                            (this.state.activePage - 1) * 10,
-                            this.state.activePage * 10
-                        )}
-                        itemCount={this.items.length}
-                        activePage={this.state.activePage}
-                        filterValue={this.state.groupFilter}
-                        onPageChange={this.handlePageChange}
-                        onFilterChange={this.handleFilterChange}
-                    />
-                </ErrorBoundary>
-            </div>
+            <View fluid error={this.state.error}>
+                <Link to="/groups/new">
+                    <button type="button" className="btn btn-success">
+                        Create group
+                    </button>
+                </Link>
+                <PagedList
+                    listItem={GroupItem}
+                    columnNames={["Name", "Members"]}
+                    items={this.items.slice(
+                        (this.state.activePage - 1) * 10,
+                        this.state.activePage * 10
+                    )}
+                    itemCount={this.items.length}
+                    activePage={this.state.activePage}
+                    filterValue={this.state.groupFilter}
+                    onPageChange={this.handlePageChange}
+                    onFilterChange={this.handleFilterChange}
+                />
+            </View>
         );
     }
 }

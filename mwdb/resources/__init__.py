@@ -102,7 +102,11 @@ def load_schema(request_data, schema):
     return obj
 
 
-def get_shares_group(upload_as):
+def get_shares_for_upload(upload_as):
+    """
+    Translates 'upload_as' value from API into list of groups that
+    object will be shared with
+    """
     if upload_as == "*":
         # If '*' is provided: share with all user's groups except 'public'
         share_with = [group for group in g.auth_user.groups if group.name != "public"]

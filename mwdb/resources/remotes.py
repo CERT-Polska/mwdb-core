@@ -393,7 +393,7 @@ class RemoteFilePushResource(RemotePullResource):
             "file",
             files={
                 "file": (db_object.file_name, db_object.open()),
-                "options": json.dumps(options),
+                "options": (None, json.dumps(options)),
             },
         ).json()
         logger.info(

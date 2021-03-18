@@ -3,6 +3,7 @@ import { useHistory } from "react-router";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -10,9 +11,11 @@ import { mapObjectType } from "@mwdb-web/commons/helpers";
 
 export default function PullAction() {
     const api = useContext(APIContext);
+    const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const history = useHistory();
     const [shareMode, setShareMode] = useState("*");
+    const [group, setGroup] = useState("");
     const [isPullModalOpen, setPullModalOpen] = useState(false);
     const [isPullModalDisabled, setPullModalDisabled] = useState(false);
 
@@ -20,13 +23,14 @@ export default function PullAction() {
 
     async function pullRemote() {
         let type = mapObjectType(context.object.type);
+        let upload_as = shareMode === "single" ? group : shareMode;
         try {
             setPullModalDisabled(true);
             await api.pullObjectRemote(
                 api.remote,
                 type,
                 context.object.id,
-                shareMode
+                upload_as
             );
             history.push(`/${type}/${context.object.id}`);
         } catch (error) {
@@ -42,6 +46,13 @@ export default function PullAction() {
         if (!remoteForm.current || !remoteForm.current.reportValidity()) return;
         pullRemote();
     }
+
+    const groups = auth.user.groups
+        .filter(
+            (name) => !["everything", "public", auth.user.login].includes(name)
+        )
+        .sort()
+        .map((name) => <option value={name}>{name}</option>);
 
     return (
         <React.Fragment>
@@ -76,18 +87,24 @@ export default function PullAction() {
                         >
                             <option value="*">All my groups</option>
                             <option value="single">Single group...</option>
-                            <option value="private">Only me</option>
                             <option value="public">Everybody</option>
+                            <option value="private">Only me</option>
                         </select>
                     </div>
                     <div className="form-group">
-                        <label>Single group</label>
-                        <input
-                            type="text"
+                        <label>Group name</label>
+                        <select
                             className="form-control"
-                            disabled={shareMode !== "single"}
+                            value={group}
+                            disabled={
+                                isPullModalDisabled || shareMode !== "single"
+                            }
+                            onChange={(e) => setGroup(e.target.value)}
                             required
-                        />
+                        >
+                            <option value="" hidden />
+                            {groups}
+                        </select>
                     </div>
                 </form>
             </ConfirmationModal>

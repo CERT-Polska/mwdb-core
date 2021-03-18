@@ -24,7 +24,7 @@ export function mapObjectType(objectType) {
     return (
         {
             object: "object",
-            file: "sample",
+            file: "file",
             static_config: "config",
             text_blob: "blob",
         }[objectType] || objectType

@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
+import { Link } from "react-router-dom";
 import Autocomplete from "react-autocomplete";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
-import {
-    RefString,
-    DateString,
-    ObjectLink,
-    ConfirmationModal,
-} from "@mwdb-web/commons/ui";
+import { RefString, DateString, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 function ShareItem(props) {
     const context = useContext(ObjectContext);
+    const remote = useRemote();
+    const remotePath = remote ? `remote/${remote}/` : "";
     let fieldStyle = {
         wordBreak: "break-all",
     };
@@ -23,7 +23,16 @@ function ShareItem(props) {
     return (
         <tr style={fieldStyle}>
             <td>
-                <ObjectLink type="group" id={props.group_name} />
+                <Link
+                    to={makeSearchLink(
+                        "uploader",
+                        props.group_name,
+                        false,
+                        `${remotePath}search`
+                    )}
+                >
+                    {props.group_name}
+                </Link>
                 {isCurrentObject && isUploader && (
                     <span className="ml-2">(uploader)</span>
                 )}
@@ -119,6 +128,7 @@ function ShareForm(props) {
 }
 
 function SharesBox() {
+    const api = useContext(APIContext);
     const context = useContext(ObjectContext);
 
     const [groups, setGroups] = useState([]);
@@ -221,7 +231,11 @@ function SharesBox() {
                         ))}
                 </tbody>
             </table>
-            <ShareForm onSubmit={handleShare} groups={groups} />
+            {!api.remote ? (
+                <ShareForm onSubmit={handleShare} groups={groups} />
+            ) : (
+                []
+            )}
         </div>
     );
 }

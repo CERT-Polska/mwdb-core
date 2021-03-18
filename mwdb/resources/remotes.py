@@ -1,7 +1,8 @@
+import json
 from tempfile import SpooledTemporaryFile
 
 import requests
-from flask import g
+from flask import Response, g, request
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
@@ -13,9 +14,10 @@ from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobItemResponseSchema
 from mwdb.schema.config import ConfigItemResponseSchema
 from mwdb.schema.file import FileItemResponseSchema
-from mwdb.schema.remotes import RemotesListResponseSchema
+from mwdb.schema.remotes import RemoteOptionsRequestSchema, RemotesListResponseSchema
+from mwdb.version import app_build_version
 
-from . import access_object, logger, requires_authorization
+from . import get_shares_for_upload, loads_schema, logger, requires_authorization
 
 
 class RemoteListResource(Resource):
@@ -50,6 +52,9 @@ class RemoteAPI:
         self.remote_url = app_config.get_key(f"remote:{remote_name}", "url")
         self.api_key = app_config.get_key(f"remote:{remote_name}", "api_key")
         self.session = requests.Session()
+        self.session.headers["User-Agent"] = (
+            f"mwdb-core/{app_build_version} " + self.session.headers["User-Agent"]
+        )
 
     @staticmethod
     def map_remote_api_error(response):
@@ -68,7 +73,7 @@ class RemoteAPI:
         else:
             response.raise_for_status()
 
-    def request(self, method, path, *args, raw=False, **kwargs):
+    def request(self, method, path, *args, **kwargs):
         response = self.session.request(
             method,
             f"{self.remote_url}/api/{path}",
@@ -77,26 +82,31 @@ class RemoteAPI:
             **kwargs,
         )
         self.map_remote_api_error(response)
-        return response if raw else response.json()
+        return response
 
 
 class RemoteAPIResource(Resource):
     def do_request(self, method, remote_name, remote_path):
         remote = RemoteAPI(remote_name)
-        response = remote.request(method, remote_path)
-        return response
+        response = remote.request(
+            method, remote_path, params=request.args, data=request.data, stream=True
+        )
+        return Response(
+            response.iter_content(chunk_size=2 ** 16),
+            mimetype=response.headers["content-type"],
+        )
 
-    def get(self, *args, **kwargs):
-        return self.do_request("get", *args, **kwargs)
+    def get(self, remote_name, remote_path):
+        return self.do_request("get", remote_name, remote_path)
 
-    def post(self, *args, **kwargs):
-        return self.do_request("post", *args, **kwargs)
+    def post(self, remote_name, remote_path):
+        return self.do_request("post", remote_name, remote_path)
 
-    def put(self, *args, **kwargs):
-        return self.do_request("put", *args, **kwargs)
+    def put(self, remote_name, remote_path):
+        return self.do_request("put", remote_name, remote_path)
 
-    def delete(self, *args, **kwargs):
-        return self.do_request("delete", *args, **kwargs)
+    def delete(self, remote_name, remote_path):
+        return self.do_request("delete", remote_name, remote_path)
 
 
 class RemotePullResource(Resource):
@@ -156,6 +166,12 @@ class RemoteFilePullResource(RemotePullResource):
               description: Object identifier (SHA256/SHA512/SHA1/MD5)
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object pull
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pulled file
@@ -171,12 +187,12 @@ class RemoteFilePullResource(RemotePullResource):
         """
         remote = RemoteAPI(remote_name)
         response = remote.request("GET", f"file/{identifier}")
-        file_name = response["file_name"]
-
-        response = remote.request("POST", f"request/sample/{identifier}")
-        download_url = response["url"]
-
-        response = remote.request("GET", download_url, raw=True, stream=True)
+        file_name = response.json()["file_name"]
+        response = remote.request("GET", f"file/{identifier}/download", stream=True)
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
+        share_with = get_shares_for_upload(options["upload_as"])
         with SpooledTemporaryFile() as file_stream:
             for chunk in response.iter_content(chunk_size=2 ** 16):
                 file_stream.write(chunk)
@@ -185,9 +201,7 @@ class RemoteFilePullResource(RemotePullResource):
                 item, is_new = File.get_or_create(
                     file_name=file_name,
                     file_stream=file_stream,
-                    share_with=[
-                        group for group in g.auth_user.groups if group.name != "public"
-                    ],
+                    share_with=share_with,
                 )
             except ObjectTypeConflictError:
                 raise Conflict("Object already exists locally and is not a file")
@@ -224,6 +238,12 @@ class RemoteConfigPullResource(RemotePullResource):
               description: Config identifier
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object pull
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pulled config
@@ -242,9 +262,13 @@ class RemoteConfigPullResource(RemotePullResource):
                 description: Object exists yet but has different type
         """
         remote = RemoteAPI(remote_name)
-        spec = remote.request("GET", f"config/{identifier}")
+        config_spec = remote.request("GET", f"config/{identifier}").json()
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
+        share_with = get_shares_for_upload(options["upload_as"])
         try:
-            config = dict(spec["cfg"])
+            config = dict(config_spec["cfg"])
             blobs = []
             for first, second in config.items():
                 if isinstance(second, dict) and list(second.keys()) == ["in-blob"]:
@@ -255,9 +279,13 @@ class RemoteConfigPullResource(RemotePullResource):
                         raise BadRequest("'in-blob' is not a correct blob reference")
                     blob_obj = TextBlob.access(in_blob)
                     if not blob_obj:
-                        raise NotFound(
-                            f"Blob {in_blob} is referenced by config "
-                            f"but doesn't exist locally"
+                        # If blob object doesn't exist locally: pull it as well
+                        blob_spec = remote.request("GET", f"blob/{in_blob}").json()
+                        blob_obj, _ = TextBlob.get_or_create(
+                            content=blob_spec["content"],
+                            blob_name=blob_spec["blob_name"],
+                            blob_type=blob_spec["blob_type"],
+                            share_with=share_with,
                         )
                     blobs.append(blob_obj)
                     config[first]["in-blob"] = blob_obj.dhash
@@ -266,17 +294,14 @@ class RemoteConfigPullResource(RemotePullResource):
                     raise BadRequest("'in-blob' should be the only key")
 
             item, is_new = Config.get_or_create(
-                cfg=spec["cfg"],
-                family=spec["family"],
-                config_type=spec["config_type"],
-                share_with=[
-                    group for group in g.auth_user.groups if group.name != "public"
-                ],
+                cfg=config_spec["cfg"],
+                family=config_spec["family"],
+                config_type=config_spec["config_type"],
+                share_with=share_with,
             )
 
             for blob in blobs:
                 blob.add_parent(item, commit=False)
-
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")
 
@@ -312,6 +337,12 @@ class RemoteTextBlobPullResource(RemotePullResource):
               description: Blob identifier
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object pull
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pulled text blob
@@ -325,15 +356,17 @@ class RemoteTextBlobPullResource(RemotePullResource):
                 description: Object exists yet but has different type
         """
         remote = RemoteAPI(remote_name)
-        spec = remote.request("GET", f"blob/{identifier}")
+        spec = remote.request("GET", f"blob/{identifier}").json()
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
+        share_with = get_shares_for_upload(options["upload_as"])
         try:
             item, is_new = TextBlob.get_or_create(
                 content=spec["content"],
                 blob_name=spec["blob_name"],
                 blob_type=spec["blob_type"],
-                share_with=[
-                    group for group in g.auth_user.groups if group.name != "public"
-                ],
+                share_with=share_with,
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a config")
@@ -364,6 +397,12 @@ class RemoteFilePushResource(RemotePullResource):
               description: Object identifier (SHA256/SHA512/SHA1/MD5)
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object push
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pushed fie
@@ -372,14 +411,22 @@ class RemoteFilePushResource(RemotePullResource):
                     When the name of the remote instance is not figured
                     in the application config or object doesn't exist
         """
-        db_object = access_object("file", identifier)
+        db_object = File.access(identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
         remote = RemoteAPI(remote_name)
-        response = remote.request(
-            "POST", "file", files={"file": (db_object.file_name, db_object.open())}
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
         )
+        response = remote.request(
+            "POST",
+            "file",
+            files={
+                "file": (db_object.file_name, db_object.open()),
+                "options": (None, json.dumps(options)),
+            },
+        ).json()
         logger.info(
             f"{db_object.type} pushed remote",
             extra={"dhash": db_object.dhash, "remote_name": remote_name},
@@ -410,6 +457,12 @@ class RemoteConfigPushResource(RemotePullResource):
               description: Object identifier (SHA256/SHA512/SHA1/MD5)
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object push
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pushed config
@@ -418,17 +471,39 @@ class RemoteConfigPushResource(RemotePullResource):
                     When the name of the remote instance is not figured
                     in the application config or object doesn't exist
         """
-        db_object = access_object("config", identifier)
+        db_object = Config.access(identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
+        config = db_object.cfg
+        # Extract in-blob references into embedded content
+        for first, second in config.items():
+            if isinstance(second, dict) and list(second.keys()) == ["in-blob"]:
+                in_blob = second["in-blob"]
+                if not isinstance(in_blob, str):
+                    raise BadRequest(
+                        "'in-blob' key doesn't contain a correct blob reference"
+                    )
+                embedded_blob = TextBlob.access(in_blob)
+                if not embedded_blob:
+                    raise NotFound(f"Referenced blob '{in_blob}' doesn't exist")
+                second["in-blob"] = {
+                    "content": embedded_blob.content,
+                    "blob_name": embedded_blob.blob_name,
+                    "blob_type": embedded_blob.blob_type,
+                }
+
         remote = RemoteAPI(remote_name)
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
         params = {
             "family": db_object.family,
-            "cfg": db_object.cfg,
+            "cfg": config,
             "config_type": db_object.config_type,
+            "upload_as": options["upload_as"],
         }
-        response = remote.request("POST", "config", json=params)
+        response = remote.request("POST", "config", json=params).json()
         logger.info(
             f"{db_object.type} pushed remote",
             extra={"dhash": db_object.dhash, "remote_name": remote_name},
@@ -459,6 +534,12 @@ class RemoteTextBlobPushResource(RemotePullResource):
               description: Object identifier (SHA256/SHA512/SHA1/MD5)
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object push
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pushed text blob
@@ -467,17 +548,21 @@ class RemoteTextBlobPushResource(RemotePullResource):
                     When the name of the remote instance is not figured
                     in the application config or object doesn't exist
         """
-        db_object = access_object("blob", identifier)
+        db_object = TextBlob.access(identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
         remote = RemoteAPI(remote_name)
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
         params = {
             "blob_name": db_object.blob_name,
             "blob_type": db_object.blob_type,
             "content": db_object.content,
+            "upload_as": options["upload_as"],
         }
-        response = remote.request("POST", "blob", json=params)
+        response = remote.request("POST", "blob", json=params).json()
         logger.info(
             f"{db_object.type} pushed remote",
             extra={"dhash": db_object.dhash, "remote_name": remote_name},

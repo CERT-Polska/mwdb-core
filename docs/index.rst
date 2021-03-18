@@ -17,12 +17,14 @@ Features
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   
+
+   whats-changed
    setup-and-configuration
    user-guide/index
    integration-guide
    extra-features
    developer-guide
+   remotes-guide
 
 Indices and tables
 ==================

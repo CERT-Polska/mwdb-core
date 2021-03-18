@@ -1,4 +1,4 @@
-FROM node:8 AS build
+FROM node:14 AS build
 
 COPY ./mwdb/web /app
 COPY ./docker/plugins /plugins

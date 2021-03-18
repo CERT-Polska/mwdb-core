@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, Redirect, useLocation } from "react-router-dom";
 
 import About from "./components/About";
 import Navigation from "./components/Navigation";
@@ -12,7 +12,6 @@ import ShowConfig from "./components/ShowConfig";
 import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
 import Upload from "./components/Upload";
-import PullRemote from "./components/Pull";
 import UserLogin from "./components/UserLogin";
 import UserProfile from "./components/UserProfile";
 import ShowUsers from "./components/ShowUsers";
@@ -32,6 +31,14 @@ import RelationsPlot from "./components/RelationsPlot";
 import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
 import Docs from "./components/Docs";
+import RemoteShowSample from "./components/Remote/RemoteShowSample";
+import RemoteShowConfig from "./components/Remote/RemoteShowConfig";
+import RemoteShowTextBlob from "./components/Remote/RemoteShowTextBlob";
+import RemoteRecentSamples from "./components/Remote/RemoteRecentSamples";
+import RemoteRecentConfigs from "./components/Remote/RemoteRecentConfigs";
+import RemoteRecentBlobs from "./components/Remote/RemoteRecentBlobs";
+import RemoteDiffTextBlob from "./components/Remote/RemoteDiffTextBlob";
+import RemoteSearch from "./components/Remote/RemoteSearch";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -64,8 +71,9 @@ import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { Extension } from "@mwdb-web/commons/extensions";
-import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
+import { fromPlugin } from "@mwdb-web/commons/extensions";
+import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
+import { Extendable } from "./commons/extensions";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -113,10 +121,26 @@ function AttributeRoute(args) {
     );
 }
 
+function DefaultRoute() {
+    const location = useLocation();
+    return (
+        <Route>
+            <Redirect
+                to={{
+                    pathname: "/",
+                    state: {
+                        error: `Location '${location.pathname}' doesn't exist`,
+                    },
+                }}
+            />
+        </Route>
+    );
+}
+
 export default function App() {
     const config = useContext(ConfigContext);
 
-    const main = config.config ? (
+    const routeSwitch = config.config ? (
         <Switch>
             <Route exact path="/login" component={UserLogin} />
             {config.config["is_registration_enabled"] ? (
@@ -138,7 +162,6 @@ export default function App() {
             />
             <AuthenticatedRoute exact path="/blobs" component={RecentBlobs} />
             <AuthenticatedRoute exact path="/upload" component={Upload} />
-            <AuthenticatedRoute exact path="/pull" component={PullRemote} />
             <AuthenticatedRoute path="/search" component={Search} />
             <AuthenticatedRoute path="/search_help" component={SearchHelp} />
             <AuthenticatedRoute
@@ -153,7 +176,8 @@ export default function App() {
                 path="/profile/:login"
                 component={UserProfile}
             />
-            <AuthenticatedRoute path="/sample/:hash" component={ShowSample} />
+            <Redirect from="/sample/:hash" to="/file/:hash" />
+            <AuthenticatedRoute path="/file/:hash" component={ShowSample} />
             <AuthenticatedRoute path="/config/:hash" component={ShowConfig} />
             <AuthenticatedRoute path="/blob/:hash" component={ShowTextBlob} />
             <AuthenticatedRoute
@@ -208,7 +232,43 @@ export default function App() {
                 path="/attributes/new"
                 component={AttributeDefine}
             />
-            <Extension ident="routes" />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote"
+                component={RemoteRecentSamples}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote/configs"
+                component={RemoteRecentConfigs}
+            />
+            <AuthenticatedRoute
+                exact
+                path="/remote/:remote/blobs"
+                component={RemoteRecentBlobs}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/file/:hash"
+                component={RemoteShowSample}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/config/:hash"
+                component={RemoteShowConfig}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/blob/:hash"
+                component={RemoteShowTextBlob}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/diff/:current/:previous"
+                component={RemoteDiffTextBlob}
+            />
+            <AuthenticatedRoute
+                path="/remote/:remote/search"
+                component={RemoteSearch}
+            />
+            {fromPlugin("routes")}
+            <DefaultRoute />
         </Switch>
     ) : (
         []
@@ -218,14 +278,9 @@ export default function App() {
         <div className="App">
             <Navigation />
             <div className="content">
-                <View
-                    fluid
-                    ident="main"
-                    style={{ padding: "0" }}
-                    error={config.configError}
-                >
-                    {main}
-                </View>
+                <ErrorBoundary error={config.error}>
+                    <Extendable ident="main">{routeSwitch}</Extendable>
+                </ErrorBoundary>
             </div>
         </div>
     );

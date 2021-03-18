@@ -454,7 +454,11 @@ class AttributeUpdate extends Component {
         );
 
         return (
-            <View error={this.state.error} success={success}>
+            <View
+                ident="attributeUpdate"
+                error={this.state.error}
+                success={success}
+            >
                 <ConfirmationModal
                     isOpen={this.state.isModalOpen}
                     onRequestClose={() => this.setState({ isModalOpen: false })}

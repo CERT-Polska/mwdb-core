@@ -3,10 +3,13 @@ import Axios from "axios";
 function getApiForEnvironment() {
     if (process.env.NODE_ENV === "development") {
         // If application is running under development server (out of Docker)
-        return process.env.REACT_APP_API_URL || "http://localhost:8080/";
+        return (
+            process.env.REACT_APP_API_URL.replace(/\/$/g, "") ||
+            "http://localhost:8080"
+        );
     }
     // Default API endpoint
-    return "/api/";
+    return "/api";
 }
 
 let axios = Axios.create({
@@ -320,8 +323,17 @@ function deleteMetakeyPermission(key, group_name) {
     return axios.delete(`/meta/manage/${key}/permissions/${group_name}`);
 }
 
-function requestFileDownload(id) {
-    return axios.post(`/request/sample/${id}`);
+function downloadFile(id) {
+    return axios.get(`/file/${id}/download`, {
+        responseType: "arraybuffer",
+        responseEncoding: "binary",
+    });
+}
+
+async function requestFileDownloadLink(id) {
+    const response = await axios.post(`/file/${id}/download`);
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/file/${id}/download?token=${response.data.token}`;
 }
 
 function uploadFile(file, parent, upload_as, metakeys) {
@@ -342,16 +354,20 @@ function getRemoteNames() {
     return axios.get("/remote");
 }
 
-function pushObjectRemote(remote, type, identifier) {
-    return axios.post(`remote/${remote}/push/${type}/${identifier}`);
+function pushObjectRemote(remote, type, identifier, upload_as) {
+    return axios.post(`/remote/${remote}/push/${type}/${identifier}`, {
+        upload_as: upload_as,
+    });
 }
 
-function pullObjectRemote(remote, type, identifier) {
-    return axios.post(`remote/${remote}/pull/${type}/${identifier}`);
+function pullObjectRemote(remote, type, identifier, upload_as) {
+    return axios.post(`/remote/${remote}/pull/${type}/${identifier}`, {
+        upload_as: upload_as,
+    });
 }
 
 function getObjectRemote(remote, identifier) {
-    return axios.get(`remote/${remote}/api/object/${identifier}`);
+    return axios.get(`/remote/${remote}/api/object/${identifier}`);
 }
 
 function getConfigStats(fromTime) {
@@ -360,6 +376,57 @@ function getConfigStats(fromTime) {
             range: fromTime,
         },
     });
+}
+
+function getRemoteObject(remote, type, id) {
+    return axios.get(`/remote/${remote}/api/${type}/${id}`);
+}
+
+function getRemoteObjectList(remote, type, older_than, query) {
+    return axios.get(`/remote/${remote}/api/${type}`, {
+        params: { older_than, query },
+    });
+}
+
+function getRemoteObjectCount(remote, type, query) {
+    return axios.get(`/remote/${remote}/api/${type}/count`, {
+        params: { query },
+    });
+}
+
+function getRemoteObjectTags(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/tag`);
+}
+
+function getRemoteObjectComments(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/comment`);
+}
+
+function getRemoteObjectRelations(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/relations`);
+}
+
+function getRemoteObjectShares(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/share`);
+}
+
+function getRemoteObjectMetakeys(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/meta`);
+}
+
+function downloadRemoteFile(remote, id) {
+    return axios.get(`/remote/${remote}/api/file/${id}/download`, {
+        responseType: "arraybuffer",
+        responseEncoding: "binary",
+    });
+}
+
+async function requestRemoteFileDownloadLink(remote, id) {
+    const response = await axios.post(
+        `/remote/${remote}/api/file/${id}/download`
+    );
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/remote/${remote}/api/file/${id}/download?token=${response.data.token}`;
 }
 
 export default {
@@ -425,7 +492,8 @@ export default {
     addMetakeyDefinition,
     setMetakeyPermission,
     deleteMetakeyPermission,
-    requestFileDownload,
+    downloadFile,
+    requestFileDownloadLink,
     uploadFile,
     getRemoteNames,
     pushObjectRemote,
@@ -434,4 +502,14 @@ export default {
     getConfigStats,
     getObjectRelations,
     addObjectRelation,
+    getRemoteObject,
+    getRemoteObjectList,
+    getRemoteObjectCount,
+    getRemoteObjectTags,
+    getRemoteObjectComments,
+    getRemoteObjectRelations,
+    getRemoteObjectShares,
+    getRemoteObjectMetakeys,
+    downloadRemoteFile,
+    requestRemoteFileDownloadLink,
 };

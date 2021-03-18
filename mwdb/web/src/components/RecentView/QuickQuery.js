@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
@@ -47,6 +47,7 @@ function UploaderQueryItem(props) {
 }
 
 export default function QuickQuery(props) {
+    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
 
     const [addModalOpen, setAddModalOpen] = useState(false);
@@ -87,13 +88,15 @@ export default function QuickQuery(props) {
     };
 
     const predefinedQueryBadges = [
-        <UploaderQueryItem
-            key="uploaded-by-me"
-            onClick={(ev) => {
-                ev.preventDefault();
-                props.addToQuery("uploader", auth.user.login);
-            }}
-        />,
+        !api.remote && (
+            <UploaderQueryItem
+                key="uploaded-by-me"
+                onClick={(ev) => {
+                    ev.preventDefault();
+                    props.addToQuery("uploader", auth.user.login);
+                }}
+            />
+        ),
         <QuickQueryItem
             key="exclude-public"
             label="Exclude public"
@@ -103,15 +106,17 @@ export default function QuickQuery(props) {
                 props.addToQuery("NOT shared", "public");
             }}
         />,
-        <QuickQueryItem
-            key="favorites"
-            label="Favorites"
-            color="info"
-            onClick={(ev) => {
-                ev.preventDefault();
-                props.addToQuery("favorites", auth.user.login);
-            }}
-        />,
+        !api.remote && (
+            <QuickQueryItem
+                key="favorites"
+                label="Favorites"
+                color="info"
+                onClick={(ev) => {
+                    ev.preventDefault();
+                    props.addToQuery("favorites", auth.user.login);
+                }}
+            />
+        ),
         <QuickQueryItem
             key="exclude-feed"
             label="Exclude feed:*"
@@ -172,15 +177,8 @@ export default function QuickQuery(props) {
         </span>
     );
 
-    // Fetch queries on mount
-    useEffect(() => {
-        updateQueries();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    return (
-        <div className="quick-query-bar">
-            Quick query: {predefinedQueryBadges}
+    const userQuickQueryBadges = !api.remote ? (
+        <React.Fragment>
             {queryBadges}
             {newQuickQueryButton}
             <ConfirmationModal
@@ -205,6 +203,21 @@ export default function QuickQuery(props) {
                     setAddModalOpen(false);
                 }}
             />
+        </React.Fragment>
+    ) : (
+        []
+    );
+
+    // Fetch queries on mount
+    useEffect(() => {
+        updateQueries();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return (
+        <div className="quick-query-bar">
+            Quick query: {predefinedQueryBadges}
+            {userQuickQueryBadges}
         </div>
     );
 }

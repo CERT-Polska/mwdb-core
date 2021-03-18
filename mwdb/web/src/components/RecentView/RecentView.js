@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { Link, useHistory } from "react-router-dom";
 
 import queryString from "query-string";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import {
     encodeSearchQuery,
     decodeSearchQuery,
@@ -31,17 +31,18 @@ export default function RecentView(props) {
      *                   check if query syntax is correct and there are no other errors.
      * - queryInput:     state of query input
      */
-
+    const api = useContext(APIContext);
+    const history = useHistory();
     const getLinkForQuery = (query) =>
-        `${props.location.pathname}?${queryString.stringify({
-            ...queryString.parse(props.location.search),
+        `${history.location.pathname}?${queryString.stringify({
+            ...queryString.parse(history.location.search),
             q: encodeSearchQuery(query),
         })}`;
     const currentQuery = decodeSearchQuery(
-        (queryString.parse(props.location.search)["q"] || "").trim()
+        (queryString.parse(history.location.search)["q"] || "").trim()
     );
     const setCurrentQuery = (query) => {
-        props.history.push(getLinkForQuery(query));
+        history.push(getLinkForQuery(query));
     };
 
     // Query input state
@@ -132,7 +133,7 @@ export default function RecentView(props) {
             []
         );
     return (
-        <View fluid ident="RecentObjects" error={error}>
+        <View fluid ident="recentObjects" error={error}>
             <div className="table-responsive">
                 <form
                     className="searchForm"

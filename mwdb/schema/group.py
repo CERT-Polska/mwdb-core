@@ -13,6 +13,8 @@ class GroupNameSchemaBase(Schema):
                 "Group should contain max 32 chars and include only "
                 "letters, digits, underscores and dashes"
             )
+        if name.lower() == "private":
+            raise ValidationError("Group cannot be named private")
 
 
 class GroupCreateRequestSchema(Schema):

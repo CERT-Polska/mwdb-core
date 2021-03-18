@@ -17,6 +17,8 @@ class UserLoginSchemaBase(Schema):
                 "Login should contain max 32 chars and include only "
                 "letters, digits, underscores and dashes"
             )
+        if value.lower() == "private":
+            raise ValidationError("User cannot be named private")
 
 
 class UserCreateRequestSchema(Schema):

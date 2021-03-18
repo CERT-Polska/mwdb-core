@@ -1,9 +1,9 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect, useContext } from "react";
 import { useHistory } from "react-router";
 
 import queryString from "query-string";
 
-import api from "@mwdb-web/commons/api";
+import { APIContext } from "@mwdb-web/commons/api/context";
 import { capitalize } from "@mwdb-web/commons/helpers";
 
 import DagreD3Plot from "./DagreD3Plot";
@@ -11,14 +11,14 @@ import { Tag } from "@mwdb-web/commons/ui";
 
 function RelationsNode(props) {
     const typeMapping = {
-        file: "sample",
+        file: "file",
         config: "config",
         static_config: "config",
         text_blob: "blob",
     };
 
     const styleMapping = {
-        sample: "bg-danger",
+        file: "bg-danger",
         config: "bg-success",
         blob: "bg-info",
     };
@@ -46,7 +46,9 @@ function RelationsNode(props) {
                 <div className="card-body">
                     <p className="card-text">
                         <small className="text-muted">
-                            <a href={`/${nodeType}/${props.node.id}`}>
+                            <a
+                                href={`${props.remote}/${nodeType}/${props.node.id}`}
+                            >
                                 {props.node.id.substr(0, 16)}
                             </a>
                         </small>
@@ -66,9 +68,9 @@ function RelationsNode(props) {
 }
 
 function RelationsPlot(props) {
+    const api = useContext(APIContext);
     const history = useHistory();
     const { hash, height } = props;
-
     const defaultProps = {
         height: "900",
         width: "100%",

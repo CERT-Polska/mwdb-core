@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 
+import { APIProvider } from "@mwdb-web/commons/api/provider";
 import { AuthProvider } from "@mwdb-web/commons/auth";
 import { ConfigProvider } from "@mwdb-web/commons/config";
 
@@ -15,7 +16,9 @@ ReactDOM.render(
     <BrowserRouter>
         <ConfigProvider>
             <AuthProvider>
-                <App />
+                <APIProvider>
+                    <App />
+                </APIProvider>
             </AuthProvider>
         </ConfigProvider>
     </BrowserRouter>,

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useContext } from "react";
 import { Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,8 +8,9 @@ import DiffMatchPatch from "diff-match-patch";
 import "brace/mode/text";
 import "brace/theme/chrome";
 
-import api from "@mwdb-web/commons/api";
-import { ErrorBoundary } from "@mwdb-web/commons/ui";
+import { APIContext } from "@mwdb-web/commons/api/context";
+import { View } from "@mwdb-web/commons/ui";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 class DiffTextBlobContentPresenter extends Component {
     constructor(props) {
@@ -139,11 +140,11 @@ class DiffView extends Component {
 
     async updateTextBlob() {
         try {
-            let currentBlob = await api.getObject(
+            let currentBlob = await this.props.api.getObject(
                 "blob",
                 this.props.match.params.current
             );
-            let previousBlob = await api.getObject(
+            let previousBlob = await this.props.api.getObject(
                 "blob",
                 this.props.match.params.previous
             );
@@ -165,8 +166,11 @@ class DiffView extends Component {
     }
 
     render() {
+        const remotePath = this.props.remote
+            ? `/remote/${this.props.remote}`
+            : "";
         return (
-            <ErrorBoundary error={this.state.error}>
+            <View fluid error={this.state.error}>
                 {this.state.current && this.state.previous ? (
                     <div className="card-body">
                         <div className="card-header">
@@ -186,14 +190,14 @@ class DiffView extends Component {
                                         <tr>
                                             <th style={{ width: "49%" }}>
                                                 <Link
-                                                    to={`/blob/${this.state.current.id}`}
+                                                    to={`${remotePath}/blob/${this.state.current.id}`}
                                                 >
                                                     {this.state.current.id}
                                                 </Link>
                                             </th>
                                             <td>
                                                 <Link
-                                                    to={`/diff/${this.state.previous.id}/${this.state.current.id}`}
+                                                    to={`${remotePath}/diff/${this.state.previous.id}/${this.state.current.id}`}
                                                 >
                                                     <button
                                                         onClick={
@@ -213,7 +217,7 @@ class DiffView extends Component {
                                             </td>
                                             <td>
                                                 <Link
-                                                    to={`/blob/${this.state.previous.id}`}
+                                                    to={`${remotePath}/blob/${this.state.previous.id}`}
                                                 >
                                                     {this.state.previous.id}
                                                 </Link>
@@ -235,9 +239,15 @@ class DiffView extends Component {
                 ) : (
                     []
                 )}
-            </ErrorBoundary>
+            </View>
         );
     }
 }
 
-export default DiffView;
+function ConnectedDiffView(props) {
+    const remote = useRemote();
+    const api = useContext(APIContext);
+    return <DiffView {...props} remote={remote} api={api} />;
+}
+
+export default ConnectedDiffView;

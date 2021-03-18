@@ -8,10 +8,12 @@ class GroupNameSchemaBase(Schema):
 
     @validates("name")
     def validate_name(self, name):
-        if not re.match("^[A-Za-z0-9_-]{1,32}$", name):
+        print(name)
+        if not re.match("^[A-Za-z0-9_-]{1,32}$", name) or name.lower() == "private":
             raise ValidationError(
                 "Group should contain max 32 chars and include only "
                 "letters, digits, underscores and dashes"
+                "Group cannot be named private"
             )
 
 

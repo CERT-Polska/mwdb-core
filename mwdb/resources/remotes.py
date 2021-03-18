@@ -14,10 +14,10 @@ from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobItemResponseSchema
 from mwdb.schema.config import ConfigItemResponseSchema
 from mwdb.schema.file import FileItemResponseSchema
-from mwdb.schema.remotes import RemoteShareRequestSchema, RemotesListResponseSchema
+from mwdb.schema.remotes import RemoteOptionsRequestSchema, RemotesListResponseSchema
 from mwdb.version import app_build_version
 
-from . import get_shares_group, loads_schema, logger, requires_authorization
+from . import get_shares_for_upload, loads_schema, logger, requires_authorization
 
 
 class RemoteListResource(Resource):
@@ -112,7 +112,7 @@ class RemoteAPIResource(Resource):
 class RemotePullResource(Resource):
     ObjectType = None
     ItemResponseSchema = None
-    ShareRequestSchema = RemoteShareRequestSchema()
+    ShareRequestSchema = RemoteOptionsRequestSchema()
 
     on_created = None
     on_reuploaded = None
@@ -185,7 +185,7 @@ class RemoteFilePullResource(RemotePullResource):
         file_name = response.json()["file_name"]
         response = remote.request("GET", f"file/{identifier}/download", stream=True)
         options = loads_schema(request.get_data(as_text=True), self.ShareRequestSchema)
-        share_with = get_shares_group(options["upload_as"])
+        share_with = get_shares_for_upload(options["upload_as"])
         with SpooledTemporaryFile() as file_stream:
             for chunk in response.iter_content(chunk_size=2 ** 16):
                 file_stream.write(chunk)
@@ -251,7 +251,7 @@ class RemoteConfigPullResource(RemotePullResource):
         remote = RemoteAPI(remote_name)
         config_spec = remote.request("GET", f"config/{identifier}").json()
         options = loads_schema(request.get_data(as_text=True), self.ShareRequestSchema)
-        share_with = get_shares_group(options["upload_as"])
+        share_with = get_shares_for_upload(options["upload_as"])
         try:
             config = dict(config_spec["cfg"])
             blobs = []
@@ -337,7 +337,7 @@ class RemoteTextBlobPullResource(RemotePullResource):
         remote = RemoteAPI(remote_name)
         spec = remote.request("GET", f"blob/{identifier}").json()
         options = loads_schema(request.get_data(as_text=True), self.ShareRequestSchema)
-        share_with = get_shares_group(options["upload_as"])
+        share_with = get_shares_for_upload(options["upload_as"])
         try:
             item, is_new = TextBlob.get_or_create(
                 content=spec["content"],

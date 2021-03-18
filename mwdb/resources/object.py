@@ -18,7 +18,7 @@ from mwdb.schema.object import (
 )
 
 from . import (
-    get_shares_group,
+    get_shares_for_upload,
     get_type_from_str,
     load_schema,
     logger,
@@ -70,7 +70,7 @@ class ObjectUploader:
                 )
 
         # Validate upload_as argument
-        share_with = get_shares_group(params["upload_as"])
+        share_with = get_shares_for_upload(params["upload_as"])
 
         item, is_new = self._create_object(params, parent_object, share_with, metakeys)
 

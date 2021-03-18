@@ -354,12 +354,16 @@ function getRemoteNames() {
     return axios.get("/remote");
 }
 
-function pushObjectRemote(remote, type, identifier) {
-    return axios.post(`/remote/${remote}/push/${type}/${identifier}`);
+function pushObjectRemote(remote, type, identifier, upload_as) {
+    return axios.post(`/remote/${remote}/push/${type}/${identifier}`, {
+        upload_as: upload_as,
+    });
 }
 
-function pullObjectRemote(remote, type, identifier) {
-    return axios.post(`/remote/${remote}/pull/${type}/${identifier}`);
+function pullObjectRemote(remote, type, identifier, upload_as) {
+    return axios.post(`/remote/${remote}/pull/${type}/${identifier}`, {
+        upload_as: upload_as,
+    });
 }
 
 function getObjectRemote(remote, identifier) {

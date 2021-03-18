@@ -3,10 +3,11 @@ from json import JSONDecodeError
 
 from flask import g, request
 from marshmallow import EXCLUDE, ValidationError
-from werkzeug.exceptions import BadRequest, Forbidden, Unauthorized
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 
 from mwdb.core import log
-from mwdb.model import Config, File, Object, TextBlob
+from mwdb.core.capabilities import Capabilities
+from mwdb.model import Config, File, Group, Object, TextBlob
 
 logger = log.getLogger()
 
@@ -99,3 +100,31 @@ def load_schema(request_data, schema):
         raise BadRequest(f"JSONDecodeError: {json_decode_err}")
 
     return obj
+
+
+def get_shares_for_upload(upload_as):
+    """
+    Translates 'upload_as' value from API into list of groups that
+    object will be shared with
+    """
+    if upload_as == "*":
+        # If '*' is provided: share with all user's groups except 'public'
+        share_with = [group for group in g.auth_user.groups if group.name != "public"]
+    elif upload_as == "private":
+        share_with = [Group.get_by_name(g.auth_user.login)]
+    else:
+        share_group = Group.get_by_name(upload_as)
+        # Does group exist?
+        if share_group is None:
+            raise NotFound(f"Group {upload_as} doesn't exist")
+        # Has user access to group?
+        if share_group not in g.auth_user.groups and not g.auth_user.has_rights(
+            Capabilities.sharing_objects
+        ):
+            raise NotFound(f"Group {upload_as} doesn't exist")
+        # Is group pending?
+        if share_group.pending_group is True:
+            raise NotFound(f"Group {upload_as} is pending")
+        share_with = [share_group, Group.get_by_name(g.auth_user.login)]
+
+    return share_with

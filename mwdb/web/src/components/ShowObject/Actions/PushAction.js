@@ -17,6 +17,7 @@ export default function PushAction() {
     const [isPushModalDisabled, setPushModalDisabled] = useState(false);
     const [isPushModalOpen, setPushModalOpen] = useState(false);
     const [remoteName, setRemoteName] = useState("");
+    const [shareMode, setShareMode] = useState("*");
 
     const remotes = config.config.remotes;
 
@@ -26,12 +27,25 @@ export default function PushAction() {
         let type = mapObjectType(context.object.type);
         try {
             setPushModalDisabled(true);
-            await api.pushObjectRemote(remoteName, type, context.object.id);
+            await api.pushObjectRemote(
+                remoteName,
+                type,
+                context.object.id,
+                shareMode
+            );
             history.push(`/remote/${remoteName}/${type}/${context.object.id}`);
         } catch (error) {
             context.setObjectError(error);
             setPushModalOpen(false);
         }
+    }
+
+    const remoteForm = React.createRef();
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        if (!remoteForm.current || !remoteForm.current.reportValidity()) return;
+        pushRemote();
     }
 
     return (
@@ -44,31 +58,52 @@ export default function PushAction() {
             <ConfirmationModal
                 buttonStyle="badge-success"
                 confirmText="Push"
-                message="Select remote where you want to push"
+                message="Push object remote"
                 isOpen={isPushModalOpen}
-                onRequestClose={() => setPushModalOpen(false)}
+                onRequestClose={() => {
+                    setPushModalOpen(false);
+                    setRemoteName("");
+                    setShareMode("");
+                }}
                 disabled={isPushModalDisabled}
                 onConfirm={(ev) => {
-                    ev.preventDefault();
-                    pushRemote();
+                    handleSubmit(ev);
                 }}
             >
-                <form onSubmit={pushRemote}>
-                    <select
-                        className="form-control"
-                        value={remoteName}
-                        disabled={isPushModalDisabled}
-                        onChange={(e) => setRemoteName(e.target.value)}
-                    >
-                        <option value="" hidden>
-                            Select the remote instance name
-                        </option>
-                        {remotes.sort().map((name) => (
-                            <option key={name} value={name}>
-                                {name}
+                <form onSubmit={pushRemote} ref={remoteForm}>
+                    <div className="form-group">
+                        <label>Remote instance</label>
+                        <select
+                            className="form-control"
+                            value={remoteName}
+                            disabled={isPushModalDisabled}
+                            onChange={(e) => setRemoteName(e.target.value)}
+                            required
+                        >
+                            <option value="" hidden>
+                                Select the remote name
                             </option>
-                        ))}
-                    </select>
+                            {remotes.sort().map((name) => (
+                                <option key={name} value={name}>
+                                    {name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Share with</label>
+                        <select
+                            className="form-control"
+                            value={shareMode}
+                            disabled={isPushModalDisabled}
+                            onChange={(e) => setShareMode(e.target.value)}
+                            required
+                        >
+                            <option value="*">All my groups</option>
+                            <option value="public">Everybody</option>
+                            <option value="private">Only me</option>
+                        </select>
+                    </div>
                 </form>
             </ConfirmationModal>
         </React.Fragment>

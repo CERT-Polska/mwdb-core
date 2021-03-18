@@ -9,7 +9,7 @@ import "brace/mode/text";
 import "brace/theme/chrome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
-import { ErrorBoundary } from "@mwdb-web/commons/ui";
+import { View } from "@mwdb-web/commons/ui";
 import { useRemote } from "@mwdb-web/commons/remotes";
 
 class DiffTextBlobContentPresenter extends Component {
@@ -170,7 +170,7 @@ class DiffView extends Component {
             ? `/remote/${this.props.remote}`
             : "";
         return (
-            <ErrorBoundary error={this.state.error}>
+            <View fluid error={this.state.error}>
                 {this.state.current && this.state.previous ? (
                     <div className="card-body">
                         <div className="card-header">
@@ -239,7 +239,7 @@ class DiffView extends Component {
                 ) : (
                     []
                 )}
-            </ErrorBoundary>
+            </View>
         );
     }
 }

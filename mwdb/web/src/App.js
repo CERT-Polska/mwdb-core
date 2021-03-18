@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Switch, Route, Redirect, useLocation } from "react-router-dom";
 
 import About from "./components/About";
 import Navigation from "./components/Navigation";
@@ -72,7 +72,8 @@ import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
-import { ProtectedRoute, View } from "@mwdb-web/commons/ui";
+import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
+import { Extendable } from "./commons/extensions";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -120,10 +121,26 @@ function AttributeRoute(args) {
     );
 }
 
+function DefaultRoute() {
+    const location = useLocation();
+    return (
+        <Route>
+            <Redirect
+                to={{
+                    pathname: "/",
+                    state: {
+                        error: `Location '${location.pathname}' doesn't exist`,
+                    },
+                }}
+            />
+        </Route>
+    );
+}
+
 export default function App() {
     const config = useContext(ConfigContext);
 
-    const main = config.config ? (
+    const routeSwitch = config.config ? (
         <Switch>
             <Route exact path="/login" component={UserLogin} />
             {config.config["is_registration_enabled"] ? (
@@ -251,9 +268,7 @@ export default function App() {
                 component={RemoteSearch}
             />
             {fromPlugin("routes")}
-            <Route>
-                <Redirect to="/" />
-            </Route>
+            <DefaultRoute />
         </Switch>
     ) : (
         []
@@ -263,14 +278,9 @@ export default function App() {
         <div className="App">
             <Navigation />
             <div className="content">
-                <View
-                    fluid
-                    ident="main"
-                    style={{ padding: "0" }}
-                    error={config.configError}
-                >
-                    {main}
-                </View>
+                <ErrorBoundary error={config.error}>
+                    <Extendable ident="main">{routeSwitch}</Extendable>
+                </ErrorBoundary>
             </div>
         </div>
     );

@@ -5,7 +5,7 @@ import { capabilitiesList } from "./Capabilities";
 import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { View, DateString, ErrorBoundary } from "@mwdb-web/commons/ui";
+import { View, DateString } from "@mwdb-web/commons/ui";
 
 import ManageAPIKeys from "./ManageAPIKeys";
 
@@ -77,8 +77,6 @@ export default class UserProfile extends Component {
     render() {
         if (!this.state.profile && !this.state.error) {
             return <div>Loading...</div>;
-        } else if (!this.state.profile && this.state.error) {
-            return <ErrorBoundary error={this.state.error} />;
         }
 
         return (
@@ -86,6 +84,7 @@ export default class UserProfile extends Component {
                 ident="userProfile"
                 error={this.state.error}
                 success={this.state.success}
+                showIf={this.state.profile}
             >
                 <table className="table table-striped table-bordered wrap-table">
                     <thead>

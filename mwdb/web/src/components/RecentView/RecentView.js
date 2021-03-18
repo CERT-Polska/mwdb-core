@@ -133,7 +133,7 @@ export default function RecentView(props) {
             []
         );
     return (
-        <View fluid ident="RecentObjects" error={error}>
+        <View fluid ident="recentObjects" error={error}>
             <div className="table-responsive">
                 <form
                     className="searchForm"

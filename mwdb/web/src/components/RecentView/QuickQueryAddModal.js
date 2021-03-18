@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { ConfirmationModal, View } from "@mwdb-web/commons/ui";
+import { Alert, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 class QuickQueryAddModal extends Component {
     constructor(props) {
@@ -42,19 +42,18 @@ class QuickQueryAddModal extends Component {
                 onConfirm={this.handleSubmit}
             >
                 <form onSubmit={this.handleSubmit}>
-                    <View error={this.props.error}>
-                        <div className="row pb-2">
-                            <input
-                                type="text"
-                                className="form-control"
-                                style={{ width: "470px" }}
-                                placeholder="Set name for your quick query"
-                                onChange={this.handleValueChange}
-                                name="name"
-                                required
-                            />
-                        </div>
-                    </View>
+                    <Alert error={this.props.error} />
+                    <div className="row pb-2">
+                        <input
+                            type="text"
+                            className="form-control"
+                            style={{ width: "470px" }}
+                            placeholder="Set name for your quick query"
+                            onChange={this.handleValueChange}
+                            name="name"
+                            required
+                        />
+                    </div>
                 </form>
             </ConfirmationModal>
         );

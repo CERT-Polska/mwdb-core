@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { ErrorBoundary, PagedList } from "@mwdb-web/commons/ui";
+import { PagedList, View } from "@mwdb-web/commons/ui";
 
 class ManageAttributes extends Component {
     state = {
@@ -43,32 +43,26 @@ class ManageAttributes extends Component {
 
     render() {
         return (
-            <div className="container-fluid">
-                <ErrorBoundary error={this.state.error}>
-                    <Link to="/attributes/new">
-                        <button type="button" className="btn btn-success">
-                            Define attribute
-                        </button>
-                    </Link>
-                    <PagedList
-                        listItem={MetakeyItem}
-                        columnNames={[
-                            "Key (Label)",
-                            "Description",
-                            "URL Template",
-                        ]}
-                        items={this.items.slice(
-                            (this.state.activePage - 1) * 10,
-                            this.state.activePage * 10
-                        )}
-                        itemCount={this.items.length}
-                        activePage={this.state.activePage}
-                        filterValue={this.state.keyFilter}
-                        onPageChange={this.handlePageChange}
-                        onFilterChange={this.handleFilterChange}
-                    />
-                </ErrorBoundary>
-            </div>
+            <View fluid error={this.state.error}>
+                <Link to="/attributes/new">
+                    <button type="button" className="btn btn-success">
+                        Define attribute
+                    </button>
+                </Link>
+                <PagedList
+                    listItem={MetakeyItem}
+                    columnNames={["Key (Label)", "Description", "URL Template"]}
+                    items={this.items.slice(
+                        (this.state.activePage - 1) * 10,
+                        this.state.activePage * 10
+                    )}
+                    itemCount={this.items.length}
+                    activePage={this.state.activePage}
+                    filterValue={this.state.keyFilter}
+                    onPageChange={this.handlePageChange}
+                    onFilterChange={this.handleFilterChange}
+                />
+            </View>
         );
     }
 }

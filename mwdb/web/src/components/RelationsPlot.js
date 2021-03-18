@@ -11,14 +11,14 @@ import { Tag } from "@mwdb-web/commons/ui";
 
 function RelationsNode(props) {
     const typeMapping = {
-        file: "sample",
+        file: "file",
         config: "config",
         static_config: "config",
         text_blob: "blob",
     };
 
     const styleMapping = {
-        sample: "bg-danger",
+        file: "bg-danger",
         config: "bg-success",
         blob: "bg-info",
     };

@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-
 import { intersperse } from "../helpers";
 
 function getErrorMessage(error) {
@@ -36,41 +35,52 @@ export function Alert(props) {
     return <div />;
 }
 
-class ErrorBoundary extends Component {
-    constructor(props) {
-        super(props);
+function CriticalError(props) {
+    return (
+        <div className="container-fluid">
+            <div className="alert alert-danger" role="alert">
+                <h4 className="alert-heading">Critical error occurred</h4>
+                <p>
+                    Something really bad happened during rendering this view. If
+                    this is not your fault, let us know by leaving a bug report
+                    in{" "}
+                    <a href="https://github.com/CERT-Polska/mwdb-core/issues">
+                        Issues
+                    </a>
+                    <br />
+                    Remember to copy-paste the error message shown below to the
+                    bug report.
+                </p>
+                <hr />
+                <p className="mb-0">{props.error.toString()}</p>
+            </div>
+        </div>
+    );
+}
 
-        let error = props.error;
+export default class ErrorBoundary extends Component {
+    state = {};
 
-        if (!error) {
-            error = null;
-        }
-
-        this.state = { error: error };
+    static getDerivedStateFromProps(props) {
+        // Derived state for external critical errors
+        return { propsError: props.error };
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.props.error !== this.state.error) {
-            this.setState({ error: this.props.error });
-        }
-    }
-
-    componentDidCatch(error, info) {
-        this.setState({ error: error });
+    static getDerivedStateFromError(error) {
+        // Derived state for render() errors
+        return { renderError: error };
     }
 
     render() {
-        if (this.state.error) {
-            // You can render any custom fallback UI
+        if (this.state.renderError)
+            return <CriticalError error={this.state.renderError} />;
+        else if (this.state.propsError) {
+            // Fallback to single Alert
             return (
                 <div className="container-fluid">
-                    <Alert error={this.state.error} />
+                    <Alert error={this.state.propsError} />
                 </div>
             );
-        }
-
-        return this.props.children;
+        } else return this.props.children;
     }
 }
-
-export default ErrorBoundary;

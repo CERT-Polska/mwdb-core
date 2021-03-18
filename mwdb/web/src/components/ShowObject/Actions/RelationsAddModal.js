@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ConfirmationModal, View } from "@mwdb-web/commons/ui";
+import { Alert, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default function RelationsAddModal(props) {
     const [relation, setRelation] = useState("");
@@ -29,38 +29,35 @@ export default function RelationsAddModal(props) {
             onConfirm={handleSubmit}
         >
             <form onSubmit={handleSubmit}>
-                <View error={props.error}>
-                    <table>
-                        <tr>
-                            <td>
-                                <select
-                                    className="form-control"
-                                    value={relation}
-                                    onChange={(ev) =>
-                                        setRelation(ev.target.value)
-                                    }
-                                >
-                                    <option value="" hidden>
-                                        Select relationship
-                                    </option>
-                                    <option value="parent">parent</option>
-                                    <option value="child">child</option>
-                                </select>
-                            </td>
-                            <td>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    style={{ width: "600px" }}
-                                    placeholder="Type object sha256 identifier..."
-                                    onChange={(ev) => setValue(ev.target.value)}
-                                    value={value}
-                                    required
-                                />
-                            </td>
-                        </tr>
-                    </table>
-                </View>
+                <Alert error={props.error} />
+                <table>
+                    <tr>
+                        <td>
+                            <select
+                                className="form-control"
+                                value={relation}
+                                onChange={(ev) => setRelation(ev.target.value)}
+                            >
+                                <option value="" hidden>
+                                    Select relationship
+                                </option>
+                                <option value="parent">parent</option>
+                                <option value="child">child</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input
+                                type="text"
+                                className="form-control"
+                                style={{ width: "600px" }}
+                                placeholder="Type object sha256 identifier..."
+                                onChange={(ev) => setValue(ev.target.value)}
+                                value={value}
+                                required
+                            />
+                        </td>
+                    </tr>
+                </table>
             </form>
         </ConfirmationModal>
     );

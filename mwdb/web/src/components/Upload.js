@@ -136,7 +136,9 @@ export default class Upload extends Component {
                 this.state.attributes
             );
             this.sha256 = response.data.sha256;
-            this.props.history.replace("/sample/" + this.sha256);
+            this.props.history.replace("/file/" + this.sha256, {
+                success: "File uploaded successfully.",
+            });
         } catch (error) {
             this.setState({ error });
         }
@@ -173,16 +175,12 @@ export default class Upload extends Component {
     };
 
     render() {
-        if (this.state.groups === null) {
-            return (
-                <View error={this.state.error} success={this.state.success} />
-            );
-        }
         return (
             <View
                 ident="upload"
                 error={this.state.error}
                 success={this.state.success}
+                showIf={this.state.groups !== null}
             >
                 <form>
                     <UploadDropzone
@@ -232,7 +230,7 @@ export default class Upload extends Component {
                                 value={this.state.shareWith}
                                 onChange={this.updateSharingMode}
                             >
-                                {this.state.groups.length
+                                {this.state.groups && this.state.groups.length
                                     ? [
                                           <option value="default">
                                               All my groups

@@ -1,6 +1,6 @@
 {
   "name": "mwdb-web",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.0-14",
@@ -49,7 +49,7 @@
     "exports-loader": "^1.1.0",
     "http-proxy-middleware": "^0.20.0",
     "imports-loader": "^1.1.0",
-    "madge": "^3.3.0",
+    "madge": "^4.0.2",
     "prettier": "^2.2.1",
     "react-app-rewired": "2.1.3"
   },

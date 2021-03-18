@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Route } from "react-router-dom";
 
-import ErrorBoundary from "./ErrorBoundary";
+import { Alert } from "./ErrorBoundary";
 
 import { AuthContext } from "../auth";
 
@@ -15,7 +15,9 @@ export default function ProtectedRoute(props) {
         return props.condition ? (
             <props.component {...renderProps} />
         ) : (
-            <ErrorBoundary error="You don't have permission to see that page" />
+            <div className="container-fluid">
+                <Alert error="You don't have permission to see that page" />
+            </div>
         );
     }
     return <Route {...props} component={undefined} render={routeRender} />;

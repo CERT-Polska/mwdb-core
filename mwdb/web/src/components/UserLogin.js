@@ -16,9 +16,6 @@ export default function UserLogin(props) {
     const [loginError, setLoginError] = useState(null);
 
     const locationState = history.location.state || {};
-    const error = loginError || locationState.error;
-    const success = !error && locationState.success;
-
     async function tryLogin() {
         try {
             const response = await api.authLogin(login, password);
@@ -33,7 +30,7 @@ export default function UserLogin(props) {
     if (auth.isAuthenticated) return <Redirect to="/" />;
 
     return (
-        <View ident="userLogin" error={error} success={success}>
+        <View ident="userLogin" error={loginError}>
             <h2>Login</h2>
             <form
                 onSubmit={(ev) => {

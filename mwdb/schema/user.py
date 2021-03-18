@@ -12,13 +12,13 @@ class UserLoginSchemaBase(Schema):
 
     @validates("login")
     def validate_login(self, value):
-        print(value)
-        if not re.match("^[A-Za-z0-9_-]{1,32}$", value) or value.lower() == "private":
+        if not re.match("^[A-Za-z0-9_-]{1,32}$", value):
             raise ValidationError(
                 "Login should contain max 32 chars and include only "
                 "letters, digits, underscores and dashes"
-                "User login cannot be named private"
             )
+        if value.lower() == "private":
+            raise ValidationError("User cannot be named private")
 
 
 class UserCreateRequestSchema(Schema):

@@ -112,7 +112,6 @@ class RemoteAPIResource(Resource):
 class RemotePullResource(Resource):
     ObjectType = None
     ItemResponseSchema = None
-    ShareRequestSchema = RemoteOptionsRequestSchema()
 
     on_created = None
     on_reuploaded = None
@@ -167,6 +166,12 @@ class RemoteFilePullResource(RemotePullResource):
               description: Object identifier (SHA256/SHA512/SHA1/MD5)
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object pull
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pulled file
@@ -184,7 +189,9 @@ class RemoteFilePullResource(RemotePullResource):
         response = remote.request("GET", f"file/{identifier}")
         file_name = response.json()["file_name"]
         response = remote.request("GET", f"file/{identifier}/download", stream=True)
-        options = loads_schema(request.get_data(as_text=True), self.ShareRequestSchema)
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
         share_with = get_shares_for_upload(options["upload_as"])
         with SpooledTemporaryFile() as file_stream:
             for chunk in response.iter_content(chunk_size=2 ** 16):
@@ -231,6 +238,12 @@ class RemoteConfigPullResource(RemotePullResource):
               description: Config identifier
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object pull
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pulled config
@@ -250,7 +263,9 @@ class RemoteConfigPullResource(RemotePullResource):
         """
         remote = RemoteAPI(remote_name)
         config_spec = remote.request("GET", f"config/{identifier}").json()
-        options = loads_schema(request.get_data(as_text=True), self.ShareRequestSchema)
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
         share_with = get_shares_for_upload(options["upload_as"])
         try:
             config = dict(config_spec["cfg"])
@@ -322,6 +337,12 @@ class RemoteTextBlobPullResource(RemotePullResource):
               description: Blob identifier
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object pull
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pulled text blob
@@ -336,7 +357,9 @@ class RemoteTextBlobPullResource(RemotePullResource):
         """
         remote = RemoteAPI(remote_name)
         spec = remote.request("GET", f"blob/{identifier}").json()
-        options = loads_schema(request.get_data(as_text=True), self.ShareRequestSchema)
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
         share_with = get_shares_for_upload(options["upload_as"])
         try:
             item, is_new = TextBlob.get_or_create(
@@ -374,6 +397,12 @@ class RemoteFilePushResource(RemotePullResource):
               description: Object identifier (SHA256/SHA512/SHA1/MD5)
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object push
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pushed fie
@@ -387,7 +416,9 @@ class RemoteFilePushResource(RemotePullResource):
             raise NotFound("Object not found")
 
         remote = RemoteAPI(remote_name)
-        options = loads_schema(request.get_data(as_text=True), self.ShareRequestSchema)
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
         response = remote.request(
             "POST",
             "file",
@@ -426,6 +457,12 @@ class RemoteConfigPushResource(RemotePullResource):
               description: Object identifier (SHA256/SHA512/SHA1/MD5)
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object push
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pushed config
@@ -457,7 +494,9 @@ class RemoteConfigPushResource(RemotePullResource):
                 }
 
         remote = RemoteAPI(remote_name)
-        options = loads_schema(request.get_data(as_text=True), self.ShareRequestSchema)
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
         params = {
             "family": db_object.family,
             "cfg": config,
@@ -495,6 +534,12 @@ class RemoteTextBlobPushResource(RemotePullResource):
               description: Object identifier (SHA256/SHA512/SHA1/MD5)
               schema:
                 type: string
+        requestBody:
+            required: false
+            description: Additional options for object push
+            content:
+              application/json:
+                schema: RemoteOptionsRequestSchema
         responses:
             200:
                 description: Information about pushed text blob
@@ -508,7 +553,9 @@ class RemoteTextBlobPushResource(RemotePullResource):
             raise NotFound("Object not found")
 
         remote = RemoteAPI(remote_name)
-        options = loads_schema(request.get_data(as_text=True), self.ShareRequestSchema)
+        options = loads_schema(
+            request.get_data(as_text=True), RemoteOptionsRequestSchema()
+        )
         params = {
             "blob_name": db_object.blob_name,
             "blob_type": db_object.blob_type,

@@ -6,4 +6,4 @@ class RemotesListResponseSchema(Schema):
 
 
 class RemoteOptionsRequestSchema(Schema):
-    upload_as = fields.Str(required=True, allow_none=False)
+    upload_as = fields.Str(missing="*", allow_none=False)

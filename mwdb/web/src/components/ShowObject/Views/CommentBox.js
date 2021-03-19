@@ -154,7 +154,7 @@ function CommentBox() {
         setCommentToRemove(comment_id);
     }
 
-    const getComments = useCallback(updateComments, []);
+    const getComments = useCallback(updateComments, [context.object.id]);
 
     useEffect(() => {
         getComments();

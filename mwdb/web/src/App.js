@@ -32,6 +32,7 @@ import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
 import Docs from "./components/Docs";
 import RemoteViews from "./components/Remote/RemoteViews";
+import SettingsView from "./components/SettingsView/SettingsView";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -216,6 +217,9 @@ export default function App() {
             </AttributeRoute>
             <ProtectedRoute path="/remote/:remote">
                 <RemoteViews />
+            </ProtectedRoute>
+            <ProtectedRoute path="/manage">
+                <SettingsView />
             </ProtectedRoute>
             {fromPlugin("routes")}
             <DefaultRoute />

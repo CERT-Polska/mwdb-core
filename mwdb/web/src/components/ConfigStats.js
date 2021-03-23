@@ -16,7 +16,7 @@ function ConfigStatsItem(props) {
                         "family",
                         props.family,
                         false,
-                        `${remotePath}configs`
+                        `${remotePath}/configs`
                     )}
                 >
                     {props.family}

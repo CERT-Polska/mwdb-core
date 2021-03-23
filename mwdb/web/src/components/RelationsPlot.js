@@ -47,7 +47,7 @@ function RelationsNode(props) {
                     <p className="card-text">
                         <small className="text-muted">
                             <a
-                                href={`${props.remote}/${nodeType}/${props.node.id}`}
+                                href={`${props.remotePath}/${nodeType}/${props.node.id}`}
                             >
                                 {props.node.id.substr(0, 16)}
                             </a>

@@ -28,7 +28,7 @@ export function RecentBlobRow(props) {
         props.id === diffWith ? (
             <Hash hash={props.id} />
         ) : (
-            <Link to={`${remotePath}diff/${props.id}/${diffWith}`}>
+            <Link to={`${remotePath}/diff/${props.id}/${diffWith}`}>
                 <Hash hash={props.id} />
             </Link>
         )

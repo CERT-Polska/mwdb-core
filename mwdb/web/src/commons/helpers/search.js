@@ -24,11 +24,11 @@ export function escapeSearchValue(input) {
 export function makeSearchLink(field, input, noEscape, endpoint) {
     if (input === undefined) return "";
 
-    let prefix = field + ":";
+    const prefix = field + ":";
 
     if (!noEscape) input = escapeSearchValue(input);
     return (
-        `/${endpoint === undefined ? "search" : endpoint}?q=` +
+        `${endpoint === undefined ? "/search" : endpoint}?q=` +
         encodeSearchQuery(prefix + input)
     );
 }

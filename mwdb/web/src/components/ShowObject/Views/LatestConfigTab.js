@@ -30,11 +30,7 @@ export default function LatestConfigTab(props) {
             actions={
                 <ObjectAction
                     label="Go to config"
-                    link={
-                        remotePath +
-                        "/config/" +
-                        context.object.latest_config.id
-                    }
+                    link={`${remotePath}/config/${context.object.latest_config.id}`}
                 />
             }
             component={() => (

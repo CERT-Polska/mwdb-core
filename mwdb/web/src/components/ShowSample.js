@@ -53,7 +53,7 @@ function SampleDetails() {
                                 "name",
                                 context.object.file_name,
                                 false,
-                                remotePath
+                                `${remotePath}/`
                             )}
                         >
                             {context.object.file_name}
@@ -74,7 +74,7 @@ function SampleDetails() {
                                 "size",
                                 context.object.file_size,
                                 false,
-                                remotePath
+                                `${remotePath}/`
                             )}
                         >
                             {humanFileSize(context.object.file_size)}
@@ -95,7 +95,7 @@ function SampleDetails() {
                                 "type",
                                 context.object.file_type,
                                 false,
-                                remotePath
+                                `${remotePath}/`
                             )}
                         >
                             {context.object.file_type}
@@ -176,7 +176,7 @@ function SampleDetails() {
                                 "ssdeep",
                                 context.object.ssdeep,
                                 false,
-                                remotePath
+                                `${remotePath}/`
                             )}
                         >
                             {context.object.ssdeep}
@@ -198,7 +198,7 @@ function SampleDetails() {
                                 to={makeSearchDateLink(
                                     "upload_time",
                                     context.object.upload_time,
-                                    remotePath
+                                    `${remotePath}/`
                                 )}
                             >
                                 <DateString date={context.object.upload_time} />

@@ -27,7 +27,7 @@ function ShareItem(props) {
                         "uploader",
                         props.group_name,
                         false,
-                        `${remotePath}search`
+                        `${remotePath}/search`
                     )}
                 >
                     {props.group_name}

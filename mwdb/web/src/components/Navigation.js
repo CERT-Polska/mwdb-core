@@ -233,7 +233,7 @@ export default function Navigation() {
             <Extendable ident="navbarAuthenticated">
                 <React.Fragment>
                     <li className="nav-item">
-                        <Link className="nav-link" to={`${remotePath}`}>
+                        <Link className="nav-link" to={`${remotePath}/`}>
                             <FontAwesomeIcon
                                 className="navbar-icon"
                                 icon={faFile}
@@ -242,7 +242,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" to={`${remotePath}configs`}>
+                        <Link className="nav-link" to={`${remotePath}/configs`}>
                             <FontAwesomeIcon
                                 className="navbar-icon"
                                 icon={faTable}
@@ -251,7 +251,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" to={`${remotePath}blobs`}>
+                        <Link className="nav-link" to={`${remotePath}/blobs`}>
                             <FontAwesomeIcon
                                 className="navbar-icon"
                                 icon={faScroll}
@@ -260,7 +260,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" to={`${remotePath}search`}>
+                        <Link className="nav-link" to={`${remotePath}/search`}>
                             Search
                         </Link>
                     </li>

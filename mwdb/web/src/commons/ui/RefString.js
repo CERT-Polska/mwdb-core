@@ -24,7 +24,7 @@ export default function RefString(props) {
                 "uploader",
                 props.related_user_login,
                 false,
-                `${remotePath}search`
+                `${remotePath}/search`
             )}
         >
             {props.related_user_login}

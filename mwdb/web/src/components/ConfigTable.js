@@ -54,7 +54,7 @@ export function ConfigRow(props) {
                     `cfg.${path.join(".")}`,
                     value,
                     false,
-                    `${remotePath}configs`
+                    `${remotePath}/configs`
                 )}
             >
                 {String(value)}
@@ -165,7 +165,7 @@ export default function ConfigTable(props) {
                                 "family",
                                 object.family,
                                 false,
-                                `${remotePath}configs`
+                                `${remotePath}/configs`
                             )}
                         >
                             {object.family}
@@ -180,7 +180,7 @@ export default function ConfigTable(props) {
                                 "type",
                                 object.config_type,
                                 false,
-                                `${remotePath}configs`
+                                `${remotePath}/configs`
                             )}
                         >
                             {object.config_type}
@@ -196,7 +196,7 @@ export default function ConfigTable(props) {
                                 to={makeSearchDateLink(
                                     "upload_time",
                                     object.upload_time,
-                                    `${remotePath}configs`
+                                    `${remotePath}/configs`
                                 )}
                             >
                                 <DateString date={object.upload_time} />

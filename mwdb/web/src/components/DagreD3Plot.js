@@ -36,7 +36,7 @@ function DagreD3Plot(props) {
         // ReactDOM.render is asynchronic - node render is deferred
         return new Promise((resolve) => {
             ReactDOM.render(
-                <NodeComponent node={node} remote={remotePath} />,
+                <NodeComponent node={node} remotePath={remotePath} />,
                 parentNode,
                 () => resolve(parentNode)
             );

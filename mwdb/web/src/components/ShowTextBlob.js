@@ -46,7 +46,7 @@ function TextBlobDetails() {
                                 "name",
                                 context.object.blob_name,
                                 false,
-                                `${remotePath}blobs`
+                                `${remotePath}/blobs`
                             )}
                         >
                             {context.object.blob_name}
@@ -61,7 +61,7 @@ function TextBlobDetails() {
                                 "size",
                                 context.object.blob_size,
                                 false,
-                                `${remotePath}blobs`
+                                `${remotePath}/blobs`
                             )}
                         >
                             {humanFileSize(context.object.blob_size)}
@@ -76,7 +76,7 @@ function TextBlobDetails() {
                                 "type",
                                 context.object.blob_type,
                                 false,
-                                `${remotePath}blobs`
+                                `${remotePath}/blobs`
                             )}
                         >
                             {context.object.blob_type}
@@ -92,7 +92,7 @@ function TextBlobDetails() {
                                 to={makeSearchDateLink(
                                     "upload_time",
                                     context.object.upload_time,
-                                    `${remotePath}blobs`
+                                    `${remotePath}/blobs`
                                 )}
                             >
                                 <DateString date={context.object.upload_time} />
@@ -111,7 +111,7 @@ function TextBlobDetails() {
                                 to={makeSearchDateLink(
                                     "last_seen",
                                     context.object.last_seen,
-                                    `${remotePath}blobs`
+                                    `${remotePath}/blobs`
                                 )}
                             >
                                 <DateString date={context.object.last_seen} />
@@ -140,7 +140,7 @@ function BlobDiffAction() {
         <ObjectAction
             label="Diff with"
             icon={faRandom}
-            link={`${remotePath}blobs?diff=${context.object.id}`}
+            link={`${remotePath}/blobs?diff=${context.object.id}`}
         />
     );
 }

@@ -16,7 +16,7 @@ and run MWDB via
 
 .. code-block::
 
-    docker-compose -f docker-compose-dev.yml up -d``
+    docker-compose -f docker-compose-dev.yml up -d
 
 After a minute - MWDB should be accessible via ``http://127.0.0.1`` with enabled hot-reload and debug facilities.
 

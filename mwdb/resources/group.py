@@ -220,11 +220,6 @@ class GroupResource(Resource):
 
         if obj["capabilities"] is not None:
             group.capabilities = obj["capabilities"]
-
-        # Invalidate all sessions due to potentially changed capabilities
-        for member in group.users:
-            member.reset_sessions()
-
         db.session.commit()
 
         logger.info(
@@ -304,7 +299,6 @@ class GroupMemberResource(Resource):
             raise Forbidden("User is pending and need to be accepted first")
 
         group.users.append(member)
-        member.reset_sessions()
         db.session.commit()
 
         logger.info(
@@ -392,8 +386,6 @@ class GroupMemberResource(Resource):
             raise Forbidden("User is pending and need to be accepted first")
 
         member.set_group_admin(group.id, membership["group_admin"])
-
-        member.reset_sessions()
         db.session.commit()
 
         logger.info(
@@ -444,7 +436,6 @@ class GroupMemberResource(Resource):
                 description: When user or group doesn't exist
         """
         group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
-
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         group = (
@@ -481,7 +472,6 @@ class GroupMemberResource(Resource):
             raise Forbidden("User is pending and need to be accepted first")
 
         group.users.remove(member)
-        member.reset_sessions()
         db.session.commit()
 
         logger.info(

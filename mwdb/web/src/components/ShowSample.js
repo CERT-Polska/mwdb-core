@@ -37,12 +37,11 @@ import {
     Hash,
     HexView,
 } from "@mwdb-web/commons/ui";
-import { useRemote } from "@mwdb-web/commons/remotes";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 function SampleDetails() {
     const context = useContext(ObjectContext);
-    const remote = useRemote();
-    const remotePath = remote ? `remote/${remote}` : "";
+    const remotePath = useRemotePath();
     return (
         <DataTable>
             <Extendable ident="showSampleDetails">

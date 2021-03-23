@@ -30,12 +30,11 @@ import {
 } from "@mwdb-web/commons/helpers";
 import { DataTable, DateString, HexView } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/extensions";
-import { useRemote } from "@mwdb-web/commons/remotes";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 function TextBlobDetails() {
     const context = useContext(ObjectContext);
-    const remote = useRemote();
-    const remotePath = remote ? `remote/${remote}/` : "";
+    const remotePath = useRemotePath();
     return (
         <DataTable>
             <Extendable ident="showTextBlobDetails">
@@ -47,7 +46,7 @@ function TextBlobDetails() {
                                 "name",
                                 context.object.blob_name,
                                 false,
-                                `${remotePath}/blobs`
+                                `${remotePath}blobs`
                             )}
                         >
                             {context.object.blob_name}
@@ -136,13 +135,12 @@ function TextBlobPreview() {
 
 function BlobDiffAction() {
     const context = useContext(ObjectContext);
-    const remote = useRemote();
-    const remotePath = remote ? `/remote/${remote}` : "";
+    const remotePath = useRemotePath();
     return (
         <ObjectAction
             label="Diff with"
             icon={faRandom}
-            link={`${remotePath}/blobs?diff=${context.object.id}`}
+            link={`${remotePath}blobs?diff=${context.object.id}`}
         />
     );
 }

@@ -12,7 +12,7 @@ import {
     DateString,
     ObjectLink,
 } from "@mwdb-web/commons/ui";
-import { useRemote } from "@mwdb-web/commons/remotes";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 export function ConfigRow(props) {
     const key = props.configKey;
@@ -28,8 +28,7 @@ export function ConfigRow(props) {
         Object.keys(value)[0] === "in-blob";
     const isRegularObject = isObject && !isEmbeddedBlob;
 
-    const remote = useRemote();
-    const remotePath = remote ? `remote/${remote}/` : "";
+    const remotePath = useRemotePath();
 
     useEffect(() => {
         // Automatically expand all nested objects if parent has been expanded
@@ -153,8 +152,7 @@ export function ConfigRows(props) {
 
 export default function ConfigTable(props) {
     const object = props.object;
-    const remote = useRemote();
-    const remotePath = remote ? `remote/${remote}/` : "";
+    const remotePath = useRemotePath();
 
     return (
         <DataTable>

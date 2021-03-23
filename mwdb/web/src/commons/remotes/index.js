@@ -5,3 +5,8 @@ export function useRemote() {
     const match = useRouteMatch("/remote/:remote");
     return match && match.params.remote;
 }
+
+export function useRemotePath() {
+    const remote = useRemote();
+    return remote ? `/remote/${remote}` : "";
+}

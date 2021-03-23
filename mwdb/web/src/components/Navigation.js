@@ -15,7 +15,7 @@ import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { NavDropdown } from "@mwdb-web/commons/ui";
-import { useRemote } from "@mwdb-web/commons/remotes";
+import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
 
 import logo from "../assets/logo.png";
 
@@ -116,7 +116,7 @@ export default function Navigation() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
     const remote = useRemote();
-    const remotePath = remote ? `/remote/${remote}` : "";
+    const remotePath = useRemotePath();
     const navItems = config.config ? (
         <Extendable ident="navbar">
             {!auth.isAuthenticated &&
@@ -242,7 +242,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" to={`${remotePath}/configs`}>
+                        <Link className="nav-link" to={`${remotePath}configs`}>
                             <FontAwesomeIcon
                                 className="navbar-icon"
                                 icon={faTable}
@@ -251,7 +251,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" to={`${remotePath}/blobs`}>
+                        <Link className="nav-link" to={`${remotePath}blobs`}>
                             <FontAwesomeIcon
                                 className="navbar-icon"
                                 icon={faScroll}
@@ -260,7 +260,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" to={`${remotePath}/search`}>
+                        <Link className="nav-link" to={`${remotePath}search`}>
                             Search
                         </Link>
                     </li>

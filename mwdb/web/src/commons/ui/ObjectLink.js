@@ -3,14 +3,14 @@ import { Link, useParams } from "react-router-dom";
 
 import { AuthContext } from "../auth";
 import { mapObjectType } from "../helpers";
+import { useRemotePath } from "../remotes/index";
 
 import Hash from "./Hash";
 
 export default function ObjectLink(props) {
     const auth = useContext(AuthContext);
     const objectType = mapObjectType(props.type);
-    const { remote } = useParams();
-    const remotePath = remote ? `/remote/${remote}` : "";
+    const remotePath = useRemotePath();
 
     let linkElement = (
         <Link

@@ -214,7 +214,7 @@ class GroupResource(Resource):
             raise NotFound("No such group")
 
         if obj["name"] is not None:
-            if obj["name"] != group_name_obj["name"] and group.immutable:
+            if obj["name"] != group_name_obj["name"] and group.is_immutable:
                 raise Forbidden("Renaming group not allowed - group is immutable")
             group.name = obj["name"]
 
@@ -286,7 +286,7 @@ class GroupMemberResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
-        if group.immutable:
+        if group.is_immutable:
             raise Forbidden("Adding members to private or public group is not allowed")
 
         member = (
@@ -371,7 +371,7 @@ class GroupMemberResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
-        if group.immutable:
+        if group.is_immutable:
             raise Forbidden(
                 "Change membership in private or public group is not allowed"
             )
@@ -452,7 +452,7 @@ class GroupMemberResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
-        if group.immutable:
+        if group.is_immutable:
             raise Forbidden(
                 "Removing members from private or public group is not allowed"
             )

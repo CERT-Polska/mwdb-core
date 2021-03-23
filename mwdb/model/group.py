@@ -15,6 +15,7 @@ class Group(db.Model):
         "capabilities", ARRAY(db.Text), nullable=False, server_default="{}"
     )
     private = db.Column(db.Boolean, nullable=False, default=False)
+    builtin = db.Column(db.Boolean, nullable=False, default=False)
 
     members = db.relationship(
         "Member", back_populates="group", cascade="all, delete-orphan"
@@ -22,6 +23,7 @@ class Group(db.Model):
     users = association_proxy("members", "user", creator=lambda user: Member(user=user))
 
     PUBLIC_GROUP_NAME = "public"
+    TRUSTED_GROUP_NAME = "trusted"
     EVERYTHING_GROUP_NAME = "everything"
 
     @property
@@ -34,8 +36,21 @@ class Group(db.Model):
         )
 
     @property
-    def immutable(self):
-        return self.private or self.name == self.PUBLIC_GROUP_NAME
+    def is_immutable(self):
+        """
+        Immutable groups can't be renamed, joined or left directly.
+        """
+        return self.private or self.builtin
+
+    @property
+    def is_workspace(self):
+        """
+        Workspace is a group that is directly visible for regular users.
+        Users see each other and group admins can additionally do some basic
+        group management.
+        Immutable groups are not workspaces.
+        """
+        return not self.is_immutable
 
     @property
     def user_logins(self):
@@ -50,11 +65,19 @@ class Group(db.Model):
         return Group.get_by_name(Group.PUBLIC_GROUP_NAME)
 
     @staticmethod
+    def trusted_group():
+        return Group.get_by_name(Group.TRUSTED_GROUP_NAME)
+
+    @staticmethod
     def get_by_name(name):
         return db.session.query(Group).filter(Group.name == name).first()
 
     @staticmethod
     def all_access_groups():
+        """
+        All access groups are all groups that have access_all_objects capability turned on.
+        They have access to all samples regardless of the sharing settings
+        """
         return (
             db.session.query(Group)
             .filter(Group.capabilities.contains([Capabilities.access_all_objects]))

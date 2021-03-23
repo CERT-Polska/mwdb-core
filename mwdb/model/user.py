@@ -11,7 +11,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from mwdb.core.config import app_config
 
 from . import db
-from .group import Member
+from .group import Group, Member
 from .object import ObjectPermission, favorites
 
 
@@ -73,6 +73,10 @@ class User(db.Model):
     def capabilities(self):
         return set.union(*[set(group.capabilities) for group in self.groups])
 
+    @property
+    def is_guest(self):
+        return Group.TRUSTED_GROUP_NAME not in self.group_names
+
     def has_rights(self, perms):
         return perms in self.capabilities
 
@@ -96,7 +100,8 @@ class User(db.Model):
 
     @staticmethod
     def create(
-        login, email, additional_info, pending=False, feed_quality=None, commit=True
+        login, email, additional_info, pending=False, feed_quality=None,
+        guest=False, commit=True
     ):
         from mwdb.model.group import Group
 
@@ -104,6 +109,9 @@ class User(db.Model):
         user_group = Group(name=login, private=True)
         db.session.add(user_group)
 
+        default_groups = [user_group, Group.public_group()]
+        if not guest:
+            default_groups += [Group.trusted_group()]
         # Create user object
         user = User(
             login=login,
@@ -112,7 +120,7 @@ class User(db.Model):
             feed_quality=feed_quality or "high",
             pending=pending,
             disabled=False,
-            groups=[user_group, Group.public_group()],
+            groups=default_groups,
         )
         user.reset_sessions()
 

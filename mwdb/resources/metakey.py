@@ -394,6 +394,44 @@ class MetakeyDefinitionManageResource(Resource):
         schema = MetakeyDefinitionManageItemResponseSchema()
         return schema.dump(metakey_definition)
 
+    @requires_authorization
+    @requires_capabilities(Capabilities.managing_attributes)
+    def delete(self, key):
+        """
+        ---
+        summary: Delete attribute
+        description: |
+            Delete attribute key definition.
+
+            Requires `managing_attributes` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - attribute
+        parameters:
+            - in: path
+              name: key
+              schema:
+                type: string
+              description: Attribute key
+        responses:
+            200:
+                description: Delete attribute key definition
+            403:
+                description: When user doesn't have `managing_attributes` capability.
+            404:
+                description: When specified attribute key doesn't exist
+        """
+        metakey = (
+            db.session.query(MetakeyDefinition)
+            .filter(MetakeyDefinition.key == key)
+            .first()
+        )
+        if metakey is None:
+            raise NotFound("No such metakey")
+        db.session.delete(metakey)
+        db.session.commit()
+
 
 class MetakeyPermissionResource(Resource):
     @requires_authorization

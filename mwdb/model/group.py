@@ -48,7 +48,7 @@ class Group(db.Model):
         Workspace is a group that is directly visible for regular users.
         Users see each other and group admins can additionally do some basic
         group management.
-        Immutable groups are not workspaces.
+        Currently only immutable groups are not workspaces.
         """
         return not self.is_immutable
 

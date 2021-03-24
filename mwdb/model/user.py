@@ -66,6 +66,10 @@ class User(db.Model):
         return [group.name for group in self.groups]
 
     @property
+    def workspace_names(self):
+        return [group.name for group in self.groups if group.is_workspace]
+
+    @property
     def registrar_login(self):
         return self.registrar and self.registrar.login
 
@@ -74,7 +78,7 @@ class User(db.Model):
         return set.union(*[set(group.capabilities) for group in self.groups])
 
     @property
-    def is_guest(self):
+    def is_trusted(self):
         return Group.TRUSTED_GROUP_NAME not in self.group_names
 
     def has_rights(self, perms):
@@ -101,7 +105,7 @@ class User(db.Model):
     @staticmethod
     def create(
         login, email, additional_info, pending=False, feed_quality=None,
-        guest=False, commit=True
+        trusted=True, commit=True
     ):
         from mwdb.model.group import Group
 
@@ -110,7 +114,7 @@ class User(db.Model):
         db.session.add(user_group)
 
         default_groups = [user_group, Group.public_group()]
-        if not guest:
+        if trusted:
             default_groups += [Group.trusted_group()]
         # Create user object
         user = User(

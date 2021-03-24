@@ -138,8 +138,7 @@ def test_metakey_definition_remove(admin, attr_user):
     attr_user.add_attribute(sample_id, attr_name, "random_value")
 
     admin.remove_attribute_definition(attr_name)
-    with ShouldRaise(404):
-        attr_user.add_attribute(sample_id, attr_name, "random_value")
+
     attrs = attr_user.get_attributes(sample_id)["metakeys"]
     assert len(attrs) == 0
     attrs = admin.get_attribute_definitions()

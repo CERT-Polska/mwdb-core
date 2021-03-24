@@ -298,6 +298,11 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
+    def get_attribute(self, key):
+        res = self.session.get(self.mwdb_url + "/meta/manage/" + key)
+        res.raise_for_status()
+        return res.json()
+
     def remove_attribute_definition(self, key):
         res = self.session.delete(self.mwdb_url + "/meta/manage/" + key)
         res.raise_for_status()

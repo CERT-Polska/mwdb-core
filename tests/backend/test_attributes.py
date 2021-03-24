@@ -142,4 +142,4 @@ def test_metakey_definition_remove(admin, attr_user):
     attrs = attr_user.get_attributes(sample_id)["metakeys"]
     assert len(attrs) == 0
     with ShouldRaise(404):
-        admin.get_attribute_definition(attr_name)
+        admin.get_attribute(attr_name)

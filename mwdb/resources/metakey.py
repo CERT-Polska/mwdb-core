@@ -399,9 +399,9 @@ class MetakeyDefinitionManageResource(Resource):
     def delete(self, key):
         """
         ---
-        summary: Delete attribute
+        summary: Delete attribute key
         description: |
-            Delete attribute key definition.
+            Deletes attribute key including all related object attributes.
 
             Requires `managing_attributes` capability.
         security:
@@ -416,7 +416,7 @@ class MetakeyDefinitionManageResource(Resource):
               description: Attribute key
         responses:
             200:
-                description: Delete attribute key definition
+                description: When attribute key was deleted
             403:
                 description: When user doesn't have `managing_attributes` capability.
             404:

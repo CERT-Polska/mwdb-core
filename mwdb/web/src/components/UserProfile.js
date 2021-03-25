@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { capabilitiesList } from "./Capabilities";
 
 import api from "@mwdb-web/commons/api";
@@ -9,7 +9,7 @@ import { View, DateString } from "@mwdb-web/commons/ui";
 
 import ManageAPIKeys from "./ManageAPIKeys";
 
-export default class UserProfile extends Component {
+class UserProfile extends Component {
     state = {
         pressedRequestPassword: false,
         error: false,
@@ -223,3 +223,5 @@ export default class UserProfile extends Component {
         );
     }
 }
+
+export default withRouter(UserProfile);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import {
     ShowObject,
@@ -265,6 +265,7 @@ function PreviewSwitchAction(props) {
 
 export default function ShowSample(props) {
     const api = useContext(APIContext);
+    const params = useParams();
     async function downloadSample(object) {
         window.location.href = await api.requestFileDownloadLink(object.id);
     }
@@ -273,7 +274,7 @@ export default function ShowSample(props) {
         <ShowObject
             ident="showSample"
             objectType="file"
-            objectId={props.match.params.hash}
+            objectId={params.hash}
             searchEndpoint=""
             headerIcon={faFile}
             headerCaption="File details"

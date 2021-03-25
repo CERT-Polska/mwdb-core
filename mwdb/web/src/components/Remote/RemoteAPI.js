@@ -2,11 +2,9 @@ import React from "react";
 import { APIContext } from "@mwdb-web/commons/api/context";
 import api from "@mwdb-web/commons/api";
 import { useRemote } from "@mwdb-web/commons/remotes";
-import { Alert } from "@mwdb-web/commons/ui";
 
 export default function RemoteAPI(props) {
     const remote = useRemote();
-    const message = `Remote view of ${remote}`;
     return (
         <APIContext.Provider
             value={{
@@ -30,9 +28,6 @@ export default function RemoteAPI(props) {
                     api.requestRemoteFileDownloadLink(remote, id),
             }}
         >
-            <div className="container-fluid">
-                <Alert warning={message} />
-            </div>
             {props.children}
         </APIContext.Provider>
     );

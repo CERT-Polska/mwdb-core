@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router";
 import Capabilities from "./Capabilities";
 import { UserLink } from "./ShowUsers";
 
@@ -11,7 +12,7 @@ export let GroupMemberList = (props) => (
     <MemberList nameKey="login" itemLinkClass={UserLink} {...props} />
 );
 
-export default class GroupUpdate extends Component {
+class GroupUpdate extends Component {
     state = {
         error: null,
         loginFilter: "",
@@ -230,3 +231,5 @@ export default class GroupUpdate extends Component {
         );
     }
 }
+
+export default withRouter(GroupUpdate);

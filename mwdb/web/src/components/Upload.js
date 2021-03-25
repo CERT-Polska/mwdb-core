@@ -1,4 +1,5 @@
 import React, { Component, useCallback } from "react";
+import { withRouter } from "react-router";
 import Autocomplete from "react-autocomplete";
 import { useDropzone } from "react-dropzone";
 import queryString from "query-string";
@@ -56,7 +57,7 @@ function UploadDropzone(props) {
     );
 }
 
-export default class Upload extends Component {
+class Upload extends Component {
     state = {
         files: null,
         error: null,
@@ -379,3 +380,5 @@ export default class Upload extends Component {
         );
     }
 }
+
+export default withRouter(Upload);

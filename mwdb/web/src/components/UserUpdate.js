@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { capabilitiesList } from "./Capabilities";
 import { GroupLink } from "./ShowGroups";
 
@@ -431,4 +431,4 @@ class UserUpdate extends Component {
     }
 }
 
-export default UserUpdate;
+export default withRouter(UserUpdate);

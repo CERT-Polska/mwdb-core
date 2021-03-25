@@ -3,7 +3,7 @@ import re
 from marshmallow import Schema, ValidationError, fields, validates
 
 from .api_key import APIKeyListItemResponseSchema
-from .group import GroupBasicResponseSchema, GroupNameSchemaBase
+from .group import GroupBasicResponseSchema, GroupNameSchemaBase, RESTRICTED_NAMES
 from .utils import UTCDateTime
 
 
@@ -17,8 +17,8 @@ class UserLoginSchemaBase(Schema):
                 "Login should contain max 32 chars and include only "
                 "letters, digits, underscores and dashes"
             )
-        if value.lower() == "private":
-            raise ValidationError("User cannot be named private")
+        if value.lower() in RESTRICTED_NAMES:
+            raise ValidationError(f"Group cannot be named '{value.lower()}'")
 
 
 class UserCreateRequestSchema(Schema):
@@ -26,6 +26,7 @@ class UserCreateRequestSchema(Schema):
     additional_info = fields.Str(required=True, allow_none=False)
     feed_quality = fields.Str(missing="high")
     send_email = fields.Boolean(missing=False)
+    trusted = fields.Boolean(missing=True)
 
     @validates("additional_info")
     def validate_additional_info(self, value):
@@ -39,6 +40,7 @@ class UserUpdateRequestSchema(Schema):
     feed_quality = fields.Str(missing=None)
     send_email = fields.Boolean(missing=None)
     disabled = fields.Boolean(missing=None)
+    trusted = fields.Boolean(missing=None)
 
     @validates("additional_info")
     def validate_additional_info(self, value):
@@ -59,6 +61,7 @@ class UserItemResponseSchema(UserLoginSchemaBase):
 
     disabled = fields.Boolean(required=True, allow_none=False)
     pending = fields.Boolean(required=True, allow_none=False)
+    is_trusted = fields.Boolean(required=True, allow_none=False)
 
     groups = fields.Nested(
         GroupBasicResponseSchema, many=True, required=True, allow_none=False
@@ -75,6 +78,7 @@ class UserListItemResponseSchema(UserLoginSchemaBase):
     requested_on = UTCDateTime(required=True)
     disabled = fields.Boolean(required=True, allow_none=False)
     pending = fields.Boolean(required=True, allow_none=False)
+    is_trusted = fields.Boolean(required=True, allow_none=False)
     groups = fields.Nested(
         GroupNameSchemaBase, many=True, required=True, allow_none=False
     )
@@ -104,6 +108,7 @@ class UserOwnProfileResponseSchema(UserLoginSchemaBase):
     registered_on = UTCDateTime(required=True)
     logged_on = UTCDateTime(required=True)
     set_password_on = UTCDateTime(required=True)
+    is_trusted = fields.Boolean(required=True, allow_none=False)
 
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     groups = fields.Nested(

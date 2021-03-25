@@ -2,6 +2,10 @@ import re
 
 from marshmallow import Schema, ValidationError, fields, validates
 
+RESTRICTED_NAMES = [
+    "public", "private", "trusted"
+]
+
 
 class GroupNameSchemaBase(Schema):
     name = fields.Str(required=True, allow_none=False)
@@ -13,8 +17,8 @@ class GroupNameSchemaBase(Schema):
                 "Group should contain max 32 chars and include only "
                 "letters, digits, underscores and dashes"
             )
-        if name.lower() == "private":
-            raise ValidationError("Group cannot be named private")
+        if name.lower() in RESTRICTED_NAMES:
+            raise ValidationError(f"Group cannot be named '{name.lower()}'")
 
 
 class GroupCreateRequestSchema(Schema):
@@ -41,11 +45,13 @@ class GroupMemberUpdateRequestSchema(Schema):
 class GroupBasicResponseSchema(GroupNameSchemaBase):
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     private = fields.Boolean(required=True)
+    builtin = fields.Boolean(required=True)
 
 
 class GroupItemResponseSchema(GroupNameSchemaBase):
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     private = fields.Boolean(required=True)
+    builtin = fields.Boolean(required=True)
     users = fields.List(
         fields.Str(), attribute="user_logins", required=True, allow_none=False
     )

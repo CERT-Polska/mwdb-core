@@ -40,6 +40,9 @@ class Group(db.Model):
     def is_immutable(self):
         """
         Immutable groups can't be renamed, joined or left directly.
+        Private groups are groups associated only with the single user account.
+        Builtin groups represent roles like registered user ("public") or
+        trusted user ("trusted").
         """
         return self.private or self.builtin
 
@@ -47,8 +50,8 @@ class Group(db.Model):
     def is_workspace(self):
         """
         Workspace is a group that is directly visible for regular users.
-        Users see each other and group admins can additionally do some basic
-        group management.
+        Users can see each other. Some members can be marked as group admins
+        can additionally do some basic group management.
         Currently only immutable groups are not workspaces.
         """
         # It's hybrid: don't use boolean operators here

@@ -17,7 +17,7 @@ luqum==0.7.4
 logmatic-python==0.1.7
 click==7.1.2
 click-default-group==1.2.2
-PyYAML==5.3.1
+PyYAML==5.4
 redis==3.2.1
 minio==6.0.0
 typed-config==0.2.1

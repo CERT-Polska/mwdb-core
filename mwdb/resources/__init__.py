@@ -108,8 +108,8 @@ def get_shares_for_upload(upload_as):
     object will be shared with
     """
     if upload_as == "*":
-        # If '*' is provided: share with all user's groups except 'public'
-        share_with = [group for group in g.auth_user.groups if group.name != "public"]
+        # If '*' is provided: share with all user's groups except 'public' and 'trusted'
+        share_with = [group for group in g.auth_user.groups if not group.builtin]
     elif upload_as == "private":
         share_with = [Group.get_by_name(g.auth_user.login)]
     else:

@@ -1,5 +1,6 @@
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from mwdb.core.capabilities import Capabilities
 
@@ -42,7 +43,7 @@ class Group(db.Model):
         """
         return self.private or self.builtin
 
-    @property
+    @hybrid_property
     def is_workspace(self):
         """
         Workspace is a group that is directly visible for regular users.
@@ -50,7 +51,8 @@ class Group(db.Model):
         group management.
         Currently only immutable groups are not workspaces.
         """
-        return not self.is_immutable
+        # It's hybrid: don't use boolean operators here
+        return ~self.private & ~self.builtin
 
     @property
     def user_logins(self):

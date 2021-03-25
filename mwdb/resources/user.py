@@ -518,7 +518,7 @@ class UserProfileResource(Resource):
                 db.session.query(User)
                 .join(User.memberships)
                 .join(Member.group)
-                .filter(Group.name != "public")
+                .filter(Group.builtin.is_(False))
                 .filter(g.auth_user.is_member(Group.id))
                 .filter(User.login == user_login_obj["login"])
             ).first()

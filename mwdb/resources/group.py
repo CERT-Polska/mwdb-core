@@ -169,7 +169,7 @@ class GroupResource(Resource):
         description: |
             Updates group name and capabilities.
 
-            Works only for user-defined groups (excluding private and 'public')
+            Works only for user-defined groups.
 
             Requires `manage_users` capability.
         security:
@@ -240,7 +240,7 @@ class GroupMemberResource(Resource):
         description: |
             Adds new member to existing group
 
-            Works only for user-defined groups (excluding private and 'public')
+            Works only for user-defined groups.
 
             Requires `manage_users` capability
         security:
@@ -287,7 +287,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.is_immutable:
-            raise Forbidden("Adding members to private or public group is not allowed")
+            raise Forbidden("Adding members to immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()
@@ -316,7 +316,7 @@ class GroupMemberResource(Resource):
         description: |
             Updates group membership for specific member e.g. to set admin role.
 
-            Works only for user-defined groups (excluding private and 'public')
+            Works only for user-defined groups.
 
             Requires `manage_users` capability
         security:
@@ -373,7 +373,7 @@ class GroupMemberResource(Resource):
 
         if group.is_immutable:
             raise Forbidden(
-                "Change membership in private or public group is not allowed"
+                "Change membership in immutable group is not allowed"
             )
 
         member = (
@@ -402,7 +402,7 @@ class GroupMemberResource(Resource):
         description: |
             Removes member from existing group.
 
-            Works only for user-defined groups (excluding private and 'public')
+            Works only for user-defined groups.
 
             Requires `manage_users` capability or group_admin membership.
         security:
@@ -454,7 +454,7 @@ class GroupMemberResource(Resource):
 
         if group.is_immutable:
             raise Forbidden(
-                "Removing members from private or public group is not allowed"
+                "Removing members from immutable group is not allowed"
             )
 
         member = (

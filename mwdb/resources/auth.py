@@ -6,7 +6,7 @@ from flask_restful import Resource
 from sqlalchemy import exists, func
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.sql.expression import false
+from sqlalchemy.sql.expression import false, true
 from werkzeug.exceptions import Conflict, Forbidden, InternalServerError
 
 from mwdb.core.config import app_config
@@ -441,8 +441,7 @@ class AuthGroupListResource(Resource):
             db.session.query(Group)
             .options(joinedload(Group.members, Member.user))
             .filter(g.auth_user.is_member(Group.id))
-            .filter(Group.name != "public")
-            .filter(Group.private.is_(False))
+            .filter(Group.is_workspace == true())
         ).all()
 
         schema = GroupListResponseSchema()

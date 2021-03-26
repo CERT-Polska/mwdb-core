@@ -15,8 +15,19 @@ def _initialize(admin_password):
     """
     Creates initial objects in database
     """
-    public_group = Group(name=Group.PUBLIC_GROUP_NAME, capabilities=[])
+    public_group = Group(name=Group.PUBLIC_GROUP_NAME, builtin=True, capabilities=[])
     db.session.add(public_group)
+
+    trusted_group = Group(
+        name=Group.TRUSTED_GROUP_NAME,
+        builtin=True,
+        capabilities=[
+            Capabilities.adding_files,
+            Capabilities.manage_profile,
+            Capabilities.personalize,
+        ],
+    )
+    db.session.add(trusted_group)
 
     everything_group = Group(
         name=Group.EVERYTHING_GROUP_NAME, capabilities=[Capabilities.access_all_objects]
@@ -32,7 +43,7 @@ def _initialize(admin_password):
         login=app_config.mwdb.admin_login,
         email="admin@mwdb.local",
         additional_info="MWDB built-in administrator account",
-        groups=[admin_group, everything_group, public_group],
+        groups=[admin_group, everything_group, public_group, trusted_group],
     )
     admin_user.reset_sessions()
     admin_user.set_password(admin_password)

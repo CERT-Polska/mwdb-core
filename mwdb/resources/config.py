@@ -242,7 +242,8 @@ class ConfigResource(ObjectResource, ConfigUploader):
                     schema: ConfigItemResponseSchema
             403:
                 description: |
-                    No permissions to perform additional operations
+                    No permissions to upload configs or
+                    perform additional operations
                     (e.g. adding parent, metakeys)
             404:
                 description: |
@@ -375,7 +376,8 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
                     schema: ConfigItemResponseSchema
             403:
                 description: |
-                    No permissions to perform additional operations
+                    No permissions to upload configs or
+                    perform additional operations
                     (e.g. adding parent, metakeys)
             404:
                 description: |

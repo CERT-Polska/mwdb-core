@@ -3,7 +3,7 @@ import re
 from marshmallow import Schema, ValidationError, fields, validates
 
 from .api_key import APIKeyListItemResponseSchema
-from .group import GroupBasicResponseSchema, GroupNameSchemaBase, RESTRICTED_NAMES
+from .group import RESTRICTED_NAMES, GroupBasicResponseSchema, GroupNameSchemaBase
 from .utils import UTCDateTime
 
 
@@ -18,7 +18,7 @@ class UserLoginSchemaBase(Schema):
                 "letters, digits, underscores and dashes"
             )
         if value.lower() in RESTRICTED_NAMES:
-            raise ValidationError(f"Group cannot be named '{value.lower()}'")
+            raise ValidationError(f"User cannot be named '{value.lower()}'")
 
 
 class UserCreateRequestSchema(Schema):

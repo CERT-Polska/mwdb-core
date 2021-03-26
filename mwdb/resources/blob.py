@@ -134,7 +134,7 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                     schema: BlobItemResponseSchema
             403:
                 description: |
-                    No permissions to perform additional operations
+                    No permissions to upload blobs or perform additional operations
                     (e.g. adding metakeys)
             404:
                 description: Specified group doesn't exist
@@ -264,7 +264,7 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
                     schema: BlobItemResponseSchema
             403:
                 description: |
-                    No permissions to perform additional operations
+                    No permissions to upload blobs or perform additional operations
                     (e.g. adding metakeys)
             404:
                 description: Specified group doesn't exist

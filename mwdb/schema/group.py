@@ -2,9 +2,7 @@ import re
 
 from marshmallow import Schema, ValidationError, fields, validates
 
-RESTRICTED_NAMES = [
-    "public", "private", "trusted"
-]
+RESTRICTED_NAMES = ["public", "private", "trusted"]
 
 
 class GroupNameSchemaBase(Schema):

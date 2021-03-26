@@ -9,6 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import false, true
 from werkzeug.exceptions import Conflict, Forbidden, InternalServerError
 
+from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
 from mwdb.model import Group, Member, User, db
@@ -23,7 +24,7 @@ from mwdb.schema.auth import (
 from mwdb.schema.group import GroupListResponseSchema
 from mwdb.schema.user import UserSuccessResponseSchema
 
-from . import loads_schema, logger, requires_authorization
+from . import loads_schema, logger, requires_authorization, requires_capabilities
 
 
 def verify_recaptcha(recaptcha_token):
@@ -228,6 +229,7 @@ class ChangePasswordResource(Resource):
 
 class RequestPasswordChangeResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.manage_profile)
     def post(self):
         """
         ---
@@ -238,6 +240,8 @@ class RequestPasswordChangeResource(Resource):
             Link expires after setting a new password or after 14 days.
 
             Link is sent to the e-mail address set in user's profile.
+
+            Requires `manage_profile` capability.
         security:
             - bearerAuth: []
         tags:
@@ -249,6 +253,9 @@ class RequestPasswordChangeResource(Resource):
               content:
                 application/json:
                   schema: UserSuccessResponseSchema
+            403:
+              description: |
+                When user doesn't have required `manage_profile` capability.
             500:
               description: |
                 When SMTP server is unavailable or not properly configured

@@ -2,19 +2,24 @@ from flask import g, request
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
+from mwdb.core.capabilities import Capabilities
 from mwdb.model import QuickQuery, db
 from mwdb.schema.quick_query import QuickQueryResponseSchema, QuickQuerySchemaBase
 
-from . import loads_schema, logger, requires_authorization
+from . import loads_schema, logger, requires_authorization, requires_capabilities
 
 
 class QuickQueryResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.personalize)
     def post(self, type):
         """
         ---
         summary: Create a new query
-        description: Create a new saved quick query.
+        description: |
+            Create a new saved quick query.
+
+            Requires `personalize` capability.
         tags:
             - query
         requestBody:
@@ -32,6 +37,8 @@ class QuickQueryResource(Resource):
                       items: QuickQueryResponseSchema
             400:
                 description: When query is invalid
+            403:
+                description: When user doesn't have `personalize` capability.
         """
         schema = QuickQuerySchemaBase()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -86,11 +93,15 @@ class QuickQueryResource(Resource):
 
 class QuickQueryItemResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.personalize)
     def delete(self, id):
         """
         ---
         summary: Delete query
-        description: Delete custom quick query.
+        description: |
+            Delete custom quick query.
+
+            Requires `personalize` capability.
         tags:
             - query
         parameters:
@@ -100,10 +111,12 @@ class QuickQueryItemResource(Resource):
                 id: int
               description: Query identifier
         responses:
-            404:
-                description: When query was not found.
             200:
                 description: When query was successfully deleted
+            403:
+                description: When user doesn't have `personalize` capability.
+            404:
+                description: When query was not found.
         """
         quick_query = (
             db.session.query(QuickQuery)

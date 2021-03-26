@@ -79,7 +79,7 @@ class User(db.Model):
 
     @property
     def is_trusted(self):
-        return Group.TRUSTED_GROUP_NAME not in self.group_names
+        return Group.TRUSTED_GROUP_NAME in self.group_names
 
     def has_rights(self, perms):
         return perms in self.capabilities
@@ -104,8 +104,13 @@ class User(db.Model):
 
     @staticmethod
     def create(
-        login, email, additional_info, pending=False, feed_quality=None,
-        trusted=True, commit=True
+        login,
+        email,
+        additional_info,
+        pending=False,
+        feed_quality=None,
+        trusted=True,
+        commit=True,
     ):
         from mwdb.model.group import Group
 

@@ -80,7 +80,8 @@ class Group(db.Model):
     @staticmethod
     def all_access_groups():
         """
-        All access groups are all groups that have access_all_objects capability turned on.
+        All access groups are all groups that have access_all_objects
+        capability turned on.
         They have access to all samples regardless of the sharing settings
         """
         return (

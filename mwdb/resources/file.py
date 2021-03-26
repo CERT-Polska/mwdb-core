@@ -92,6 +92,7 @@ class FileResource(ObjectResource, FileUploader):
         return super().get()
 
     @requires_authorization
+    @requires_capabilities(Capabilities.adding_files)
     def post(self):
         """
         ---
@@ -136,7 +137,8 @@ class FileResource(ObjectResource, FileUploader):
                     schema: FileItemResponseSchema
             403:
                 description: |
-                    No permissions to perform additional operations
+                    No permissions to upload files or
+                    perform additional operations
                     (e.g. adding parent, metakeys)
             404:
                 description: |
@@ -193,6 +195,7 @@ class FileItemResource(ObjectItemResource, FileUploader):
         return super().get(identifier)
 
     @requires_authorization
+    @requires_capabilities(Capabilities.adding_files)
     def post(self, identifier):
         """
         ---
@@ -256,7 +259,8 @@ class FileItemResource(ObjectItemResource, FileUploader):
                     schema: FileItemResponseSchema
             403:
                 description: |
-                    No permissions to perform additional operations
+                    No permissions to upload files or
+                    perform additional operations
                     (e.g. adding parent, metakeys)
             404:
                 description: |

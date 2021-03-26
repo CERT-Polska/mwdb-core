@@ -372,9 +372,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.is_immutable:
-            raise Forbidden(
-                "Change membership in immutable group is not allowed"
-            )
+            raise Forbidden("Change membership in immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()
@@ -431,6 +429,7 @@ class GroupMemberResource(Resource):
             403:
                 description: |
                     When user doesn't have `manage_users` capability,
+                    user is not an admin of group,
                     group is immutable or user is pending
             404:
                 description: When user or group doesn't exist
@@ -453,9 +452,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.is_immutable:
-            raise Forbidden(
-                "Removing members from immutable group is not allowed"
-            )
+            raise Forbidden("Removing members from immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()

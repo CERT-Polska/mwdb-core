@@ -17,6 +17,24 @@ def test_member_public_groups():
         session.remove_member("public", Alice.identity)
 
 
+def test_existing_member_groups():
+    testCase = RelationTestCase()
+
+    Alice = testCase.new_user("Alice")
+    Group = testCase.new_group("Group")
+
+    session = MwdbTest()
+    session.login()
+
+    session.add_member(Group.identity, Alice.identity)
+    with ShouldRaise(status_code=409):
+        session.add_member(Group.identity, Alice.identity)
+
+    session.remove_member(Group.identity, Alice.identity)
+    with ShouldRaise(status_code=409):
+        session.remove_member(Group.identity, Alice.identity)
+
+
 def test_member_private_groups():
     testCase = RelationTestCase()
 

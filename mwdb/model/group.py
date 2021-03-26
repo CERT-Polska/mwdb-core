@@ -1,5 +1,7 @@
 from sqlalchemy.dialects.postgresql.array import ARRAY
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm.exc import FlushError
 
 from mwdb.core.capabilities import Capabilities
 
@@ -44,6 +46,32 @@ class Group(db.Model):
     @property
     def group_admins(self):
         return [member.user.login for member in self.members if member.group_admin]
+
+    def add_member(self, user):
+        if user in self.users:
+            return False
+
+        db.session.begin_nested()
+        try:
+            self.users.append(user)
+            db.session.commit()
+        except (FlushError, IntegrityError):
+            db.session.rollback()
+            return False
+        return True
+
+    def remove_member(self, user):
+        if user not in self.users:
+            return False
+
+        db.session.begin_nested()
+        try:
+            self.users.remove(user)
+            db.session.commit()
+        except (FlushError, IntegrityError):
+            db.session.rollback()
+            return False
+        return True
 
     @staticmethod
     def public_group():

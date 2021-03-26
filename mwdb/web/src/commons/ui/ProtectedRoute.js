@@ -16,11 +16,13 @@ export function ProtectedRoute({ children, condition, ...props }) {
             condition={auth.isAuthenticated}
             fallback={
                 <Redirect
-                    to="/login"
-                    state={{
-                        prevLocation: location,
-                        error:
-                            "You need to authenticate before accessing this page",
+                    to={{
+                        pathname: "/login",
+                        state: {
+                            prevLocation: location,
+                            error:
+                                "You need to authenticate before accessing this page",
+                        },
                     }}
                 />
             }
@@ -30,9 +32,11 @@ export function ProtectedRoute({ children, condition, ...props }) {
                 children
             ) : (
                 <Redirect
-                    to="/"
-                    state={{
-                        error: `You don't have permission to access '${location.pathname}'`,
+                    to={{
+                        pathname: "/",
+                        state: {
+                            error: `You don't have permission to access '${location.pathname}'`,
+                        },
                     }}
                 />
             )}

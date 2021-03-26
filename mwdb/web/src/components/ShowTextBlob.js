@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import {
     ShowObject,
@@ -146,6 +146,7 @@ function BlobDiffAction() {
 }
 
 export default function ShowTextBlob(props) {
+    const params = useParams();
     async function downloadTextBlob(object) {
         downloadData(object.content, object.id, "text/plain");
     }
@@ -154,7 +155,7 @@ export default function ShowTextBlob(props) {
         <ShowObject
             ident="showTextBlob"
             objectType="blob"
-            objectId={props.match.params.hash}
+            objectId={params.hash}
             searchEndpoint="/blobs"
             headerIcon={faScroll}
             headerCaption="Blob details"

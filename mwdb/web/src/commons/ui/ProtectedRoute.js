@@ -1,24 +1,60 @@
 import React, { useContext } from "react";
-import { Route } from "react-router-dom";
-
-import { Alert } from "./ErrorBoundary";
+import { useLocation } from "react-router";
+import { Redirect, Route } from "react-router-dom";
 
 import { AuthContext } from "../auth";
 
-export default function ProtectedRoute(props) {
+export function ConditionalRoute({ children, condition, fallback, ...props }) {
+    return <Route {...props}>{condition ? children : fallback}</Route>;
+}
+
+export function ProtectedRoute({ children, condition, ...props }) {
     const auth = useContext(AuthContext);
-    function routeRender(renderProps) {
-        if (!auth.isAuthenticated) {
-            auth.logout("You need to authenticate before accessing this page");
-            return [];
-        }
-        return props.condition ? (
-            <props.component {...renderProps} />
-        ) : (
-            <div className="container-fluid">
-                <Alert error="You don't have permission to see that page" />
-            </div>
-        );
-    }
-    return <Route {...props} component={undefined} render={routeRender} />;
+    const location = useLocation();
+    return (
+        <ConditionalRoute
+            condition={auth.isAuthenticated}
+            fallback={
+                <Redirect
+                    to={{
+                        pathname: "/login",
+                        state: {
+                            prevLocation: location,
+                            error:
+                                "You need to authenticate before accessing this page",
+                        },
+                    }}
+                />
+            }
+            {...props}
+        >
+            {condition || condition === undefined ? (
+                children
+            ) : (
+                <Redirect
+                    to={{
+                        pathname: "/",
+                        state: {
+                            error: `You don't have permission to access '${location.pathname}'`,
+                        },
+                    }}
+                />
+            )}
+        </ConditionalRoute>
+    );
+}
+
+export function AdministrativeRoute(args) {
+    const auth = useContext(AuthContext);
+    return <ProtectedRoute condition={auth.isAdmin} {...args} />;
+}
+
+export function AttributeRoute(args) {
+    const auth = useContext(AuthContext);
+    return (
+        <ProtectedRoute
+            condition={auth.hasCapability("managing_attributes")}
+            {...args}
+        />
+    );
 }

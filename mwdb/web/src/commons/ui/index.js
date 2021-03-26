@@ -12,7 +12,11 @@ export { default as MemberList } from "./MemberList";
 export { default as NavDropdown } from "./NavDropdown";
 export { default as ObjectLink } from "./ObjectLink";
 export { default as PagedList } from "./PagedList";
-export { default as ProtectedRoute } from "./ProtectedRoute";
+export {
+    ProtectedRoute,
+    AdministrativeRoute,
+    AttributeRoute,
+} from "./ProtectedRoute";
 export { default as RefString } from "./RefString";
 export { default as SortedList } from "./SortedList";
 export { default as View } from "./View";

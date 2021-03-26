@@ -7,7 +7,7 @@ import api from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/extensions";
 import { View } from "@mwdb-web/commons/ui";
 
-export default function UserLogin(props) {
+export default function UserLogin() {
     const auth = useContext(AuthContext);
     const history = useHistory();
 

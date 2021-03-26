@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router";
 import Autocomplete from "react-autocomplete";
 
 import _ from "lodash";
@@ -611,4 +612,4 @@ class AttributeUpdate extends Component {
     }
 }
 
-export default AttributeUpdate;
+export default withRouter(AttributeUpdate);

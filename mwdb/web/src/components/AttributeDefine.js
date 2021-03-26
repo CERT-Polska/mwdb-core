@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router";
 
 import api from "@mwdb-web/commons/api";
 import { Alert } from "@mwdb-web/commons/ui";
@@ -153,4 +154,4 @@ class AttributeDefine extends Component {
     }
 }
 
-export default AttributeDefine;
+export default withRouter(AttributeDefine);

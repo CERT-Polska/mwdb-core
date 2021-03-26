@@ -301,6 +301,10 @@ function getMetakeyDefinition(key) {
     return axios.get(`/meta/manage/${key}`);
 }
 
+function removeMetakeyDefinition(key) {
+    return axios.delete(`/meta/manage/${key}`);
+}
+
 function addMetakeyDefinition(key, label, description, template, hidden) {
     return axios.put(`/meta/manage/${key}`, {
         key,
@@ -489,6 +493,7 @@ export default {
     getSettableMetakeyDefinitions,
     getMetakeyDefinitions,
     getMetakeyDefinition,
+    removeMetakeyDefinition,
     addMetakeyDefinition,
     setMetakeyPermission,
     deleteMetakeyPermission,

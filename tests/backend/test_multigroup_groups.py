@@ -76,7 +76,7 @@ def test_multigroup_sharing():
     assert set(gr["group_name"] for gr in shares["shares"]) == {Bob.identity}
 
     shares = Joe.session().get_shares(File.dhash)
-    groups = {"public", Alice.identity, Bob.identity, Joe.identity, Workgroup.identity}
+    groups = {"public", 'trusted', Alice.identity, Bob.identity, Joe.identity, Workgroup.identity}
     assert set(shares["groups"]).intersection(groups) == groups
     assert set(gr["group_name"] for gr in shares["shares"]).issuperset(
         {Alice.identity, Bob.identity, Joe.identity, Workgroup.identity, admin_login()})

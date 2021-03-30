@@ -298,7 +298,8 @@ class GroupMemberResource(Resource):
         if member.pending:
             raise Forbidden("User is pending and need to be accepted first")
 
-        group.users.append(member)
+        if not group.add_member(member):
+            raise Conflict("Member is already added")
         db.session.commit()
 
         logger.info(
@@ -353,6 +354,8 @@ class GroupMemberResource(Resource):
                     group is immutable or user is pending
             404:
                 description: When user or group doesn't exist
+            409:
+                description: When member is already added
         """
         group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
 
@@ -434,6 +437,8 @@ class GroupMemberResource(Resource):
                     group is immutable or user is pending
             404:
                 description: When user or group doesn't exist
+            409:
+                description: When member is already removed
         """
         group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
@@ -471,7 +476,8 @@ class GroupMemberResource(Resource):
         if member.pending:
             raise Forbidden("User is pending and need to be accepted first")
 
-        group.users.remove(member)
+        if not group.remove_member(member):
+            raise Conflict("Member is already removed")
         db.session.commit()
 
         logger.info(

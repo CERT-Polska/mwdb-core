@@ -24,6 +24,8 @@ class GroupCreateRequestSchema(Schema):
 class GroupUpdateRequestSchema(Schema):
     name = fields.Str(missing=None)
     capabilities = fields.List(fields.Str(), missing=None)
+    default = fields.Boolean(missing=None)
+    workspace = fields.Boolean(missing=None)
 
     @validates("name")
     def validate_name(self, name):
@@ -46,6 +48,8 @@ class GroupBasicResponseSchema(GroupNameSchemaBase):
 class GroupItemResponseSchema(GroupNameSchemaBase):
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     private = fields.Boolean(required=True)
+    default = fields.Boolean(required=True)
+    workspace = fields.Boolean(required=True)
     users = fields.List(
         fields.Str(), attribute="user_logins", required=True, allow_none=False
     )

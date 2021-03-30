@@ -149,10 +149,7 @@ class GroupResource(Resource):
         ).scalar():
             raise Conflict("Group exists yet")
 
-        group = Group(
-            name=group_name_obj["name"],
-            capabilities=obj["capabilities"]
-        )
+        group = Group(name=group_name_obj["name"], capabilities=obj["capabilities"])
         db.session.add(group)
         db.session.commit()
 
@@ -389,9 +386,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.immutable:
-            raise Forbidden(
-                "Change membership in immutable group is not allowed"
-            )
+            raise Forbidden("Change membership in immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()
@@ -472,9 +467,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.immutable:
-            raise Forbidden(
-                "Removing members from immutable group is not allowed"
-            )
+            raise Forbidden("Removing members from immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()

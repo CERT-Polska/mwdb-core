@@ -17,13 +17,13 @@ depends_on = None
 
 def upgrade():
     op.add_column("group", sa.Column("default", sa.Boolean(), nullable=True))
-    op.execute('UPDATE "group" SET "default"=TRUE WHERE name="public"')
-    op.execute('UPDATE "group" SET "default"=FALSE WHERE name<>"public"')
+    op.execute('UPDATE "group" SET "default"=TRUE WHERE name=\'public\'')
+    op.execute('UPDATE "group" SET "default"=FALSE WHERE name<>\'public\'')
     op.alter_column("group", "default", existing_type=sa.Boolean(), nullable=False)
 
     op.add_column("group", sa.Column("workspace", sa.Boolean(), nullable=True))
-    op.execute('UPDATE "group" SET "workspace"=FALSE WHERE name="public"')
-    op.execute('UPDATE "group" SET "workspace"=TRUE WHERE name<>"public"')
+    op.execute('UPDATE "group" SET "workspace"=FALSE WHERE name=\'public\'')
+    op.execute('UPDATE "group" SET "workspace"=TRUE WHERE name<>\'public\'')
     op.alter_column("group", "workspace", existing_type=sa.Boolean(), nullable=False)
 
 

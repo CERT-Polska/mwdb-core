@@ -12,10 +12,13 @@ class Capabilities(object):
     adding_all_attributes = "adding_all_attributes"
     managing_attributes = "managing_attributes"
     removing_attributes = "removing_attributes"
+    adding_files = "adding_files"
     adding_configs = "adding_configs"
     adding_blobs = "adding_blobs"
     unlimited_requests = "unlimited_requests"
     removing_objects = "removing_objects"
+    manage_profile = "manage_profile"
+    personalize = "personalize"
 
     @classmethod
     def all(cls):

@@ -202,7 +202,10 @@ class ConfigResource(ObjectResource, ConfigUploader):
         """
         ---
         summary: Upload config
-        description: Uploads new config.
+        description: |
+            Uploads a new config.
+
+            Requires `adding_configs` capability.
         security:
             - bearerAuth: []
         tags:
@@ -304,7 +307,10 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
         """
         ---
         summary: Upload config
-        description: Uploads new config.
+        description: |
+            Uploads a new config.
+
+            Requires `adding_configs` capability.
         security:
             - bearerAuth: []
         tags:

@@ -17,9 +17,9 @@ class Capabilities(object):
     removing_comments = "removing_comments"
     # Can add parents
     adding_parents = "adding_parents"
-    # Can read all attributes, ignoring ACLs
+    # Can read all attributes, regardless of ACLs
     reading_all_attributes = "reading_all_attributes"
-    # Can set all attributes, ignoring ACLs
+    # Can set all attributes, regardless of ACLs
     adding_all_attributes = "adding_all_attributes"
     # Can add/edit/remove attribute keys
     managing_attributes = "managing_attributes"
@@ -33,7 +33,7 @@ class Capabilities(object):
     unlimited_requests = "unlimited_requests"
     # Can remove objects
     removing_objects = "removing_objects"
-    # Can manage own profile (adding API keys, setting password)
+    # Can manage own profile (add API keys, change a password)
     manage_profile = "manage_profile"
     # Can personalize own profile (mark as favorite, manage quick queries)
     personalize = "personalize"

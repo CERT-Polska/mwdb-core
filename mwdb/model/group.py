@@ -21,8 +21,8 @@ class Group(db.Model):
     # New users are automatically added to this group
     default = db.Column(db.Boolean, nullable=False, default=False)
     # Workspace groups have two traits:
-    # - group members see each other
-    # - they are considered for sharing when upload_as:*
+    # - group members can list all the other group memebers
+    # - they are candidates for sharing when upload_as:*
     workspace = db.Column(db.Boolean, nullable=False, default=True)
 
     members = db.relationship(
@@ -104,6 +104,9 @@ class Group(db.Model):
 
     @staticmethod
     def all_default_groups():
+        """
+        Return all default groups
+        """
         return db.session.query(Group).filter(Group.default.is_(True)).all()
 
 

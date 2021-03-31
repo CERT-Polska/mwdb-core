@@ -169,7 +169,7 @@ class GroupResource(Resource):
         description: |
             Updates group attributes.
 
-            If group is immutable, you can only change capabilities.
+            If the group is immutable, you can only change capabilities.
 
             Requires `manage_users` capability.
         security:

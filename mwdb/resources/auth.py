@@ -338,7 +338,7 @@ class RecoverPasswordResource(Resource):
 
         if not user.has_rights(Capabilities.manage_profile):
             raise Forbidden(
-                "Password recovery is disabled for this user. "
+                "You are not allowed to recover the password. "
                 "Ask administrator for details."
             )
 

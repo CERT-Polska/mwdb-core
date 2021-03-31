@@ -286,7 +286,9 @@ class UploaderField(BaseField):
                 db.session.query(User)
                 .join(User.memberships)
                 .join(Member.group)
-                .filter(and_(g.auth_user.is_member(Group.id), Group.name != "public"))
+                .filter(
+                    and_(g.auth_user.is_member(Group.id), Group.workspace.is_(True))
+                )
                 .filter(or_(Group.name == value, User.login == value))
             ).all()
             # Regular users can see only uploads to its own groups

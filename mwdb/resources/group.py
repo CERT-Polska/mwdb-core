@@ -165,11 +165,11 @@ class GroupResource(Resource):
     def put(self, name):
         """
         ---
-        summary: Update group name and capabilities
+        summary: Update group attributes
         description: |
-            Updates group name and capabilities.
+            Updates group attributes.
 
-            Works only for user-defined groups (excluding private and 'public')
+            If the group is immutable, you can only change capabilities.
 
             Requires `manage_users` capability.
         security:
@@ -213,13 +213,24 @@ class GroupResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
+        immutable_fields = ["name", "default", "workspace"]
+        if group.immutable:
+            for field in immutable_fields:
+                if obj[field] is not None:
+                    raise Forbidden(f"Can't change '{field}', group is immutable")
+
         if obj["name"] is not None:
-            if obj["name"] != group_name_obj["name"] and group.immutable:
-                raise Forbidden("Renaming group not allowed - group is immutable")
             group.name = obj["name"]
 
         if obj["capabilities"] is not None:
             group.capabilities = obj["capabilities"]
+
+        if obj["default"] is not None:
+            group.default = obj["default"]
+
+        if obj["workspace"] is not None:
+            group.default = obj["workspace"]
+
         db.session.commit()
 
         logger.info(
@@ -287,7 +298,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.immutable:
-            raise Forbidden("Adding members to private or public group is not allowed")
+            raise Forbidden("Adding members to immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()
@@ -375,9 +386,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.immutable:
-            raise Forbidden(
-                "Change membership in private or public group is not allowed"
-            )
+            raise Forbidden("Change membership in immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()
@@ -458,9 +467,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.immutable:
-            raise Forbidden(
-                "Removing members from private or public group is not allowed"
-            )
+            raise Forbidden("Removing members from immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()

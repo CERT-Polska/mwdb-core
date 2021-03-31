@@ -86,15 +86,15 @@ def test_multigroup_sharing():
     File.create(Joe)
 
     shares = Alice.session().get_shares(File.dhash)
-    assert set(shares["groups"]) == {"public", Alice.identity, Workgroup.identity}
+    assert set(shares["groups"]) == {"public", "registered", Alice.identity, Workgroup.identity}
     assert set(gr["group_name"] for gr in shares["shares"]) == {Alice.identity, Workgroup.identity}
 
     shares = Bob.session().get_shares(File.dhash)
-    assert set(shares["groups"]) == {"public", Bob.identity}
+    assert set(shares["groups"]) == {"public", "registered", Bob.identity}
     assert set(gr["group_name"] for gr in shares["shares"]) == {Bob.identity}
 
     shares = Joe.session().get_shares(File.dhash)
-    groups = {"public", Alice.identity, Bob.identity, Joe.identity, Workgroup.identity}
+    groups = {"public", "registered", Alice.identity, Bob.identity, Joe.identity, Workgroup.identity}
     assert set(shares["groups"]).intersection(groups) == groups
     assert set(gr["group_name"] for gr in shares["shares"]).issuperset(
         {Alice.identity, Bob.identity, Joe.identity, Workgroup.identity, admin_login()})

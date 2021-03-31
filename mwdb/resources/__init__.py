@@ -109,7 +109,7 @@ def get_shares_for_upload(upload_as):
     """
     if upload_as == "*":
         # If '*' is provided: share with all user's groups except 'public'
-        share_with = [group for group in g.auth_user.groups if group.name != "public"]
+        share_with = [group for group in g.auth_user.groups if group.workspace]
     elif upload_as == "private":
         share_with = [Group.get_by_name(g.auth_user.login)]
     else:

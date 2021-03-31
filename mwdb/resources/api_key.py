@@ -10,17 +10,20 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.model import APIKey, User, db
 from mwdb.schema.api_key import APIKeyIdentifierBase, APIKeyTokenResponseSchema
 
-from . import load_schema, logger, requires_authorization
+from . import load_schema, logger, requires_authorization, requires_capabilities
 
 
 class APIKeyIssueResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.manage_profile)
     def post(self, login):
         """
         ---
         summary: Create a new API key for user
         description: |
             Creates a new API key and returns its id and token.
+
+            Requires `manage_profile` capability.
 
             Requires `manage_users` capability if login doesn't match the login
             of currently authenticated user.
@@ -42,7 +45,7 @@ class APIKeyIssueResource(Resource):
                     schema: APIKeyTokenResponseSchema
             403:
                 description: |
-                    When user doesn't have required `manage_users` capability
+                    When user doesn't have required capability
             404:
                 description: |
                     If provided login doesn't exist.
@@ -83,12 +86,15 @@ class APIKeyIssueResource(Resource):
 
 class APIKeyResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.manage_profile)
     def get(self, api_key_id):
         """
         ---
         summary: Get token for API key
         description: |
             Returns token for provided API key identifier.
+
+            Requires `manage_profile` capability.
 
             Requires `manage_users` capability if current user doesn't own the key.
         security:
@@ -110,6 +116,9 @@ class APIKeyResource(Resource):
                     schema: APIKeyTokenResponseSchema
             400:
                 description: When API key identifier is not a correct UUID
+            403:
+                description: |
+                    When user doesn't have required capability
             404:
                 description: |
                     When API key doesn't exist or user doesn't own the key and
@@ -138,12 +147,15 @@ class APIKeyResource(Resource):
         )
 
     @requires_authorization
+    @requires_capabilities(Capabilities.manage_profile)
     def delete(self, api_key_id):
         """
         ---
         summary: Delete API key
         description: |
             Deletes API key with provided identifier.
+
+            Requires `manage_profile` capability.
 
             Requires `manage_users` capability if current user doesn't own the key.
         security:
@@ -162,6 +174,9 @@ class APIKeyResource(Resource):
                 description: When API key was successfully deleted
             400:
                 description: When API key identifier is not a correct UUID
+            403:
+                description: |
+                    When user doesn't have required capability
             404:
                 description: |
                     When API key doesn't exist or user doesn't own the key and

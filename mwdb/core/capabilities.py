@@ -1,21 +1,42 @@
 class Capabilities(object):
+    # Can create/update users and groups
     manage_users = "manage_users"
+    # Queried objects by members are automatically shared with this group
     share_queried_objects = "share_queried_objects"
+    # All new uploaded objects are automatically shared with this group
     access_all_objects = "access_all_objects"
+    # Can share objects with all groups, have access to complete list of groups
     sharing_objects = "sharing_objects"
+    # Can add tags
     adding_tags = "adding_tags"
+    # Can remove tags
     removing_tags = "removing_tags"
+    # Can add comments
     adding_comments = "adding_comments"
+    # Can remove comments
     removing_comments = "removing_comments"
+    # Can add parents
     adding_parents = "adding_parents"
+    # Can read all attributes, regardless of ACLs
     reading_all_attributes = "reading_all_attributes"
+    # Can set all attributes, regardless of ACLs
     adding_all_attributes = "adding_all_attributes"
+    # Can add/edit/remove attribute keys
     managing_attributes = "managing_attributes"
-    removing_attributes = "removing_attributes"
+    # Can upload files
+    adding_files = "adding_files"
+    # Can upload configs
     adding_configs = "adding_configs"
+    # Can upload blobs
     adding_blobs = "adding_blobs"
+    # Requests are not rate-limited for members of this group
     unlimited_requests = "unlimited_requests"
+    # Can remove objects
     removing_objects = "removing_objects"
+    # Can manage own profile (add API keys, change a password)
+    manage_profile = "manage_profile"
+    # Can personalize own profile (mark as favorite, manage quick queries)
+    personalize = "personalize"
 
     @classmethod
     def all(cls):

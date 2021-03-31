@@ -315,8 +315,7 @@ class Object(db.Model):
             child.change_inherited_permission(top_parent_id, new_inheritance_id)
         for share in self.shares:
             if share.related_object_id == top_parent_id:
-                print(share.related_object_id, " == ", new_inheritance_id)
-                # share.related_object_id = new_inheritance_id
+                share.related_object_id = new_inheritance_id
 
     def remove_parent(self, parent, commit=True):
         """
@@ -326,7 +325,7 @@ class Object(db.Model):
             # Relationship not exist
             return False
 
-        # Add relationship in nested transaction
+        # Remove relationship in nested transaction
         db.session.begin_nested()
 
         # Remove inherited permissions from parent
@@ -336,7 +335,6 @@ class Object(db.Model):
             db.session.flush()
             db.session.commit()
         except IntegrityError:
-            # The same relationship was added concurrently
             db.session.rollback()
             db.session.refresh(self)
             if parent in self.parents:

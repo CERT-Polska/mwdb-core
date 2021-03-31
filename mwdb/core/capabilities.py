@@ -3,7 +3,7 @@ class Capabilities(object):
     manage_users = "manage_users"
     # Queried objects by members are automatically shared with this group
     share_queried_objects = "share_queried_objects"
-    # Uploaded objects are automatically shared with this group
+    # All new uploaded objects are automatically shared with this group
     access_all_objects = "access_all_objects"
     # Can share with all groups, have access to complete list of groups
     sharing_objects = "sharing_objects"

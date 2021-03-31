@@ -77,7 +77,10 @@ class ObjectPermission(db.Model):
     related_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), index=True)
 
     object = db.relationship(
-        "Object", foreign_keys=[object_id], lazy="joined", back_populates="shares"
+        "Object",
+        foreign_keys=[object_id],
+        lazy="joined",
+        back_populates="shares",
     )
     related_object = db.relationship(
         "Object",
@@ -86,10 +89,16 @@ class ObjectPermission(db.Model):
         back_populates="related_shares",
     )
     related_user = db.relationship(
-        "User", foreign_keys=[related_user_id], lazy="joined"
+        "User",
+        foreign_keys=[related_user_id],
+        lazy="joined",
     )
 
-    group = db.relationship("Group", foreign_keys=[group_id], lazy="joined")
+    group = db.relationship(
+        "Group",
+        foreign_keys=[group_id],
+        lazy="joined",
+    )
 
     @property
     def access_reason(self):
@@ -276,11 +285,73 @@ class Object(db.Model):
             db.session.commit()
         return True
 
+    def remove_inherited_permission(self, top_parent_id):
+        new_inheritance_id = None
+        for parent in self.parents:
+            if parent.has_explicit_access(g.auth_user):
+                for parent_share in parent.shares:
+                    if parent_share.related_object_id == top_parent_id:
+                        return False
+                new_inheritance_id = parent.id
+                break
+
+        if new_inheritance_id is not None:
+            self.change_inherited_permission(top_parent_id, new_inheritance_id)
+            return True
+        else:
+            for child in self.children:
+                child.remove_inherited_permission(top_parent_id)
+            permissions = (
+                db.session.query(ObjectPermission)
+                .filter(ObjectPermission.object_id == self.id)
+                .filer(ObjectPermission.related_object_id == top_parent_id)
+                .all()
+            )
+            for perm in permissions:
+                db.session.delete(perm)
+
+    def change_inherited_permission(self, top_parent_id, new_inheritance_id):
+        for child in self.children:
+            child.change_inherited_permission(top_parent_id, new_inheritance_id)
+        for share in self.shares:
+            if share.related_object_id == top_parent_id:
+                print(share.related_object_id, " == ", new_inheritance_id)
+                # share.related_object_id = new_inheritance_id
+
+    def remove_parent(self, parent, commit=True):
+        """
+        Removing child with permission inheritance
+        """
+        if parent not in self.parents:
+            # Relationship not exist
+            return False
+
+        # Add relationship in nested transaction
+        db.session.begin_nested()
+
+        # Remove inherited permissions from parent
+        self.remove_inherited_permission(parent.id)
+        try:
+            self.parents.remove(parent)
+            db.session.flush()
+            db.session.commit()
+        except IntegrityError:
+            # The same relationship was added concurrently
+            db.session.rollback()
+            db.session.refresh(self)
+            if parent in self.parents:
+                raise
+            return False
+
+        if commit:
+            db.session.commit()
+        return True
+
     def give_access(
         self, group_id, reason_type, related_object, related_user, commit=True
     ):
         """
-        Give access to group with recursive propagation
+        Give access or revoke to group with recursive propagation
         """
         visited = set()
         queue = [self]

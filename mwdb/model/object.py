@@ -364,15 +364,15 @@ class Object(db.Model):
             print(recursion_value is False)
 
             if recursion_value is False:
-                print("usuwamy: ", permission)
-                print("usuwamy: ", permission.object_id)
+                print("removing: ", permission)
+                print("removing: ", permission.object_id)
                 # db.session.delete(permission)
                 # db.session.flush()
                 # db.session.commit()
             else:
-                print("usuwamy: ", permission)
-                print("zmianiamy: ", permission.object_id)
-                print(permission.related_object_id, " na ", recursion_value)
+                print("removing: ", permission)
+                print("removing: ", permission.object_id)
+                print(permission.related_object_id, " for ", recursion_value)
                 # permission.related_object_id = recursion_value
                 # permission.reason_type = "inherited"
                 # db.session.flush()

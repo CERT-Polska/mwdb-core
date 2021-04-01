@@ -164,7 +164,9 @@ class ObjectChildResource(Resource):
         if child_object is None:
             raise NotFound("Child object not found")
 
-        child_object.remove_parent(parent_object)
+        child_object.modify_inherited_permission(parent_object.id)
+        # when permissions will be finally worked out
+        # child_object.remove_parent(parent_object.id)
         #
         # db.session.commit()
         logger.info(

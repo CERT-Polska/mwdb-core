@@ -322,24 +322,27 @@ class Object(db.Model):
         return True
 
     def modify_inherited_permission(self, top_parent_id):
-        new_inheritance_id = None
+        """
+        The beginning of recursive modification of the object permissions,
+        starting with the relation between the supreme parent and his closest child (current object)
+        """
         related_groups_id = [share.group_id for share in self.shares]
-
         for group_id in related_groups_id:
-            self.update_inherited_permissions(
-                top_parent_id, top_parent_id, new_inheritance_id, group_id
-            )
+            self.update_inherited_permissions(top_parent_id, top_parent_id, group_id)
 
     def update_inherited_permissions(
-        self, source_id, top_parent_id, new_inheritance_id, group_id
+        self, source_id, top_parent_id, group_id, new_inheritance_id=None
     ):
         """
-        Recursive change in permission inheritance for a given group
+        Recursive change in permission inheritance for a given group for family of objects
         """
-        recursion_value = self.check_parents_for_inheritence(
+        print("update_inherited_permissions")
+        print(source_id, top_parent_id, group_id, new_inheritance_id)
+        recursion_value = self.check_parents_for_inheritance(
             source_id, top_parent_id, new_inheritance_id, group_id
         )
         if recursion_value is True:
+            print("recursion_value is True for: ", group_id)
             return True
         else:
             for child in self.children:
@@ -348,27 +351,45 @@ class Object(db.Model):
                 )
             permission = (
                 db.session.query(ObjectPermission)
-                .filter(ObjectPermission.object_id == self.id)
-                .filer(ObjectPermission.related_object_id == top_parent_id)
-                .filer(ObjectPermission.group_id == group_id)
+                .filter(
+                    and_(
+                        ObjectPermission.object_id == self.id,
+                        ObjectPermission.related_object_id == top_parent_id,
+                        ObjectPermission.group_id == group_id,
+                    )
+                )
                 .first()
             )
-            if recursion_value is False:
-                db.session.delete(permission)
-                db.session.flush()
-                db.session.commit()
-            else:
-                permission.related_object_id = recursion_value
-                permission.related_object_id = "inherited"
-                db.session.flush()
-                db.session.commit()
 
-    def check_parents_for_inheritence(
+            print(recursion_value is False)
+
+            if recursion_value is False:
+                print("usuwamy: ", permission)
+                print("usuwamy: ", permission.object_id)
+                # db.session.delete(permission)
+                # db.session.flush()
+                # db.session.commit()
+            else:
+                print("usuwamy: ", permission)
+                print("zmianiamy: ", permission.object_id)
+                print(permission.related_object_id, " na ", recursion_value)
+                # permission.related_object_id = recursion_value
+                # permission.reason_type = "inherited"
+                # db.session.flush()
+                # db.session.commit()
+
+    def check_parents_for_inheritance(
         self, source_id, group_id, top_parent_id, new_inheritance_id=None
     ):
         """
         Checking whether an object inherits permissions from other parents
         """
+
+        # object uploaded by user so no need to check parent for permission inheritance
+        for share in self.shares:
+            if share.related_object_id == self.id:
+                return True
+
         break_for_group = False
         for parent in self.parents:
             if parent.id != source_id:
@@ -379,7 +400,9 @@ class Object(db.Model):
                             break_for_group = True
                             break
                         else:
-                            new_inheritance_id = parent.id
+                            # Only set if there is no new inheritance from any of the higher parent
+                            if new_inheritance_id is None:
+                                new_inheritance_id = parent.id
                     if break_for_group:
                         break
             if break_for_group:

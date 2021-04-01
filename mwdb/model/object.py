@@ -293,6 +293,34 @@ class Object(db.Model):
             db.session.commit()
         return True
 
+    def remove_parent(self, parent, commit=True):
+        """
+        Removing child with modify permission inheritance
+        """
+        if parent not in self.parents:
+            # Relationship not exist
+            return False
+
+        # Remove relationship in nested transaction
+        db.session.begin_nested()
+
+        # Remove inherited permissions from parent
+        self.modify_inherited_permission(parent.id)
+        try:
+            self.parents.remove(parent)
+            db.session.flush()
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            db.session.refresh(self)
+            if parent in self.parents:
+                raise
+            return False
+
+        if commit:
+            db.session.commit()
+        return True
+
     def modify_inherited_permission(self, top_parent_id):
         new_inheritance_id = None
         related_groups_id = [share.group_id for share in self.shares]
@@ -305,6 +333,9 @@ class Object(db.Model):
     def update_inherited_permissions(
         self, source_id, top_parent_id, new_inheritance_id, group_id
     ):
+        """
+        Recursive change in permission inheritance for a given group
+        """
         recursion_value = self.check_parents_for_inheritence(
             source_id, top_parent_id, new_inheritance_id, group_id
         )
@@ -335,6 +366,9 @@ class Object(db.Model):
     def check_parents_for_inheritence(
         self, source_id, group_id, top_parent_id, new_inheritance_id=None
     ):
+        """
+        Checking whether an object inherits permissions from other parents
+        """
         break_for_group = False
         for parent in self.parents:
             if parent.id != source_id:
@@ -356,34 +390,6 @@ class Object(db.Model):
             return True
         else:
             return new_inheritance_id
-
-    def remove_parent(self, parent, commit=True):
-        """
-        Removing child with permission inheritance
-        """
-        if parent not in self.parents:
-            # Relationship not exist
-            return False
-
-        # Remove relationship in nested transaction
-        db.session.begin_nested()
-
-        # Remove inherited permissions from parent
-        self.modify_inherited_permission(parent.id)
-        try:
-            self.parents.remove(parent)
-            db.session.flush()
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            db.session.refresh(self)
-            if parent in self.parents:
-                raise
-            return False
-
-        if commit:
-            db.session.commit()
-        return True
 
     def give_access(
         self, group_id, reason_type, related_object, related_user, commit=True

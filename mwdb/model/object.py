@@ -370,8 +370,8 @@ class Object(db.Model):
                 # db.session.flush()
                 # db.session.commit()
             else:
-                print("removing: ", permission)
-                print("removing: ", permission.object_id)
+                print("changing: ", permission)
+                print("changing: ", permission.object_id)
                 print(permission.related_object_id, " for ", recursion_value)
                 # permission.related_object_id = recursion_value
                 # permission.reason_type = "inherited"

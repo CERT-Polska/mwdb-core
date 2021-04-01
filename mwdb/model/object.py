@@ -132,6 +132,14 @@ class ObjectPermission(db.Model):
     def related_user_login(self):
         return self.related_user.login
 
+    @property
+    def get_explicit_groups(self):
+        """
+        Get object tags
+        :return: List of group ids with object explicit permissions
+        """
+        return [group.id for group in self.group]
+
     @classmethod
     def create(cls, object_id, group_id, reason_type, related_object, related_user):
         if not db.session.query(
@@ -285,37 +293,69 @@ class Object(db.Model):
             db.session.commit()
         return True
 
-    def remove_inherited_permission(self, top_parent_id):
+    def modify_inherited_permission(self, top_parent_id):
         new_inheritance_id = None
-        for parent in self.parents:
-            if parent.has_explicit_access(g.auth_user):
-                for parent_share in parent.shares:
-                    if parent_share.related_object_id == top_parent_id:
-                        return False
-                new_inheritance_id = parent.id
-                break
+        related_groups_id = [share.group_id for share in self.shares]
 
-        if new_inheritance_id is not None:
-            self.change_inherited_permission(top_parent_id, new_inheritance_id)
+        for group_id in related_groups_id:
+            self.update_inherited_permissions(
+                top_parent_id, top_parent_id, new_inheritance_id, group_id
+            )
+
+    def update_inherited_permissions(
+        self, source_id, top_parent_id, new_inheritance_id, group_id
+    ):
+        recursion_value = self.check_parents_for_inheritence(
+            source_id, top_parent_id, new_inheritance_id, group_id
+        )
+        if recursion_value is True:
             return True
         else:
             for child in self.children:
-                child.remove_inherited_permission(top_parent_id)
-            permissions = (
+                child.update_inherited_permissions(
+                    self.id, top_parent_id, new_inheritance_id, group_id
+                )
+            permission = (
                 db.session.query(ObjectPermission)
                 .filter(ObjectPermission.object_id == self.id)
                 .filer(ObjectPermission.related_object_id == top_parent_id)
-                .all()
+                .filer(ObjectPermission.group_id == group_id)
+                .first()
             )
-            for perm in permissions:
-                db.session.delete(perm)
+            if recursion_value is False:
+                db.session.delete(permission)
+                db.session.flush()
+                db.session.commit()
+            else:
+                permission.related_object_id = recursion_value
+                permission.related_object_id = "inherited"
+                db.session.flush()
+                db.session.commit()
 
-    def change_inherited_permission(self, top_parent_id, new_inheritance_id):
-        for child in self.children:
-            child.change_inherited_permission(top_parent_id, new_inheritance_id)
-        for share in self.shares:
-            if share.related_object_id == top_parent_id:
-                share.related_object_id = new_inheritance_id
+    def check_parents_for_inheritence(
+        self, source_id, group_id, top_parent_id, new_inheritance_id=None
+    ):
+        break_for_group = False
+        for parent in self.parents:
+            if parent.id != source_id:
+                for parent_share in parent.shares:
+                    if parent_share.group_id == group_id:
+                        if parent_share.related_object_id == top_parent_id:
+                            # break the recursion for that group
+                            break_for_group = True
+                            break
+                        else:
+                            new_inheritance_id = parent.id
+                    if break_for_group:
+                        break
+            if break_for_group:
+                break
+        if break_for_group is False and new_inheritance_id is None:
+            return False
+        elif break_for_group:
+            return True
+        else:
+            return new_inheritance_id
 
     def remove_parent(self, parent, commit=True):
         """
@@ -329,7 +369,7 @@ class Object(db.Model):
         db.session.begin_nested()
 
         # Remove inherited permissions from parent
-        self.remove_inherited_permission(parent.id)
+        self.modify_inherited_permission(parent.id)
         try:
             self.parents.remove(parent)
             db.session.flush()
@@ -379,6 +419,20 @@ class Object(db.Model):
                 and_(
                     ObjectPermission.object_id == self.id,
                     user.is_member(ObjectPermission.group_id),
+                )
+            )
+        ).scalar()
+
+    def check_group_explicit_access(self, group):
+        """
+        Check whether group has access via explicit ObjectPermissions
+        Used by Object.access
+        """
+        return db.session.query(
+            exists().where(
+                and_(
+                    ObjectPermission.object_id == self.id,
+                    ObjectPermission.group_id == group.id,
                 )
             )
         ).scalar()

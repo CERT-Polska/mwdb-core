@@ -1,10 +1,14 @@
 import React, { useContext } from "react";
-import { NavLink, Route, Switch, useRouteMatch } from "react-router-dom";
+import { NavLink, Redirect, Route, Switch, useRouteMatch } from "react-router-dom";
+
+import { faUser, faUsersCog } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { View} from "@mwdb-web/commons/ui";
+import { View } from "@mwdb-web/commons/ui";
 
+import ShowUserProfile from "./ShowUserProfile";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -28,7 +32,7 @@ function SettingsNav() {
                       to="/settings/admin/capabilities"
                       className="nav-link"
                   >
-                      Capabilities
+                      Access control
                   </NavLink>,
                   <NavLink exact to="/settings/admin/users" className="nav-link">
                       User settings
@@ -49,7 +53,10 @@ function SettingsNav() {
 
     return (
         <div>
-            <strong>Profile settings</strong>
+            <strong>
+                <FontAwesomeIcon icon={faUser} />{" "}
+                Profile settings
+            </strong>
             <div className="nav flex-column nav-pills">
                 <NavLink exact to="/settings" className="nav-link">
                     Account
@@ -64,7 +71,10 @@ function SettingsNav() {
             {adminLinks.length > 0 ? (
                 <React.Fragment>
                     <hr />
-                    <strong>Administration</strong>
+                    <strong>
+                        <FontAwesomeIcon icon={faUsersCog} />{" "}
+                        Administration
+                    </strong>
                     <div className="nav flex-column nav-pills">
                         {adminLinks}
                     </div>
@@ -76,11 +86,9 @@ function SettingsNav() {
     )
 }
 
-export default function SettingsView() {
-    const { path } = useRouteMatch();
-
+export default function SettingsView(props) {
     return (
-        <View ident="settings">
+        <View ident="settings" error={props.error} success={props.success}>
             <div className="row">
                 <div className="col-3">
                     <SettingsNav />
@@ -88,8 +96,14 @@ export default function SettingsView() {
                 <div className="col-9">
                     <div className="tab-content">
                         <Switch>
-                            <Route exact path={path}>
-                                hiho
+                            <Route exact path="/settings">
+                                <Redirect to="/settings/profile"/>
+                            </Route>
+                            <Route exact path={[
+                                "/settings/profile",
+                                "/settings/profile/:user"
+                            ]}>
+                                <ShowUserProfile />
                             </Route>
                         </Switch>
                     </div>

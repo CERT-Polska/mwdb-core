@@ -164,7 +164,7 @@ class ObjectChildResource(Resource):
         if child_object is None:
             raise NotFound("Child object not found")
 
-        child_object.remove_parent(parent_object.id)
+        child_object.remove_parent(parent_object)
         logger.info(
             "Child removed",
             extra={"parent": parent_object.dhash, "child": child_object.dhash},

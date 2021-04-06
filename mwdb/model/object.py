@@ -193,7 +193,7 @@ class ObjectPermission(db.Model):
         """
         assert self.group_id == origin_share.group_id
         return (
-            self.related_object == origin_share.related_object_id
+            self.related_object_id == origin_share.related_object_id
             and self.reason_type == origin_share.reason_type
         )
 
@@ -379,6 +379,10 @@ class Object(db.Model):
         return new_devisor
 
     def uninherit_share(self, share_to_remove, visited=None):
+        print(
+            f"Uninheriting share for '{share_to_remove.group_name}' ({share_to_remove.access_reason})",
+            flush=True,
+        )
         # Break the c-c-c-cycles
         visited = visited or set()
         if self in visited:
@@ -387,11 +391,13 @@ class Object(db.Model):
             visited.add(self)
         # Get our share for the same group as share_to_remove
         our_share = self.get_share_for_group(share_to_remove.group_id)
+        print("our_share", our_share, flush=True)
         # If it doesn't exist or it's unrelated: just return
         if not our_share or not our_share.inherits(share_to_remove):
             return
         # Find new devisor different than share_to_remove
         new_devisor = self._find_another_devisor(share_to_remove)
+        print("new_devisor", new_devisor, flush=True)
         # If there's nothing to change (same share is given by another parent): return
         if new_devisor is share_to_remove:
             return

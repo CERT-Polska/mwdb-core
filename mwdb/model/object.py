@@ -378,7 +378,7 @@ class Object(db.Model):
                 new_devisor = share
         return new_devisor
 
-    def uninherit_share(self, share_to_remove, visited=None):
+    def uninherit_share(self, share_to_remove, new_devisor=None, visited=None):
         print(
             f"Uninheriting share for '{share_to_remove.group_name}' "
             f"({share_to_remove.access_reason})",
@@ -397,14 +397,15 @@ class Object(db.Model):
         if not our_share or not our_share.inherits(share_to_remove):
             return
         # Find new devisor different than share_to_remove
-        new_devisor = self._find_another_devisor(share_to_remove)
+        if new_devisor is None:
+            new_devisor = self._find_another_devisor(share_to_remove)
         print("new_devisor", new_devisor, flush=True)
         # If there's nothing to change (same share is given by another parent): return
         if new_devisor is share_to_remove:
             return
         # If there is a change: first uninherit all children
         for child in self.children:
-            child.uninherit_share(our_share, visited=visited)
+            child.uninherit_share(our_share, new_devisor=new_devisor, visited=visited)
         if not new_devisor:
             # If there is no devisor: remove share
             db.session.delete(our_share)

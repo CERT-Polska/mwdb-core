@@ -100,12 +100,10 @@ export default function SettingsView(props) {
                                 path={[
                                     "/settings/profile",
                                     "/settings/user/:user",
+                                    "/settings/group/:group",
                                 ]}
                             >
                                 <ProfileSubview />
-                            </Route>
-                            <Route exact path="/settings/group/:group">
-                                todo
                             </Route>
                         </Switch>
                     </div>

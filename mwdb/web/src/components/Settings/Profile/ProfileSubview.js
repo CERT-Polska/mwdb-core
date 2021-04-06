@@ -9,6 +9,7 @@ import ProfileSettings from "./ProfileSettings";
 import ProfileAPIKeys from "./ProfileAPIKeys";
 import ProfileCapabilities from "./ProfileCapabilities";
 import ProfileResetPassword from "./ProfileResetPassword";
+import ProfileGroup from "./ProfileGroup";
 
 export default function ProfileSubview() {
     const auth = useContext(AuthContext);
@@ -26,6 +27,11 @@ export default function ProfileSubview() {
                 state: { error: getErrorMessage(error) },
             });
         }
+    }
+
+    function GroupBreadcrumb() {
+        const { group } = useParams();
+        return `Group '${group}' settings`;
     }
 
     const getProfile = useCallback(updateProfile, [user]);
@@ -62,6 +68,9 @@ export default function ProfileSubview() {
                                     <Route path="/settings/profile/reset-password">
                                         Reset password
                                     </Route>
+                                    <Route path="/settings/group/:group">
+                                        <GroupBreadcrumb />
+                                    </Route>
                                 </Switch>
                             </li>
                         </ol>
@@ -86,6 +95,9 @@ export default function ProfileSubview() {
                 </Route>
                 <Route exact path="/settings/profile/reset-password">
                     <ProfileResetPassword profile={profile} />
+                </Route>
+                <Route exact path="/settings/group/:group">
+                    <ProfileGroup profile={profile} />
                 </Route>
             </Switch>
         </div>

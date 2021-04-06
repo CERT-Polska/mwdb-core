@@ -2,6 +2,8 @@ import React from "react";
 
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 
+import GroupBadge from "../GroupBadge";
+
 function CapabilitiesTable({ profile }) {
     if (!profile.capabilities) return [];
     return (
@@ -22,15 +24,7 @@ function CapabilitiesTable({ profile }) {
                                         group.capabilities.includes(cap)
                                     )
                                     .map((group) => (
-                                        <span
-                                            className={`badge badge-${
-                                                group.private
-                                                    ? "primary"
-                                                    : "secondary"
-                                            }`}
-                                        >
-                                            {group.name}
-                                        </span>
+                                        <GroupBadge group={group} />
                                     ))}
                             </div>
                         </td>

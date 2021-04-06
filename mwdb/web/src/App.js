@@ -13,7 +13,6 @@ import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
 import Upload from "./components/Upload";
 import UserLogin from "./components/UserLogin";
-import UserProfile from "./components/UserProfile";
 import ShowUsers from "./components/ShowUsers";
 import ShowGroups from "./components/ShowGroups";
 import UserCreate from "./components/UserCreate";
@@ -162,9 +161,6 @@ export default function App() {
             </ProtectedRoute>
             <ProtectedRoute exact path="/docs">
                 <Docs />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/profile/:login">
-                <UserProfile />
             </ProtectedRoute>
             <Redirect from="/sample/:hash" to="/file/:hash" />
             <ProtectedRoute path="/file/:hash">

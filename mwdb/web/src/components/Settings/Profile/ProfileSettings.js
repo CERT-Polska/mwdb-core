@@ -86,7 +86,12 @@ export default function ProfileSettings({ profile }) {
                     </ShowIf>
                     <Link
                         className="nav-link"
-                        to={makeSearchLink("uploader", profile.login)}
+                        to={makeSearchLink(
+                            "uploader",
+                            profile.login,
+                            false,
+                            "/"
+                        )}
                     >
                         Search for uploads
                     </Link>

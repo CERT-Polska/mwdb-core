@@ -11,6 +11,8 @@ export let capabilitiesList = {
     adding_comments: "Can add comments",
     removing_comments: "Can remove (all) comments",
     adding_parents: "Can specify parent of uploaded object",
+    removing_parents:
+        "Can remove parent of object and inherited permissions from that relation",
     reading_all_attributes:
         "Has access to all attributes of object (including hidden)",
     adding_all_attributes: "Can add all attributes to object",

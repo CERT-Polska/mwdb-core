@@ -17,6 +17,8 @@ class Capabilities(object):
     removing_comments = "removing_comments"
     # Can add parents
     adding_parents = "adding_parents"
+    # Can remove parents and inherited permissions from relation
+    removing_parents = "removing_parents"
     # Can read all attributes, regardless of ACLs
     reading_all_attributes = "reading_all_attributes"
     # Can set all attributes, regardless of ACLs

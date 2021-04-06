@@ -114,7 +114,7 @@ class ObjectChildResource(Resource):
         )
 
     @requires_authorization
-    @requires_capabilities(Capabilities.adding_parents)
+    @requires_capabilities(Capabilities.removing_parents)
     def delete(self, type, parent, child):
         """
         ---

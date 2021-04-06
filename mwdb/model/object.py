@@ -248,12 +248,14 @@ class Object(db.Model):
         foreign_keys=[ObjectPermission.object_id],
         back_populates="object",
         cascade="save-update, merge, delete",
+        order_by=ObjectPermission.access_time.asc(),
     )
     related_shares = db.relationship(
         "ObjectPermission",
         lazy="dynamic",
         foreign_keys=[ObjectPermission.related_object_id],
         back_populates="related_object",
+        order_by=ObjectPermission.access_time.asc(),
     )
 
     @property

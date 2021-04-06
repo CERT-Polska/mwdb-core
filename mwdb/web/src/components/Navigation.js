@@ -19,7 +19,6 @@ import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
 
 import logo from "../assets/logo.png";
 
-
 function RemoteDropdown() {
     const config = useContext(ConfigContext);
     if (!config.config) return [];

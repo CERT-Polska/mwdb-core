@@ -4,7 +4,11 @@ export { default as APIKeyList } from "./APIKeyList";
 export { default as ConfirmationModal } from "./ConfirmationModal";
 export { default as DataTable } from "./DataTable";
 export { default as DateString } from "./DateString";
-export { default as ErrorBoundary, Alert, getErrorMessage } from "./ErrorBoundary";
+export {
+    default as ErrorBoundary,
+    Alert,
+    getErrorMessage,
+} from "./ErrorBoundary";
 export { default as Hash } from "./Hash";
 export { default as HexView } from "./HexView";
 export { default as Identicon } from "./Identicon";
@@ -58,7 +62,7 @@ export function getStyleForTag(tag) {
     return "danger";
 }
 
-export function ShowIf({condition, children}) {
+export function ShowIf({ condition, children }) {
     return condition ? children : [];
 }
 

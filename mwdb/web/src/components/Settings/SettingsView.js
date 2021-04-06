@@ -4,18 +4,17 @@ import { NavLink, Redirect, Route, Switch } from "react-router-dom";
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 
-import ProfileSubview from "./ProfileSubview";
-import ProfileAPIKeys from "./ProfileAPIKeys";
+import ProfileSubview from "./Profile/ProfileSubview";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
     const adminLinks = [
-        ...(auth.hasCapability("manage_users")
+        ...(auth.hasCapability(Capability.manageUsers)
             ? [
                   ...(config.config["is_registration_enabled"]
                       ? [
@@ -35,15 +34,23 @@ function SettingsNav() {
                   >
                       Access control
                   </NavLink>,
-                  <NavLink exact to="/settings/admin/users" className="nav-link">
+                  <NavLink
+                      exact
+                      to="/settings/admin/users"
+                      className="nav-link"
+                  >
                       User settings
                   </NavLink>,
-                  <NavLink exact to="/settings/admin/groups" className="nav-link">
+                  <NavLink
+                      exact
+                      to="/settings/admin/groups"
+                      className="nav-link"
+                  >
                       Group settings
                   </NavLink>,
               ]
             : []),
-        ...(auth.hasCapability("managing_attributes")
+        ...(auth.hasCapability(Capability.managingAttributes)
             ? [
                   <NavLink to="/settings/admin/attributes" className="nav-link">
                       Attribute settings
@@ -63,8 +70,7 @@ function SettingsNav() {
                 <React.Fragment>
                     <hr />
                     <strong>
-                        <FontAwesomeIcon icon={faUsersCog} />{" "}
-                        Administration
+                        <FontAwesomeIcon icon={faUsersCog} /> Administration
                     </strong>
                     <div className="nav flex-column nav-pills">
                         {adminLinks}
@@ -74,7 +80,7 @@ function SettingsNav() {
                 []
             )}
         </div>
-    )
+    );
 }
 
 export default function SettingsView(props) {
@@ -88,16 +94,15 @@ export default function SettingsView(props) {
                     <div className="tab-content">
                         <Switch>
                             <Route exact path="/settings">
-                                <Redirect to="/settings/profile"/>
+                                <Redirect to="/settings/profile" />
                             </Route>
-                            <Route path={[
-                                "/settings/profile",
-                                "/settings/user/:user"
-                            ]}>
+                            <Route
+                                path={[
+                                    "/settings/profile",
+                                    "/settings/user/:user",
+                                ]}
+                            >
                                 <ProfileSubview />
-                            </Route>
-                            <Route exact path="/settings/api-keys">
-                                <ProfileAPIKeys />
                             </Route>
                             <Route exact path="/settings/group/:group">
                                 todo

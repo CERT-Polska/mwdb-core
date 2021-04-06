@@ -3,6 +3,7 @@ import { useHistory } from "react-router";
 
 import api from "../api";
 
+import { Capability } from "./capabilities";
 import { AuthContext } from "./context";
 
 const localStorageAuthKey = "user";
@@ -184,7 +185,7 @@ export function AuthProvider(props) {
             value={{
                 user: session,
                 isAuthenticated: !!session,
-                isAdmin: hasCapability("manage_users"),
+                isAdmin: hasCapability(Capability.manageUsers),
                 hasCapability,
                 refreshSession,
                 updateSession,

@@ -380,7 +380,8 @@ class Object(db.Model):
 
     def uninherit_share(self, share_to_remove, visited=None):
         print(
-            f"Uninheriting share for '{share_to_remove.group_name}' ({share_to_remove.access_reason})",
+            f"Uninheriting share for '{share_to_remove.group_name}' "
+            f"({share_to_remove.access_reason})",
             flush=True,
         )
         # Break the c-c-c-cycles

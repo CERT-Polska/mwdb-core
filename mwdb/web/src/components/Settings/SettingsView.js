@@ -1,15 +1,15 @@
 import React, { useContext } from "react";
 import { NavLink, Redirect, Route, Switch } from "react-router-dom";
 
-import { faUser, faUsersCog } from "@fortawesome/free-solid-svg-icons";
+import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 
-import AccountSubview from "./AccountSubview";
-import AccountAPIKeys from "./AccountAPIKeys";
+import ProfileSubview from "./ProfileSubview";
+import ProfileAPIKeys from "./ProfileAPIKeys";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -54,16 +54,9 @@ function SettingsNav() {
 
     return (
         <div>
-            <strong>
-                <FontAwesomeIcon icon={faUser} />{" "}
-                Profile settings
-            </strong>
             <div className="nav flex-column nav-pills">
-                <NavLink exact to="/settings/account" className="nav-link">
-                    Account
-                </NavLink>
-                <NavLink exact to="/settings/api-keys" className="nav-link">
-                    API keys
+                <NavLink exact to="/settings/profile" className="nav-link">
+                    Profile settings
                 </NavLink>
             </div>
             {adminLinks.length > 0 ? (
@@ -95,16 +88,16 @@ export default function SettingsView(props) {
                     <div className="tab-content">
                         <Switch>
                             <Route exact path="/settings">
-                                <Redirect to="/settings/account"/>
+                                <Redirect to="/settings/profile"/>
                             </Route>
                             <Route path={[
-                                "/settings/account",
+                                "/settings/profile",
                                 "/settings/user/:user"
                             ]}>
-                                <AccountSubview />
+                                <ProfileSubview />
                             </Route>
                             <Route exact path="/settings/api-keys">
-                                <AccountAPIKeys />
+                                <ProfileAPIKeys />
                             </Route>
                             <Route exact path="/settings/group/:group">
                                 todo

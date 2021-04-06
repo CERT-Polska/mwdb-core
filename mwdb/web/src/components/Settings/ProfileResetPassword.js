@@ -4,7 +4,7 @@ import {Link, useHistory} from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {ShowIf, getErrorMessage} from "@mwdb-web/commons/ui";
 
-export default function AccountResetPassword({profile}) {
+export default function ProfileResetPassword({profile}) {
     const [pending, setPending] = useState(false);
     const history = useHistory();
 
@@ -13,14 +13,14 @@ export default function AccountResetPassword({profile}) {
         try {
             await api.authRequestPasswordChange();
             history.push({
-                pathname: "/settings/account",
+                pathname: "/settings/profile",
                 state: {
                     success: "Password reset link was successfully sent to your e-mail address."
                 }
             })
         } catch(error) {
             history.push({
-                pathname: "/settings/account",
+                pathname: "/settings/profile",
                 state: {
                     error: getErrorMessage(error)
                 }
@@ -42,7 +42,7 @@ export default function AccountResetPassword({profile}) {
                         onClick={(ev) => { ev.preventDefault(); resetPassword() }}>
                         Send password reset link
                     </button>
-                    <Link to="/settings/account" className="card-link">
+                    <Link to="/settings/profile" className="card-link">
                         <button type="button" className="btn btn-outline-danger">Cancel</button>
                     </Link>
                 </ShowIf>

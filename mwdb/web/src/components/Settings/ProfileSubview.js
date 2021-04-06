@@ -5,11 +5,12 @@ import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { getErrorMessage } from "@mwdb-web/commons/ui";
 
-import AccountProfile from "./AccountProfile";
-import AccountCapabilities from "./AccountCapabilities";
-import AccountResetPassword from "./AccountResetPassword";
+import ProfileSettings from "./ProfileSettings";
+import ProfileAPIKeys from "./ProfileAPIKeys";
+import ProfileCapabilities from "./ProfileCapabilities";
+import ProfileResetPassword from "./ProfileResetPassword";
 
-export default function AccountSubview() {
+export default function ProfileSubview() {
     const auth = useContext(AuthContext);
     const history = useHistory();
     const user = useParams().user || auth.user.login;
@@ -23,7 +24,7 @@ export default function AccountSubview() {
             setProfile(response.data);
         } catch (error) {
             history.push({
-                pathname: "/settings/account",
+                pathname: "/settings/profile",
                 state: {error: getErrorMessage(error)}
             })
         }
@@ -42,19 +43,20 @@ export default function AccountSubview() {
         <div>
             <Switch>
                 <Route exact path={[
-                    "/settings/account",
+                    "/settings/profile",
                     "/settings/user/:user"
                 ]}/>
                 <Route>
                     <nav aria-label="breadcrumb">
                         <ol className="breadcrumb">
                             <li className="breadcrumb-item">
-                                <Link to="/settings/account">Account settings</Link>
+                                <Link to="/settings/profile">Profile settings</Link>
                             </li>
                             <li className="breadcrumb-item active">
                                 <Switch>
-                                    <Route path="/settings/account/capabilities">Capabilities</Route>
-                                    <Route path="/settings/account/reset-password">Reset password</Route>
+                                    <Route path="/settings/profile/capabilities">Capabilities</Route>
+                                    <Route path="/settings/profile/api-keys">API keys</Route>
+                                    <Route path="/settings/profile/reset-password">Reset password</Route>
                                 </Switch>
                             </li>
                         </ol>
@@ -63,16 +65,19 @@ export default function AccountSubview() {
             </Switch>
             <Switch>
                 <Route exact path={[
-                    "/settings/account",
+                    "/settings/profile",
                     "/settings/user/:user"
                 ]}>
-                    <AccountProfile profile={profile}/>
+                    <ProfileSettings profile={profile}/>
                 </Route>
-                <Route exact path="/settings/account/capabilities">
-                    <AccountCapabilities profile={profile}/>
+                <Route exact path="/settings/profile/capabilities">
+                    <ProfileCapabilities profile={profile}/>
                 </Route>
-                <Route exact path="/settings/account/reset-password">
-                    <AccountResetPassword profile={profile}/>
+                <Route exact path="/settings/profile/api-keys">
+                    <ProfileAPIKeys profile={profile} updateProfile={updateProfile}/>
+                </Route>
+                <Route exact path="/settings/profile/reset-password">
+                    <ProfileResetPassword profile={profile}/>
                 </Route>
             </Switch>
         </div>

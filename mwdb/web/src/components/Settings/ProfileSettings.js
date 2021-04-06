@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 
-import { faUserCog } from "@fortawesome/free-solid-svg-icons";
+import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
@@ -22,13 +22,13 @@ function ProfileItem(props) {
     )
 }
 
-export default function AccountProfile({profile}) {
+export default function ProfileSettings({profile}) {
     const auth = useContext(AuthContext);
     const isCurrentUser = profile.login === auth.user.login;
 
     return (
         <div>
-            <h4>Account details</h4>
+            <h4>Profile settings</h4>
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
                     <ProfileItem label="Login" value={profile.login}/>
@@ -64,8 +64,11 @@ export default function AccountProfile({profile}) {
                         <Link className="nav-link" to="/settings/profile/capabilities">
                             Check your capabilities
                         </Link>
-                        <Link className="nav-link" to="/settings/profile/reset_password">
-                            Request new password
+                        <Link className="nav-link" to="/settings/profile/api-keys">
+                            Set up API keys
+                        </Link>
+                        <Link className="nav-link" to="/settings/profile/reset-password">
+                            Reset password
                         </Link>
                     </ShowIf>
                     <Link className="nav-link" to={makeSearchLink("uploader", profile.login)}>
@@ -73,7 +76,7 @@ export default function AccountProfile({profile}) {
                     </Link>
                     <ShowIf condition={auth.hasCapability("manage_users")}>
                         <Link className="nav-link" to={`/settings/admin/user/${profile.login}`}>
-                            <FontAwesomeIcon icon={faUserCog} />
+                            <FontAwesomeIcon icon={faUsersCog} />
                             User settings
                         </Link>
                     </ShowIf>

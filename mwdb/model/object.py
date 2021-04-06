@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from flask import g
 from sqlalchemy import and_, exists
@@ -176,6 +177,26 @@ class ObjectPermission(db.Model):
         # Capabilities exist yet
         return False
 
+    def make_inherited(self, devisor: "ObjectPermission"):
+        """
+        Modifies share to inherit from another devisor
+        """
+        assert self.group_id == devisor.group_id
+        self.related_object_id = devisor.related_object_id
+        self.reason_type = devisor.reason_type
+        self.access_time = datetime.datetime.utcnow()
+
+    def inherits(self, origin_share):
+        """
+        Checks if share (possibly) was inherited from the origin
+        Assumes that origin_share comes from the parent.
+        """
+        assert self.group_id == origin_share.group_id
+        return (
+            self.related_object == origin_share.related_object_id
+            and self.reason_type == origin_share.reason_type
+        )
+
 
 class Object(db.Model):
     __tablename__ = "object"
@@ -304,9 +325,11 @@ class Object(db.Model):
         # Remove relationship in nested transaction
         db.session.begin_nested()
 
-        # Remove inherited permissions from parent
-        self.modify_inherited_permission(parent.id)
         try:
+            # Remove inherited permissions from parent
+            for share in parent.shares:
+                self.uninherit_share(share)
+            # Remove parent
             self.parents.remove(parent)
             db.session.flush()
             db.session.commit()
@@ -321,104 +344,70 @@ class Object(db.Model):
             db.session.commit()
         return True
 
-    def modify_inherited_permission(self, top_parent_id):
+    def get_share_for_group(self, group_id) -> Optional[ObjectPermission]:
         """
-        The beginning of recursive modification of the object permissions,
-        starting with the relation between the supreme parent and his closest child (current object)
+        Finds share (ObjectPermission) for given group id.
+        If share doesn't exist: returns None.
         """
-        related_groups_id = [share.group_id for share in self.shares]
-        for group_id in related_groups_id:
-            self.update_inherited_permissions(top_parent_id, top_parent_id, group_id)
-
-    def update_inherited_permissions(
-        self, source_id, top_parent_id, group_id, new_inheritance_id=None
-    ):
-        """
-        Recursive change in permission inheritance for a given group for family of objects
-        """
-        print("update_inherited_permissions")
-        print(source_id, top_parent_id, group_id, new_inheritance_id)
-        recursion_value = self.check_parents_for_inheritance(
-            source_id, top_parent_id, new_inheritance_id, group_id
+        return next(
+            (share for share in self.shares if share.group_id == group_id), None
         )
-        if recursion_value is True:
-            print("recursion_value is True for: ", group_id)
-            return True
-        else:
-            for child in self.children:
-                child.update_inherited_permissions(
-                    self.id, top_parent_id, new_inheritance_id, group_id
-                )
-            permission = (
-                db.session.query(ObjectPermission)
-                .filter(
-                    and_(
-                        ObjectPermission.object_id == self.id,
-                        ObjectPermission.related_object_id == top_parent_id,
-                        ObjectPermission.group_id == group_id,
-                    )
-                )
-                .first()
-            )
 
-            print(recursion_value is False)
-
-            if recursion_value is False:
-                print("removing: ", permission)
-                print("removing: ", permission.object_id)
-                # db.session.delete(permission)
-                # db.session.flush()
-                # db.session.commit()
-            else:
-                print("changing: ", permission)
-                print("changing: ", permission.object_id)
-                print(permission.related_object_id, " for ", recursion_value)
-                # permission.related_object_id = recursion_value
-                # permission.reason_type = "inherited"
-                # db.session.flush()
-                # db.session.commit()
-
-    def check_parents_for_inheritance(
-        self, source_id, group_id, top_parent_id, new_inheritance_id=None
-    ):
+    def _find_another_devisor(self, share_to_remove):
         """
-        Checking whether an object inherits permissions from other parents
+        Looks for another devisor for given share inherited from given parent.
+        Share must be inherited (related_object_id is not None and comes from parent)
         """
-
-        # object uploaded by user so no need to check parent for permission inheritance
-        for share in self.shares:
-            if share.related_object_id == self.id:
-                return True
-
-        break_for_group = False
+        new_devisor = None
+        # For each other parent
         for parent in self.parents:
-            if parent.id != source_id:
-                for parent_share in parent.shares:
-                    if parent_share.group_id == group_id:
-                        if parent_share.related_object_id == top_parent_id:
-                            # break the recursion for that group
-                            break_for_group = True
-                            break
-                        else:
-                            # Only set if there is no new inheritance from any of the higher parent
-                            if new_inheritance_id is None:
-                                new_inheritance_id = parent.id
-                    if break_for_group:
-                        break
-            if break_for_group:
-                break
-        if break_for_group is False and new_inheritance_id is None:
-            return False
-        elif break_for_group:
-            return True
+            if parent.id == share_to_remove.object_id:
+                continue
+            share = parent.get_share_for_group(share_to_remove.group_id)
+            # If parent is not shared with given group: ignore
+            if share is None:
+                continue
+            # If other parent is inherited as well: nothing to change
+            if share.inherits(share_to_remove):
+                return share_to_remove
+            else:
+                # If found another devisor: store it but keep looking
+                # for other
+                new_devisor = share
+        return new_devisor
+
+    def uninherit_share(self, share_to_remove, visited=None):
+        # Break the c-c-c-cycles
+        visited = visited or set()
+        if self in visited:
+            return
         else:
-            return new_inheritance_id
+            visited.add(self)
+        # Get our share for the same group as share_to_remove
+        our_share = self.get_share_for_group(share_to_remove.group_id)
+        # If it doesn't exist or it's unrelated: just return
+        if not our_share or not our_share.inherits(share_to_remove):
+            return
+        # Find new devisor different than share_to_remove
+        new_devisor = self._find_another_devisor(share_to_remove)
+        # If there's nothing to change (same share is given by another parent): return
+        if new_devisor is share_to_remove:
+            return
+        # If there is a change: first uninherit all children
+        for child in self.children:
+            child.uninherit_share(our_share, visited=visited)
+        if not new_devisor:
+            # If there is no devisor: remove share
+            db.session.delete(our_share)
+        else:
+            # If there is a new devisor: remap current share to inherit from it
+            our_share.make_inherited(new_devisor)
 
     def give_access(
         self, group_id, reason_type, related_object, related_user, commit=True
     ):
         """
-        Give access or revoke to group with recursive propagation
+        Give access to group with recursive propagation
         """
         visited = set()
         queue = [self]

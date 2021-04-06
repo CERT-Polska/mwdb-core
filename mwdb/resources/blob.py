@@ -95,7 +95,7 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
         ---
         summary: Upload text blob
         description: |
-            Uploads new text blob.
+            Uploads a new text blob.
 
             Requires `adding_blobs` capability.
         security:
@@ -192,7 +192,7 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
         ---
         summary: Upload text blob
         description: |
-            Uploads new text blob.
+            Uploads a new text blob.
 
             Requires `adding_blobs` capability.
         security:

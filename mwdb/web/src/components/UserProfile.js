@@ -147,7 +147,7 @@ class UserProfile extends Component {
                                         <ul className="table-ul">
                                             {this.capabilities.map((c) => (
                                                 <li>
-                                                    {capabilitiesList[c]}
+                                                    {capabilitiesList[c]}{" "}
                                                     (inherited from:{" "}
                                                     {this.inheritedFrom(c).join(
                                                         ", "
@@ -174,7 +174,8 @@ class UserProfile extends Component {
                         <tr className="d-flex">
                             <td className="col-12" colspan="3">
                                 {this.context.user.login ===
-                                this.state.profile.login ? (
+                                    this.state.profile.login &&
+                                this.context.hasCapability("manage_profile") ? (
                                     <button
                                         type="button"
                                         className="btn btn-success"
@@ -205,20 +206,21 @@ class UserProfile extends Component {
                         </tr>
                     </tbody>
                 </table>
-                {this.context.user.login === this.state.profile.login && (
-                    <div>
-                        <h4>API keys</h4>
-                        <ManageAPIKeys
-                            items={this.state.profile.api_keys}
-                            userLogin={this.context.user.login}
-                            onSuccess={(success) => {
-                                this.handleUpdate();
-                                this.setState({ success });
-                            }}
-                            onError={(error) => this.setState({ error })}
-                        />
-                    </div>
-                )}
+                {this.context.user.login === this.state.profile.login &&
+                    this.context.hasCapability("manage_profile") && (
+                        <div>
+                            <h4>API keys</h4>
+                            <ManageAPIKeys
+                                items={this.state.profile.api_keys}
+                                userLogin={this.context.user.login}
+                                onSuccess={(success) => {
+                                    this.handleUpdate();
+                                    this.setState({ success });
+                                }}
+                                onError={(error) => this.setState({ error })}
+                            />
+                        </div>
+                    )}
             </View>
         );
     }

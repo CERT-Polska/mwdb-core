@@ -12,7 +12,12 @@ export default function RemoveAction() {
     const context = useContext(ObjectContext);
 
     // If user can't add parents: don't show the action
-    if (!auth.hasCapability("adding_parents") || api.remote) return [];
+    if (
+        !auth.hasCapability("adding_parents") ||
+        !auth.hasCapability("adding_files") ||
+        api.remote
+    )
+        return [];
 
     return (
         <ObjectAction

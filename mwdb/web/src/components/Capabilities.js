@@ -22,6 +22,9 @@ export let capabilitiesList = {
     adding_blobs: "Can upload text blobs",
     unlimited_requests: "API requests are not rate-limited for this group",
     removing_objects: "Can remove objects",
+    adding_files: "Can add files",
+    manage_profile: "Can manage own profile",
+    personalize: "Can mark favorites and manage own quick queries",
 };
 
 for (let extraCapabilities of fromPlugin("capabilities")) {

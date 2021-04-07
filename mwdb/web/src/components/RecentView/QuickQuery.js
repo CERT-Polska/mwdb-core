@@ -106,7 +106,7 @@ export default function QuickQuery(props) {
                 props.addToQuery("NOT shared", "public");
             }}
         />,
-        !api.remote && (
+        !api.remote && auth.hasCapability("personalize") && (
             <QuickQueryItem
                 key="favorites"
                 label="Favorites"
@@ -148,11 +148,14 @@ export default function QuickQuery(props) {
                     ev.preventDefault();
                     props.submitQuery(v.query);
                 }}
-                onDelete={(ev) => {
-                    ev.preventDefault();
-                    setIdToRemove(v.id);
-                    setDeleteModalOpen(true);
-                }}
+                onDelete={
+                    auth.hasCapability("personalize") &&
+                    ((ev) => {
+                        ev.preventDefault();
+                        setIdToRemove(v.id);
+                        setDeleteModalOpen(true);
+                    })
+                }
             />
         ));
 
@@ -180,7 +183,7 @@ export default function QuickQuery(props) {
     const userQuickQueryBadges = !api.remote ? (
         <React.Fragment>
             {queryBadges}
-            {newQuickQueryButton}
+            {auth.hasCapability("personalize") ? newQuickQueryButton : []}
             <ConfirmationModal
                 buttonStyle="badge-success"
                 confirmText="Yes"

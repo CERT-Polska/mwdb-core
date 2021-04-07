@@ -62,6 +62,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
 import {
@@ -115,6 +116,7 @@ function DefaultRoute() {
 }
 
 export default function App() {
+    const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
 
     const routeSwitch = config.config ? (
@@ -144,7 +146,11 @@ export default function App() {
             <ProtectedRoute exact path="/blobs">
                 <RecentBlobs />
             </ProtectedRoute>
-            <ProtectedRoute exact path="/upload">
+            <ProtectedRoute
+                exact
+                path="/upload"
+                condition={auth.hasCapability("adding_files")}
+            >
                 <Upload />
             </ProtectedRoute>
             <ProtectedRoute exact path="/search">

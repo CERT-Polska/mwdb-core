@@ -112,6 +112,27 @@ function RemoteDropdown() {
     );
 }
 
+function UploadButton() {
+    const auth = useContext(AuthContext);
+    const buttonLink = auth.hasCapability("adding_files") ? (
+        <Link className="nav-link" to={"/upload"}>
+            <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
+            Upload
+        </Link>
+    ) : (
+        <div className="nav-link text-muted">
+            <span
+                data-toggle="tooltip"
+                title="File upload is disabled for your account"
+            >
+                <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
+                Upload
+            </span>
+        </div>
+    );
+    return buttonLink;
+}
+
 export default function Navigation() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
@@ -161,13 +182,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" to={"/upload"}>
-                            <FontAwesomeIcon
-                                className="navbar-icon"
-                                icon={faUpload}
-                            />
-                            Upload
-                        </Link>
+                        <UploadButton />
                     </li>
                 </Extendable>
             ) : (

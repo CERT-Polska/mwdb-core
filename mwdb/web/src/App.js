@@ -26,7 +26,7 @@ import UserSetPassword from "./components/UserSetPassword";
 import ManageAttributes from "./components/ManageAttributes";
 import AttributeDefine from "./components/AttributeDefine";
 import AttributeUpdate from "./components/AttributeUpdate";
-import Search, { SearchHelp } from "./components/Search";
+import Search from "./components/Search";
 import RelationsPlot from "./components/RelationsPlot";
 import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
@@ -155,9 +155,6 @@ export default function App() {
             </ProtectedRoute>
             <ProtectedRoute exact path="/search">
                 <Search />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/search_help">
-                <SearchHelp />
             </ProtectedRoute>
             <ProtectedRoute exact path="/configs/stats">
                 <ConfigStats />

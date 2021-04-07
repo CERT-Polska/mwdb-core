@@ -22,10 +22,7 @@ function RelationsBox(props) {
         false
     );
     const [disabledModalButton, setDisabledModalButton] = useState(false);
-    const [relationToRemove, setRelationToRemove] = useState({
-        relation: "",
-        id: "",
-    });
+    const [relationToRemove, setRelationToRemove] = useState({});
     const [modalError, setModalError] = useState("");
 
     async function addObjectRelations(relation, value) {
@@ -34,12 +31,13 @@ function RelationsBox(props) {
                 await api.addObjectRelation(context.object.id, value);
             else if (relation === "parent")
                 await api.addObjectRelation(value, context.object.id);
-            context.updateObject();
-            setAttributeAddModalOpen(false);
         } catch (error) {
             if (error.response && error.response.status === 404)
                 setModalError("Object not found or incorrect SHA256 hash.");
             else setModalError(error);
+        } finally {
+            context.updateObject();
+            setAttributeAddModalOpen(false);
         }
     }
 
@@ -50,13 +48,14 @@ function RelationsBox(props) {
                 await api.removeObjectRelation(context.object.id, value);
             else if (relation === "parent")
                 await api.removeObjectRelation(value, context.object.id);
-            context.updateObject();
-            setAttributeDeleteModalOpen(false);
-            setDisabledModalButton(false);
         } catch (error) {
             if (error.response && error.response.status === 404)
                 setModalError("Object not found or incorrect SHA256 hash.");
             else setModalError(error);
+            setDisabledModalButton(false);
+        } finally {
+            context.updateObject();
+            setAttributeDeleteModalOpen(false);
             setDisabledModalButton(false);
         }
     }

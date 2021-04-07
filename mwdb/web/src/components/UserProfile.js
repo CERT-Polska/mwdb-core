@@ -147,7 +147,7 @@ class UserProfile extends Component {
                                         <ul className="table-ul">
                                             {this.capabilities.map((c) => (
                                                 <li>
-                                                    {capabilitiesList[c]}
+                                                    {capabilitiesList[c]}{" "}
                                                     (inherited from:{" "}
                                                     {this.inheritedFrom(c).join(
                                                         ", "

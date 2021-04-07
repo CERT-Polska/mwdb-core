@@ -3,18 +3,29 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
+import { AuthContext } from "@mwdb-web/commons/auth/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     ObjectLink,
     ActionCopyToClipboard,
+    ConfirmationModal,
     TagList,
 } from "@mwdb-web/commons/ui";
 import RelationsAddModal from "../Actions/RelationsAddModal";
 
 function RelationsBox(props) {
     const api = useContext(APIContext);
+    const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const [isAttributeAddModalOpen, setAttributeAddModalOpen] = useState(false);
+    const [isAttributeDeleteModalOpen, setAttributeDeleteModalOpen] = useState(
+        false
+    );
+    const [disabledModalButton, setDisabledModalButton] = useState(false);
+    const [relationToRemove, setRelationToRemove] = useState({
+        relation: "",
+        id: "",
+    });
     const [modalError, setModalError] = useState("");
 
     async function addObjectRelations(relation, value) {
@@ -29,6 +40,24 @@ function RelationsBox(props) {
             if (error.response && error.response.status === 404)
                 setModalError("Object not found or incorrect SHA256 hash.");
             else setModalError(error);
+        }
+    }
+
+    async function removeObjectRelations(relation, value) {
+        try {
+            setDisabledModalButton(true);
+            if (relation === "child")
+                await api.removeObjectRelation(context.object.id, value);
+            else if (relation === "parent")
+                await api.removeObjectRelation(value, context.object.id);
+            context.updateObject();
+            setAttributeDeleteModalOpen(false);
+            setDisabledModalButton(false);
+        } catch (error) {
+            if (error.response && error.response.status === 404)
+                setModalError("Object not found or incorrect SHA256 hash.");
+            else setModalError(error);
+            setDisabledModalButton(false);
         }
     }
 
@@ -52,6 +81,28 @@ function RelationsBox(props) {
                         tooltipMessage="Copy sha256 to clipboard"
                     />
                 </span>
+                {auth.hasCapability("removing_parents") && (
+                    <span
+                        className="ml-2"
+                        data-toggle="tooltip"
+                        title="Remove relation to parent object."
+                        onClick={() => {
+                            setRelationToRemove({
+                                relation: "parent",
+                                id: parent.id,
+                            });
+                            setAttributeDeleteModalOpen(true);
+                        }}
+                    >
+                        <i>
+                            <FontAwesomeIcon
+                                icon={"trash"}
+                                size="sm"
+                                style={{ cursor: "pointer" }}
+                            />
+                        </i>
+                    </span>
+                )}
             </td>
             <td>
                 <TagList tags={parent.tags} />
@@ -79,6 +130,28 @@ function RelationsBox(props) {
                         tooltipMessage="Copy sha256 to clipboard"
                     />
                 </span>
+                {auth.hasCapability("removing_parents") && (
+                    <span
+                        className="ml-2"
+                        data-toggle="tooltip"
+                        title="Remove relation to child object."
+                        onClick={() => {
+                            setRelationToRemove({
+                                relation: "child",
+                                id: child.id,
+                            });
+                            setAttributeDeleteModalOpen(true);
+                        }}
+                    >
+                        <i>
+                            <FontAwesomeIcon
+                                icon={"trash"}
+                                size="sm"
+                                style={{ cursor: "pointer" }}
+                            />
+                        </i>
+                    </span>
+                )}
             </td>
             <td>
                 <TagList tags={child.tags} />
@@ -127,6 +200,21 @@ function RelationsBox(props) {
                 onSubmit={addObjectRelations}
                 onError={setModalError}
                 onRequestModalClose={() => setAttributeAddModalOpen(false)}
+            />
+            <ConfirmationModal
+                isOpen={isAttributeDeleteModalOpen}
+                disabled={disabledModalButton}
+                onRequestClose={() => setAttributeDeleteModalOpen(false)}
+                onConfirm={() =>
+                    removeObjectRelations(
+                        relationToRemove.relation,
+                        relationToRemove.id
+                    )
+                }
+                message="Are you sure you want to delete this relation?"
+                buttonStyle="btn btn-danger"
+                confirmText="yes"
+                cancelText="no"
             />
         </div>
     );

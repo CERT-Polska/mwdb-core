@@ -406,7 +406,8 @@ def test_removing_relations():
                         ],
                         should_access=[Alice],
                     ),
-                ]
+                ],
+                should_access=[Alice],
             ),
             SampleD(should_access=[Alice]),
         ],

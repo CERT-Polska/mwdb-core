@@ -252,6 +252,13 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
+    def remove_parent(self, parent, child):
+        res = self.session.delete(
+            self.mwdb_url + "/object/" + parent + "/child/" + child
+        )
+        res.raise_for_status()
+        return res.json()
+
     def delete_comment(self, identifier, comment_id):
         res = self.session.delete(
             self.mwdb_url + "/object/" + identifier + "/comment/" + str(comment_id)
@@ -375,13 +382,6 @@ class MwdbTest(object):
                 "content": content or str(uuid.uuid4()),
                 "parent": parent,
             },
-        )
-        res.raise_for_status()
-        return res.json()
-
-    def remove_parent(self, parent, child):
-        res = self.session.delete(
-            self.mwdb_url + "/object/" + parent + "/relation/" + child
         )
         res.raise_for_status()
         return res.json()

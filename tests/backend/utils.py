@@ -379,6 +379,13 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
+    def remove_parent(self, parent, child):
+        res = self.session.delete(
+            self.mwdb_url + "/object/" + parent + "/relation/" + child
+        )
+        res.raise_for_status()
+        return res.json()
+
     def get_blob(self, identifier):
         res = self.session.get(self.mwdb_url + "/blob/" + identifier)
         res.raise_for_status()

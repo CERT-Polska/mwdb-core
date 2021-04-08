@@ -459,7 +459,7 @@ def test_removing_relations():
     Alice.session().remove_parent(SampleF.dhash, SampleC.dhash)
     SampleC(
         [
-            SampleD(should_access=[Alice], should_not_access=[Bob]),
+            SampleD(should_access=[Alice, Bob]),
             SampleE(should_access=[Alice], should_not_access=[Bob]),
         ],
         should_access=[Alice],

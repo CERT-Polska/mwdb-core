@@ -18,22 +18,18 @@ def test_inheritance():
     #       /
     #     [D]
 
-    SampleA([
-        SampleB([
-            SampleD()
-        ]),
-        SampleC()
-    ]).create()
+    SampleA([SampleB([SampleD()]), SampleC()]).create()
 
     SampleA.create(Alice)
     SampleB.create(Bob)
 
-    SampleA([
-        SampleB([
-            SampleD(should_access=[Alice, Bob])
-        ], should_access=[Alice, Bob]),
-        SampleC(should_access=[Alice])
-    ], should_access=[Alice]).test()
+    SampleA(
+        [
+            SampleB([SampleD(should_access=[Alice, Bob])], should_access=[Alice, Bob]),
+            SampleC(should_access=[Alice]),
+        ],
+        should_access=[Alice],
+    ).test()
 
 
 def test_mixed_types():
@@ -49,29 +45,29 @@ def test_mixed_types():
     SampleF = testCase.new_sample("SampleF")
     SampleG = testCase.new_sample("SampleG")
 
-    SampleA([
-        SampleB(),
-        SampleC([
-            ConfigD(),
-            ConfigE([
-                SampleF(),
-                SampleG()
-            ])
-        ])
-    ]).create()
+    SampleA([SampleB(), SampleC([ConfigD(), ConfigE([SampleF(), SampleG()])])]).create()
 
     SampleA.create(Alice)
 
-    SampleA([
-        SampleB(should_access=[Alice]),
-        SampleC([
-            ConfigD(should_access=[Alice]),
-            ConfigE([
-                SampleF(should_access=[Alice]),
-                SampleG(should_access=[Alice])
-            ], should_access=[Alice])
-        ], should_access=[Alice])
-    ], should_access=[Alice]).test()
+    SampleA(
+        [
+            SampleB(should_access=[Alice]),
+            SampleC(
+                [
+                    ConfigD(should_access=[Alice]),
+                    ConfigE(
+                        [
+                            SampleF(should_access=[Alice]),
+                            SampleG(should_access=[Alice]),
+                        ],
+                        should_access=[Alice],
+                    ),
+                ],
+                should_access=[Alice],
+            ),
+        ],
+        should_access=[Alice],
+    ).test()
 
 
 def test_existing_parent():
@@ -97,30 +93,35 @@ def test_existing_parent():
     #              /    \
     #            [BB]   [BC]
 
-    SampleAA([
-        SampleAB([
-            SampleAC()
-        ])
-    ]).create(Alice)
+    SampleAA([SampleAB([SampleAC()])]).create(Alice)
 
-    SampleBA([
-        SampleBB(),
-        SampleBC()
-    ]).create(Bob)
+    SampleBA([SampleBB(), SampleBC()]).create(Bob)
 
     SampleAC.create(Bob)
     SampleBA.create(Bob, SampleAC)
 
-    SampleAA([
-        SampleAB([
-            SampleAC([
-                SampleBA([
-                    SampleBB(should_access=[Alice, Bob]),
-                    SampleBC(should_access=[Alice, Bob])
-                ], should_access=[Alice, Bob])
-            ], should_access=[Alice, Bob])
-        ], should_access=[Alice])
-    ], should_access=[Alice])
+    SampleAA(
+        [
+            SampleAB(
+                [
+                    SampleAC(
+                        [
+                            SampleBA(
+                                [
+                                    SampleBB(should_access=[Alice, Bob]),
+                                    SampleBC(should_access=[Alice, Bob]),
+                                ],
+                                should_access=[Alice, Bob],
+                            )
+                        ],
+                        should_access=[Alice, Bob],
+                    )
+                ],
+                should_access=[Alice],
+            )
+        ],
+        should_access=[Alice],
+    )
 
 
 def test_cycle_relations():
@@ -141,14 +142,7 @@ def test_cycle_relations():
     #           /           \        /
     #        [AAA]          [ABA] ---
 
-    SampleA([
-        SampleAA([
-            SampleAAA()
-        ]),
-        SampleAB([
-            SampleABA()
-        ])
-    ]).create(Alice)
+    SampleA([SampleAA([SampleAAA()]), SampleAB([SampleABA()])]).create(Alice)
 
     SampleABA.create(Bob)
     SampleA.create(Bob, SampleABA)
@@ -156,14 +150,17 @@ def test_cycle_relations():
     session = MwdbTest()
     session.login()
 
-    SampleA([
-        SampleAA([
-            SampleAAA(should_access=[Alice, Bob])
-        ], should_access=[Alice, Bob]),
-        SampleAB([
-            SampleABA(should_access=[Alice, Bob])
-        ], should_access=[Alice, Bob])
-    ], should_access=[Alice, Bob]).test()
+    SampleA(
+        [
+            SampleAA(
+                [SampleAAA(should_access=[Alice, Bob])], should_access=[Alice, Bob]
+            ),
+            SampleAB(
+                [SampleABA(should_access=[Alice, Bob])], should_access=[Alice, Bob]
+            ),
+        ],
+        should_access=[Alice, Bob],
+    ).test()
 
 
 def test_multiparent_visibility():
@@ -186,12 +183,7 @@ def test_multiparent_visibility():
     #              /   \
     #            [Y]   [Z]
 
-    SampleA([
-        SampleX([
-            SampleY(),
-            SampleZ()
-        ])
-    ]).create(Alice)
+    SampleA([SampleX([SampleY(), SampleZ()])]).create(Alice)
 
     SampleB.create(Alice)
     SampleC.create(Alice)
@@ -208,22 +200,16 @@ def test_multiparent_visibility():
     parents = list(map(lambda d: d["id"], sample_x["parents"]))
     assert sorted(parents) == sorted([SampleA.dhash, SampleB.dhash, SampleC.dhash])
 
-    subtree = SampleX([
-        SampleY(should_access=[Alice, Bob]),
-        SampleZ(should_access=[Alice, Bob])
-    ], should_access=[Alice, Bob])
+    subtree = SampleX(
+        [SampleY(should_access=[Alice, Bob]), SampleZ(should_access=[Alice, Bob])],
+        should_access=[Alice, Bob],
+    )
 
-    SampleA([
-        subtree
-    ], should_access=[Alice]).test()
+    SampleA([subtree], should_access=[Alice]).test()
 
-    SampleB([
-        subtree
-    ], should_access=[Alice]).test()
+    SampleB([subtree], should_access=[Alice]).test()
 
-    SampleC([
-        subtree
-    ], should_access=[Alice, Bob]).test()
+    SampleC([subtree], should_access=[Alice, Bob]).test()
 
 
 def test_recent_samples():
@@ -243,23 +229,32 @@ def test_recent_samples():
     #       /
     #     [D]
 
-    SampleA([
-        SampleB([
-            SampleD()
-        ]),
-        SampleC()
-    ]).create()
+    SampleA([SampleB([SampleD()]), SampleC()]).create()
 
     SampleA.create(Alice)
     SampleB.create(Bob)
 
     def recent_filter(l):
-        return sorted(list(filter(lambda d: d in [SampleA.dhash, SampleB.dhash, SampleC.dhash, SampleD.dhash], l)))
+        return sorted(
+            list(
+                filter(
+                    lambda d: d
+                    in [SampleA.dhash, SampleB.dhash, SampleC.dhash, SampleD.dhash],
+                    l,
+                )
+            )
+        )
 
-    alice_recent = recent_filter(map(lambda d: d["id"], Alice.session().recent_samples(1)["files"]))
-    bob_recent = recent_filter(map(lambda d: d["id"], Bob.session().recent_samples(1)["files"]))
+    alice_recent = recent_filter(
+        map(lambda d: d["id"], Alice.session().recent_samples(1)["files"])
+    )
+    bob_recent = recent_filter(
+        map(lambda d: d["id"], Bob.session().recent_samples(1)["files"])
+    )
 
-    assert alice_recent == sorted([SampleA.dhash, SampleB.dhash, SampleC.dhash, SampleD.dhash])
+    assert alice_recent == sorted(
+        [SampleA.dhash, SampleB.dhash, SampleC.dhash, SampleD.dhash]
+    )
     assert bob_recent == sorted([SampleB.dhash, SampleD.dhash])
 
 
@@ -285,21 +280,23 @@ def test_xref_adding():
     SampleC.create(Alice)
     SampleD.create(Bob)
 
-    SampleA([
-        SampleB([
-            SampleD(should_access=[Bob])
-        ], should_access=[Alice, Bob]),
-        SampleC(should_access=[Alice])
-    ], should_access=[Alice]).test()
+    SampleA(
+        [
+            SampleB([SampleD(should_access=[Bob])], should_access=[Alice, Bob]),
+            SampleC(should_access=[Alice]),
+        ],
+        should_access=[Alice],
+    ).test()
 
     Bob.session().add_xref(SampleB.dhash, SampleD.dhash)
 
-    SampleA([
-        SampleB([
-            SampleD(should_access=[Alice, Bob])
-        ], should_access=[Alice, Bob]),
-        SampleC(should_access=[Alice])
-    ], should_access=[Alice]).test()
+    SampleA(
+        [
+            SampleB([SampleD(should_access=[Alice, Bob])], should_access=[Alice, Bob]),
+            SampleC(should_access=[Alice]),
+        ],
+        should_access=[Alice],
+    ).test()
 
 
 def test_uploader_share():
@@ -321,18 +318,150 @@ def test_uploader_share():
     b_shares = Alice.session().get_shares(SampleB.dhash)["shares"]
 
     # Look for uploader entry in SampleA shares
-    assert any([
-        (share["group_name"] == Alice.identity and
-         share["related_user_login"] == Alice.identity and
-         share["related_object_dhash"] == SampleA.dhash and
-         share["reason_type"] == "added")
-        for share in a_shares
-    ])
+    assert any(
+        [
+            (
+                share["group_name"] == Alice.identity
+                and share["related_user_login"] == Alice.identity
+                and share["related_object_dhash"] == SampleA.dhash
+                and share["reason_type"] == "added"
+            )
+            for share in a_shares
+        ]
+    )
     # Look for uploader entry in SampleB shares
-    assert any([
-        (share["group_name"] == Alice.identity and
-         share["related_user_login"] == Alice.identity and
-         share["related_object_dhash"] == SampleB.dhash and
-         share["reason_type"] == "added")
-        for share in b_shares
-    ])
+    assert any(
+        [
+            (
+                share["group_name"] == Alice.identity
+                and share["related_user_login"] == Alice.identity
+                and share["related_object_dhash"] == SampleB.dhash
+                and share["reason_type"] == "added"
+            )
+            for share in b_shares
+        ]
+    )
+
+
+def test_removing_relations():
+    testCase = RelationTestCase()
+
+    Alice = testCase.new_user("Alice", capabilities=["removing_parents"])
+    Bob = testCase.new_user("Bob")
+
+    SampleA = testCase.new_sample("SampleA")
+    SampleB = testCase.new_sample("SampleB")
+    SampleC = testCase.new_sample("SampleC")
+    SampleD = testCase.new_sample("SampleD")
+    SampleE = testCase.new_sample("SampleE")
+    SampleF = testCase.new_sample("SampleF")
+    SampleG = testCase.new_sample("SampleG")
+
+    #
+    # Alice & Bob -> [A]     [G] <- Alice
+    #               /   \   /
+    #               \    [B]   [F] <- Alice & Bob
+    #                \     \   /
+    #                 \     [C]
+    #                  \   /   \
+    #                   [D]     [E]
+
+    SampleA(
+        [
+            SampleB(
+                [
+                    SampleC([SampleD(), SampleE()]),
+                ]
+            ),
+            SampleD(),
+        ]
+    ).create()
+
+    SampleG(
+        [
+            SampleB(
+                [
+                    SampleC([SampleD(), SampleE()]),
+                ]
+            ),
+        ]
+    ).create()
+
+    SampleF(
+        [
+            SampleC([SampleD(), SampleE()]),
+        ]
+    ).create()
+
+    SampleA.create(Alice)
+
+    SampleA(
+        [
+            SampleB(
+                [
+                    SampleC(
+                        [
+                            SampleD(should_access=[Alice]),
+                            SampleE(should_access=[Alice]),
+                        ],
+                        should_access=[Alice],
+                    ),
+                ],
+                should_access=[Alice],
+            ),
+            SampleD(should_access=[Alice]),
+        ],
+        should_access=[Alice],
+    ).test()
+
+    # Check access for SampleD after removing C -> D relation
+    Alice.session().remove_parent(SampleC.dhash, SampleD.dhash)
+    d_shares = Alice.session().get_shares(SampleD.dhash)["shares"]
+    assert any(
+        [
+            (
+                share["group_name"] == Alice.identity
+                and share["related_user_login"] == Alice.identity
+                and share["related_object_dhash"] == SampleA.dhash
+                and share["reason_type"] == "added"
+            )
+            for share in d_shares
+        ]
+    )
+
+    SampleA.create(Bob)
+    SampleF.create(Bob)
+    SampleF.create(Alice)
+    SampleG.create(Alice)
+
+    # Check access for every children after removing A -> B relation
+    Alice.session().remove_parent(SampleA.dhash, SampleB.dhash)
+    SampleG(
+        [
+            SampleB(
+                [
+                    SampleC(
+                        [
+                            SampleD(should_access=[Alice, Bob]),
+                            SampleE(should_access=[Alice, Bob]),
+                        ],
+                        should_access=[Alice, Bob],
+                    ),
+                ],
+                should_access=[Alice],
+                should_not_access=[Bob],
+            ),
+        ],
+        should_access=[Alice],
+    ).test()
+
+    # Check access for every children after removing F -> C relation
+    Alice.session().remove_parent(SampleF.dhash, SampleC.dhash)
+    SampleC(
+        [
+            SampleD(should_access=[Alice, Bob]),
+            SampleE(should_access=[Alice], should_not_access=[Bob]),
+        ],
+        should_access=[Alice],
+        should_not_access=[Bob],
+    ).test()

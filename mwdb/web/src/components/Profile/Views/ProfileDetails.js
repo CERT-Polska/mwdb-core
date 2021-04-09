@@ -68,12 +68,21 @@ export default function ProfileDetails({ profile }) {
                         <Link className="nav-link" to="/profile/capabilities">
                             Check your capabilities
                         </Link>
-                        <Link className="nav-link" to="/profile/api-keys">
-                            Set up API keys
-                        </Link>
-                        <Link className="nav-link" to="/profile/reset-password">
-                            Reset password
-                        </Link>
+                        <ShowIf
+                            condition={auth.hasCapability(
+                                Capability.personalize
+                            )}
+                        >
+                            <Link className="nav-link" to="/profile/api-keys">
+                                Set up API keys
+                            </Link>
+                            <Link
+                                className="nav-link"
+                                to="/profile/reset-password"
+                            >
+                                Reset password
+                            </Link>
+                        </ShowIf>
                     </ShowIf>
                     <Link
                         className="nav-link"

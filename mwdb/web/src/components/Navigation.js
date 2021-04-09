@@ -12,7 +12,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { NavDropdown } from "@mwdb-web/commons/ui";
@@ -25,7 +25,9 @@ function AdminDropdown() {
     const [pendingUsersCount, setPendingUsersCount] = useState(null);
 
     const isAdmin = auth.isAdmin;
-    const isAttributeManager = auth.hasCapability("managing_attributes");
+    const isAttributeManager = auth.hasCapability(
+        Capability.managingAttributes
+    );
 
     async function updatePendingUsersCount() {
         try {
@@ -113,6 +115,27 @@ function RemoteDropdown() {
     );
 }
 
+function UploadButton() {
+    const auth = useContext(AuthContext);
+    const buttonLink = auth.hasCapability(Capability.addingFiles) ? (
+        <Link className="nav-link" to={"/upload"}>
+            <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
+            Upload
+        </Link>
+    ) : (
+        <div className="nav-link text-muted">
+            <span
+                data-toggle="tooltip"
+                title="File upload is disabled for your account"
+            >
+                <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
+                Upload
+            </span>
+        </div>
+    );
+    return buttonLink;
+}
+
 export default function Navigation() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
@@ -162,13 +185,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" to={"/upload"}>
-                            <FontAwesomeIcon
-                                className="navbar-icon"
-                                icon={faUpload}
-                            />
-                            Upload
-                        </Link>
+                        <UploadButton />
                     </li>
                 </Extendable>
             ) : (

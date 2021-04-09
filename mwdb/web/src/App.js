@@ -25,7 +25,7 @@ import UserSetPassword from "./components/UserSetPassword";
 import ManageAttributes from "./components/ManageAttributes";
 import AttributeDefine from "./components/AttributeDefine";
 import AttributeUpdate from "./components/AttributeUpdate";
-import Search, { SearchHelp } from "./components/Search";
+import Search from "./components/Search";
 import RelationsPlot from "./components/RelationsPlot";
 import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
@@ -62,6 +62,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
 import {
@@ -115,6 +116,7 @@ function DefaultRoute() {
 }
 
 export default function App() {
+    const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
 
     const routeSwitch = config.config ? (
@@ -144,14 +146,15 @@ export default function App() {
             <ProtectedRoute exact path="/blobs">
                 <RecentBlobs />
             </ProtectedRoute>
-            <ProtectedRoute exact path="/upload">
+            <ProtectedRoute
+                exact
+                path="/upload"
+                condition={auth.hasCapability(Capability.addingFiles)}
+            >
                 <Upload />
             </ProtectedRoute>
             <ProtectedRoute exact path="/search">
                 <Search />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/search_help">
-                <SearchHelp />
             </ProtectedRoute>
             <ProtectedRoute exact path="/configs/stats">
                 <ConfigStats />

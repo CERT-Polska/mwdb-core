@@ -4,11 +4,13 @@ import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 
 export default function FavoriteAction() {
     const api = useContext(APIContext);
+    const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
 
     async function markFavoriteObject() {
@@ -29,7 +31,7 @@ export default function FavoriteAction() {
         }
     }
 
-    if (api.remote) return [];
+    if (!auth.hasCapability(Capability.personalize) || api.remote) return [];
 
     if (context.object.favorite)
         return (

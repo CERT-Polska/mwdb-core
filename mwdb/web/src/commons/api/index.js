@@ -122,6 +122,10 @@ function addObjectRelation(parent, child) {
     return axios.put(`/object/${parent}/child/${child}`);
 }
 
+function removeObjectRelation(parent, child) {
+    return axios.delete(`/object/${parent}/child/${child}`);
+}
+
 function getObjectShares(id) {
     return axios.get(`/object/${id}/share`);
 }
@@ -507,6 +511,7 @@ export default {
     getConfigStats,
     getObjectRelations,
     addObjectRelation,
+    removeObjectRelation,
     getRemoteObject,
     getRemoteObjectList,
     getRemoteObjectCount,

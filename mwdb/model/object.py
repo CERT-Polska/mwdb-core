@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from flask import g
 from sqlalchemy import and_, exists
@@ -77,7 +78,10 @@ class ObjectPermission(db.Model):
     related_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), index=True)
 
     object = db.relationship(
-        "Object", foreign_keys=[object_id], lazy="joined", back_populates="shares"
+        "Object",
+        foreign_keys=[object_id],
+        lazy="joined",
+        back_populates="shares",
     )
     related_object = db.relationship(
         "Object",
@@ -86,10 +90,16 @@ class ObjectPermission(db.Model):
         back_populates="related_shares",
     )
     related_user = db.relationship(
-        "User", foreign_keys=[related_user_id], lazy="joined"
+        "User",
+        foreign_keys=[related_user_id],
+        lazy="joined",
     )
 
-    group = db.relationship("Group", foreign_keys=[group_id], lazy="joined")
+    group = db.relationship(
+        "Group",
+        foreign_keys=[group_id],
+        lazy="joined",
+    )
 
     @property
     def access_reason(self):
@@ -122,6 +132,14 @@ class ObjectPermission(db.Model):
     @property
     def related_user_login(self):
         return self.related_user.login
+
+    @property
+    def get_explicit_groups(self):
+        """
+        Get object tags
+        :return: List of group ids with object explicit permissions
+        """
+        return [group.id for group in self.group]
 
     @classmethod
     def create(cls, object_id, group_id, reason_type, related_object, related_user):
@@ -158,6 +176,26 @@ class ObjectPermission(db.Model):
                     raise
         # Capabilities exist yet
         return False
+
+    def make_inherited(self, devisor: "ObjectPermission"):
+        """
+        Modifies share to inherit from another devisor
+        """
+        assert self.group_id == devisor.group_id
+        self.related_object_id = devisor.related_object_id
+        self.reason_type = devisor.reason_type
+        self.access_time = datetime.datetime.utcnow()
+
+    def inherits(self, origin_share):
+        """
+        Checks if share (possibly) was inherited from the origin
+        Assumes that origin_share comes from the parent.
+        """
+        assert self.group_id == origin_share.group_id
+        return (
+            self.related_object_id == origin_share.related_object_id
+            and self.reason_type == origin_share.reason_type
+        )
 
 
 class Object(db.Model):
@@ -210,12 +248,14 @@ class Object(db.Model):
         foreign_keys=[ObjectPermission.object_id],
         back_populates="object",
         cascade="save-update, merge, delete",
+        order_by=ObjectPermission.access_time.asc(),
     )
     related_shares = db.relationship(
         "ObjectPermission",
         lazy="dynamic",
         foreign_keys=[ObjectPermission.related_object_id],
         back_populates="related_object",
+        order_by=ObjectPermission.access_time.asc(),
     )
 
     @property
@@ -276,6 +316,103 @@ class Object(db.Model):
             db.session.commit()
         return True
 
+    def remove_parent(self, parent, commit=True):
+        """
+        Removing child with modify permission inheritance
+        """
+        if parent not in self.parents:
+            # Relationship not exist
+            return False
+
+        # Remove relationship in nested transaction
+        db.session.begin_nested()
+
+        try:
+            # Remove inherited permissions from parent
+            for share in parent.shares:
+                self.uninherit_share(share)
+            # Remove parent
+            self.parents.remove(parent)
+            db.session.flush()
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            db.session.refresh(self)
+            if parent in self.parents:
+                raise
+            return False
+
+        if commit:
+            db.session.commit()
+        return True
+
+    def get_share_for_group(self, group_id) -> Optional[ObjectPermission]:
+        """
+        Finds share (ObjectPermission) for given group id.
+        If share doesn't exist: returns None.
+        """
+        return next(
+            (share for share in self.shares if share.group_id == group_id), None
+        )
+
+    def _find_another_devisor(self, share_to_remove):
+        """
+        Looks for another devisor for given share inherited from given parent.
+        Share must be inherited (related_object_id is not None and comes from parent)
+        """
+        new_devisor = None
+        # For each other parent
+        for parent in self.parents:
+            if parent.id == share_to_remove.object_id:
+                continue
+            share = parent.get_share_for_group(share_to_remove.group_id)
+            # If parent is not shared with given group: ignore
+            if share is None:
+                continue
+            # If other parent is inherited as well: nothing to change
+            if share.inherits(share_to_remove):
+                return share_to_remove
+            else:
+                # If found another devisor: store it but keep looking
+                # for other
+                new_devisor = share
+        return new_devisor
+
+    def uninherit_share(self, share_to_remove, new_devisor=None, visited=None):
+        print(
+            f"Uninheriting share for '{share_to_remove.group_name}' "
+            f"({share_to_remove.access_reason})",
+            flush=True,
+        )
+        # Break the c-c-c-cycles
+        visited = visited or set()
+        if self in visited:
+            return
+        else:
+            visited.add(self)
+        # Get our share for the same group as share_to_remove
+        our_share = self.get_share_for_group(share_to_remove.group_id)
+        print("our_share", our_share, flush=True)
+        # If it doesn't exist or it's unrelated: just return
+        if not our_share or not our_share.inherits(share_to_remove):
+            return
+        # Find new devisor different than share_to_remove
+        if new_devisor is None:
+            new_devisor = self._find_another_devisor(share_to_remove)
+        print("new_devisor", new_devisor, flush=True)
+        # If there's nothing to change (same share is given by another parent): return
+        if new_devisor is share_to_remove:
+            return
+        # If there is a change: first uninherit all children
+        for child in self.children:
+            child.uninherit_share(our_share, new_devisor=new_devisor, visited=visited)
+        if not new_devisor:
+            # If there is no devisor: remove share
+            db.session.delete(our_share)
+        else:
+            # If there is a new devisor: remap current share to inherit from it
+            our_share.make_inherited(new_devisor)
+
     def give_access(
         self, group_id, reason_type, related_object, related_user, commit=True
     ):
@@ -310,6 +447,20 @@ class Object(db.Model):
                 and_(
                     ObjectPermission.object_id == self.id,
                     user.is_member(ObjectPermission.group_id),
+                )
+            )
+        ).scalar()
+
+    def check_group_explicit_access(self, group):
+        """
+        Check whether group has access via explicit ObjectPermissions
+        Used by Object.access
+        """
+        return db.session.query(
+            exists().where(
+                and_(
+                    ObjectPermission.object_id == self.id,
+                    ObjectPermission.group_id == group.id,
                 )
             )
         ).scalar()

@@ -10,6 +10,7 @@ export const Capability = {
     addingComments: "adding_comments",
     removingComments: "removing_comments",
     addingParents: "adding_parents",
+    removingParents: "removing_parents",
     readingAllAttributes: "reading_all_attributes",
     addingAllAttributes: "adding_all_attributes",
     managingAttributes: "managing_attributes",
@@ -19,6 +20,8 @@ export const Capability = {
     addingBlobs: "adding_blobs",
     unlimitedRequests: "unlimited_requests",
     removingObjects: "removing_objects",
+    manageProfile: "manage_profile",
+    personalize: "personalize",
 };
 
 export let capabilitiesList = {
@@ -33,6 +36,8 @@ export let capabilitiesList = {
     [Capability.addingComments]: "Can add comments",
     [Capability.removingComments]: "Can remove (all) comments",
     [Capability.addingParents]: "Can specify parent of uploaded object",
+    [Capability.removingParents]:
+        "Can remove parent of object and inherited permissions from that relation",
     [Capability.readingAllAttributes]:
         "Has access to all attributes of object (including hidden)",
     [Capability.addingAllAttributes]: "Can add all attributes to object",
@@ -45,6 +50,8 @@ export let capabilitiesList = {
     [Capability.unlimitedRequests]:
         "API requests are not rate-limited for this group",
     [Capability.removingObjects]: "Can remove objects",
+    [Capability.manageProfile]: "Can manage own profile",
+    [Capability.personalize]: "Can mark favorites and manage own quick queries",
 };
 
 for (let extraCapabilities of fromPlugin("capabilities")) {

@@ -1,8 +1,7 @@
 import React from "react";
 
 import { capabilitiesList } from "@mwdb-web/commons/auth";
-
-import GroupBadge from "../GroupBadge";
+import { GroupBadge } from "@mwdb-web/commons/ui";
 
 function CapabilitiesTable({ profile }) {
     if (!profile.capabilities) return [];

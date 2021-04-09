@@ -6,8 +6,8 @@ export default function GroupBadge({ group }) {
         <Link
             to={
                 group.private
-                    ? `/settings/user/${group.name}`
-                    : `/settings/group/${group.name}`
+                    ? `/profile/user/${group.name}`
+                    : `/profile/group/${group.name}`
             }
         >
             <span

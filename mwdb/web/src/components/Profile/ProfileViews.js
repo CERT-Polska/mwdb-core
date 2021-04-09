@@ -3,15 +3,15 @@ import { Link, Route, Switch, useHistory, useParams } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
-import { getErrorMessage } from "@mwdb-web/commons/ui";
+import { View, getErrorMessage } from "@mwdb-web/commons/ui";
 
-import ProfileSettings from "./ProfileSettings";
-import ProfileAPIKeys from "./ProfileAPIKeys";
-import ProfileCapabilities from "./ProfileCapabilities";
-import ProfileResetPassword from "./ProfileResetPassword";
-import ProfileGroup from "./ProfileGroup";
+import ProfileDetails from "./Views/ProfileDetails";
+import ProfileAPIKeys from "./Views/ProfileAPIKeys";
+import ProfileCapabilities from "./Views/ProfileCapabilities";
+import ProfileResetPassword from "./Views/ProfileResetPassword";
+import ProfileGroup from "./Views/ProfileGroup";
 
-export default function ProfileSubview() {
+export default function ProfileViews() {
     const auth = useContext(AuthContext);
     const history = useHistory();
     const user = useParams().user || auth.user.login;
@@ -23,7 +23,7 @@ export default function ProfileSubview() {
             setProfile(response.data);
         } catch (error) {
             history.push({
-                pathname: "/settings/profile",
+                pathname: "/profile",
                 state: { error: getErrorMessage(error) },
             });
         }
@@ -31,7 +31,12 @@ export default function ProfileSubview() {
 
     function GroupBreadcrumb() {
         const { group } = useParams();
-        return `Group '${group}' settings`;
+        return `Group '${group}' profile`;
+    }
+
+    function UserBreadcrumb() {
+        const { user } = useParams();
+        return `User '${user}' profile`;
     }
 
     const getProfile = useCallback(updateProfile, [user]);
@@ -43,33 +48,31 @@ export default function ProfileSubview() {
     if (!profile) return [];
 
     return (
-        <div>
+        <View ident="profile">
             <Switch>
-                <Route
-                    exact
-                    path={["/settings/profile", "/settings/user/:user"]}
-                />
+                <Route exact path="/profile" />
                 <Route>
                     <nav aria-label="breadcrumb">
                         <ol className="breadcrumb">
                             <li className="breadcrumb-item">
-                                <Link to="/settings/profile">
-                                    Profile settings
-                                </Link>
+                                <Link to="/profile">Profile settings</Link>
                             </li>
                             <li className="breadcrumb-item active">
                                 <Switch>
-                                    <Route path="/settings/profile/capabilities">
+                                    <Route path="/profile/capabilities">
                                         Capabilities
                                     </Route>
-                                    <Route path="/settings/profile/api-keys">
+                                    <Route path="/profile/api-keys">
                                         API keys
                                     </Route>
-                                    <Route path="/settings/profile/reset-password">
+                                    <Route path="/profile/reset-password">
                                         Reset password
                                     </Route>
-                                    <Route path="/settings/group/:group">
+                                    <Route path="/profile/group/:group">
                                         <GroupBreadcrumb />
+                                    </Route>
+                                    <Route path="/profile/user/:user">
+                                        <UserBreadcrumb />
                                     </Route>
                                 </Switch>
                             </li>
@@ -78,28 +81,25 @@ export default function ProfileSubview() {
                 </Route>
             </Switch>
             <Switch>
-                <Route
-                    exact
-                    path={["/settings/profile", "/settings/user/:user"]}
-                >
-                    <ProfileSettings profile={profile} />
+                <Route exact path={["/profile", "/profile/user/:user"]}>
+                    <ProfileDetails profile={profile} />
                 </Route>
-                <Route exact path="/settings/profile/capabilities">
+                <Route exact path="/profile/group/:group">
+                    <ProfileGroup profile={profile} />
+                </Route>
+                <Route exact path="/profile/capabilities">
                     <ProfileCapabilities profile={profile} />
                 </Route>
-                <Route exact path="/settings/profile/api-keys">
+                <Route exact path="/profile/api-keys">
                     <ProfileAPIKeys
                         profile={profile}
                         updateProfile={updateProfile}
                     />
                 </Route>
-                <Route exact path="/settings/profile/reset-password">
+                <Route exact path="/profile/reset-password">
                     <ProfileResetPassword profile={profile} />
                 </Route>
-                <Route exact path="/settings/group/:group">
-                    <ProfileGroup profile={profile} />
-                </Route>
             </Switch>
-        </div>
+        </View>
     );
 }

@@ -7,8 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { ShowIf, getErrorMessage } from "@mwdb-web/commons/ui";
-import GroupBadge from "../GroupBadge";
+import { GroupBadge, ShowIf, getErrorMessage } from "@mwdb-web/commons/ui";
 
 function ProfileItem(props) {
     if (!props.value) return [];
@@ -32,7 +31,7 @@ export default function ProfileGroup({ profile }) {
             setWorkspaces(response.data["groups"]);
         } catch (error) {
             history.push({
-                pathname: "/settings/profile",
+                pathname: "/profile",
                 state: {
                     error: getErrorMessage(error),
                 },
@@ -53,7 +52,7 @@ export default function ProfileGroup({ profile }) {
         return (
             <Redirect
                 to={{
-                    pathname: "/settings/profile",
+                    pathname: "/profile",
                     state: {
                         error: `Group ${groupName} doesn't exist`,
                     },
@@ -63,7 +62,7 @@ export default function ProfileGroup({ profile }) {
     // Merge it with workspace info
     const workspace = workspaces.find((group) => group.name === groupName);
 
-    if (group.private) return <Redirect to={`/settings/user/${group.name}`} />;
+    if (group.private) return <Redirect to={`/profile/user/${group.name}`} />;
 
     return (
         <div>
@@ -122,10 +121,7 @@ export default function ProfileGroup({ profile }) {
                     <ShowIf
                         condition={auth.hasCapability(Capability.manageUsers)}
                     >
-                        <Link
-                            className="nav-link"
-                            to={`/settings/admin/group/${group.name}`}
-                        >
+                        <Link className="nav-link" to={`/group/${group.name}`}>
                             <FontAwesomeIcon icon={faUsersCog} />
                             Group settings
                         </Link>

@@ -18,7 +18,7 @@ function ProfileItem(props) {
     );
 }
 
-export default function ProfileSettings({ profile }) {
+export default function ProfileDetails({ profile }) {
     const auth = useContext(AuthContext);
     const isCurrentUser = profile.login === auth.user.login;
 
@@ -52,7 +52,7 @@ export default function ProfileSettings({ profile }) {
                             profile.groups
                                 .filter((group) => !group.private)
                                 .map((group) => (
-                                    <Link to={`/settings/group/${group.name}`}>
+                                    <Link to={`/profile/group/${group.name}`}>
                                         <span className="badge badge-secondary">
                                             {group.name}
                                         </span>
@@ -65,22 +65,13 @@ export default function ProfileSettings({ profile }) {
             <ul className="nav flex-column">
                 <li className="nav-item">
                     <ShowIf condition={isCurrentUser}>
-                        <Link
-                            className="nav-link"
-                            to="/settings/profile/capabilities"
-                        >
+                        <Link className="nav-link" to="/profile/capabilities">
                             Check your capabilities
                         </Link>
-                        <Link
-                            className="nav-link"
-                            to="/settings/profile/api-keys"
-                        >
+                        <Link className="nav-link" to="/profile/api-keys">
                             Set up API keys
                         </Link>
-                        <Link
-                            className="nav-link"
-                            to="/settings/profile/reset-password"
-                        >
+                        <Link className="nav-link" to="/profile/reset-password">
                             Reset password
                         </Link>
                     </ShowIf>
@@ -100,7 +91,7 @@ export default function ProfileSettings({ profile }) {
                     >
                         <Link
                             className="nav-link"
-                            to={`/settings/admin/user/${profile.login}`}
+                            to={`/user/${profile.login}`}
                         >
                             <FontAwesomeIcon icon={faUsersCog} />
                             User settings

@@ -34,7 +34,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             setCurrentApiToken(response.data);
         } catch (error) {
             history.push({
-                pathname: "/settings/profile/api-keys",
+                pathname: "/profile/api-keys",
                 state: { error: getErrorMessage(error) },
             });
         }
@@ -46,7 +46,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             setCurrentApiToken(response.data);
             updateProfile();
             history.push({
-                pathname: "/settings/profile/api-keys",
+                pathname: "/profile/api-keys",
                 state: {
                     success: "New API key successfully added",
                     addedKey: response.data.id,
@@ -54,7 +54,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             });
         } catch (error) {
             history.push({
-                pathname: "/settings/profile/api-keys",
+                pathname: "/profile/api-keys",
                 state: { error: getErrorMessage(error) },
             });
         }
@@ -68,14 +68,14 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             updateProfile();
             setRemoveModalOpened(false);
             history.push({
-                pathname: "/settings/profile/api-keys",
+                pathname: "/profile/api-keys",
                 state: {
                     success: "API key successfully removed",
                 },
             });
         } catch (error) {
             history.push({
-                pathname: "/settings/profile/api-keys",
+                pathname: "/profile/api-keys",
                 state: { error: getErrorMessage(error) },
             });
         }

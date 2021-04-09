@@ -13,7 +13,7 @@ export default function ProfileResetPassword({ profile }) {
         try {
             await api.authRequestPasswordChange();
             history.push({
-                pathname: "/settings/profile",
+                pathname: "/profile",
                 state: {
                     success:
                         "Password reset link was successfully sent to your e-mail address.",
@@ -21,7 +21,7 @@ export default function ProfileResetPassword({ profile }) {
             });
         } catch (error) {
             history.push({
-                pathname: "/settings/profile",
+                pathname: "/profile",
                 state: {
                     error: getErrorMessage(error),
                 },
@@ -49,7 +49,7 @@ export default function ProfileResetPassword({ profile }) {
                     >
                         Send password reset link
                     </button>
-                    <Link to="/settings/profile" className="card-link">
+                    <Link to="/profile" className="card-link">
                         <button
                             type="button"
                             className="btn btn-outline-danger"

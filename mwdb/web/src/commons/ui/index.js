@@ -9,6 +9,7 @@ export {
     Alert,
     getErrorMessage,
 } from "./ErrorBoundary";
+export { default as GroupBadge } from "./GroupBadge";
 export { default as Hash } from "./Hash";
 export { default as HexView } from "./HexView";
 export { default as Identicon } from "./Identicon";

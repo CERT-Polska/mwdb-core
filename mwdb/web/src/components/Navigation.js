@@ -2,12 +2,12 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
-    faCog,
     faFile,
     faTable,
     faScroll,
     faUpload,
     faGlobe,
+    faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -294,17 +294,6 @@ export default function Navigation() {
                         <Extendable ident="navbarRight">
                             {auth.isAuthenticated ? (
                                 <React.Fragment>
-                                    {!remote && (
-                                        <li className="nav-item">
-                                            <span
-                                                className="navbar-text"
-                                                style={{ marginRight: "1rem" }}
-                                            >
-                                                Logged as:{" "}
-                                                <b>{auth.user.login}</b>
-                                            </span>
-                                        </li>
-                                    )}
                                     <RemoteDropdown />
                                     <li className="nav-item">
                                         <div className="btn-group">
@@ -320,13 +309,13 @@ export default function Navigation() {
                                                 <React.Fragment>
                                                     <Link
                                                         className="btn btn-outline-success"
-                                                        to="/settings"
+                                                        to="/profile"
                                                     >
                                                         <FontAwesomeIcon
                                                             className="navbar-icon"
-                                                            icon={faCog}
+                                                            icon={faUser}
                                                         />
-                                                        Settings
+                                                        {auth.user.login}
                                                     </Link>
                                                     <a
                                                         className="btn btn-outline-danger"

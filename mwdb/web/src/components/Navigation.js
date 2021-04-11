@@ -325,7 +325,7 @@ export default function Navigation() {
                                             ) : (
                                                 <React.Fragment>
                                                     <Link
-                                                        className="btn btn-outline-success"
+                                                        className="btn btn-outline-success profile-button"
                                                         to="/profile"
                                                     >
                                                         <FontAwesomeIcon

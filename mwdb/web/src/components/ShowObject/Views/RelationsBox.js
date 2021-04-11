@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth/context";
+import { Capability } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     ObjectLink,

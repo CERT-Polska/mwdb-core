@@ -17,5 +17,5 @@ export const browserLogin = (username, password) => {
   cy.get("input[name=password]").type(password).should("have.value", password);
 
   cy.contains("Submit").click();
-  cy.contains("Logged as: " + username);
+  cy.get("a").should("have.attr", "href").and('contain', '/profile');
 };

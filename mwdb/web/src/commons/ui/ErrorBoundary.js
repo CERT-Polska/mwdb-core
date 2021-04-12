@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { intersperse } from "../helpers";
 
-function getErrorMessage(error) {
+export function getErrorMessage(error) {
     if (error.response) {
         if (error.response.data.message) {
             return error.response.data.message;

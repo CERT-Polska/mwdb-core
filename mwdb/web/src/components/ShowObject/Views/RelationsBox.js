@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
+import { Capability } from "@mwdb-web/commons/auth";
 import { AuthContext } from "@mwdb-web/commons/auth/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
@@ -80,7 +81,7 @@ function RelationsBox(props) {
                         tooltipMessage="Copy sha256 to clipboard"
                     />
                 </span>
-                {auth.hasCapability("removing_parents") && (
+                {auth.hasCapability(Capability.removingParents) && (
                     <span
                         className="ml-2"
                         data-toggle="tooltip"
@@ -129,7 +130,7 @@ function RelationsBox(props) {
                         tooltipMessage="Copy sha256 to clipboard"
                     />
                 </span>
-                {auth.hasCapability("removing_parents") && (
+                {auth.hasCapability(Capability.removingParents) && (
                     <span
                         className="ml-2"
                         data-toggle="tooltip"

@@ -13,7 +13,6 @@ import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
 import Upload from "./components/Upload";
 import UserLogin from "./components/UserLogin";
-import UserProfile from "./components/UserProfile";
 import ShowUsers from "./components/ShowUsers";
 import ShowGroups from "./components/ShowGroups";
 import UserCreate from "./components/UserCreate";
@@ -32,6 +31,7 @@ import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
 import Docs from "./components/Docs";
 import RemoteViews from "./components/Remote/RemoteViews";
+import ProfileViews from "./components/Profile/ProfileViews";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -62,7 +62,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
 import {
@@ -149,7 +149,7 @@ export default function App() {
             <ProtectedRoute
                 exact
                 path="/upload"
-                condition={auth.hasCapability("adding_files")}
+                condition={auth.hasCapability(Capability.addingFiles)}
             >
                 <Upload />
             </ProtectedRoute>
@@ -164,9 +164,6 @@ export default function App() {
             </ProtectedRoute>
             <ProtectedRoute exact path="/docs">
                 <Docs />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/profile/:login">
-                <UserProfile />
             </ProtectedRoute>
             <Redirect from="/sample/:hash" to="/file/:hash" />
             <ProtectedRoute path="/file/:hash">
@@ -219,6 +216,9 @@ export default function App() {
             </AttributeRoute>
             <ProtectedRoute path="/remote/:remote">
                 <RemoteViews />
+            </ProtectedRoute>
+            <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
+                <ProfileViews />
             </ProtectedRoute>
             {fromPlugin("routes")}
             <DefaultRoute />

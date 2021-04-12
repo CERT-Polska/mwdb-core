@@ -4,7 +4,7 @@ import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 
@@ -31,7 +31,7 @@ export default function FavoriteAction() {
         }
     }
 
-    if (!auth.hasCapability("personalize") || api.remote) return [];
+    if (!auth.hasCapability(Capability.personalize) || api.remote) return [];
 
     if (context.object.favorite)
         return (

@@ -1,35 +1,6 @@
 import React, { Component } from "react";
-import { fromPlugin } from "@mwdb-web/commons/extensions";
 
-export let capabilitiesList = {
-    manage_users: "Managing users and groups (system administration)",
-    share_queried_objects: "Query for all objects in system",
-    access_all_objects: "Has access to all new uploaded objects into system",
-    sharing_objects: "Can share objects with all groups in system",
-    adding_tags: "Can add tags",
-    removing_tags: "Can remove tags",
-    adding_comments: "Can add comments",
-    removing_comments: "Can remove (all) comments",
-    adding_parents: "Can specify parent of uploaded object",
-    removing_parents:
-        "Can remove parent of object and inherited permissions from that relation",
-    reading_all_attributes:
-        "Has access to all attributes of object (including hidden)",
-    adding_all_attributes: "Can add all attributes to object",
-    managing_attributes: "Can define new attributes and manage them",
-    removing_attributes: "Can remove attribute from objects",
-    adding_configs: "Can upload configs",
-    adding_blobs: "Can upload text blobs",
-    unlimited_requests: "API requests are not rate-limited for this group",
-    removing_objects: "Can remove objects",
-    adding_files: "Can add files",
-    manage_profile: "Can manage own profile",
-    personalize: "Can mark favorites and manage own quick queries",
-};
-
-for (let extraCapabilities of fromPlugin("capabilities")) {
-    capabilitiesList = { ...capabilitiesList, ...extraCapabilities };
-}
+import { capabilitiesList } from "@mwdb-web/commons/auth";
 
 export default class Capabilities extends Component {
     isCapabilityChanged(cap) {

@@ -31,12 +31,12 @@ export default function ProfileViews() {
 
     function GroupBreadcrumb() {
         const { group } = useParams();
-        return `Group '${group}' profile`;
+        return `Group '${group}' details`;
     }
 
     function UserBreadcrumb() {
         const { user } = useParams();
-        return `User '${user}' profile`;
+        return `User '${user}' details`;
     }
 
     const getProfile = useCallback(updateProfile, [user]);
@@ -55,7 +55,7 @@ export default function ProfileViews() {
                     <nav aria-label="breadcrumb">
                         <ol className="breadcrumb">
                             <li className="breadcrumb-item">
-                                <Link to="/profile">Profile settings</Link>
+                                <Link to="/profile">Profile</Link>
                             </li>
                             <li className="breadcrumb-item active">
                                 <Switch>

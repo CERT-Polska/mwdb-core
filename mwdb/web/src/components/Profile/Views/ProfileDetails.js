@@ -24,7 +24,7 @@ export default function ProfileDetails({ profile }) {
 
     return (
         <div>
-            <h4>Profile settings</h4>
+            <h4>Profile details</h4>
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
                     <ProfileItem label="Login" value={profile.login} />

@@ -68,7 +68,7 @@ export default function ProfileGroup({ profile }) {
         <div>
             <h4>
                 Group <span className="text-monospace">{groupName}</span>{" "}
-                settings
+                details
             </h4>
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>

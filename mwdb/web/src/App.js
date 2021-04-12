@@ -217,7 +217,7 @@ export default function App() {
             <ProtectedRoute path="/remote/:remote">
                 <RemoteViews />
             </ProtectedRoute>
-            <ProtectedRoute path="/profile">
+            <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
                 <ProfileViews />
             </ProtectedRoute>
             {fromPlugin("routes")}

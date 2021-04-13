@@ -53,14 +53,14 @@ class ObjectPermission(db.Model):
 
     object_id = db.Column(
         db.Integer,
-        db.ForeignKey("object.id"),
+        db.ForeignKey("object.id", ondelete="CASCADE"),
         primary_key=True,
         autoincrement=False,
         index=True,
     )
     group_id = db.Column(
         db.Integer,
-        db.ForeignKey("group.id"),
+        db.ForeignKey("group.id", ondelete="CASCADE"),
         primary_key=True,
         autoincrement=False,
         index=True,

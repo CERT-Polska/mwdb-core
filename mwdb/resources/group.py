@@ -240,6 +240,54 @@ class GroupResource(Resource):
         schema = GroupSuccessResponseSchema()
         return schema.dump({"name": group.name})
 
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def delete(self, name):
+        """
+        ---
+        summary: Delete group
+        description: |
+            Remove group definition from database.
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+        responses:
+            200:
+                description: When group was removed successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
+            403:
+                description: When user doesn't have `manage_users` capability.
+            404:
+                description: When group doesn't exist
+        """
+        if name in ["public", "everything", "registered"]:
+            raise Forbidden(f"You can't remove default {name} group.")
+        group = (
+            db.session.query(Group)
+            .options(joinedload(Group.members), joinedload(Group.members, Member.user))
+            .filter(Group.name == name)
+        ).first()
+        if group is None:
+            raise NotFound("No such group")
+
+        db.session.delete(group)
+        db.session.commit()
+
+        logger.info("Group was deleted", extra={"group": name})
+        schema = GroupSuccessResponseSchema()
+        return schema.dump({"name": name})
+
 
 class GroupMemberResource(Resource):
     @requires_authorization

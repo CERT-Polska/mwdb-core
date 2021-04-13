@@ -30,6 +30,12 @@ class Group(db.Model):
     )
     users = association_proxy("members", "user", creator=lambda user: Member(user=user))
 
+    permissions = db.relationship(
+        "ObjectPermission",
+        lazy="joined",
+        cascade="all, delete",
+    )
+
     PUBLIC_GROUP_NAME = "public"
     # These groups are just pre-created for convenience by 'mwdb-core configure'
     DEFAULT_EVERYTHING_GROUP_NAME = "everything"

@@ -48,6 +48,11 @@ class User(db.Model):
     groups = association_proxy(
         "memberships", "group", creator=lambda group: Member(group=group)
     )
+    permissions = db.relationship(
+        "ObjectPermission",
+        lazy="joined",
+        cascade="all, delete",
+    )
     favorites = db.relationship(
         "Object", secondary=favorites, back_populates="followers", lazy="joined"
     )

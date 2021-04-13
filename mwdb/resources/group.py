@@ -286,7 +286,7 @@ class GroupResource(Resource):
             raise Forbidden(f"You can't remove default {name} mwdb group.")
 
         if group.private is True:
-            raise Forbidden(f"You can't remove private group.")
+            raise Forbidden("You can't remove private group.")
 
         db.session.delete(group)
         db.session.commit()

@@ -499,10 +499,10 @@ class UserResource(Resource):
               description: User login
         responses:
             200:
-                description: User information
+                description: When user was removed successfully
                 content:
                   application/json:
-                    schema: UserItemResponseSchema
+                    schema: UserSuccessResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
             404:

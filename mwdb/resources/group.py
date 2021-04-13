@@ -247,7 +247,7 @@ class GroupResource(Resource):
         ---
         summary: Delete group
         description: |
-            Remove group definition from database.
+            Remove group from database.
 
             Requires `manage_users` capability.
         security:

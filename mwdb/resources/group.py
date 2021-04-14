@@ -271,8 +271,6 @@ class GroupResource(Resource):
             404:
                 description: When group doesn't exist
         """
-        if name in ["public", "everything", "registered"]:
-            raise Forbidden(f"You can't remove default {name} git group.")
         group = (
             db.session.query(Group)
             .options(joinedload(Group.members), joinedload(Group.members, Member.user))
@@ -282,11 +280,8 @@ class GroupResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
-        if group.default is True:
-            raise Forbidden(f"You can't remove default {name} mwdb group.")
-
-        if group.private is True:
-            raise Forbidden("You can't remove private group.")
+        if group.immutable is True:
+            raise Forbidden(f"Group '{name}' is immutable and can't be removed.")
 
         db.session.delete(group)
         db.session.commit()

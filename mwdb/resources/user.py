@@ -3,6 +3,7 @@ import datetime
 from flask import g, request
 from flask_restful import Resource
 from sqlalchemy import exists
+from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import true
 from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFound
@@ -511,10 +512,16 @@ class UserResource(Resource):
         if g.auth_user.login == login:
             raise Forbidden("You can't remove yourself from the database.")
         user = db.session.query(User).filter(User.login == login).first()
+        group = (
+            db.session.query(Group)
+            .options(joinedload(Group.members), joinedload(Group.members, Member.user))
+            .filter(Group.name == login)
+        ).first()
         if user is None:
             raise NotFound("No such user")
 
         db.session.delete(user)
+        db.session.delete(group)
         db.session.commit()
 
         logger.info("User was deleted", extra={"user": login})

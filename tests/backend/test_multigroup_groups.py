@@ -117,7 +117,7 @@ def test_remove_group_and_user():
                 and share["related_user_login"] == Alice.identity
                 and share["related_object_dhash"] == SampleB.dhash
             )
-            for share in a_shares
+            for share in b_shares
         ]
     )
 
@@ -136,7 +136,7 @@ def test_remove_group_and_user():
                 and share["related_user_login"] == Alice.identity
                 and share["related_object_dhash"] == SampleB.dhash
             )
-            for share in a_shares
+            for share in b_shares
         ]
     )
 

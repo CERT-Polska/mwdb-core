@@ -73,9 +73,11 @@ def test_remove_group_and_user():
     testCase = RelationTestCase()
 
     Alice = testCase.new_user("Alice")
+    Bob = testCase.new_user("Bob")
     Workgroup = testCase.new_group("Workgroup")
 
     Workgroup.add_member(Alice)
+    Workgroup.add_member(Bob)
 
     SampleA = testCase.new_sample("SampleA")
     SampleB = testCase.new_sample("SampleB")
@@ -84,9 +86,9 @@ def test_remove_group_and_user():
         [
             SampleB(),
         ],
-    ).test()
+    ).create()
 
-    SampleA.create(Workgroup)
+    SampleA.create(Bob)
     SampleB.create(Alice)
 
     session = MwdbTest()

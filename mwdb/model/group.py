@@ -36,6 +36,12 @@ class Group(db.Model):
         cascade="all, delete",
     )
 
+    attributes = db.relationship(
+        "MetakeyPermission",
+        lazy="joined",
+        cascade="all, delete",
+    )
+
     PUBLIC_GROUP_NAME = "public"
     # These groups are just pre-created for convenience by 'mwdb-core configure'
     DEFAULT_EVERYTHING_GROUP_NAME = "everything"

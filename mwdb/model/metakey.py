@@ -85,7 +85,7 @@ class MetakeyPermission(db.Model):
     )
     group_id = db.Column(
         db.Integer,
-        db.ForeignKey("group.id"),
+        db.ForeignKey("group.id", ondelete="CASCADE"),
         primary_key=True,
         autoincrement=False,
         index=True,

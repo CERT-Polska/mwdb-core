@@ -99,9 +99,10 @@ def test_remove_group_and_user():
     SampleA(
         [
             SampleB(
-                should_access=[Alice],
+                should_access=[Alice, Bob],
             ),
         ],
+        should_access=[Bob],
         should_not_access=[Alice],
     ).test()
 
@@ -125,9 +126,6 @@ def test_remove_group_and_user():
     )
 
     session.remove_user(Alice.identity)
-
-    with ShouldRaise(status_code=404):
-        session.get_user(Alice.identity)
 
     with ShouldRaise(status_code=404):
         session.get_group(Alice.identity)

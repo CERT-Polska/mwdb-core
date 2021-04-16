@@ -167,11 +167,6 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def get_user(self, login):
-        res = self.session.get(self.mwdb_url + "/user/" + login)
-        res.raise_for_status()
-        return res.json()
-
     def remove_user(self, login):
         res = self.session.delete(self.mwdb_url + "/user/" + login)
         res.raise_for_status()

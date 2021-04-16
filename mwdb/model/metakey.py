@@ -101,7 +101,12 @@ class MetakeyPermission(db.Model):
         lazy="joined",
         back_populates="permissions",
     )
-    group = db.relationship("Group", foreign_keys=[group_id], lazy="joined")
+    group = db.relationship(
+        "Group",
+        foreign_keys=[group_id],
+        lazy="joined",
+        back_populates="attributes",
+    )
 
     @property
     def group_name(self):

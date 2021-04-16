@@ -50,8 +50,9 @@ class User(db.Model):
     )
     permissions = db.relationship(
         "ObjectPermission",
-        lazy="joined",
+        back_populates="user",
         cascade="all, delete",
+        passive_deletes=True,
     )
     favorites = db.relationship(
         "Object", secondary=favorites, back_populates="followers", lazy="joined"

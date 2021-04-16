@@ -93,12 +93,14 @@ class ObjectPermission(db.Model):
         "User",
         foreign_keys=[related_user_id],
         lazy="joined",
+        back_populates="permissions",
     )
 
     group = db.relationship(
         "Group",
         foreign_keys=[group_id],
         lazy="joined",
+        back_populates="permissions",
     )
 
     @property

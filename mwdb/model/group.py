@@ -32,14 +32,16 @@ class Group(db.Model):
 
     permissions = db.relationship(
         "ObjectPermission",
-        lazy="joined",
+        back_populates="group",
         cascade="all, delete",
+        passive_deletes=True,
     )
 
     attributes = db.relationship(
         "MetakeyPermission",
-        lazy="joined",
+        back_populates="group",
         cascade="all, delete",
+        passive_deletes=True,
     )
 
     PUBLIC_GROUP_NAME = "public"

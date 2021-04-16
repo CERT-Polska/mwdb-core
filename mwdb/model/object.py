@@ -75,7 +75,9 @@ class ObjectPermission(db.Model):
 
     reason_type = db.Column(db.String(32))
     related_object_id = db.Column(db.Integer, db.ForeignKey("object.id"))
-    related_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), index=True)
+    related_user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), index=True
+    )
 
     object = db.relationship(
         "Object",

@@ -271,11 +271,7 @@ class GroupResource(Resource):
             404:
                 description: When group doesn't exist
         """
-        group = (
-            db.session.query(Group)
-            .options(joinedload(Group.members), joinedload(Group.members, Member.user))
-            .filter(Group.name == name)
-        ).first()
+        group = (db.session.query(Group).filter(Group.name == name)).first()
 
         if group is None:
             raise NotFound("No such group")

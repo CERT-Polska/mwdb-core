@@ -304,8 +304,12 @@ class UserResource(Resource):
                     schema: UserItemResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
+            404:
+                description: When user doesn't exist.
         """
         obj = db.session.query(User).filter(User.login == login).first()
+        if obj is None:
+            raise NotFound("No such user")
         schema = UserItemResponseSchema()
         return schema.dump(obj)
 
@@ -512,13 +516,11 @@ class UserResource(Resource):
         if g.auth_user.login == login:
             raise Forbidden("You can't remove yourself from the database.")
         user = db.session.query(User).filter(User.login == login).first()
-        group = (
-            db.session.query(Group)
-            .options(joinedload(Group.members), joinedload(Group.members, Member.user))
-            .filter(Group.name == login)
-        ).first()
+
         if user is None:
             raise NotFound("No such user")
+
+        group = (db.session.query(Group).filter(Group.name == login)).first()
 
         db.session.delete(user)
         db.session.delete(group)

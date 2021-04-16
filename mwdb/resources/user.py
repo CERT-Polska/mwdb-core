@@ -3,7 +3,6 @@ import datetime
 from flask import g, request
 from flask_restful import Resource
 from sqlalchemy import exists
-from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import true
 from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFound

@@ -94,7 +94,7 @@ def test_remove_group_and_user():
     session = MwdbTest()
     session.login()
 
-    session.remove_group(Workgroup.name)
+    session.remove_group("Workgroup")
 
     SampleA(
         [

@@ -1,5 +1,6 @@
-from .utils import MwdbTest, random_name
 import requests
+
+from .utils import MwdbTest, random_name
 
 
 class RelationTestEntity(object):

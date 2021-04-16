@@ -104,6 +104,7 @@ class MwdbTest(object):
     def remove_group(self, name):
         res = self.session.delete(self.mwdb_url + "/group/" + name)
         res.raise_for_status()
+        return res.json()
 
     def set_group(self, name, new_name=None, capabilities=None):
         res = self.session.put(
@@ -169,10 +170,12 @@ class MwdbTest(object):
     def get_user(self, login):
         res = self.session.get(self.mwdb_url + "/user/" + login)
         res.raise_for_status()
+        return res.json()
 
     def remove_user(self, login):
         res = self.session.delete(self.mwdb_url + "/user/" + login)
         res.raise_for_status()
+        return res
 
     def add_sample_legacy(
         self, filename=None, content=None, parent=None, metakeys=None, upload_as=None

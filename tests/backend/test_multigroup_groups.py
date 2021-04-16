@@ -106,13 +106,13 @@ def test_remove_group_and_user():
     ).test()
 
     with ShouldRaise(status_code=404):
-        session.get_group(Workgroup.name)
+        session.get_group(Workgroup.identity)
 
     a_shares = session.get_shares(SampleA.dhash)["shares"]
-    assert not any([(share["group_name"] == Workgroup.name) for share in a_shares])
+    assert not any([(share["group_name"] == Workgroup.identity) for share in a_shares])
 
     b_shares = session.get_shares(SampleB.dhash)["shares"]
-    assert not any([(share["group_name"] == Workgroup.name) for share in b_shares])
+    assert not any([(share["group_name"] == Workgroup.identity) for share in b_shares])
     assert any(
         [
             (

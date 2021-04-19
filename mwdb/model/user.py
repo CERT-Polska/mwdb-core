@@ -58,8 +58,14 @@ class User(db.Model):
         "Object", secondary=favorites, back_populates="followers", lazy="joined"
     )
 
-    comments = db.relationship("Comment", back_populates="author")
-    api_keys = db.relationship("APIKey", foreign_keys="APIKey.user_id", backref="user")
+    comments = db.relationship(
+        "Comment",
+        back_populates="author",
+        cascade="all, delete",
+    )
+    api_keys = db.relationship(
+        "APIKey", foreign_keys="APIKey.user_id", backref="user", cascade="all, delete"
+    )
     registrar = db.relationship(
         "User", foreign_keys="User.registered_by", remote_side=[id], uselist=False
     )

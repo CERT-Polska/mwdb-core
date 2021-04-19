@@ -12,9 +12,7 @@ class Comment(db.Model):
     object_id = db.Column(
         db.Integer, db.ForeignKey("object.id", ondelete="CASCADE"), nullable=False
     )
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
-    )
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
 
     author = db.relationship("User", lazy="joined")
 

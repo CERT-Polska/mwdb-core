@@ -51,8 +51,6 @@ class User(db.Model):
     permissions = db.relationship(
         "ObjectPermission",
         back_populates="related_user",
-        cascade="all, delete",
-        passive_deletes=True,
     )
     favorites = db.relationship(
         "Object", secondary=favorites, back_populates="followers", lazy="joined"
@@ -61,7 +59,6 @@ class User(db.Model):
     comments = db.relationship(
         "Comment",
         back_populates="author",
-        cascade="all, delete",
     )
     api_keys = db.relationship(
         "APIKey", foreign_keys="APIKey.user_id", backref="user", cascade="all, delete"

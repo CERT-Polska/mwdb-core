@@ -53,14 +53,14 @@ class ObjectPermission(db.Model):
 
     object_id = db.Column(
         db.Integer,
-        db.ForeignKey("object.id"),
+        db.ForeignKey("object.id", ondelete="CASCADE"),
         primary_key=True,
         autoincrement=False,
         index=True,
     )
     group_id = db.Column(
         db.Integer,
-        db.ForeignKey("group.id"),
+        db.ForeignKey("group.id", ondelete="CASCADE"),
         primary_key=True,
         autoincrement=False,
         index=True,
@@ -75,7 +75,9 @@ class ObjectPermission(db.Model):
 
     reason_type = db.Column(db.String(32))
     related_object_id = db.Column(db.Integer, db.ForeignKey("object.id"))
-    related_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), index=True)
+    related_user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), index=True
+    )
 
     object = db.relationship(
         "Object",
@@ -93,12 +95,14 @@ class ObjectPermission(db.Model):
         "User",
         foreign_keys=[related_user_id],
         lazy="joined",
+        back_populates="permissions",
     )
 
     group = db.relationship(
         "Group",
         foreign_keys=[group_id],
         lazy="joined",
+        back_populates="permissions",
     )
 
     @property

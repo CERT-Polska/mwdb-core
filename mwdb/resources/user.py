@@ -303,8 +303,12 @@ class UserResource(Resource):
                     schema: UserItemResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
+            404:
+                description: When user doesn't exist.
         """
         obj = db.session.query(User).filter(User.login == login).first()
+        if obj is None:
+            raise NotFound("No such user")
         schema = UserItemResponseSchema()
         return schema.dump(obj)
 
@@ -476,6 +480,55 @@ class UserResource(Resource):
 
         schema = UserSuccessResponseSchema()
         return schema.dump({"login": user_login_obj["login"]})
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def delete(self, login):
+        """
+        ---
+        summary: Delete user
+        description: |
+            Remove user from database.
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - user
+        parameters:
+            - in: path
+              name: login
+              schema:
+                type: string
+              description: User login
+        responses:
+            200:
+                description: When user was removed successfully
+                content:
+                  application/json:
+                    schema: UserSuccessResponseSchema
+            403:
+                description: When user doesn't have `manage_users` capability.
+            404:
+                description: When user doesn't exist.
+        """
+        if g.auth_user.login == login:
+            raise Forbidden("You can't remove yourself from the database.")
+        user = db.session.query(User).filter(User.login == login).first()
+
+        if user is None:
+            raise NotFound("No such user")
+
+        group = (db.session.query(Group).filter(Group.name == login)).first()
+
+        db.session.delete(user)
+        db.session.delete(group)
+        db.session.commit()
+
+        logger.info("User was deleted", extra={"user": login})
+
+        schema = UserSuccessResponseSchema()
+        return schema.dump({"login": login})
 
 
 class UserProfileResource(Resource):

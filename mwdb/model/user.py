@@ -48,12 +48,21 @@ class User(db.Model):
     groups = association_proxy(
         "memberships", "group", creator=lambda group: Member(group=group)
     )
+    permissions = db.relationship(
+        "ObjectPermission",
+        back_populates="related_user",
+    )
     favorites = db.relationship(
         "Object", secondary=favorites, back_populates="followers", lazy="joined"
     )
 
-    comments = db.relationship("Comment", back_populates="author")
-    api_keys = db.relationship("APIKey", foreign_keys="APIKey.user_id", backref="user")
+    comments = db.relationship(
+        "Comment",
+        back_populates="author",
+    )
+    api_keys = db.relationship(
+        "APIKey", foreign_keys="APIKey.user_id", backref="user", cascade="all, delete"
+    )
     registrar = db.relationship(
         "User", foreign_keys="User.registered_by", remote_side=[id], uselist=False
     )

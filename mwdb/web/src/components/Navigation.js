@@ -100,7 +100,8 @@ function RemoteDropdown() {
     const config = useContext(ConfigContext);
     if (!config.config) return [];
 
-    const remoteItems = config.config.remotes.map((remote) => (
+    const remotes = config.config.remotes || [];
+    const remoteItems = remotes.map((remote) => (
         <Link key="remote" className="dropdown-item" to={`/remote/${remote}`}>
             {remote}
         </Link>

@@ -1,12 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useRemote } from "@mwdb-web/commons/remotes";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 import ObjectLink from "./ObjectLink";
 import { makeSearchLink } from "../helpers";
 
 export default function RefString(props) {
-    const remote = useRemote();
-    const remotePath = remote ? `remote/${remote}/` : "";
+    const remotePath = useRemotePath();
     const reasonText =
         props.reason_type.charAt(0).toUpperCase() +
         props.reason_type.slice(1).toLowerCase();
@@ -25,7 +24,7 @@ export default function RefString(props) {
                 "uploader",
                 props.related_user_login,
                 false,
-                `${remotePath}search`
+                `${remotePath}/search`
             )}
         >
             {props.related_user_login}

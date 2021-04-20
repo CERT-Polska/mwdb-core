@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router";
 import Autocomplete from "react-autocomplete";
 
 import _ from "lodash";
@@ -299,6 +300,8 @@ class AttributeUpdate extends Component {
         groups: [],
         modalSpec: {},
         isModalOpen: false,
+        isDeleteModalOpen: false,
+        disabledModalButton: false,
         error: null,
         success: false,
     };
@@ -417,6 +420,22 @@ class AttributeUpdate extends Component {
         this.setState({
             [name]: value,
         });
+    };
+
+    handleRemoveAttribute = async (event) => {
+        event.preventDefault();
+        let metakey = this.props.match.params.metakey;
+        this.setState({ disabledModalButton: true });
+        try {
+            await api.removeMetakeyDefinition(metakey);
+            this.props.history.push("/attributes");
+        } catch (error) {
+            this.setState({
+                disabledModalButton: false,
+                isDeleteModalOpen: false,
+                error: error,
+            });
+        }
     };
 
     handleSubmit = async (event) => {
@@ -543,7 +562,7 @@ class AttributeUpdate extends Component {
                             <label
                                 htmlFor="hidden_checkbox"
                                 className="bg-primary"
-                            ></label>
+                            />
                         </div>
                         <div className="form-hint">
                             Hidden attributes have protected values. Attribute
@@ -558,8 +577,29 @@ class AttributeUpdate extends Component {
                         <button type="submit" className="btn btn-primary">
                             Submit
                         </button>
+                        <button
+                            type="button"
+                            className="btn btn-danger btn-lg float-right"
+                            disabled={this.props.disabledModalButton}
+                            onClick={() =>
+                                this.setState({ isDeleteModalOpen: true })
+                            }
+                        >
+                            Remove attribute
+                        </button>
                     </div>
                 </form>
+                <ConfirmationModal
+                    isOpen={this.state.isDeleteModalOpen}
+                    onRequestClose={() =>
+                        this.setState({ isDeleteModalOpen: false })
+                    }
+                    onConfirm={this.handleRemoveAttribute}
+                    message="Are you sure you want to delete this attribute?"
+                    buttonStyle="btn btn-danger"
+                    confirmText="yes"
+                    cancelText="no"
+                />
                 <AttributePermissionsBox
                     permissions={this.state.permissions}
                     groupItems={this.state.groups}
@@ -572,4 +612,4 @@ class AttributeUpdate extends Component {
     }
 }
 
-export default AttributeUpdate;
+export default withRouter(AttributeUpdate);

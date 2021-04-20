@@ -363,12 +363,15 @@ class ObjectCountResource(Resource):
 
 class ObjectFavoriteResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.personalize)
     def put(self, identifier):
         """
         ---
         summary: Mark favorite object
         description: |
             Mark an object as a favorite for the user.
+
+            Requires `personalize` capability.
         security:
             - bearerAuth: []
         tags:
@@ -384,6 +387,8 @@ class ObjectFavoriteResource(Resource):
                 description: Unmark favorite object
             400:
                 description: When request body is invalid
+            403:
+                description: When user doesn't have `personalize` capability.
             404:
                 description: When object doesn't exist.
         """
@@ -415,6 +420,8 @@ class ObjectFavoriteResource(Resource):
         summary: Unmark favorite object
         description: |
             Unmark an object as a favorite for the user.
+
+            Requires `personalize` capability.
         security:
             - bearerAuth: []
         tags:
@@ -430,6 +437,8 @@ class ObjectFavoriteResource(Resource):
                 description: Unmark favorite object
             400:
                 description: When request body is invalid
+            403:
+                description: When user doesn't have `personalize` capability.
             404:
                 description: When object doesn't exist.
         """

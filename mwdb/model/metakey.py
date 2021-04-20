@@ -17,7 +17,7 @@ class Metakey(db.Model):
     object_id = db.Column(db.Integer, db.ForeignKey("object.id"), nullable=False)
     key = db.Column(
         db.String(64),
-        db.ForeignKey("metakey_definition.key"),
+        db.ForeignKey("metakey_definition.key", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -79,13 +79,13 @@ class MetakeyPermission(db.Model):
 
     key = db.Column(
         db.String(64),
-        db.ForeignKey("metakey_definition.key"),
+        db.ForeignKey("metakey_definition.key", ondelete="CASCADE"),
         primary_key=True,
         index=True,
     )
     group_id = db.Column(
         db.Integer,
-        db.ForeignKey("group.id"),
+        db.ForeignKey("group.id", ondelete="CASCADE"),
         primary_key=True,
         autoincrement=False,
         index=True,
@@ -101,7 +101,12 @@ class MetakeyPermission(db.Model):
         lazy="joined",
         back_populates="permissions",
     )
-    group = db.relationship("Group", foreign_keys=[group_id], lazy="joined")
+    group = db.relationship(
+        "Group",
+        foreign_keys=[group_id],
+        lazy="joined",
+        back_populates="attributes",
+    )
 
     @property
     def group_name(self):
@@ -117,7 +122,16 @@ class MetakeyDefinition(db.Model):
     url_template = db.Column(db.Text, nullable=False)
     hidden = db.Column(db.Boolean, nullable=False, default=False)
     permissions = db.relationship(
-        "MetakeyPermission", lazy="joined", back_populates="template"
+        "MetakeyPermission",
+        lazy="joined",
+        back_populates="template",
+        cascade="all, delete",
+    )
+    metakey = db.relationship(
+        "Metakey",
+        lazy="joined",
+        back_populates="template",
+        cascade="all, delete",
     )
 
     @staticmethod

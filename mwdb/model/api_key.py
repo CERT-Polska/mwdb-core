@@ -14,7 +14,9 @@ class APIKey(db.Model):
     __tablename__ = "api_key"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
     issued_on = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
     issued_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 

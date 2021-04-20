@@ -109,12 +109,14 @@ def test_list_groups_for_share():
     assert sorted(Alice.session().get_sharing_groups()) == sorted([
         Alice.identity,
         Workgroup.identity,
+        "registered",
         "public"
     ])
 
     assert sorted(Bob.session().get_sharing_groups()) == sorted([
         Bob.identity,
         Workgroup.identity,
+        "registered",
         "public"
     ])
 
@@ -124,5 +126,6 @@ def test_list_groups_for_share():
         Joe.identity,
         Homegroup.identity,
         Workgroup.identity,
+        "registered",
         "public"
     ])

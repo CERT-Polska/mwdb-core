@@ -1,5 +1,7 @@
 from sqlalchemy.dialects.postgresql.array import ARRAY
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm.exc import FlushError
 
 from mwdb.core.capabilities import Capabilities
 
@@ -14,15 +16,38 @@ class Group(db.Model):
     capabilities = db.Column(
         "capabilities", ARRAY(db.Text), nullable=False, server_default="{}"
     )
+    # Group is user's private group
     private = db.Column(db.Boolean, nullable=False, default=False)
+    # New users are automatically added to this group
+    default = db.Column(db.Boolean, nullable=False, default=False)
+    # Workspace groups have two traits:
+    # - group members can list all the other group memebers
+    # - they are candidates for sharing when upload_as:*
+    workspace = db.Column(db.Boolean, nullable=False, default=True)
 
     members = db.relationship(
         "Member", back_populates="group", cascade="all, delete-orphan"
     )
     users = association_proxy("members", "user", creator=lambda user: Member(user=user))
 
+    permissions = db.relationship(
+        "ObjectPermission",
+        back_populates="group",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+
+    attributes = db.relationship(
+        "MetakeyPermission",
+        back_populates="group",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+
     PUBLIC_GROUP_NAME = "public"
-    EVERYTHING_GROUP_NAME = "everything"
+    # These groups are just pre-created for convenience by 'mwdb-core configure'
+    DEFAULT_EVERYTHING_GROUP_NAME = "everything"
+    DEFAULT_REGISTERED_GROUP_NAME = "registered"
 
     @property
     def pending_group(self):
@@ -35,6 +60,10 @@ class Group(db.Model):
 
     @property
     def immutable(self):
+        """
+        Immutable groups can't be renamed, joined and left.
+        The only thing that can be changed are capabilities.
+        """
         return self.private or self.name == self.PUBLIC_GROUP_NAME
 
     @property
@@ -44,6 +73,32 @@ class Group(db.Model):
     @property
     def group_admins(self):
         return [member.user.login for member in self.members if member.group_admin]
+
+    def add_member(self, user):
+        if user in self.users:
+            return False
+
+        db.session.begin_nested()
+        try:
+            self.users.append(user)
+            db.session.commit()
+        except (FlushError, IntegrityError):
+            db.session.rollback()
+            return False
+        return True
+
+    def remove_member(self, user):
+        if user not in self.users:
+            return False
+
+        db.session.begin_nested()
+        try:
+            self.users.remove(user)
+            db.session.commit()
+        except (FlushError, IntegrityError):
+            db.session.rollback()
+            return False
+        return True
 
     @staticmethod
     def public_group():
@@ -60,6 +115,13 @@ class Group(db.Model):
             .filter(Group.capabilities.contains([Capabilities.access_all_objects]))
             .all()
         )
+
+    @staticmethod
+    def all_default_groups():
+        """
+        Return all default groups
+        """
+        return db.session.query(Group).filter(Group.default.is_(True)).all()
 
 
 class Member(db.Model):

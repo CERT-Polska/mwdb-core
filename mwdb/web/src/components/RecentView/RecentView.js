@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import queryString from "query-string";
 
@@ -168,12 +168,12 @@ export default function RecentView(props) {
                                 type="submit"
                                 value="Search"
                             />
-                            <Link
-                                to="/search_help"
+                            <a
+                                href="https://mwdb.readthedocs.io/en/latest/user-guide/7-Lucene-search.html"
                                 className="btn btn-outline-primary"
                             >
                                 ?
-                            </Link>
+                            </a>
                         </div>
                     </div>
                     <div className="input-group">

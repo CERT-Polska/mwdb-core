@@ -122,6 +122,10 @@ function addObjectRelation(parent, child) {
     return axios.put(`/object/${parent}/child/${child}`);
 }
 
+function removeObjectRelation(parent, child) {
+    return axios.delete(`/object/${parent}/child/${child}`);
+}
+
 function getObjectShares(id) {
     return axios.get(`/object/${id}/share`);
 }
@@ -299,6 +303,10 @@ function getMetakeyDefinitions() {
 
 function getMetakeyDefinition(key) {
     return axios.get(`/meta/manage/${key}`);
+}
+
+function removeMetakeyDefinition(key) {
+    return axios.delete(`/meta/manage/${key}`);
 }
 
 function addMetakeyDefinition(key, label, description, template, hidden) {
@@ -489,6 +497,7 @@ export default {
     getSettableMetakeyDefinitions,
     getMetakeyDefinitions,
     getMetakeyDefinition,
+    removeMetakeyDefinition,
     addMetakeyDefinition,
     setMetakeyPermission,
     deleteMetakeyPermission,
@@ -502,6 +511,7 @@ export default {
     getConfigStats,
     getObjectRelations,
     addObjectRelation,
+    removeObjectRelation,
     getRemoteObject,
     getRemoteObjectList,
     getRemoteObjectCount,

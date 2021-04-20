@@ -4,7 +4,12 @@ export { default as APIKeyList } from "./APIKeyList";
 export { default as ConfirmationModal } from "./ConfirmationModal";
 export { default as DataTable } from "./DataTable";
 export { default as DateString } from "./DateString";
-export { default as ErrorBoundary, Alert } from "./ErrorBoundary";
+export {
+    default as ErrorBoundary,
+    Alert,
+    getErrorMessage,
+} from "./ErrorBoundary";
+export { default as GroupBadge } from "./GroupBadge";
 export { default as Hash } from "./Hash";
 export { default as HexView } from "./HexView";
 export { default as Identicon } from "./Identicon";
@@ -12,7 +17,11 @@ export { default as MemberList } from "./MemberList";
 export { default as NavDropdown } from "./NavDropdown";
 export { default as ObjectLink } from "./ObjectLink";
 export { default as PagedList } from "./PagedList";
-export { default as ProtectedRoute } from "./ProtectedRoute";
+export {
+    ProtectedRoute,
+    AdministrativeRoute,
+    AttributeRoute,
+} from "./ProtectedRoute";
 export { default as RefString } from "./RefString";
 export { default as SortedList } from "./SortedList";
 export { default as View } from "./View";
@@ -52,6 +61,10 @@ export function getStyleForTag(tag) {
     }
     if (tag.indexOf(":") !== -1) return "info";
     return "danger";
+}
+
+export function ShowIf({ condition, children }) {
+    return condition ? children : [];
 }
 
 export function HighlightText(props) {

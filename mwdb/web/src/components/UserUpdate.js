@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import { capabilitiesList } from "./Capabilities";
+import { Link, withRouter } from "react-router-dom";
 import { GroupLink } from "./ShowGroups";
 
 import _ from "lodash";
 import api from "@mwdb-web/commons/api";
+import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { View, MemberList, DateString } from "@mwdb-web/commons/ui";
 import ManageAPIKeys from "./ManageAPIKeys";
 
@@ -431,4 +431,4 @@ class UserUpdate extends Component {
     }
 }
 
-export default UserUpdate;
+export default withRouter(UserUpdate);

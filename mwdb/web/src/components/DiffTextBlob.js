@@ -1,5 +1,5 @@
 import React, { Component, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useRouteMatch } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { split as SplitEditor } from "react-ace";
@@ -247,7 +247,8 @@ class DiffView extends Component {
 function ConnectedDiffView(props) {
     const remote = useRemote();
     const api = useContext(APIContext);
-    return <DiffView {...props} remote={remote} api={api} />;
+    const match = useRouteMatch();
+    return <DiffView {...props} remote={remote} api={api} match={match} />;
 }
 
 export default ConnectedDiffView;

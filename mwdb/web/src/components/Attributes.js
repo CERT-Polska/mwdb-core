@@ -3,7 +3,7 @@ import AttributesAddModal from "./AttributesAddModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import {
@@ -79,7 +79,7 @@ function DefaultAttributeRenderer(props) {
                                 tooltipMessage="Copy value to clipboard"
                             />
                         </span>
-                        {auth.hasCapability("removing_attributes") && (
+                        {auth.hasCapability(Capability.removingAttributes) && (
                             <span
                                 className="ml-2"
                                 data-toggle="tooltip"

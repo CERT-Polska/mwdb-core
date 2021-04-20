@@ -7,15 +7,16 @@ import {
     faScroll,
     faUpload,
     faGlobe,
+    faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { NavDropdown } from "@mwdb-web/commons/ui";
-import { useRemote } from "@mwdb-web/commons/remotes";
+import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
 
 import logo from "../assets/logo.png";
 
@@ -24,7 +25,9 @@ function AdminDropdown() {
     const [pendingUsersCount, setPendingUsersCount] = useState(null);
 
     const isAdmin = auth.isAdmin;
-    const isAttributeManager = auth.hasCapability("managing_attributes");
+    const isAttributeManager = auth.hasCapability(
+        Capability.managingAttributes
+    );
 
     async function updatePendingUsersCount() {
         try {
@@ -112,11 +115,32 @@ function RemoteDropdown() {
     );
 }
 
+function UploadButton() {
+    const auth = useContext(AuthContext);
+    const buttonLink = auth.hasCapability(Capability.addingFiles) ? (
+        <Link className="nav-link" to={"/upload"}>
+            <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
+            Upload
+        </Link>
+    ) : (
+        <div className="nav-link text-muted">
+            <span
+                data-toggle="tooltip"
+                title="File upload is disabled for your account"
+            >
+                <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
+                Upload
+            </span>
+        </div>
+    );
+    return buttonLink;
+}
+
 export default function Navigation() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
     const remote = useRemote();
-    const remotePath = remote ? `/remote/${remote}` : "";
+    const remotePath = useRemotePath();
     const navItems = config.config ? (
         <Extendable ident="navbar">
             {!auth.isAuthenticated &&
@@ -161,13 +185,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link" to={"/upload"}>
-                            <FontAwesomeIcon
-                                className="navbar-icon"
-                                icon={faUpload}
-                            />
-                            Upload
-                        </Link>
+                        <UploadButton />
                     </li>
                 </Extendable>
             ) : (
@@ -179,11 +197,6 @@ export default function Navigation() {
                     <li className="nav-item">
                         <Link className="nav-link" to={"/search"}>
                             Search
-                        </Link>
-                    </li>
-                    <li>
-                        <Link className="nav-link" to="/user_groups">
-                            Groups
                         </Link>
                     </li>
                     <li className="nav-item">
@@ -233,7 +246,7 @@ export default function Navigation() {
             <Extendable ident="navbarAuthenticated">
                 <React.Fragment>
                     <li className="nav-item">
-                        <Link className="nav-link" to={`${remotePath}`}>
+                        <Link className="nav-link" to={`${remotePath}/`}>
                             <FontAwesomeIcon
                                 className="navbar-icon"
                                 icon={faFile}
@@ -298,17 +311,6 @@ export default function Navigation() {
                         <Extendable ident="navbarRight">
                             {auth.isAuthenticated ? (
                                 <React.Fragment>
-                                    {!remote && (
-                                        <li className="nav-item">
-                                            <span
-                                                className="navbar-text"
-                                                style={{ marginRight: "1rem" }}
-                                            >
-                                                Logged as:{" "}
-                                                <b>{auth.user.login}</b>
-                                            </span>
-                                        </li>
-                                    )}
                                     <RemoteDropdown />
                                     <li className="nav-item">
                                         <div className="btn-group">
@@ -323,10 +325,14 @@ export default function Navigation() {
                                             ) : (
                                                 <React.Fragment>
                                                     <Link
-                                                        className="btn btn-outline-success"
-                                                        to={`/profile/${auth.user.login}`}
+                                                        className="btn btn-outline-success profile-button"
+                                                        to="/profile"
                                                     >
-                                                        Profile
+                                                        <FontAwesomeIcon
+                                                            className="navbar-icon"
+                                                            icon={faUser}
+                                                        />
+                                                        {auth.user.login}
                                                     </Link>
                                                     <a
                                                         className="btn btn-outline-danger"

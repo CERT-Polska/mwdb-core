@@ -101,11 +101,15 @@ class FileResource(ObjectResource, FileUploader):
         return super().get()
 
     @requires_authorization
+    @requires_capabilities(Capabilities.adding_files)
     def post(self):
         """
         ---
         summary: Upload file
-        description: Uploads new file.
+        description: |
+            Uploads a new file.
+
+            Requires `adding_files` capability.
         security:
             - bearerAuth: []
         tags:
@@ -199,11 +203,15 @@ class FileItemResource(ObjectItemResource, FileUploader):
         return super().get(identifier)
 
     @requires_authorization
+    @requires_capabilities(Capabilities.adding_files)
     def post(self, identifier):
         """
         ---
         summary: Upload file
-        description: Uploads new file.
+        description: |
+            Uploads a new file.
+
+            Requires `adding_files` capability.
         security:
             - bearerAuth: []
         tags:

@@ -11,7 +11,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from mwdb.core.config import app_config
 
 from . import db
-from .group import Member
+from .group import Group, Member
 from .object import ObjectPermission, favorites
 
 
@@ -48,12 +48,21 @@ class User(db.Model):
     groups = association_proxy(
         "memberships", "group", creator=lambda group: Member(group=group)
     )
+    permissions = db.relationship(
+        "ObjectPermission",
+        back_populates="related_user",
+    )
     favorites = db.relationship(
         "Object", secondary=favorites, back_populates="followers", lazy="joined"
     )
 
-    comments = db.relationship("Comment", back_populates="author")
-    api_keys = db.relationship("APIKey", foreign_keys="APIKey.user_id", backref="user")
+    comments = db.relationship(
+        "Comment",
+        back_populates="author",
+    )
+    api_keys = db.relationship(
+        "APIKey", foreign_keys="APIKey.user_id", backref="user", cascade="all, delete"
+    )
     registrar = db.relationship(
         "User", foreign_keys="User.registered_by", remote_side=[id], uselist=False
     )
@@ -112,7 +121,7 @@ class User(db.Model):
             feed_quality=feed_quality or "high",
             pending=pending,
             disabled=False,
-            groups=[user_group, Group.public_group()],
+            groups=[user_group] + Group.all_default_groups(),
         )
         user.reset_sessions()
 
@@ -202,18 +211,22 @@ class User(db.Model):
         member.group_admin = set_admin
 
     def has_access_to_object(self, object_id):
+        """
+        Query filter for objects visible by this user
+        """
         return object_id.in_(
             db.session.query(ObjectPermission.object_id).filter(
                 self.is_member(ObjectPermission.group_id)
             )
         )
 
-    def has_uploaded_object(self, object_id):
-        return object_id.in_(
-            db.session.query(ObjectPermission.object_id).filter(
-                and_(
-                    ObjectPermission.related_object == ObjectPermission.object_id,
-                    ObjectPermission.related_user_id == self.id,
-                )
-            )
+    def workspaces(self):
+        """
+        Query for workspace groups for this user
+        """
+        return (
+            db.session.query(Group)
+            .join(Group.members)
+            .join(Member.user)
+            .filter(and_(Member.user_id == self.id, Group.workspace.is_(True)))
         )

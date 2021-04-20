@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { useParams } from "react-router";
 
 import {
     faFingerprint,
@@ -39,6 +40,7 @@ function ConfigPreview() {
 }
 
 export default function ShowConfig(props) {
+    const params = useParams();
     async function downloadTextBlob(object) {
         downloadData(JSON.stringify(object.cfg), object.id, "application/json");
     }
@@ -47,7 +49,7 @@ export default function ShowConfig(props) {
         <ShowObject
             ident="showConfig"
             objectType="config"
-            objectId={props.match.params.hash}
+            objectId={params.hash}
             searchEndpoint="/configs"
             headerIcon={faTable}
             headerCaption="Config details"

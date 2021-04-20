@@ -13,7 +13,6 @@ import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
 import Upload from "./components/Upload";
 import UserLogin from "./components/UserLogin";
-import UserProfile from "./components/UserProfile";
 import ShowUsers from "./components/ShowUsers";
 import ShowGroups from "./components/ShowGroups";
 import UserCreate from "./components/UserCreate";
@@ -26,19 +25,13 @@ import UserSetPassword from "./components/UserSetPassword";
 import ManageAttributes from "./components/ManageAttributes";
 import AttributeDefine from "./components/AttributeDefine";
 import AttributeUpdate from "./components/AttributeUpdate";
-import Search, { SearchHelp } from "./components/Search";
+import Search from "./components/Search";
 import RelationsPlot from "./components/RelationsPlot";
 import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
 import Docs from "./components/Docs";
-import RemoteShowSample from "./components/Remote/RemoteShowSample";
-import RemoteShowConfig from "./components/Remote/RemoteShowConfig";
-import RemoteShowTextBlob from "./components/Remote/RemoteShowTextBlob";
-import RemoteRecentSamples from "./components/Remote/RemoteRecentSamples";
-import RemoteRecentConfigs from "./components/Remote/RemoteRecentConfigs";
-import RemoteRecentBlobs from "./components/Remote/RemoteRecentBlobs";
-import RemoteDiffTextBlob from "./components/Remote/RemoteDiffTextBlob";
-import RemoteSearch from "./components/Remote/RemoteSearch";
+import RemoteViews from "./components/Remote/RemoteViews";
+import ProfileViews from "./components/Profile/ProfileViews";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -69,10 +62,15 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
-import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
+import {
+    ErrorBoundary,
+    ProtectedRoute,
+    AdministrativeRoute,
+    AttributeRoute,
+} from "@mwdb-web/commons/ui";
 import { Extendable } from "./commons/extensions";
 
 library.add(faTimes);
@@ -101,26 +99,6 @@ library.add(faThumbtack);
 library.add(faStar);
 library.add(farStar);
 
-function AuthenticatedRoute(args) {
-    const auth = useContext(AuthContext);
-    return <ProtectedRoute condition={auth.isAuthenticated} {...args} />;
-}
-
-function AdministrativeRoute(args) {
-    const auth = useContext(AuthContext);
-    return <ProtectedRoute condition={auth.isAdmin} {...args} />;
-}
-
-function AttributeRoute(args) {
-    const auth = useContext(AuthContext);
-    return (
-        <ProtectedRoute
-            condition={auth.hasCapability("managing_attributes")}
-            {...args}
-        />
-    );
-}
-
 function DefaultRoute() {
     const location = useLocation();
     return (
@@ -138,135 +116,110 @@ function DefaultRoute() {
 }
 
 export default function App() {
+    const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
 
     const routeSwitch = config.config ? (
         <Switch>
-            <Route exact path="/login" component={UserLogin} />
+            <Route exact path="/login">
+                <UserLogin />
+            </Route>
             {config.config["is_registration_enabled"] ? (
-                <Route exact path="/register" component={UserRegister} />
+                <Route exact path="/register">
+                    <UserRegister />
+                </Route>
             ) : (
                 []
             )}
-            <Route
+            <Route exact path="/recover_password">
+                <UserPasswordRecover />
+            </Route>
+            <Route exact path="/setpasswd/:token">
+                <UserSetPassword />
+            </Route>
+            <ProtectedRoute exact path="/">
+                <RecentSamples />
+            </ProtectedRoute>
+            <ProtectedRoute exact path="/configs">
+                <RecentConfigs />
+            </ProtectedRoute>
+            <ProtectedRoute exact path="/blobs">
+                <RecentBlobs />
+            </ProtectedRoute>
+            <ProtectedRoute
                 exact
-                path="/recover_password"
-                component={UserPasswordRecover}
-            />
-            <Route exact path="/setpasswd/:token" component={UserSetPassword} />
-            <AuthenticatedRoute exact path="/" component={RecentSamples} />
-            <AuthenticatedRoute
-                exact
-                path="/configs"
-                component={RecentConfigs}
-            />
-            <AuthenticatedRoute exact path="/blobs" component={RecentBlobs} />
-            <AuthenticatedRoute exact path="/upload" component={Upload} />
-            <AuthenticatedRoute path="/search" component={Search} />
-            <AuthenticatedRoute path="/search_help" component={SearchHelp} />
-            <AuthenticatedRoute
-                exact
-                path="/configs/stats"
-                component={ConfigStats}
-            />
-            <AuthenticatedRoute exact path="/about" component={About} />
-            <AuthenticatedRoute exact path="/docs" component={Docs} />
-            <AuthenticatedRoute
-                exact
-                path="/profile/:login"
-                component={UserProfile}
-            />
+                path="/upload"
+                condition={auth.hasCapability(Capability.addingFiles)}
+            >
+                <Upload />
+            </ProtectedRoute>
+            <ProtectedRoute exact path="/search">
+                <Search />
+            </ProtectedRoute>
+            <ProtectedRoute exact path="/configs/stats">
+                <ConfigStats />
+            </ProtectedRoute>
+            <ProtectedRoute exact path="/about">
+                <About />
+            </ProtectedRoute>
+            <ProtectedRoute exact path="/docs">
+                <Docs />
+            </ProtectedRoute>
             <Redirect from="/sample/:hash" to="/file/:hash" />
-            <AuthenticatedRoute path="/file/:hash" component={ShowSample} />
-            <AuthenticatedRoute path="/config/:hash" component={ShowConfig} />
-            <AuthenticatedRoute path="/blob/:hash" component={ShowTextBlob} />
-            <AuthenticatedRoute
-                path="/diff/:current/:previous"
-                component={DiffTextBlob}
-            />
-            <AuthenticatedRoute path="/relations" component={RelationsPlot} />
-            <AuthenticatedRoute
-                exact
-                path="/user_groups"
-                component={UserGroups}
-            />
-            <AdministrativeRoute
-                exact
-                path="/user/:login"
-                component={UserUpdate}
-            />
-            <AdministrativeRoute exact path="/users" component={ShowUsers} />
-            <AdministrativeRoute
-                exact
-                path="/users/pending"
-                component={ShowPendingUsers}
-            />
-            <AdministrativeRoute
-                exact
-                path="/users/new"
-                component={UserCreate}
-            />
-            <AdministrativeRoute exact path="/groups" component={ShowGroups} />
-            <AdministrativeRoute
-                exact
-                path="/groups/new"
-                component={GroupRegister}
-            />
-            <AdministrativeRoute
-                exact
-                path="/group/:name"
-                component={GroupUpdate}
-            />
-            <AttributeRoute
-                exact
-                path="/attribute/:metakey"
-                component={AttributeUpdate}
-            />
-            <AttributeRoute
-                exact
-                path="/attributes"
-                component={ManageAttributes}
-            />
-            <AttributeRoute
-                exact
-                path="/attributes/new"
-                component={AttributeDefine}
-            />
-            <AuthenticatedRoute
-                exact
-                path="/remote/:remote"
-                component={RemoteRecentSamples}
-            />
-            <AuthenticatedRoute
-                exact
-                path="/remote/:remote/configs"
-                component={RemoteRecentConfigs}
-            />
-            <AuthenticatedRoute
-                exact
-                path="/remote/:remote/blobs"
-                component={RemoteRecentBlobs}
-            />
-            <AuthenticatedRoute
-                path="/remote/:remote/file/:hash"
-                component={RemoteShowSample}
-            />
-            <AuthenticatedRoute
-                path="/remote/:remote/config/:hash"
-                component={RemoteShowConfig}
-            />
-            <AuthenticatedRoute
-                path="/remote/:remote/blob/:hash"
-                component={RemoteShowTextBlob}
-            />
-            <AuthenticatedRoute
-                path="/remote/:remote/diff/:current/:previous"
-                component={RemoteDiffTextBlob}
-            />
-            <AuthenticatedRoute
-                path="/remote/:remote/search"
-                component={RemoteSearch}
-            />
+            <ProtectedRoute path="/file/:hash">
+                <ShowSample />
+            </ProtectedRoute>
+            <ProtectedRoute path="/config/:hash">
+                <ShowConfig />
+            </ProtectedRoute>
+            <ProtectedRoute path="/blob/:hash">
+                <ShowTextBlob />
+            </ProtectedRoute>
+            <ProtectedRoute path="/diff/:current/:previous">
+                <DiffTextBlob />
+            </ProtectedRoute>
+            <ProtectedRoute path="/relations">
+                <RelationsPlot />
+            </ProtectedRoute>
+            <ProtectedRoute exact path="/user_groups">
+                <UserGroups />
+            </ProtectedRoute>
+            <AdministrativeRoute exact path="/user/:login">
+                <UserUpdate />
+            </AdministrativeRoute>
+            <AdministrativeRoute exact path="/users">
+                <ShowUsers />
+            </AdministrativeRoute>
+            <AdministrativeRoute exact path="/users/pending">
+                <ShowPendingUsers />
+            </AdministrativeRoute>
+            <AdministrativeRoute exact path="/users/new">
+                <UserCreate />
+            </AdministrativeRoute>
+            <AdministrativeRoute exact path="/groups">
+                <ShowGroups />
+            </AdministrativeRoute>
+            <AdministrativeRoute exact path="/groups/new">
+                <GroupRegister />
+            </AdministrativeRoute>
+            <AdministrativeRoute exact path="/group/:name">
+                <GroupUpdate />
+            </AdministrativeRoute>
+            <AttributeRoute exact path="/attribute/:metakey">
+                <AttributeUpdate />
+            </AttributeRoute>
+            <AttributeRoute exact path="/attributes">
+                <ManageAttributes />
+            </AttributeRoute>
+            <AttributeRoute exact path="/attributes/new">
+                <AttributeDefine />
+            </AttributeRoute>
+            <ProtectedRoute path="/remote/:remote">
+                <RemoteViews />
+            </ProtectedRoute>
+            <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
+                <ProfileViews />
+            </ProtectedRoute>
             {fromPlugin("routes")}
             <DefaultRoute />
         </Switch>

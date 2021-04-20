@@ -165,11 +165,11 @@ class GroupResource(Resource):
     def put(self, name):
         """
         ---
-        summary: Update group name and capabilities
+        summary: Update group attributes
         description: |
-            Updates group name and capabilities.
+            Updates group attributes.
 
-            Works only for user-defined groups (excluding private and 'public')
+            If the group is immutable, you can only change capabilities.
 
             Requires `manage_users` capability.
         security:
@@ -213,17 +213,23 @@ class GroupResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
+        immutable_fields = ["name", "default", "workspace"]
+        if group.immutable:
+            for field in immutable_fields:
+                if obj[field] is not None:
+                    raise Forbidden(f"Can't change '{field}', group is immutable")
+
         if obj["name"] is not None:
-            if obj["name"] != group_name_obj["name"] and group.immutable:
-                raise Forbidden("Renaming group not allowed - group is immutable")
             group.name = obj["name"]
 
         if obj["capabilities"] is not None:
             group.capabilities = obj["capabilities"]
 
-        # Invalidate all sessions due to potentially changed capabilities
-        for member in group.users:
-            member.reset_sessions()
+        if obj["default"] is not None:
+            group.default = obj["default"]
+
+        if obj["workspace"] is not None:
+            group.default = obj["workspace"]
 
         db.session.commit()
 
@@ -233,6 +239,52 @@ class GroupResource(Resource):
         )
         schema = GroupSuccessResponseSchema()
         return schema.dump({"name": group.name})
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def delete(self, name):
+        """
+        ---
+        summary: Delete group
+        description: |
+            Remove group from database.
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+        responses:
+            200:
+                description: When group was removed successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
+            403:
+                description: When user doesn't have `manage_users` capability.
+            404:
+                description: When group doesn't exist
+        """
+        group = (db.session.query(Group).filter(Group.name == name)).first()
+
+        if group is None:
+            raise NotFound("No such group")
+
+        if group.immutable is True:
+            raise Forbidden(f"Group '{name}' is immutable and can't be removed.")
+
+        db.session.delete(group)
+        db.session.commit()
+
+        logger.info("Group was deleted", extra={"group": name})
+        schema = GroupSuccessResponseSchema()
+        return schema.dump({"name": name})
 
 
 class GroupMemberResource(Resource):
@@ -292,7 +344,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.immutable:
-            raise Forbidden("Adding members to private or public group is not allowed")
+            raise Forbidden("Adding members to immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()
@@ -303,8 +355,8 @@ class GroupMemberResource(Resource):
         if member.pending:
             raise Forbidden("User is pending and need to be accepted first")
 
-        group.users.append(member)
-        member.reset_sessions()
+        if not group.add_member(member):
+            raise Conflict("Member is already added")
         db.session.commit()
 
         logger.info(
@@ -359,6 +411,8 @@ class GroupMemberResource(Resource):
                     group is immutable or user is pending
             404:
                 description: When user or group doesn't exist
+            409:
+                description: When member is already added
         """
         group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
 
@@ -378,9 +432,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.immutable:
-            raise Forbidden(
-                "Change membership in private or public group is not allowed"
-            )
+            raise Forbidden("Change membership in immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()
@@ -392,8 +444,6 @@ class GroupMemberResource(Resource):
             raise Forbidden("User is pending and need to be accepted first")
 
         member.set_group_admin(group.id, membership["group_admin"])
-
-        member.reset_sessions()
         db.session.commit()
 
         logger.info(
@@ -442,9 +492,10 @@ class GroupMemberResource(Resource):
                     group is immutable or user is pending
             404:
                 description: When user or group doesn't exist
+            409:
+                description: When member is already removed
         """
         group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
-
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
         group = (
@@ -462,9 +513,7 @@ class GroupMemberResource(Resource):
             raise NotFound("No such group")
 
         if group.immutable:
-            raise Forbidden(
-                "Removing members from private or public group is not allowed"
-            )
+            raise Forbidden("Removing members from immutable group is not allowed")
 
         member = (
             db.session.query(User).filter(User.login == user_login_obj["login"]).first()
@@ -480,8 +529,8 @@ class GroupMemberResource(Resource):
         if member.pending:
             raise Forbidden("User is pending and need to be accepted first")
 
-        group.users.remove(member)
-        member.reset_sessions()
+        if not group.remove_member(member):
+            raise Conflict("Member is already removed")
         db.session.commit()
 
         logger.info(

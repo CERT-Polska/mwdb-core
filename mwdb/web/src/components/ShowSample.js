@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import {
     ShowObject,
@@ -37,12 +37,11 @@ import {
     Hash,
     HexView,
 } from "@mwdb-web/commons/ui";
-import { useRemote } from "@mwdb-web/commons/remotes";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 function SampleDetails() {
     const context = useContext(ObjectContext);
-    const remote = useRemote();
-    const remotePath = remote ? `remote/${remote}` : "";
+    const remotePath = useRemotePath();
     return (
         <DataTable>
             <Extendable ident="showSampleDetails">
@@ -54,7 +53,7 @@ function SampleDetails() {
                                 "name",
                                 context.object.file_name,
                                 false,
-                                remotePath
+                                `${remotePath}/`
                             )}
                         >
                             {context.object.file_name}
@@ -75,7 +74,7 @@ function SampleDetails() {
                                 "size",
                                 context.object.file_size,
                                 false,
-                                remotePath
+                                `${remotePath}/`
                             )}
                         >
                             {humanFileSize(context.object.file_size)}
@@ -96,7 +95,7 @@ function SampleDetails() {
                                 "type",
                                 context.object.file_type,
                                 false,
-                                remotePath
+                                `${remotePath}/`
                             )}
                         >
                             {context.object.file_type}
@@ -177,7 +176,7 @@ function SampleDetails() {
                                 "ssdeep",
                                 context.object.ssdeep,
                                 false,
-                                remotePath
+                                `${remotePath}/`
                             )}
                         >
                             {context.object.ssdeep}
@@ -199,7 +198,7 @@ function SampleDetails() {
                                 to={makeSearchDateLink(
                                     "upload_time",
                                     context.object.upload_time,
-                                    remotePath
+                                    `${remotePath}/`
                                 )}
                             >
                                 <DateString date={context.object.upload_time} />
@@ -266,6 +265,7 @@ function PreviewSwitchAction(props) {
 
 export default function ShowSample(props) {
     const api = useContext(APIContext);
+    const params = useParams();
     async function downloadSample(object) {
         window.location.href = await api.requestFileDownloadLink(object.id);
     }
@@ -274,7 +274,7 @@ export default function ShowSample(props) {
         <ShowObject
             ident="showSample"
             objectType="file"
-            objectId={props.match.params.hash}
+            objectId={params.hash}
             searchEndpoint=""
             headerIcon={faFile}
             headerCaption="File details"

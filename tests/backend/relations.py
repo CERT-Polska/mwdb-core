@@ -1,11 +1,12 @@
-from .utils import MwdbTest, random_name
 import requests
+
+from .utils import MwdbTest, random_name
 
 
 class RelationTestEntity(object):
     def __init__(self, context, name):
         self.context = context
-        self.dhash = ''
+        self.dhash = ""
         self.identity = random_name()
         self.name = name
 
@@ -63,9 +64,10 @@ class RelationTestObject(RelationTestEntity):
     def _access_object(self, session):
         raise NotImplementedError()
 
-    def __call__(self, children=None, should_access=None):
+    def __call__(self, children=None, should_access=None, should_not_access=None):
         children = children or []
         should_access = should_access or []
+        should_not_access = should_not_access or []
 
         class BoundTestSample(object):
             def __init__(self, sample, children, should_access):
@@ -92,7 +94,12 @@ class RelationTestObject(RelationTestEntity):
 
             def test(self):
                 for user in self.context.users:
-                    (self.sample.should_access if user in should_access else self.sample.should_not_access)(user)
+                    if user in should_access:
+                        self.sample.should_access(user)
+                    elif user in should_not_access:
+                        self.sample.should_not_access(user)
+                    else:
+                        self.sample.should_not_access(user)
                 for child in self.children:
                     child.test()
 
@@ -108,15 +115,19 @@ class RelationTestObject(RelationTestEntity):
         else:
             session = group.session()
 
-        self._create_object(session, self.identity,
-                            parent=parent and parent.dhash,
-                            upload_as=upload_as)
+        self._create_object(
+            session, self.identity, parent=parent and parent.dhash, upload_as=upload_as
+        )
 
     def should_access(self, group):
         try:
             self._access_object(group.session())
         except requests.exceptions.HTTPError as e:
-            raise Exception("{}.should_access({}) failed with {}".format(str(self), str(group), str(e)))
+            raise Exception(
+                "{}.should_access({}) failed with {}".format(
+                    str(self), str(group), str(e)
+                )
+            )
 
     def should_not_access(self, group):
         try:
@@ -129,7 +140,9 @@ class RelationTestObject(RelationTestEntity):
 
 class RelationTestSample(RelationTestObject):
     def _create_object(self, session, identity, parent=None, upload_as=None):
-        return session.add_sample(identity, identity, parent=parent, upload_as=upload_as)
+        return session.add_sample(
+            identity, identity, parent=parent, upload_as=upload_as
+        )
 
     def _access_object(self, session):
         session.get_sample(self.dhash)
@@ -137,14 +150,16 @@ class RelationTestSample(RelationTestObject):
 
 class RelationTestConfig(RelationTestObject):
     def _create_object(self, session, identity, parent=None, upload_as=None):
-        return session.add_config(parent, "malwarex", {
-            "key1": identity,
-            "key2": identity,
-            "array": [identity, identity],
-            "nested": {
-                "nestedkey": identity
-            }
-        })
+        return session.add_config(
+            parent,
+            "malwarex",
+            {
+                "key1": identity,
+                "key2": identity,
+                "array": [identity, identity],
+                "nested": {"nestedkey": identity},
+            },
+        )
 
     def _access_object(self, session):
         session.get_config(self.dhash)
@@ -152,10 +167,9 @@ class RelationTestConfig(RelationTestObject):
 
 class RelationTestBlob(RelationTestObject):
     def _create_object(self, session, identity, parent=None, upload_as=None):
-        return session.add_blob(parent,
-                                blobname="malwarex.inject",
-                                blobtype="inject",
-                                content=identity)
+        return session.add_blob(
+            parent, blobname="malwarex.inject", blobtype="inject", content=identity
+        )
 
     def _access_object(self, session):
         session.get_blob(self.dhash)

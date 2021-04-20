@@ -1,4 +1,5 @@
 import React, { Component, useCallback } from "react";
+import { withRouter } from "react-router";
 import Autocomplete from "react-autocomplete";
 import { useDropzone } from "react-dropzone";
 import queryString from "query-string";
@@ -7,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AttributesAddModal from "./AttributesAddModal";
 
 import api from "@mwdb-web/commons/api";
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { DataTable, View } from "@mwdb-web/commons/ui";
 
 function UploadDropzone(props) {
@@ -56,7 +57,7 @@ function UploadDropzone(props) {
     );
 }
 
-export default class Upload extends Component {
+class Upload extends Component {
     state = {
         files: null,
         error: null,
@@ -188,7 +189,9 @@ export default class Upload extends Component {
                         onDrop={(file) => this.setState({ file })}
                     />
                     <div className="form-group">
-                        {this.context.hasCapability("adding_parents") ? (
+                        {this.context.hasCapability(
+                            Capability.addingParents
+                        ) ? (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label className="input-group-text">
@@ -379,3 +382,5 @@ export default class Upload extends Component {
         );
     }
 }
+
+export default withRouter(Upload);

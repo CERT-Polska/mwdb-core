@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import api from "@mwdb-web/commons/api";
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default class AttributesAddModal extends Component {
@@ -77,7 +77,7 @@ export default class AttributesAddModal extends Component {
                 onRequestClose={this.props.onRequestClose}
                 onConfirm={this.handleSubmit}
             >
-                {!this.context.hasCapability("adding_all_attributes") &&
+                {!this.context.hasCapability(Capability.addingAllAttributes) &&
                 !Object.keys(this.state.attributes).length ? (
                     <div>
                         Sorry, there are no attributes you can set at this

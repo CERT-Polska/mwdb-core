@@ -3,6 +3,7 @@ import { useHistory } from "react-router";
 
 import api from "../api";
 
+import { Capability } from "./capabilities";
 import { AuthContext } from "./context";
 
 const localStorageAuthKey = "user";
@@ -127,6 +128,26 @@ export function AuthProvider(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Effect for 403 Forbidden to handle unexpected loss of permissions
+    useEffect(() => {
+        // Set 403 Forbidden interceptor when AuthProvider is mounted
+        const interceptor = api.axios.interceptors.response.use(
+            (_) => _,
+            (error) => {
+                // Asynchronically refresh session with 403 expecting new set of capabilities
+                if (error.response && error.response.status === 403)
+                    refreshSession();
+                return Promise.reject(error);
+            }
+        );
+
+        // Unset the interceptor when AuthProvider is unmounted
+        return () => {
+            api.axios.interceptors.response.eject(interceptor);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     // Effect for periodic session refresh
     useEffect(() => {
         function setRefreshTimer() {
@@ -164,7 +185,7 @@ export function AuthProvider(props) {
             value={{
                 user: session,
                 isAuthenticated: !!session,
-                isAdmin: hasCapability("manage_users"),
+                isAdmin: hasCapability(Capability.manageUsers),
                 hasCapability,
                 refreshSession,
                 updateSession,

@@ -16,7 +16,9 @@ function Comment(props) {
                 <Identicon data={props.author} size="45" />
             </div>
             <div className="media-body">
-                <h4 className="media-heading user_name">{props.author}</h4>
+                <h4 className="media-heading user_name">
+                    {props.author ? props.author : "(deleted)"}
+                </h4>
                 <span>
                     {_.flatMap(
                         props.comment.split("\n"),

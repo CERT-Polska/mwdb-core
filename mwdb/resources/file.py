@@ -23,10 +23,6 @@ from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 class FileUploader(ObjectUploader):
     def on_created(self, object):
-        if app_config.mwdb.enable_karton:
-            metakeys = object.get_metakeys(as_dict=True, check_permissions=False)
-            if "karton" not in metakeys:
-                send_file_to_karton(object)
         hooks.on_created_file(object)
 
     def on_reuploaded(self, object):

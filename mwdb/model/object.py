@@ -10,6 +10,7 @@ from sqlalchemy.sql.expression import true
 from mwdb.core.capabilities import Capabilities
 
 from . import db
+from .karton import KartonAnalysis, karton_object
 from .metakey import Metakey, MetakeyDefinition, MetakeyPermission
 from .tag import Tag, object_tag_table
 
@@ -260,6 +261,12 @@ class Object(db.Model):
         foreign_keys=[ObjectPermission.related_object_id],
         back_populates="related_object",
         order_by=ObjectPermission.access_time.asc(),
+    )
+
+    analyses = db.relationship(
+        "KartonAnalysis",
+        secondary=karton_object,
+        back_populates="objects",
     )
 
     @property

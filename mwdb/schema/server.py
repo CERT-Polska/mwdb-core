@@ -11,7 +11,7 @@ class ServerInfoResponseSchema(Schema):
     is_maintenance_set = fields.Boolean(required=True, allow_none=False)
     is_registration_enabled = fields.Boolean(required=True, allow_none=False)
     recaptcha_site_key = fields.Str(required=True, allow_none=True)
-    base_url = fields.Str(required=True, allow_none=False)
-    # Dict() supporting keys and values is added to marshmallow 3.x
+
+
+class ServerPluginInfoResponseSchema(Schema):
     active_plugins = fields.Dict(required=True, allow_none=False)
-    remotes = fields.List(fields.Str(), required=True, allow_none=False)

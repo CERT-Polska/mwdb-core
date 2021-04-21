@@ -14,13 +14,13 @@ import "swagger-ui-react/swagger-ui.css";
 
 ReactDOM.render(
     <BrowserRouter>
-        <ConfigProvider>
-            <AuthProvider>
+        <AuthProvider>
+            <ConfigProvider>
                 <APIProvider>
                     <App />
                 </APIProvider>
-            </AuthProvider>
-        </ConfigProvider>
+            </ConfigProvider>
+        </AuthProvider>
     </BrowserRouter>,
     document.getElementById("root")
 );

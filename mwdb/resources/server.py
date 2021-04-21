@@ -4,8 +4,14 @@ from flask_restful import Resource
 from mwdb.core.app import api
 from mwdb.core.config import app_config
 from mwdb.core.plugins import get_plugin_info
-from mwdb.schema.server import ServerInfoResponseSchema, ServerPingResponseSchema
+from mwdb.schema.server import (
+    ServerInfoResponseSchema,
+    ServerPingResponseSchema,
+    ServerPluginInfoResponseSchema,
+)
 from mwdb.version import app_build_version
+
+from . import requires_authorization
 
 
 class PingResource(Resource):
@@ -52,19 +58,41 @@ class ServerInfoResource(Resource):
                 "is_maintenance_set": app_config.mwdb.enable_maintenance,
                 "is_registration_enabled": app_config.mwdb.enable_registration,
                 "recaptcha_site_key": app_config.mwdb.recaptcha_site_key,
-                "base_url": app_config.mwdb.base_url,
-                "active_plugins": get_plugin_info(),
-                "remotes": app_config.mwdb.remotes,
             }
         )
 
 
+class ServerPluginInfoResource(Resource):
+    @requires_authorization
+    def get(self):
+        """
+        ---
+        summary: Get plugin information
+        description: Returns information about installed plugins
+        security:
+            - bearerAuth: []
+        tags:
+            - server
+        responses:
+            200:
+              description: Server plugin info with public configuration
+              content:
+                application/json:
+                  schema: ServerInfoResponseSchema
+        """
+        schema = ServerPluginInfoResponseSchema()
+        return schema.dump({"active_plugins": get_plugin_info()})
+
+
 class ServerDocsResource(Resource):
+    @requires_authorization
     def get(self):
         """
         ---
         summary: Get server API documentation
         description: Returns API documentation in OAS3 format
+        security:
+            - bearerAuth: []
         tags:
             - server
         responses:

@@ -17,8 +17,6 @@ from . import (
 
 
 class CommentResource(Resource):
-    on_created = hooks.on_created_comment
-
     @requires_authorization
     def get(self, type, identifier):
         """

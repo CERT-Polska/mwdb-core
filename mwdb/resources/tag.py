@@ -79,8 +79,6 @@ class TagListResource(Resource):
 
 
 class TagResource(Resource):
-    on_created = hooks.on_created_tag
-    on_reuploaded = hooks.on_reuploaded_tag
 
     @requires_authorization
     def get(self, type, identifier):

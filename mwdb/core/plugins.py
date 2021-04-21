@@ -83,7 +83,7 @@ class PluginHookBase(object):
         pass
 
     @hook_handler_method
-    def on_reuploaded_tag(self, tag: Tag):
+    def on_reuploaded_tag(self, object: Object, tag: Tag):
         pass
 
     @hook_handler_method

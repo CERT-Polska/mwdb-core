@@ -4,6 +4,7 @@ from sqlalchemy.sql import and_
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.plugins import hooks
 from mwdb.model import ObjectPermission, Tag, db, object_tag_table
 from mwdb.schema.tag import (
     TagItemResponseSchema,
@@ -78,6 +79,9 @@ class TagListResource(Resource):
 
 
 class TagResource(Resource):
+    on_created = hooks.on_created_tag
+    on_reuploaded = hooks.on_reuploaded_tag
+
     @requires_authorization
     def get(self, type, identifier):
         """
@@ -179,10 +183,15 @@ class TagResource(Resource):
             raise NotFound("Object not found")
 
         tag_name = obj["tag"]
-        db_object.add_tag(tag_name)
+        is_new = db_object.add_tag(tag_name)
 
         logger.info("Tag added", extra={"tag": tag_name, "dhash": db_object.dhash})
         db.session.refresh(db_object)
+        if is_new:
+            hooks.on_created_tag(db_object, tag_name)
+        else:
+            hooks.on_reuploaded_tag(db_object, tag_name)
+
         schema = TagItemResponseSchema(many=True)
         return schema.dump(db_object.tags)
 

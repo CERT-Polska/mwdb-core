@@ -79,7 +79,6 @@ class TagListResource(Resource):
 
 
 class TagResource(Resource):
-
     @requires_authorization
     def get(self, type, identifier):
         """

@@ -119,7 +119,7 @@ export default function App() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
 
-    const routeSwitch = config.config ? (
+    const routeSwitch = config.config["server_version"] ? (
         <Switch>
             <Route exact path="/login">
                 <UserLogin />

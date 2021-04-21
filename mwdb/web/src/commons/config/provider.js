@@ -72,6 +72,7 @@ export function ConfigProvider(props) {
             value={{
                 config: serverConfig.config,
                 configError: serverConfig.error,
+                isReady: !!serverConfig.config["server_version"],
                 update: updateServerInfo,
             }}
         >

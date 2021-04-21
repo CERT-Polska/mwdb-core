@@ -98,7 +98,7 @@ function AdminDropdown() {
 
 function RemoteDropdown() {
     const config = useContext(ConfigContext);
-    if (!config.config) return [];
+    if (!config.isReady) return [];
 
     const remotes = config.config.remotes || [];
     const remoteItems = remotes.map((remote) => (
@@ -142,7 +142,7 @@ export default function Navigation() {
     const config = useContext(ConfigContext);
     const remote = useRemote();
     const remotePath = useRemotePath();
-    const navItems = config.config ? (
+    const navItems = config.isReady ? (
         <Extendable ident="navbar">
             {!auth.isAuthenticated &&
             config.config["is_registration_enabled"] ? (
@@ -243,7 +243,7 @@ export default function Navigation() {
     );
 
     const remoteNavItems =
-        config.config && auth.isAuthenticated ? (
+        config.isReady && auth.isAuthenticated ? (
             <Extendable ident="navbarAuthenticated">
                 <React.Fragment>
                     <li className="nav-item">

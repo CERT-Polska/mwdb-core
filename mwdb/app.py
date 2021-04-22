@@ -62,7 +62,12 @@ from mwdb.resources.remotes import (
     RemoteTextBlobPushResource,
 )
 from mwdb.resources.search import SearchResource
-from mwdb.resources.server import PingResource, ServerDocsResource, ServerInfoResource
+from mwdb.resources.server import (
+    PingResource,
+    ServerDocsResource,
+    ServerInfoResource,
+    ServerPluginInfoResource,
+)
 from mwdb.resources.share import ShareGroupListResource, ShareResource
 from mwdb.resources.tag import TagListResource, TagResource
 from mwdb.resources.user import (
@@ -195,6 +200,7 @@ def require_auth():
 # Server health endpoints
 api.add_resource(PingResource, "/ping")
 api.add_resource(ServerInfoResource, "/server")
+api.add_resource(ServerPluginInfoResource, "/server/plugins")
 api.add_resource(ServerDocsResource, "/docs")
 
 # Authentication endpoints

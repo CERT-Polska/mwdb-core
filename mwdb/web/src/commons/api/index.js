@@ -44,6 +44,10 @@ function getServerInfo() {
     return axios.get("/server");
 }
 
+function getServerPluginInfo() {
+    return axios.get("/server/plugins");
+}
+
 function authLogin(login, password) {
     return axios.post("/auth/login", { login, password });
 }
@@ -442,6 +446,7 @@ export default {
     getApiForEnvironment,
     getServerDocs,
     getServerInfo,
+    getServerPluginInfo,
     authLogin,
     authGroups,
     authRefresh,

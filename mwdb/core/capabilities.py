@@ -39,7 +39,10 @@ class Capabilities(object):
     manage_profile = "manage_profile"
     # Can personalize own profile (mark as favorite, manage quick queries)
     personalize = "personalize"
-    karton_manage = "karton_manage"
+    # Can assign existing Karton analysis to the object
+    karton_assign = "karton_assign"
+    # Can resubmit object to Karton
+    karton_reanalyze = "karton_reanalyze"
 
     @classmethod
     def all(cls):

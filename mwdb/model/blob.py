@@ -27,7 +27,14 @@ class TextBlob(Object):
 
     @classmethod
     def get_or_create(
-        cls, content, blob_name, blob_type, parent=None, metakeys=None, share_with=None
+        cls,
+        content,
+        blob_name,
+        blob_type,
+        parent=None,
+        metakeys=None,
+        share_with=None,
+        analysis=None,
     ):
         dhash = hashlib.sha256(content.encode("utf-8")).hexdigest()
 
@@ -40,7 +47,11 @@ class TextBlob(Object):
             _content=content.encode("unicode_escape").decode("utf-8"),
         )
         blob_obj, is_new = cls._get_or_create(
-            blob_obj, parent=parent, metakeys=metakeys, share_with=share_with
+            blob_obj,
+            parent=parent,
+            metakeys=metakeys,
+            share_with=share_with,
+            analysis=analysis,
         )
         # If object exists yet: we need to refresh last_seen timestamp
         if not is_new:

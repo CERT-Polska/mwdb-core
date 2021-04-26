@@ -31,7 +31,14 @@ class Config(Object):
 
     @classmethod
     def get_or_create(
-        cls, cfg, family, config_type, parent=None, metakeys=None, share_with=None
+        cls,
+        cfg,
+        family,
+        config_type,
+        parent=None,
+        metakeys=None,
+        share_with=None,
+        analysis=None,
     ):
         dhash = config_dhash(cfg)
 
@@ -39,7 +46,11 @@ class Config(Object):
             dhash=dhash, _cfg=config_encode(cfg), family=family, config_type=config_type
         )
         return cls._get_or_create(
-            cfg_obj, parent=parent, metakeys=metakeys, share_with=share_with
+            cfg_obj,
+            parent=parent,
+            metakeys=metakeys,
+            share_with=share_with,
+            analysis=analysis,
         )
 
 

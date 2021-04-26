@@ -50,7 +50,6 @@ def send_file_to_karton(file: File) -> str:
     if tmpfile is not None:
         tmpfile.close()
 
-    file.add_metakey("karton", task.root_uid, check_permissions=False)
     logger.info("File sent to Karton with %s", task.root_uid)
     return task.root_uid
 
@@ -66,7 +65,7 @@ def send_config_to_karton(config: Config) -> str:
         },
     )
     producer.send_task(task)
-    config.add_metakey("karton", task.root_uid, check_permissions=False)
+
     logger.info("Configuration sent to Karton with %s", task.root_uid)
     return task.root_uid
 
@@ -82,7 +81,7 @@ def send_blob_to_karton(blob: TextBlob) -> str:
         },
     )
     producer.send_task(task)
-    blob.add_metakey("karton", task.root_uid, check_permissions=False)
+
     logger.info("Blob sent to Karton with %s", task.root_uid)
     return task.root_uid
 

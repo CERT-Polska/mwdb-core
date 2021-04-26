@@ -10,6 +10,7 @@ from mwdb.core.config import app_config
 from mwdb.core.karton import send_config_to_karton
 from mwdb.core.plugins import hooks
 from mwdb.model import Config, TextBlob, db
+from mwdb.model.karton import KartonAnalysis
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobCreateSpecSchema
 from mwdb.schema.config import (
@@ -82,14 +83,20 @@ class ConfigStatsResource(Resource):
 
 
 class ConfigUploader(ObjectUploader):
-    def on_created(self, object):
-        if app_config.mwdb.enable_karton:
-            metakeys = object.get_metakeys(as_dict=True, check_permissions=False)
-            if "karton" not in metakeys:
-                send_config_to_karton(object)
+    def on_created(self, object, params):
+        if app_config.mwdb.enable_karton and not object.is_analyzed():
+            analysis_id = send_config_to_karton(object)
+            KartonAnalysis.create(
+                analysis_id=analysis_id,
+                initial_object=object,
+                arguments=params.get("karton_arguments", {}),
+            )
+            db.session.commit()
+        super().on_created(object, params)
         hooks.on_created_config(object)
 
-    def on_reuploaded(self, object):
+    def on_reuploaded(self, object, params):
+        super().on_reuploaded(object, params)
         hooks.on_reuploaded_config(object)
 
     def _get_embedded_blob(self, in_blob, share_with, metakeys):
@@ -119,7 +126,7 @@ class ConfigUploader(ObjectUploader):
                 "'in-blob' key must be set to blob SHA256 hash or blob specification"
             )
 
-    def _create_object(self, spec, parent, share_with, metakeys):
+    def _create_object(self, spec, parent, share_with, metakeys, analysis):
         try:
             blobs = []
             config = dict(spec["cfg"])
@@ -143,6 +150,7 @@ class ConfigUploader(ObjectUploader):
                 parent=parent,
                 share_with=share_with,
                 metakeys=metakeys,
+                analysis=analysis,
             )
 
             for blob in blobs:

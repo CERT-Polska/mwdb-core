@@ -1,4 +1,5 @@
 import json
+from uuid import UUID
 
 from flask import g, request
 from flask_restful import Resource
@@ -9,6 +10,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import MetakeyDefinition, Object, db
+from mwdb.model.karton import KartonAnalysis
 from mwdb.schema.object import (
     ObjectCountRequestSchema,
     ObjectCountResponseSchema,
@@ -38,13 +40,13 @@ class ObjectUploader:
     ObjectType = None
     ItemResponseSchema = None
 
-    def on_created(self, object):
-        raise NotImplementedError
+    def on_created(self, object, params):
+        hooks.on_created_object(object)
 
-    def on_reuploaded(self, object):
-        raise NotImplementedError
+    def on_reuploaded(self, object, params):
+        hooks.on_reuploaded_object(object)
 
-    def _create_object(self, spec, parent, share_with, metakeys):
+    def _create_object(self, spec, parent, share_with, metakeys, analysis):
         raise NotImplementedError
 
     def create_object(self, params):
@@ -62,30 +64,50 @@ class ObjectUploader:
         else:
             parent_object = None
 
-        # Validate metakeys
+        # Validate metakeys and Karton assignment
+        karton_id = params.get("karton_id")
+
         metakeys = params["metakeys"]
         for metakey in params["metakeys"]:
             key = metakey["key"]
+            if key == "karton":
+                if karton_id is not None:
+                    raise BadRequest("Duplicated Karton analysis identifier")
+                try:
+                    karton_id = UUID(metakey["value"])
+                except (ValueError, AttributeError):
+                    raise BadRequest("'karton' attribute accepts only UUID values")
             if not MetakeyDefinition.query_for_set(key).first():
                 raise NotFound(
                     f"Metakey '{key}' not defined or insufficient "
                     "permissions to set that one"
                 )
 
+        if karton_id is not None and not g.auth_user.has_rights(
+            Capabilities.karton_assign
+        ):
+            raise Forbidden(
+                "You are not permitted to assign existing Karton analysis to object"
+            )
+
+        analysis = KartonAnalysis.get(karton_id).first()
+        if analysis is None:
+            raise NotFound("Karton analysis not found")
+
         # Validate upload_as argument
         share_with = get_shares_for_upload(params["upload_as"])
 
-        item, is_new = self._create_object(params, parent_object, share_with, metakeys)
+        item, is_new = self._create_object(
+            params, parent_object, share_with, metakeys, analysis
+        )
 
         try:
             db.session.commit()
 
             if is_new:
-                hooks.on_created_object(item)
-                self.on_created(item)
+                self.on_created(item, params)
             else:
-                hooks.on_reuploaded_object(item)
-                self.on_reuploaded(item)
+                self.on_reuploaded(item, params)
         finally:
             item.release_after_upload()
 

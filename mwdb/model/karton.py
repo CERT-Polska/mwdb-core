@@ -40,8 +40,9 @@ class KartonAnalysis(db.Model):
         return db.session.query(KartonAnalysis).filter(KartonAnalysis.id == analysis_id)
 
     @classmethod
-    def create(cls, analysis_id, arguments, initial_object):
-        analysis = KartonAnalysis(id=analysis_id, arguments=arguments)
-        analysis.objects.append(initial_object)
+    def create(cls, analysis_id, initial_object, arguments=None):
+        analysis = KartonAnalysis(
+            id=analysis_id, arguments=arguments or {}, objects=[initial_object]
+        )
         db.session.add(analysis)
         return analysis

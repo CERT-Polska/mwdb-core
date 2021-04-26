@@ -75,7 +75,13 @@ class File(Object):
 
     @classmethod
     def get_or_create(
-        cls, file_name, file_stream, parent=None, metakeys=None, share_with=None
+        cls,
+        file_name,
+        file_stream,
+        parent=None,
+        metakeys=None,
+        share_with=None,
+        analysis=None,
     ):
         file_stream.seek(0, os.SEEK_END)
         file_size = file_stream.tell()
@@ -97,7 +103,11 @@ class File(Object):
         )
 
         file_obj, is_new = cls._get_or_create(
-            file_obj, parent=parent, metakeys=metakeys, share_with=share_with
+            file_obj,
+            parent=parent,
+            metakeys=metakeys,
+            share_with=share_with,
+            analysis=analysis,
         )
 
         if is_new:

@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
-import { NavLink, Redirect, Route, Switch } from "react-router-dom";
+import {
+    Link,
+    NavLink,
+    Redirect,
+    Route,
+    Switch,
+    useLocation,
+    useParams,
+} from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,10 +20,16 @@ import {
     AdministrativeRoute,
     AttributeRoute,
 } from "@mwdb-web/commons/ui";
-import ShowGroups from "../ShowGroups";
-import ShowUsers from "../ShowUsers";
-import ShowPendingUsers from "../ShowPendingUsers";
-import ManageAttributes from "../ManageAttributes";
+import ShowGroups from "./Views/ShowGroups";
+import ShowUsers from "./Views/ShowUsers";
+import ShowPendingUsers from "./Views/ShowPendingUsers";
+import ManageAttributes from "./Views/ManageAttributes";
+import AttributeUpdate from "./Views/AttributeUpdate";
+import GroupUpdate from "./Views/GroupUpdate";
+import UserUpdate from "./Views/UserUpdate";
+import UserCreate from "./Views/UserCreate";
+import GroupRegister from "./Views/GroupRegister";
+import AttributeDefine from "./Views/AttributeDefine";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -70,17 +84,17 @@ function SettingsNav() {
                       Access control
                   </NavLink>,
                   <NavLink exact to="/admin/users" className="nav-link">
-                      User settings
+                      Users
                   </NavLink>,
                   <NavLink exact to="/admin/groups" className="nav-link">
-                      Group settings
+                      Groups
                   </NavLink>,
               ]
             : []),
         ...(auth.hasCapability(Capability.managingAttributes)
             ? [
                   <NavLink to="/admin/attributes" className="nav-link">
-                      Attribute settings
+                      Attributes
                   </NavLink>,
               ]
             : []),
@@ -93,9 +107,7 @@ function SettingsNav() {
                     <strong>
                         <FontAwesomeIcon icon={faUsersCog} /> Administration
                     </strong>
-                    <div className="nav flex-column nav-pills">
-                        {adminLinks}
-                    </div>
+                    <div className="nav flex-column">{adminLinks}</div>
                 </React.Fragment>
             ) : (
                 []
@@ -105,6 +117,31 @@ function SettingsNav() {
 }
 
 export default function SettingsView(props) {
+    function TabBradcrump() {
+        const currentPath = useLocation();
+        const tabName = currentPath.pathname.split("/")[2];
+        const targetName = currentPath.pathname.split("/")[3];
+        if (!targetName) return [];
+
+        return (
+            <Switch>
+                <Route exact path="/profile" />
+                <Route>
+                    <nav aria-label="breadcrumb">
+                        <ol className="breadcrumb">
+                            <li className="breadcrumb-item">
+                                <Link to={`/admin/${tabName}`}>{tabName}</Link>
+                            </li>
+                            <li className="breadcrumb-item active">
+                                {targetName} details
+                            </li>
+                        </ol>
+                    </nav>
+                </Route>
+            </Switch>
+        );
+    }
+
     return (
         <View
             ident="settings"
@@ -116,23 +153,54 @@ export default function SettingsView(props) {
                 <div className="col-2">
                     <SettingsNav />
                 </div>
-                <div className="col-10">
+                <div className="col-8">
                     <div className="tab-content">
+                        {/*<TabBradcrump />*/}
                         <Switch>
-                            <Route exact path="/admin">
+                            <AdministrativeRoute exact path="/admin">
                                 <Redirect to="/admin/pending" />
-                            </Route>
+                            </AdministrativeRoute>
                             <AdministrativeRoute path="/admin/pending">
                                 <ShowPendingUsers />
                             </AdministrativeRoute>
-                            <AdministrativeRoute path="/admin/users">
+
+                            <AdministrativeRoute exact path="/admin/users">
                                 <ShowUsers />
                             </AdministrativeRoute>
-                            <AdministrativeRoute path="/admin/groups">
+                            <AdministrativeRoute exact path="/admin/user/new">
+                                <UserCreate />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute
+                                exact
+                                path="/admin/user/:login"
+                            >
+                                <UserUpdate />
+                            </AdministrativeRoute>
+
+                            <AdministrativeRoute exact path="/admin/groups">
                                 <ShowGroups />
                             </AdministrativeRoute>
-                            <AttributeRoute path="/admin/attributes">
+                            <AdministrativeRoute exact path="/admin/group/new">
+                                <GroupRegister />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute
+                                exact
+                                path="/admin/group/:name"
+                            >
+                                <GroupUpdate />
+                            </AdministrativeRoute>
+
+                            <AttributeRoute exact path="/admin/attributes">
                                 <ManageAttributes />
+                            </AttributeRoute>
+                            <AttributeRoute exact path="/admin/attribute/new">
+                                <AttributeDefine />
+                            </AttributeRoute>
+                            <AttributeRoute
+                                exact
+                                path="/admin/attribute/:metakey"
+                            >
+                                <AttributeUpdate />
                             </AttributeRoute>
                         </Switch>
                     </div>

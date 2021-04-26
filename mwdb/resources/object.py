@@ -83,16 +83,17 @@ class ObjectUploader:
                     "permissions to set that one"
                 )
 
-        if karton_id is not None and not g.auth_user.has_rights(
-            Capabilities.karton_assign
-        ):
-            raise Forbidden(
-                "You are not permitted to assign existing Karton analysis to object"
-            )
+        if karton_id is not None:
+            if not g.auth_user.has_rights(Capabilities.karton_assign):
+                raise Forbidden(
+                    "You are not permitted to assign existing Karton analysis to object"
+                )
 
-        analysis = KartonAnalysis.get(karton_id).first()
-        if analysis is None:
-            raise NotFound("Karton analysis not found")
+            analysis = KartonAnalysis.get(karton_id).first()
+            if analysis is None:
+                raise NotFound("Karton analysis not found")
+        else:
+            analysis = None
 
         # Validate upload_as argument
         share_with = get_shares_for_upload(params["upload_as"])

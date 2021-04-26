@@ -1,8 +1,8 @@
-"""KartonAnalysis table
+"""Added KartonAnalysis table
 
-Revision ID: d615fe946f03
+Revision ID: 7e52d19ee7c4
 Revises: bd88eb7eec2b
-Create Date: 2021-04-26 17:39:17.754919
+Create Date: 2021-04-26 18:21:32.926043
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "d615fe946f03"
+revision = "7e52d19ee7c4"
 down_revision = "bd88eb7eec2b"
 branch_labels = None
 depends_on = None
@@ -27,7 +27,7 @@ def upgrade():
     )
     op.create_table(
         "karton_object",
-        sa.Column("analysis_id", sa.Integer(), nullable=False),
+        sa.Column("analysis_id", postgresql.UUID(), nullable=False),
         sa.Column("object_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["analysis_id"],

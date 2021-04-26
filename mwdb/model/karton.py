@@ -8,7 +8,7 @@ karton_object = db.Table(
     "karton_object",
     db.Column(
         "analysis_id",
-        db.Integer,
+        UUID,
         db.ForeignKey("karton_analysis.id"),
         index=True,
         nullable=False,

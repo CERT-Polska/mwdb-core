@@ -740,9 +740,9 @@ class Object(db.Model):
             metakeys += [
                 KartonMetakey(key="karton", value=str(analysis.id))
                 for analysis in (
-                    db.session.query(KartonAnalysis).filter(
-                        KartonAnalysis.objects.any(id=self.id).all()
-                    )
+                    db.session.query(KartonAnalysis)
+                    .filter(KartonAnalysis.objects.any(id=self.id))
+                    .all()
                 )
             ]
 

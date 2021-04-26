@@ -1,7 +1,6 @@
 import logging
 import shutil
 import tempfile
-from typing import Optional
 
 from flask import g
 from karton.core import Config as KartonConfig
@@ -86,29 +85,8 @@ def send_blob_to_karton(blob: TextBlob) -> str:
     return task.root_uid
 
 
-def get_karton_analysis(
-    db_object: Object, root_uid: Optional[str] = None
-) -> Optional[KartonAnalysis]:
-    # Includes 'karton' permission check
-    metakeys = db_object.get_metakeys(as_dict=True)
-
-    if "karton" not in metakeys:
-        return None
-    if not root_uid:
-        # Metakeys are ordered from oldest to latest one
-        root_uid = metakeys["karton"][-1]
-    elif root_uid not in metakeys["karton"]:
-        # root_uid must occur in attributes to get the analysis status
-        return None
-
+def get_karton_state():
     karton_config = KartonConfig(app_config.karton.config_path)
     karton_backend = KartonBackend(karton_config)
     karton_state = KartonState(karton_backend)
-
-    if root_uid not in karton_state.analyses:
-        return None
-
-    if karton_state.analyses[root_uid].is_done:
-        return None
-
-    return karton_state.analyses[root_uid]
+    return karton_state

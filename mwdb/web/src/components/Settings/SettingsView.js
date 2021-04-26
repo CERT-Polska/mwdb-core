@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import {
-    Link,
-    NavLink,
-    Redirect,
-    Route,
-    Switch,
-    useLocation,
-    useParams,
-} from "react-router-dom";
+import { NavLink, Redirect, Switch } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -117,30 +109,30 @@ function SettingsNav() {
 }
 
 export default function SettingsView(props) {
-    function TabBradcrump() {
-        const currentPath = useLocation();
-        const tabName = currentPath.pathname.split("/")[2];
-        const targetName = currentPath.pathname.split("/")[3];
-        if (!targetName) return [];
-
-        return (
-            <Switch>
-                <Route exact path="/profile" />
-                <Route>
-                    <nav aria-label="breadcrumb">
-                        <ol className="breadcrumb">
-                            <li className="breadcrumb-item">
-                                <Link to={`/admin/${tabName}`}>{tabName}</Link>
-                            </li>
-                            <li className="breadcrumb-item active">
-                                {targetName} details
-                            </li>
-                        </ol>
-                    </nav>
-                </Route>
-            </Switch>
-        );
-    }
+    // function TabBradcrump() {
+    //     const currentPath = useLocation();
+    //     const tabName = currentPath.pathname.split("/")[2];
+    //     const targetName = currentPath.pathname.split("/")[3];
+    //     if (!targetName) return [];
+    //
+    //     return (
+    //         <Switch>
+    //             <Route exact path="/profile" />
+    //             <Route>
+    //                 <nav aria-label="breadcrumb">
+    //                     <ol className="breadcrumb">
+    //                         <li className="breadcrumb-item">
+    //                             <Link to={`/admin/${tabName}`}>{tabName}</Link>
+    //                         </li>
+    //                         <li className="breadcrumb-item active">
+    //                             {targetName} details
+    //                         </li>
+    //                     </ol>
+    //                 </nav>
+    //             </Route>
+    //         </Switch>
+    //     );
+    // }
 
     return (
         <View

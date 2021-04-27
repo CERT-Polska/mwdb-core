@@ -6,10 +6,10 @@ from flask import g
 from karton.core import Config as KartonConfig
 from karton.core import Producer, Resource, Task
 from karton.core.backend import KartonBackend
-from karton.core.inspect import KartonAnalysis, KartonState
+from karton.core.inspect import KartonState
 from karton.core.task import TaskPriority
 
-from ..model import Config, File, Object, TextBlob
+from ..model import Config, File, TextBlob
 from .config import app_config
 
 logger = logging.getLogger("mwdb.karton")

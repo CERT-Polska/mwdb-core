@@ -109,31 +109,6 @@ function SettingsNav() {
 }
 
 export default function SettingsView(props) {
-    // function TabBradcrump() {
-    //     const currentPath = useLocation();
-    //     const tabName = currentPath.pathname.split("/")[2];
-    //     const targetName = currentPath.pathname.split("/")[3];
-    //     if (!targetName) return [];
-    //
-    //     return (
-    //         <Switch>
-    //             <Route exact path="/profile" />
-    //             <Route>
-    //                 <nav aria-label="breadcrumb">
-    //                     <ol className="breadcrumb">
-    //                         <li className="breadcrumb-item">
-    //                             <Link to={`/admin/${tabName}`}>{tabName}</Link>
-    //                         </li>
-    //                         <li className="breadcrumb-item active">
-    //                             {targetName} details
-    //                         </li>
-    //                     </ol>
-    //                 </nav>
-    //             </Route>
-    //         </Switch>
-    //     );
-    // }
-
     return (
         <View
             ident="settings"
@@ -147,7 +122,6 @@ export default function SettingsView(props) {
                 </div>
                 <div className="col-8">
                     <div className="tab-content">
-                        {/*<TabBradcrump />*/}
                         <Switch>
                             <AdministrativeRoute exact path="/admin">
                                 <Redirect to="/admin/pending" />

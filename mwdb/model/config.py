@@ -1,6 +1,7 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from mwdb.core.karton import send_config_to_karton
 from mwdb.core.util import config_decode, config_dhash, config_encode
 
 from . import db
@@ -52,6 +53,9 @@ class Config(Object):
             share_with=share_with,
             analysis=analysis,
         )
+
+    def _send_to_karton(self):
+        return send_config_to_karton(self)
 
 
 # Compatibility reasons

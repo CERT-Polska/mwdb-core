@@ -7,6 +7,7 @@ from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import MetakeyDefinition, Object, db
@@ -41,6 +42,8 @@ class ObjectUploader:
     ItemResponseSchema = None
 
     def on_created(self, object, params):
+        if app_config.mwdb.enable_karton and not object.is_analyzed():
+            object.spawn_analysis(arguments=params.get("karton_arguments", {}))
         hooks.on_created_object(object)
 
     def on_reuploaded(self, object, params):

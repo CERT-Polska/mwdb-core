@@ -6,11 +6,8 @@ from sqlalchemy import func
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.core.config import app_config
-from mwdb.core.karton import send_config_to_karton
 from mwdb.core.plugins import hooks
 from mwdb.model import Config, TextBlob, db
-from mwdb.model.karton import KartonAnalysis
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobCreateSpecSchema
 from mwdb.schema.config import (
@@ -84,14 +81,6 @@ class ConfigStatsResource(Resource):
 
 class ConfigUploader(ObjectUploader):
     def on_created(self, object, params):
-        if app_config.mwdb.enable_karton and not object.is_analyzed():
-            analysis_id = send_config_to_karton(object)
-            KartonAnalysis.create(
-                analysis_id=analysis_id,
-                initial_object=object,
-                arguments=params.get("karton_arguments", {}),
-            )
-            db.session.commit()
         super().on_created(object, params)
         hooks.on_created_config(object)
 

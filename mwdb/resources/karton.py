@@ -1,33 +1,9 @@
-import json
-from uuid import UUID
-
-from flask import g, request
 from flask_restful import Resource
-from luqum.parser import ParseError
-from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFound
+from werkzeug.exceptions import NotFound
 
-from mwdb.core.capabilities import Capabilities
-from mwdb.core.plugins import hooks
-from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
-from mwdb.model import MetakeyDefinition, Object, db
-from mwdb.model.karton import KartonAnalysis
-from mwdb.schema.object import (
-    ObjectCountRequestSchema,
-    ObjectCountResponseSchema,
-    ObjectItemResponseSchema,
-    ObjectListRequestSchema,
-    ObjectListResponseSchema,
-)
+from mwdb.schema.karton import KartonListResponseSchema
 
-from . import (
-    access_object,
-    get_shares_for_upload,
-    get_type_from_str,
-    load_schema,
-    logger,
-    requires_authorization,
-    requires_capabilities,
-)
+from . import access_object, requires_authorization
 
 
 class KartonObjectResource(Resource):
@@ -57,10 +33,10 @@ class KartonObjectResource(Resource):
               description: Object identifier
         responses:
             200:
-                description: Information about object
+                description: Information about analysis status
                 content:
                   application/json:
-                    schema: ObjectItemResponseSchema
+                    schema: KartonListResponseSchema
             404:
                 description: |
                     When object doesn't exist or user doesn't have access
@@ -70,12 +46,6 @@ class KartonObjectResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-
-class KartonAnalysisResource(Resource):
-    @requires_authorization
-    def get(self, type, identifier):
-        pass
-
-    @requires_authorization
-    def put(self, type, identifier):
-        pass
+        status = db_object.get_analysis_status()
+        schema = KartonListResponseSchema()
+        return schema.dump({"status": status, "analyses": db_object.analyses})

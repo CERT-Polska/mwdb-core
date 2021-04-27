@@ -3,6 +3,8 @@ import hashlib
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from mwdb.core.karton import send_blob_to_karton
+
 from . import db
 from .object import Object
 
@@ -58,3 +60,6 @@ class TextBlob(Object):
             blob_obj.last_seen = datetime.datetime.utcnow()
 
         return blob_obj, is_new
+
+    def _send_to_karton(self):
+        return send_blob_to_karton(self)

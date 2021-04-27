@@ -61,12 +61,16 @@ class KartonAnalysis(db.Model):
 
     @property
     def last_update(self):
-        return self._analysis_state.last_update if self._analysis_state else None
+        return (
+            datetime.datetime.fromtimestamp(self._analysis_state.last_update)
+            if self._analysis_state
+            else None
+        )
 
     @property
     def processing_in(self):
         if not self._analysis_state:
-            return []
+            return {}
         return {
             queue_name: {
                 "received_from": list(

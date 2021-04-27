@@ -839,6 +839,23 @@ class Object(db.Model):
         ).all()
         return shares
 
+    def _send_to_karton(self):
+        raise NotImplementedError
+
+    def spawn_analysis(self, arguments, commit=True):
+        """
+        Spawns new KartonAnalysis for this object
+        """
+        analysis_id = self._send_to_karton()
+        analysis = KartonAnalysis.create(
+            analysis_id=analysis_id,
+            initial_object=object,
+            arguments=arguments,
+        )
+        if commit:
+            db.session.commit()
+        return analysis
+
     def assign_analysis(self, analysis):
         """
         Assigns KartonAnalysis to the object
@@ -850,3 +867,11 @@ class Object(db.Model):
 
     def is_analyzed(self):
         return bool(self.analyses)
+
+    def get_analysis_status(self):
+        if not self.analyses:
+            return "not_analyzed"
+        for analysis in self.analyses:
+            if analysis.status == "running":
+                return "running"
+        return "finished"

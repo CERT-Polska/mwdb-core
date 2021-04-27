@@ -9,6 +9,7 @@ from sqlalchemy import or_
 from werkzeug.utils import secure_filename
 
 from mwdb.core.config import StorageProviderType, app_config
+from mwdb.core.karton import send_file_to_karton
 from mwdb.core.util import (
     calc_crc32,
     calc_hash,
@@ -276,3 +277,6 @@ class File(Object):
             return None
         except BadSignature:
             return None
+
+    def _send_to_karton(self):
+        return send_file_to_karton(self)

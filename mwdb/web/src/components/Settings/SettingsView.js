@@ -1,18 +1,53 @@
-import React, { useContext } from "react";
-import { NavLink, Redirect, Route, Switch } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { NavLink, Redirect, Switch } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { View } from "@mwdb-web/commons/ui";
-
-import ProfileSubview from "./Profile/ProfileSubview";
+import {
+    View,
+    AdministrativeRoute,
+    AttributeRoute,
+} from "@mwdb-web/commons/ui";
+import ShowGroups from "./Views/ShowGroups";
+import ShowUsers from "./Views/ShowUsers";
+import ShowPendingUsers from "./Views/ShowPendingUsers";
+import ManageAttributes from "./Views/ManageAttributes";
+import AttributeUpdate from "./Views/AttributeUpdate";
+import GroupUpdate from "./Views/GroupUpdate";
+import UserUpdate from "./Views/UserUpdate";
+import UserCreate from "./Views/UserCreate";
+import GroupRegister from "./Views/GroupRegister";
+import AttributeDefine from "./Views/AttributeDefine";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
+    const [pendingUsersCount, setPendingUsersCount] = useState(null);
+    const isAdmin = auth.isAdmin;
+
+    async function updatePendingUsersCount() {
+        try {
+            let response = await api.getPendingUsers();
+            setPendingUsersCount(response.data.users.length);
+        } catch (error) {
+            console.error(error);
+            setPendingUsersCount("?");
+        }
+    }
+
+    useEffect(() => {
+        if (!isAdmin) return;
+        let timer = setInterval(updatePendingUsersCount, 15000);
+        updatePendingUsersCount();
+        return () => {
+            clearInterval(timer);
+        };
+    }, [isAdmin]);
+
     const adminLinks = [
         ...(auth.hasCapability(Capability.manageUsers)
             ? [
@@ -20,40 +55,38 @@ function SettingsNav() {
                       ? [
                             <NavLink
                                 exact
-                                to="/settings/admin/pending"
+                                to="/admin/pending"
                                 className="nav-link"
                             >
                                 Pending registrations
+                                {pendingUsersCount ? (
+                                    <span
+                                        className="badge badge-pill badge-warning"
+                                        style={{ marginLeft: "8px" }}
+                                    >
+                                        {pendingUsersCount}
+                                    </span>
+                                ) : (
+                                    []
+                                )}
                             </NavLink>,
                         ]
                       : []),
-                  <NavLink
-                      exact
-                      to="/settings/admin/capabilities"
-                      className="nav-link"
-                  >
+                  <NavLink exact to="/admin/capabilities" className="nav-link">
                       Access control
                   </NavLink>,
-                  <NavLink
-                      exact
-                      to="/settings/admin/users"
-                      className="nav-link"
-                  >
-                      User settings
+                  <NavLink exact to="/admin/users" className="nav-link">
+                      Users
                   </NavLink>,
-                  <NavLink
-                      exact
-                      to="/settings/admin/groups"
-                      className="nav-link"
-                  >
-                      Group settings
+                  <NavLink exact to="/admin/groups" className="nav-link">
+                      Groups
                   </NavLink>,
               ]
             : []),
         ...(auth.hasCapability(Capability.managingAttributes)
             ? [
-                  <NavLink to="/settings/admin/attributes" className="nav-link">
-                      Attribute settings
+                  <NavLink to="/admin/attributes" className="nav-link">
+                      Attributes
                   </NavLink>,
               ]
             : []),
@@ -61,20 +94,12 @@ function SettingsNav() {
 
     return (
         <div>
-            <div className="nav flex-column nav-pills">
-                <NavLink exact to="/settings/profile" className="nav-link">
-                    Profile settings
-                </NavLink>
-            </div>
             {adminLinks.length > 0 ? (
                 <React.Fragment>
-                    <hr />
                     <strong>
                         <FontAwesomeIcon icon={faUsersCog} /> Administration
                     </strong>
-                    <div className="nav flex-column nav-pills">
-                        {adminLinks}
-                    </div>
+                    <div className="nav flex-column">{adminLinks}</div>
                 </React.Fragment>
             ) : (
                 []
@@ -85,26 +110,64 @@ function SettingsNav() {
 
 export default function SettingsView(props) {
     return (
-        <View ident="settings" error={props.error} success={props.success}>
+        <View
+            ident="settings"
+            error={props.error}
+            success={props.success}
+            fluid
+        >
             <div className="row">
-                <div className="col-3">
+                <div className="col-2">
                     <SettingsNav />
                 </div>
-                <div className="col-9">
+                <div className="col-8">
                     <div className="tab-content">
                         <Switch>
-                            <Route exact path="/settings">
-                                <Redirect to="/settings/profile" />
-                            </Route>
-                            <Route
-                                path={[
-                                    "/settings/profile",
-                                    "/settings/user/:user",
-                                    "/settings/group/:group",
-                                ]}
+                            <AdministrativeRoute exact path="/admin">
+                                <Redirect to="/admin/pending" />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute path="/admin/pending">
+                                <ShowPendingUsers />
+                            </AdministrativeRoute>
+
+                            <AdministrativeRoute exact path="/admin/users">
+                                <ShowUsers />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute exact path="/admin/user/new">
+                                <UserCreate />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute
+                                exact
+                                path="/admin/user/:login"
                             >
-                                <ProfileSubview />
-                            </Route>
+                                <UserUpdate />
+                            </AdministrativeRoute>
+
+                            <AdministrativeRoute exact path="/admin/groups">
+                                <ShowGroups />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute exact path="/admin/group/new">
+                                <GroupRegister />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute
+                                exact
+                                path="/admin/group/:name"
+                            >
+                                <GroupUpdate />
+                            </AdministrativeRoute>
+
+                            <AttributeRoute exact path="/admin/attributes">
+                                <ManageAttributes />
+                            </AttributeRoute>
+                            <AttributeRoute exact path="/admin/attribute/new">
+                                <AttributeDefine />
+                            </AttributeRoute>
+                            <AttributeRoute
+                                exact
+                                path="/admin/attribute/:metakey"
+                            >
+                                <AttributeUpdate />
+                            </AttributeRoute>
                         </Switch>
                     </div>
                 </div>

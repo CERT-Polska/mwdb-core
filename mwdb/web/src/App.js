@@ -72,6 +72,7 @@ import {
     AttributeRoute,
 } from "@mwdb-web/commons/ui";
 import { Extendable } from "./commons/extensions";
+import SettingsView from "./components/Settings/SettingsView";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -216,6 +217,9 @@ export default function App() {
             </AttributeRoute>
             <ProtectedRoute path="/remote/:remote">
                 <RemoteViews />
+            </ProtectedRoute>
+            <ProtectedRoute path="/admin">
+                <SettingsView />
             </ProtectedRoute>
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
                 <ProfileViews />

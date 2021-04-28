@@ -97,6 +97,8 @@ class KartonObjectResource(Resource):
                 content:
                   application/json:
                     schema: KartonItemResponseSchema
+            403:
+                description: When user doesn't have `karton_reanalyze` capability.
             404:
                 description: |
                     When object doesn't exist or user doesn't have access
@@ -121,12 +123,7 @@ class KartonAnalysisResource(Resource):
         ---
         summary: Get information about Karton analysis
         description: |
-            Submits object into Karton to trigger new analysis
-
-            If submit was successful: returns information about
-            spawned Karton analyses for provided object
-
-            Requires `karton_reanalyze` capability.
+            Returns information about Karton analysis
         security:
             - bearerAuth: []
         tags:
@@ -184,12 +181,9 @@ class KartonAnalysisResource(Resource):
         ---
         summary: Assign Karton analysis to the object
         description: |
-            Submits object into Karton to trigger new analysis
+            Assigns Karton object to existing Karton analysis
 
-            If submit was successful: returns information about
-            spawned Karton analyses for provided object
-
-            Requires `karton_reanalyze` capability.
+            Requires `karton_assign` capability.
         security:
             - bearerAuth: []
         tags:
@@ -200,6 +194,8 @@ class KartonAnalysisResource(Resource):
                 content:
                   application/json:
                     schema: KartonItemResponseSchema
+            403:
+                description: When user doesn't have `karton_assign` capability.
             404:
                 description: |
                     When object doesn't exist or user doesn't have access

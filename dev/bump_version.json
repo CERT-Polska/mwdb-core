@@ -7,5 +7,5 @@
         "mwdb/web/src/commons/package.json": "\"version\": \"$VERSION\"",
         "docs/conf.py": "release = '$VERSION'"
     },
-    "regex": "(\\d.\\d.\\d(?:-(post|dev|alpha|beta|rc)[0-9])?)"
+    "regex": "(\\d[.]\\d[.]\\d(?:-(post|dev|alpha|beta|rc)[0-9])?)"
 }

@@ -1,11 +1,9 @@
 from flask import request
 from flask_restful import Resource
-from sqlalchemy.sql import and_
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import KartonAnalysis, Object
-from mwdb.model.karton import karton_object
 from mwdb.schema.karton import (
     KartonItemResponseSchema,
     KartonListResponseSchema,

@@ -22,6 +22,8 @@ export const Capability = {
     removingObjects: "removing_objects",
     manageProfile: "manage_profile",
     personalize: "personalize",
+    kartonAssign: "karton_assign",
+    kartonReanalyze: "karton_reanalyze",
 };
 
 export let capabilitiesList = {
@@ -52,6 +54,9 @@ export let capabilitiesList = {
     [Capability.removingObjects]: "Can remove objects",
     [Capability.manageProfile]: "Can manage own profile",
     [Capability.personalize]: "Can mark favorites and manage own quick queries",
+    [Capability.kartonAssign]:
+        "Can assign existing analysis to the object (required by karton-mwdb-reporter)",
+    [Capability.kartonReanalyze]: "Can resubmit any object for analysis",
 };
 
 for (let extraCapabilities of fromPlugin("capabilities")) {

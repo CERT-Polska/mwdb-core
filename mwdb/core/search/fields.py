@@ -1,5 +1,5 @@
-import uuid
 import re
+import uuid
 from datetime import datetime, timedelta
 from typing import Any, List, Type, Union
 
@@ -152,9 +152,7 @@ class ListField(BaseField):
 
         if expression.has_wildcard():
             if not self.support_wildcards:
-                raise UnsupportedGrammarException(
-                    "Wildcards are not allowed here"
-                )
+                raise UnsupportedGrammarException("Wildcards are not allowed here")
             return self.column.any(self.value_column.like(value))
         else:
             return self.column.any(self.value_column == value)
@@ -174,16 +172,12 @@ class UUIDField(BaseField):
         value = get_term_value(expression)
 
         if expression.has_wildcard():
-            raise UnsupportedGrammarException(
-                "Wildcards are not allowed here"
-            )
+            raise UnsupportedGrammarException("Wildcards are not allowed here")
 
         try:
             uuid_value = uuid.UUID(value)
         except ValueError:
-            raise UnsupportedGrammarException(
-                "Field accepts only correct UUID values"
-            )
+            raise UnsupportedGrammarException("Field accepts only correct UUID values")
 
         return self.column.any(self.value_column == uuid_value)
 

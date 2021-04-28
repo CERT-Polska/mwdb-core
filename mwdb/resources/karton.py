@@ -103,13 +103,13 @@ class KartonObjectResource(Resource):
                     to this object.
         """
         schema = KartonSubmitAnalysisRequestSchema()
-        obj = loads_schema(request.get_data(as_text=True), schema)
+        obj = loads_schema(request.get_data(as_text=True) or "{}", schema)
 
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
-        analysis = db_object.spawn_analysis(obj.data["arguments"])
+        analysis = db_object.spawn_analysis(obj["arguments"])
         schema = KartonItemResponseSchema()
         return schema.dump(analysis)
 

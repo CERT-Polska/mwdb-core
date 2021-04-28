@@ -441,6 +441,18 @@ async function requestRemoteFileDownloadLink(remote, id) {
     return `${baseURL}/remote/${remote}/api/file/${id}/download?token=${response.data.token}`;
 }
 
+function getKartonAnalysesList(id) {
+    return axios.get(`/object/${id}/karton`);
+}
+
+function getKartonAnalysisStatus(id, analysis_id) {
+    return axios.get(`/object/${id}/karton/${analysis_id}`);
+}
+
+function resubmitKartonAnalysis(id) {
+    return axios.post(`/object/${id}/karton`);
+}
+
 export default {
     axios,
     getApiForEnvironment,
@@ -527,4 +539,7 @@ export default {
     getRemoteObjectMetakeys,
     downloadRemoteFile,
     requestRemoteFileDownloadLink,
+    getKartonAnalysesList,
+    getKartonAnalysisStatus,
+    resubmitKartonAnalysis,
 };

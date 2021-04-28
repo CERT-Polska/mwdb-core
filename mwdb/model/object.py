@@ -771,7 +771,7 @@ class Object(db.Model):
                 # Analysis with given UUID doesn't exist
                 return None
 
-            is_new = self.assign_analysis(analysis)
+            is_new = self.assign_analysis(analysis, commit=False)
 
             if commit:
                 db.session.commit()
@@ -849,20 +849,22 @@ class Object(db.Model):
         analysis_id = self._send_to_karton()
         analysis = KartonAnalysis.create(
             analysis_id=analysis_id,
-            initial_object=object,
+            initial_object=self,
             arguments=arguments,
         )
         if commit:
             db.session.commit()
         return analysis
 
-    def assign_analysis(self, analysis):
+    def assign_analysis(self, analysis, commit=True):
         """
         Assigns KartonAnalysis to the object
         """
         if analysis.id in [existing.id for existing in self.analyses]:
             return False
         self.analyses.append(analysis)
+        if commit:
+            db.session.commit()
         return True
 
     def is_analyzed(self):

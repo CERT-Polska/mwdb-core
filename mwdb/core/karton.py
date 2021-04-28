@@ -9,7 +9,6 @@ from karton.core.backend import KartonBackend
 from karton.core.inspect import KartonState
 from karton.core.task import TaskPriority
 
-from ..model import Config, File, TextBlob
 from .config import app_config
 
 logger = logging.getLogger("mwdb.karton")
@@ -21,7 +20,9 @@ def get_karton_producer() -> Producer:
     )
 
 
-def send_file_to_karton(file: File) -> str:
+def send_file_to_karton(file):
+    from mwdb.model.file import File
+
     try:
         path = file.get_path()
         tmpfile = None
@@ -53,7 +54,7 @@ def send_file_to_karton(file: File) -> str:
     return task.root_uid
 
 
-def send_config_to_karton(config: Config) -> str:
+def send_config_to_karton(config):
     producer = get_karton_producer()
     task = Task(
         headers={"type": "config", "kind": config.config_type, "family": config.family},
@@ -69,7 +70,7 @@ def send_config_to_karton(config: Config) -> str:
     return task.root_uid
 
 
-def send_blob_to_karton(blob: TextBlob) -> str:
+def send_blob_to_karton(blob):
     producer = get_karton_producer()
     task = Task(
         headers={"type": "blob", "kind": blob.blob_type},

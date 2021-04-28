@@ -8,7 +8,7 @@ from mwdb.core.app import api, app
 from mwdb.core.config import app_config
 from mwdb.core.log import getLogger
 from mwdb.core.util import is_subdir
-from mwdb.model import Config, File, Object, TextBlob
+from mwdb.model import Comment, Config, File, Object, Tag, TextBlob
 
 logger = getLogger()
 
@@ -76,6 +76,18 @@ class PluginHookBase(object):
 
     @hook_handler_method
     def on_reuploaded_text_blob(self, blob: TextBlob):
+        pass
+
+    @hook_handler_method
+    def on_created_tag(self, object: Object, tag: Tag):
+        pass
+
+    @hook_handler_method
+    def on_reuploaded_tag(self, object: Object, tag: Tag):
+        pass
+
+    @hook_handler_method
+    def on_created_comment(self, object: Object, comment: Comment):
         pass
 
 

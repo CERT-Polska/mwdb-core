@@ -18,7 +18,7 @@ export default function RefString(props) {
     ) : (
         <span className="text-muted">(object deleted)</span>
     );
-    const userLink = (
+    const userLink = props.related_user_login ? (
         <Link
             to={makeSearchLink(
                 "uploader",
@@ -29,6 +29,8 @@ export default function RefString(props) {
         >
             {props.related_user_login}
         </Link>
+    ) : (
+        <span className="text-muted">(deleted)</span>
     );
 
     return (

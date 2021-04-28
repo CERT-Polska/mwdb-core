@@ -72,6 +72,7 @@ import {
     AttributeRoute,
 } from "@mwdb-web/commons/ui";
 import { Extendable } from "./commons/extensions";
+import SettingsView from "./components/Settings/SettingsView";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -119,7 +120,7 @@ export default function App() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
 
-    const routeSwitch = config.config ? (
+    const routeSwitch = config.isReady ? (
         <Switch>
             <Route exact path="/login">
                 <UserLogin />
@@ -216,6 +217,9 @@ export default function App() {
             </AttributeRoute>
             <ProtectedRoute path="/remote/:remote">
                 <RemoteViews />
+            </ProtectedRoute>
+            <ProtectedRoute path="/admin">
+                <SettingsView />
             </ProtectedRoute>
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
                 <ProfileViews />

@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.plugins import hooks
 from mwdb.model import Comment, db
 from mwdb.schema.comment import CommentItemResponseSchema, CommentRequestSchema
 
@@ -121,6 +122,7 @@ class CommentResource(Resource):
         logger.info("comment added", extra={"comment": comment.object_id})
 
         db.session.refresh(comment)
+        hooks.on_created_comment(db_object, comment)
         schema = CommentItemResponseSchema()
         return schema.dump(comment)
 

@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 
+import api from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 
@@ -27,9 +28,28 @@ function PluginItems(props) {
 
 export default function About() {
     const config = useContext(ConfigContext);
-    let plugins = Object.entries(config.config["active_plugins"])
-        .sort()
-        .map(([key, value]) => <PluginItems name={key} info={value} />);
+    const [pluginsList, setPluginsList] = useState([]);
+
+    async function updatePlugins() {
+        try {
+            const response = await api.getServerPluginInfo();
+            setPluginsList(
+                Object.entries(response.data["active_plugins"]).sort()
+            );
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    const getPlugins = useCallback(updatePlugins, []);
+
+    useEffect(() => {
+        getPlugins();
+    }, [getPlugins]);
+
+    const plugins = pluginsList.map(([key, value]) => (
+        <PluginItems name={key} info={value} />
+    ));
 
     return (
         <div className="align-items-center">

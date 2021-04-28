@@ -96,11 +96,60 @@ function AdminDropdown() {
     );
 }
 
+function AdminNav() {
+    const auth = useContext(AuthContext);
+    const [pendingUsersCount, setPendingUsersCount] = useState(null);
+
+    const isAdmin = auth.isAdmin;
+    const isAttributeManager = auth.hasCapability(
+        Capability.managingAttributes
+    );
+
+    async function updatePendingUsersCount() {
+        try {
+            let response = await api.getPendingUsers();
+            setPendingUsersCount(response.data.users.length);
+        } catch (error) {
+            console.error(error);
+            setPendingUsersCount("?");
+        }
+    }
+
+    useEffect(() => {
+        if (!isAdmin) return;
+        let timer = setInterval(updatePendingUsersCount, 15000);
+        updatePendingUsersCount();
+        return () => {
+            clearInterval(timer);
+        };
+    }, [isAdmin]);
+
+    if (!isAdmin && !isAttributeManager) return [];
+    return (
+        <li className="nav-item">
+            <Link className="nav-link" to={"/admin"}>
+                Settings
+                {pendingUsersCount ? (
+                    <span
+                        className="badge badge-pill badge-warning"
+                        style={{ marginLeft: "8px" }}
+                    >
+                        {pendingUsersCount}
+                    </span>
+                ) : (
+                    []
+                )}
+            </Link>
+        </li>
+    );
+}
+
 function RemoteDropdown() {
     const config = useContext(ConfigContext);
-    if (!config.config) return [];
+    if (!config.isReady) return [];
 
-    const remoteItems = config.config.remotes.map((remote) => (
+    const remotes = config.config.remotes || [];
+    const remoteItems = remotes.map((remote) => (
         <Link key="remote" className="dropdown-item" to={`/remote/${remote}`}>
             {remote}
         </Link>
@@ -141,7 +190,7 @@ export default function Navigation() {
     const config = useContext(ConfigContext);
     const remote = useRemote();
     const remotePath = useRemotePath();
-    const navItems = config.config ? (
+    const navItems = config.isReady ? (
         <Extendable ident="navbar">
             {!auth.isAuthenticated &&
             config.config["is_registration_enabled"] ? (
@@ -192,6 +241,7 @@ export default function Navigation() {
                 []
             )}
             <AdminDropdown />
+            <AdminNav />
             {auth.isAuthenticated ? (
                 <React.Fragment>
                     <li className="nav-item">
@@ -242,7 +292,7 @@ export default function Navigation() {
     );
 
     const remoteNavItems =
-        config.config && auth.isAuthenticated ? (
+        config.isReady && auth.isAuthenticated ? (
             <Extendable ident="navbarAuthenticated">
                 <React.Fragment>
                     <li className="nav-item">

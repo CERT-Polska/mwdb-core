@@ -168,16 +168,13 @@ function KartonAttributeRow(props) {
                     {status && status["last_update"] ? (
                         <div>
                             <b>Last update:</b>{" "}
-                            {readableTime(
-                                new Date(
-                                    parseFloat(status["last_update"]) * 1000
-                                )
-                            )}
+                            {readableTime(new Date(status["last_update"]))}
                         </div>
                     ) : (
                         []
                     )}
-                    {status && status["processing_in"] ? (
+                    {status &&
+                    Object.keys(status["processing_in"]).length > 0 ? (
                         <div>
                             <b>Currently processed by:</b>
                             {queueProcessingList}

@@ -1,18 +1,17 @@
+#! /usr/bin/env python3
+# bump_version.py 0.1.0
 import difflib
+import json
 import re
 import sys
 from pathlib import Path
 
+CONFIG = json.loads((Path(__file__).parent / "bump_version.json").read_text())
 CURRENT_DIR = Path.cwd()
 VERSION_FILES = {
-    CURRENT_DIR / "setup.py": 'version="$VERSION"',
-    CURRENT_DIR / "mwdb" / "version.py": 'app_version = "$VERSION"',
-    CURRENT_DIR / "mwdb" / "web" / "package.json": '"version": "$VERSION"',
-    CURRENT_DIR / "mwdb" / "web" / "package-lock.json": '"version": "$VERSION"',
-    CURRENT_DIR / "mwdb" / "web" / "src" / "commons" / "package.json": '"version": "$VERSION"',
-    CURRENT_DIR / "docs" / "conf.py": "release = '$VERSION'"
+    (CURRENT_DIR / path): pattern for path, pattern in CONFIG["files"].items()
 }
-VERSION_REGEX = r"(\d.\d.\d(?:-(post|dev|alpha|beta|rc)[0-9])?)"
+VERSION_REGEX = CONFIG["regex"]
 
 
 def main(new_version):
@@ -25,7 +24,11 @@ def main(new_version):
         return
 
     def subst_version(repl):
-        return repl.string[repl.start(0):repl.start(1)] + new_version + repl.string[repl.end(1):repl.end(0)]
+        return (
+            repl.string[repl.start(0) : repl.start(1)]
+            + new_version
+            + repl.string[repl.end(1) : repl.end(0)]
+        )
 
     for path in VERSION_FILES.keys():
         if not path.exists():
@@ -40,7 +43,10 @@ def main(new_version):
         output_files[path] = re.sub(pattern, subst_version, content, count=1)
 
         if old_version is not None and version != old_version:
-            print(f"[!] {str(path)} contains different version than other files ({version} != {old_version})")
+            print(
+                f"[!] {str(path)} contains different version than other files "
+                f"({version} != {old_version})"
+            )
         old_version = version
 
     for path in VERSION_FILES.keys():
@@ -50,10 +56,10 @@ def main(new_version):
             print("[*] No changes detected.")
             return
         print("=== " + str(path))
-        for line in difflib.unified_diff(input_lines, output_lines, lineterm=''):
+        for line in difflib.unified_diff(input_lines, output_lines, lineterm=""):
             print(line)
 
-    response = ''
+    response = ""
     while response.lower() not in {"y", "n", "yes", "no"}:
         response = input("[*] Check above diff ^ Is it correct? (y/n): ")
 

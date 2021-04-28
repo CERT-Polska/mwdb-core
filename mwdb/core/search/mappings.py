@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, Type
 
-from mwdb.model import Comment, Config, File, Object, Tag, TextBlob
+from mwdb.model import Comment, Config, File, Object, Tag, TextBlob, KartonAnalysis
 
 from .exceptions import FieldNotQueryableException, MultipleObjectsQueryException
 from .fields import (
@@ -15,6 +15,7 @@ from .fields import (
     SizeField,
     StringField,
     UploaderField,
+    UUIDField
 )
 
 object_mapping: Dict[str, Type[Object]] = {
@@ -37,6 +38,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "parent": RelationField(Object.parents),
         "child": RelationField(Object.children),
         "favorites": FavoritesField(Object.followers),
+        "karton": UUIDField(Object.analyses, KartonAnalysis.id)
     },
     File.__name__: {
         "name": StringField(File.file_name),

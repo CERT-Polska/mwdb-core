@@ -13,6 +13,7 @@ import {
 
 import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { ObjectContext } from "@mwdb-web/commons/context";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 
@@ -192,6 +193,7 @@ function KartonAttributeRow(props) {
 export function FirstAnalysisBanner(props) {
     const [submitted, setSubmitted] = useState(false);
     const auth = useContext(AuthContext);
+    const context = useContext(ObjectContext);
     const isReanalysisAvailable = auth.hasCapability(
         Capability.kartonReanalyze
     );
@@ -208,9 +210,13 @@ export function FirstAnalysisBanner(props) {
     let analyze = async (ev) => {
         ev.preventDefault();
         setSubmitted(true);
-        await api.resubmitKartonAnalysis(props.object.id);
-        // Update attributes
-        props.onUpdateAttributes();
+        try {
+            await api.resubmitKartonAnalysis(props.object.id);
+            // Update attributes
+            props.onUpdateAttributes();
+        } catch (error) {
+            context.setObjectError(error);
+        }
     };
 
     return (
@@ -235,6 +241,7 @@ export function KartonAttributeRenderer(props) {
     const [canReanalyze, setCanReanalyze] = useState(false);
 
     const auth = useContext(AuthContext);
+    const context = useContext(ObjectContext);
     const isReanalysisAvailable = auth.hasCapability(
         Capability.kartonReanalyze
     );
@@ -259,9 +266,13 @@ export function KartonAttributeRenderer(props) {
         // Turn off second reanalysis until we get new attribute state
         setCanReanalyze(false);
         // Trigger reanalysis
-        await api.resubmitKartonAnalysis(props.object.id);
-        // Update attributes
-        props.onUpdateAttributes();
+        try {
+            await api.resubmitKartonAnalysis(props.object.id);
+            // Update attributes
+            props.onUpdateAttributes();
+        } catch (error) {
+            context.setObjectError(error);
+        }
     };
 
     const showMore = (ev) => {

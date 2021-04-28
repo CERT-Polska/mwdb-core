@@ -183,7 +183,15 @@ function ObjectAttributes(props) {
             onUpdateAttributes={updateAttributes}
             object={context.object}
         >
-            {config.config["is_karton_enabled"] ? <FirstAnalysisBanner /> : []}
+            {config.config["is_karton_enabled"] ? (
+                <FirstAnalysisBanner
+                    attributes={attributes}
+                    object={context.object}
+                    onUpdateAttributes={updateAttributes}
+                />
+            ) : (
+                []
+            )}
             {Object.keys(attributes).length > 0 ? (
                 <DataTable>
                     {Object.keys(attributes)

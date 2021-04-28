@@ -54,7 +54,7 @@ https://gist.github.com/Chaser324/ce0505fbed06b947d962).
    
    Version bump should be included in the same PR.
 
-6. When you feel like you're done, commit the files:
+7. When you feel like you're done, commit the files:
 
 ```bash
 $ git add -A

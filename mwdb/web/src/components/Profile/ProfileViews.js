@@ -28,7 +28,7 @@ export default function ProfileViews() {
             });
         }
     }
-    console.log(profile);
+
     function GroupBreadcrumb() {
         const { group } = useParams();
         return `Group '${group}' details`;

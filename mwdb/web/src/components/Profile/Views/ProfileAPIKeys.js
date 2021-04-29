@@ -25,8 +25,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
     const [currentApiToken, setCurrentApiToken] = useState({});
     const [apiKeyToRemove, setApiKeyToRemove] = useState();
     const [removeModalOpened, setRemoveModalOpened] = useState(false);
-    console.log(profile);
-    console.log(location);
+
     async function getApiToken(apiKeyId) {
         try {
             setCurrentApiToken({

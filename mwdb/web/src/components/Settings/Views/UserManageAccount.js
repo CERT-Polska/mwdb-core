@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "@mwdb-web/commons/api";
 import UserItem from "./UserItem";
 
@@ -8,7 +8,6 @@ export default function UserManageAccount({ user, updateUser }) {
         user.additional_info
     );
     const [feed_quality, setFeed_quality] = useState(user.feed_quality);
-    if (!user) return [];
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -19,13 +18,21 @@ export default function UserManageAccount({ user, updateUser }) {
                 additional_info,
                 feed_quality
             );
-            //set sucess
+            //set success
         } catch (error) {
             console.log(error);
         } finally {
             updateUser();
         }
     }
+
+    useEffect(() => {
+        setEmail(user.email);
+        setAdditional_info(user.additional_info);
+        setFeed_quality(user.feed_quality);
+    }, [user]);
+
+    if (Object.keys(user).length === 0) return [];
 
     return (
         <div className="container">

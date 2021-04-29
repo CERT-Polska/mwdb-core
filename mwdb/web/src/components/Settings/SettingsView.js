@@ -18,10 +18,10 @@ import ShowPendingUsers from "./Views/ShowPendingUsers";
 import ManageAttributes from "./Views/ManageAttributes";
 import AttributeUpdate from "./Views/AttributeUpdate";
 import GroupUpdate from "./Views/GroupUpdate";
-import UserUpdate from "./Views/UserUpdate";
 import UserCreate from "./Views/UserCreate";
 import GroupRegister from "./Views/GroupRegister";
 import AttributeDefine from "./Views/AttributeDefine";
+import UserView from "./Views/UserView";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -138,9 +138,14 @@ export default function SettingsView(props) {
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
-                                path="/admin/user/:login"
+                                path={[
+                                    "/admin/user/:login",
+                                    "/admin/user/:login/manage",
+                                    "/admin/user/:login/capabilities",
+                                    "/admin/user/:login/api-keys",
+                                ]}
                             >
-                                <UserUpdate />
+                                <UserView />
                             </AdministrativeRoute>
 
                             <AdministrativeRoute exact path="/admin/groups">

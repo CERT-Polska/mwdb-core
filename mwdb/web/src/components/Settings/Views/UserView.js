@@ -11,7 +11,7 @@ import UserManageAccount from "./UserManageAccount";
 export default function UserView() {
     const { login } = useParams();
     const [user, setUser] = useState({});
-    console.log(user);
+
     async function updateUser() {
         try {
             const response = await api.getUser(login);

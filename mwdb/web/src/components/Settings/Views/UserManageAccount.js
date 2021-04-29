@@ -8,6 +8,7 @@ export default function UserManageAccount({ user, updateUser }) {
         user.additional_info
     );
     const [feed_quality, setFeed_quality] = useState(user.feed_quality);
+    const [disabled, setDisabled] = useState(user.disabled);
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -26,10 +27,23 @@ export default function UserManageAccount({ user, updateUser }) {
         }
     }
 
+    async function handleBlockUser(event, block) {
+        event.preventDefault();
+        try {
+            await api.setUserDisabled(user.login, block);
+            //set success
+        } catch (error) {
+            console.log(error);
+        } finally {
+            updateUser();
+        }
+    }
+
     useEffect(() => {
         setEmail(user.email);
         setAdditional_info(user.additional_info);
         setFeed_quality(user.feed_quality);
+        setDisabled(user.disabled);
     }, [user]);
 
     if (Object.keys(user).length === 0) return [];
@@ -85,6 +99,23 @@ export default function UserManageAccount({ user, updateUser }) {
                         className="btn btn-primary"
                     />
                 </div>
+                {disabled ? (
+                    <button
+                        onClick={(event) => handleBlockUser(event, false)}
+                        type="button"
+                        className="btn btn-success align-right"
+                    >
+                        Unblock
+                    </button>
+                ) : (
+                    <button
+                        onClick={(event) => handleBlockUser(event, true)}
+                        type="button"
+                        className="btn btn-danger align-right"
+                    >
+                        Block
+                    </button>
+                )}
             </form>
         </div>
     );

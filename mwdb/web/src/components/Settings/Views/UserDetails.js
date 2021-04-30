@@ -1,11 +1,103 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import api from "@mwdb-web/commons/api";
 import { DateString } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import UserItem from "./UserItem";
 
-export default function UserDetails({ user }) {
+function EditableItem(props) {
+    return (
+        <span>
+            {props.edit ? (
+                <span>
+                    {props.selective ? (
+                        <select
+                            value={props.item}
+                            name={props.name}
+                            onChange={(ev) => props.setItem(ev.target.value)}
+                        >
+                            {props.children}
+                        </select>
+                    ) : (
+                        <input
+                            type="text"
+                            name={props.name}
+                            className=".input-sm"
+                            value={props.item}
+                            onChange={(ev) => props.setItem(ev.target.value)}
+                        />
+                    )}
+                    <span
+                        className="float-right"
+                        onClick={() => {
+                            props.setItem(null);
+                            props.setEdit(false);
+                        }}
+                        style={{ cursor: "pointer" }}
+                    >
+                        <FontAwesomeIcon className="float-right" icon="times" />
+                    </span>
+                    <span
+                        className="float-right"
+                        onClick={() => {
+                            props.onSubmit();
+                            props.setEdit(false);
+                        }}
+                        style={{ marginRight: "8px", cursor: "pointer" }}
+                    >
+                        <FontAwesomeIcon className="float-right" icon="save" />
+                    </span>
+                </span>
+            ) : (
+                <span>
+                    <span
+                        className={props.badge ? "badge badge-secondary" : ""}
+                    >
+                        {props.defaultValue}
+                    </span>
+                    <span
+                        className="float-right"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                            props.setEdit(true);
+                            props.setItem(props.defaultValue);
+                        }}
+                    >
+                        <FontAwesomeIcon className="float-right" icon="edit" />
+                    </span>
+                </span>
+            )}
+        </span>
+    );
+}
+
+export default function UserDetails({ user, updateUser }) {
+    const [email, setEmail] = useState(null);
+    const [editEmail, setEditEmail] = useState(false);
+    const [additionalInfo, setAdditionalInfo] = useState(null);
+    const [editAdditionalInfo, setEditAdditionalInfo] = useState(false);
+    const [feedQuality, setFeedQuality] = useState(null);
+    const [editFeedQuality, setEditFeedQuality] = useState(false);
+
+    async function handleSubmit() {
+        try {
+            await api.updateUser(
+                user.login,
+                email,
+                additionalInfo,
+                feedQuality
+            );
+            //set success
+        } catch (error) {
+            console.log(error);
+        } finally {
+            updateUser();
+        }
+    }
+
     if (!user) return [];
+    console.log(email, additionalInfo, feedQuality);
 
     return (
         <div className="container">
@@ -13,15 +105,43 @@ export default function UserDetails({ user }) {
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
                     <UserItem label="Login" value={user.login} />
-                    <UserItem label="E-mail" value={user.email} />
-                    <UserItem
-                        label="Additional info"
-                        value={user.additional_info}
-                    />
-                    <UserItem label="Feed quality" value={user.feed_quality}>
-                        <span className="badge badge-secondary">
-                            {user.feed_quality}
-                        </span>
+                    <UserItem label="E-mail">
+                        <EditableItem
+                            item={email}
+                            setItem={setEmail}
+                            edit={editEmail}
+                            setEdit={setEditEmail}
+                            name="email"
+                            defaultValue={user.email}
+                            onSubmit={handleSubmit}
+                        />
+                    </UserItem>
+                    <UserItem label="Additional info">
+                        <EditableItem
+                            item={additionalInfo}
+                            setItem={setAdditionalInfo}
+                            edit={editAdditionalInfo}
+                            setEdit={setEditAdditionalInfo}
+                            name={"additional_info"}
+                            defaultValue={user.additional_info}
+                            onSubmit={handleSubmit}
+                        />
+                    </UserItem>
+                    <UserItem label="Feed quality">
+                        <EditableItem
+                            item={feedQuality}
+                            setItem={setFeedQuality}
+                            edit={editFeedQuality}
+                            setEdit={setEditFeedQuality}
+                            name={"additional_info"}
+                            defaultValue={user.feed_quality}
+                            onSubmit={handleSubmit}
+                            badge
+                            selective
+                        >
+                            <option value="high">high</option>
+                            <option value="low">low</option>
+                        </EditableItem>
                     </UserItem>
                     <UserItem label="Requested on" value={user.requested_on}>
                         <DateString date={user.requested_on} />

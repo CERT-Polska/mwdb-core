@@ -32,7 +32,7 @@ export default function UserView() {
     return (
         <React.Fragment>
             <AdministrativeRoute exact path="/admin/user/:login">
-                <UserDetails user={user} />
+                <UserDetails user={user} updateUser={updateUser} />
             </AdministrativeRoute>
             <AdministrativeRoute exact path="/admin/user/:login/manage">
                 <UserManageAccount user={user} updateUser={updateUser} />

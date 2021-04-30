@@ -59,6 +59,8 @@ import {
     faCopy,
     faThumbtack,
     faStar,
+    faEdit,
+    faSave,
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
@@ -99,6 +101,8 @@ library.add(faCopy);
 library.add(faThumbtack);
 library.add(faStar);
 library.add(farStar);
+library.add(faEdit);
+library.add(faSave);
 
 function DefaultRoute() {
     const location = useLocation();

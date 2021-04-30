@@ -1,11 +1,15 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router";
-import Autocomplete from "react-autocomplete";
 
 import _ from "lodash";
 
 import api from "@mwdb-web/commons/api";
-import { ConfirmationModal, ObjectLink, View } from "@mwdb-web/commons/ui";
+import {
+    Autocomplete,
+    ConfirmationModal,
+    ObjectLink,
+    View,
+} from "@mwdb-web/commons/ui";
 
 class AttributePermissionsBox extends Component {
     state = {
@@ -197,76 +201,25 @@ class AttributePermissionsBox extends Component {
                                 </tr>
                             ))}
                         <tr>
-                            <td colSpan="2">
+                            <td>
                                 <Autocomplete
                                     value={this.state.newMember}
-                                    inputProps={{ id: "states-autocomplete" }}
-                                    wrapperStyle={{
-                                        position: "relative",
-                                        display: "inline-block",
-                                    }}
-                                    items={this.props.groupItems}
-                                    getItemValue={(item) => item.name}
-                                    shouldItemRender={(item, value) => {
-                                        return (
+                                    items={this.props.groupItems.filter(
+                                        (item) =>
                                             item.name
                                                 .toLowerCase()
                                                 .indexOf(
-                                                    value.toLowerCase()
+                                                    this.state.newMember.toLowerCase()
                                                 ) !== -1
-                                        );
-                                    }}
-                                    onChange={(event) =>
-                                        this.setState({
-                                            newMember: event.target.value,
-                                        })
-                                    }
-                                    onSelect={(value) =>
+                                    )}
+                                    getItemValue={(item) => item.name}
+                                    onChange={(value) =>
                                         this.setState({ newMember: value })
                                     }
-                                    renderInput={(props) => (
-                                        <input
-                                            {...props}
-                                            className="form-control"
-                                        />
-                                    )}
-                                    renderMenu={(children) => (
-                                        <div
-                                            className={
-                                                "dropdown-menu " +
-                                                (children.length !== 0
-                                                    ? "show"
-                                                    : "")
-                                            }
-                                        >
-                                            {children.map((c, idx) => (
-                                                <a
-                                                    key={idx}
-                                                    href="#dropdown"
-                                                    className="dropdown-item"
-                                                    style={{
-                                                        cursor: "pointer",
-                                                    }}
-                                                >
-                                                    {c}
-                                                </a>
-                                            ))}
-                                        </div>
-                                    )}
-                                    renderItem={(item, isHighlighted) => (
-                                        <div
-                                            className={`item ${
-                                                isHighlighted
-                                                    ? "item-highlighted"
-                                                    : ""
-                                            }`}
-                                            key={item.name}
-                                        >
-                                            {item.name}
-                                        </div>
-                                    )}
+                                    className="form-control"
                                 />
                             </td>
+                            <td />
                             <td>
                                 <button
                                     type="button"

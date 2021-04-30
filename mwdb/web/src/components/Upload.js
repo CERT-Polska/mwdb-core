@@ -1,6 +1,5 @@
 import React, { Component, useCallback } from "react";
 import { withRouter } from "react-router";
-import Autocomplete from "react-autocomplete";
 import { useDropzone } from "react-dropzone";
 import queryString from "query-string";
 
@@ -9,7 +8,7 @@ import AttributesAddModal from "./AttributesAddModal";
 
 import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { DataTable, View } from "@mwdb-web/commons/ui";
+import { Autocomplete, DataTable, View } from "@mwdb-web/commons/ui";
 
 function UploadDropzone(props) {
     const onDrop = props.onDrop;
@@ -251,82 +250,31 @@ class Upload extends Component {
                             </div>
                         </div>
                         {this.state.shareWith === "single" ? (
-                            <div className="input-group mb-3">
-                                <div className="input-group-prepend">
-                                    <label className="input-group-text">
-                                        Group name
-                                    </label>
-                                </div>
+                            <div className="mb-3">
                                 <Autocomplete
                                     value={this.state.group}
-                                    inputProps={{ id: "states-autocomplete" }}
-                                    getItemValue={(item) => item}
-                                    shouldItemRender={(item, value) => {
-                                        return (
+                                    items={this.state.groups.filter(
+                                        (item) =>
                                             item
                                                 .toLowerCase()
                                                 .indexOf(
-                                                    value.toLowerCase()
+                                                    this.state.group.toLowerCase()
                                                 ) !== -1
-                                        );
-                                    }}
-                                    items={this.state.groups}
-                                    onChange={(event) =>
-                                        this.setState({
-                                            group: event.target.value,
-                                        })
-                                    }
-                                    onSelect={(value) =>
+                                    )}
+                                    onChange={(value) =>
                                         this.setState({ group: value })
                                     }
-                                    renderInput={(props) => (
-                                        <input
-                                            {...props}
-                                            className="form-control"
-                                            style={{ fontSize: "medium" }}
-                                            placeholder="Type group name..."
-                                        />
-                                    )}
-                                    wrapperStyle={{
-                                        display: "block",
-                                        flex: "1 1 auto",
-                                    }}
-                                    renderMenu={(children) => (
-                                        <div
-                                            className={
-                                                "dropdown-menu " +
-                                                (children.length !== 0
-                                                    ? "show"
-                                                    : "")
-                                            }
-                                        >
-                                            {children.map((c) => (
-                                                <a
-                                                    key={c}
-                                                    href="#dropdown"
-                                                    className="dropdown-item"
-                                                    style={{
-                                                        cursor: "pointer",
-                                                    }}
-                                                >
-                                                    {c}
-                                                </a>
-                                            ))}
-                                        </div>
-                                    )}
-                                    renderItem={(item, isHighlighted) => (
-                                        <div
-                                            className={`item ${
-                                                isHighlighted
-                                                    ? "item-highlighted"
-                                                    : ""
-                                            }`}
-                                            key={item}
-                                        >
-                                            {item}
-                                        </div>
-                                    )}
-                                />
+                                    className="form-control"
+                                    style={{ fontSize: "medium" }}
+                                    placeholder="Type group name..."
+                                    prependChildren
+                                >
+                                    <div className="input-group-prepend">
+                                        <label className="input-group-text">
+                                            Group name
+                                        </label>
+                                    </div>
+                                </Autocomplete>
                             </div>
                         ) : (
                             []

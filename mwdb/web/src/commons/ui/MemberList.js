@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import Autocomplete from "react-autocomplete";
+import Autocomplete from "./Autocomplete";
 import PagedList from "./PagedList";
 import ConfirmationModal from "./ConfirmationModal";
 
@@ -135,58 +135,19 @@ class MemberItem extends Component {
                     <td style={{ textAlign: "left" }}>
                         <Autocomplete
                             value={this.state.newMember}
-                            inputProps={{ id: "states-autocomplete" }}
-                            wrapperStyle={{
-                                position: "relative",
-                                display: "inline-block",
-                            }}
-                            items={this.props.newMemberItems}
-                            getItemValue={(item) => item[this.props.nameKey]}
-                            shouldItemRender={(item, value) => {
-                                return (
+                            items={this.props.newMemberItems.filter(
+                                (item) =>
                                     item[this.props.nameKey]
                                         .toLowerCase()
-                                        .indexOf(value.toLowerCase()) !== -1
-                                );
-                            }}
-                            onChange={(event) =>
-                                this.setState({ newMember: event.target.value })
-                            }
-                            onSelect={(value) =>
+                                        .indexOf(
+                                            this.state.newMember.toLowerCase()
+                                        ) !== -1
+                            )}
+                            getItemValue={(item) => item[this.props.nameKey]}
+                            onChange={(value) =>
                                 this.setState({ newMember: value })
                             }
-                            renderInput={(props) => (
-                                <input {...props} className="form-control" />
-                            )}
-                            renderMenu={(children) => (
-                                <div
-                                    className={
-                                        "dropdown-menu " +
-                                        (children.length !== 0 ? "show" : "")
-                                    }
-                                >
-                                    {children.map((c, idx) => (
-                                        <a
-                                            key={idx}
-                                            href="#dropdown"
-                                            className="dropdown-item"
-                                            style={{ cursor: "pointer" }}
-                                        >
-                                            {c}
-                                        </a>
-                                    ))}
-                                </div>
-                            )}
-                            renderItem={(item, isHighlighted) => (
-                                <div
-                                    className={`item ${
-                                        isHighlighted ? "item-highlighted" : ""
-                                    }`}
-                                    key={item[this.props.nameKey]}
-                                >
-                                    {item[this.props.nameKey]}
-                                </div>
-                            )}
+                            className="form-control"
                         />
                     </td>
                     <td>

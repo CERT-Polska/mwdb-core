@@ -1,38 +1,73 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useReducer } from "react";
+import { Link, useHistory } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
-import { DateString } from "@mwdb-web/commons/ui";
+import { DateString, getErrorMessage } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import UserItem from "./UserItem";
+
+const initialState = {
+    email: null,
+    additionalInfo: null,
+    feedQuality: null,
+};
+
+function userItemReducer(state, action) {
+    switch (action.type) {
+        case "email":
+            return { email: action.payload };
+        case "additionalInfo":
+            return { additionalInfo: action.payload };
+        case "feedQuality":
+            return { feedQuality: action.payload };
+        case "reset":
+            return initialState;
+        default:
+            return state;
+    }
+}
 
 function EditableItem(props) {
+    const [state, dispatch] = useReducer(userItemReducer, initialState);
+    const [edit, setEdit] = useState(false);
     return (
         <span>
-            {props.edit ? (
+            {edit ? (
                 <span>
                     {props.selective ? (
                         <select
-                            value={props.item}
-                            name={props.name}
-                            onChange={(ev) => props.setItem(ev.target.value)}
+                            value={state.feedQuality}
+                            name={state[props.name]}
+                            onChange={(ev) =>
+                                dispatch({
+                                    type: props.name,
+                                    payload: ev.target.value,
+                                })
+                            }
                         >
                             {props.children}
                         </select>
                     ) : (
                         <input
-                            type="text"
+                            type={props.name === "email" ? "email" : "text"}
                             name={props.name}
                             className=".input-sm"
-                            value={props.item}
-                            onChange={(ev) => props.setItem(ev.target.value)}
+                            value={state[props.name]}
+                            onChange={(ev) =>
+                                dispatch({
+                                    type: props.name,
+                                    payload: ev.target.value,
+                                })
+                            }
                         />
                     )}
                     <span
                         className="float-right"
                         onClick={() => {
-                            props.setItem(null);
-                            props.setEdit(false);
+                            dispatch({
+                                type: "reset",
+                                payload: initialState,
+                            });
+                            setEdit(false);
                         }}
                         style={{ cursor: "pointer" }}
                     >
@@ -41,8 +76,12 @@ function EditableItem(props) {
                     <span
                         className="float-right"
                         onClick={() => {
-                            props.onSubmit();
-                            props.setEdit(false);
+                            props.onSubmit(
+                                state.email,
+                                state.additionalInfo,
+                                state.feedQuality
+                            );
+                            setEdit(false);
                         }}
                         style={{ marginRight: "8px", cursor: "pointer" }}
                     >
@@ -60,8 +99,11 @@ function EditableItem(props) {
                         className="float-right"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
-                            props.setEdit(true);
-                            props.setItem(props.defaultValue);
+                            setEdit(true);
+                            dispatch({
+                                type: props.name,
+                                payload: props.defaultValue,
+                            });
                         }}
                     >
                         <FontAwesomeIcon className="float-right" icon="edit" />
@@ -72,15 +114,20 @@ function EditableItem(props) {
     );
 }
 
-export default function UserDetails({ user, updateUser }) {
-    const [email, setEmail] = useState(null);
-    const [editEmail, setEditEmail] = useState(false);
-    const [additionalInfo, setAdditionalInfo] = useState(null);
-    const [editAdditionalInfo, setEditAdditionalInfo] = useState(false);
-    const [feedQuality, setFeedQuality] = useState(null);
-    const [editFeedQuality, setEditFeedQuality] = useState(false);
+function UserItem(props) {
+    let value = props.value ? props.value : "never";
+    return (
+        <tr className="d-flex">
+            <th className="col-3">{props.label}</th>
+            <td className="col-9">{props.children || value}</td>
+        </tr>
+    );
+}
 
-    async function handleSubmit() {
+export default function UserDetails({ user, getUser }) {
+    const history = useHistory();
+
+    async function handleSubmit(email, additionalInfo, feedQuality) {
         try {
             await api.updateUser(
                 user.login,
@@ -88,16 +135,17 @@ export default function UserDetails({ user, updateUser }) {
                 additionalInfo,
                 feedQuality
             );
-            //set success
         } catch (error) {
-            console.log(error);
+            history.push({
+                pathname: `/admin/user/${user.login}`,
+                state: { error: getErrorMessage(error) },
+            });
         } finally {
-            updateUser();
+            getUser();
         }
     }
 
     if (!user) return [];
-    console.log(email, additionalInfo, feedQuality);
 
     return (
         <div className="container">
@@ -107,10 +155,6 @@ export default function UserDetails({ user, updateUser }) {
                     <UserItem label="Login" value={user.login} />
                     <UserItem label="E-mail">
                         <EditableItem
-                            item={email}
-                            setItem={setEmail}
-                            edit={editEmail}
-                            setEdit={setEditEmail}
                             name="email"
                             defaultValue={user.email}
                             onSubmit={handleSubmit}
@@ -118,22 +162,14 @@ export default function UserDetails({ user, updateUser }) {
                     </UserItem>
                     <UserItem label="Additional info">
                         <EditableItem
-                            item={additionalInfo}
-                            setItem={setAdditionalInfo}
-                            edit={editAdditionalInfo}
-                            setEdit={setEditAdditionalInfo}
-                            name={"additional_info"}
+                            name="additionalInfo"
                             defaultValue={user.additional_info}
                             onSubmit={handleSubmit}
                         />
                     </UserItem>
                     <UserItem label="Feed quality">
                         <EditableItem
-                            item={feedQuality}
-                            setItem={setFeedQuality}
-                            edit={editFeedQuality}
-                            setEdit={setEditFeedQuality}
-                            name={"additional_info"}
+                            name="feedQuality"
                             defaultValue={user.feed_quality}
                             onSubmit={handleSubmit}
                             badge
@@ -180,15 +216,9 @@ export default function UserDetails({ user, updateUser }) {
                 <li className="nav-item">
                     <Link
                         className="nav-link"
-                        to={`/admin/user/${user.login}/manage`}
-                    >
-                        Manage account
-                    </Link>
-                    <Link
-                        className="nav-link"
                         to={`/admin/user/${user.login}/capabilities`}
                     >
-                        Modify capabilities
+                        Check user capabilities
                     </Link>
                     <Link
                         className="nav-link"

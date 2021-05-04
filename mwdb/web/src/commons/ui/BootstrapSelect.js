@@ -1,4 +1,4 @@
-import React, { useCallback, useRef} from "react";
+import React, { useCallback, useLayoutEffect, useRef } from "react";
 
 import "bootstrap-select";
 import "bootstrap-select/dist/css/bootstrap-select.css";
@@ -22,6 +22,12 @@ export default function BootstrapSelect({children, onChange, ...props}) {
         // Save a reference to the node
         ref.current = node
       }, [doOnChange])
+
+    useLayoutEffect(() => {
+        if(ref.current) {
+            $(ref.current).selectpicker("refresh");
+        }
+    }, [props])
 
     return (
         <select ref={setRef} {...props}>

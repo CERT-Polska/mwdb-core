@@ -1,5 +1,4 @@
 import React, {useState, useCallback, useEffect } from "react";
-import Autocomplete from "react-autocomplete";
 import { Link } from "react-router-dom";
 
 import { faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -8,9 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import api from "@mwdb-web/commons/api";
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { intersperse } from "@mwdb-web/commons/helpers";
-import { ConfirmationModal, GroupBadge, ShowIf } from "@mwdb-web/commons/ui";
-
-import CapabilitiesSelect from "@mwdb-web/commons/ui/CapabilitiesSelect";
+import { Autocomplete, BootstrapSelect, ConfirmationModal, GroupBadge, ShowIf } from "@mwdb-web/commons/ui";
 
 function GroupAppliesTo({ group }) {
     if (group["name"] === "public")
@@ -73,46 +70,67 @@ function CapabilitiesList({ capabilities, onDelete }) {
     ));
 }
 
-function GroupInputField({groups, value, onValueUpdate}) {
+function CapabilitiesSelect({value, onChange}) {
+    const capabilities = Object.keys(capabilitiesList);
+    const selectedCaps = value || [];
     return (
-        <Autocomplete
-            value={value}
-            getItemValue={(group) => group.name}
-            shouldItemRender={(group, value) => {
-                return (
-                    group.name.toLowerCase().indexOf(value.toLowerCase()) !== -1
-                );
-            }}
-            items={groups}
-            onChange={(event) => onValueUpdate(event.target.value)}
-            onSelect={(value) => onValueUpdate(value)}
-            renderInput={(props) => (
-                <input
-                    {...props}
+        <BootstrapSelect data-multiple-separator={""}
+                         data-live-search="true"
+                         data-none-selected-text={
+                             value === undefined
+                             ? "Provide existing group name"
+                             : "No additional capabilities enabled"
+                         }
+                         className={"form-control"} multiple
+                         disabled={value === undefined}
+                         onChange={(e, clickedIndex, isSelected) => {
+            if(isSelected)
+                onChange(selectedCaps.concat(capabilities[clickedIndex]));
+            else
+                onChange(selectedCaps.filter(cap => cap !== capabilities[clickedIndex]))
+        }}>
+            {
+                capabilities.map((cap) => (
+                    <option data-content={`<span class='badge badge-success'>${cap}</span>`}
+                            selected={selectedCaps.indexOf(cap) !== -1}>
+                        {cap}
+                    </option>
+                ))
+            }
+        </BootstrapSelect>
+    )
+}
+
+
+function CapabilityChangeCard({ groups, onSubmit }) {
+    const [groupName, setGroupName] = useState("");
+    const [capabilities, setCapabilities] = useState();
+
+    useEffect(() => {
+        const matchedGroup = groups.find(group => group.name === groupName) || {};
+        setCapabilities(matchedGroup.capabilities);
+    }, [groups, groupName])
+    return (
+        <div className="card">
+            <div className="card-body">
+                <Autocomplete
+                    value={groupName}
+                    getItemValue={(group) => group.name}
+                    items={groups.filter(group => group.name.toLowerCase().indexOf(groupName.toLowerCase()) !== -1)}
+                    onChange={(value) => setGroupName(value)}
                     className="form-control"
                     placeholder="Group name"
+                    renderItem={({item}) => (
+                        <GroupBadge group={item} />
+                    )}
                 />
-            )}
-            wrapperStyle={{ display: "block" }}
-            renderMenu={(children) => {
-                console.log(children)
-                return (
-                    <div className="dropdown">
-                        <div className="dropdown-menu show">
-                            {children}
-                        </div>
-                    </div>
-                )
-            }}
-            renderItem={(group, isHighlighted) => (
-                <div
-                    className="dropdown-item"
-                    key={group.name}
-                >
-                    <GroupBadge group={group} />
-                </div>
-            )}
-        />
+                <CapabilitiesSelect value={capabilities} onChange={(caps) => setCapabilities(caps)}/>
+                <Link>
+                    <FontAwesomeIcon icon={faPlus} />{" "}
+                    Update capabilities
+                </Link>
+            </div>
+        </div>
     )
 }
 
@@ -165,17 +183,7 @@ export default function AccessControl() {
     return (
         <div>
             <h5>Access control</h5>
-            <div className="card">
-                <div className="card-body">
-                    <GroupInputField/>
-                    <CapabilitiesSelect/>
-                    <Link>
-                        <FontAwesomeIcon icon={faPlus} />{" "}
-                        Update capabilities
-                    </Link>
-                </div>
-            </div>
-            <h5>Enabled capabilities</h5>
+            <CapabilityChangeCard groups={groups} />
             <table className="table table-bordered wrap-table">
                 <tbody>
                     {groups

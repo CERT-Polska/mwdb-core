@@ -202,7 +202,7 @@ export default function UserDetails({ user, getUser }) {
                             user.groups
                                 .filter((group) => !group.private)
                                 .map((group) => (
-                                    <Link to={`/profile/group/${group.name}`}>
+                                    <Link to={`/admin/group/${group.name}`}>
                                         <span className="badge badge-secondary">
                                             {group.name}
                                         </span>
@@ -226,7 +226,10 @@ export default function UserDetails({ user, getUser }) {
                     >
                         Manage API keys
                     </Link>
-                    <Link className="nav-link" to="/profile/reset-password">
+                    <Link
+                        className="nav-link"
+                        to={`/admin/user/${user.login}/password`}
+                    >
                         Change password
                     </Link>
                     <Link

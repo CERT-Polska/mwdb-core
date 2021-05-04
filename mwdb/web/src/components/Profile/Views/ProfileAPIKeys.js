@@ -85,7 +85,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
     if (Object.keys(profile).length === 0) return [];
 
     return (
-        <div>
+        <div className="container">
             <h5>API keys</h5>
             {!profile.api_keys.length ? (
                 <p>

@@ -2,10 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
+import { AdministrativeRoute, getErrorMessage } from "@mwdb-web/commons/ui";
+
+import UserDetails from "./UserDetails";
+import UserResetPassword from "./UserResetPassword";
 import ProfileAPIKeys from "../../Profile/Views/ProfileAPIKeys";
 import ProfileCapabilities from "../../Profile/Views/ProfileCapabilities";
-import { AdministrativeRoute, getErrorMessage } from "@mwdb-web/commons/ui";
-import UserDetails from "./UserDetails";
 
 export default function UserView() {
     const history = useHistory();
@@ -42,6 +44,9 @@ export default function UserView() {
             </AdministrativeRoute>
             <AdministrativeRoute exact path="/admin/user/:login/api-keys">
                 <ProfileAPIKeys profile={user} updateProfile={updateUser} />
+            </AdministrativeRoute>
+            <AdministrativeRoute exact path="/admin/user/:login/password">
+                <UserResetPassword user={user} />
             </AdministrativeRoute>
         </React.Fragment>
     );

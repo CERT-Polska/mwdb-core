@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { GroupLink } from "./ShowGroups";
 import api from "@mwdb-web/commons/api";
 import { MemberList, getErrorMessage } from "@mwdb-web/commons/ui";
@@ -36,7 +36,7 @@ export default function UserSingleGroups({ user, getUser }) {
         }
     }
 
-    async function getAllGroups() {
+    async function updateAllGroups() {
         try {
             let response = await api.getGroups();
             setAllGroups(response.data.groups);
@@ -48,9 +48,11 @@ export default function UserSingleGroups({ user, getUser }) {
         }
     }
 
+    const getAllGroups = useCallback(updateAllGroups, []);
+
     useEffect(() => {
         getAllGroups();
-    }, []);
+    }, [getAllGroups]);
 
     if (Object.keys(user).length === 0) return [];
 

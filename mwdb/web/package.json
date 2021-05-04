@@ -1,6 +1,6 @@
 {
   "name": "mwdb-web",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.0-14",
@@ -23,7 +23,6 @@
     "query-string": "^5.1.1",
     "react": "^16.13.1",
     "react-ace": "^6.2.0",
-    "react-autocomplete": "^1.8.1",
     "react-bootstrap": "^0.32.1",
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.4.1",

@@ -40,7 +40,21 @@ https://gist.github.com/Chaser324/ce0505fbed06b947d962).
    npx prettier --write src/
    ```
 
-6. When you feel like you're done, commit the files:
+6. If setup.py version matches the latest release version: 
+   include version bump in your commit according to the [semantic versioning](https://semver.org)
+   
+   e.g.
+   ```
+   python3 dev/bump_version 1.2.3
+   ```
+   
+   - Bump MAJOR version (2.2.2 => 3.0.0) when your change breaks the API compatibility.
+   - Bump MINOR version (2.2.2 => 2.3.0) when you add functionality in a backwards compatible manner.
+   - Bump PATCH version (2.2.2 => 2.2.3) when you provide a bug fix.
+   
+   Version bump should be included in the same PR.
+
+7. When you feel like you're done, commit the files:
 
 ```bash
 $ git add -A

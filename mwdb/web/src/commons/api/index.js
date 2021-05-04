@@ -285,11 +285,11 @@ function registerUser(login, email, additional_info, recaptcha) {
     });
 }
 
-function updateUser(login, email, additional_info, feed_quality) {
+function updateUser(login, { email, additionalInfo, feedQuality }) {
     return axios.put(`/user/${login}`, {
         email,
-        additional_info,
-        feed_quality,
+        additional_info: additionalInfo,
+        feed_quality: feedQuality,
     });
 }
 

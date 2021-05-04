@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from "react";
+import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
@@ -9,71 +9,46 @@ import {
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-const initialState = {
-    email: null,
-    additionalInfo: null,
-    feedQuality: null,
-};
 
-function userItemReducer(state, action) {
-    switch (action.type) {
-        case "email":
-            return { email: action.payload };
-        case "additionalInfo":
-            return { additionalInfo: action.payload };
-        case "feedQuality":
-            return { feedQuality: action.payload };
-        case "reset":
-            return initialState;
-        default:
-            return state;
-    }
-}
-
-function EditableItem(props) {
-    const [state, dispatch] = useReducer(userItemReducer, initialState);
+function EditableItem({
+    name,
+    type,
+    selective,
+    badge,
+    children,
+    defaultValue,
+    onSubmit,
+}) {
+    const [value, setValue] = useState(defaultValue);
     const [edit, setEdit] = useState(false);
+
     return (
         <span>
             {edit ? (
                 <div className="input-group">
-                    {props.selective ? (
+                    {selective ? (
                         <select
                             className="form-control"
-                            value={state.feedQuality}
-                            name={state[props.name]}
-                            onChange={(ev) =>
-                                dispatch({
-                                    type: props.name,
-                                    payload: ev.target.value,
-                                })
-                            }
+                            value={value}
+                            name={name}
+                            onChange={(ev) => setValue(ev.target.value)}
                         >
-                            {props.children}
+                            {children}
                         </select>
                     ) : (
                         <input
-                            type={props.name === "email" ? "email" : "text"}
-                            name={props.name}
+                            type={type || "text"}
+                            name={name}
                             className="form-control"
-                            value={state[props.name]}
-                            onChange={(ev) =>
-                                dispatch({
-                                    type: props.name,
-                                    payload: ev.target.value,
-                                })
-                            }
+                            value={value}
+                            onChange={(ev) => setValue(ev.target.value)}
                         />
                     )}
                     <div className="input-group-append">
                         <button
                             className="btn btn-outline-success"
                             onClick={() => {
-                                props.onSubmit(
-                                    state.email,
-                                    state.additionalInfo,
-                                    state.feedQuality
-                                );
+                                onSubmit({ [name]: value });
                                 setEdit(false);
                             }}
                         >
@@ -83,10 +58,7 @@ function EditableItem(props) {
                         <button
                             className="btn btn-outline-danger"
                             onClick={() => {
-                                dispatch({
-                                    type: "reset",
-                                    payload: initialState,
-                                });
+                                setValue(defaultValue);
                                 setEdit(false);
                             }}
                         >
@@ -99,23 +71,20 @@ function EditableItem(props) {
                 <div>
                     <span
                         className={
-                            props.badge
+                            badge
                                 ? "badge badge-secondary align-middle"
                                 : "align-middle"
                         }
                     >
-                        {props.defaultValue}
+                        {defaultValue}
                     </span>
                     <button
                         className="float-right align-middle btn shadow-none"
                         style={{ cursor: "pointer" }}
                         onClick={(ev) => {
                             ev.preventDefault();
+                            setValue(defaultValue);
                             setEdit(true);
-                            dispatch({
-                                type: props.name,
-                                payload: props.defaultValue,
-                            });
                         }}
                     >
                         <small className="text-muted">Edit </small>
@@ -142,14 +111,9 @@ export default function UserDetails({ user, getUser }) {
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
-    async function handleSubmit(email, additionalInfo, feedQuality) {
+    async function handleSubmit(newValue) {
         try {
-            await api.updateUser(
-                user.login,
-                email,
-                additionalInfo,
-                feedQuality
-            );
+            await api.updateUser(user.login, newValue);
         } catch (error) {
             history.push({
                 pathname: `/admin/user/${user.login}`,

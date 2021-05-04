@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useEffect, useRef} from "react";
+import React, {useState, useCallback, useEffect } from "react";
 import Autocomplete from "react-autocomplete";
 import { Link } from "react-router-dom";
 
@@ -10,9 +10,7 @@ import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { intersperse } from "@mwdb-web/commons/helpers";
 import { ConfirmationModal, GroupBadge, ShowIf } from "@mwdb-web/commons/ui";
 
-import "bootstrap-select";
-import "bootstrap-select/dist/css/bootstrap-select.css";
-import $ from "jquery";
+import CapabilitiesSelect from "@mwdb-web/commons/ui/CapabilitiesSelect";
 
 function GroupAppliesTo({ group }) {
     if (group["name"] === "public")
@@ -167,11 +165,17 @@ export default function AccessControl() {
     return (
         <div>
             <h5>Access control</h5>
-            <Link>
-                <FontAwesomeIcon icon={faPlus} />{" "}
-                Add capabilities
-            </Link>
-            <GroupInputField groups={groups} value={""} onValueUpdate={()=>{}}/>
+            <div className="card">
+                <div className="card-body">
+                    <GroupInputField/>
+                    <CapabilitiesSelect/>
+                    <Link>
+                        <FontAwesomeIcon icon={faPlus} />{" "}
+                        Update capabilities
+                    </Link>
+                </div>
+            </div>
+            <h5>Enabled capabilities</h5>
             <table className="table table-bordered wrap-table">
                 <tbody>
                     {groups

@@ -1,7 +1,11 @@
 import React, { useState, useReducer } from "react";
 import { Link, useHistory } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
-import { DateString, getErrorMessage } from "@mwdb-web/commons/ui";
+import {
+    DateString,
+    getErrorMessage,
+    ConfirmationModal,
+} from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -126,6 +130,8 @@ function UserItem(props) {
 
 export default function UserDetails({ user, getUser }) {
     const history = useHistory();
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
     async function handleSubmit(email, additionalInfo, feedQuality) {
         try {
@@ -142,6 +148,37 @@ export default function UserDetails({ user, getUser }) {
             });
         } finally {
             getUser();
+        }
+    }
+
+    async function setDisabledState(ban) {
+        try {
+            setDeleteModalDisabled(true);
+            await api.setUserDisabled(user.login, ban);
+        } catch (error) {
+            history.push({
+                pathname: `/admin/user/${user.login}`,
+                state: { error: getErrorMessage(error) },
+            });
+        } finally {
+            getUser();
+        }
+    }
+
+    async function handleRemoveUser() {
+        try {
+            setDeleteModalDisabled(true);
+            await api.removeUser(user.login);
+            history.push({
+                pathname: `/admin/users/`,
+                state: { success: "User has been successfully removed" },
+            });
+        } catch (error) {
+            history.push({
+                pathname: `/admin/user/${user.login}`,
+                state: { error: getErrorMessage(error) },
+            });
+            setDeleteModalDisabled(false);
         }
     }
 
@@ -216,6 +253,12 @@ export default function UserDetails({ user, getUser }) {
                 <li className="nav-item">
                     <Link
                         className="nav-link"
+                        to={makeSearchLink("uploader", user.login, false, "/")}
+                    >
+                        Search for uploads
+                    </Link>
+                    <Link
+                        className="nav-link"
                         to={`/admin/user/${user.login}/capabilities`}
                     >
                         Check user capabilities
@@ -232,14 +275,43 @@ export default function UserDetails({ user, getUser }) {
                     >
                         Change password
                     </Link>
-                    <Link
-                        className="nav-link"
-                        to={makeSearchLink("uploader", user.login, false, "/")}
+                    {user.disabled ? (
+                        <a
+                            href="#block-user"
+                            className="nav-link text-danger"
+                            onClick={() => setDisabledState(false)}
+                        >
+                            <FontAwesomeIcon icon="ban" />
+                            Unblock user
+                        </a>
+                    ) : (
+                        <a
+                            href="#block-user"
+                            className="nav-link text-danger"
+                            onClick={() => setDisabledState(true)}
+                        >
+                            <FontAwesomeIcon icon="ban" />
+                            Block user
+                        </a>
+                    )}
+                    <a
+                        href="#remove-user"
+                        className="nav-link text-danger"
+                        onClick={() => setDeleteModalOpen(true)}
                     >
-                        Search for uploads
-                    </Link>
+                        <FontAwesomeIcon icon="trash" />
+                        Remove user
+                    </a>
                 </li>
             </ul>
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                disabled={isDeleteModalDisabled}
+                onRequestClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleRemoveUser}
+                message={`Are tou sure you want to delete ${user.login} from mwdb`}
+                buttonStyle="btn-danger"
+            />
         </div>
     );
 }

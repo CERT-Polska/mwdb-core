@@ -51,7 +51,7 @@ class ShowUsers extends Component {
 
     render() {
         return (
-            <View fluid ident="showUsers" error={this.state.error}>
+            <div>
                 <Link to="/admin/user/new">
                     <button type="button" className="btn btn-success">
                         Register user
@@ -70,7 +70,7 @@ class ShowUsers extends Component {
                     onPageChange={this.handlePageChange}
                     onFilterChange={this.handleFilterChange}
                 />
-            </View>
+            </div>
         );
     }
 }

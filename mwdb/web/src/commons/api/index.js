@@ -293,6 +293,10 @@ function updateUser(login, email, additional_info, feed_quality) {
     });
 }
 
+function removeUser(login) {
+    return axios.delete(`/user/${login}`);
+}
+
 function getReadableMetakeyDefinitions() {
     return axios.get("/meta/list/read");
 }
@@ -498,6 +502,7 @@ export default {
     createUser,
     registerUser,
     updateUser,
+    removeUser,
     getReadableMetakeyDefinitions,
     getSettableMetakeyDefinitions,
     getMetakeyDefinitions,

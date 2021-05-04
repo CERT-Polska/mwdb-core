@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext, useLocation } from "react";
-import { NavLink, Link, Redirect, Switch } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { NavLink, Redirect, Switch } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -143,6 +143,7 @@ export default function SettingsView(props) {
                                     "/admin/user/:login/password",
                                     "/admin/user/:login/capabilities",
                                     "/admin/user/:login/api-keys",
+                                    "/admin/user/:login/groups",
                                 ]}
                             >
                                 <UserView />

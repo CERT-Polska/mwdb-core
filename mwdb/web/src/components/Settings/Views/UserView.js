@@ -8,6 +8,7 @@ import UserDetails from "./UserDetails";
 import UserResetPassword from "./UserResetPassword";
 import ProfileAPIKeys from "../../Profile/Views/ProfileAPIKeys";
 import ProfileCapabilities from "../../Profile/Views/ProfileCapabilities";
+import UserSingleGroups from "./UserSingleGroups";
 
 export default function UserView() {
     const history = useHistory();
@@ -34,6 +35,8 @@ export default function UserView() {
 
     if (!user) return [];
 
+    console.log(user);
+
     return (
         <React.Fragment>
             <AdministrativeRoute exact path="/admin/user/:login">
@@ -47,6 +50,9 @@ export default function UserView() {
             </AdministrativeRoute>
             <AdministrativeRoute exact path="/admin/user/:login/password">
                 <UserResetPassword user={user} />
+            </AdministrativeRoute>
+            <AdministrativeRoute exact path="/admin/user/:login/groups">
+                <UserSingleGroups user={user} getUser={updateUser} />
             </AdministrativeRoute>
         </React.Fragment>
     );

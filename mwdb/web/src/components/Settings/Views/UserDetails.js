@@ -259,6 +259,12 @@ export default function UserDetails({ user, getUser }) {
                     </Link>
                     <Link
                         className="nav-link"
+                        to={`/admin/user/${user.login}/groups`}
+                    >
+                        Show user groups
+                    </Link>
+                    <Link
+                        className="nav-link"
                         to={`/admin/user/${user.login}/capabilities`}
                     >
                         Check user capabilities

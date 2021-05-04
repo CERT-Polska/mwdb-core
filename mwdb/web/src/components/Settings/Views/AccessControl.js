@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, {useState, useCallback, useEffect, useRef} from "react";
 import Autocomplete from "react-autocomplete";
 import { Link } from "react-router-dom";
 
@@ -9,6 +9,10 @@ import api from "@mwdb-web/commons/api";
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { intersperse } from "@mwdb-web/commons/helpers";
 import { ConfirmationModal, GroupBadge, ShowIf } from "@mwdb-web/commons/ui";
+
+import "bootstrap-select";
+import "bootstrap-select/dist/css/bootstrap-select.css";
+import $ from "jquery";
 
 function GroupAppliesTo({ group }) {
     if (group["name"] === "public")
@@ -118,7 +122,7 @@ export default function AccessControl() {
     const [groups, setGroups] = useState(null);
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [isAddModalOpen, setAddModalOpen] = useState(false);
+    // const [isAddModalOpen, setAddModalOpen] = useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
     const [capabilityToDelete, setCapabilityToDelete] = useState({});
 
@@ -135,10 +139,6 @@ export default function AccessControl() {
         } catch (error) {
             console.error(error);
         }
-    }
-
-    async function addCapabilities() {
-
     }
 
     async function deleteCapability({group, capability}) {
@@ -160,6 +160,7 @@ export default function AccessControl() {
     useEffect(() => {
         getGroups();
     }, [getGroups]);
+
 
     if (!groups) return [];
 

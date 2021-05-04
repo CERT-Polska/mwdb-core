@@ -5,6 +5,7 @@
     "version": "2.2.2",
     "peerDependencies": {
         "@fortawesome/react-fontawesome": "*",
+        "bootstrap-select": "*",
         "lodash": "*",
         "react": "*",
         "react-ace": "*",

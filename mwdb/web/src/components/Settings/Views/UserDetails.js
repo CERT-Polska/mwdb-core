@@ -9,7 +9,6 @@ import {
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-
 function EditableItem({
     name,
     type,

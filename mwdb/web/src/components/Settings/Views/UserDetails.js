@@ -36,9 +36,10 @@ function EditableItem(props) {
     return (
         <span>
             {edit ? (
-                <span>
+                <div className="input-group">
                     {props.selective ? (
                         <select
+                            className="form-control"
                             value={state.feedQuality}
                             name={state[props.name]}
                             onChange={(ev) =>
@@ -54,7 +55,7 @@ function EditableItem(props) {
                         <input
                             type={props.name === "email" ? "email" : "text"}
                             name={props.name}
-                            className=".input-sm"
+                            className="form-control"
                             value={state[props.name]}
                             onChange={(ev) =>
                                 dispatch({
@@ -64,45 +65,52 @@ function EditableItem(props) {
                             }
                         />
                     )}
-                    <span
-                        className="float-right"
-                        onClick={() => {
-                            dispatch({
-                                type: "reset",
-                                payload: initialState,
-                            });
-                            setEdit(false);
-                        }}
-                        style={{ cursor: "pointer" }}
-                    >
-                        <FontAwesomeIcon className="float-right" icon="times" />
-                    </span>
-                    <span
-                        className="float-right"
-                        onClick={() => {
-                            props.onSubmit(
-                                state.email,
-                                state.additionalInfo,
-                                state.feedQuality
-                            );
-                            setEdit(false);
-                        }}
-                        style={{ marginRight: "8px", cursor: "pointer" }}
-                    >
-                        <FontAwesomeIcon className="float-right" icon="save" />
-                    </span>
-                </span>
+                    <div className="input-group-append">
+                        <button
+                            className="btn btn-outline-success"
+                            onClick={() => {
+                                props.onSubmit(
+                                    state.email,
+                                    state.additionalInfo,
+                                    state.feedQuality
+                                );
+                                setEdit(false);
+                            }}
+                        >
+                            <small>Save </small>
+                            <FontAwesomeIcon icon="save" />
+                        </button>
+                        <button
+                            className="btn btn-outline-danger"
+                            onClick={() => {
+                                dispatch({
+                                    type: "reset",
+                                    payload: initialState,
+                                });
+                                setEdit(false);
+                            }}
+                        >
+                            <small>Cancel </small>
+                            <FontAwesomeIcon icon="times" />
+                        </button>
+                    </div>
+                </div>
             ) : (
-                <span>
+                <div>
                     <span
-                        className={props.badge ? "badge badge-secondary" : ""}
+                        className={
+                            props.badge
+                                ? "badge badge-secondary align-middle"
+                                : "align-middle"
+                        }
                     >
                         {props.defaultValue}
                     </span>
-                    <span
-                        className="float-right"
+                    <button
+                        className="float-right align-middle btn shadow-none"
                         style={{ cursor: "pointer" }}
-                        onClick={() => {
+                        onClick={(ev) => {
+                            ev.preventDefault();
                             setEdit(true);
                             dispatch({
                                 type: props.name,
@@ -110,9 +118,10 @@ function EditableItem(props) {
                             });
                         }}
                     >
-                        <FontAwesomeIcon className="float-right" icon="edit" />
-                    </span>
-                </span>
+                        <small className="text-muted">Edit </small>
+                        <FontAwesomeIcon icon="edit" />
+                    </button>
+                </div>
             )}
         </span>
     );
@@ -249,7 +258,7 @@ export default function UserDetails({ user, getUser }) {
                 </tbody>
             </table>
             <b>Actions:</b>
-            <ul className="nav flex-column">
+            <ul className="nav">
                 <li className="nav-item">
                     <Link
                         className="nav-link"

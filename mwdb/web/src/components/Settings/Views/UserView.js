@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useHistory, useParams, Switch, Route, Link } from "react-router-dom";
+import { useHistory, useParams, Switch, Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
 import { AdministrativeRoute, getErrorMessage } from "@mwdb-web/commons/ui";

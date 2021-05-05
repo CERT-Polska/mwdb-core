@@ -69,7 +69,6 @@ export default function UserSingleGroups({ user, getUser }) {
 
     return (
         <div className="container">
-            <h4>Groups</h4>
             <GroupMemberList
                 items={groupItems}
                 addMember={addMember}

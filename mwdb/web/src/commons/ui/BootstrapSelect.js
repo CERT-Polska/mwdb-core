@@ -4,34 +4,42 @@ import "bootstrap-select";
 import "bootstrap-select/dist/css/bootstrap-select.css";
 import $ from "jquery";
 
-export default function BootstrapSelect({children, onChange, ...props}) {
-    const ref = useRef(null)
-    const doOnChange = useCallback(onChange || (()=>{}), []);
-    const setRef = useCallback(node => {
-        // Initialize the select element with 'selectpicker' plugin
-        if(!ref.current && node) {
+export default function BootstrapSelect({
+    children,
+    onChange,
+    noneSelectedText,
+    ...props
+}) {
+    const ref = useRef(null);
+    const setRef = useCallback((node) => {
+        // Initialize the select element when mounted
+        if (node) {
             const selectElement = $(node);
             selectElement.selectpicker();
-            selectElement.on('changed.bs.select', doOnChange);
-        }
-        // Deinitialize the select element otherwise
-        if(ref.current && !node) {
-            const selectElement = $(ref.current);
-            selectElement.off('changed.bs.select', doOnChange);
         }
         // Save a reference to the node
-        ref.current = node
-      }, [doOnChange])
+        ref.current = node;
+    }, []);
 
     useLayoutEffect(() => {
-        if(ref.current) {
-            $(ref.current).selectpicker("refresh");
-        }
-    }, [props])
+        // Bind onChange event handler and unbind the old/unmounted one
+        const selectElement = $(ref.current);
+        selectElement.on("changed.bs.select", onChange);
+        return () => {
+            selectElement.off("changed.bs.select", onChange);
+        };
+    }, [onChange]);
+
+    useLayoutEffect(() => {
+        // Re-render selectpicker when props are changed
+        // FIX: noneSelectedText doesn't update on refresh itself
+        $(ref.current).selectpicker({ noneSelectedText });
+        $(ref.current).selectpicker("refresh");
+    }, [props, noneSelectedText]);
 
     return (
         <select ref={setRef} {...props}>
             {children}
         </select>
-    )
+    );
 }

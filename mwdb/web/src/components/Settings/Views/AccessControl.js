@@ -1,13 +1,19 @@
-import React, {useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-import { faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { intersperse } from "@mwdb-web/commons/helpers";
-import { Autocomplete, BootstrapSelect, ConfirmationModal, GroupBadge, ShowIf } from "@mwdb-web/commons/ui";
+import {
+    Autocomplete,
+    BootstrapSelect,
+    ConfirmationModal,
+    GroupBadge,
+    ShowIf,
+} from "@mwdb-web/commons/ui";
 
 function GroupAppliesTo({ group }) {
     if (group["name"] === "public")
@@ -53,10 +59,12 @@ function CapabilitiesList({ capabilities, onDelete }) {
     return capabilities.map((cap) => (
         <tr>
             <td className="col-auto">
-                <Link onClick={(ev) => {
-                    ev.preventDefault();
-                    onDelete(cap);
-                }}>
+                <Link
+                    onClick={(ev) => {
+                        ev.preventDefault();
+                        onDelete(cap);
+                    }}
+                >
                     <FontAwesomeIcon icon={faTimes} />
                 </Link>
             </td>
@@ -64,83 +72,133 @@ function CapabilitiesList({ capabilities, onDelete }) {
                 <span className="badge badge-success">{cap}</span>
             </th>
             <td className="col">
-                {capabilitiesList[cap] || "Undocumented. Possibly internal and required by plugin."}
+                {capabilitiesList[cap] ||
+                    "Undocumented. Possibly internal and required by plugin."}
             </td>
         </tr>
     ));
 }
 
-function CapabilitiesSelect({value, onChange}) {
-    const capabilities = Object.keys(capabilitiesList);
-    const selectedCaps = value || [];
-    return (
-        <BootstrapSelect data-multiple-separator={""}
-                         data-live-search="true"
-                         data-none-selected-text={
-                             value === undefined
-                             ? "Provide existing group name"
-                             : "No additional capabilities enabled"
-                         }
-                         className={"form-control"} multiple
-                         disabled={value === undefined}
-                         onChange={(e, clickedIndex, isSelected) => {
-            if(isSelected)
-                onChange(selectedCaps.concat(capabilities[clickedIndex]));
-            else
-                onChange(selectedCaps.filter(cap => cap !== capabilities[clickedIndex]))
-        }}>
-            {
-                capabilities.map((cap) => (
-                    <option data-content={`<span class='badge badge-success'>${cap}</span>`}
-                            selected={selectedCaps.indexOf(cap) !== -1}>
-                        {cap}
-                    </option>
-                ))
-            }
-        </BootstrapSelect>
-    )
-}
-
-
 function CapabilityChangeCard({ groups, onSubmit }) {
     const [groupName, setGroupName] = useState("");
-    const [capabilities, setCapabilities] = useState();
+    const [chosenGroup, setChosenGroup] = useState({});
+    const [chosenCapabilities, setChosenCapabilities] = useState();
+
+    const capabilities = Object.keys(capabilitiesList);
+    const selectedCaps = chosenCapabilities || [];
+    const originalCaps = chosenGroup.capabilities || [];
+    const changedCaps = capabilities.filter(
+        (cap) => selectedCaps.includes(cap) !== originalCaps.includes(cap)
+    );
+    const selectHandler = useCallback(
+        (e, clickedIndex, isSelected) => {
+            if (isSelected)
+                setChosenCapabilities(
+                    selectedCaps.concat(capabilities[clickedIndex])
+                );
+            else
+                setChosenCapabilities(
+                    selectedCaps.filter(
+                        (cap) => cap !== capabilities[clickedIndex]
+                    )
+                );
+        },
+        [selectedCaps, capabilities]
+    );
+
+    function dismissChanges() {
+        setChosenCapabilities(chosenGroup.capabilities);
+    }
 
     useEffect(() => {
-        const matchedGroup = groups.find(group => group.name === groupName) || {};
-        setCapabilities(matchedGroup.capabilities);
-    }, [groups, groupName])
+        const matchedGroup =
+            groups.find((group) => group.name === groupName) || {};
+        setChosenGroup(matchedGroup);
+        setChosenCapabilities(matchedGroup.capabilities);
+    }, [groups, groupName]);
+
     return (
         <div className="card">
             <div className="card-body">
                 <Autocomplete
                     value={groupName}
                     getItemValue={(group) => group.name}
-                    items={groups.filter(group => group.name.toLowerCase().indexOf(groupName.toLowerCase()) !== -1)}
+                    items={groups.filter(
+                        (group) =>
+                            group.name
+                                .toLowerCase()
+                                .indexOf(groupName.toLowerCase()) !== -1
+                    )}
                     onChange={(value) => setGroupName(value)}
                     className="form-control"
                     placeholder="Group name"
-                    renderItem={({item}) => (
-                        <GroupBadge group={item} />
-                    )}
+                    renderItem={({ item }) => <GroupBadge group={item} />}
                 />
-                <CapabilitiesSelect value={capabilities} onChange={(caps) => setCapabilities(caps)}/>
-                <Link>
-                    <FontAwesomeIcon icon={faPlus} />{" "}
-                    Update capabilities
-                </Link>
+                <BootstrapSelect
+                    data-multiple-separator={""}
+                    data-live-search="true"
+                    noneSelectedText={
+                        chosenCapabilities === undefined
+                            ? "Provide group name first"
+                            : "No additional capabilities enabled"
+                    }
+                    className={"form-control"}
+                    multiple
+                    disabled={chosenCapabilities === undefined}
+                    onChange={selectHandler}
+                >
+                    {capabilities.map((cap) => {
+                        const changed = changedCaps.includes(cap);
+                        const selected = selectedCaps.includes(cap);
+                        return (
+                            <option
+                                data-content={`
+                                ${changed ? "*" : ""}
+                                <span class='badge badge-success'>${cap}</span>
+                                <small class="text-muted">${
+                                    capabilitiesList[cap]
+                                }</small>
+                            `}
+                                selected={selected}
+                            >
+                                {cap}
+                            </option>
+                        );
+                    })}
+                </BootstrapSelect>
+                {changedCaps.length > 0 && (
+                    <div>
+                        <small>
+                            * There are pending changes. Click Apply if you want
+                            to commit them or Dismiss otherwise.
+                        </small>
+                    </div>
+                )}
+                <button
+                    className="btn btn-outline-success mt-2 mr-1"
+                    disabled={changedCaps.length === 0}
+                    onClick={() => onSubmit(groupName, chosenCapabilities)}
+                >
+                    <FontAwesomeIcon icon={faSave} /> Apply
+                </button>
+                <button
+                    className="btn btn-outline-danger mt-2"
+                    disabled={changedCaps.length === 0}
+                    onClick={() => dismissChanges()}
+                >
+                    <FontAwesomeIcon icon={faTimes} /> Dismiss
+                </button>
             </div>
         </div>
-    )
+    );
 }
 
 export default function AccessControl() {
     const [groups, setGroups] = useState(null);
 
-    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-    // const [isAddModalOpen, setAddModalOpen] = useState(false);
+    const [isChangeModalOpen, setChangeModalOpen] = useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
-    const [capabilityToDelete, setCapabilityToDelete] = useState({});
+    const [changeToApply, setChangeToApply] = useState({});
 
     async function updateGroups() {
         try {
@@ -157,17 +215,16 @@ export default function AccessControl() {
         }
     }
 
-    async function deleteCapability({group, capability}) {
+    async function changeCapabilities({ group, capabilities }) {
         try {
             setDisabledModalButton(true);
-            const response = await api.getGroup(group);
-            const newCapabilities = response.data.capabilities.filter(item => item !== capability)
-            await api.updateGroup(group, undefined, newCapabilities);
+            await api.updateGroup(group, undefined, capabilities);
             await updateGroups();
-        } catch(e) {}
-        finally {
+        } catch (e) {
+            // todo
+        } finally {
             setDisabledModalButton(false);
-            setDeleteModalOpen(false);
+            setChangeModalOpen(false);
         }
     }
 
@@ -177,13 +234,22 @@ export default function AccessControl() {
         getGroups();
     }, [getGroups]);
 
-
     if (!groups) return [];
 
     return (
         <div>
             <h5>Access control</h5>
-            <CapabilityChangeCard groups={groups} />
+            <p>
+                Use a form below to enable/disable capabilities for specific
+                user or group.
+            </p>
+            <CapabilityChangeCard
+                groups={groups}
+                onSubmit={(group, capabilities) => {
+                    setChangeToApply({ group, capabilities });
+                    setChangeModalOpen(true);
+                }}
+            />
             <table className="table table-bordered wrap-table">
                 <tbody>
                     {groups
@@ -192,11 +258,14 @@ export default function AccessControl() {
                             <CapabilitiesHeader group={group} />,
                             <CapabilitiesList
                                 capabilities={group.capabilities}
-                                onDelete={(capability) => {
-                                    setCapabilityToDelete({
-                                        group: group.name, capability
+                                onDelete={(capToRemove) => {
+                                    setChangeToApply({
+                                        group: group.name,
+                                        capabilities: group.capabilities.filter(
+                                            (cap) => cap !== capToRemove
+                                        ),
                                     });
-                                    setDeleteModalOpen(true);
+                                    setChangeModalOpen(true);
                                 }}
                             />,
                         ])}
@@ -205,14 +274,13 @@ export default function AccessControl() {
             <ConfirmationModal
                 buttonStyle="badge-success"
                 confirmText="Yes"
-                message={`Are you sure you want to remove ${capabilityToDelete.capability}
-                          capability from '${capabilityToDelete.group}'?`}
-                isOpen={isDeleteModalOpen}
+                message={`Are you sure you want to change '${changeToApply.group}' capabilities?`}
+                isOpen={isChangeModalOpen}
                 disabled={disabledModalButton}
-                onRequestClose={() => setDeleteModalOpen(false)}
+                onRequestClose={() => setChangeModalOpen(false)}
                 onConfirm={(ev) => {
                     ev.preventDefault();
-                    deleteCapability(capabilityToDelete);
+                    changeCapabilities(changeToApply);
                 }}
             />
         </div>

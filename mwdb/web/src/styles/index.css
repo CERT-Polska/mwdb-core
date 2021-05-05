@@ -317,3 +317,8 @@ a.blob {
 .detailed-view-header svg {
     margin-right: 6pt;
 }
+
+/* Bootstrap-Select */
+.filter-option small.text-muted {
+    display: none;
+}

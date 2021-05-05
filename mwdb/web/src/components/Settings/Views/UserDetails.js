@@ -125,7 +125,6 @@ export default function UserDetails({ user, getUser }) {
 
     async function setDisabledState(ban) {
         try {
-            setDeleteModalDisabled(true);
             await api.setUserDisabled(user.login, ban);
         } catch (error) {
             history.push({
@@ -158,10 +157,8 @@ export default function UserDetails({ user, getUser }) {
 
     return (
         <div className="container">
-            <h4>Account details</h4>
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
-                    <UserItem label="Login" value={user.login} />
                     <UserItem label="E-mail">
                         <EditableItem
                             name="email"

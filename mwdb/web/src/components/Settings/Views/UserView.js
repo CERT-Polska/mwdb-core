@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useHistory, useParams, Switch, Link } from "react-router-dom";
+import {
+    useHistory,
+    useParams,
+    Switch,
+    Link,
+    useLocation,
+} from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
 import { AdministrativeRoute, getErrorMessage } from "@mwdb-web/commons/ui";
@@ -11,6 +17,7 @@ import ProfileCapabilities from "../../Profile/Views/ProfileCapabilities";
 import UserSingleGroups from "./UserSingleGroups";
 
 export default function UserView() {
+    const location = useLocation();
     const history = useHistory();
     const { login } = useParams();
     const [user, setUser] = useState({});
@@ -37,36 +44,38 @@ export default function UserView() {
 
     return (
         <div className="container">
-            <Switch>
-                <AdministrativeRoute exact path="/admin/user/:login" />
-                <AdministrativeRoute>
-                    <nav aria-label="breadcrumb">
-                        <ol className="breadcrumb">
-                            <li className="breadcrumb-item">
-                                <Link to={`/admin/user/${user.login}`}>
-                                    {user.login}
-                                </Link>
-                            </li>
-                            <li className="breadcrumb-item active">
-                                <Switch>
-                                    <AdministrativeRoute path="/admin/user/:login/capabilities">
-                                        Capabilities
-                                    </AdministrativeRoute>
-                                    <AdministrativeRoute path="/admin/user/:login/api-keys">
-                                        API keys
-                                    </AdministrativeRoute>
-                                    <AdministrativeRoute path="/admin/user/:login/password">
-                                        Reset password
-                                    </AdministrativeRoute>
-                                    <AdministrativeRoute path="/admin/user/:login/groups">
-                                        Groups
-                                    </AdministrativeRoute>
-                                </Switch>
-                            </li>
-                        </ol>
-                    </nav>
-                </AdministrativeRoute>
-            </Switch>
+            <nav aria-label="breadcrumb">
+                <ol className="breadcrumb">
+                    <li className="breadcrumb-item">
+                        <strong>Account details: </strong>
+                        {location.pathname.split("/").length > 4 ? (
+                            <Link to={`/admin/user/${user.login}`}>
+                                {user.login}
+                            </Link>
+                        ) : (
+                            <span>{user.login}</span>
+                        )}
+                    </li>
+                    {location.pathname.split("/").length > 4 && (
+                        <li className="breadcrumb-item active">
+                            <Switch>
+                                <AdministrativeRoute path="/admin/user/:login/capabilities">
+                                    Capabilities
+                                </AdministrativeRoute>
+                                <AdministrativeRoute path="/admin/user/:login/api-keys">
+                                    API keys
+                                </AdministrativeRoute>
+                                <AdministrativeRoute path="/admin/user/:login/password">
+                                    Reset password
+                                </AdministrativeRoute>
+                                <AdministrativeRoute path="/admin/user/:login/groups">
+                                    Groups
+                                </AdministrativeRoute>
+                            </Switch>
+                        </li>
+                    )}
+                </ol>
+            </nav>
             <Switch>
                 <AdministrativeRoute exact path="/admin/user/:login">
                     <UserDetails user={user} getUser={updateUser} />

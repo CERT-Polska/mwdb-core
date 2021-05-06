@@ -2,6 +2,7 @@ import React from "react";
 
 export { default as APIKeyList } from "./APIKeyList";
 export { default as Autocomplete } from "./Autocomplete";
+export { default as BootstrapSelect } from "./BootstrapSelect";
 export { default as ConfirmationModal } from "./ConfirmationModal";
 export { default as DataTable } from "./DataTable";
 export { default as DateString } from "./DateString";

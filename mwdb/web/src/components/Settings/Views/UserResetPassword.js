@@ -35,9 +35,7 @@ export default function UserResetPassword({ user }) {
     async function generatePasswordResetLink() {
         try {
             let getURLFromToken = (token) =>
-                encodeURI(
-                    `${window.location.origin}/setpasswd/${token}`
-                );
+                encodeURI(`${window.location.origin}/setpasswd/${token}`);
             let response = await api.generateSetPasswordToken(user.login);
             setPasswordURL(getURLFromToken(response.data.token));
         } catch (error) {

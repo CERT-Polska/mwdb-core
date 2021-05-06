@@ -36,7 +36,7 @@ export default function UserResetPassword({ user }) {
         try {
             let getURLFromToken = (token) =>
                 encodeURI(
-                    `${window.location.protocol}//${window.location.host}/setpasswd/${token}`
+                    `${window.location.origin}/setpasswd/${token}`
                 );
             let response = await api.generateSetPasswordToken(user.login);
             setPasswordURL(getURLFromToken(response.data.token));
@@ -90,7 +90,7 @@ export default function UserResetPassword({ user }) {
             <div className="card">
                 <div className="card-body">
                     <h5 className="card-title">
-                        Alternative you can generate reset password link
+                        Alternatively you can generate reset password link
                     </h5>
                     <button
                         onClick={(ev) => {

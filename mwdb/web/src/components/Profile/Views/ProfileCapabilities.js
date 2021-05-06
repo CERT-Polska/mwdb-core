@@ -36,8 +36,7 @@ function CapabilitiesTable({ profile }) {
 
 export default function ProfileCapabilities({ profile }) {
     return (
-        <div>
-            <h4>Account capabilities</h4>
+        <div className="container">
             <CapabilitiesTable profile={profile} />
         </div>
     );

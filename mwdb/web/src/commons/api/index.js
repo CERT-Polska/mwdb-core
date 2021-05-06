@@ -285,12 +285,16 @@ function registerUser(login, email, additional_info, recaptcha) {
     });
 }
 
-function updateUser(login, email, additional_info, feed_quality) {
+function updateUser(login, { email, additionalInfo, feedQuality }) {
     return axios.put(`/user/${login}`, {
         email,
-        additional_info,
-        feed_quality,
+        additional_info: additionalInfo,
+        feed_quality: feedQuality,
     });
+}
+
+function removeUser(login) {
+    return axios.delete(`/user/${login}`);
 }
 
 function getReadableMetakeyDefinitions() {
@@ -498,6 +502,7 @@ export default {
     createUser,
     registerUser,
     updateUser,
+    removeUser,
     getReadableMetakeyDefinitions,
     getSettableMetakeyDefinitions,
     getMetakeyDefinitions,

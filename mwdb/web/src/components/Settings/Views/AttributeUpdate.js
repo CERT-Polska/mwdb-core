@@ -381,7 +381,7 @@ class AttributeUpdate extends Component {
         this.setState({ disabledModalButton: true });
         try {
             await api.removeMetakeyDefinition(metakey);
-            this.props.history.push("/attributes");
+            this.props.history.push("/admin/attributes");
         } catch (error) {
             this.setState({
                 disabledModalButton: false,

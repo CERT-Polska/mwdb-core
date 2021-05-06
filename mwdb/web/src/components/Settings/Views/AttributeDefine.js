@@ -44,7 +44,7 @@ class AttributeDefine extends Component {
                 this.state.template,
                 this.state.hidden
             );
-            this.props.history.push(`/attribute/${this.state.metakey}`);
+            this.props.history.push(`/admin/attribute/${this.state.metakey}`);
         } catch (error) {
             this.setState({ ...this.initialState, error });
         }
@@ -132,7 +132,7 @@ class AttributeDefine extends Component {
                             <label
                                 htmlFor="hidden_checkbox"
                                 className="bg-primary"
-                            ></label>
+                            />
                         </div>
                         <div className="form-hint">
                             Hidden attributes have protected values. Attribute

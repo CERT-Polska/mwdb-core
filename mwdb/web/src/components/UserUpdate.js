@@ -176,12 +176,11 @@ class UserUpdate extends Component {
         event.preventDefault();
         let login = this.props.match.params.login;
         try {
-            await api.updateUser(
-                login,
-                this.state.email,
-                this.state.additional_info,
-                this.state.feed_quality
-            );
+            await api.updateUser(login, {
+                email: this.state.email,
+                additionalInfo: this.state.additional_info,
+                feedQuality: this.state.feed_quality,
+            });
             this.setState({
                 success: "Successfuly updated user",
                 error: null,

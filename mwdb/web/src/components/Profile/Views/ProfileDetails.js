@@ -49,16 +49,16 @@ export default function ProfileDetails({ profile }) {
             <b>Actions:</b>
             <ul className="nav flex-column">
                 <li className="nav-item">
-                    <ShowIf condition={isCurrentUser && auth.hasCapability(
-                                Capability.personalize
-                            )}>
+                    <ShowIf
+                        condition={
+                            isCurrentUser &&
+                            auth.hasCapability(Capability.personalize)
+                        }
+                    >
                         <Link className="nav-link" to="/profile/api-keys">
                             Set up API keys
                         </Link>
-                        <Link
-                            className="nav-link"
-                            to="/profile/reset-password"
-                        >
+                        <Link className="nav-link" to="/profile/reset-password">
                             Reset password
                         </Link>
                     </ShowIf>

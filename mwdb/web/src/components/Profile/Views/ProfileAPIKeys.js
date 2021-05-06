@@ -88,8 +88,9 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
         <div>
             <h2>API keys</h2>
             <p className="lead">
-                API keys are just an alternative to password-based authentication. They are recommended to use for
-                scripts and other automation instead of plaintext passwords.
+                API keys are just an alternative to password-based
+                authentication. They are recommended to use for scripts and
+                other automation instead of plaintext passwords.
             </p>
             {!profile.api_keys.length ? (
                 <p>

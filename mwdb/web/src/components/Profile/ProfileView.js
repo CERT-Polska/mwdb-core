@@ -1,5 +1,12 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import {Link, NavLink, Route, Switch, useHistory, useParams} from "react-router-dom";
+import {
+    Link,
+    NavLink,
+    Route,
+    Switch,
+    useHistory,
+    useParams,
+} from "react-router-dom";
 
 import { faUserCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -36,7 +43,7 @@ function ProfileNav() {
                 </NavLink>
             </div>
         </div>
-    )
+    );
 }
 
 export default function ProfileView() {
@@ -79,7 +86,7 @@ export default function ProfileView() {
         <View ident="profile" fluid>
             <div className="row">
                 <div className="col-2">
-                    <ProfileNav/>
+                    <ProfileNav />
                 </div>
                 <div className="col-8">
                     <Switch>
@@ -124,7 +131,7 @@ export default function ProfileView() {
                             <ProfileGroup profile={profile} />
                         </Route>
                         <Route exact path="/profile/groups">
-                            <ProfileGroups profile={profile}/>
+                            <ProfileGroups profile={profile} />
                         </Route>
                         <Route exact path="/profile/capabilities">
                             <ProfileCapabilities profile={profile} />

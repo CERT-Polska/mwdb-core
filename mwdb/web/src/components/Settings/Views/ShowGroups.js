@@ -47,7 +47,7 @@ class ShowGroups extends Component {
 
     render() {
         return (
-            <View fluid error={this.state.error}>
+            <div>
                 <Link to="/admin/group/new">
                     <button type="button" className="btn btn-success">
                         Create group
@@ -66,7 +66,7 @@ class ShowGroups extends Component {
                     onPageChange={this.handlePageChange}
                     onFilterChange={this.handleFilterChange}
                 />
-            </View>
+            </div>
         );
     }
 }

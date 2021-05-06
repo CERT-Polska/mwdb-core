@@ -22,6 +22,7 @@ import UserCreate from "./Views/UserCreate";
 import GroupRegister from "./Views/GroupRegister";
 import AttributeDefine from "./Views/AttributeDefine";
 import UserView from "./Views/UserView";
+import GroupView from "./Views/GroupView";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -148,18 +149,22 @@ export default function SettingsView(props) {
                             >
                                 <UserView />
                             </AdministrativeRoute>
+                            <AdministrativeRoute
+                                exact
+                                path={[
+                                    "/admin/group/:name",
+                                    "/admin/group/:name/capabilities",
+                                    "/admin/group/:name/members",
+                                ]}
+                            >
+                                <GroupView />
+                            </AdministrativeRoute>
 
                             <AdministrativeRoute exact path="/admin/groups">
                                 <ShowGroups />
                             </AdministrativeRoute>
                             <AdministrativeRoute exact path="/admin/group/new">
                                 <GroupRegister />
-                            </AdministrativeRoute>
-                            <AdministrativeRoute
-                                exact
-                                path="/admin/group/:name"
-                            >
-                                <GroupUpdate />
                             </AdministrativeRoute>
 
                             <AttributeRoute exact path="/admin/attributes">

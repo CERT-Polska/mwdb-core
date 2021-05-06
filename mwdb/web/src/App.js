@@ -31,7 +31,7 @@ import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
 import Docs from "./components/Docs";
 import RemoteViews from "./components/Remote/RemoteViews";
-import ProfileViews from "./components/Profile/ProfileViews";
+import ProfileView from "./components/Profile/ProfileView";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -226,7 +226,7 @@ export default function App() {
                 <SettingsView />
             </ProtectedRoute>
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
-                <ProfileViews />
+                <ProfileView />
             </ProtectedRoute>
             {fromPlugin("routes")}
             <DefaultRoute />

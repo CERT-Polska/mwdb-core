@@ -44,21 +44,6 @@ export default function ProfileDetails({ profile }) {
                     >
                         <DateString date={profile.set_password_on} />
                     </ProfileItem>
-                    <ProfileItem
-                        label="Groups"
-                        value={profile.groups && profile.groups.length}
-                    >
-                        {profile.groups &&
-                            profile.groups
-                                .filter((group) => !group.private)
-                                .map((group) => (
-                                    <Link to={`/profile/group/${group.name}`}>
-                                        <span className="badge badge-secondary">
-                                            {group.name}
-                                        </span>
-                                    </Link>
-                                ))}
-                    </ProfileItem>
                 </tbody>
             </table>
             <b>Actions:</b>

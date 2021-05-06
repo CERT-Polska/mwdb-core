@@ -1,6 +1,36 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import {useHistory} from "react-router-dom";
+
+import api from "@mwdb-web/commons/api";
+import { getErrorMessage } from "@mwdb-web/commons/ui";
+import {GroupBadge} from "../../../commons/ui";
 
 export default function ProfileGroups({ profile }) {
+    const history = useHistory();
+    const [workspaces, setWorkspaces] = useState();
+
+    async function updateWorkspaces() {
+        try {
+            const response = await api.authGroups();
+            setWorkspaces(response.data["groups"]);
+        } catch (error) {
+            history.push({
+                pathname: "/profile",
+                state: {
+                    error: getErrorMessage(error),
+                },
+            });
+        }
+    }
+
+    const getWorkspaces = useCallback(updateWorkspaces, []);
+
+    useEffect(() => {
+        getWorkspaces();
+    }, [getWorkspaces]);
+
+    if (!workspaces) return [];
+
     return (
         <div>
             <h2>Role groups</h2>
@@ -10,9 +40,16 @@ export default function ProfileGroups({ profile }) {
             </p>
             <table className="table table-bordered wrap-table">
                 <tbody>
-                    <tr><td>Hello</td></tr>
-                    <tr><td>Cruel</td></tr>
-                    <tr><td>World</td></tr>
+                    {
+                        profile.groups
+                            .filter((group) => !group.private)
+                            .filter((group) => !workspaces.map(workspace => workspace.name).includes(group.name))
+                            .map((group) => (
+                                <tr><td>
+                                    <GroupBadge group={group} clickable/>
+                                </td></tr>
+                            ))
+                    }
                 </tbody>
             </table>
             <h2>Workgroups</h2>
@@ -27,9 +64,18 @@ export default function ProfileGroups({ profile }) {
             </p>
             <table className="table table-bordered wrap-table">
                 <tbody>
-                    <tr><td>Hello</td></tr>
-                    <tr><td>Cruel</td></tr>
-                    <tr><td>World</td></tr>
+                    {
+                        workspaces
+                            .filter((group) => !group.private)
+                            .map((group) => (
+                                <tr><td>
+                                    <GroupBadge group={group} clickable/>{" "}
+                                    <small className="text-muted">
+                                        {group.users.length} members
+                                    </small>
+                                </td></tr>
+                            ))
+                    }
                 </tbody>
             </table>
             <p>

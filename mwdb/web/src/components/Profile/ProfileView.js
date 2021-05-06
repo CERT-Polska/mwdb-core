@@ -39,7 +39,7 @@ function ProfileNav() {
     )
 }
 
-export default function ProfileViews() {
+export default function ProfileView() {
     const auth = useContext(AuthContext);
     const history = useHistory();
     const user = useParams().user || auth.user.login;
@@ -73,7 +73,7 @@ export default function ProfileViews() {
         getProfile();
     }, [getProfile]);
 
-    if (!profile) return [];
+    if (!profile || profile.login !== user) return [];
 
     return (
         <View ident="profile" fluid>

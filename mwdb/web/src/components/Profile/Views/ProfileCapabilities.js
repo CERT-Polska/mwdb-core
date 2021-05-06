@@ -23,7 +23,7 @@ function CapabilitiesTable({ profile }) {
                                         group.capabilities.includes(cap)
                                     )
                                     .map((group) => (
-                                        <GroupBadge group={group} />
+                                        <GroupBadge group={group} clickable />
                                     ))}
                             </div>
                         </td>

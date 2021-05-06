@@ -84,6 +84,7 @@ export default function ProfileGroup({ profile }) {
                                         name: login,
                                         private: true,
                                     }}
+                                    clickable
                                 />
                             ))}
                     </ProfileItem>
@@ -98,6 +99,7 @@ export default function ProfileGroup({ profile }) {
                                         name: login,
                                         private: true,
                                     }}
+                                    clickable
                                 />
                             ))}
                     </ProfileItem>

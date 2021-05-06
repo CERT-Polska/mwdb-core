@@ -24,7 +24,7 @@ export default function ProfileDetails({ profile }) {
 
     return (
         <div>
-            <h4>Profile details</h4>
+            <h2>Profile details</h2>
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
                     <ProfileItem label="Login" value={profile.login} />
@@ -64,25 +64,18 @@ export default function ProfileDetails({ profile }) {
             <b>Actions:</b>
             <ul className="nav flex-column">
                 <li className="nav-item">
-                    <ShowIf condition={isCurrentUser}>
-                        <Link className="nav-link" to="/profile/capabilities">
-                            Check your capabilities
-                        </Link>
-                        <ShowIf
-                            condition={auth.hasCapability(
+                    <ShowIf condition={isCurrentUser && auth.hasCapability(
                                 Capability.personalize
-                            )}
+                            )}>
+                        <Link className="nav-link" to="/profile/api-keys">
+                            Set up API keys
+                        </Link>
+                        <Link
+                            className="nav-link"
+                            to="/profile/reset-password"
                         >
-                            <Link className="nav-link" to="/profile/api-keys">
-                                Set up API keys
-                            </Link>
-                            <Link
-                                className="nav-link"
-                                to="/profile/reset-password"
-                            >
-                                Reset password
-                            </Link>
-                        </ShowIf>
+                            Reset password
+                        </Link>
                     </ShowIf>
                     <Link
                         className="nav-link"
@@ -100,7 +93,7 @@ export default function ProfileDetails({ profile }) {
                     >
                         <Link
                             className="nav-link"
-                            to={`/user/${profile.login}`}
+                            to={`/admin/user/${profile.login}`}
                         >
                             <FontAwesomeIcon icon={faUsersCog} />
                             User settings

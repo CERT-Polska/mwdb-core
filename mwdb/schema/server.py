@@ -10,6 +10,7 @@ class ServerInfoResponseSchema(Schema):
     is_authenticated = fields.Boolean(required=True, allow_none=False)
     is_maintenance_set = fields.Boolean(required=True, allow_none=False)
     is_registration_enabled = fields.Boolean(required=True, allow_none=False)
+    is_karton_enabled = fields.Boolean(required=True, allow_none=False)
     recaptcha_site_key = fields.Str(required=True, allow_none=True)
 
 

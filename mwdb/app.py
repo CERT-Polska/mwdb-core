@@ -36,6 +36,7 @@ from mwdb.resources.config import (
 from mwdb.resources.download import DownloadResource, RequestSampleDownloadResource
 from mwdb.resources.file import FileDownloadResource, FileItemResource, FileResource
 from mwdb.resources.group import GroupListResource, GroupMemberResource, GroupResource
+from mwdb.resources.karton import KartonAnalysisResource, KartonObjectResource
 from mwdb.resources.metakey import (
     MetakeyDefinitionManageResource,
     MetakeyListDefinitionManageResource,
@@ -294,6 +295,16 @@ api.add_resource(MetakeyListDefinitionManageResource, "/meta/manage")
 api.add_resource(MetakeyDefinitionManageResource, "/meta/manage/<key>")
 api.add_resource(
     MetakeyPermissionResource, "/meta/manage/<key>/permissions/<group_name>"
+)
+
+# Karton endpoints
+api.add_resource(
+    KartonObjectResource,
+    "/<any(file, config, blob, object):type>/<hash64:identifier>/karton",
+)
+api.add_resource(
+    KartonAnalysisResource,
+    "/<any(file, config, blob, object):type>/<hash64:identifier>/karton/<analysis_id>",
 )
 
 # User endpoints

@@ -101,6 +101,7 @@ class MWDBConfig(Config):
     enable_registration = key(cast=intbool, required=False, default=False)
     enable_maintenance = key(cast=intbool, required=False, default=False)
     enable_hooks = key(cast=intbool, required=False, default=True)
+    enable_karton = key(cast=intbool, required=False, default=False)
 
     mail_smtp = key(cast=str, required=False)
     mail_from = key(cast=str, required=False, default="noreply@mwdb")
@@ -115,8 +116,14 @@ class MWDBConfig(Config):
     enable_json_logger = key(cast=intbool, required=False, default=False)
 
 
+@section("karton")
+class KartonConfig(Config):
+    config_path = key(cast=str, required=False, default=None)
+
+
 class AppConfig(Config):
     mwdb = group_key(MWDBConfig)
+    karton = group_key(KartonConfig)
 
 
 def _config_sources():

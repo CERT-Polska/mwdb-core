@@ -21,3 +21,4 @@ PyYAML==5.4
 redis==3.2.1
 minio==6.0.0
 typed-config==0.2.1
+karton-core==4.2.0

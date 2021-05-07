@@ -17,7 +17,15 @@ from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
 class TextBlobUploader(ObjectUploader):
-    def _create_object(self, spec, parent, share_with, metakeys):
+    def on_created(self, object, params):
+        super().on_created(object, params)
+        hooks.on_created_text_blob(object)
+
+    def on_reuploaded(self, object, params):
+        super().on_reuploaded(object, params)
+        hooks.on_reuploaded_text_blob(object)
+
+    def _create_object(self, spec, parent, share_with, metakeys, analysis):
         try:
             return TextBlob.get_or_create(
                 spec["content"],
@@ -26,6 +34,7 @@ class TextBlobUploader(ObjectUploader):
                 parent=parent,
                 share_with=share_with,
                 metakeys=metakeys,
+                analysis=analysis,
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a blob")
@@ -35,9 +44,6 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
     ObjectType = TextBlob
     ListResponseSchema = BlobListResponseSchema
     ItemResponseSchema = BlobItemResponseSchema
-
-    on_created = hooks.on_created_text_blob
-    on_reuploaded = hooks.on_reuploaded_text_blob
 
     @requires_authorization
     def get(self):
@@ -150,10 +156,7 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
 class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
     ObjectType = TextBlob
     ItemResponseSchema = BlobItemResponseSchema
-
     CreateRequestSchema = BlobLegacyCreateRequestSchema
-    on_created = hooks.on_created_text_blob
-    on_reuploaded = hooks.on_reuploaded_text_blob
 
     @requires_authorization
     def get(self, identifier):

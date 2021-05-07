@@ -36,6 +36,8 @@ class ObjectCreateRequestSchemaBase(Schema):
     parent = fields.Str(missing=None)
     metakeys = fields.Nested(MetakeyItemRequestSchema, many=True, missing=[])
     upload_as = fields.Str(missing="*", allow_none=False)
+    karton_id = fields.UUID(missing=None)
+    karton_arguments = fields.Dict(missing={}, keys=fields.Str(), values=fields.Str())
 
 
 class ObjectLegacyMetakeysMixin(Schema):

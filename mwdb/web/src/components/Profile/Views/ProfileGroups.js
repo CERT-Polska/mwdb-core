@@ -32,11 +32,11 @@ export default function ProfileGroups({ profile }) {
     if (!workspaces) return [];
 
     return (
-        <div>
+        <div className="container">
             <h2>Role groups</h2>
             <p className="lead">
-                Role groups are created to give you additional superpowers and
-                enable you to share your objects with broader community.
+                Role groups are created to give additional superpowers and
+                enable to share objects with broader community.
             </p>
             <table className="table table-bordered wrap-table">
                 <tbody>

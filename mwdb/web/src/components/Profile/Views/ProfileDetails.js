@@ -23,7 +23,7 @@ export default function ProfileDetails({ profile }) {
     const isCurrentUser = profile.login === auth.user.login;
 
     return (
-        <div>
+        <div className="container">
             <h2>Profile details</h2>
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>

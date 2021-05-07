@@ -149,6 +149,9 @@ export default function SettingsView(props) {
                             >
                                 <UserView />
                             </AdministrativeRoute>
+                            <AdministrativeRoute exact path="/admin/group/new">
+                                <GroupRegister />
+                            </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
                                 path={[
@@ -162,9 +165,6 @@ export default function SettingsView(props) {
 
                             <AdministrativeRoute exact path="/admin/groups">
                                 <ShowGroups />
-                            </AdministrativeRoute>
-                            <AdministrativeRoute exact path="/admin/group/new">
-                                <GroupRegister />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact

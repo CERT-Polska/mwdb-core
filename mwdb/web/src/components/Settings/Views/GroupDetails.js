@@ -19,7 +19,7 @@ function GroupItem(props) {
     );
 }
 
-export default function UserDetails({ group, getGroup }) {
+export default function GroupDetails({ group }) {
     const history = useHistory();
     const location = useLocation();
     const pathNames = location.pathname.split("/");
@@ -59,7 +59,7 @@ export default function UserDetails({ group, getGroup }) {
     }
 
     if (Object.keys(group).length === 0) return [];
-    console.log(group);
+
     return (
         <div className="container">
             <table className="table table-striped table-bordered wrap-table">

@@ -70,7 +70,7 @@ export default function GroupView() {
             </nav>
             <Switch>
                 <AdministrativeRoute exact path="/admin/group/:name">
-                    <GroupDetails group={group} getGroup={updateGroup} />
+                    <GroupDetails group={group} />
                 </AdministrativeRoute>
                 <AdministrativeRoute
                     exact

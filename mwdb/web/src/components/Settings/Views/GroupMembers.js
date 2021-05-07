@@ -68,13 +68,13 @@ export default function GroupMembers({ group, getGroup }) {
     if (Object.keys(group).length === 0) return [];
 
     let usersItems = group.users.map((user) => ({ login: user }));
-    console.log(usersItems);
     let allUsersItems = allUsers.filter(
         (v) => !usersItems.map((c) => c.login).includes(v.login)
     );
 
     return (
         <div className="container">
+            <h2>Group members:</h2>
             <GroupMemberList
                 items={usersItems}
                 admins={group.admins}

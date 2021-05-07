@@ -23,7 +23,7 @@ from sqlalchemy.orm import aliased
 from mwdb.model import Object, db
 
 from .exceptions import FieldNotQueryableException, UnsupportedGrammarException
-from .mappings import get_field_mapper
+from .mappings import get_default_field_condition, get_field_mapper
 from .tree import Subquery
 
 T = TypeVar("T", bound=Term)
@@ -53,12 +53,20 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
 
         Returns mapped node
         """
-        if context.field_mapper is None:
-            raise FieldNotQueryableException(
-                "You have to specify field, check help for more information"
-            )
+        is_range_term = parents and isinstance(parents[-1], Range)
 
-        is_range_term = isinstance(parents[-1], Range)
+        # Default field handler
+        if context.field_mapper is None:
+            if not is_range_term:
+                condition = get_default_field_condition(context.queried_type, node)
+            else:
+                condition = None
+            # If we can't guess default field for that type: raise exception
+            if condition is None:
+                raise FieldNotQueryableException(
+                    "You have to specify field, check help for more information"
+                )
+            return condition
 
         if node.has_wildcard() and is_range_term and str(node) != "*":
             raise UnsupportedGrammarException(
@@ -163,6 +171,8 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
                 for child_node in node.children
             ]
         )
+
+    visit_unknown_operation = visit_or_operation
 
     def visit_not(
         self, node: Not, parents: List[Item], context: SQLQueryBuilderContext

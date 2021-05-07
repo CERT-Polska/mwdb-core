@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
-import Autocomplete from "react-autocomplete";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
-import { RefString, DateString, ConfirmationModal } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
+import {
+    RefString,
+    DateString,
+    ConfirmationModal,
+    Autocomplete,
+} from "@mwdb-web/commons/ui";
 
 function ShareItem(props) {
     const context = useContext(ObjectContext);
@@ -53,6 +57,11 @@ function ShareItem(props) {
 
 function ShareForm(props) {
     const [group, setGroup] = useState("");
+    const groups = props.groups
+        .sort()
+        .filter(
+            (item) => item.toLowerCase().indexOf(group.toLowerCase()) !== -1
+        );
 
     function handleSubmit(e) {
         e.preventDefault();
@@ -65,63 +74,19 @@ function ShareForm(props) {
         <form className="tagForm" onSubmit={handleSubmit}>
             <Autocomplete
                 value={group}
-                inputProps={{ id: "states-autocomplete" }}
-                getItemValue={(item) => item}
-                shouldItemRender={(item, value) => {
-                    return (
-                        item.toLowerCase().indexOf(value.toLowerCase()) !== -1
-                    );
-                }}
-                items={props.groups}
-                onChange={(event) => setGroup(event.target.value)}
-                onSelect={(value) => setGroup(value)}
-                renderInput={(props) => (
-                    <div className="input-group">
-                        <input
-                            {...props}
-                            className="form-control"
-                            placeholder="Share with group"
-                        />
-                        <div className="input-group-append">
-                            <input
-                                className="btn btn-outline-primary"
-                                type="submit"
-                                value="Add"
-                            />
-                        </div>
-                    </div>
-                )}
-                wrapperStyle={{ display: "block" }}
-                renderMenu={(children) => (
-                    <div
-                        className={
-                            "dropdown-menu " +
-                            (children.length !== 0 ? "show" : "")
-                        }
-                    >
-                        {children.map((c) => (
-                            <a
-                                key={c}
-                                href="#dropdown"
-                                className="dropdown-item"
-                                style={{ cursor: "pointer" }}
-                            >
-                                {c}
-                            </a>
-                        ))}
-                    </div>
-                )}
-                renderItem={(item, isHighlighted) => (
-                    <div
-                        className={`item ${
-                            isHighlighted ? "item-highlighted" : ""
-                        }`}
-                        key={item}
-                    >
-                        {item}
-                    </div>
-                )}
-            />
+                items={groups}
+                onChange={(value) => setGroup(value)}
+                className="form-control"
+                placeholder="Share with group"
+            >
+                <div className="input-group-append">
+                    <input
+                        className="btn btn-outline-primary"
+                        type="submit"
+                        value="Add"
+                    />
+                </div>
+            </Autocomplete>
         </form>
     );
 }

@@ -18,10 +18,11 @@ import ShowPendingUsers from "./Views/ShowPendingUsers";
 import ManageAttributes from "./Views/ManageAttributes";
 import AttributeUpdate from "./Views/AttributeUpdate";
 import GroupUpdate from "./Views/GroupUpdate";
-import UserUpdate from "./Views/UserUpdate";
 import UserCreate from "./Views/UserCreate";
 import GroupRegister from "./Views/GroupRegister";
 import AttributeDefine from "./Views/AttributeDefine";
+import UserView from "./Views/UserView";
+import AccessControl from "./Views/AccessControl";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -138,9 +139,15 @@ export default function SettingsView(props) {
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
-                                path="/admin/user/:login"
+                                path={[
+                                    "/admin/user/:login",
+                                    "/admin/user/:login/password",
+                                    "/admin/user/:login/capabilities",
+                                    "/admin/user/:login/api-keys",
+                                    "/admin/user/:login/groups",
+                                ]}
                             >
-                                <UserUpdate />
+                                <UserView />
                             </AdministrativeRoute>
 
                             <AdministrativeRoute exact path="/admin/groups">
@@ -154,6 +161,13 @@ export default function SettingsView(props) {
                                 path="/admin/group/:name"
                             >
                                 <GroupUpdate />
+                            </AdministrativeRoute>
+
+                            <AdministrativeRoute
+                                exact
+                                path="/admin/capabilities"
+                            >
+                                <AccessControl />
                             </AdministrativeRoute>
 
                             <AttributeRoute exact path="/admin/attributes">

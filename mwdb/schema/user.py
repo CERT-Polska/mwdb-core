@@ -63,6 +63,8 @@ class UserItemResponseSchema(UserLoginSchemaBase):
     groups = fields.Nested(
         GroupBasicResponseSchema, many=True, required=True, allow_none=False
     )
+    capabilities = fields.List(fields.Str(), required=True, allow_none=False)
+
     api_keys = fields.Nested(
         APIKeyListItemResponseSchema, many=True, required=True, allow_none=False
     )

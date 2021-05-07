@@ -18,12 +18,13 @@ function CapabilitiesTable({ profile }) {
                                 {capabilitiesList[cap] || "(no description)"}
                             </div>
                             <div>
+                                <small className="text-muted">Got from:</small>
                                 {profile.groups
                                     .filter((group) =>
                                         group.capabilities.includes(cap)
                                     )
                                     .map((group) => (
-                                        <GroupBadge group={group} />
+                                        <GroupBadge group={group} clickable />
                                     ))}
                             </div>
                         </td>
@@ -36,8 +37,9 @@ function CapabilitiesTable({ profile }) {
 
 export default function ProfileCapabilities({ profile }) {
     return (
-        <div>
-            <h4>Account capabilities</h4>
+        <div className="container">
+            <h2>Capabilities</h2>
+            <p className="lead">Here is the list of account superpowers:</p>
             <CapabilitiesTable profile={profile} />
         </div>
     );

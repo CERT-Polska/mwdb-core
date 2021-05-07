@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
 import {
     faCopy,
@@ -21,6 +21,7 @@ import {
 
 export default function ProfileAPIKeys({ profile, updateProfile }) {
     const history = useHistory();
+    const location = useLocation();
     const [currentApiToken, setCurrentApiToken] = useState({});
     const [apiKeyToRemove, setApiKeyToRemove] = useState();
     const [removeModalOpened, setRemoveModalOpened] = useState(false);
@@ -34,7 +35,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             setCurrentApiToken(response.data);
         } catch (error) {
             history.push({
-                pathname: "/profile/api-keys",
+                pathname: location.pathname,
                 state: { error: getErrorMessage(error) },
             });
         }
@@ -46,7 +47,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             setCurrentApiToken(response.data);
             updateProfile();
             history.push({
-                pathname: "/profile/api-keys",
+                pathname: location.pathname,
                 state: {
                     success: "New API key successfully added",
                     addedKey: response.data.id,
@@ -54,7 +55,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             });
         } catch (error) {
             history.push({
-                pathname: "/profile/api-keys",
+                pathname: location.pathname,
                 state: { error: getErrorMessage(error) },
             });
         }
@@ -68,22 +69,29 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             updateProfile();
             setRemoveModalOpened(false);
             history.push({
-                pathname: "/profile/api-keys",
+                pathname: location.pathname,
                 state: {
                     success: "API key successfully removed",
                 },
             });
         } catch (error) {
             history.push({
-                pathname: "/profile/api-keys",
+                pathname: location.pathname,
                 state: { error: getErrorMessage(error) },
             });
         }
     }
 
+    if (Object.keys(profile).length === 0) return [];
+
     return (
-        <div>
-            <h5>API keys</h5>
+        <div className="container">
+            <h2>API keys</h2>
+            <p className="lead">
+                API keys are just an alternative to password-based
+                authentication. They are recommended to use for scripts and
+                other automation instead of plaintext passwords.
+            </p>
             {!profile.api_keys.length ? (
                 <p>
                     <i>

@@ -31,7 +31,7 @@ import UserPasswordRecover from "./components/UserPasswordRecover";
 import ShowPendingUsers from "./components/ShowPendingUsers";
 import Docs from "./components/Docs";
 import RemoteViews from "./components/Remote/RemoteViews";
-import ProfileViews from "./components/Profile/ProfileViews";
+import ProfileView from "./components/Profile/ProfileView";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -59,6 +59,8 @@ import {
     faCopy,
     faThumbtack,
     faStar,
+    faEdit,
+    faSave,
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
@@ -99,6 +101,8 @@ library.add(faCopy);
 library.add(faThumbtack);
 library.add(faStar);
 library.add(farStar);
+library.add(faEdit);
+library.add(faSave);
 
 function DefaultRoute() {
     const location = useLocation();
@@ -222,7 +226,7 @@ export default function App() {
                 <SettingsView />
             </ProtectedRoute>
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
-                <ProfileViews />
+                <ProfileView />
             </ProtectedRoute>
             {fromPlugin("routes")}
             <DefaultRoute />

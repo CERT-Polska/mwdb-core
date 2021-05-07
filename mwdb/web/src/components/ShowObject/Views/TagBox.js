@@ -1,11 +1,10 @@
 import React, { useState, useContext, useEffect, useCallback } from "react";
-import Autocomplete from "react-autocomplete";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
-import { TagList, Tag } from "@mwdb-web/commons/ui";
+import { Autocomplete, TagList, Tag } from "@mwdb-web/commons/ui";
 
 function TagForm(props) {
     const api = useContext(APIContext);
@@ -36,73 +35,33 @@ function TagForm(props) {
         }
     }
 
-    let tagItems = text ? tags : [];
+    let tagItems = text
+        ? tags.filter(
+              (item) => item.toLowerCase().indexOf(text.toLowerCase()) !== -1
+          )
+        : [];
 
     return (
         <form className="tagForm" onSubmit={handleSubmit}>
             <Autocomplete
                 value={text}
-                inputProps={{ id: "tags-autocomplete" }}
-                getItemValue={(item) => item}
-                shouldItemRender={(item, value) => {
-                    return (
-                        item.toLowerCase().indexOf(value.toLowerCase()) !== -1
-                    );
-                }}
                 items={tagItems}
-                onChange={(ev) => updateInputValue(ev.target.value)}
-                onSelect={(value) => updateInputValue(value)}
-                renderInput={(props) => (
-                    <div className="input-group">
-                        <input
-                            {...props}
-                            className="form-control"
-                            type="text"
-                            placeholder="Add tag"
-                        />
-                        <div className="input-group-append">
-                            <input
-                                className="btn btn-outline-primary"
-                                type="submit"
-                                value="Add"
-                            />
-                        </div>
-                    </div>
+                onChange={(value) => updateInputValue(value)}
+                renderItem={({ item }) => (
+                    <Tag tag={item} tagClick={(ev) => ev.preventDefault()} />
                 )}
-                wrapperStyle={{ display: "block" }}
-                renderMenu={(children) => (
-                    <div
-                        className={
-                            "dropdown-menu " +
-                            (children.length !== 0 ? "show" : "")
-                        }
-                    >
-                        {children.map((c) => (
-                            <a
-                                key={c}
-                                href="#dropdown"
-                                className="dropdown-item"
-                                style={{ cursor: "pointer" }}
-                            >
-                                {c}
-                            </a>
-                        ))}
-                    </div>
-                )}
-                renderItem={(item, isHighlighted) => (
-                    <div
-                        className={`item ${
-                            isHighlighted ? "item-highlighted" : ""
-                        }`}
-                        key={item}
-                    >
-                        <Tag
-                            tag={item}
-                            tagClick={(ev) => ev.preventDefault()}
-                        />
-                    </div>
-                )}
-            />
+                className="form-control"
+                type="text"
+                placeholder="Add tag"
+            >
+                <div className="input-group-append">
+                    <input
+                        className="btn btn-outline-primary"
+                        type="submit"
+                        value="Add"
+                    />
+                </div>
+            </Autocomplete>
         </form>
     );
 }

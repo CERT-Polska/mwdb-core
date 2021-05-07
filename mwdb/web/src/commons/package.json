@@ -5,10 +5,10 @@
     "version": "2.3.0",
     "peerDependencies": {
         "@fortawesome/react-fontawesome": "*",
+        "bootstrap-select": "*",
         "lodash": "*",
         "react": "*",
         "react-ace": "*",
-        "react-autocomplete": "*",
         "react-copy-to-clipboard": "*",
         "react-js-pagination": "*",
         "react-router": "*",

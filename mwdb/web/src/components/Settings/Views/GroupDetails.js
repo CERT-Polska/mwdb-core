@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
     getErrorMessage,
@@ -21,14 +21,17 @@ function GroupItem(props) {
 
 export default function UserDetails({ group, getGroup }) {
     const history = useHistory();
+    const location = useLocation();
+    const pathNames = location.pathname.split("/");
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
     async function handleSubmit(newName) {
-        console.log(newName);
         try {
             await api.updateGroup(group.name, newName["name"], undefined);
-            getGroup(newName["name"]);
+            history.push({
+                pathname: `/${pathNames[1]}/${pathNames[2]}/${newName["name"]}`,
+            });
         } catch (error) {
             history.push({
                 pathname: `/admin/group/${group.name}`,
@@ -43,13 +46,14 @@ export default function UserDetails({ group, getGroup }) {
             await api.removeGroup(group.name);
             history.push({
                 pathname: `/admin/groups/`,
-                state: { success: "User has been successfully removed" },
+                state: { success: "Group has been successfully removed" },
             });
         } catch (error) {
             history.push({
                 pathname: `/admin/group/${group.name}`,
                 state: { error: getErrorMessage(error) },
             });
+            setDeleteModalOpen(false);
             setDeleteModalDisabled(false);
         }
     }
@@ -70,9 +74,9 @@ export default function UserDetails({ group, getGroup }) {
                     <GroupItem label="Members">
                         {group &&
                             group.users.map((user) => (
-                                <Link to={`/admin/user/${user.login}`}>
+                                <Link to={`/admin/user/${user}`}>
                                     <span className="badge badge-secondary">
-                                        {user.login}
+                                        {user}
                                     </span>
                                 </Link>
                             ))}

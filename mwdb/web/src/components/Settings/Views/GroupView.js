@@ -12,13 +12,14 @@ import { AdministrativeRoute, getErrorMessage } from "@mwdb-web/commons/ui";
 
 import GroupDetails from "./GroupDetails";
 import ProfileCapabilities from "../../Profile/Views/ProfileCapabilities";
+import GroupMembers from "./GroupMembers";
 
 export default function GroupView() {
     const location = useLocation();
     const history = useHistory();
     const { name } = useParams();
     const [group, setGroup] = useState({});
-    console.log(name);
+    console.log(group);
     async function updateGroup() {
         try {
             const response = await api.getGroup(name);
@@ -78,7 +79,7 @@ export default function GroupView() {
                     <ProfileCapabilities profile={group} />
                 </AdministrativeRoute>
                 <AdministrativeRoute exact path="/admin/group/:name/members">
-                    {/*    group members component */}
+                    <GroupMembers group={group} getGroup={updateGroup} />
                 </AdministrativeRoute>
             </Switch>
         </div>

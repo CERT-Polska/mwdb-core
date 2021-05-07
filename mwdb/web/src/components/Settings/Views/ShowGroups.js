@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { UserLink } from "./ShowUsers";
 
 import api from "@mwdb-web/commons/api";
-import { PagedList, HighlightText, View } from "@mwdb-web/commons/ui";
+import { PagedList, HighlightText } from "@mwdb-web/commons/ui";
 
 class ShowGroups extends Component {
     state = {

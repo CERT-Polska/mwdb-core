@@ -161,6 +161,7 @@ class GroupUpdate extends Component {
                 <span />
             );
         };
+        console.log(this.state.users);
         let groupName = this.props.match.params.name;
         return (
             <div className="container">

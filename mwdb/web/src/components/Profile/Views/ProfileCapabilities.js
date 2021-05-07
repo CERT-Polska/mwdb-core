@@ -18,13 +18,14 @@ function CapabilitiesTable({ profile }) {
                                 {capabilitiesList[cap] || "(no description)"}
                             </div>
                             <div>
-                                {profile.groups
-                                    .filter((group) =>
-                                        group.capabilities.includes(cap)
-                                    )
-                                    .map((group) => (
-                                        <GroupBadge group={group} />
-                                    ))}
+                                {profile.groups &&
+                                    profile.groups
+                                        .filter((group) =>
+                                            group.capabilities.includes(cap)
+                                        )
+                                        .map((group) => (
+                                            <GroupBadge group={group} />
+                                        ))}
                             </div>
                         </td>
                     </tr>

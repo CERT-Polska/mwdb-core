@@ -1,6 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
-    Link,
     NavLink,
     Route,
     Switch,
@@ -64,16 +63,6 @@ export default function ProfileView() {
         }
     }
 
-    function GroupBreadcrumb() {
-        const { group } = useParams();
-        return `Group '${group}' details`;
-    }
-
-    function UserBreadcrumb() {
-        const { user } = useParams();
-        return `User '${user}' details`;
-    }
-
     const getProfile = useCallback(updateProfile, [user]);
 
     useEffect(() => {
@@ -89,40 +78,6 @@ export default function ProfileView() {
                     <ProfileNav />
                 </div>
                 <div className="col-8">
-                    <Switch>
-                        <Route exact path="/profile" />
-                        <Route>
-                            <nav aria-label="breadcrumb">
-                                <ol className="breadcrumb">
-                                    <li className="breadcrumb-item">
-                                        <Link to="/profile">Profile</Link>
-                                    </li>
-                                    <li className="breadcrumb-item active">
-                                        <Switch>
-                                            <Route path="/profile/capabilities">
-                                                Capabilities
-                                            </Route>
-                                            <Route path="/profile/api-keys">
-                                                API keys
-                                            </Route>
-                                            <Route path="/profile/groups">
-                                                Groups
-                                            </Route>
-                                            <Route path="/profile/reset-password">
-                                                Reset password
-                                            </Route>
-                                            <Route path="/profile/group/:group">
-                                                <GroupBreadcrumb />
-                                            </Route>
-                                            <Route path="/profile/user/:user">
-                                                <UserBreadcrumb />
-                                            </Route>
-                                        </Switch>
-                                    </li>
-                                </ol>
-                            </nav>
-                        </Route>
-                    </Switch>
                     <Switch>
                         <Route exact path={["/profile", "/profile/user/:user"]}>
                             <ProfileDetails profile={profile} />

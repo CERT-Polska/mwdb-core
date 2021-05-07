@@ -17,12 +17,12 @@ import ShowUsers from "./Views/ShowUsers";
 import ShowPendingUsers from "./Views/ShowPendingUsers";
 import ManageAttributes from "./Views/ManageAttributes";
 import AttributeUpdate from "./Views/AttributeUpdate";
-import GroupUpdate from "./Views/GroupUpdate";
 import UserCreate from "./Views/UserCreate";
 import GroupRegister from "./Views/GroupRegister";
 import AttributeDefine from "./Views/AttributeDefine";
 import UserView from "./Views/UserView";
 import AccessControl from "./Views/AccessControl";
+import GroupView from "./Views/GroupView";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -149,20 +149,23 @@ export default function SettingsView(props) {
                             >
                                 <UserView />
                             </AdministrativeRoute>
-
-                            <AdministrativeRoute exact path="/admin/groups">
-                                <ShowGroups />
-                            </AdministrativeRoute>
                             <AdministrativeRoute exact path="/admin/group/new">
                                 <GroupRegister />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
-                                path="/admin/group/:name"
+                                path={[
+                                    "/admin/group/:name",
+                                    "/admin/group/:name/capabilities",
+                                    "/admin/group/:name/members",
+                                ]}
                             >
-                                <GroupUpdate />
+                                <GroupView />
                             </AdministrativeRoute>
 
+                            <AdministrativeRoute exact path="/admin/groups">
+                                <ShowGroups />
+                            </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
                                 path="/admin/capabilities"

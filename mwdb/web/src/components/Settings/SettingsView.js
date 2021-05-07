@@ -21,6 +21,7 @@ import UserCreate from "./Views/UserCreate";
 import GroupRegister from "./Views/GroupRegister";
 import AttributeDefine from "./Views/AttributeDefine";
 import UserView from "./Views/UserView";
+import AccessControl from "./Views/AccessControl";
 import GroupView from "./Views/GroupView";
 
 function SettingsNav() {
@@ -164,6 +165,12 @@ export default function SettingsView(props) {
                             </AdministrativeRoute>
                             <AdministrativeRoute exact path="/admin/group/new">
                                 <GroupRegister />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute
+                                exact
+                                path="/admin/capabilities"
+                            >
+                                <AccessControl />
                             </AdministrativeRoute>
 
                             <AttributeRoute exact path="/admin/attributes">

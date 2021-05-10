@@ -18,14 +18,23 @@ function CapabilitiesTable({ profile }) {
                                 {capabilitiesList[cap] || "(no description)"}
                             </div>
                             <div>
-                                <small className="text-muted">Got from:</small>
-                                {profile.groups
-                                    .filter((group) =>
-                                        group.capabilities.includes(cap)
-                                    )
-                                    .map((group) => (
-                                        <GroupBadge group={group} clickable />
-                                    ))}
+                                {profile.groups && (
+                                    <span>
+                                        <small className="text-muted">
+                                            Got from:
+                                        </small>
+                                        {profile.groups
+                                            .filter((group) =>
+                                                group.capabilities.includes(cap)
+                                            )
+                                            .map((group) => (
+                                                <GroupBadge
+                                                    group={group}
+                                                    clickable
+                                                />
+                                            ))}
+                                    </span>
+                                )}
                             </div>
                         </td>
                     </tr>
@@ -39,7 +48,10 @@ export default function ProfileCapabilities({ profile }) {
     return (
         <div className="container">
             <h2>Capabilities</h2>
-            <p className="lead">Here is the list of account superpowers:</p>
+            <p className="lead">
+                Here is the list of {profile.groups ? "account" : "group"}{" "}
+                superpowers:
+            </p>
             <CapabilitiesTable profile={profile} />
         </div>
     );

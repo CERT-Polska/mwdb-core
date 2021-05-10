@@ -12,8 +12,8 @@ import {
     AdministrativeRoute,
     AttributeRoute,
 } from "@mwdb-web/commons/ui";
-import ShowGroups from "./Views/ShowGroups";
-import ShowUsers from "./Views/ShowUsers";
+import GroupsList from "./Views/GroupsList";
+import UsersList from "./Views/UsersList";
 import ShowPendingUsers from "./Views/ShowPendingUsers";
 import ManageAttributes from "./Views/ManageAttributes";
 import AttributeUpdate from "./Views/AttributeUpdate";
@@ -132,7 +132,7 @@ export default function SettingsView(props) {
                             </AdministrativeRoute>
 
                             <AdministrativeRoute exact path="/admin/users">
-                                <ShowUsers />
+                                <UsersList />
                             </AdministrativeRoute>
                             <AdministrativeRoute exact path="/admin/user/new">
                                 <UserCreate />
@@ -164,7 +164,7 @@ export default function SettingsView(props) {
                             </AdministrativeRoute>
 
                             <AdministrativeRoute exact path="/admin/groups">
-                                <ShowGroups />
+                                <GroupsList />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact

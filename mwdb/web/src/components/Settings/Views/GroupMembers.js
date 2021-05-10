@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { UserLink } from "./ShowUsers";
 import api from "@mwdb-web/commons/api";
 import { MemberList, getErrorMessage } from "@mwdb-web/commons/ui";
 import { useHistory } from "react-router-dom";
 
 export let GroupMemberList = (props) => (
-    <MemberList nameKey="login" itemLinkClass={UserLink} {...props} />
+    <MemberList nameKey="login" itemLinkClass={<div>dummy</div>} {...props} />
 );
 
 export default function GroupMembers({ group, getGroup }) {

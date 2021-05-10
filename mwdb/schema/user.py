@@ -78,7 +78,7 @@ class UserListItemResponseSchema(UserLoginSchemaBase):
     disabled = fields.Boolean(required=True, allow_none=False)
     pending = fields.Boolean(required=True, allow_none=False)
     groups = fields.Nested(
-        GroupNameSchemaBase, many=True, required=True, allow_none=False
+        GroupBasicResponseSchema, many=True, required=True, allow_none=False
     )
 
 

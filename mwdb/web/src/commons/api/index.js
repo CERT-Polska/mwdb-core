@@ -214,6 +214,10 @@ function updateGroup(name, newName, capabilities) {
     return axios.put(`/group/${name}`, { name: newName, capabilities });
 }
 
+function removeGroup(name) {
+    return axios.delete(`/group/${name}`);
+}
+
 function addGroupMember(name, member) {
     return axios.post(`/group/${name}/member/${member}`);
 }
@@ -499,6 +503,7 @@ export default {
     getGroup,
     registerGroup,
     updateGroup,
+    removeGroup,
     addGroupMember,
     removeGroupMember,
     setGroupAdmin,

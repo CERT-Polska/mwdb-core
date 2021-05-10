@@ -20,7 +20,15 @@ from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
 class FileUploader(ObjectUploader):
-    def _create_object(self, spec, parent, share_with, metakeys):
+    def on_created(self, object, params):
+        super().on_created(object, params)
+        hooks.on_created_file(object)
+
+    def on_reuploaded(self, object, params):
+        super().on_reuploaded(object, params)
+        hooks.on_reuploaded_file(object)
+
+    def _create_object(self, spec, parent, share_with, metakeys, analysis):
         try:
             return File.get_or_create(
                 request.files["file"].filename,
@@ -28,6 +36,7 @@ class FileUploader(ObjectUploader):
                 parent=parent,
                 share_with=share_with,
                 metakeys=metakeys,
+                analysis=analysis,
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a file")
@@ -39,9 +48,6 @@ class FileResource(ObjectResource, FileUploader):
     ObjectType = File
     ListResponseSchema = FileListResponseSchema
     ItemResponseSchema = FileItemResponseSchema
-
-    on_created = hooks.on_created_file
-    on_reuploaded = hooks.on_reuploaded_file
 
     @requires_authorization
     def get(self):
@@ -161,10 +167,7 @@ class FileResource(ObjectResource, FileUploader):
 class FileItemResource(ObjectItemResource, FileUploader):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema
-
     CreateRequestSchema = FileLegacyCreateRequestSchema
-    on_created = hooks.on_created_file
-    on_reuploaded = hooks.on_reuploaded_file
 
     @requires_authorization
     def get(self, identifier):

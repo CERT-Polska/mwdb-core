@@ -80,6 +80,14 @@ class ConfigStatsResource(Resource):
 
 
 class ConfigUploader(ObjectUploader):
+    def on_created(self, object, params):
+        super().on_created(object, params)
+        hooks.on_created_config(object)
+
+    def on_reuploaded(self, object, params):
+        super().on_reuploaded(object, params)
+        hooks.on_reuploaded_config(object)
+
     def _get_embedded_blob(self, in_blob, share_with, metakeys):
         if isinstance(in_blob, dict):
             schema = BlobCreateSpecSchema()
@@ -107,7 +115,7 @@ class ConfigUploader(ObjectUploader):
                 "'in-blob' key must be set to blob SHA256 hash or blob specification"
             )
 
-    def _create_object(self, spec, parent, share_with, metakeys):
+    def _create_object(self, spec, parent, share_with, metakeys, analysis):
         try:
             blobs = []
             config = dict(spec["cfg"])
@@ -131,6 +139,7 @@ class ConfigUploader(ObjectUploader):
                 parent=parent,
                 share_with=share_with,
                 metakeys=metakeys,
+                analysis=analysis,
             )
 
             for blob in blobs:
@@ -145,9 +154,6 @@ class ConfigResource(ObjectResource, ConfigUploader):
     ObjectType = Config
     ListResponseSchema = ConfigListResponseSchema
     ItemResponseSchema = ConfigItemResponseSchema
-
-    on_created = hooks.on_created_config
-    on_reuploaded = hooks.on_reuploaded_config
 
     @requires_authorization
     def get(self):
@@ -266,10 +272,7 @@ class ConfigResource(ObjectResource, ConfigUploader):
 class ConfigItemResource(ObjectItemResource, ConfigUploader):
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
-
     CreateRequestSchema = ConfigLegacyCreateRequestSchema
-    on_created = hooks.on_created_config
-    on_reuploaded = hooks.on_reuploaded_config
 
     @requires_authorization
     def get(self, identifier):

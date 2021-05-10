@@ -9,6 +9,7 @@ from sqlalchemy import or_
 from werkzeug.utils import secure_filename
 
 from mwdb.core.config import StorageProviderType, app_config
+from mwdb.core.karton import send_file_to_karton
 from mwdb.core.util import (
     calc_crc32,
     calc_hash,
@@ -75,7 +76,13 @@ class File(Object):
 
     @classmethod
     def get_or_create(
-        cls, file_name, file_stream, parent=None, metakeys=None, share_with=None
+        cls,
+        file_name,
+        file_stream,
+        parent=None,
+        metakeys=None,
+        share_with=None,
+        analysis=None,
     ):
         file_stream.seek(0, os.SEEK_END)
         file_size = file_stream.tell()
@@ -97,7 +104,11 @@ class File(Object):
         )
 
         file_obj, is_new = cls._get_or_create(
-            file_obj, parent=parent, metakeys=metakeys, share_with=share_with
+            file_obj,
+            parent=parent,
+            metakeys=metakeys,
+            share_with=share_with,
+            analysis=analysis,
         )
 
         if is_new:
@@ -266,3 +277,6 @@ class File(Object):
             return None
         except BadSignature:
             return None
+
+    def _send_to_karton(self):
+        return send_file_to_karton(self)

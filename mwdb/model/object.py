@@ -1,5 +1,7 @@
 import datetime
+from collections import namedtuple
 from typing import Optional
+from uuid import UUID
 
 from flask import g
 from sqlalchemy import and_, exists
@@ -10,6 +12,7 @@ from sqlalchemy.sql.expression import true
 from mwdb.core.capabilities import Capabilities
 
 from . import db
+from .karton import KartonAnalysis, karton_object
 from .metakey import Metakey, MetakeyDefinition, MetakeyPermission
 from .tag import Tag, object_tag_table
 
@@ -262,6 +265,12 @@ class Object(db.Model):
         order_by=ObjectPermission.access_time.asc(),
     )
 
+    analyses = db.relationship(
+        "KartonAnalysis",
+        secondary=karton_object,
+        back_populates="objects",
+    )
+
     @property
     def latest_config(self):
         from .config import Config
@@ -480,7 +489,9 @@ class Object(db.Model):
         return cls.query.filter(cls.dhash == identifier.lower())
 
     @classmethod
-    def _get_or_create(cls, obj, parent=None, metakeys=None, share_with=None):
+    def _get_or_create(
+        cls, obj, parent=None, metakeys=None, share_with=None, analysis=None
+    ):
         """
         Polymophic get or create pattern, useful in dealing with race condition
         resulting in IntegrityError on the dhash unique constraint.
@@ -550,6 +561,9 @@ class Object(db.Model):
         # related with upload itself
         if parent:
             new_cls.add_parent(parent, commit=False)
+
+        if analysis:
+            new_cls.assign_analysis(analysis)
 
         return new_cls, is_new
 
@@ -686,7 +700,9 @@ class Object(db.Model):
                 raise
         return False
 
-    def get_metakeys(self, as_dict=False, check_permissions=True, show_hidden=False):
+    def get_metakeys(
+        self, as_dict=False, check_permissions=True, show_hidden=False, show_karton=True
+    ):
         """
         Gets all object metakeys (attributes)
         :param as_dict: |
@@ -694,6 +710,7 @@ class Object(db.Model):
         :param check_permissions: |
             Filter results including current user permissions (default: True)
         :param show_hidden: Show hidden metakeys
+        :param show_karton: Show Karton metakeys (for compatibility)
         """
         metakeys = (
             db.session.query(Metakey)
@@ -717,6 +734,18 @@ class Object(db.Model):
 
         metakeys = metakeys.order_by(Metakey.id).all()
 
+        if show_karton:
+            KartonMetakey = namedtuple("KartonMetakey", ["key", "value"])
+
+            metakeys += [
+                KartonMetakey(key="karton", value=str(analysis.id))
+                for analysis in (
+                    db.session.query(KartonAnalysis)
+                    .filter(KartonAnalysis.objects.any(id=self.id))
+                    .all()
+                )
+            ]
+
         if not as_dict:
             return metakeys
 
@@ -728,6 +757,26 @@ class Object(db.Model):
         return dict_metakeys
 
     def add_metakey(self, key, value, commit=True, check_permissions=True):
+        if key == "karton":
+            karton_id = UUID(value)
+
+            if check_permissions and not g.auth_user.has_rights(
+                Capabilities.karton_assign
+            ):
+                # User doesn't have permissions to assign analysis
+                return None
+
+            analysis = KartonAnalysis.get(karton_id).first()
+            if analysis is None:
+                # Analysis with given UUID doesn't exist
+                return None
+
+            is_new = self.assign_analysis(analysis, commit=False)
+
+            if commit:
+                db.session.commit()
+            return is_new
+
         if check_permissions:
             metakey_definition = MetakeyDefinition.query_for_set(key).first()
         else:
@@ -789,3 +838,42 @@ class Object(db.Model):
             .order_by(ObjectPermission.access_time.desc())
         ).all()
         return shares
+
+    def _send_to_karton(self):
+        raise NotImplementedError
+
+    def spawn_analysis(self, arguments, commit=True):
+        """
+        Spawns new KartonAnalysis for this object
+        """
+        analysis_id = self._send_to_karton()
+        analysis = KartonAnalysis.create(
+            analysis_id=analysis_id,
+            initial_object=self,
+            arguments=arguments,
+        )
+        if commit:
+            db.session.commit()
+        return analysis
+
+    def assign_analysis(self, analysis, commit=True):
+        """
+        Assigns KartonAnalysis to the object
+        """
+        if analysis.id in [existing.id for existing in self.analyses]:
+            return False
+        self.analyses.append(analysis)
+        if commit:
+            db.session.commit()
+        return True
+
+    def is_analyzed(self):
+        return bool(self.analyses)
+
+    def get_analysis_status(self):
+        if not self.analyses:
+            return "not_analyzed"
+        for analysis in self.analyses:
+            if analysis.status == "running":
+                return "running"
+        return "finished"

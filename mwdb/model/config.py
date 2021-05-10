@@ -1,6 +1,7 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from mwdb.core.karton import send_config_to_karton
 from mwdb.core.util import config_decode, config_dhash, config_encode
 
 from . import db
@@ -31,7 +32,14 @@ class Config(Object):
 
     @classmethod
     def get_or_create(
-        cls, cfg, family, config_type, parent=None, metakeys=None, share_with=None
+        cls,
+        cfg,
+        family,
+        config_type,
+        parent=None,
+        metakeys=None,
+        share_with=None,
+        analysis=None,
     ):
         dhash = config_dhash(cfg)
 
@@ -39,8 +47,15 @@ class Config(Object):
             dhash=dhash, _cfg=config_encode(cfg), family=family, config_type=config_type
         )
         return cls._get_or_create(
-            cfg_obj, parent=parent, metakeys=metakeys, share_with=share_with
+            cfg_obj,
+            parent=parent,
+            metakeys=metakeys,
+            share_with=share_with,
+            analysis=analysis,
         )
+
+    def _send_to_karton(self):
+        return send_config_to_karton(self)
 
 
 # Compatibility reasons

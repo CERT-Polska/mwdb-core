@@ -1,55 +1,12 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 
-import api from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 
 import logo from "../assets/logo.png";
 
-function PluginItems(props) {
-    const { name, info } = props;
-    const { active, version, description } = info;
-
-    return (
-        <tr>
-            <td>
-                {name}{" "}
-                {active ? (
-                    <span className="badge badge-success">Active</span>
-                ) : (
-                    <span className="badge badge-danger">Inactive</span>
-                )}
-            </td>
-            <td>{description}</td>
-            <td>{version}</td>
-        </tr>
-    );
-}
-
 export default function About() {
     const config = useContext(ConfigContext);
-    const [pluginsList, setPluginsList] = useState([]);
-
-    async function updatePlugins() {
-        try {
-            const response = await api.getServerPluginInfo();
-            setPluginsList(
-                Object.entries(response.data["active_plugins"]).sort()
-            );
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    const getPlugins = useCallback(updatePlugins, []);
-
-    useEffect(() => {
-        getPlugins();
-    }, [getPlugins]);
-
-    const plugins = pluginsList.map(([key, value]) => (
-        <PluginItems name={key} info={value} />
-    ));
 
     return (
         <div className="align-items-center">
@@ -82,27 +39,6 @@ export default function About() {
                     </div>
                 </View>
             </div>
-            {plugins.length ? (
-                <div className="container">
-                    <table className="table table-striped table-bordered wrap-table">
-                        <thead>
-                            <tr>
-                                <th>Plugin name</th>
-                                <th>Description</th>
-                                <th>Version</th>
-                            </tr>
-                        </thead>
-                        <tbody>{plugins}</tbody>
-                    </table>
-                </div>
-            ) : (
-                <p style={{ textAlign: "center" }}>
-                    No plugins are installed. Visit our{" "}
-                    <a href="https://mwdb.readthedocs.io/">documentation</a> to
-                    learn about MWDB plugins and how they can be used and
-                    installed.
-                </p>
-            )}
         </div>
     );
 }

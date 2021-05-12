@@ -303,7 +303,7 @@ class MwdbTest(object):
         return res.json()
 
     def add_attribute_definition(self, key, template, hidden=False):
-        res = self.session.put(
+        res = self.session.post(
             self.mwdb_url + "/meta/manage/" + key,
             json={
                 "label": "",

@@ -120,6 +120,21 @@ function DefaultRoute() {
     );
 }
 
+function SettingsRoute() {
+    const auth = useContext(AuthContext);
+    return (
+        <ProtectedRoute
+            condition={
+                auth.hasCapability(Capability.managingAttributes) ||
+                auth.hasCapability(Capability.manageUsers)
+            }
+            path="/admin"
+        >
+            <SettingsView />
+        </ProtectedRoute>
+    );
+}
+
 export default function App() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
@@ -222,9 +237,7 @@ export default function App() {
             <ProtectedRoute path="/remote/:remote">
                 <RemoteViews />
             </ProtectedRoute>
-            <ProtectedRoute path="/admin">
-                <SettingsView />
-            </ProtectedRoute>
+            <SettingsRoute />
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
                 <ProfileView />
             </ProtectedRoute>

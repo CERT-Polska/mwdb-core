@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { NavLink, Switch } from "react-router-dom";
+import { NavLink, Route, Switch } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -128,9 +128,9 @@ export default function SettingsView(props) {
                 <div className="col-8">
                     <div className="tab-content">
                         <Switch>
-                            <AdministrativeRoute exact path="/admin">
+                            <Route exact path="/admin">
                                 <SettingsOverview />
-                            </AdministrativeRoute>
+                            </Route>
                             <AdministrativeRoute path="/admin/pending">
                                 <ShowPendingUsers />
                             </AdministrativeRoute>

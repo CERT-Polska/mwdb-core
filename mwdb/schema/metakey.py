@@ -43,6 +43,13 @@ class MetakeyDefinitionItemRequestArgsSchema(MetakeyKeySchema):
     pass
 
 
+class MetakeyUpdateRequestSchema(Schema):
+    label = fields.Str(missing=None)
+    description = fields.Str(missing=None)
+    template = fields.Str(missing=None)
+    hidden = fields.Str(missing=None)
+
+
 class MetakeyDefinitionItemRequestBodySchema(Schema):
     template = fields.Str(attribute="url_template", required=True, allow_none=False)
     label = fields.Str(required=True, allow_none=False)

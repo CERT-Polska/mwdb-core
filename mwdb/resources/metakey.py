@@ -7,20 +7,24 @@ from mwdb.model import Group, MetakeyDefinition, MetakeyPermission, db
 from mwdb.schema.metakey import (
     MetakeyDefinitionItemRequestArgsSchema,
     MetakeyDefinitionItemRequestBodySchema,
+    MetakeyDefinitionItemResponseSchema,
     MetakeyDefinitionListResponseSchema,
     MetakeyDefinitionManageItemResponseSchema,
     MetakeyDefinitionManageListResponseSchema,
     MetakeyItemRequestSchema,
+    MetakeyKeySchema,
     MetakeyListRequestSchema,
     MetakeyListResponseSchema,
     MetakeyPermissionSetRequestArgsSchema,
     MetakeyPermissionSetRequestBodySchema,
+    MetakeyUpdateRequestSchema,
 )
 
 from . import (
     access_object,
     load_schema,
     loads_schema,
+    logger,
     requires_authorization,
     requires_capabilities,
 )
@@ -340,12 +344,12 @@ class MetakeyDefinitionManageResource(Resource):
 
     @requires_authorization
     @requires_capabilities(Capabilities.managing_attributes)
-    def put(self, key):
+    def post(self, key):
         """
         ---
-        summary: Create/update attribute key
+        summary: Create attribute key
         description: |
-            Creates or updates attribute key definition.
+            Creates attribute key definition.
 
             Requires `managing_attributes` capability.
         security:
@@ -393,6 +397,83 @@ class MetakeyDefinitionManageResource(Resource):
 
         schema = MetakeyDefinitionManageItemResponseSchema()
         return schema.dump(metakey_definition)
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def put(self, key):
+        """
+        ---
+        summary: Updated attribute key
+        description: |
+            Updated attribute key definition.
+
+            Requires `managing_attributes` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - attribute
+        parameters:
+            - in: path
+              name: key
+              schema:
+                type: string
+              description: Attribute key
+        requestBody:
+            description: Attribute key definition
+            content:
+              application/json:
+                schema: MetakeyDefinitionItemRequestBodySchema
+        responses:
+            200:
+                description: When metakey definition is successfully updated
+                content:
+                  application/json:
+                    schema: MetakeyDefinitionManageItemResponseSchema
+            400:
+                description: |
+                    When one of attribute definition fields is missing or incorrect.
+            403:
+                description: When user doesn't have `managing_attributes` capability.
+            404:
+                description: When metakey doesn't exist.
+        """
+        schema = MetakeyUpdateRequestSchema()
+        print(request.get_data(as_text=True))
+        obj = loads_schema(request.get_data(as_text=True), schema)
+        print(obj)
+        metakey_obj = load_schema({"key": key}, MetakeyKeySchema())
+        metakey = (
+            db.session.query(MetakeyDefinition)
+            .filter(MetakeyDefinition.key == metakey_obj["key"])
+            .first()
+        )
+        if metakey is None:
+            raise NotFound("No such metakey")
+
+        label = obj["label"]
+        if label is not None:
+            metakey.label = label
+
+        description = obj["description"]
+        if description is not None:
+            metakey.description = description
+
+        url_template = obj["template"]
+        if url_template is not None:
+            metakey.url_template = url_template
+
+        hidden = obj["hidden"]
+        if hidden is not None:
+            if hidden == "Enabled":
+                metakey.hidden = True
+            else:
+                metakey.hidden = False
+
+        db.session.commit()
+        logger.info("Metakey updated", extra=obj)
+
+        schema = MetakeyDefinitionItemResponseSchema()
+        return schema.dump(metakey)
 
     @requires_authorization
     @requires_capabilities(Capabilities.managing_attributes)

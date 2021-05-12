@@ -23,6 +23,7 @@ import AttributeDefine from "./Views/AttributeDefine";
 import UserView from "./Views/UserView";
 import AccessControl from "./Views/AccessControl";
 import GroupView from "./Views/GroupView";
+import AttributeView from "./Views/AttributeView";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -181,9 +182,12 @@ export default function SettingsView(props) {
                             </AttributeRoute>
                             <AttributeRoute
                                 exact
-                                path="/admin/attribute/:metakey"
+                                path={[
+                                    "/admin/attribute/:metakey",
+                                    "/admin/attribute/:metakey/permissions",
+                                ]}
                             >
-                                <AttributeUpdate />
+                                <AttributeView />
                             </AttributeRoute>
                         </Switch>
                     </div>

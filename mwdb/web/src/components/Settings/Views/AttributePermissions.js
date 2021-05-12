@@ -1,21 +1,12 @@
-import React, {
-    Component,
-    useState,
-    useEffect,
-    useCallback,
-    useLayoutEffect,
-} from "react";
+import React, { Component, useState, useEffect, useCallback } from "react";
 
 import api from "@mwdb-web/commons/api";
 import {
     Autocomplete,
     getErrorMessage,
     ConfirmationModal,
-    ObjectLink,
-    View,
 } from "@mwdb-web/commons/ui";
 import { Link, useHistory, useParams } from "react-router-dom";
-import Hash from "../../../commons/ui/Hash";
 
 class AttributePermissionsBox extends Component {
     state = {
@@ -334,7 +325,6 @@ export function AttributesPermissions({ attribute, getAttribute }) {
                 set: permission["can_set"],
             };
         setPermissions(attributePermissions);
-        console.log(attributePermissions);
     }
 
     function handleUpdate() {
@@ -342,9 +332,11 @@ export function AttributesPermissions({ attribute, getAttribute }) {
         updateAttributePermissions();
     }
 
+    const getUpdate = useCallback(handleUpdate, [attribute]);
+
     useEffect(() => {
-        handleUpdate();
-    }, [attribute]);
+        getUpdate();
+    }, [getUpdate]);
 
     if (Object.keys(attribute).length === 0) return [];
 

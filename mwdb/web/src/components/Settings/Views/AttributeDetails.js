@@ -25,7 +25,6 @@ export function AttributeDetails({ attribute, getAttribute }) {
 
     async function handleSubmit(newValue) {
         try {
-            console.log(newValue);
             await api.updateMetakeyDefinition(attribute.key, newValue);
         } catch (error) {
             history.push({

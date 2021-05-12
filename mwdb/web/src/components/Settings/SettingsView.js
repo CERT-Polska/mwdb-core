@@ -16,7 +16,6 @@ import ShowGroups from "./Views/ShowGroups";
 import ShowUsers from "./Views/ShowUsers";
 import ShowPendingUsers from "./Views/ShowPendingUsers";
 import ManageAttributes from "./Views/ManageAttributes";
-import AttributeUpdate from "./Views/AttributeUpdate";
 import UserCreate from "./Views/UserCreate";
 import GroupRegister from "./Views/GroupRegister";
 import AttributeDefine from "./Views/AttributeDefine";

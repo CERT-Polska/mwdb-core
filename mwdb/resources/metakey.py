@@ -438,9 +438,8 @@ class MetakeyDefinitionManageResource(Resource):
                 description: When metakey doesn't exist.
         """
         schema = MetakeyUpdateRequestSchema()
-        print(request.get_data(as_text=True))
         obj = loads_schema(request.get_data(as_text=True), schema)
-        print(obj)
+
         metakey_obj = load_schema({"key": key}, MetakeyKeySchema())
         metakey = (
             db.session.query(MetakeyDefinition)

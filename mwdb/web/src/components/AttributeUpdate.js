@@ -319,7 +319,6 @@ class AttributeUpdate extends Component {
         let metakey = this.props.match.params.metakey;
         try {
             let response = await api.getMetakeyDefinition(metakey);
-            console.log(response.data);
             let data = {
                 label: response.data.label,
                 description: response.data.description,
@@ -425,7 +424,7 @@ class AttributeUpdate extends Component {
                 successfully.
             </div>
         );
-        console.log(this.state.permissions);
+
         return (
             <View
                 ident="attributeUpdate"

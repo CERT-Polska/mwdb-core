@@ -16,13 +16,13 @@ import ShowGroups from "./Views/ShowGroups";
 import ShowUsers from "./Views/ShowUsers";
 import ShowPendingUsers from "./Views/ShowPendingUsers";
 import ManageAttributes from "./Views/ManageAttributes";
-import AttributeUpdate from "./Views/AttributeUpdate";
 import UserCreate from "./Views/UserCreate";
 import GroupRegister from "./Views/GroupRegister";
 import AttributeDefine from "./Views/AttributeDefine";
 import UserView from "./Views/UserView";
 import AccessControl from "./Views/AccessControl";
 import GroupView from "./Views/GroupView";
+import AttributeView from "./Views/AttributeView";
 import SettingsOverview from "./Views/SettingsOverview";
 
 function SettingsNav() {
@@ -190,9 +190,12 @@ export default function SettingsView(props) {
                             </AttributeRoute>
                             <AttributeRoute
                                 exact
-                                path="/admin/attribute/:metakey"
+                                path={[
+                                    "/admin/attribute/:metakey",
+                                    "/admin/attribute/:metakey/permissions",
+                                ]}
                             >
-                                <AttributeUpdate />
+                                <AttributeView />
                             </AttributeRoute>
                         </Switch>
                     </div>

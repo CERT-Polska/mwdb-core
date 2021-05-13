@@ -1,15 +1,12 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router";
-
-import _ from "lodash";
+import React, { Component, useState, useEffect, useCallback } from "react";
 
 import api from "@mwdb-web/commons/api";
 import {
     Autocomplete,
+    getErrorMessage,
     ConfirmationModal,
-    ObjectLink,
-    View,
 } from "@mwdb-web/commons/ui";
+import { Link, useHistory, useParams } from "react-router-dom";
 
 class AttributePermissionsBox extends Component {
     state = {
@@ -63,10 +60,9 @@ class AttributePermissionsBox extends Component {
                             .map((permGroup) => (
                                 <tr key={permGroup}>
                                     <td>
-                                        <ObjectLink
-                                            id={permGroup}
-                                            type="group"
-                                        />
+                                        <Link to={`/admin/group/${permGroup}`}>
+                                            {permGroup}
+                                        </Link>
                                     </td>
                                     <td>
                                         <table className="float-left">
@@ -243,326 +239,124 @@ class AttributePermissionsBox extends Component {
     }
 }
 
-class AttributeUpdate extends Component {
-    state = {
-        label: "",
-        description: "",
-        template: "",
-        hidden: false,
-        permissions: {},
-        groups: [],
-        modalSpec: {},
-        isModalOpen: false,
-        isDeleteModalOpen: false,
-        disabledModalButton: false,
-        error: null,
-        success: false,
-    };
+export function AttributesPermissions({ attribute, getAttribute }) {
+    const { metakey } = useParams();
+    const history = useHistory();
+    const [allGroups, setAllGroups] = useState([]);
+    const [permissions, setPermissions] = useState({});
+    const [modalSpec, setModalSpec] = useState({});
+    const [isModalOpen, setModalOpen] = useState(false);
 
-    addGroup = async (group) => {
+    async function addGroup(group) {
         try {
-            let metakey = this.props.match.params.metakey;
-            await api.setMetakeyPermission(metakey, group, false, false);
-            this.handleUpdate();
-        } catch (error) {
-            this.setState({ error });
-        }
-    };
-
-    async updateGroup(group, can_read, can_set) {
-        try {
-            let metakey = this.props.match.params.metakey;
-            await api.setMetakeyPermission(metakey, group, can_read, can_set);
-            this.handleUpdate();
-            this.setState({ isModalOpen: false });
+            await api.setMetakeyPermission(attribute.key, group, false, false);
+            getAttribute();
         } catch (error) {
             this.setState({ error });
         }
     }
 
-    handleUpdateGroup = (group, can_read, can_set) => {
-        this.setState({
-            isModalOpen: true,
-            modalSpec: {
-                action: this.updateGroup.bind(this, group, can_read, can_set),
-                message: `Update ${group} group permissions`,
-                buttonStyle: "bg-primary",
-                confirmText: "Update",
-            },
-        });
-    };
-
-    async removeGroup(group) {
+    async function updateGroup(group, can_read, can_set) {
         try {
-            let metakey = this.props.match.params.metakey;
-            await api.deleteMetakeyPermission(metakey, group);
-            this.handleUpdate();
-            this.setState({ isModalOpen: false });
+            await api.setMetakeyPermission(
+                attribute.key,
+                group,
+                can_read,
+                can_set
+            );
+            getAttribute();
+            setModalOpen(false);
+        } catch (error) {
+            history.push({
+                pathname: `/admin/attribute/${attribute.key}`,
+                state: { error: getErrorMessage(error) },
+            });
+        }
+    }
+
+    function handleUpdateGroup(group, can_read, can_set) {
+        setModalOpen(true);
+        setModalSpec({
+            action: () => updateGroup(group, can_read, can_set),
+            message: `Update ${group} group permissions`,
+            buttonStyle: "bg-primary",
+            confirmText: "Update",
+        });
+    }
+
+    async function removeGroup(group) {
+        try {
+            await api.deleteMetakeyPermission(attribute.key, group);
+            getAttribute();
+            setModalOpen(false);
         } catch (error) {
             this.setState({ error });
         }
     }
 
-    handleRemoveGroup = (group) => {
-        this.setState({
-            isModalOpen: true,
-            modalSpec: {
-                action: this.removeGroup.bind(this, group),
-                message: `Remove ${group} group permissions`,
-                buttonStyle: "bg-danger",
-                confirmText: "Remove",
-            },
+    function handleRemoveGroup(group) {
+        setModalOpen(true);
+        setModalSpec({
+            action: () => removeGroup(group),
+            message: `Remove ${group} group permissions`,
+            buttonStyle: "bg-danger",
+            confirmText: "Remove",
         });
-    };
+    }
 
-    async handleUpdate() {
-        let metakey = this.props.match.params.metakey;
+    async function updateAllGroups() {
         try {
-            let response = await api.getMetakeyDefinition(metakey);
-            let data = {
-                label: response.data.label,
-                description: response.data.description,
-                template: response.data.template,
-                hidden: response.data.hidden,
+            let response = await api.getGroups();
+            setAllGroups(response.data.groups);
+        } catch (error) {
+            history.push({
+                pathname: `/admin/attribute/${metakey}`,
+                state: { error: getErrorMessage(error) },
+            });
+        }
+    }
+
+    async function updateAttributePermissions() {
+        let response = await api.getMetakeyDefinition(metakey);
+        let attributePermissions = {};
+        for (let permission of response.data.permissions)
+            attributePermissions[permission["group_name"]] = {
+                read: permission["can_read"],
+                set: permission["can_set"],
             };
-            let permissions = {};
-            for (let permission of response.data.permissions)
-                permissions[permission["group_name"]] = {
-                    read: permission["can_read"],
-                    set: permission["can_set"],
-                };
-            response = await api.getGroups();
-            this.setState({
-                error: null,
-                groups: response.data.groups,
-                permissions,
-                ..._.fromPairs(
-                    _.toPairs(data).reduce(
-                        (p, c) => p.concat([c], [["original_" + c[0], c[1]]]),
-                        []
-                    )
-                ),
-            });
-        } catch (error) {
-            this.setState({ error });
-        }
+        setPermissions(attributePermissions);
     }
 
-    changedFields() {
-        let fields = ["label", "description", "template", "hidden"];
-        let changed = fields.reduce(
-            (p, c) =>
-                p.concat(
-                    this.state[c] !== this.state["original_" + c] ? c : []
-                ),
-            []
-        );
-        return changed;
+    function handleUpdate() {
+        updateAllGroups();
+        updateAttributePermissions();
     }
 
-    componentDidMount() {
-        this.handleUpdate();
-    }
+    const getUpdate = useCallback(handleUpdate, [attribute]);
 
-    handleInputChange = (event) => {
-        const target = event.target;
-        const value =
-            target.type === "checkbox" ? target.checked : target.value;
-        const name = target.name;
+    useEffect(() => {
+        getUpdate();
+    }, [getUpdate]);
 
-        this.setState({
-            [name]: value,
-        });
-    };
+    if (Object.keys(attribute).length === 0) return [];
 
-    handleRemoveAttribute = async (event) => {
-        event.preventDefault();
-        let metakey = this.props.match.params.metakey;
-        this.setState({ disabledModalButton: true });
-        try {
-            await api.removeMetakeyDefinition(metakey);
-            this.props.history.push("/admin/attributes");
-        } catch (error) {
-            this.setState({
-                disabledModalButton: false,
-                isDeleteModalOpen: false,
-                error: error,
-            });
-        }
-    };
-
-    handleSubmit = async (event) => {
-        event.preventDefault();
-        let metakey = this.props.match.params.metakey;
-        try {
-            await api.addMetakeyDefinition(
-                metakey,
-                this.state.label,
-                this.state.description,
-                this.state.template,
-                this.state.hidden
-            );
-            this.handleUpdate();
-            this.setState({ success: true, error: null });
-        } catch (error) {
-            this.setState({ error });
-        }
-    };
-
-    render() {
-        let changeNotifier = (field) => {
-            return this.state[field] !== this.state["original_" + field] ? (
-                <span style={{ color: "red" }}>*</span>
-            ) : (
-                <span />
-            );
-        };
-
-        let success = this.state.success && (
-            <div>
-                Attribute {this.props.match.params.metakey} modified
-                successfully.
-            </div>
-        );
-
-        return (
-            <View
-                ident="attributeUpdate"
-                error={this.state.error}
-                success={success}
-            >
-                <ConfirmationModal
-                    isOpen={this.state.isModalOpen}
-                    onRequestClose={() => this.setState({ isModalOpen: false })}
-                    onConfirm={this.state.modalSpec.action}
-                    message={this.state.modalSpec.message}
-                    buttonStyle={this.state.modalSpec.buttonStyle}
-                    confirmText={this.state.modalSpec.confirmText}
-                />
-                <h2>Modify attribute {this.props.match.params.metakey}</h2>
-                <form onSubmit={this.handleSubmit}>
-                    <div className="form-group">
-                        <label>Key</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            value={this.props.match.params.metakey}
-                            disabled
-                        />
-                        <div class="form-hint">
-                            Key must contain only lowercase letters and digits,
-                            max 32 characters allowed.
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label>{changeNotifier("label")}Label</label>
-                        <input
-                            type="text"
-                            name="label"
-                            value={this.state.label}
-                            onChange={this.handleInputChange}
-                            className="form-control"
-                        />
-                        <div className="form-hint">
-                            User-friendly name for attribute (optional)
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label>
-                            {changeNotifier("description")}Description
-                        </label>
-                        <input
-                            type="text"
-                            name="description"
-                            value={this.state.description}
-                            onChange={this.handleInputChange}
-                            className="form-control"
-                        />
-                        <div className="form-hint">
-                            Description of the attribute meaning (optional)
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label>{changeNotifier("template")}URL template</label>
-                        <input
-                            type="text"
-                            name="template"
-                            value={this.state.template}
-                            onChange={this.handleInputChange}
-                            className="form-control"
-                        />
-                        <div className="form-hint">
-                            Provide URL template for specified attribute with
-                            $value as placeholder (e.g.
-                            http://system.cert.pl/job/$value)
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <label>
-                            {changeNotifier("hidden")}Hidden attribute
-                        </label>
-                        <div className="material-switch">
-                            <input
-                                type="checkbox"
-                                name="hidden"
-                                onChange={this.handleInputChange}
-                                id="hidden_checkbox"
-                                checked={this.state.hidden}
-                            />
-                            <label
-                                htmlFor="hidden_checkbox"
-                                className="bg-primary"
-                            />
-                        </div>
-                        <div className="form-hint">
-                            Hidden attributes have protected values. Attribute
-                            values are not visible for users without
-                            reading_all_attributes capability and explicit
-                            request for reading them. Also only exact search is
-                            allowed. User still must have permission to read key
-                            to use it in query.
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <button type="submit" className="btn btn-primary">
-                            Submit
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-danger btn-lg float-right"
-                            disabled={this.props.disabledModalButton}
-                            onClick={() =>
-                                this.setState({ isDeleteModalOpen: true })
-                            }
-                        >
-                            Remove attribute
-                        </button>
-                    </div>
-                </form>
-                <ConfirmationModal
-                    isOpen={this.state.isDeleteModalOpen}
-                    onRequestClose={() =>
-                        this.setState({ isDeleteModalOpen: false })
-                    }
-                    onConfirm={this.handleRemoveAttribute}
-                    message="Are you sure you want to delete this attribute?"
-                    buttonStyle="btn btn-danger"
-                    confirmText="yes"
-                    cancelText="no"
-                />
-                <AttributePermissionsBox
-                    permissions={this.state.permissions}
-                    groupItems={this.state.groups}
-                    addGroup={this.addGroup}
-                    updateGroup={this.handleUpdateGroup}
-                    removeGroup={this.handleRemoveGroup}
-                />
-            </View>
-        );
-    }
+    return (
+        <React.Fragment>
+            <AttributePermissionsBox
+                permissions={permissions}
+                groupItems={allGroups}
+                addGroup={addGroup}
+                updateGroup={handleUpdateGroup}
+                removeGroup={handleRemoveGroup}
+            />
+            <ConfirmationModal
+                isOpen={isModalOpen}
+                onRequestClose={() => setModalOpen(false)}
+                onConfirm={modalSpec.action}
+                message={modalSpec.message}
+                buttonStyle={modalSpec.buttonStyle}
+                confirmText={modalSpec.confirmText}
+            />
+        </React.Fragment>
+    );
 }
-
-export default withRouter(AttributeUpdate);

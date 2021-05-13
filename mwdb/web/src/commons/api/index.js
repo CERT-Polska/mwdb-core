@@ -322,8 +322,20 @@ function removeMetakeyDefinition(key) {
 }
 
 function addMetakeyDefinition(key, label, description, template, hidden) {
-    return axios.put(`/meta/manage/${key}`, {
+    return axios.post(`/meta/manage/${key}`, {
         key,
+        label,
+        description,
+        template,
+        hidden,
+    });
+}
+
+function updateMetakeyDefinition(
+    key,
+    { label, description, template, hidden }
+) {
+    return axios.put(`/meta/manage/${key}`, {
         label,
         description,
         template,
@@ -526,6 +538,7 @@ export default {
     getMetakeyDefinition,
     removeMetakeyDefinition,
     addMetakeyDefinition,
+    updateMetakeyDefinition,
     setMetakeyPermission,
     deleteMetakeyPermission,
     downloadFile,

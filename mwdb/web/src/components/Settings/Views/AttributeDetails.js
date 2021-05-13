@@ -129,7 +129,7 @@ export function AttributeDetails({ attribute, getAttribute }) {
                 disabled={isDeleteModalDisabled}
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleRemoveAttribute}
-                message={`Are tou sure you want to delete ${attribute.key} attribute`}
+                message={`Are you sure you want to delete ${attribute.key} attribute`}
                 buttonStyle="btn-danger"
             />
         </div>

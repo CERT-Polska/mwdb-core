@@ -24,6 +24,11 @@ export function AttributeDetails({ attribute, getAttribute }) {
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
     async function handleSubmit(newValue) {
+        if (newValue.hidden === "Enabled") {
+            newValue.hidden = true;
+        } else if (newValue.hidden === "Disabled") {
+            newValue.hidden = false;
+        }
         try {
             await api.updateMetakeyDefinition(attribute.key, newValue);
         } catch (error) {

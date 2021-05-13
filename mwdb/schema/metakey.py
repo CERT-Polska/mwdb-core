@@ -47,7 +47,7 @@ class MetakeyUpdateRequestSchema(Schema):
     label = fields.Str(missing=None)
     description = fields.Str(missing=None)
     template = fields.Str(missing=None)
-    hidden = fields.Str(missing=None)
+    hidden = fields.Boolean(missing=None)
 
 
 class MetakeyDefinitionItemRequestBodySchema(Schema):

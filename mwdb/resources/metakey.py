@@ -463,10 +463,7 @@ class MetakeyDefinitionManageResource(Resource):
 
         hidden = obj["hidden"]
         if hidden is not None:
-            if hidden == "Enabled":
-                metakey.hidden = True
-            else:
-                metakey.hidden = False
+            metakey.hidden = obj["hidden"]
 
         db.session.commit()
         logger.info("Metakey updated", extra=obj)

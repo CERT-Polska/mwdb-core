@@ -399,13 +399,13 @@ class MetakeyDefinitionManageResource(Resource):
         return schema.dump(metakey_definition)
 
     @requires_authorization
-    @requires_capabilities(Capabilities.manage_users)
+    @requires_capabilities(Capabilities.managing_attributes)
     def put(self, key):
         """
         ---
-        summary: Updated attribute key
+        summary: Update attribute key
         description: |
-            Updated attribute key definition.
+            Update attribute key definition.
 
             Requires `managing_attributes` capability.
         security:
@@ -428,7 +428,7 @@ class MetakeyDefinitionManageResource(Resource):
                 description: When metakey definition is successfully updated
                 content:
                   application/json:
-                    schema: MetakeyDefinitionManageItemResponseSchema
+                    schema: MetakeyDefinitionItemResponseSchema
             400:
                 description: |
                     When one of attribute definition fields is missing or incorrect.

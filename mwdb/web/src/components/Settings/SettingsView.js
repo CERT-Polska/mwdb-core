@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { NavLink, Redirect, Switch } from "react-router-dom";
+import { NavLink, Route, Switch } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,6 +23,7 @@ import UserView from "./Views/UserView";
 import AccessControl from "./Views/AccessControl";
 import GroupView from "./Views/GroupView";
 import AttributeView from "./Views/AttributeView";
+import SettingsOverview from "./Views/SettingsOverview";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -50,6 +51,14 @@ function SettingsNav() {
     }, [isAdmin]);
 
     const adminLinks = [
+        ...(auth.hasCapability(Capability.managingAttributes) ||
+        auth.hasCapability(Capability.manageUsers)
+            ? [
+                  <NavLink to="/admin" className="nav-link">
+                      Overview
+                  </NavLink>,
+              ]
+            : []),
         ...(auth.hasCapability(Capability.manageUsers)
             ? [
                   ...(config.config["is_registration_enabled"]
@@ -124,9 +133,9 @@ export default function SettingsView(props) {
                 <div className="col-8">
                     <div className="tab-content">
                         <Switch>
-                            <AdministrativeRoute exact path="/admin">
-                                <Redirect to="/admin/pending" />
-                            </AdministrativeRoute>
+                            <Route exact path="/admin">
+                                <SettingsOverview />
+                            </Route>
                             <AdministrativeRoute path="/admin/pending">
                                 <ShowPendingUsers />
                             </AdministrativeRoute>

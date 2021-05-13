@@ -372,7 +372,7 @@ class MetakeyDefinitionManageResource(Resource):
                 description: When metakey definition is successfully added
                 content:
                   application/json:
-                    schema: MetakeyDefinitionManageItemResponseSchema
+                    schema: MetakeyDefinitionItemResponseSchema
             400:
                 description: |
                     When one of attribute definition fields is missing or incorrect.
@@ -395,7 +395,7 @@ class MetakeyDefinitionManageResource(Resource):
         metakey_definition = db.session.merge(metakey_definition)
         db.session.commit()
 
-        schema = MetakeyDefinitionManageItemResponseSchema()
+        schema = MetakeyDefinitionItemResponseSchema()
         return schema.dump(metakey_definition)
 
     @requires_authorization
@@ -419,10 +419,10 @@ class MetakeyDefinitionManageResource(Resource):
                 type: string
               description: Attribute key
         requestBody:
-            description: Attribute key definition
+            description: Attribute definition to update
             content:
               application/json:
-                schema: MetakeyDefinitionItemRequestBodySchema
+                schema: MetakeyUpdateRequestSchema
         responses:
             200:
                 description: When metakey definition is successfully updated

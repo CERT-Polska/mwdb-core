@@ -51,11 +51,16 @@ function SettingsNav() {
     }, [isAdmin]);
 
     const adminLinks = [
-        ...(auth.hasCapability(Capability.manageUsers)
+        ...(auth.hasCapability(Capability.managingAttributes) ||
+        auth.hasCapability(Capability.manageUsers)
             ? [
                   <NavLink to="/admin" className="nav-link">
                       Overview
                   </NavLink>,
+              ]
+            : []),
+        ...(auth.hasCapability(Capability.manageUsers)
+            ? [
                   ...(config.config["is_registration_enabled"]
                       ? [
                             <NavLink

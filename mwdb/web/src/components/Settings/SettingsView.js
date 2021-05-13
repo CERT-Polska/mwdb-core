@@ -54,7 +54,7 @@ function SettingsNav() {
         ...(auth.hasCapability(Capability.managingAttributes) ||
         auth.hasCapability(Capability.manageUsers)
             ? [
-                  <NavLink to="/admin" className="nav-link">
+                  <NavLink exact to="/admin" className="nav-link">
                       Overview
                   </NavLink>,
               ]
@@ -109,11 +109,12 @@ function SettingsNav() {
                     <strong>
                         <FontAwesomeIcon icon={faUsersCog} /> Administration
                     </strong>
-                    <div className="nav flex-column">{adminLinks}</div>
+                    <div className="nav sidenav flex-column">{adminLinks}</div>
                 </React.Fragment>
             ) : (
                 []
             )}
+            <hr />
         </div>
     );
 }
@@ -127,10 +128,10 @@ export default function SettingsView(props) {
             fluid
         >
             <div className="row">
-                <div className="col-2">
+                <div className="col-sm-2">
                     <SettingsNav />
                 </div>
-                <div className="col-8">
+                <div className="col-sm-8">
                     <div className="tab-content">
                         <Switch>
                             <Route exact path="/admin">

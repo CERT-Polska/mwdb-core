@@ -115,7 +115,7 @@ export function AttributeDetails({ attribute, getAttribute }) {
                             className="nav-link"
                             to={`/admin/attribute/${attribute.key}/permissions`}
                         >
-                            Show attribute permissions
+                            Edit attribute permissions
                         </Link>
                     )}
                     <a

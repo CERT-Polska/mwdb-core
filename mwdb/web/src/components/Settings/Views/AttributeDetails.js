@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useHistory } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
@@ -6,6 +6,7 @@ import {
     ConfirmationModal,
     EditableItem,
 } from "@mwdb-web/commons/ui";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function AttributeItem(props) {
@@ -19,6 +20,7 @@ function AttributeItem(props) {
 }
 
 export function AttributeDetails({ attribute, getAttribute }) {
+    const auth = useContext(AuthContext);
     const history = useHistory();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
@@ -108,12 +110,14 @@ export function AttributeDetails({ attribute, getAttribute }) {
             <b>Actions:</b>
             <ul className="nav">
                 <li className="nav-item">
-                    <Link
-                        className="nav-link"
-                        to={`/admin/attribute/${attribute.key}/permissions`}
-                    >
-                        Show attribute permissions
-                    </Link>
+                    {auth.hasCapability(Capability.manageUsers) && (
+                        <Link
+                            className="nav-link"
+                            to={`/admin/attribute/${attribute.key}/permissions`}
+                        >
+                            Edit attribute permissions
+                        </Link>
+                    )}
                     <a
                         href="#remove-user"
                         className="nav-link text-danger"

@@ -121,7 +121,10 @@ export function AttributeDetails({ attribute, getAttribute }) {
                     <a
                         href="#remove-user"
                         className="nav-link text-danger"
-                        onClick={() => setDeleteModalOpen(true)}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setDeleteModalOpen(true);
+                        }}
                     >
                         <FontAwesomeIcon icon="trash" />
                         Remove attribute

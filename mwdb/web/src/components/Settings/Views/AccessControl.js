@@ -237,9 +237,9 @@ export default function AccessControl() {
     if (!groups) return [];
 
     return (
-        <div>
-            <h5>Access control</h5>
-            <p>
+        <div className="container">
+            <h2>Access control</h2>
+            <p className="lead">
                 Use a form below to enable/disable capabilities for specific
                 user or group.
             </p>

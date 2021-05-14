@@ -20,82 +20,6 @@ import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
 
 import logo from "../assets/logo.png";
 
-function AdminDropdown() {
-    const auth = useContext(AuthContext);
-    const [pendingUsersCount, setPendingUsersCount] = useState(null);
-
-    const isAdmin = auth.isAdmin;
-    const isAttributeManager = auth.hasCapability(
-        Capability.managingAttributes
-    );
-
-    async function updatePendingUsersCount() {
-        try {
-            let response = await api.getPendingUsers();
-            setPendingUsersCount(response.data.users.length);
-        } catch (error) {
-            console.error(error);
-            setPendingUsersCount("?");
-        }
-    }
-
-    useEffect(() => {
-        if (!isAdmin) return;
-        let timer = setInterval(updatePendingUsersCount, 15000);
-        updatePendingUsersCount();
-        return () => {
-            clearInterval(timer);
-        };
-    }, [isAdmin]);
-
-    if (!isAdmin && !isAttributeManager) return [];
-
-    const adminItems = isAdmin
-        ? [
-              <Link
-                  key="pending-users"
-                  className="dropdown-item"
-                  to="/users/pending"
-              >
-                  Pending users
-                  {pendingUsersCount ? (
-                      <span className="badge badge-pill badge-warning">
-                          {pendingUsersCount}
-                      </span>
-                  ) : (
-                      []
-                  )}
-              </Link>,
-              <Link key="users" className="dropdown-item" to="/users">
-                  Manage users
-              </Link>,
-              <Link key="groups" className="dropdown-item" to="/groups">
-                  Manage groups
-              </Link>,
-          ]
-        : [];
-
-    const attributeItems = isAttributeManager
-        ? [
-              <Link key="attributes" className="dropdown-item" to="/attributes">
-                  Manage attributes
-              </Link>,
-          ]
-        : [];
-
-    return (
-        <NavDropdown
-            title="Admin"
-            elements={[
-                ...adminItems,
-                ...attributeItems,
-                ...fromPlugin("navdropdownAdmin"),
-            ]}
-            badge={isAdmin ? pendingUsersCount : null}
-        />
-    );
-}
-
 function AdminNav() {
     const auth = useContext(AuthContext);
     const [pendingUsersCount, setPendingUsersCount] = useState(null);
@@ -240,7 +164,6 @@ export default function Navigation() {
             ) : (
                 []
             )}
-            <AdminDropdown />
             <AdminNav />
             {auth.isAuthenticated ? (
                 <React.Fragment>

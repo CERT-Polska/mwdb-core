@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useHistory } from "react";
 import { NavLink, Route, Switch } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
@@ -24,6 +24,7 @@ import AccessControl from "./Views/AccessControl";
 import GroupView from "./Views/GroupView";
 import AttributeView from "./Views/AttributeView";
 import SettingsOverview from "./Views/SettingsOverview";
+import SettingsContext from "./SettingsContext";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -121,87 +122,84 @@ function SettingsNav() {
 
 export default function SettingsView(props) {
     return (
-        <View
-            ident="settings"
-            error={props.error}
-            success={props.success}
-            fluid
-        >
-            <div className="row">
-                <div className="col-sm-2">
-                    <SettingsNav />
-                </div>
-                <div className="col-sm-8">
-                    <div className="tab-content">
-                        <Switch>
-                            <Route exact path="/admin">
-                                <SettingsOverview />
-                            </Route>
-                            <AdministrativeRoute path="/admin/pending">
-                                <ShowPendingUsers />
-                            </AdministrativeRoute>
+        <SettingsContext.Provider>
+            <View ident="settings" fluid>
+                <div className="row">
+                    <div className="col-sm-2">
+                        <SettingsNav />
+                    </div>
+                    <div className="col-sm-8">
+                        <div className="tab-content">
+                            <Switch>
+                                <Route exact path="/admin">
+                                    <SettingsOverview />
+                                </Route>
+                                <AdministrativeRoute path="/admin/pending">
+                                    <ShowPendingUsers />
+                                </AdministrativeRoute>
 
-                            <AdministrativeRoute exact path="/admin/users">
-                                <UsersList />
-                            </AdministrativeRoute>
-                            <AdministrativeRoute exact path="/admin/user/new">
-                                <UserCreate />
-                            </AdministrativeRoute>
-                            <AdministrativeRoute
-                                exact
-                                path={[
-                                    "/admin/user/:login",
-                                    "/admin/user/:login/password",
-                                    "/admin/user/:login/capabilities",
-                                    "/admin/user/:login/api-keys",
-                                    "/admin/user/:login/groups",
-                                ]}
-                            >
-                                <UserView />
-                            </AdministrativeRoute>
-                            <AdministrativeRoute exact path="/admin/group/new">
-                                <GroupRegister />
-                            </AdministrativeRoute>
-                            <AdministrativeRoute
-                                exact
-                                path={[
-                                    "/admin/group/:name",
-                                    "/admin/group/:name/capabilities",
-                                    "/admin/group/:name/members",
-                                ]}
-                            >
-                                <GroupView />
-                            </AdministrativeRoute>
+                                <AdministrativeRoute exact path="/admin/users">
+                                    <UsersList />
+                                </AdministrativeRoute>
+                                <AdministrativeRoute exact path="/admin/user/new">
+                                    <UserCreate />
+                                </AdministrativeRoute>
+                                <AdministrativeRoute
+                                    exact
+                                    path={[
+                                        "/admin/user/:login",
+                                        "/admin/user/:login/password",
+                                        "/admin/user/:login/capabilities",
+                                        "/admin/user/:login/api-keys",
+                                        "/admin/user/:login/groups",
+                                    ]}
+                                >
+                                    <UserView />
+                                </AdministrativeRoute>
+                                <AdministrativeRoute exact path="/admin/group/new">
+                                    <GroupRegister />
+                                </AdministrativeRoute>
+                                <AdministrativeRoute
+                                    exact
+                                    path={[
+                                        "/admin/group/:name",
+                                        "/admin/group/:name/capabilities",
+                                        "/admin/group/:name/members",
+                                    ]}
+                                >
+                                    <GroupView />
+                                </AdministrativeRoute>
 
-                            <AdministrativeRoute exact path="/admin/groups">
-                                <GroupsList />
-                            </AdministrativeRoute>
-                            <AdministrativeRoute
-                                exact
-                                path="/admin/capabilities"
-                            >
-                                <AccessControl />
-                            </AdministrativeRoute>
+                                <AdministrativeRoute exact path="/admin/groups">
+                                    <GroupsList />
+                                </AdministrativeRoute>
+                                <AdministrativeRoute
+                                    exact
+                                    path="/admin/capabilities"
+                                >
+                                    <AccessControl />
+                                </AdministrativeRoute>
 
-                            <AttributeRoute exact path="/admin/attributes">
-                                <ManageAttributes />
-                            </AttributeRoute>
-                            <AttributeRoute exact path="/admin/attribute/new">
-                                <AttributeDefine />
-                            </AttributeRoute>
-                            <AttributeRoute
-                                exact
-                                path={[
-                                    "/admin/attribute/:metakey",
-                                    "/admin/attribute/:metakey/permissions",
-                                ]}
-                            >
-                                <AttributeView />
-                            </AttributeRoute>
-                        </Switch>
+                                <AttributeRoute exact path="/admin/attributes">
+                                    <ManageAttributes />
+                                </AttributeRoute>
+                                <AttributeRoute exact path="/admin/attribute/new">
+                                    <AttributeDefine />
+                                </AttributeRoute>
+                                <AttributeRoute
+                                    exact
+                                    path={[
+                                        "/admin/attribute/:metakey",
+                                        "/admin/attribute/:metakey/permissions",
+                                    ]}
+                                >
+                                    <AttributeView />
+                                </AttributeRoute>
+                            </Switch>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </View>
+            </View>
+        </SettingsContext.Provider>
     );
 }

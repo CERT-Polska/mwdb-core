@@ -14,5 +14,7 @@ class ServerInfoResponseSchema(Schema):
     recaptcha_site_key = fields.Str(required=True, allow_none=True)
 
 
-class ServerPluginInfoResponseSchema(Schema):
+class ServerAdminInfoResponseSchema(Schema):
+    rate_limit_enabled = fields.Boolean(required=True, allow_none=False)
+    plugins_enabled = fields.Boolean(required=True, allow_none=False)
     active_plugins = fields.Dict(required=True, allow_none=False)

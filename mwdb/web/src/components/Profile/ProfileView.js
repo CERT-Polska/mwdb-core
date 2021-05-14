@@ -27,7 +27,7 @@ function ProfileNav() {
             <strong>
                 <FontAwesomeIcon icon={faUserCog} /> Profile
             </strong>
-            <div className="nav flex-column">
+            <div className="nav sidenav flex-column">
                 <NavLink exact to="/profile" className="nav-link">
                     Profile details
                 </NavLink>
@@ -41,6 +41,7 @@ function ProfileNav() {
                     API keys
                 </NavLink>
             </div>
+            <hr />
         </div>
     );
 }
@@ -74,10 +75,10 @@ export default function ProfileView() {
     return (
         <View ident="profile" fluid>
             <div className="row">
-                <div className="col-2">
+                <div className="col-sm-2">
                     <ProfileNav />
                 </div>
-                <div className="col-8">
+                <div className="col-sm-8">
                     <Switch>
                         <Route exact path={["/profile", "/profile/user/:user"]}>
                             <ProfileDetails profile={profile} />

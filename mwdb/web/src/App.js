@@ -13,25 +13,16 @@ import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
 import Upload from "./components/Upload";
 import UserLogin from "./components/UserLogin";
-import ShowUsers from "./components/ShowUsers";
-import ShowGroups from "./components/ShowGroups";
-import UserCreate from "./components/UserCreate";
 import UserRegister from "./components/UserRegister";
-import UserUpdate from "./components/UserUpdate";
 import UserGroups from "./components/UserGroups";
-import GroupRegister from "./components/GroupRegister";
-import GroupUpdate from "./components/GroupUpdate";
 import UserSetPassword from "./components/UserSetPassword";
-import ManageAttributes from "./components/ManageAttributes";
-import AttributeDefine from "./components/AttributeDefine";
-import AttributeUpdate from "./components/AttributeUpdate";
 import Search from "./components/Search";
 import RelationsPlot from "./components/RelationsPlot";
 import UserPasswordRecover from "./components/UserPasswordRecover";
-import ShowPendingUsers from "./components/ShowPendingUsers";
 import Docs from "./components/Docs";
 import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
+import SettingsView from "./components/Settings/SettingsView";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -67,14 +58,8 @@ import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
-import {
-    ErrorBoundary,
-    ProtectedRoute,
-    AdministrativeRoute,
-    AttributeRoute,
-} from "@mwdb-web/commons/ui";
+import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
 import { Extendable } from "./commons/extensions";
-import SettingsView from "./components/Settings/SettingsView";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -117,6 +102,21 @@ function DefaultRoute() {
                 }}
             />
         </Route>
+    );
+}
+
+function SettingsRoute(args) {
+    const auth = useContext(AuthContext);
+    return (
+        <ProtectedRoute
+            condition={
+                auth.hasCapability(Capability.managingAttributes) ||
+                auth.hasCapability(Capability.manageUsers)
+            }
+            {...args}
+        >
+            <SettingsView />
+        </ProtectedRoute>
     );
 }
 
@@ -189,42 +189,10 @@ export default function App() {
             <ProtectedRoute exact path="/user_groups">
                 <UserGroups />
             </ProtectedRoute>
-            <AdministrativeRoute exact path="/user/:login">
-                <UserUpdate />
-            </AdministrativeRoute>
-            <AdministrativeRoute exact path="/users">
-                <ShowUsers />
-            </AdministrativeRoute>
-            <AdministrativeRoute exact path="/users/pending">
-                <ShowPendingUsers />
-            </AdministrativeRoute>
-            <AdministrativeRoute exact path="/users/new">
-                <UserCreate />
-            </AdministrativeRoute>
-            <AdministrativeRoute exact path="/groups">
-                <ShowGroups />
-            </AdministrativeRoute>
-            <AdministrativeRoute exact path="/groups/new">
-                <GroupRegister />
-            </AdministrativeRoute>
-            <AdministrativeRoute exact path="/group/:name">
-                <GroupUpdate />
-            </AdministrativeRoute>
-            <AttributeRoute exact path="/attribute/:metakey">
-                <AttributeUpdate />
-            </AttributeRoute>
-            <AttributeRoute exact path="/attributes">
-                <ManageAttributes />
-            </AttributeRoute>
-            <AttributeRoute exact path="/attributes/new">
-                <AttributeDefine />
-            </AttributeRoute>
             <ProtectedRoute path="/remote/:remote">
                 <RemoteViews />
             </ProtectedRoute>
-            <ProtectedRoute path="/admin">
-                <SettingsView />
-            </ProtectedRoute>
+            <SettingsRoute path="/admin" />
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
                 <ProfileView />
             </ProtectedRoute>

@@ -151,6 +151,18 @@ div.quick-query-bar {
     margin-bottom: 6pt;
 }
 
+.sidenav .nav-link {
+    border-left: #eee solid;
+}
+
+.sidenav .nav-link.active {
+    border-left-color: var(--blue);
+}
+
+.sidenav .nav-link:hover {
+    border-left-color: var(--info);
+}
+
 /***
 	Material Design Switches for Bootstrap 4 and Material Design Bootstrap (MDB)
 	by djibe

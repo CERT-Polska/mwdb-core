@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { NavLink, Redirect, Switch } from "react-router-dom";
+import { NavLink, Route, Switch } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,13 +16,14 @@ import GroupsList from "./Views/GroupsList";
 import UsersList from "./Views/UsersList";
 import ShowPendingUsers from "./Views/ShowPendingUsers";
 import ManageAttributes from "./Views/ManageAttributes";
-import AttributeUpdate from "./Views/AttributeUpdate";
 import UserCreate from "./Views/UserCreate";
 import GroupRegister from "./Views/GroupRegister";
 import AttributeDefine from "./Views/AttributeDefine";
 import UserView from "./Views/UserView";
 import AccessControl from "./Views/AccessControl";
 import GroupView from "./Views/GroupView";
+import AttributeView from "./Views/AttributeView";
+import SettingsOverview from "./Views/SettingsOverview";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -50,6 +51,14 @@ function SettingsNav() {
     }, [isAdmin]);
 
     const adminLinks = [
+        ...(auth.hasCapability(Capability.managingAttributes) ||
+        auth.hasCapability(Capability.manageUsers)
+            ? [
+                  <NavLink exact to="/admin" className="nav-link">
+                      Overview
+                  </NavLink>,
+              ]
+            : []),
         ...(auth.hasCapability(Capability.manageUsers)
             ? [
                   ...(config.config["is_registration_enabled"]
@@ -100,11 +109,12 @@ function SettingsNav() {
                     <strong>
                         <FontAwesomeIcon icon={faUsersCog} /> Administration
                     </strong>
-                    <div className="nav flex-column">{adminLinks}</div>
+                    <div className="nav sidenav flex-column">{adminLinks}</div>
                 </React.Fragment>
             ) : (
                 []
             )}
+            <hr />
         </div>
     );
 }
@@ -118,15 +128,15 @@ export default function SettingsView(props) {
             fluid
         >
             <div className="row">
-                <div className="col-2">
+                <div className="col-sm-2">
                     <SettingsNav />
                 </div>
-                <div className="col-8">
+                <div className="col-sm-8">
                     <div className="tab-content">
                         <Switch>
-                            <AdministrativeRoute exact path="/admin">
-                                <Redirect to="/admin/pending" />
-                            </AdministrativeRoute>
+                            <Route exact path="/admin">
+                                <SettingsOverview />
+                            </Route>
                             <AdministrativeRoute path="/admin/pending">
                                 <ShowPendingUsers />
                             </AdministrativeRoute>
@@ -181,9 +191,12 @@ export default function SettingsView(props) {
                             </AttributeRoute>
                             <AttributeRoute
                                 exact
-                                path="/admin/attribute/:metakey"
+                                path={[
+                                    "/admin/attribute/:metakey",
+                                    "/admin/attribute/:metakey/permissions",
+                                ]}
                             >
-                                <AttributeUpdate />
+                                <AttributeView />
                             </AttributeRoute>
                         </Switch>
                     </div>

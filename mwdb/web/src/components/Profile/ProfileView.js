@@ -1,18 +1,12 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import {
-    NavLink,
-    Route,
-    Switch,
-    useHistory,
-    useParams,
-} from "react-router-dom";
+import { NavLink, Route, Switch, useParams } from "react-router-dom";
 
 import { faUserCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
-import { View, getErrorMessage } from "@mwdb-web/commons/ui";
+import { View } from "@mwdb-web/commons/ui";
 
 import ProfileDetails from "./Views/ProfileDetails";
 import ProfileAPIKeys from "./Views/ProfileAPIKeys";
@@ -20,6 +14,7 @@ import ProfileCapabilities from "./Views/ProfileCapabilities";
 import ProfileResetPassword from "./Views/ProfileResetPassword";
 import ProfileGroup from "./Views/ProfileGroup";
 import ProfileGroups from "./Views/ProfileGroups";
+import { useViewAlert } from "../../commons/ui";
 
 function ProfileNav() {
     return (
@@ -48,7 +43,7 @@ function ProfileNav() {
 
 export default function ProfileView() {
     const auth = useContext(AuthContext);
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const user = useParams().user || auth.user.login;
     const [profile, setProfile] = useState();
 
@@ -57,9 +52,9 @@ export default function ProfileView() {
             const response = await api.getUserProfile(user);
             setProfile(response.data);
         } catch (error) {
-            history.push({
-                pathname: "/profile",
-                state: { error: getErrorMessage(error) },
+            viewAlert.redirectToAlert({
+                target: "/profile",
+                error,
             });
         }
     }

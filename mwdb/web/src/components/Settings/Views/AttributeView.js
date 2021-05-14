@@ -1,19 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-    Link,
-    Switch,
-    useHistory,
-    useLocation,
-    useParams,
-} from "react-router-dom";
+import { Link, Switch, useLocation, useParams } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import { AttributeDetails } from "./AttributeDetails";
-import { AttributeRoute, getErrorMessage } from "@mwdb-web/commons/ui";
+import { AttributeRoute, useViewAlert } from "@mwdb-web/commons/ui";
 import { AttributesPermissions } from "./AttributePermissions";
 
 export default function AttributeView() {
     const location = useLocation();
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const { metakey } = useParams();
     const [attribute, setAttribute] = useState({});
 
@@ -22,10 +16,7 @@ export default function AttributeView() {
             let response = await api.getMetakeyDefinition(metakey);
             setAttribute(response.data);
         } catch (error) {
-            history.push({
-                pathname: `/admin/attribute/${metakey}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 

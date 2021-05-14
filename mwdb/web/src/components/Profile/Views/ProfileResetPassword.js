@@ -1,31 +1,24 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { ShowIf, getErrorMessage } from "@mwdb-web/commons/ui";
+import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function ProfileResetPassword({ profile }) {
     const [pending, setPending] = useState(false);
-    const history = useHistory();
+    const viewAlert = useViewAlert();
 
     async function resetPassword() {
         setPending(true);
         try {
             await api.authRequestPasswordChange();
-            history.push({
-                pathname: "/profile",
-                state: {
-                    success:
-                        "Password reset link was successfully sent to your e-mail address.",
-                },
+            viewAlert.redirectToAlert({
+                target: "/profile",
+                success:
+                    "Password reset link was successfully sent to your e-mail address.",
             });
         } catch (error) {
-            history.push({
-                pathname: "/profile",
-                state: {
-                    error: getErrorMessage(error),
-                },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 

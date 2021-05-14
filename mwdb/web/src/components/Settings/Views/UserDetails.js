@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
     DateString,
-    getErrorMessage,
     ConfirmationModal,
     EditableItem,
+    useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,18 +21,18 @@ function UserItem(props) {
 }
 
 export default function UserDetails({ user, getUser }) {
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
     async function handleSubmit(newValue) {
         try {
             await api.updateUser(user.login, newValue);
-        } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.setAlert({
+                success: "User successfully updated.",
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         } finally {
             getUser();
         }
@@ -41,11 +41,11 @@ export default function UserDetails({ user, getUser }) {
     async function setDisabledState(ban) {
         try {
             await api.setUserDisabled(user.login, ban);
-        } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.setAlert({
+                success: `User successfully ${ban ? "blocked" : "unblocked"}.`,
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         } finally {
             getUser();
         }
@@ -55,15 +55,12 @@ export default function UserDetails({ user, getUser }) {
         try {
             setDeleteModalDisabled(true);
             await api.removeUser(user.login);
-            history.push({
-                pathname: `/admin/users/`,
-                state: { success: "User has been successfully removed" },
+            viewAlert.redirectToAlert({
+                target: "/admin/users",
+                success: `User '${user.login}' successfully removed.`,
             });
         } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
             setDeleteModalDisabled(false);
         }
     }

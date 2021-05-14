@@ -27,7 +27,7 @@ export {
 } from "./ProtectedRoute";
 export { default as RefString } from "./RefString";
 export { default as SortedList } from "./SortedList";
-export { default as View } from "./View";
+export { default as View, useViewAlert } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
 
 export { Tag, TagList } from "./Tag";

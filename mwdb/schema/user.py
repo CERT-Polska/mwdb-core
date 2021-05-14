@@ -3,7 +3,7 @@ import re
 from marshmallow import Schema, ValidationError, fields, validates
 
 from .api_key import APIKeyListItemResponseSchema
-from .group import GroupBasicResponseSchema, GroupNameSchemaBase
+from .group import GroupBasicResponseSchema
 from .utils import UTCDateTime
 
 

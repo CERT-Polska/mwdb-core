@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 export let GroupMemberList = (props) => (
     <MemberList
         nameKey="name"
-        itemLinkClass={(group) => <GroupBadge group={group} />}
+        itemLinkClass={(group) => <GroupBadge group={group} clickable />}
         {...props}
     />
 );

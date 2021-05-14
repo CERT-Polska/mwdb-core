@@ -7,7 +7,7 @@ export let GroupMemberList = (props) => (
     <MemberList
         nameKey="login"
         itemLinkClass={(user) => (
-            <GroupBadge group={{ name: user.login, private: true }} />
+            <GroupBadge group={{ name: user.login, private: true }} clickable />
         )}
         {...props}
     />

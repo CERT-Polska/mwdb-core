@@ -125,7 +125,7 @@ export default function GroupDetails({ group }) {
                 disabled={isDeleteModalDisabled}
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleRemoveGroup}
-                message={`Are tou sure you want to delete ${group.name} from mwdb`}
+                message={`Are you sure you want to delete ${group.name} from mwdb`}
                 buttonStyle="btn-danger"
             />
         </div>

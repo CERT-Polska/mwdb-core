@@ -113,7 +113,10 @@ export default function GroupDetails({ group }) {
                     <a
                         href="#remove-group"
                         className="nav-link text-danger"
-                        onClick={() => setDeleteModalOpen(true)}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setDeleteModalOpen(true);
+                        }}
                     >
                         <FontAwesomeIcon icon="trash" />
                         Remove group

@@ -169,7 +169,10 @@ export default function UserDetails({ user, getUser }) {
                         <a
                             href="#block-user"
                             className="nav-link text-danger"
-                            onClick={() => setDisabledState(false)}
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                setDisabledState(false);
+                            }}
                         >
                             <FontAwesomeIcon icon="ban" />
                             Unblock user
@@ -178,7 +181,10 @@ export default function UserDetails({ user, getUser }) {
                         <a
                             href="#block-user"
                             className="nav-link text-danger"
-                            onClick={() => setDisabledState(true)}
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                setDisabledState(true);
+                            }}
                         >
                             <FontAwesomeIcon icon="ban" />
                             Block user
@@ -187,7 +193,10 @@ export default function UserDetails({ user, getUser }) {
                     <a
                         href="#remove-user"
                         className="nav-link text-danger"
-                        onClick={() => setDeleteModalOpen(true)}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setDeleteModalOpen(true);
+                        }}
                     >
                         <FontAwesomeIcon icon="trash" />
                         Remove user

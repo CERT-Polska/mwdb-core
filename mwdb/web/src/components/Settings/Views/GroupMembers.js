@@ -1,26 +1,25 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { UserLink } from "./ShowUsers";
 import api from "@mwdb-web/commons/api";
-import { MemberList, getErrorMessage } from "@mwdb-web/commons/ui";
-import { useHistory } from "react-router-dom";
+import { MemberList, useViewAlert } from "@mwdb-web/commons/ui";
 
 export let GroupMemberList = (props) => (
     <MemberList nameKey="login" itemLinkClass={UserLink} {...props} />
 );
 
 export default function GroupMembers({ group, getGroup }) {
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const [allUsers, setAllUsers] = useState([]);
 
     async function addMember(login) {
         try {
             await api.addGroupMember(group.name, login);
             getGroup();
-        } catch (error) {
-            history.push({
-                pathname: `/admin/group/${group.name}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.setAlert({
+                success: `Member '${login}' successfully added.`,
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -28,22 +27,22 @@ export default function GroupMembers({ group, getGroup }) {
         try {
             await api.removeGroupMember(group.name, login);
             getGroup();
-        } catch (error) {
-            history.push({
-                pathname: `/admin/group/${group.name}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.setAlert({
+                success: `Member '${login}' successfully removed.`,
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
     async function setAdminMembership(login, membership) {
         try {
             await api.setGroupAdmin(group.name, login, membership);
             getGroup();
-        } catch (error) {
-            history.push({
-                pathname: `/admin/group/${group.name}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.setAlert({
+                success: `Member '${login}' successfully updated.`,
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -52,10 +51,7 @@ export default function GroupMembers({ group, getGroup }) {
             let response = await api.getUsers();
             setAllUsers(response.data.users);
         } catch (error) {
-            history.push({
-                pathname: `/admin/group/${group.name}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 

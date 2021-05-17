@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 
 import api from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
+import { useViewAlert } from "@mwdb-web/commons/ui";
 
 function PluginItems(props) {
     const { name, info } = props;
@@ -25,14 +26,15 @@ function PluginItems(props) {
 
 export default function SettingsOverview() {
     const config = useContext(ConfigContext);
+    const viewAlert = useViewAlert();
     const [extendedInfo, setExtendedInfo] = useState();
 
     async function updateExtendedInfo() {
         try {
             const response = await api.getServerAdminInfo();
             setExtendedInfo(response.data);
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 

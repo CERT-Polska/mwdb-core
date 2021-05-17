@@ -1,14 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-    useHistory,
-    useParams,
-    Switch,
-    Link,
-    useLocation,
-} from "react-router-dom";
+import { useParams, Switch, Link, useLocation } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { AdministrativeRoute, getErrorMessage } from "@mwdb-web/commons/ui";
+import { AdministrativeRoute, useViewAlert } from "@mwdb-web/commons/ui";
 
 import UserDetails from "./UserDetails";
 import UserResetPassword from "./UserResetPassword";
@@ -18,7 +12,7 @@ import UserSingleGroups from "./UserSingleGroups";
 
 export default function UserView() {
     const location = useLocation();
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const { login } = useParams();
     const [user, setUser] = useState({});
 
@@ -27,10 +21,7 @@ export default function UserView() {
             const response = await api.getUser(login);
             setUser(response.data);
         } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 

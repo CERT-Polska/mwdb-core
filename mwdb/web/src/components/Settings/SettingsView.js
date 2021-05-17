@@ -119,14 +119,9 @@ function SettingsNav() {
     );
 }
 
-export default function SettingsView(props) {
+export default function SettingsView() {
     return (
-        <View
-            ident="settings"
-            error={props.error}
-            success={props.success}
-            fluid
-        >
+        <View ident="settings" fluid>
             <div className="row">
                 <div className="col-sm-2">
                     <SettingsNav />

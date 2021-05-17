@@ -3,10 +3,10 @@ import React, { Component, useState, useEffect, useCallback } from "react";
 import api from "@mwdb-web/commons/api";
 import {
     Autocomplete,
-    getErrorMessage,
     ConfirmationModal,
+    useViewAlert,
 } from "@mwdb-web/commons/ui";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 class AttributePermissionsBox extends Component {
     state = {
@@ -241,7 +241,7 @@ class AttributePermissionsBox extends Component {
 
 export function AttributesPermissions({ attribute, getAttribute }) {
     const { metakey } = useParams();
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const [allGroups, setAllGroups] = useState([]);
     const [permissions, setPermissions] = useState({});
     const [modalSpec, setModalSpec] = useState({});
@@ -252,7 +252,7 @@ export function AttributesPermissions({ attribute, getAttribute }) {
             await api.setMetakeyPermission(attribute.key, group, false, false);
             getAttribute();
         } catch (error) {
-            this.setState({ error });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -267,10 +267,7 @@ export function AttributesPermissions({ attribute, getAttribute }) {
             getAttribute();
             setModalOpen(false);
         } catch (error) {
-            history.push({
-                pathname: `/admin/attribute/${attribute.key}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -290,7 +287,7 @@ export function AttributesPermissions({ attribute, getAttribute }) {
             getAttribute();
             setModalOpen(false);
         } catch (error) {
-            this.setState({ error });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -309,10 +306,7 @@ export function AttributesPermissions({ attribute, getAttribute }) {
             let response = await api.getGroups();
             setAllGroups(response.data.groups);
         } catch (error) {
-            history.push({
-                pathname: `/admin/attribute/${metakey}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 

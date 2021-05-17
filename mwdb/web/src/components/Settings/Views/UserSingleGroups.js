@@ -1,26 +1,26 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { GroupLink } from "./ShowGroups";
+
 import api from "@mwdb-web/commons/api";
-import { MemberList, getErrorMessage } from "@mwdb-web/commons/ui";
-import { useHistory } from "react-router-dom";
+import { MemberList, useViewAlert } from "@mwdb-web/commons/ui";
 
 export let GroupMemberList = (props) => (
     <MemberList nameKey="name" itemLinkClass={GroupLink} {...props} />
 );
 
 export default function UserSingleGroups({ user, getUser }) {
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const [allGroups, setAllGroups] = useState([]);
 
     async function addMember(group) {
         try {
             await api.addGroupMember(group, user.login);
             getUser();
-        } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.setAlert({
+                success: `User successfully added to '${group}' group.`,
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -28,11 +28,11 @@ export default function UserSingleGroups({ user, getUser }) {
         try {
             await api.removeGroupMember(group, user.login);
             getUser();
-        } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.setAlert({
+                success: `User successfully removed from '${group}' group.`,
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -41,10 +41,7 @@ export default function UserSingleGroups({ user, getUser }) {
             let response = await api.getGroups();
             setAllGroups(response.data.groups);
         } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 

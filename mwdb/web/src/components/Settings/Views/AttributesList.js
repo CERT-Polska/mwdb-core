@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { PagedList } from "@mwdb-web/commons/ui";
+import { PagedList, useViewAlert } from "@mwdb-web/commons/ui";
 
 function AttributeItem({ name, label, description, template }) {
     return (
@@ -23,6 +23,7 @@ function AttributeItem({ name, label, description, template }) {
 }
 
 export default function AttributesList() {
+    const viewAlert = useViewAlert();
     const [attributes, setAttributes] = useState([]);
     const [activePage, setActivePage] = useState(1);
     const [attributeFilter, setAttributeFilter] = useState("");
@@ -36,8 +37,8 @@ export default function AttributesList() {
                     name: attribute.key,
                 }))
             );
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 

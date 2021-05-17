@@ -2,9 +2,15 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { PagedList, DateString, ConfirmationModal } from "@mwdb-web/commons/ui";
+import {
+    PagedList,
+    DateString,
+    ConfirmationModal,
+    useViewAlert,
+} from "@mwdb-web/commons/ui";
 
 export default function UsersPendingList() {
+    const viewAlert = useViewAlert();
     const [pendingUsers, setPendingUsers] = useState([]);
     const [activePage, setActivePage] = useState(1);
     const [userFilter, setUserFilter] = useState("");
@@ -14,8 +20,8 @@ export default function UsersPendingList() {
         try {
             const response = await api.getPendingUsers();
             setPendingUsers(response.data["users"]);
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -41,30 +47,24 @@ export default function UsersPendingList() {
     async function acceptUser(login) {
         try {
             await api.acceptPendingUser(login);
-            /*
-            this.setState({
-                success: "Successfully accepted user",
-                error: null,
+            viewAlert.setAlert({
+                success: `User ${login} successfully accepted.`,
             });
-            */
             await getUsers();
         } catch (error) {
-            console.error(error);
+            viewAlert.setAlert({ error });
         }
     }
 
     async function rejectUser(login, mailNotification) {
         try {
             await api.rejectPendingUser(login, mailNotification);
-            /*
-            this.setState({
-                success: "Successfully rejected user",
-                error: null,
+            viewAlert.setAlert({
+                success: `User ${login} successfully rejected.`,
             });
-            */
             await getUsers();
         } catch (error) {
-            console.error(error);
+            viewAlert.setAlert({ error });
         }
     }
 

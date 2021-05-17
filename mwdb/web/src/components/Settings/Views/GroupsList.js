@@ -2,7 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { GroupBadge, PagedList, HighlightText } from "@mwdb-web/commons/ui";
+import {
+    GroupBadge,
+    PagedList,
+    HighlightText,
+    useViewAlert,
+} from "@mwdb-web/commons/ui";
 
 function GroupItem(props) {
     return (
@@ -32,6 +37,7 @@ function GroupItem(props) {
 }
 
 export default function GroupsList() {
+    const viewAlert = useViewAlert();
     const [groups, setGroups] = useState([]);
     const [activePage, setActivePage] = useState(1);
     const [groupFilter, setGroupFilter] = useState("");
@@ -40,8 +46,8 @@ export default function GroupsList() {
         try {
             const response = await api.getGroups();
             setGroups(response.data["groups"]);
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 

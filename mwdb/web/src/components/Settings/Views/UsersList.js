@@ -2,7 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { GroupBadge, PagedList, HighlightText } from "@mwdb-web/commons/ui";
+import {
+    GroupBadge,
+    PagedList,
+    HighlightText,
+    useViewAlert,
+} from "@mwdb-web/commons/ui";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faRobot } from "@fortawesome/free-solid-svg-icons";
@@ -56,6 +61,7 @@ function UserItem(props) {
 }
 
 export default function UsersList() {
+    const viewAlert = useViewAlert();
     const [users, setUsers] = useState([]);
     const [activePage, setActivePage] = useState(1);
     const [userFilter, setUserFilter] = useState("");
@@ -64,8 +70,8 @@ export default function UsersList() {
         try {
             const response = await api.getUsers();
             setUsers(response.data["users"]);
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 

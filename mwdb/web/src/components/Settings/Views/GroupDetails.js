@@ -24,11 +24,13 @@ export default function GroupDetails({ group }) {
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
-    async function handleSubmit(newName) {
+    async function handleRename(newValue) {
+        const newName = newValue["name"];
         try {
-            await api.updateGroup(group.name, newName["name"], undefined);
-            viewAlert.setAlert({
-                success: `Group successfully updated.`,
+            await api.updateGroup(group.name, newName, undefined);
+            viewAlert.redirectToAlert({
+                target: `/admin/group/${newName}`,
+                success: `Group successfully renamed.`,
             });
         } catch (error) {
             viewAlert.setAlert({ error });
@@ -60,7 +62,7 @@ export default function GroupDetails({ group }) {
                         <EditableItem
                             name="name"
                             defaultValue={group.name}
-                            onSubmit={handleSubmit}
+                            onSubmit={handleRename}
                         />
                     </GroupItem>
                     <GroupItem label="Members">
@@ -120,7 +122,7 @@ export default function GroupDetails({ group }) {
                 disabled={isDeleteModalDisabled}
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleRemoveGroup}
-                message={`Are tou sure you want to delete ${group.name} from mwdb`}
+                message={`Are you sure you want to delete ${group.name} from mwdb`}
                 buttonStyle="btn-danger"
             />
         </div>

@@ -12,10 +12,10 @@ import {
     AdministrativeRoute,
     AttributeRoute,
 } from "@mwdb-web/commons/ui";
-import ShowGroups from "./Views/ShowGroups";
-import ShowUsers from "./Views/ShowUsers";
-import ShowPendingUsers from "./Views/ShowPendingUsers";
-import ManageAttributes from "./Views/ManageAttributes";
+import GroupsList from "./Views/GroupsList";
+import UsersList from "./Views/UsersList";
+import UsersPendingList from "./Views/UsersPendingList";
+import AttributesList from "./Views/AttributesList";
 import UserCreate from "./Views/UserCreate";
 import GroupRegister from "./Views/GroupRegister";
 import AttributeDefine from "./Views/AttributeDefine";
@@ -133,11 +133,11 @@ export default function SettingsView() {
                                 <SettingsOverview />
                             </Route>
                             <AdministrativeRoute path="/admin/pending">
-                                <ShowPendingUsers />
+                                <UsersPendingList />
                             </AdministrativeRoute>
 
                             <AdministrativeRoute exact path="/admin/users">
-                                <ShowUsers />
+                                <UsersList />
                             </AdministrativeRoute>
                             <AdministrativeRoute exact path="/admin/user/new">
                                 <UserCreate />
@@ -169,7 +169,7 @@ export default function SettingsView() {
                             </AdministrativeRoute>
 
                             <AdministrativeRoute exact path="/admin/groups">
-                                <ShowGroups />
+                                <GroupsList />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
@@ -179,7 +179,7 @@ export default function SettingsView() {
                             </AdministrativeRoute>
 
                             <AttributeRoute exact path="/admin/attributes">
-                                <ManageAttributes />
+                                <AttributesList />
                             </AttributeRoute>
                             <AttributeRoute exact path="/admin/attribute/new">
                                 <AttributeDefine />

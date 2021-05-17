@@ -1,10 +1,15 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { UserLink } from "./ShowUsers";
 import api from "@mwdb-web/commons/api";
-import { MemberList, useViewAlert } from "@mwdb-web/commons/ui";
+import { GroupBadge, MemberList, useViewAlert } from "@mwdb-web/commons/ui";
 
 export let GroupMemberList = (props) => (
-    <MemberList nameKey="login" itemLinkClass={UserLink} {...props} />
+    <MemberList
+        nameKey="login"
+        itemLinkClass={(user) => (
+            <GroupBadge group={{ name: user.login, private: true }} clickable />
+        )}
+        {...props}
+    />
 );
 
 export default function GroupMembers({ group, getGroup }) {

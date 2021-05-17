@@ -205,7 +205,7 @@ export default function UserDetails({ user, getUser }) {
                 disabled={isDeleteModalDisabled}
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleRemoveUser}
-                message={`Are tou sure you want to delete ${user.login} from mwdb`}
+                message={`Are you sure you want to delete ${user.login} from mwdb`}
                 buttonStyle="btn-danger"
             />
         </div>

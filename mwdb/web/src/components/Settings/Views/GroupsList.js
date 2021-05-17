@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
 import {
-    GroupBadge,
+    UserBadge,
     PagedList,
     HighlightText,
     useViewAlert,
@@ -23,12 +23,10 @@ function GroupItem(props) {
                 {props.name === "public"
                     ? "(Group is public and contains all members)"
                     : props.users.map((login) => (
-                          <GroupBadge
-                              group={{
-                                  name: login,
-                                  private: true,
-                              }}
+                          <UserBadge
+                              user={{ login }}
                               clickable
+                              basePath="/admin"
                           />
                       ))}
             </td>

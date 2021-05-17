@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import api from "@mwdb-web/commons/api";
-import { GroupBadge, useViewAlert } from "../../../commons/ui";
+import { GroupBadge, useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function ProfileGroups({ profile }) {
     const viewAlert = useViewAlert();

@@ -11,7 +11,7 @@ export {
     Alert,
     getErrorMessage,
 } from "./ErrorBoundary";
-export { default as GroupBadge } from "./GroupBadge";
+export { default as GroupBadge, UserBadge } from "./GroupBadge";
 export { default as EditableItem } from "./EditableItem";
 export { default as Hash } from "./Hash";
 export { default as HexView } from "./HexView";

@@ -5,7 +5,9 @@ import { GroupBadge, MemberList, useViewAlert } from "@mwdb-web/commons/ui";
 export let GroupMemberList = (props) => (
     <MemberList
         nameKey="name"
-        itemLinkClass={(group) => <GroupBadge group={group} clickable />}
+        itemLinkClass={(group) => (
+            <GroupBadge group={group} clickable basePath="/admin" />
+        )}
         {...props}
     />
 );

@@ -53,7 +53,7 @@ function UserItem(props) {
             <td>{feed_badge}</td>
             <td>
                 {groups.map((group) => (
-                    <GroupBadge group={group} clickable />
+                    <GroupBadge group={group} clickable basePath="/admin" />
                 ))}
             </td>
         </tr>

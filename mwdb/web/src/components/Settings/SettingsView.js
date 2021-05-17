@@ -119,7 +119,7 @@ function SettingsNav() {
     );
 }
 
-export default function SettingsView(props) {
+export default function SettingsView() {
     return (
         <View ident="settings" fluid>
             <div className="row">

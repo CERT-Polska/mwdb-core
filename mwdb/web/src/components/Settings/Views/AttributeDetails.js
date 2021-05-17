@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
-    getErrorMessage,
     ConfirmationModal,
     EditableItem,
+    useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,7 +21,7 @@ function AttributeItem(props) {
 
 export function AttributeDetails({ attribute, getAttribute }) {
     const auth = useContext(AuthContext);
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
@@ -34,10 +34,7 @@ export function AttributeDetails({ attribute, getAttribute }) {
         try {
             await api.updateMetakeyDefinition(attribute.key, newValue);
         } catch (error) {
-            history.push({
-                pathname: `/admin/attribute/${attribute.key}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         } finally {
             getAttribute();
         }
@@ -47,12 +44,12 @@ export function AttributeDetails({ attribute, getAttribute }) {
         try {
             setDeleteModalDisabled(true);
             await api.removeMetakeyDefinition(attribute.key);
-            history.push("/admin/attributes");
-        } catch (error) {
-            history.push({
-                pathname: `/admin/attribute/${attribute.key}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.redirectToAlert({
+                target: "/admin/attributes",
+                success: `Attribute '${attribute.key}' successfully removed.`,
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -121,7 +118,10 @@ export function AttributeDetails({ attribute, getAttribute }) {
                     <a
                         href="#remove-user"
                         className="nav-link text-danger"
-                        onClick={() => setDeleteModalOpen(true)}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setDeleteModalOpen(true);
+                        }}
                     >
                         <FontAwesomeIcon icon="trash" />
                         Remove attribute

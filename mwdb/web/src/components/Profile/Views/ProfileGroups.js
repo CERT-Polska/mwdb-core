@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { getErrorMessage } from "@mwdb-web/commons/ui";
-import { GroupBadge } from "../../../commons/ui";
+import { GroupBadge, useViewAlert } from "../../../commons/ui";
 
 export default function ProfileGroups({ profile }) {
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const [workspaces, setWorkspaces] = useState();
 
     async function updateWorkspaces() {
@@ -14,11 +12,9 @@ export default function ProfileGroups({ profile }) {
             const response = await api.authGroups();
             setWorkspaces(response.data["groups"]);
         } catch (error) {
-            history.push({
-                pathname: "/profile",
-                state: {
-                    error: getErrorMessage(error),
-                },
+            viewAlert.redirectToAlert({
+                target: "/profile",
+                error,
             });
         }
     }

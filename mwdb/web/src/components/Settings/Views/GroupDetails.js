@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Link, useHistory, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
-    getErrorMessage,
     ConfirmationModal,
     EditableItem,
+    useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -20,23 +20,18 @@ function GroupItem(props) {
 }
 
 export default function GroupDetails({ group }) {
-    const history = useHistory();
-    const location = useLocation();
-    const pathNames = location.pathname.split("/");
+    const viewAlert = useViewAlert();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
     async function handleSubmit(newName) {
         try {
             await api.updateGroup(group.name, newName["name"], undefined);
-            history.push({
-                pathname: `/${pathNames[1]}/${pathNames[2]}/${newName["name"]}`,
+            viewAlert.setAlert({
+                success: `Group successfully updated.`,
             });
         } catch (error) {
-            history.push({
-                pathname: `/admin/group/${group.name}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -44,15 +39,12 @@ export default function GroupDetails({ group }) {
         try {
             setDeleteModalDisabled(true);
             await api.removeGroup(group.name);
-            history.push({
-                pathname: `/admin/groups/`,
-                state: { success: "Group has been successfully removed" },
+            viewAlert.redirectToAlert({
+                target: `/admin/groups/`,
+                success: `Group '${group.name}' has been successfully removed`,
             });
         } catch (error) {
-            history.push({
-                pathname: `/admin/group/${group.name}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
             setDeleteModalOpen(false);
             setDeleteModalDisabled(false);
         }
@@ -113,7 +105,10 @@ export default function GroupDetails({ group }) {
                     <a
                         href="#remove-group"
                         className="nav-link text-danger"
-                        onClick={() => setDeleteModalOpen(true)}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setDeleteModalOpen(true);
+                        }}
                     >
                         <FontAwesomeIcon icon="trash" />
                         Remove group

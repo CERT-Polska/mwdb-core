@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { useHistory, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import {
     faCopy,
@@ -15,13 +15,13 @@ import api from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
     DateString,
-    getErrorMessage,
     ShowIf,
+    useViewAlert,
 } from "@mwdb-web/commons/ui";
 
 export default function ProfileAPIKeys({ profile, updateProfile }) {
-    const history = useHistory();
     const location = useLocation();
+    const viewAlert = useViewAlert();
     const [currentApiToken, setCurrentApiToken] = useState({});
     const [apiKeyToRemove, setApiKeyToRemove] = useState();
     const [removeModalOpened, setRemoveModalOpened] = useState(false);
@@ -34,10 +34,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             const response = await api.apiKeyGetToken(apiKeyId);
             setCurrentApiToken(response.data);
         } catch (error) {
-            history.push({
-                pathname: location.pathname,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -46,18 +43,14 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             const response = await api.apiKeyAdd(profile.login);
             setCurrentApiToken(response.data);
             updateProfile();
-            history.push({
-                pathname: location.pathname,
+            viewAlert.setAlert({
+                success: "New API key successfully added",
                 state: {
-                    success: "New API key successfully added",
                     addedKey: response.data.id,
                 },
             });
         } catch (error) {
-            history.push({
-                pathname: location.pathname,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -68,17 +61,14 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             setApiKeyToRemove(undefined);
             updateProfile();
             setRemoveModalOpened(false);
-            history.push({
-                pathname: location.pathname,
+            viewAlert.setAlert({
+                success: "API key successfully removed",
                 state: {
-                    success: "API key successfully removed",
+                    addedKey: null,
                 },
             });
         } catch (error) {
-            history.push({
-                pathname: location.pathname,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -105,8 +95,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             {profile.api_keys.map((apiKey) => (
                 <div
                     className={`card ${
-                        history.location.state &&
-                        history.location.state.addedKey === apiKey.id
+                        location.state && location.state.addedKey === apiKey.id
                             ? "border-success"
                             : ""
                     }`}

@@ -13,6 +13,7 @@ import {
     ConfirmationModal,
     GroupBadge,
     ShowIf,
+    useViewAlert,
 } from "@mwdb-web/commons/ui";
 
 function GroupAppliesTo({ group }) {
@@ -195,6 +196,7 @@ function CapabilityChangeCard({ groups, onSubmit }) {
 
 export default function AccessControl() {
     const [groups, setGroups] = useState(null);
+    const viewAlert = useViewAlert();
 
     const [isChangeModalOpen, setChangeModalOpen] = useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
@@ -211,7 +213,7 @@ export default function AccessControl() {
             );
             setGroups(groupList);
         } catch (error) {
-            console.error(error);
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -220,8 +222,11 @@ export default function AccessControl() {
             setDisabledModalButton(true);
             await api.updateGroup(group, undefined, capabilities);
             await updateGroups();
-        } catch (e) {
-            // todo
+            viewAlert.setAlert({
+                success: `Group '${group}' capabilities successfully changed`,
+            });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         } finally {
             setDisabledModalButton(false);
             setChangeModalOpen(false);

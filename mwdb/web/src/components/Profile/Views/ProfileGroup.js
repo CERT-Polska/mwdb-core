@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Link, Redirect, useParams, useHistory } from "react-router-dom";
+import { Link, Redirect, useParams } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { GroupBadge, ShowIf, getErrorMessage } from "@mwdb-web/commons/ui";
+import { GroupBadge, ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
 
 function ProfileItem(props) {
     if (!props.value) return [];
@@ -21,7 +21,7 @@ function ProfileItem(props) {
 
 export default function ProfileGroup({ profile }) {
     const auth = useContext(AuthContext);
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const { group: groupName } = useParams();
     const [workspaces, setWorkspaces] = useState();
 
@@ -30,11 +30,9 @@ export default function ProfileGroup({ profile }) {
             const response = await api.authGroups();
             setWorkspaces(response.data["groups"]);
         } catch (error) {
-            history.push({
-                pathname: "/profile",
-                state: {
-                    error: getErrorMessage(error),
-                },
+            viewAlert.redirectToAlert({
+                target: "/profile",
+                error,
             });
         }
     }

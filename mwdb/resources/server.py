@@ -88,9 +88,7 @@ class ServerAdminInfoResource(Resource):
             403:
               description: When user doesn't have any of required capabilities
         """
-        if not g.auth_user.has_rights(
-            Capabilities.manage_users
-        ) and not g.auth_user.has_rights(Capabilities.managing_attributes):
+        if not g.auth_user.has_rights(Capabilities.manage_users):
             raise Forbidden("You don't have required capability to perform this action")
 
         schema = ServerAdminInfoResponseSchema()

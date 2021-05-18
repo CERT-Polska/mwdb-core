@@ -13,7 +13,6 @@ export const Capability = {
     removingParents: "removing_parents",
     readingAllAttributes: "reading_all_attributes",
     addingAllAttributes: "adding_all_attributes",
-    managingAttributes: "managing_attributes",
     removingAttributes: "removing_attributes",
     addingFiles: "adding_files",
     addingConfigs: "adding_configs",
@@ -43,8 +42,6 @@ export let capabilitiesList = {
     [Capability.readingAllAttributes]:
         "Has access to all attributes of object (including hidden)",
     [Capability.addingAllAttributes]: "Can add all attributes to object",
-    [Capability.managingAttributes]:
-        "Can define new attributes and manage them",
     [Capability.removingAttributes]: "Can remove attribute from objects",
     [Capability.addingFiles]: "Can upload files",
     [Capability.addingConfigs]: "Can upload configs",

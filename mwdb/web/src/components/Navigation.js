@@ -25,9 +25,6 @@ function AdminNav() {
     const [pendingUsersCount, setPendingUsersCount] = useState(null);
 
     const isAdmin = auth.isAdmin;
-    const isAttributeManager = auth.hasCapability(
-        Capability.managingAttributes
-    );
 
     async function updatePendingUsersCount() {
         try {
@@ -48,7 +45,7 @@ function AdminNav() {
         };
     }, [isAdmin]);
 
-    if (!isAdmin && !isAttributeManager) return [];
+    if (!isAdmin) return [];
     return (
         <li className="nav-item">
             <Link className="nav-link" to={"/admin"}>

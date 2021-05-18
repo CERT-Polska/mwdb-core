@@ -109,10 +109,7 @@ function SettingsRoute(args) {
     const auth = useContext(AuthContext);
     return (
         <ProtectedRoute
-            condition={
-                auth.hasCapability(Capability.managingAttributes) ||
-                auth.hasCapability(Capability.manageUsers)
-            }
+            condition={auth.hasCapability(Capability.manageUsers)}
             {...args}
         >
             <SettingsView />

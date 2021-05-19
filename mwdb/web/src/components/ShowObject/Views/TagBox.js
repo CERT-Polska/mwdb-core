@@ -131,7 +131,6 @@ export default function TagBox() {
                         tags={tags}
                         tagRemove={handleTagRemove}
                         deletable={auth.hasCapability(Capability.removingTags)}
-                        searchEndpoint={context.searchEndpoint}
                     />
                 ) : (
                     <div className="text-muted">No tags to display</div>

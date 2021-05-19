@@ -7,11 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import {
-    View,
-    AdministrativeRoute,
-    AttributeRoute,
-} from "@mwdb-web/commons/ui";
+import { View, AdministrativeRoute } from "@mwdb-web/commons/ui";
 import GroupsList from "./Views/GroupsList";
 import UsersList from "./Views/UsersList";
 import UsersPendingList from "./Views/UsersPendingList";
@@ -51,16 +47,13 @@ function SettingsNav() {
     }, [isAdmin]);
 
     const adminLinks = [
-        ...(auth.hasCapability(Capability.managingAttributes) ||
-        auth.hasCapability(Capability.manageUsers)
-            ? [
-                  <NavLink exact to="/admin" className="nav-link">
-                      Overview
-                  </NavLink>,
-              ]
-            : []),
         ...(auth.hasCapability(Capability.manageUsers)
             ? [
+                  [
+                      <NavLink exact to="/admin" className="nav-link">
+                          Overview
+                      </NavLink>,
+                  ],
                   ...(config.config["is_registration_enabled"]
                       ? [
                             <NavLink
@@ -91,10 +84,6 @@ function SettingsNav() {
                   <NavLink exact to="/admin/groups" className="nav-link">
                       Groups
                   </NavLink>,
-              ]
-            : []),
-        ...(auth.hasCapability(Capability.managingAttributes)
-            ? [
                   <NavLink to="/admin/attributes" className="nav-link">
                       Attributes
                   </NavLink>,
@@ -178,13 +167,16 @@ export default function SettingsView() {
                                 <AccessControl />
                             </AdministrativeRoute>
 
-                            <AttributeRoute exact path="/admin/attributes">
+                            <AdministrativeRoute exact path="/admin/attributes">
                                 <AttributesList />
-                            </AttributeRoute>
-                            <AttributeRoute exact path="/admin/attribute/new">
+                            </AdministrativeRoute>
+                            <AdministrativeRoute
+                                exact
+                                path="/admin/attribute/new"
+                            >
                                 <AttributeCreate />
-                            </AttributeRoute>
-                            <AttributeRoute
+                            </AdministrativeRoute>
+                            <AdministrativeRoute
                                 exact
                                 path={[
                                     "/admin/attribute/:metakey",
@@ -192,7 +184,7 @@ export default function SettingsView() {
                                 ]}
                             >
                                 <AttributeView />
-                            </AttributeRoute>
+                            </AdministrativeRoute>
                         </Switch>
                     </div>
                 </div>

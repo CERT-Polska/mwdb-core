@@ -271,7 +271,7 @@ class MetakeyListDefinitionResource(Resource):
 
 class MetakeyListDefinitionManageResource(Resource):
     @requires_authorization
-    @requires_capabilities(Capabilities.managing_attributes)
+    @requires_capabilities(Capabilities.manage_users)
     def get(self):
         """
         ---
@@ -279,7 +279,7 @@ class MetakeyListDefinitionManageResource(Resource):
         description: |
             Returns list of attribute key definitions.
 
-            Requires `managing_attributes` capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -291,7 +291,7 @@ class MetakeyListDefinitionManageResource(Resource):
                   application/json:
                     schema: MetakeyDefinitionManageListResponseSchema
             403:
-                description: When user doesn't have `managing_attributes` capability.
+                description: When user doesn't have `manage_users` capability.
         """
         metakeys = (
             db.session.query(MetakeyDefinition).order_by(MetakeyDefinition.key).all()
@@ -302,7 +302,7 @@ class MetakeyListDefinitionManageResource(Resource):
 
 class MetakeyDefinitionManageResource(Resource):
     @requires_authorization
-    @requires_capabilities(Capabilities.managing_attributes)
+    @requires_capabilities(Capabilities.manage_users)
     def get(self, key):
         """
         ---
@@ -310,7 +310,7 @@ class MetakeyDefinitionManageResource(Resource):
         description: |
             Returns attribute key definition details.
 
-            Requires `managing_attributes` capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -328,7 +328,7 @@ class MetakeyDefinitionManageResource(Resource):
                   application/json:
                     schema: MetakeyDefinitionManageItemResponseSchema
             403:
-                description: When user doesn't have `managing_attributes` capability.
+                description: When user doesn't have `manage_users` capability.
             404:
                 description: When specified attribute key doesn't exist
         """
@@ -343,7 +343,7 @@ class MetakeyDefinitionManageResource(Resource):
         return schema.dump(metakey)
 
     @requires_authorization
-    @requires_capabilities(Capabilities.managing_attributes)
+    @requires_capabilities(Capabilities.manage_users)
     def post(self, key):
         """
         ---
@@ -351,7 +351,7 @@ class MetakeyDefinitionManageResource(Resource):
         description: |
             Creates attribute key definition.
 
-            Requires `managing_attributes` capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -377,7 +377,7 @@ class MetakeyDefinitionManageResource(Resource):
                 description: |
                     When one of attribute definition fields is missing or incorrect.
             403:
-                description: When user doesn't have `managing_attributes` capability.
+                description: When user doesn't have `manage_users` capability.
         """
         schema = MetakeyDefinitionItemRequestArgsSchema()
         args_obj = load_schema({"key": key}, schema)
@@ -399,7 +399,7 @@ class MetakeyDefinitionManageResource(Resource):
         return schema.dump(metakey_definition)
 
     @requires_authorization
-    @requires_capabilities(Capabilities.managing_attributes)
+    @requires_capabilities(Capabilities.manage_users)
     def put(self, key):
         """
         ---
@@ -407,7 +407,7 @@ class MetakeyDefinitionManageResource(Resource):
         description: |
             Update attribute key definition.
 
-            Requires `managing_attributes` capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -433,7 +433,7 @@ class MetakeyDefinitionManageResource(Resource):
                 description: |
                     When one of attribute definition fields is missing or incorrect.
             403:
-                description: When user doesn't have `managing_attributes` capability.
+                description: When user doesn't have `manage_users` capability.
             404:
                 description: When metakey doesn't exist.
         """
@@ -472,7 +472,7 @@ class MetakeyDefinitionManageResource(Resource):
         return schema.dump(metakey)
 
     @requires_authorization
-    @requires_capabilities(Capabilities.managing_attributes)
+    @requires_capabilities(Capabilities.manage_users)
     def delete(self, key):
         """
         ---
@@ -480,7 +480,7 @@ class MetakeyDefinitionManageResource(Resource):
         description: |
             Deletes attribute key including all related object attributes.
 
-            Requires `managing_attributes` capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -495,7 +495,7 @@ class MetakeyDefinitionManageResource(Resource):
             200:
                 description: When attribute key was deleted
             403:
-                description: When user doesn't have `managing_attributes` capability.
+                description: When user doesn't have `manage_users` capability.
             404:
                 description: When specified attribute key doesn't exist
         """
@@ -512,7 +512,7 @@ class MetakeyDefinitionManageResource(Resource):
 
 class MetakeyPermissionResource(Resource):
     @requires_authorization
-    @requires_capabilities(Capabilities.managing_attributes)
+    @requires_capabilities(Capabilities.manage_users)
     def put(self, key, group_name):
         """
         ---
@@ -521,7 +521,7 @@ class MetakeyPermissionResource(Resource):
             Adds or modifies attribute key group permission
             for specified key and group name.
 
-            Requires `managing_attributes` capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -552,7 +552,7 @@ class MetakeyPermissionResource(Resource):
                 description: |
                     When one of attribute permission fields is missing or incorrect.
             403:
-                description: When user doesn't have `managing_attributes` capability.
+                description: When user doesn't have `manage_users` capability.
             404:
                 description: When attribute key or group doesn't exist
         """
@@ -590,7 +590,7 @@ class MetakeyPermissionResource(Resource):
         return schema.dump(metakey_definition)
 
     @requires_authorization
-    @requires_capabilities(Capabilities.managing_attributes)
+    @requires_capabilities(Capabilities.manage_users)
     def delete(self, key, group_name):
         """
         ---
@@ -598,7 +598,7 @@ class MetakeyPermissionResource(Resource):
         description: |
             Removes attribute key permission for specified key and group name.
 
-            Requires `managing_attributes` capability.
+            Requires `manage_users` capability.
         security:
             - bearerAuth: []
         tags:
@@ -618,7 +618,7 @@ class MetakeyPermissionResource(Resource):
             200:
                 description: When group permission has been successfully removed
             403:
-                description: When user doesn't have `managing_attributes` capability.
+                description: When user doesn't have `manage_users` capability.
             404:
                 description: |
                     When attribute key or group or group permission doesn't exist

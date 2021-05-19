@@ -1,6 +1,5 @@
 from flask import g
 from flask_restful import Resource
-from werkzeug.exceptions import Forbidden
 
 from mwdb.core.app import api
 from mwdb.core.capabilities import Capabilities
@@ -13,7 +12,7 @@ from mwdb.schema.server import (
 )
 from mwdb.version import app_build_version
 
-from . import requires_authorization
+from . import requires_authorization, requires_capabilities
 
 
 class PingResource(Resource):
@@ -67,6 +66,7 @@ class ServerInfoResource(Resource):
 
 class ServerAdminInfoResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
     def get(self):
         """
         ---
@@ -74,7 +74,7 @@ class ServerAdminInfoResource(Resource):
         description: |
             Returns information about extra flags and installed plugins
 
-            Requires any administration capability (manage_users, manage_attributes)
+            Requires any administration capability (manage_users)
         security:
             - bearerAuth: []
         tags:
@@ -88,10 +88,6 @@ class ServerAdminInfoResource(Resource):
             403:
               description: When user doesn't have any of required capabilities
         """
-        if not g.auth_user.has_rights(
-            Capabilities.manage_users
-        ) and not g.auth_user.has_rights(Capabilities.managing_attributes):
-            raise Forbidden("You don't have required capability to perform this action")
 
         schema = ServerAdminInfoResponseSchema()
         return schema.dump(

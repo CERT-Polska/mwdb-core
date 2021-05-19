@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { useLocation } from "react-router";
 import { Redirect, Route } from "react-router-dom";
 
-import { AuthContext, Capability } from "../auth";
+import { AuthContext } from "../auth";
 
 export function ConditionalRoute({ children, condition, fallback, ...props }) {
     return <Route {...props}>{condition ? children : fallback}</Route>;
@@ -47,14 +47,4 @@ export function ProtectedRoute({ children, condition, ...props }) {
 export function AdministrativeRoute(args) {
     const auth = useContext(AuthContext);
     return <ProtectedRoute condition={auth.isAdmin} {...args} />;
-}
-
-export function AttributeRoute(args) {
-    const auth = useContext(AuthContext);
-    return (
-        <ProtectedRoute
-            condition={auth.hasCapability(Capability.managingAttributes)}
-            {...args}
-        />
-    );
 }

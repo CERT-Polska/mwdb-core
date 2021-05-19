@@ -1,6 +1,5 @@
 from flask import g
 from flask_restful import Resource
-from werkzeug.exceptions import Forbidden
 
 from mwdb.core.app import api
 from mwdb.core.capabilities import Capabilities

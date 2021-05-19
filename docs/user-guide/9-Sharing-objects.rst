@@ -171,7 +171,7 @@ Each capability has its own name and the administration page shows only the frie
 * 
   **manage_users - Managing users and groups (system administration)**
 
-  Allows to access all users and groups in MWDB. Rules described in *Who is who?* don't apply to users with that permission. Enables user to create new user accounts, new groups and change their capabilities and membership.
+  Allows to access all users and groups in MWDB. Rules described in *Who is who?* don't apply to users with that permission. Enables user to create new user accounts, new groups and change their capabilities and membership. Allows to manage attribute keys, define new ones, delete and set the group permissions for them.
 
 * 
   **share_queried_objects - Query for all objects in system**
@@ -223,12 +223,7 @@ Each capability has its own name and the administration page shows only the frie
 
   Enables group to add all the attributes, even if it doesn't have ``set`` permission for that attribute key.
 
-* 
-  **managing_attributes - Can define new attributes and manage them**
-
-  Allows to manage attribute keys, define new ones and set the group permissions for them.
-
-* 
+*
   **removing_attributes - Can remove attribute from objects**
 
   Allows to remove attribute from object. To remove attribute, you need to have ``set`` permission for key. Combined with ``adding_all_attributes``\ , allows to remove all attributes.

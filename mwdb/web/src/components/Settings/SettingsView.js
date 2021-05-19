@@ -13,8 +13,8 @@ import UsersList from "./Views/UsersList";
 import UsersPendingList from "./Views/UsersPendingList";
 import AttributesList from "./Views/AttributesList";
 import UserCreate from "./Views/UserCreate";
-import GroupRegister from "./Views/GroupRegister";
-import AttributeDefine from "./Views/AttributeDefine";
+import GroupCreate from "./Views/GroupCreate";
+import AttributeCreate from "./Views/AttributeCreate";
 import UserView from "./Views/UserView";
 import AccessControl from "./Views/AccessControl";
 import GroupView from "./Views/GroupView";
@@ -144,7 +144,7 @@ export default function SettingsView() {
                                 <UserView />
                             </AdministrativeRoute>
                             <AdministrativeRoute exact path="/admin/group/new">
-                                <GroupRegister />
+                                <GroupCreate />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
@@ -174,7 +174,7 @@ export default function SettingsView() {
                                 exact
                                 path="/admin/attribute/new"
                             >
-                                <AttributeDefine />
+                                <AttributeCreate />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact

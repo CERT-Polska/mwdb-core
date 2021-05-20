@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, Switch, useLocation, useParams } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import { AttributeDetails } from "./AttributeDetails";
-import { AttributeRoute, useViewAlert } from "@mwdb-web/commons/ui";
+import { AdministrativeRoute, useViewAlert } from "@mwdb-web/commons/ui";
 import { AttributesPermissions } from "./AttributePermissions";
 
 export default function AttributeView() {
@@ -44,22 +44,22 @@ export default function AttributeView() {
                     {location.pathname.split("/").length > 4 && (
                         <li className="breadcrumb-item active">
                             <Switch>
-                                <AttributeRoute path="/admin/attribute/:metakey/permissions">
+                                <AdministrativeRoute path="/admin/attribute/:metakey/permissions">
                                     Permissions
-                                </AttributeRoute>
+                                </AdministrativeRoute>
                             </Switch>
                         </li>
                     )}
                 </ol>
             </nav>
             <Switch>
-                <AttributeRoute exact path="/admin/attribute/:metakey">
+                <AdministrativeRoute exact path="/admin/attribute/:metakey">
                     <AttributeDetails
                         attribute={attribute}
                         getAttribute={updateAttribute}
                     />
-                </AttributeRoute>
-                <AttributeRoute
+                </AdministrativeRoute>
+                <AdministrativeRoute
                     exact
                     path="/admin/attribute/:metakey/permissions"
                 >
@@ -67,7 +67,7 @@ export default function AttributeView() {
                         attribute={attribute}
                         getAttribute={updateAttribute}
                     />
-                </AttributeRoute>
+                </AdministrativeRoute>
             </Switch>
         </div>
     );

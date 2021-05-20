@@ -472,6 +472,8 @@ class UserResource(Resource):
 
         disabled = obj["disabled"]
         if disabled is not None:
+            if user.id == g.auth_user.id:
+                raise Forbidden("You can't block yourself.")
             user.disabled = disabled
             user.reset_sessions()
 

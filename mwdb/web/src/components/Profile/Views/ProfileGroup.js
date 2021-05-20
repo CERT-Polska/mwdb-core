@@ -63,7 +63,7 @@ export default function ProfileGroup({ profile }) {
     if (group.private) return <Redirect to={`/profile/user/${group.name}`} />;
 
     return (
-        <div>
+        <div className="container">
             <h4>
                 Group <span className="text-monospace">{groupName}</span>{" "}
                 details
@@ -118,10 +118,30 @@ export default function ProfileGroup({ profile }) {
                     >
                         Search for shared files
                     </Link>
+                    {workspace && (
+                        <ShowIf
+                            condition={
+                                workspace.admins.includes(auth.user.login) ||
+                                auth.hasCapability(Capability.manageUsers)
+                            }
+                        >
+                            <Link
+                                className="nav-link"
+                                to={`/profile/group/${group.name}/members`}
+                            >
+                                <FontAwesomeIcon icon={faUsersCog} />
+                                Members settings
+                            </Link>
+                        </ShowIf>
+                    )}
+
                     <ShowIf
                         condition={auth.hasCapability(Capability.manageUsers)}
                     >
-                        <Link className="nav-link" to={`/group/${group.name}`}>
+                        <Link
+                            className="nav-link"
+                            to={`/admin/group/${group.name}`}
+                        >
                             <FontAwesomeIcon icon={faUsersCog} />
                             Group settings
                         </Link>

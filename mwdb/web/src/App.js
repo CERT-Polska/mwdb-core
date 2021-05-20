@@ -14,7 +14,6 @@ import DiffTextBlob from "./components/DiffTextBlob";
 import Upload from "./components/Upload";
 import UserLogin from "./components/UserLogin";
 import UserRegister from "./components/UserRegister";
-import UserGroups from "./components/UserGroups";
 import UserSetPassword from "./components/UserSetPassword";
 import Search from "./components/Search";
 import RelationsPlot from "./components/RelationsPlot";
@@ -182,9 +181,6 @@ export default function App() {
             </ProtectedRoute>
             <ProtectedRoute path="/relations">
                 <RelationsPlot />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/user_groups">
-                <UserGroups />
             </ProtectedRoute>
             <ProtectedRoute path="/remote/:remote">
                 <RemoteViews />

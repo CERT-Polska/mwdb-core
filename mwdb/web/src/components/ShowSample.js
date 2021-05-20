@@ -266,6 +266,8 @@ function PreviewSwitchAction(props) {
 export default function ShowSample(props) {
     const api = useContext(APIContext);
     const params = useParams();
+    const remotePath = useRemotePath();
+
     async function downloadSample(object) {
         window.location.href = await api.requestFileDownloadLink(object.id);
     }
@@ -275,7 +277,7 @@ export default function ShowSample(props) {
             ident="showSample"
             objectType="file"
             objectId={params.hash}
-            searchEndpoint=""
+            searchEndpoint={`${remotePath}/`}
             headerIcon={faFile}
             headerCaption="File details"
         >

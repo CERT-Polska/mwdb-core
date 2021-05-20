@@ -271,7 +271,7 @@ export default function ShowSample(props) {
     async function downloadSample(object) {
         window.location.href = await api.requestFileDownloadLink(object.id);
     }
-    console.log(api.remote);
+
     return (
         <ShowObject
             ident="showSample"

@@ -157,7 +157,7 @@ export default function ShowTextBlob(props) {
             ident="showTextBlob"
             objectType="blob"
             objectId={params.hash}
-            searchEndpoint="/blobs"
+            searchEndpoint={`${remotePath}/blobs`}
             headerIcon={faScroll}
             headerCaption="Blob details"
             defaultTab="preview"

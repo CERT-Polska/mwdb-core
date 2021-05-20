@@ -12,12 +12,14 @@ import {
     ConfirmationModal,
     TagList,
 } from "@mwdb-web/commons/ui";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 import RelationsAddModal from "../Actions/RelationsAddModal";
 
 function RelationsBox(props) {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
+    const remotePath = useRemotePath();
     const [isAttributeAddModalOpen, setAttributeAddModalOpen] = useState(false);
     const [isAttributeDeleteModalOpen, setAttributeDeleteModalOpen] = useState(
         false
@@ -105,7 +107,10 @@ function RelationsBox(props) {
                 )}
             </td>
             <td>
-                <TagList tags={parent.tags} />
+                <TagList
+                    tags={parent.tags}
+                    searchEndpoint={`${remotePath}/search`}
+                />
             </td>
         </tr>
     ));

@@ -147,6 +147,7 @@ function BlobDiffAction() {
 
 export default function ShowTextBlob(props) {
     const params = useParams();
+    const remotePath = useRemotePath();
     async function downloadTextBlob(object) {
         downloadData(object.content, object.id, "text/plain");
     }

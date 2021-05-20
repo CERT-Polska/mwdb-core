@@ -22,6 +22,7 @@ import {
 
 import { downloadData } from "@mwdb-web/commons/helpers";
 import { HexView } from "@mwdb-web/commons/ui";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 function ConfigDetails() {
     const context = useContext(ObjectContext);
@@ -41,6 +42,7 @@ function ConfigPreview() {
 
 export default function ShowConfig(props) {
     const params = useParams();
+    const remotePath = useRemotePath();
     async function downloadTextBlob(object) {
         downloadData(JSON.stringify(object.cfg), object.id, "application/json");
     }
@@ -50,7 +52,7 @@ export default function ShowConfig(props) {
             ident="showConfig"
             objectType="config"
             objectId={params.hash}
-            searchEndpoint="/configs"
+            searchEndpoint={`${remotePath}/configs`}
             headerIcon={faTable}
             headerCaption="Config details"
         >

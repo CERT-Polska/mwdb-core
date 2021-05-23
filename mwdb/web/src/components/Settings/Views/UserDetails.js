@@ -24,6 +24,8 @@ export default function UserDetails({ user, getUser }) {
     const viewAlert = useViewAlert();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
+    const [isBlockModalOpen, setBlockModalOpen] = useState(false);
+    const [isBlockModalDisabled, setBlockModalDisabled] = useState(false);
 
     async function handleSubmit(newValue) {
         try {
@@ -40,6 +42,7 @@ export default function UserDetails({ user, getUser }) {
 
     async function setDisabledState(ban) {
         try {
+            setBlockModalDisabled(true);
             await api.setUserDisabled(user.login, ban);
             viewAlert.setAlert({
                 success: `User successfully ${ban ? "blocked" : "unblocked"}.`,
@@ -47,6 +50,8 @@ export default function UserDetails({ user, getUser }) {
         } catch (error) {
             viewAlert.setAlert({ error });
         } finally {
+            setBlockModalDisabled(false);
+            setBlockModalOpen(false);
             getUser();
         }
     }
@@ -168,7 +173,7 @@ export default function UserDetails({ user, getUser }) {
                             className="nav-link text-danger"
                             onClick={(ev) => {
                                 ev.preventDefault();
-                                setDisabledState(false);
+                                setBlockModalOpen(true);
                             }}
                         >
                             <FontAwesomeIcon icon="ban" />
@@ -180,7 +185,7 @@ export default function UserDetails({ user, getUser }) {
                             className="nav-link text-danger"
                             onClick={(ev) => {
                                 ev.preventDefault();
-                                setDisabledState(true);
+                                setBlockModalOpen(true);
                             }}
                         >
                             <FontAwesomeIcon icon="ban" />
@@ -206,6 +211,16 @@ export default function UserDetails({ user, getUser }) {
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleRemoveUser}
                 message={`Are you sure you want to delete ${user.login} from mwdb`}
+                buttonStyle="btn-danger"
+            />
+            <ConfirmationModal
+                isOpen={isBlockModalOpen}
+                disabled={isBlockModalDisabled}
+                onRequestClose={() => setBlockModalOpen(false)}
+                onConfirm={() => setDisabledState(!user.disabled)}
+                message={`Are you sure you want to ${
+                    user.disabled ? "unblock" : "block"
+                } ${user.login}?`}
                 buttonStyle="btn-danger"
             />
         </div>

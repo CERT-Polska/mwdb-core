@@ -14,6 +14,7 @@ import ProfileCapabilities from "./Views/ProfileCapabilities";
 import ProfileResetPassword from "./Views/ProfileResetPassword";
 import ProfileGroup from "./Views/ProfileGroup";
 import ProfileGroups from "./Views/ProfileGroups";
+import ProfileGroupMembers from "./Views/ProfileGroupMembers";
 import { useViewAlert } from "../../commons/ui";
 
 function ProfileNav() {
@@ -80,6 +81,9 @@ export default function ProfileView() {
                         </Route>
                         <Route exact path="/profile/group/:group">
                             <ProfileGroup profile={profile} />
+                        </Route>
+                        <Route exact path="/profile/group/:group/members">
+                            <ProfileGroupMembers profile={profile} />
                         </Route>
                         <Route exact path="/profile/groups">
                             <ProfileGroups profile={profile} />

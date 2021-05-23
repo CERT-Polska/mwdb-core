@@ -129,7 +129,6 @@ class MetakeyDefinition(db.Model):
     )
     metakey = db.relationship(
         "Metakey",
-        lazy="joined",
         back_populates="template",
         cascade="all, delete",
     )

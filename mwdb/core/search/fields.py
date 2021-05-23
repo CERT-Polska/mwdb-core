@@ -151,8 +151,6 @@ class ListField(BaseField):
         value = get_term_value(expression)
 
         if expression.has_wildcard():
-            if not self.support_wildcards:
-                raise UnsupportedGrammarException("Wildcards are not allowed here")
             return self.column.any(self.value_column.like(value))
         else:
             return self.column.any(self.value_column == value)

@@ -66,8 +66,24 @@ def upgrade():
         return
 
     analyses = set()
+    batch = []
+    batch_size = 10000
 
-    logger.info("Migrating 'karton' attributes to KartonAnalysis objects...")
+    def store_batch():
+        nonlocal batch
+        connection.execute(
+            karton_analysis.insert(),
+            [entry for name, entry in batch if name == "karton_analysis"],
+        )
+        connection.execute(
+            karton_object.insert(),
+            [entry for name, entry in batch if name == "karton_object"],
+        )
+        batch = []
+
+    logger.info(
+        "Migrating 'karton' attributes to KartonAnalysis objects. This may take few minutes..."
+    )
     for idx, attribute in enumerate(
         connection.execute(metakey.select().where(metakey.c.key == "karton"))
     ):
@@ -80,23 +96,32 @@ def upgrade():
             continue
 
         if analysis_uuid not in analyses:
-            connection.execute(
-                karton_analysis.insert().values(
-                    id=analysis_uuid,
-                    creation_time=datetime.datetime.utcnow(),
-                    arguments={},
+            batch.append(
+                (
+                    "karton_analysis",
+                    dict(
+                        id=analysis_uuid,
+                        creation_time=datetime.datetime.utcnow(),
+                        arguments={},
+                    ),
                 )
             )
             analyses.add(analysis_uuid)
 
-        connection.execute(
-            karton_object.insert().values(
-                analysis_id=analysis_uuid, object_id=attribute.object_id
+        batch.append(
+            (
+                "karton_object",
+                dict(analysis_id=analysis_uuid, object_id=attribute.object_id),
             )
         )
+
+        if len(batch) > batch_size:
+            store_batch()
+
         if idx and idx % 10000 == 0:
             logger.info("   %d entries migrated ...", idx)
 
+    store_batch()
     logger.info("Migrated %d analyses.", len(analyses))
 
     logger.info("Removing 'karton' attribute...")

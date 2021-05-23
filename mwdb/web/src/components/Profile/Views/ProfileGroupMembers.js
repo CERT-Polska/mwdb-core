@@ -18,13 +18,14 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
         try {
             await api.removeGroupMember(workspace.name, login);
             updateWorkspace();
-            setDeleteModalOpen(false);
-            setRemoveUser(null);
             viewAlert.setAlert({
                 success: `Member '${login}' successfully removed.`,
             });
         } catch (error) {
             viewAlert.setAlert({ error });
+        } finally {
+            setDeleteModalOpen(false);
+            setRemoveUser(null);
         }
     }
 

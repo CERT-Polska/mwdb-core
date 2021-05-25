@@ -22,24 +22,13 @@ import logo from "../assets/logo.png";
 
 function AdminNav() {
     const auth = useContext(AuthContext);
-    const [pendingUsersCount, setPendingUsersCount] = useState(null);
-
+    const config = useContext(ConfigContext);
     const isAdmin = auth.isAdmin;
-
-    async function updatePendingUsersCount() {
-        try {
-            let response = await api.getPendingUsers();
-            setPendingUsersCount(response.data.users.length);
-        } catch (error) {
-            console.error(error);
-            setPendingUsersCount("?");
-        }
-    }
 
     useEffect(() => {
         if (!isAdmin) return;
-        let timer = setInterval(updatePendingUsersCount, 15000);
-        updatePendingUsersCount();
+        let timer = setInterval(config.updatePendingUsers, 15000);
+        config.updatePendingUsers();
         return () => {
             clearInterval(timer);
         };
@@ -50,12 +39,12 @@ function AdminNav() {
         <li className="nav-item">
             <Link className="nav-link" to={"/admin"}>
                 Settings
-                {pendingUsersCount ? (
+                {config.pendingUsers.length ? (
                     <span
                         className="badge badge-pill badge-warning"
                         style={{ marginLeft: "8px" }}
                     >
-                        {pendingUsersCount}
+                        {config.pendingUsers.length}
                     </span>
                 ) : (
                     []

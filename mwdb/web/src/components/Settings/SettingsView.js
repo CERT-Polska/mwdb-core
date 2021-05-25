@@ -24,23 +24,12 @@ import SettingsOverview from "./Views/SettingsOverview";
 function SettingsNav() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-    const [pendingUsersCount, setPendingUsersCount] = useState(null);
     const isAdmin = auth.isAdmin;
-
-    async function updatePendingUsersCount() {
-        try {
-            let response = await api.getPendingUsers();
-            setPendingUsersCount(response.data.users.length);
-        } catch (error) {
-            console.error(error);
-            setPendingUsersCount("?");
-        }
-    }
 
     useEffect(() => {
         if (!isAdmin) return;
-        let timer = setInterval(updatePendingUsersCount, 15000);
-        updatePendingUsersCount();
+        let timer = setInterval(config.updatePendingUsers, 15000);
+        config.updatePendingUsers();
         return () => {
             clearInterval(timer);
         };
@@ -62,12 +51,12 @@ function SettingsNav() {
                                 className="nav-link"
                             >
                                 Pending registrations
-                                {pendingUsersCount ? (
+                                {config.pendingUsers.length ? (
                                     <span
                                         className="badge badge-pill badge-warning"
                                         style={{ marginLeft: "8px" }}
                                     >
-                                        {pendingUsersCount}
+                                        {config.pendingUsers.length}
                                     </span>
                                 ) : (
                                     []

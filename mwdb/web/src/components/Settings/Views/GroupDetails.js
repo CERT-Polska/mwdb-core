@@ -4,6 +4,7 @@ import api from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
     EditableItem,
+    FeatureSwitch,
     useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
@@ -19,19 +20,19 @@ function GroupItem(props) {
     );
 }
 
-export default function GroupDetails({ group }) {
+export default function GroupDetails({ group, updateGroup }) {
     const viewAlert = useViewAlert();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
-    async function handleRename(newValue) {
-        const newName = newValue["name"];
+    async function handleUpdate(newValue) {
         try {
-            await api.updateGroup(group.name, newName, undefined);
+            await api.updateGroup(group.name, newValue);
             viewAlert.redirectToAlert({
-                target: `/admin/group/${newName}`,
-                success: `Group successfully renamed.`,
+                target: `/admin/group/${newValue["name"] || group.name}`,
+                success: `Group has been successfully updated.`,
             });
+            if (!newValue["name"]) updateGroup();
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -62,7 +63,7 @@ export default function GroupDetails({ group }) {
                         <EditableItem
                             name="name"
                             defaultValue={group.name}
-                            onSubmit={handleRename}
+                            onSubmit={handleUpdate}
                         />
                     </GroupItem>
                     <GroupItem label="Members">
@@ -77,6 +78,37 @@ export default function GroupDetails({ group }) {
                     </GroupItem>
                 </tbody>
             </table>
+            <b>Group features:</b>
+            <FeatureSwitch
+                name="workspace"
+                value={group["workspace"]}
+                onUpdate={handleUpdate}
+            >
+                <b>Workgroup</b>
+                {group["workspace"] ? (
+                    <span className="badge badge-success">Enabled</span>
+                ) : (
+                    []
+                )}
+                <div>
+                    Converts group to the workgroup, so users will see each
+                    other within this group. Enabled by default for user-defined
+                    groups.
+                </div>
+            </FeatureSwitch>
+            <FeatureSwitch
+                name="default"
+                value={group["default"]}
+                onUpdate={handleUpdate}
+            >
+                <b>Default group</b>
+                {group["default"] ? (
+                    <span className="badge badge-success">Enabled</span>
+                ) : (
+                    []
+                )}
+                <div>Automatically adds new users to this group.</div>
+            </FeatureSwitch>
             <b>Actions:</b>
             <ul className="nav">
                 <li className="nav-item">

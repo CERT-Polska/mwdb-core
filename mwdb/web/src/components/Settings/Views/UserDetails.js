@@ -79,6 +79,7 @@ export default function UserDetails({ user, getUser }) {
                     <UserItem label="E-mail">
                         <EditableItem
                             name="email"
+                            type="email"
                             defaultValue={user.email}
                             onSubmit={handleSubmit}
                         />

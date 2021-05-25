@@ -19,7 +19,7 @@ export default function UsersPendingList() {
 
     useEffect(() => {
         config.getPendingUsers();
-    }, [config.getPendingUsers]);
+    }, [config]);
 
     const query = userFilter.toLowerCase();
     const items = config.pendingUsers

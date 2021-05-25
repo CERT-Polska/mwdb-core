@@ -32,7 +32,7 @@ function SettingsNav() {
         return () => {
             clearInterval(timer);
         };
-    }, [isAdmin, config.getPendingUsers]);
+    }, [isAdmin, config]);
 
     const adminLinks = [
         ...(auth.hasCapability(Capability.manageUsers)

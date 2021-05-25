@@ -1,4 +1,10 @@
-import React, { useState, useContext, useEffect, useReducer } from "react";
+import React, {
+    useState,
+    useContext,
+    useEffect,
+    useReducer,
+    useCallback,
+} from "react";
 import api from "../api";
 import { ConfigContext } from "./context";
 import { AuthContext } from "../auth";
@@ -80,6 +86,8 @@ export function ConfigProvider(props) {
         if (auth.isAuthenticated) updateRemoteInfo();
     }, [auth.isAuthenticated]);
 
+    const getPendingUsers = useCallback(updatePendingUsers, []);
+
     return (
         <ConfigContext.Provider
             value={{
@@ -88,7 +96,7 @@ export function ConfigProvider(props) {
                 isReady: !!serverConfig.config["server_version"],
                 update: updateServerInfo,
                 pendingUsers: pendingUsers,
-                updatePendingUsers: updatePendingUsers,
+                getPendingUsers: getPendingUsers,
             }}
         >
             {props.children}

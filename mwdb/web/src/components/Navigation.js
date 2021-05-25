@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -26,8 +26,8 @@ function AdminNav() {
 
     useEffect(() => {
         if (!isAdmin) return;
-        let timer = setInterval(config.updatePendingUsers, 15000);
-        config.updatePendingUsers();
+        let timer = setInterval(config.getPendingUsers, 15000);
+        config.getPendingUsers();
         return () => {
             clearInterval(timer);
         };

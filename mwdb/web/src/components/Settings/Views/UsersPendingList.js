@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
@@ -17,11 +17,9 @@ export default function UsersPendingList() {
     const [userFilter, setUserFilter] = useState("");
     const [modalSpec, setModalSpec] = useState({});
 
-    const getUsers = useCallback(config.updatePendingUsers, []);
-
     useEffect(() => {
-        getUsers();
-    }, [getUsers]);
+        config.getPendingUsers();
+    }, [config.getPendingUsers]);
 
     const query = userFilter.toLowerCase();
     const items = config.pendingUsers
@@ -42,7 +40,7 @@ export default function UsersPendingList() {
             viewAlert.setAlert({
                 success: `User ${login} successfully accepted.`,
             });
-            await getUsers();
+            config.getPendingUsers();
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -54,7 +52,7 @@ export default function UsersPendingList() {
             viewAlert.setAlert({
                 success: `User ${login} successfully rejected.`,
             });
-            await getUsers();
+            config.getPendingUsers();
         } catch (error) {
             viewAlert.setAlert({ error });
         }

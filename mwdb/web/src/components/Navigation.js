@@ -31,7 +31,7 @@ function AdminNav() {
         return () => {
             clearInterval(timer);
         };
-    }, [isAdmin]);
+    }, [isAdmin, config.getPendingUsers]);
 
     if (!isAdmin) return [];
     return (

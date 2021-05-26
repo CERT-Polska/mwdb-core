@@ -23,16 +23,6 @@ import SettingsOverview from "./Views/SettingsOverview";
 function SettingsNav() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-    const isAdmin = auth.isAdmin;
-
-    useEffect(() => {
-        if (!isAdmin) return;
-        let timer = setInterval(config.getPendingUsers, 15000);
-        config.getPendingUsers();
-        return () => {
-            clearInterval(timer);
-        };
-    }, [isAdmin, config]);
 
     const adminLinks = [
         ...(auth.hasCapability(Capability.manageUsers)

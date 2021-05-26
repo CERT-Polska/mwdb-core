@@ -78,6 +78,8 @@ export function ConfigProvider(props) {
         }
     }
 
+    const getPendingUsers = useCallback(updatePendingUsers, []);
+
     useEffect(() => {
         updateServerInfo();
     }, []);
@@ -86,7 +88,24 @@ export function ConfigProvider(props) {
         if (auth.isAuthenticated) updateRemoteInfo();
     }, [auth.isAuthenticated]);
 
-    const getPendingUsers = useCallback(updatePendingUsers, []);
+    useEffect(() => {
+        if (
+            auth.isAuthenticated &&
+            auth.isAdmin &&
+            serverConfig.config["is_registration_enabled"]
+        ) {
+            let timer = setInterval(getPendingUsers, 15000);
+            getPendingUsers();
+            return () => {
+                clearInterval(timer);
+            };
+        } else return;
+    }, [
+        auth.isAuthenticated,
+        auth.isAdmin,
+        serverConfig.config,
+        getPendingUsers,
+    ]);
 
     return (
         <ConfigContext.Provider

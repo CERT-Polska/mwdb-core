@@ -12,17 +12,17 @@ import {
 
 export default function UsersPendingList() {
     const viewAlert = useViewAlert();
-    const config = useContext(ConfigContext);
+    const { pendingUsers, getPendingUsers } = useContext(ConfigContext);
     const [activePage, setActivePage] = useState(1);
     const [userFilter, setUserFilter] = useState("");
     const [modalSpec, setModalSpec] = useState({});
 
     useEffect(() => {
-        config.getPendingUsers();
-    }, [config]);
+        getPendingUsers();
+    }, [getPendingUsers]);
 
     const query = userFilter.toLowerCase();
-    const items = config.pendingUsers
+    const items = pendingUsers
         .filter(
             (user) =>
                 user.login.toLowerCase().includes(query) ||
@@ -40,7 +40,7 @@ export default function UsersPendingList() {
             viewAlert.setAlert({
                 success: `User ${login} successfully accepted.`,
             });
-            config.getPendingUsers();
+            getPendingUsers();
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -52,7 +52,7 @@ export default function UsersPendingList() {
             viewAlert.setAlert({
                 success: `User ${login} successfully rejected.`,
             });
-            config.getPendingUsers();
+            getPendingUsers();
         } catch (error) {
             viewAlert.setAlert({ error });
         }

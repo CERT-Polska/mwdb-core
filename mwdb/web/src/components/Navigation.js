@@ -22,18 +22,8 @@ import logo from "../assets/logo.png";
 function AdminNav() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-    const isAdmin = auth.isAdmin;
 
-    useEffect(() => {
-        if (!isAdmin) return;
-        let timer = setInterval(config.getPendingUsers, 15000);
-        config.getPendingUsers();
-        return () => {
-            clearInterval(timer);
-        };
-    }, [isAdmin, config]);
-
-    if (!isAdmin) return [];
+    if (!auth.isAdmin) return [];
     return (
         <li className="nav-item">
             <Link className="nav-link" to={"/admin"}>

@@ -63,6 +63,8 @@ export default function GroupDetails({ group }) {
                             name="name"
                             defaultValue={group.name}
                             onSubmit={handleRename}
+                            required
+                            pattern="[A-Za-z0-9_-]{1,32}"
                         />
                     </GroupItem>
                     <GroupItem label="Members">

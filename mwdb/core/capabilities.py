@@ -23,6 +23,8 @@ class Capabilities(object):
     reading_all_attributes = "reading_all_attributes"
     # Can set all attributes, regardless of ACLs
     adding_all_attributes = "adding_all_attributes"
+    # Can remove attributes from objects
+    removing_attributes = "removing_attributes"
     # Can upload files
     adding_files = "adding_files"
     # Can upload configs

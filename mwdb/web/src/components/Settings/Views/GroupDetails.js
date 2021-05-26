@@ -5,6 +5,7 @@ import {
     ConfirmationModal,
     EditableItem,
     FeatureSwitch,
+    UserBadge,
     useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
@@ -71,11 +72,11 @@ export default function GroupDetails({ group, updateGroup }) {
                     <GroupItem label="Members">
                         {group &&
                             group.users.map((user) => (
-                                <Link to={`/admin/user/${user}`}>
-                                    <span className="badge badge-secondary">
-                                        {user}
-                                    </span>
-                                </Link>
+                                <UserBadge
+                                    user={{ login: user }}
+                                    clickable
+                                    basePath={"/admin"}
+                                />
                             ))}
                     </GroupItem>
                 </tbody>

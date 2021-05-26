@@ -5,6 +5,7 @@ import {
     DateString,
     ConfirmationModal,
     EditableItem,
+    GroupBadge,
     useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
@@ -126,11 +127,11 @@ export default function UserDetails({ user, getUser }) {
                             user.groups
                                 .filter((group) => !group.private)
                                 .map((group) => (
-                                    <Link to={`/admin/group/${group.name}`}>
-                                        <span className="badge badge-secondary">
-                                            {group.name}
-                                        </span>
-                                    </Link>
+                                    <GroupBadge
+                                        group={group}
+                                        clickable
+                                        basePath="/admin"
+                                    />
                                 ))}
                     </UserItem>
                 </tbody>

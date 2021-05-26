@@ -6,6 +6,7 @@ import {
     GroupBadge,
     PagedList,
     HighlightText,
+    LimitTo,
     useViewAlert,
 } from "@mwdb-web/commons/ui";
 
@@ -52,9 +53,17 @@ function UserItem(props) {
             </td>
             <td>{feed_badge}</td>
             <td>
-                {groups.map((group) => (
-                    <GroupBadge group={group} clickable basePath="/admin" />
-                ))}
+                <LimitTo count={5}>
+                    {groups
+                        .filter((group) => group.name !== props.login)
+                        .map((group) => (
+                            <GroupBadge
+                                group={group}
+                                clickable
+                                basePath="/admin"
+                            />
+                        ))}
+                </LimitTo>
             </td>
         </tr>
     );

@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import { NavLink, Route, Switch } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { View, AdministrativeRoute } from "@mwdb-web/commons/ui";
@@ -24,27 +23,6 @@ import SettingsOverview from "./Views/SettingsOverview";
 function SettingsNav() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-    const [pendingUsersCount, setPendingUsersCount] = useState(null);
-    const isAdmin = auth.isAdmin;
-
-    async function updatePendingUsersCount() {
-        try {
-            let response = await api.getPendingUsers();
-            setPendingUsersCount(response.data.users.length);
-        } catch (error) {
-            console.error(error);
-            setPendingUsersCount("?");
-        }
-    }
-
-    useEffect(() => {
-        if (!isAdmin) return;
-        let timer = setInterval(updatePendingUsersCount, 15000);
-        updatePendingUsersCount();
-        return () => {
-            clearInterval(timer);
-        };
-    }, [isAdmin]);
 
     const adminLinks = [
         ...(auth.hasCapability(Capability.manageUsers)
@@ -62,12 +40,12 @@ function SettingsNav() {
                                 className="nav-link"
                             >
                                 Pending registrations
-                                {pendingUsersCount ? (
+                                {config.pendingUsers.length ? (
                                     <span
                                         className="badge badge-pill badge-warning"
                                         style={{ marginLeft: "8px" }}
                                     >
-                                        {pendingUsersCount}
+                                        {config.pendingUsers.length}
                                     </span>
                                 ) : (
                                     []

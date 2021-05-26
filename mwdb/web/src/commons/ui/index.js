@@ -67,6 +67,19 @@ export function ShowIf({ condition, children }) {
     return condition ? children : [];
 }
 
+export function LimitTo({ children, count }) {
+    const more =
+        children.length > count
+            ? [
+                  <small className="text-muted">
+                      {" "}
+                      and {children.length - 5} more
+                  </small>,
+              ]
+            : [];
+    return [...children.slice(0, count), ...more];
+}
+
 export function HighlightText(props) {
     let text = React.Children.toArray(props.children)[0].toString();
 

@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
+import { ConfigContext } from "@mwdb-web/commons/config";
 import {
     PagedList,
     DateString,
@@ -11,25 +12,14 @@ import {
 
 export default function UsersPendingList() {
     const viewAlert = useViewAlert();
-    const [pendingUsers, setPendingUsers] = useState([]);
+    const { pendingUsers, getPendingUsers } = useContext(ConfigContext);
     const [activePage, setActivePage] = useState(1);
     const [userFilter, setUserFilter] = useState("");
     const [modalSpec, setModalSpec] = useState({});
 
-    async function updateUsers() {
-        try {
-            const response = await api.getPendingUsers();
-            setPendingUsers(response.data["users"]);
-        } catch (error) {
-            viewAlert.setAlert({ error });
-        }
-    }
-
-    const getUsers = useCallback(updateUsers, []);
-
     useEffect(() => {
-        getUsers();
-    }, [getUsers]);
+        getPendingUsers();
+    }, [getPendingUsers]);
 
     const query = userFilter.toLowerCase();
     const items = pendingUsers
@@ -50,7 +40,7 @@ export default function UsersPendingList() {
             viewAlert.setAlert({
                 success: `User ${login} successfully accepted.`,
             });
-            await getUsers();
+            await getPendingUsers();
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -62,7 +52,7 @@ export default function UsersPendingList() {
             viewAlert.setAlert({
                 success: `User ${login} successfully rejected.`,
             });
-            await getUsers();
+            await getPendingUsers();
         } catch (error) {
             viewAlert.setAlert({ error });
         }

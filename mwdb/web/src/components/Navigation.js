@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -11,7 +11,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
@@ -22,40 +21,19 @@ import logo from "../assets/logo.png";
 
 function AdminNav() {
     const auth = useContext(AuthContext);
-    const [pendingUsersCount, setPendingUsersCount] = useState(null);
+    const config = useContext(ConfigContext);
 
-    const isAdmin = auth.isAdmin;
-
-    async function updatePendingUsersCount() {
-        try {
-            let response = await api.getPendingUsers();
-            setPendingUsersCount(response.data.users.length);
-        } catch (error) {
-            console.error(error);
-            setPendingUsersCount("?");
-        }
-    }
-
-    useEffect(() => {
-        if (!isAdmin) return;
-        let timer = setInterval(updatePendingUsersCount, 15000);
-        updatePendingUsersCount();
-        return () => {
-            clearInterval(timer);
-        };
-    }, [isAdmin]);
-
-    if (!isAdmin) return [];
+    if (!auth.isAdmin) return [];
     return (
         <li className="nav-item">
             <Link className="nav-link" to={"/admin"}>
                 Settings
-                {pendingUsersCount ? (
+                {config.pendingUsers.length ? (
                     <span
                         className="badge badge-pill badge-warning"
                         style={{ marginLeft: "8px" }}
                     >
-                        {pendingUsersCount}
+                        {config.pendingUsers.length}
                     </span>
                 ) : (
                     []

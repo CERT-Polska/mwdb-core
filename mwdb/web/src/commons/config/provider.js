@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useReducer } from "react";
+import React, {
+    useState,
+    useContext,
+    useEffect,
+    useReducer,
+    useCallback,
+} from "react";
 import api from "../api";
 import { ConfigContext } from "./context";
 import { AuthContext } from "../auth";
@@ -26,6 +32,7 @@ export function ConfigProvider(props) {
         config: {},
         error: null,
     });
+    const [pendingUsers, setPendingUsers] = useState([]);
 
     async function updateServerInfo() {
         try {
@@ -59,6 +66,20 @@ export function ConfigProvider(props) {
         }
     }
 
+    async function updatePendingUsers() {
+        try {
+            const response = await api.getPendingUsers();
+            setPendingUsers(response.data["users"]);
+        } catch (error) {
+            setServerConfig({
+                type: configError,
+                error,
+            });
+        }
+    }
+
+    const getPendingUsers = useCallback(updatePendingUsers, []);
+
     useEffect(() => {
         updateServerInfo();
     }, []);
@@ -67,6 +88,25 @@ export function ConfigProvider(props) {
         if (auth.isAuthenticated) updateRemoteInfo();
     }, [auth.isAuthenticated]);
 
+    useEffect(() => {
+        if (
+            auth.isAuthenticated &&
+            auth.isAdmin &&
+            serverConfig.config["is_registration_enabled"]
+        ) {
+            let timer = setInterval(getPendingUsers, 15000);
+            getPendingUsers();
+            return () => {
+                clearInterval(timer);
+            };
+        } else return;
+    }, [
+        auth.isAuthenticated,
+        auth.isAdmin,
+        serverConfig.config,
+        getPendingUsers,
+    ]);
+
     return (
         <ConfigContext.Provider
             value={{
@@ -74,6 +114,8 @@ export function ConfigProvider(props) {
                 configError: serverConfig.error,
                 isReady: !!serverConfig.config["server_version"],
                 update: updateServerInfo,
+                pendingUsers: pendingUsers,
+                getPendingUsers: getPendingUsers,
             }}
         >
             {props.children}

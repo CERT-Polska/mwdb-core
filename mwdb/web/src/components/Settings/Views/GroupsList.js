@@ -21,17 +21,19 @@ function GroupItem(props) {
                 </Link>
             </td>
             <td>
-                <LimitTo count={5}>
-                    {props.name === "public"
-                        ? "(Group is public and contains all members)"
-                        : props.users.map((login) => (
-                              <UserBadge
-                                  user={{ login }}
-                                  clickable
-                                  basePath="/admin"
-                              />
-                          ))}
-                </LimitTo>
+                {props.name === "public" ? (
+                    "(Group is public and contains all members)"
+                ) : (
+                    <LimitTo count={5}>
+                        {props.users.map((login) => (
+                            <UserBadge
+                                user={{ login }}
+                                clickable
+                                basePath="/admin"
+                            />
+                        ))}
+                    </LimitTo>
+                )}
             </td>
         </tr>
     );

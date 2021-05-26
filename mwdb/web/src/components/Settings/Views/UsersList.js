@@ -54,9 +54,15 @@ function UserItem(props) {
             <td>{feed_badge}</td>
             <td>
                 <LimitTo count={5}>
-                    {groups.map((group) => (
-                        <GroupBadge group={group} clickable basePath="/admin" />
-                    ))}
+                    {groups
+                        .filter((group) => group.name !== props.login)
+                        .map((group) => (
+                            <GroupBadge
+                                group={group}
+                                clickable
+                                basePath="/admin"
+                            />
+                        ))}
                 </LimitTo>
             </td>
         </tr>

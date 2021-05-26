@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
 import {
+    LimitTo,
     UserBadge,
     PagedList,
     HighlightText,
@@ -20,15 +21,19 @@ function GroupItem(props) {
                 </Link>
             </td>
             <td>
-                {props.name === "public"
-                    ? "(Group is public and contains all members)"
-                    : props.users.map((login) => (
-                          <UserBadge
-                              user={{ login }}
-                              clickable
-                              basePath="/admin"
-                          />
-                      ))}
+                {props.name === "public" ? (
+                    "(Group is public and contains all members)"
+                ) : (
+                    <LimitTo count={5}>
+                        {props.users.map((login) => (
+                            <UserBadge
+                                user={{ login }}
+                                clickable
+                                basePath="/admin"
+                            />
+                        ))}
+                    </LimitTo>
+                )}
             </td>
         </tr>
     );

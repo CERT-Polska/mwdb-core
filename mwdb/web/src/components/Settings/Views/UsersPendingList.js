@@ -40,7 +40,7 @@ export default function UsersPendingList() {
             viewAlert.setAlert({
                 success: `User ${login} successfully accepted.`,
             });
-            getPendingUsers();
+            await getPendingUsers();
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -52,7 +52,7 @@ export default function UsersPendingList() {
             viewAlert.setAlert({
                 success: `User ${login} successfully rejected.`,
             });
-            getPendingUsers();
+            await getPendingUsers();
         } catch (error) {
             viewAlert.setAlert({ error });
         }

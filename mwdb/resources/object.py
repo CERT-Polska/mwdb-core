@@ -80,7 +80,7 @@ class ObjectUploader:
                     karton_id = UUID(metakey["value"])
                 except (ValueError, AttributeError):
                     raise BadRequest("'karton' attribute accepts only UUID values")
-            if not MetakeyDefinition.query_for_set(key).first():
+            elif not MetakeyDefinition.query_for_set(key).first():
                 raise NotFound(
                     f"Metakey '{key}' not defined or insufficient "
                     "permissions to set that one"

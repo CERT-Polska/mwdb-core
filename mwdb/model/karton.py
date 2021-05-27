@@ -11,7 +11,7 @@ karton_object = db.Table(
     "karton_object",
     db.Column(
         "analysis_id",
-        UUID,
+        UUID(as_uuid=True),
         db.ForeignKey("karton_analysis.id"),
         index=True,
         nullable=False,

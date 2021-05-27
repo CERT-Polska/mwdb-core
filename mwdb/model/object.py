@@ -848,7 +848,7 @@ class Object(db.Model):
         """
         analysis_id = self._send_to_karton()
         analysis = KartonAnalysis.create(
-            analysis_id=analysis_id,
+            analysis_id=UUID(analysis_id),
             initial_object=self,
             arguments=arguments,
         )

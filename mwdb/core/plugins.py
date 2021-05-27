@@ -153,6 +153,15 @@ def load_plugins(app_context: PluginAppContext):
         for plugin_name in plugin_list:
             try:
                 plugin = importlib.import_module(plugin_name)
+                if getattr(plugin, "__doc__", "").startswith(
+                    "Karton integration plugin"
+                ):
+                    logger.warning(
+                        "Karton integration features are built-in from v2.3.0. "
+                        "Ignoring '%s'...",
+                        plugin_name,
+                    )
+                    continue
                 if hasattr(plugin, "__plugin_entrypoint__"):
                     getattr(plugin, "__plugin_entrypoint__")(app_context)
                 loaded_plugins[plugin_name] = plugin

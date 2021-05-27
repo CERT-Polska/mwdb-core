@@ -2,7 +2,7 @@ Setup and configuration
 =======================
 
 Prerequisites
------------
+-------------
 
 MWDB was tested on Debian-based systems, but should work as well on other Linux distributions.
 

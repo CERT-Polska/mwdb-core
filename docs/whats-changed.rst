@@ -7,8 +7,61 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrade mwdb-core to latest version`.
 
-Latest release (2.2.0)
-----------------------
+v2.3.0
+------
+
+.. warning::
+
+    This is Release Candidate. Some features may work slightly different in stable release.
+
+    If something is missing here, feel free to report it by `creating a new issue <https://github.com/CERT-Polska/mwdb-core/issues/new?assignees=&labels=&template=feature_request.md>`_
+
+This release is focused mainly on MWDB administration improvements and further UI refactoring. 
+In addiition, Karton integration is now available out-of-the-box, without need of extra plugins.
+
+[New feature] Built-in Karton integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Karton integration is now included as a built-in part of MWDB Core. In addition, MWDB-Core 2.3.0 includes automatic migration spawned on ``mwdb-core configure`` for ``mwdb-plugin-karton`` users.
+
+If you use ``mwdb-plugin-karton`` in your setup: remove the plugin before upgrade. For more instructions, read :ref:`Karton integration guide`.
+
+[New feature] ``registered`` group
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before v2.3.0, it was difficult to setup guest accounts. To implement that, we added new capabilities:
+
+- ``adding_files`` which is required for file upload
+- ``manage_profile`` which is required for changes in user authentication (API keys, reset password)
+- ``personalize`` that enables personalization features like Favorites or Quick queries.
+
+But it was still painful to manage having only ``public`` group, which defines capabilities for all users in MWDB. That's why we created
+new predefined group called ``registered``. Within migration, all capabilities are moved to ``registered`` group (with new one enabled)
+and all existing users are added to that group.
+
+``registered`` group behavior is similar to ``public``: new users are added by default and don't see each other within the group.
+The only difference is that ``registered`` group is mutable, so any user can be easily removed from ``registered``.
+
+By removing ``registered`` membership, you can make guest account with disabled file upload and personalization features!
+
+If you don't like the split between ``public`` and ``registered`` in your instance, you can just remove the ``registered`` group and 
+manually recover capabilities settings in ``public``.
+
+[API] Plugin information is no longer available for non-admin users
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Plugin information was moved from ``/api/server`` endpoint to ``/api/server/admin``. Information was also moved from ``/about`` to the new ``/settings`` view in UI.
+
+In addition ``/api/docs`` also requires authentication.
+
+[API] Removed ``managing_attributes`` capability
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``managing_attributes`` behavior was inconsistent, because ``manage_users`` was still required e.g. to set up permissions for attribute key. From now, ``manage_users`` is required for
+all administration tasks, including setting up new attribute keys.
+
+v2.2.0
+------
 
 In 2.2.0 frontend part was heavily refactored, so some Web plugins may stop working properly without proper upgrade.
 

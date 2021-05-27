@@ -227,11 +227,11 @@ Retrieving Karton analysis status
 
 Our mwdb.cert.pl service offers automatic configuration extraction for malware samples. Analysis backend is based on Karton project, malware processing framework developed by CERT.pl that orchestrates whole analysis process.
 
-Karton is not a built-in of mwdb-core and integrated as a plugin, so there are no bindings for Karton plugin API included in mwdblib. Nevertheless, you can still retrieve the analysis status using ``APIClient`` interface, used by mwdblib to perform requests.
+Karton integration is not fully supported yet in mwdblib. Nevertheless, you can still retrieve the analysis status using ``APIClient`` interface, used by mwdblib to perform requests.
 
 .. warning::
 
-    Karton is still in **development stage**, so API should be considered **unstable**. Things described here can break in the future. We plan to offer stable API in the future along with open-source release of Karton project.
+    This part of documentation applies to the feature that is currently in **release candidate stage**. Things may work a bit different in stable release.
 
 .. code-block:: python
 
@@ -244,19 +244,19 @@ Karton is not a built-in of mwdb-core and integrated as a plugin, so there are n
     
     # Upload new file to the MWDB
     file_object = mwdb.upload_file(file_name, contents)
-    karton_id = file_object.metakeys["karton2"]
+    karton_id = file_object.metakeys["karton"][0]
 
     while True:
         time.sleep(5)
         # Get analysis status
-        analysis_status = mwdb.api.get(f"karton/{file_object.id}")["status"]
+        analysis_status = mwdb.api.get(f"object/{file_object.id}/karton/{karton_id}")["status"]
         print("Current status is '{analysis_status}'...")
         # If analysis is finished: break
         if analysis_status == "finished":
             break
     
     # Get all configurations ripped during the analysis
-    configs = list(mwdb.search_configs(f'meta.karton2:"{karton_id}"'))
+    configs = list(mwdb.search_configs(f'karton:"{karton_id}"'))
 
 Optimizing API usage
 --------------------
@@ -504,17 +504,11 @@ If you use ``mwdb.login()`` method, you may notice a warning that is shown by th
 
 Recommended authentication way to be used in scripts is to use API key token instead of password. List of created API keys can be found on the bottom of **Profile** view (next to the Logout in navbar) in **API keys** section.
 
-To create a new API key, click on ``Create a new key`` button:
+To create a new API key, click on your nickname in navigation bar and go to the ``API keys`` section. Then click on ``+ Issue new API key`` action:
 
-.. image:: ../_static/api-keys.png
-   :target: ../_static/api-keys.png
+.. image:: ../_static/api-key-create.png
+   :target: ../_static/api-key-create.png
    :alt: API keys view
-
-Then click on the ``Show API token`` to get the authorization token for created API key.
-
-.. image:: ../_static/api-key-token.png
-   :target: ../_static/api-key-token.png
-   :alt: API keys token view
 
 Authorization token can be used in mwdblib via ``api_key`` argument:
 

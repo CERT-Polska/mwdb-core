@@ -147,6 +147,7 @@ function BlobDiffAction() {
 
 export default function ShowTextBlob(props) {
     const params = useParams();
+    const remotePath = useRemotePath();
     async function downloadTextBlob(object) {
         downloadData(object.content, object.id, "text/plain");
     }
@@ -156,7 +157,7 @@ export default function ShowTextBlob(props) {
             ident="showTextBlob"
             objectType="blob"
             objectId={params.hash}
-            searchEndpoint="/blobs"
+            searchEndpoint={`${remotePath}/blobs`}
             headerIcon={faScroll}
             headerCaption="Blob details"
             defaultTab="preview"

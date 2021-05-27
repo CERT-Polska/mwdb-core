@@ -1,6 +1,6 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
-import { Alert } from "./ErrorBoundary";
+import { useHistory, useLocation } from "react-router-dom";
+import { Alert, getErrorMessage } from "./ErrorBoundary";
 import { Extendable } from "../extensions";
 
 function ViewAlert(props) {
@@ -12,6 +12,43 @@ function ViewAlert(props) {
             warning={props.warning || locationState.warning}
         />
     );
+}
+
+export function useViewAlert() {
+    const history = useHistory();
+
+    function setAlert({ success, error: rawError, warning, state }) {
+        const { pathname, search } = history.location;
+        const error = rawError && getErrorMessage(rawError);
+        history.replace(
+            { pathname, search },
+            {
+                ...history.location.state,
+                ...(state || {}),
+                success,
+                error,
+                warning,
+            }
+        );
+    }
+
+    function redirectToAlert({
+        success,
+        error: rawError,
+        warning,
+        target,
+        state,
+    }) {
+        const error = rawError && getErrorMessage(rawError);
+        history.push(target, {
+            ...(state || {}),
+            success,
+            error,
+            warning,
+        });
+    }
+
+    return { setAlert, redirectToAlert };
 }
 
 export default function View(props) {

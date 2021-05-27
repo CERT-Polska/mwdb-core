@@ -13,6 +13,7 @@ import {
     ConfirmationModal,
     GroupBadge,
     ShowIf,
+    useViewAlert,
 } from "@mwdb-web/commons/ui";
 
 function GroupAppliesTo({ group }) {
@@ -30,7 +31,7 @@ function GroupAppliesTo({ group }) {
                     group["users"]
                         .slice(0, 3)
                         .map((user) => (
-                            <Link to={`/admin/user/${user}`}>{user}</Link>
+                            <Link to={`/settings/user/${user}`}>{user}</Link>
                         )),
                     ", "
                 )}
@@ -195,6 +196,7 @@ function CapabilityChangeCard({ groups, onSubmit }) {
 
 export default function AccessControl() {
     const [groups, setGroups] = useState(null);
+    const viewAlert = useViewAlert();
 
     const [isChangeModalOpen, setChangeModalOpen] = useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
@@ -211,17 +213,20 @@ export default function AccessControl() {
             );
             setGroups(groupList);
         } catch (error) {
-            console.error(error);
+            viewAlert.setAlert({ error });
         }
     }
 
     async function changeCapabilities({ group, capabilities }) {
         try {
             setDisabledModalButton(true);
-            await api.updateGroup(group, undefined, capabilities);
+            await api.updateGroup(group, { capabilities });
             await updateGroups();
-        } catch (e) {
-            // todo
+            viewAlert.setAlert({
+                success: `Group '${group}' capabilities successfully changed`,
+            });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         } finally {
             setDisabledModalButton(false);
             setChangeModalOpen(false);
@@ -237,9 +242,9 @@ export default function AccessControl() {
     if (!groups) return [];
 
     return (
-        <div>
-            <h5>Access control</h5>
-            <p>
+        <div className="container">
+            <h2>Access control</h2>
+            <p className="lead">
                 Use a form below to enable/disable capabilities for specific
                 user or group.
             </p>

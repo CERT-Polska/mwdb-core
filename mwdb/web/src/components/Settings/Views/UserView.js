@@ -1,14 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-    useHistory,
-    useParams,
-    Switch,
-    Link,
-    useLocation,
-} from "react-router-dom";
+import { useParams, Switch, Link, useLocation } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { AdministrativeRoute, getErrorMessage } from "@mwdb-web/commons/ui";
+import { AdministrativeRoute, useViewAlert } from "@mwdb-web/commons/ui";
 
 import UserDetails from "./UserDetails";
 import UserResetPassword from "./UserResetPassword";
@@ -18,7 +12,7 @@ import UserSingleGroups from "./UserSingleGroups";
 
 export default function UserView() {
     const location = useLocation();
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const { login } = useParams();
     const [user, setUser] = useState({});
 
@@ -27,10 +21,7 @@ export default function UserView() {
             const response = await api.getUser(login);
             setUser(response.data);
         } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -49,7 +40,7 @@ export default function UserView() {
                     <li className="breadcrumb-item">
                         <strong>Account details: </strong>
                         {location.pathname.split("/").length > 4 ? (
-                            <Link to={`/admin/user/${user.login}`}>
+                            <Link to={`/settings/user/${user.login}`}>
                                 {user.login}
                             </Link>
                         ) : (
@@ -59,16 +50,16 @@ export default function UserView() {
                     {location.pathname.split("/").length > 4 && (
                         <li className="breadcrumb-item active">
                             <Switch>
-                                <AdministrativeRoute path="/admin/user/:login/capabilities">
+                                <AdministrativeRoute path="/settings/user/:login/capabilities">
                                     Capabilities
                                 </AdministrativeRoute>
-                                <AdministrativeRoute path="/admin/user/:login/api-keys">
+                                <AdministrativeRoute path="/settings/user/:login/api-keys">
                                     API keys
                                 </AdministrativeRoute>
-                                <AdministrativeRoute path="/admin/user/:login/password">
+                                <AdministrativeRoute path="/settings/user/:login/password">
                                     Reset password
                                 </AdministrativeRoute>
-                                <AdministrativeRoute path="/admin/user/:login/groups">
+                                <AdministrativeRoute path="/settings/user/:login/groups">
                                     Groups
                                 </AdministrativeRoute>
                             </Switch>
@@ -77,22 +68,28 @@ export default function UserView() {
                 </ol>
             </nav>
             <Switch>
-                <AdministrativeRoute exact path="/admin/user/:login">
+                <AdministrativeRoute exact path="/settings/user/:login">
                     <UserDetails user={user} getUser={updateUser} />
                 </AdministrativeRoute>
                 <AdministrativeRoute
                     exact
-                    path="/admin/user/:login/capabilities"
+                    path="/settings/user/:login/capabilities"
                 >
                     <ProfileCapabilities profile={user} />
                 </AdministrativeRoute>
-                <AdministrativeRoute exact path="/admin/user/:login/api-keys">
+                <AdministrativeRoute
+                    exact
+                    path="/settings/user/:login/api-keys"
+                >
                     <ProfileAPIKeys profile={user} updateProfile={updateUser} />
                 </AdministrativeRoute>
-                <AdministrativeRoute exact path="/admin/user/:login/password">
+                <AdministrativeRoute
+                    exact
+                    path="/settings/user/:login/password"
+                >
                     <UserResetPassword user={user} />
                 </AdministrativeRoute>
-                <AdministrativeRoute exact path="/admin/user/:login/groups">
+                <AdministrativeRoute exact path="/settings/user/:login/groups">
                     <UserSingleGroups user={user} getUser={updateUser} />
                 </AdministrativeRoute>
             </Switch>

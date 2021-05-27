@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Link, useHistory, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
-    getErrorMessage,
     ConfirmationModal,
     EditableItem,
+    FeatureSwitch,
+    UserBadge,
+    useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,24 +21,21 @@ function GroupItem(props) {
     );
 }
 
-export default function GroupDetails({ group }) {
-    const history = useHistory();
-    const location = useLocation();
-    const pathNames = location.pathname.split("/");
+export default function GroupDetails({ group, updateGroup }) {
+    const viewAlert = useViewAlert();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
-    async function handleSubmit(newName) {
+    async function handleUpdate(newValue) {
         try {
-            await api.updateGroup(group.name, newName["name"], undefined);
-            history.push({
-                pathname: `/${pathNames[1]}/${pathNames[2]}/${newName["name"]}`,
+            await api.updateGroup(group.name, newValue);
+            viewAlert.redirectToAlert({
+                target: `/settings/group/${newValue["name"] || group.name}`,
+                success: `Group has been successfully updated.`,
             });
+            if (!newValue["name"]) updateGroup();
         } catch (error) {
-            history.push({
-                pathname: `/admin/group/${group.name}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -44,15 +43,12 @@ export default function GroupDetails({ group }) {
         try {
             setDeleteModalDisabled(true);
             await api.removeGroup(group.name);
-            history.push({
-                pathname: `/admin/groups/`,
-                state: { success: "Group has been successfully removed" },
+            viewAlert.redirectToAlert({
+                target: `/settings/groups/`,
+                success: `Group '${group.name}' has been successfully removed`,
             });
         } catch (error) {
-            history.push({
-                pathname: `/admin/group/${group.name}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
             setDeleteModalOpen(false);
             setDeleteModalDisabled(false);
         }
@@ -68,21 +64,54 @@ export default function GroupDetails({ group }) {
                         <EditableItem
                             name="name"
                             defaultValue={group.name}
-                            onSubmit={handleSubmit}
+                            onSubmit={handleUpdate}
+                            required
+                            pattern="[A-Za-z0-9_-]{1,32}"
                         />
                     </GroupItem>
                     <GroupItem label="Members">
                         {group &&
                             group.users.map((user) => (
-                                <Link to={`/admin/user/${user}`}>
-                                    <span className="badge badge-secondary">
-                                        {user}
-                                    </span>
-                                </Link>
+                                <UserBadge
+                                    user={{ login: user }}
+                                    clickable
+                                    basePath={"/settings"}
+                                />
                             ))}
                     </GroupItem>
                 </tbody>
             </table>
+            <b>Group features:</b>
+            <FeatureSwitch
+                name="workspace"
+                value={group["workspace"]}
+                onUpdate={handleUpdate}
+            >
+                <b>Workgroup</b>
+                {group["workspace"] ? (
+                    <span className="badge badge-success">Enabled</span>
+                ) : (
+                    []
+                )}
+                <div>
+                    Converts group to the workgroup, so users will see each
+                    other within this group. Enabled by default for user-defined
+                    groups.
+                </div>
+            </FeatureSwitch>
+            <FeatureSwitch
+                name="default"
+                value={group["default"]}
+                onUpdate={handleUpdate}
+            >
+                <b>Default group</b>
+                {group["default"] ? (
+                    <span className="badge badge-success">Enabled</span>
+                ) : (
+                    []
+                )}
+                <div>Automatically adds new users to this group.</div>
+            </FeatureSwitch>
             <b>Actions:</b>
             <ul className="nav">
                 <li className="nav-item">
@@ -100,20 +129,23 @@ export default function GroupDetails({ group }) {
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/group/${group.name}/members`}
+                        to={`/settings/group/${group.name}/members`}
                     >
                         Show group members
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/group/${group.name}/capabilities`}
+                        to={`/settings/group/${group.name}/capabilities`}
                     >
                         Check group capabilities
                     </Link>
                     <a
                         href="#remove-group"
                         className="nav-link text-danger"
-                        onClick={() => setDeleteModalOpen(true)}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setDeleteModalOpen(true);
+                        }}
                     >
                         <FontAwesomeIcon icon="trash" />
                         Remove group
@@ -125,7 +157,7 @@ export default function GroupDetails({ group }) {
                 disabled={isDeleteModalDisabled}
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleRemoveGroup}
-                message={`Are tou sure you want to delete ${group.name} from mwdb`}
+                message={`Are you sure you want to delete ${group.name} from mwdb`}
                 buttonStyle="btn-danger"
             />
         </div>

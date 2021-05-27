@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
     DateString,
-    getErrorMessage,
     ConfirmationModal,
     EditableItem,
+    GroupBadge,
+    useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,18 +22,20 @@ function UserItem(props) {
 }
 
 export default function UserDetails({ user, getUser }) {
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
+    const [isBlockModalOpen, setBlockModalOpen] = useState(false);
+    const [isBlockModalDisabled, setBlockModalDisabled] = useState(false);
 
     async function handleSubmit(newValue) {
         try {
             await api.updateUser(user.login, newValue);
-        } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.setAlert({
+                success: "User successfully updated.",
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         } finally {
             getUser();
         }
@@ -40,13 +43,16 @@ export default function UserDetails({ user, getUser }) {
 
     async function setDisabledState(ban) {
         try {
+            setBlockModalDisabled(true);
             await api.setUserDisabled(user.login, ban);
-        } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
+            viewAlert.setAlert({
+                success: `User successfully ${ban ? "blocked" : "unblocked"}.`,
             });
+        } catch (error) {
+            viewAlert.setAlert({ error });
         } finally {
+            setBlockModalDisabled(false);
+            setBlockModalOpen(false);
             getUser();
         }
     }
@@ -55,15 +61,12 @@ export default function UserDetails({ user, getUser }) {
         try {
             setDeleteModalDisabled(true);
             await api.removeUser(user.login);
-            history.push({
-                pathname: `/admin/users/`,
-                state: { success: "User has been successfully removed" },
+            viewAlert.redirectToAlert({
+                target: "/settings/users",
+                success: `User '${user.login}' successfully removed.`,
             });
         } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: { error: getErrorMessage(error) },
-            });
+            viewAlert.setAlert({ error });
             setDeleteModalDisabled(false);
         }
     }
@@ -77,6 +80,7 @@ export default function UserDetails({ user, getUser }) {
                     <UserItem label="E-mail">
                         <EditableItem
                             name="email"
+                            type="email"
                             defaultValue={user.email}
                             onSubmit={handleSubmit}
                         />
@@ -123,11 +127,11 @@ export default function UserDetails({ user, getUser }) {
                             user.groups
                                 .filter((group) => !group.private)
                                 .map((group) => (
-                                    <Link to={`/admin/group/${group.name}`}>
-                                        <span className="badge badge-secondary">
-                                            {group.name}
-                                        </span>
-                                    </Link>
+                                    <GroupBadge
+                                        group={group}
+                                        clickable
+                                        basePath="/settings"
+                                    />
                                 ))}
                     </UserItem>
                 </tbody>
@@ -143,25 +147,25 @@ export default function UserDetails({ user, getUser }) {
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/user/${user.login}/groups`}
+                        to={`/settings/user/${user.login}/groups`}
                     >
                         Show user groups
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/user/${user.login}/capabilities`}
+                        to={`/settings/user/${user.login}/capabilities`}
                     >
                         Check user capabilities
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/user/${user.login}/api-keys`}
+                        to={`/settings/user/${user.login}/api-keys`}
                     >
                         Manage API keys
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/user/${user.login}/password`}
+                        to={`/settings/user/${user.login}/password`}
                     >
                         Change password
                     </Link>
@@ -169,7 +173,10 @@ export default function UserDetails({ user, getUser }) {
                         <a
                             href="#block-user"
                             className="nav-link text-danger"
-                            onClick={() => setDisabledState(false)}
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                setBlockModalOpen(true);
+                            }}
                         >
                             <FontAwesomeIcon icon="ban" />
                             Unblock user
@@ -178,7 +185,10 @@ export default function UserDetails({ user, getUser }) {
                         <a
                             href="#block-user"
                             className="nav-link text-danger"
-                            onClick={() => setDisabledState(true)}
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                setBlockModalOpen(true);
+                            }}
                         >
                             <FontAwesomeIcon icon="ban" />
                             Block user
@@ -187,7 +197,10 @@ export default function UserDetails({ user, getUser }) {
                     <a
                         href="#remove-user"
                         className="nav-link text-danger"
-                        onClick={() => setDeleteModalOpen(true)}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setDeleteModalOpen(true);
+                        }}
                     >
                         <FontAwesomeIcon icon="trash" />
                         Remove user
@@ -199,7 +212,17 @@ export default function UserDetails({ user, getUser }) {
                 disabled={isDeleteModalDisabled}
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleRemoveUser}
-                message={`Are tou sure you want to delete ${user.login} from mwdb`}
+                message={`Are you sure you want to delete ${user.login} from mwdb`}
+                buttonStyle="btn-danger"
+            />
+            <ConfirmationModal
+                isOpen={isBlockModalOpen}
+                disabled={isBlockModalDisabled}
+                onRequestClose={() => setBlockModalOpen(false)}
+                onConfirm={() => setDisabledState(!user.disabled)}
+                message={`Are you sure you want to ${
+                    user.disabled ? "unblock" : "block"
+                } ${user.login}?`}
                 buttonStyle="btn-danger"
             />
         </div>

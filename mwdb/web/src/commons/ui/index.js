@@ -6,13 +6,14 @@ export { default as BootstrapSelect } from "./BootstrapSelect";
 export { default as ConfirmationModal } from "./ConfirmationModal";
 export { default as DataTable } from "./DataTable";
 export { default as DateString } from "./DateString";
+export { default as EditableItem } from "./EditableItem";
 export {
     default as ErrorBoundary,
     Alert,
     getErrorMessage,
 } from "./ErrorBoundary";
-export { default as GroupBadge } from "./GroupBadge";
-export { default as EditableItem } from "./EditableItem";
+export { default as FeatureSwitch } from "./FeatureSwitch";
+export { default as GroupBadge, UserBadge } from "./GroupBadge";
 export { default as Hash } from "./Hash";
 export { default as HexView } from "./HexView";
 export { default as Identicon } from "./Identicon";
@@ -20,14 +21,10 @@ export { default as MemberList } from "./MemberList";
 export { default as NavDropdown } from "./NavDropdown";
 export { default as ObjectLink } from "./ObjectLink";
 export { default as PagedList } from "./PagedList";
-export {
-    ProtectedRoute,
-    AdministrativeRoute,
-    AttributeRoute,
-} from "./ProtectedRoute";
+export { ProtectedRoute, AdministrativeRoute } from "./ProtectedRoute";
 export { default as RefString } from "./RefString";
 export { default as SortedList } from "./SortedList";
-export { default as View } from "./View";
+export { default as View, useViewAlert } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
 
 export { Tag, TagList } from "./Tag";
@@ -68,6 +65,19 @@ export function getStyleForTag(tag) {
 
 export function ShowIf({ condition, children }) {
     return condition ? children : [];
+}
+
+export function LimitTo({ children, count }) {
+    const more =
+        children.length > count
+            ? [
+                  <small className="text-muted">
+                      {" "}
+                      and {children.length - 5} more
+                  </small>,
+              ]
+            : [];
+    return [...children.slice(0, count), ...more];
 }
 
 export function HighlightText(props) {

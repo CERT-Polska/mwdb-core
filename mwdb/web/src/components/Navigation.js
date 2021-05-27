@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -11,7 +11,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
@@ -20,121 +19,21 @@ import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
 
 import logo from "../assets/logo.png";
 
-function AdminDropdown() {
-    const auth = useContext(AuthContext);
-    const [pendingUsersCount, setPendingUsersCount] = useState(null);
-
-    const isAdmin = auth.isAdmin;
-    const isAttributeManager = auth.hasCapability(
-        Capability.managingAttributes
-    );
-
-    async function updatePendingUsersCount() {
-        try {
-            let response = await api.getPendingUsers();
-            setPendingUsersCount(response.data.users.length);
-        } catch (error) {
-            console.error(error);
-            setPendingUsersCount("?");
-        }
-    }
-
-    useEffect(() => {
-        if (!isAdmin) return;
-        let timer = setInterval(updatePendingUsersCount, 15000);
-        updatePendingUsersCount();
-        return () => {
-            clearInterval(timer);
-        };
-    }, [isAdmin]);
-
-    if (!isAdmin && !isAttributeManager) return [];
-
-    const adminItems = isAdmin
-        ? [
-              <Link
-                  key="pending-users"
-                  className="dropdown-item"
-                  to="/users/pending"
-              >
-                  Pending users
-                  {pendingUsersCount ? (
-                      <span className="badge badge-pill badge-warning">
-                          {pendingUsersCount}
-                      </span>
-                  ) : (
-                      []
-                  )}
-              </Link>,
-              <Link key="users" className="dropdown-item" to="/users">
-                  Manage users
-              </Link>,
-              <Link key="groups" className="dropdown-item" to="/groups">
-                  Manage groups
-              </Link>,
-          ]
-        : [];
-
-    const attributeItems = isAttributeManager
-        ? [
-              <Link key="attributes" className="dropdown-item" to="/attributes">
-                  Manage attributes
-              </Link>,
-          ]
-        : [];
-
-    return (
-        <NavDropdown
-            title="Admin"
-            elements={[
-                ...adminItems,
-                ...attributeItems,
-                ...fromPlugin("navdropdownAdmin"),
-            ]}
-            badge={isAdmin ? pendingUsersCount : null}
-        />
-    );
-}
-
 function AdminNav() {
     const auth = useContext(AuthContext);
-    const [pendingUsersCount, setPendingUsersCount] = useState(null);
+    const config = useContext(ConfigContext);
 
-    const isAdmin = auth.isAdmin;
-    const isAttributeManager = auth.hasCapability(
-        Capability.managingAttributes
-    );
-
-    async function updatePendingUsersCount() {
-        try {
-            let response = await api.getPendingUsers();
-            setPendingUsersCount(response.data.users.length);
-        } catch (error) {
-            console.error(error);
-            setPendingUsersCount("?");
-        }
-    }
-
-    useEffect(() => {
-        if (!isAdmin) return;
-        let timer = setInterval(updatePendingUsersCount, 15000);
-        updatePendingUsersCount();
-        return () => {
-            clearInterval(timer);
-        };
-    }, [isAdmin]);
-
-    if (!isAdmin && !isAttributeManager) return [];
+    if (!auth.isAdmin) return [];
     return (
         <li className="nav-item">
-            <Link className="nav-link" to={"/admin"}>
+            <Link className="nav-link" to={"/settings"}>
                 Settings
-                {pendingUsersCount ? (
+                {config.pendingUsers.length ? (
                     <span
                         className="badge badge-pill badge-warning"
                         style={{ marginLeft: "8px" }}
                     >
-                        {pendingUsersCount}
+                        {config.pendingUsers.length}
                     </span>
                 ) : (
                     []
@@ -240,8 +139,6 @@ export default function Navigation() {
             ) : (
                 []
             )}
-            <AdminDropdown />
-            <AdminNav />
             {auth.isAuthenticated ? (
                 <React.Fragment>
                     <li className="nav-item">
@@ -249,6 +146,7 @@ export default function Navigation() {
                             Search
                         </Link>
                     </li>
+                    <AdminNav />
                     <li className="nav-item">
                         <Link className="nav-link" to={"/configs/stats"}>
                             Statistics

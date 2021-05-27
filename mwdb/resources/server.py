@@ -2,16 +2,17 @@ from flask import g
 from flask_restful import Resource
 
 from mwdb.core.app import api
+from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import get_plugin_info
 from mwdb.schema.server import (
+    ServerAdminInfoResponseSchema,
     ServerInfoResponseSchema,
     ServerPingResponseSchema,
-    ServerPluginInfoResponseSchema,
 )
 from mwdb.version import app_build_version
 
-from . import requires_authorization
+from . import requires_authorization, requires_capabilities
 
 
 class PingResource(Resource):
@@ -63,26 +64,39 @@ class ServerInfoResource(Resource):
         )
 
 
-class ServerPluginInfoResource(Resource):
+class ServerAdminInfoResource(Resource):
     @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
     def get(self):
         """
         ---
-        summary: Get plugin information
-        description: Returns information about installed plugins
+        summary: Get extended server information
+        description: |
+            Returns information about extra flags and installed plugins
+
+            Requires any administration capability (manage_users)
         security:
             - bearerAuth: []
         tags:
             - server
         responses:
             200:
-              description: Server plugin info with public configuration
+              description: Server extended information
               content:
                 application/json:
-                  schema: ServerInfoResponseSchema
+                  schema: ServerAdminInfoResponseSchema
+            403:
+              description: When user doesn't have any of required capabilities
         """
-        schema = ServerPluginInfoResponseSchema()
-        return schema.dump({"active_plugins": get_plugin_info()})
+
+        schema = ServerAdminInfoResponseSchema()
+        return schema.dump(
+            {
+                "rate_limit_enabled": app_config.mwdb.enable_rate_limit,
+                "plugins_enabled": app_config.mwdb.enable_plugins,
+                "active_plugins": get_plugin_info(),
+            }
+        )
 
 
 class ServerDocsResource(Resource):

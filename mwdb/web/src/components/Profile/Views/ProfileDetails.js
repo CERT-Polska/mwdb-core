@@ -78,7 +78,7 @@ export default function ProfileDetails({ profile }) {
                     >
                         <Link
                             className="nav-link"
-                            to={`/admin/user/${profile.login}`}
+                            to={`/settings/user/${profile.login}`}
                         >
                             <FontAwesomeIcon icon={faUsersCog} />
                             User settings

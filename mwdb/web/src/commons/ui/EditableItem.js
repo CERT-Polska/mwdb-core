@@ -9,12 +9,19 @@ export default function EditableItem({
     children,
     defaultValue,
     onSubmit,
+    ...props
 }) {
     const [value, setValue] = useState(defaultValue);
     const [edit, setEdit] = useState(false);
 
     return (
-        <span>
+        <form
+            onSubmit={(ev) => {
+                ev.preventDefault();
+                onSubmit({ [name]: value });
+                setEdit(false);
+            }}
+        >
             {edit ? (
                 <div className="input-group">
                     {selective ? (
@@ -23,6 +30,7 @@ export default function EditableItem({
                             value={value}
                             name={name}
                             onChange={(ev) => setValue(ev.target.value)}
+                            {...props}
                         >
                             {children}
                         </select>
@@ -33,21 +41,20 @@ export default function EditableItem({
                             className="form-control"
                             value={value}
                             onChange={(ev) => setValue(ev.target.value)}
+                            {...props}
                         />
                     )}
                     <div className="input-group-append">
                         <button
                             className="btn btn-outline-success"
-                            onClick={() => {
-                                onSubmit({ [name]: value });
-                                setEdit(false);
-                            }}
+                            type="submit"
                         >
                             <small>Save </small>
                             <FontAwesomeIcon icon="save" />
                         </button>
                         <button
                             className="btn btn-outline-danger"
+                            type="button"
                             onClick={() => {
                                 setValue(defaultValue);
                                 setEdit(false);
@@ -72,6 +79,7 @@ export default function EditableItem({
                     <button
                         className="float-right align-middle btn shadow-none"
                         style={{ cursor: "pointer" }}
+                        type="button"
                         onClick={(ev) => {
                             ev.preventDefault();
                             setValue(defaultValue);
@@ -83,6 +91,6 @@ export default function EditableItem({
                     </button>
                 </div>
             )}
-        </span>
+        </form>
     );
 }

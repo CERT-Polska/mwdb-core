@@ -1,34 +1,26 @@
 import React, { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
-import { ShowIf, getErrorMessage } from "@mwdb-web/commons/ui";
+import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function UserResetPassword({ user }) {
-    const history = useHistory();
+    const viewAlert = useViewAlert();
     const [pending, setPending] = useState(false);
     const [passwordURL, setPasswordURL] = useState("");
     async function resetPassword() {
         setPending(true);
         try {
             await api.authRequestPasswordChange();
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: {
-                    success:
-                        "Password reset link was successfully sent to your e-mail address.",
-                },
+            viewAlert.redirectToAlert({
+                target: `/settings/user/${user.login}`,
+                success: `Password reset link was successfully sent to '${user.email}'.`,
             });
         } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: {
-                    error: getErrorMessage(error),
-                },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -39,12 +31,7 @@ export default function UserResetPassword({ user }) {
             let response = await api.generateSetPasswordToken(user.login);
             setPasswordURL(getURLFromToken(response.data.token));
         } catch (error) {
-            history.push({
-                pathname: `/admin/user/${user.login}`,
-                state: {
-                    error: getErrorMessage(error),
-                },
-            });
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -72,7 +59,7 @@ export default function UserResetPassword({ user }) {
                             Send password reset link
                         </button>
                         <Link
-                            to={`/admin/user/${user.login}`}
+                            to={`/settings/user/${user.login}`}
                             className="card-link"
                         >
                             <button

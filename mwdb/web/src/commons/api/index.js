@@ -44,8 +44,8 @@ function getServerInfo() {
     return axios.get("/server");
 }
 
-function getServerPluginInfo() {
-    return axios.get("/server/plugins");
+function getServerAdminInfo() {
+    return axios.get("/server/admin");
 }
 
 function authLogin(login, password) {
@@ -210,8 +210,8 @@ function registerGroup(name) {
     return axios.post(`/group/${name}`, { name });
 }
 
-function updateGroup(name, newName, capabilities) {
-    return axios.put(`/group/${name}`, { name: newName, capabilities });
+function updateGroup(name, value) {
+    return axios.put(`/group/${name}`, value);
 }
 
 function removeGroup(name) {
@@ -322,8 +322,20 @@ function removeMetakeyDefinition(key) {
 }
 
 function addMetakeyDefinition(key, label, description, template, hidden) {
-    return axios.put(`/meta/manage/${key}`, {
+    return axios.post(`/meta/manage/${key}`, {
         key,
+        label,
+        description,
+        template,
+        hidden,
+    });
+}
+
+function updateMetakeyDefinition(
+    key,
+    { label, description, template, hidden }
+) {
+    return axios.put(`/meta/manage/${key}`, {
         label,
         description,
         template,
@@ -466,7 +478,7 @@ export default {
     getApiForEnvironment,
     getServerDocs,
     getServerInfo,
-    getServerPluginInfo,
+    getServerAdminInfo,
     authLogin,
     authGroups,
     authRefresh,
@@ -526,6 +538,7 @@ export default {
     getMetakeyDefinition,
     removeMetakeyDefinition,
     addMetakeyDefinition,
+    updateMetakeyDefinition,
     setMetakeyPermission,
     deleteMetakeyPermission,
     downloadFile,

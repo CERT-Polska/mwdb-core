@@ -6,7 +6,7 @@ export let GroupMemberList = (props) => (
     <MemberList
         nameKey="login"
         itemLinkClass={(user) => (
-            <UserBadge user={user} clickable basePath="/admin" />
+            <UserBadge user={user} clickable basePath="/settings" />
         )}
         {...props}
     />

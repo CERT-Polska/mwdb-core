@@ -62,7 +62,7 @@ export default function UserDetails({ user, getUser }) {
             setDeleteModalDisabled(true);
             await api.removeUser(user.login);
             viewAlert.redirectToAlert({
-                target: "/admin/users",
+                target: "/settings/users",
                 success: `User '${user.login}' successfully removed.`,
             });
         } catch (error) {
@@ -130,7 +130,7 @@ export default function UserDetails({ user, getUser }) {
                                     <GroupBadge
                                         group={group}
                                         clickable
-                                        basePath="/admin"
+                                        basePath="/settings"
                                     />
                                 ))}
                     </UserItem>
@@ -147,25 +147,25 @@ export default function UserDetails({ user, getUser }) {
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/user/${user.login}/groups`}
+                        to={`/settings/user/${user.login}/groups`}
                     >
                         Show user groups
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/user/${user.login}/capabilities`}
+                        to={`/settings/user/${user.login}/capabilities`}
                     >
                         Check user capabilities
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/user/${user.login}/api-keys`}
+                        to={`/settings/user/${user.login}/api-keys`}
                     >
                         Manage API keys
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/user/${user.login}/password`}
+                        to={`/settings/user/${user.login}/password`}
                     >
                         Change password
                     </Link>

@@ -33,7 +33,7 @@ function UserItem(props) {
     return (
         <tr key={props.login}>
             <td>
-                <Link to={`/admin/user/${props.login}`}>
+                <Link to={`/settings/user/${props.login}`}>
                     <HighlightText filterValue={props.filterValue}>
                         {props.login}
                     </HighlightText>
@@ -60,7 +60,7 @@ function UserItem(props) {
                             <GroupBadge
                                 group={group}
                                 clickable
-                                basePath="/admin"
+                                basePath="/settings"
                             />
                         ))}
                 </LimitTo>
@@ -101,7 +101,7 @@ export default function UsersList() {
 
     return (
         <div className="container">
-            <Link to="/admin/user/new">
+            <Link to="/settings/user/new">
                 <button type="button" className="btn btn-success">
                     Register user
                 </button>

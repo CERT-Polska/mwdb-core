@@ -35,7 +35,7 @@ export default function UserCreate() {
                 values.send_email
             );
             viewAlert.redirectToAlert({
-                target: `/admin/user/${values.login}`,
+                target: `/settings/user/${values.login}`,
                 success: "User created successfully.",
             });
         } catch (error) {

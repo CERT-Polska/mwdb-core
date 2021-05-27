@@ -185,7 +185,7 @@ export default function App() {
             <ProtectedRoute path="/remote/:remote">
                 <RemoteViews />
             </ProtectedRoute>
-            <SettingsRoute path="/admin" />
+            <SettingsRoute path="/settings" />
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
                 <ProfileView />
             </ProtectedRoute>

@@ -46,7 +46,7 @@ export function AttributeDetails({ attribute, getAttribute }) {
             setDeleteModalDisabled(true);
             await api.removeMetakeyDefinition(attribute.key);
             viewAlert.redirectToAlert({
-                target: "/admin/attributes",
+                target: "/settings/attributes",
                 success: `Attribute '${attribute.key}' successfully removed.`,
             });
         } catch (error) {
@@ -106,7 +106,7 @@ export function AttributeDetails({ attribute, getAttribute }) {
                 <li className="nav-item">
                     <Link
                         className="nav-link"
-                        to={`/admin/attribute/${attribute.key}/permissions`}
+                        to={`/settings/attribute/${attribute.key}/permissions`}
                     >
                         Edit attribute permissions
                     </Link>

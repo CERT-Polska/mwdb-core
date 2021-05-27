@@ -60,7 +60,9 @@ class AttributePermissionsBox extends Component {
                             .map((permGroup) => (
                                 <tr key={permGroup}>
                                     <td>
-                                        <Link to={`/admin/group/${permGroup}`}>
+                                        <Link
+                                            to={`/settings/group/${permGroup}`}
+                                        >
                                             {permGroup}
                                         </Link>
                                     </td>

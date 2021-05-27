@@ -89,7 +89,9 @@ export default function UsersPendingList() {
         return (
             <tr>
                 <td>
-                    <Link to={`/admin/user/${props.login}`}>{props.login}</Link>
+                    <Link to={`/settings/user/${props.login}`}>
+                        {props.login}
+                    </Link>
                 </td>
                 <td>
                     <a href={`mailto:${props.email}`}>{props.email}</a>

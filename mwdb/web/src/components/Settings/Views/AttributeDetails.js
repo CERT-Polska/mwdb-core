@@ -4,8 +4,11 @@ import api from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
     EditableItem,
+    FeatureSwitch,
     useViewAlert,
 } from "@mwdb-web/commons/ui";
+
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function AttributeItem(props) {
@@ -76,32 +79,28 @@ export function AttributeDetails({ attribute, getAttribute }) {
                             onSubmit={handleSubmit}
                         />
                     </AttributeItem>
-                    <AttributeItem label="Hidden">
-                        <EditableItem
-                            name="hidden"
-                            defaultValue={
-                                attribute.hidden ? "Enabled" : "Disabled"
-                            }
-                            onSubmit={handleSubmit}
-                            badge
-                            selective
-                        >
-                            <option value="Enabled">Enabled</option>
-                            <option value="Disabled">Disabled</option>
-                        </EditableItem>
-                    </AttributeItem>
-                    <tr className="d-flex">
-                        <div className="form-hint">
-                            Hidden attributes have protected values. Attribute
-                            values are not visible for users without
-                            reading_all_attributes capability and explicit
-                            request for reading them. Also only exact search is
-                            allowed. User still must have permission to read key
-                            to use it in query.
-                        </div>
-                    </tr>
                 </tbody>
             </table>
+            <b>Attribute features:</b>
+            <FeatureSwitch
+                name="hidden"
+                value={attribute["hidden"]}
+                onUpdate={handleSubmit}
+            >
+                <b>Hidden attribute</b>
+                {attribute["hidden"] ? (
+                    <span className="badge badge-success">Enabled</span>
+                ) : (
+                    []
+                )}
+                <div>
+                    Hidden attributes have protected values. Attribute values
+                    are not visible for users without reading_all_attributes
+                    capability and explicit request for reading them. Also only
+                    exact search is allowed. User still must have permission to
+                    read key to use it in query.
+                </div>
+            </FeatureSwitch>
             <b>Actions:</b>
             <ul className="nav">
                 <li className="nav-item">
@@ -119,7 +118,7 @@ export function AttributeDetails({ attribute, getAttribute }) {
                             setDeleteModalOpen(true);
                         }}
                     >
-                        <FontAwesomeIcon icon="trash" />
+                        <FontAwesomeIcon icon={faTrash} />
                         Remove attribute
                     </a>
                 </li>

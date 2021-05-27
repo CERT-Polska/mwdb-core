@@ -210,8 +210,8 @@ function registerGroup(name) {
     return axios.post(`/group/${name}`, { name });
 }
 
-function updateGroup(name, newName, capabilities) {
-    return axios.put(`/group/${name}`, { name: newName, capabilities });
+function updateGroup(name, value) {
+    return axios.put(`/group/${name}`, value);
 }
 
 function removeGroup(name) {

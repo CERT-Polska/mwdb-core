@@ -220,7 +220,7 @@ export default function AccessControl() {
     async function changeCapabilities({ group, capabilities }) {
         try {
             setDisabledModalButton(true);
-            await api.updateGroup(group, undefined, capabilities);
+            await api.updateGroup(group, { capabilities });
             await updateGroups();
             viewAlert.setAlert({
                 success: `Group '${group}' capabilities successfully changed`,

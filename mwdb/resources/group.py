@@ -229,7 +229,7 @@ class GroupResource(Resource):
             group.default = obj["default"]
 
         if obj["workspace"] is not None:
-            group.default = obj["workspace"]
+            group.workspace = obj["workspace"]
 
         db.session.commit()
 

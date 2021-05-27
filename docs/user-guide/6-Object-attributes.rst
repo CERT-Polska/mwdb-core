@@ -28,20 +28,13 @@ Plugins can apply custom rendering of attribute values to include additional inf
 Declaring new attribute
 -----------------------
 
-.. warning::
+Attributes must be declared first by administrator (having ``manage_users`` capability). To declare a new attribute, go to the ``Settings`` → ``Attributes`` view using navigation bar.
 
-   **Be careful!** Attribute key **can't be renamed nor deleted** in current version of mwdb-core.
+Then, click on ``Create attribute`` button.
 
-
-Attributes must be declared first by administrator (or any other user that ``Can define new attributes and manage them``\ ). To declare a new attribute, go to the ``Admin`` → ``Manage attributes`` view using navigation bar.
-
-Then, click on ``Define attribute`` button.
-
-
-.. image:: ../_static/FnWYO8q.gif
-   :target: ../_static/FnWYO8q.gif
-   :alt: 
-
+.. image:: ../_static/attribute-create.png
+   :target: ../_static/attribute-create.png
+   :alt: Create attribute
 
 Attribute key has few basic properties described below:
 
@@ -100,7 +93,7 @@ The same operations can be performed using mwdblib. Due to backwards compatibili
    print(file_object.metakeys)
 
    # {'from': ['http://45.95.168.97/bins/sora.x86'],
-   #  'karton2': ['da83d95a-0564-4d32-8fea-ff61ac7396d1']}
+   #  'karton': ['da83d95a-0564-4d32-8fea-ff61ac7396d1']}
 
 To add a new attribute to the existing object, use `MWDBObject.add_metakey <https://mwdblib.readthedocs.io/en/latest/mwdbtypes.html#mwdblib.MWDBObject.add_metakey>`_ function. Example below will fail in mwdb.cert.pl because attribute ``test-key`` is probably undefined, but you can try it on your own instance!
 
@@ -109,7 +102,7 @@ To add a new attribute to the existing object, use `MWDBObject.add_metakey <http
    file_object.add_metakey("test-key", "test-value")
    print(file_object.metakeys)
    # {'from': ['http://45.95.168.97/bins/sora.x86'],
-   #  'karton2': ['da83d95a-0564-4d32-8fea-ff61ac7396d1'],
+   #  'karton': ['da83d95a-0564-4d32-8fea-ff61ac7396d1'],
    #  'test-key': ['test-value']}
 
 To pass an attribute value during upload, you can set it via ``metakeys`` argument using `MWDB.upload_file <https://mwdblib.readthedocs.io/en/latest/mwdblib.html#mwdblib.MWDB.upload_file>`_ routine.

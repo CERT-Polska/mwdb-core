@@ -91,7 +91,7 @@ This syntax is still not very convenient, so we have introduced shorter syntax i
    size:>=500000
    size:">=500000"
 
-Mwdb supports human-readable file size so instead of specifying the number of bytes, we can refer to larger units like kB, MB and GB.
+MWDB-Core supports human-readable file size so instead of specifying the number of bytes, we can refer to larger units like kB, MB and GB.
 
 .. code-block::
 
@@ -175,6 +175,7 @@ Untyped fields
 * ``comment:<string>`` - Object comment contents
 * ``meta.<attribute>:<string>`` - Object attribute value
 * ``upload_time:<datetime>`` - Object first upload timestamp
+* ``karton:<uuid>`` - Karton analysis artifacts
 
 Typed fields (file)
 ^^^^^^^^^^^^^^^^^^^

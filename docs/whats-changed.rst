@@ -7,8 +7,12 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrade mwdb-core to latest version`.
 
-Latest release (2.2.0)
-----------------------
+v2.3.0
+------
+
+
+v2.2.0
+------
 
 In 2.2.0 frontend part was heavily refactored, so some Web plugins may stop working properly without proper upgrade.
 

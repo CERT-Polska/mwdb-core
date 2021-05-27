@@ -25,6 +25,7 @@ Features
    extra-features
    developer-guide
    remotes-guide
+   karton-guide
 
 Indices and tables
 ==================

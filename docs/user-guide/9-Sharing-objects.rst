@@ -12,6 +12,8 @@ Every user account is a member of at least two groups:
 * user's private group, named the same as user login, which represents the exclusive user permissions.
 * ``public`` group with permissions that apply to all users in MWDB.
 
+Additionally, user can be member of ``registered`` group with permissions that apply only to non-guest users in MWDB.
+
 Users' permissions are the sum of permissions of their groups.
 
 Object access rules
@@ -62,13 +64,13 @@ Regular users are able to see only their own groups. It means that they’re abl
 
 Joining the group, you are allowed to:
 
-
 * share objects with its members
 * search for their uploads using ``shared:`` and ``uploader:`` queries (but only within groups common for both users)
 * see their profiles and membership in other common groups
 
-But there are few exclusions for that, when your login may be visible for all users in MWDB regardless of group membership:
+Rules above doesn't apply to groups marked as **Role groups** e.g. ``public`` or ``registered``.
 
+But there are few exclusions for that, when your login may be visible for all users in MWDB regardless of group membership:
 
 * when you are the first one sharing an object with ``public`` group
 * when you add a comment (login of author)
@@ -88,16 +90,12 @@ Even if you upload sample to mwdb.cert.pl with ``Only me`` option, you are shari
 How to add new user/group?
 --------------------------
 
-Users and groups can be managed by administrator using ``Manage users`` and ``Manage groups`` views in ``Admin`` menu.
+Users and groups can be managed by administrator using ``Users`` and ``Groups`` views in ``Settings`` menu.
 
 Create a new user
 ~~~~~~~~~~~~~~~~~
 
-.. warning::
-
-  **Be careful!** User accounts can't be renamed nor removed in current version of mwdb-core.
-
-To create a new user, go to ``Admin``/``Manage users`` and click on ``Register user`` button.
+To create a new user, go to ``Settings``/``Users`` and click on ``Register user`` button.
 
 .. image:: ../_static/admin-register-user.png
    :target: ../_static/admin-register-user.png
@@ -115,28 +113,16 @@ Then fill the form with the following information:
 
 By default - MWDB sends an e-mail to the new user with set password link, but if you have not configured SMTP service: disable **Send e-mail with set password link** first.
 
-After clicking on ``Submit``, you will see a confirmation message with hyperlink to user profile.
+After clicking on ``Submit``, you will be redirected to user settings.
 
-.. image:: ../_static/user-create-confirmation.png
-   :target: ../_static/user-create-confirmation.png
-   :alt: Create user form
+Using user settings, you can add user to additional groups and generate set password link. Go to the bottom of the page and click on the ``Change password`` action.
 
-Using user profile, you can add user to additional groups and generate set password link. Go to the bottom of the page and click on the ``Change password`` button.
-
-.. image:: ../_static/change-password.png
-   :target: ../_static/change-password.png
-   :alt: Change password
-
-Pass that link to the user to let them set a new password for an account.
+Pass the reset password link to the user to let them set a new password for an account.
 
 Create a new group
 ~~~~~~~~~~~~~~~~~~
 
-.. warning::
-
-  **Be careful!** Groups can't be removed in current version of mwdb-core.
-
-To create a new group, go to ``Admin``/``Manage groups`` and click on ``Create group`` button.
+To create a new group, go to ``Settings``/``Groups`` and click on ``Create group`` button.
 
 .. image:: ../_static/admin-register-group.png
    :target: ../_static/admin-register-group.png
@@ -146,27 +132,28 @@ To create a new group, go to ``Admin``/``Manage groups`` and click on ``Create g
    :target: ../_static/create-group-form.png
    :alt: Create group form
 
-Set name for a new group. After clicking on ``Submit``, you will see a confirmation message with hyperlink to group settings.
+Set name for a new group. After clicking on ``Submit``, you will be redirected to group settings.
 
-.. image:: ../_static/new-group.png
-   :target: ../_static/new-group.png
-   :alt: Create group form
+.. image:: ../_static/group-details.png
+   :target: ../_static/group-details.png
+   :alt: Group details
 
-In group settings view, you can add members to the new group.
+In group settings view, you can add members to the new group. Go to ``Access control`` if you want to set additional capabilities for group.
 
 Group capabilities (superpowers)
 --------------------------------
 
 All groups can have additional permissions that apply to all members. MWDB by default is quite restrictive and regular user accounts are allowed only to upload samples and access the object information. That default prevents breaking the existing conventions or making potentially irreversible actions, but even in CERT.pl we don't apply such limitations for users.
 
-.. image:: ../_static/capabilities.png
-   :target: ../_static/capabilities.png
-   :alt: Capabilities view
+You can change the capabilities for group and users, using ``Access control`` view.
+
+.. image:: ../_static/access-control.png
+   :target: ../_static/access-control.png
+   :alt: Access control view
 
 By default, ``admin`` private group has enabled all capabilities. All other groups are created with all disabled.
 
-Each capability has its own name and the administration page shows only the friendly description.
-
+Each capability has its own name and scope:
 
 * 
   **manage_users - Managing users and groups (system administration)**
@@ -213,6 +200,26 @@ Each capability has its own name and the administration page shows only the frie
 
   Allows to add new relationships by specifying object parent during upload or adding new relationship between existing objects.
 
+*
+  **removing_parents - Can remove parent of object and inherited permissions from that relation**
+  
+  Allows to remove relationships along with all inherited permissions.
+
+*
+  **adding_files - Can upload files**
+
+  Enables upload of files. Enabled by default for ``registered`` group.
+
+* 
+  **adding_configs - Can upload configs**
+
+  Enables upload of configurations. Configurations are intended to be uploaded by automated systems or trusted entities that follow the conventions.
+
+* 
+  **adding_blobs - Can upload text blobs**
+
+  Enables upload of blobs. Blobs may have similar meaning as configurations in terms of user roles.
+
 * 
   **reading_all_attributes - Has access to all attributes of object (including hidden)**
 
@@ -229,16 +236,6 @@ Each capability has its own name and the administration page shows only the frie
   Allows to remove attribute from object. To remove attribute, you need to have ``set`` permission for key. Combined with ``adding_all_attributes``\ , allows to remove all attributes.
 
 * 
-  **adding_configs - Can upload configs**
-
-  Enables upload of configurations. Configurations are intended to be uploaded by automated systems or trusted entities that follow the conventions.
-
-* 
-  **adding_blobs - Can upload text blobs**
-
-  Enables upload of blobs. Blobs may have similar meaning as configurations in terms of user roles.
-
-* 
   **unlimited_requests - API requests are not rate-limited for this group**
 
   Disables rate limiting for users from that group, if rate limiting feature is enabled.
@@ -248,10 +245,29 @@ Each capability has its own name and the administration page shows only the frie
 
   Can remove all accessible objects from the MWDB. May be quite destructive, we suggest to keep that capability enabled only for ``admin`` account.
 
-User capabilities are the sum of all group capabilities. If you want to enable capability system-wide (e.g. enable all users to add tags), enable that capability for ``public`` group.
+*
+  **manage_profile - Can manage profile**
 
-In mwdb.cert.pl service - ``public`` group is allowed to:
+  Allows to change personal authentication settings like issuing/deleting own API keys and reseting password.
 
+*
+  **personalize - Can mark favorites and manage own quick queries**
+
+  Allows to use personalization features like favorites or quick queries.
+
+*  
+  **karton_assign - Can assign existing analysis to the object**
+
+  Allows to assign Karton analysis to the object by setting ``karton`` attribute or using dedicated API.
+
+*
+  **karton_reanalyze - Can resubmit any object for analysis**
+
+  Can manually resubmit object to Karton.
+
+User capabilities are the sum of all group capabilities. If you want to enable capability system-wide (e.g. enable all users to add tags), enable that capability for ``registered`` group or ``public`` group if you want to include guests.
+
+In mwdb.cert.pl service - ``registered`` group is allowed to:
 
 * add new tags
 * add new comments

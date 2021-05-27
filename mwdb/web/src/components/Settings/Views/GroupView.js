@@ -38,7 +38,7 @@ export default function GroupView() {
                     <li className="breadcrumb-item">
                         <strong>Group details: </strong>
                         {location.pathname.split("/").length > 4 ? (
-                            <Link to={`/admin/group/${group.name}`}>
+                            <Link to={`/settings/group/${group.name}`}>
                                 {group.name}
                             </Link>
                         ) : (
@@ -48,10 +48,10 @@ export default function GroupView() {
                     {location.pathname.split("/").length > 4 && (
                         <li className="breadcrumb-item active">
                             <Switch>
-                                <AdministrativeRoute path="/admin/group/:name/capabilities">
+                                <AdministrativeRoute path="/settings/group/:name/capabilities">
                                     Capabilities
                                 </AdministrativeRoute>
-                                <AdministrativeRoute path="/admin/group/:name/members">
+                                <AdministrativeRoute path="/settings/group/:name/members">
                                     Members
                                 </AdministrativeRoute>
                             </Switch>
@@ -60,16 +60,16 @@ export default function GroupView() {
                 </ol>
             </nav>
             <Switch>
-                <AdministrativeRoute exact path="/admin/group/:name">
+                <AdministrativeRoute exact path="/settings/group/:name">
                     <GroupDetails group={group} updateGroup={getGroup} />
                 </AdministrativeRoute>
                 <AdministrativeRoute
                     exact
-                    path="/admin/group/:name/capabilities"
+                    path="/settings/group/:name/capabilities"
                 >
                     <ProfileCapabilities profile={group} />
                 </AdministrativeRoute>
-                <AdministrativeRoute exact path="/admin/group/:name/members">
+                <AdministrativeRoute exact path="/settings/group/:name/members">
                     <GroupMembers group={group} getGroup={updateGroup} />
                 </AdministrativeRoute>
             </Switch>

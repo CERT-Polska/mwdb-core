@@ -26,7 +26,7 @@ function AdminNav() {
     if (!auth.isAdmin) return [];
     return (
         <li className="nav-item">
-            <Link className="nav-link" to={"/admin"}>
+            <Link className="nav-link" to={"/settings"}>
                 Settings
                 {config.pendingUsers.length ? (
                     <span
@@ -139,7 +139,6 @@ export default function Navigation() {
             ) : (
                 []
             )}
-            <AdminNav />
             {auth.isAuthenticated ? (
                 <React.Fragment>
                     <li className="nav-item">
@@ -147,6 +146,7 @@ export default function Navigation() {
                             Search
                         </Link>
                     </li>
+                    <AdminNav />
                     <li className="nav-item">
                         <Link className="nav-link" to={"/configs/stats"}>
                             Statistics

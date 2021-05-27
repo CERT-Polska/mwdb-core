@@ -31,7 +31,7 @@ function GroupAppliesTo({ group }) {
                     group["users"]
                         .slice(0, 3)
                         .map((user) => (
-                            <Link to={`/admin/user/${user}`}>{user}</Link>
+                            <Link to={`/settings/user/${user}`}>{user}</Link>
                         )),
                     ", "
                 )}

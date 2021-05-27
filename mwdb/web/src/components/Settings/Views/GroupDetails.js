@@ -30,7 +30,7 @@ export default function GroupDetails({ group, updateGroup }) {
         try {
             await api.updateGroup(group.name, newValue);
             viewAlert.redirectToAlert({
-                target: `/admin/group/${newValue["name"] || group.name}`,
+                target: `/settings/group/${newValue["name"] || group.name}`,
                 success: `Group has been successfully updated.`,
             });
             if (!newValue["name"]) updateGroup();
@@ -44,7 +44,7 @@ export default function GroupDetails({ group, updateGroup }) {
             setDeleteModalDisabled(true);
             await api.removeGroup(group.name);
             viewAlert.redirectToAlert({
-                target: `/admin/groups/`,
+                target: `/settings/groups/`,
                 success: `Group '${group.name}' has been successfully removed`,
             });
         } catch (error) {
@@ -75,7 +75,7 @@ export default function GroupDetails({ group, updateGroup }) {
                                 <UserBadge
                                     user={{ login: user }}
                                     clickable
-                                    basePath={"/admin"}
+                                    basePath={"/settings"}
                                 />
                             ))}
                     </GroupItem>
@@ -129,13 +129,13 @@ export default function GroupDetails({ group, updateGroup }) {
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/group/${group.name}/members`}
+                        to={`/settings/group/${group.name}/members`}
                     >
                         Show group members
                     </Link>
                     <Link
                         className="nav-link"
-                        to={`/admin/group/${group.name}/capabilities`}
+                        to={`/settings/group/${group.name}/capabilities`}
                     >
                         Check group capabilities
                     </Link>

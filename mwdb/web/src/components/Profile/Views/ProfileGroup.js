@@ -140,7 +140,7 @@ export default function ProfileGroup({ profile }) {
                     >
                         <Link
                             className="nav-link"
-                            to={`/admin/group/${group.name}`}
+                            to={`/settings/group/${group.name}`}
                         >
                             <FontAwesomeIcon icon={faUsersCog} />
                             Group settings

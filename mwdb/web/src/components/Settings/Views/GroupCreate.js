@@ -26,7 +26,7 @@ export default function GroupCreate() {
         try {
             await api.registerGroup(values.name);
             viewAlert.redirectToAlert({
-                target: `/admin/group/${values.name}`,
+                target: `/settings/group/${values.name}`,
                 success: "Group created successfully.",
             });
         } catch (error) {

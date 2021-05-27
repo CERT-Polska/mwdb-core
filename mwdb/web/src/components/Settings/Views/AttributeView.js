@@ -34,7 +34,7 @@ export default function AttributeView() {
                     <li className="breadcrumb-item">
                         <strong>Attribute details: </strong>
                         {location.pathname.split("/").length > 4 ? (
-                            <Link to={`/admin/attribute/${attribute.key}`}>
+                            <Link to={`/settings/attribute/${attribute.key}`}>
                                 {attribute.key}
                             </Link>
                         ) : (
@@ -44,7 +44,7 @@ export default function AttributeView() {
                     {location.pathname.split("/").length > 4 && (
                         <li className="breadcrumb-item active">
                             <Switch>
-                                <AdministrativeRoute path="/admin/attribute/:metakey/permissions">
+                                <AdministrativeRoute path="/settings/attribute/:metakey/permissions">
                                     Permissions
                                 </AdministrativeRoute>
                             </Switch>
@@ -53,7 +53,7 @@ export default function AttributeView() {
                 </ol>
             </nav>
             <Switch>
-                <AdministrativeRoute exact path="/admin/attribute/:metakey">
+                <AdministrativeRoute exact path="/settings/attribute/:metakey">
                     <AttributeDetails
                         attribute={attribute}
                         getAttribute={updateAttribute}
@@ -61,7 +61,7 @@ export default function AttributeView() {
                 </AdministrativeRoute>
                 <AdministrativeRoute
                     exact
-                    path="/admin/attribute/:metakey/permissions"
+                    path="/settings/attribute/:metakey/permissions"
                 >
                     <AttributesPermissions
                         attribute={attribute}

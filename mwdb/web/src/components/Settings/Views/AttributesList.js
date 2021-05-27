@@ -8,7 +8,7 @@ function AttributeItem({ name, label, description, template }) {
     return (
         <tr>
             <td>
-                <Link to={`/admin/attribute/${name}`}>{name}</Link>
+                <Link to={`/settings/attribute/${name}`}>{name}</Link>
                 &nbsp;
                 {label && <span>({label})</span>}
             </td>
@@ -55,7 +55,7 @@ export default function AttributesList() {
 
     return (
         <div className="container">
-            <Link to="/admin/attribute/new">
+            <Link to="/settings/attribute/new">
                 <button type="button" className="btn btn-success">
                     Create attribute
                 </button>

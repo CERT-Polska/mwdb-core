@@ -35,7 +35,7 @@ export default function AttributeCreate() {
                 values.hidden
             );
             viewAlert.redirectToAlert({
-                target: `/admin/attribute/${values.metakey}`,
+                target: `/settings/attribute/${values.metakey}`,
                 success: "Attribute created successfully.",
             });
         } catch (error) {

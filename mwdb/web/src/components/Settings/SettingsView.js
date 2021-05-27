@@ -28,7 +28,7 @@ function SettingsNav() {
         ...(auth.hasCapability(Capability.manageUsers)
             ? [
                   [
-                      <NavLink exact to="/admin" className="nav-link">
+                      <NavLink exact to="/settings" className="nav-link">
                           Overview
                       </NavLink>,
                   ],
@@ -36,7 +36,7 @@ function SettingsNav() {
                       ? [
                             <NavLink
                                 exact
-                                to="/admin/pending"
+                                to="/settings/pending"
                                 className="nav-link"
                             >
                                 Pending registrations
@@ -53,16 +53,20 @@ function SettingsNav() {
                             </NavLink>,
                         ]
                       : []),
-                  <NavLink exact to="/admin/capabilities" className="nav-link">
+                  <NavLink
+                      exact
+                      to="/settings/capabilities"
+                      className="nav-link"
+                  >
                       Access control
                   </NavLink>,
-                  <NavLink exact to="/admin/users" className="nav-link">
+                  <NavLink exact to="/settings/users" className="nav-link">
                       Users
                   </NavLink>,
-                  <NavLink exact to="/admin/groups" className="nav-link">
+                  <NavLink exact to="/settings/groups" className="nav-link">
                       Groups
                   </NavLink>,
-                  <NavLink to="/admin/attributes" className="nav-link">
+                  <NavLink to="/settings/attributes" className="nav-link">
                       Attributes
                   </NavLink>,
               ]
@@ -96,69 +100,78 @@ export default function SettingsView() {
                 <div className="col-sm-8">
                     <div className="tab-content">
                         <Switch>
-                            <Route exact path="/admin">
+                            <Route exact path="/settings">
                                 <SettingsOverview />
                             </Route>
-                            <AdministrativeRoute path="/admin/pending">
+                            <AdministrativeRoute path="/settings/pending">
                                 <UsersPendingList />
                             </AdministrativeRoute>
 
-                            <AdministrativeRoute exact path="/admin/users">
+                            <AdministrativeRoute exact path="/settings/users">
                                 <UsersList />
                             </AdministrativeRoute>
-                            <AdministrativeRoute exact path="/admin/user/new">
+                            <AdministrativeRoute
+                                exact
+                                path="/settings/user/new"
+                            >
                                 <UserCreate />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
                                 path={[
-                                    "/admin/user/:login",
-                                    "/admin/user/:login/password",
-                                    "/admin/user/:login/capabilities",
-                                    "/admin/user/:login/api-keys",
-                                    "/admin/user/:login/groups",
+                                    "/settings/user/:login",
+                                    "/settings/user/:login/password",
+                                    "/settings/user/:login/capabilities",
+                                    "/settings/user/:login/api-keys",
+                                    "/settings/user/:login/groups",
                                 ]}
                             >
                                 <UserView />
                             </AdministrativeRoute>
-                            <AdministrativeRoute exact path="/admin/group/new">
+                            <AdministrativeRoute
+                                exact
+                                path="/settings/group/new"
+                            >
                                 <GroupCreate />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
                                 path={[
-                                    "/admin/group/:name",
-                                    "/admin/group/:name/capabilities",
-                                    "/admin/group/:name/members",
+                                    "/settings/group/:name",
+                                    "/settings/group/:name/capabilities",
+                                    "/settings/group/:name/members",
                                 ]}
                             >
                                 <GroupView />
                             </AdministrativeRoute>
 
-                            <AdministrativeRoute exact path="/admin/groups">
+                            <AdministrativeRoute exact path="/settings/groups">
                                 <GroupsList />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
-                                path="/admin/capabilities"
+                                path="/settings/capabilities"
                             >
                                 <AccessControl />
                             </AdministrativeRoute>
 
-                            <AdministrativeRoute exact path="/admin/attributes">
+                            <AdministrativeRoute
+                                exact
+                                path="/settings/attributes"
+                            >
                                 <AttributesList />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
-                                path="/admin/attribute/new"
+                                path="/settings/attribute/new"
                             >
                                 <AttributeCreate />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
                                 path={[
-                                    "/admin/attribute/:metakey",
-                                    "/admin/attribute/:metakey/permissions",
+                                    "/settings/attribute/:metakey",
+                                    "/settings/attribute/:metakey/permissions",
                                 ]}
                             >
                                 <AttributeView />

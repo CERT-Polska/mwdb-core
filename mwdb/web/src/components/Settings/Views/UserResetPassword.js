@@ -16,7 +16,7 @@ export default function UserResetPassword({ user }) {
         try {
             await api.authRequestPasswordChange();
             viewAlert.redirectToAlert({
-                target: `/admin/user/${user.login}`,
+                target: `/settings/user/${user.login}`,
                 success: `Password reset link was successfully sent to '${user.email}'.`,
             });
         } catch (error) {
@@ -59,7 +59,7 @@ export default function UserResetPassword({ user }) {
                             Send password reset link
                         </button>
                         <Link
-                            to={`/admin/user/${user.login}`}
+                            to={`/settings/user/${user.login}`}
                             className="card-link"
                         >
                             <button

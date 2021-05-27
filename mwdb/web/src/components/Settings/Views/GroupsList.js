@@ -14,7 +14,7 @@ function GroupItem(props) {
     return (
         <tr key={props.name}>
             <td>
-                <Link to={`/admin/group/${props.name}`}>
+                <Link to={`/settings/group/${props.name}`}>
                     <HighlightText filterValue={props.filterValue}>
                         {props.name}
                     </HighlightText>
@@ -29,7 +29,7 @@ function GroupItem(props) {
                             <UserBadge
                                 user={{ login }}
                                 clickable
-                                basePath="/admin"
+                                basePath="/settings"
                             />
                         ))}
                     </LimitTo>
@@ -68,7 +68,7 @@ export default function GroupsList() {
 
     return (
         <div className="container">
-            <Link to="/admin/group/new">
+            <Link to="/settings/group/new">
                 <button type="button" className="btn btn-success">
                     Create group
                 </button>

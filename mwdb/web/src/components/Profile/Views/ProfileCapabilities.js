@@ -10,10 +10,10 @@ function CapabilitiesTable({ profile }) {
             <tbody>
                 {profile.capabilities.sort().map((cap) => (
                     <tr>
-                        <th className="col-1">
+                        <th>
                             <span className="badge badge-success">{cap}</span>
                         </th>
-                        <td className="col">
+                        <td>
                             <div>
                                 {capabilitiesList[cap] || "(no description)"}
                             </div>

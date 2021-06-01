@@ -76,30 +76,38 @@ export default function ProfileGroup({ profile }) {
                         value={workspace && workspace.admins.length}
                     >
                         {workspace &&
-                            workspace.admins.map((login) => (
-                                <GroupBadge
-                                    group={{
-                                        name: login,
-                                        private: true,
-                                    }}
-                                    clickable
-                                />
-                            ))}
+                            workspace.admins
+                                .sort((userA, userB) =>
+                                    userA.localeCompare(userB)
+                                )
+                                .map((login) => (
+                                    <GroupBadge
+                                        group={{
+                                            name: login,
+                                            private: true,
+                                        }}
+                                        clickable
+                                    />
+                                ))}
                     </ProfileItem>
                     <ProfileItem
                         label="Members"
                         value={workspace && workspace.users.length}
                     >
                         {workspace &&
-                            workspace.users.map((login) => (
-                                <GroupBadge
-                                    group={{
-                                        name: login,
-                                        private: true,
-                                    }}
-                                    clickable
-                                />
-                            ))}
+                            workspace.users
+                                .sort((userA, userB) =>
+                                    userA.localeCompare(userB)
+                                )
+                                .map((login) => (
+                                    <GroupBadge
+                                        group={{
+                                            name: login,
+                                            private: true,
+                                        }}
+                                        clickable
+                                    />
+                                ))}
                     </ProfileItem>
                 </tbody>
             </table>

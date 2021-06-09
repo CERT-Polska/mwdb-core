@@ -26,9 +26,9 @@ function isSessionValid(authSession) {
 
 function getStoredAuthSession() {
     try {
-        const storedAuthSession = JSON.parse(
-            localStorage.getItem(localStorageAuthKey)
-        );
+        const sessionData = localStorage.getItem(localStorageAuthKey);
+        if (!sessionData) return null;
+        const storedAuthSession = JSON.parse(sessionData);
         if (!isSessionValid(storedAuthSession))
             throw new Error("Invalid session data");
         return storedAuthSession;
@@ -43,6 +43,29 @@ function setTokenForAPI(token) {
     api.axios.defaults.headers.common["Authorization"] = token
         ? "Bearer " + token
         : null;
+}
+
+function useAxiosEffect(func) {
+    /***
+     * This is special kind of effect that runs *before* render (like componentWillMount).
+     * In the same time, it keeps the original useEffect's clean-up behavior.
+     *
+     * It's required to do proper Axios setup (side-effect) before children are rendered
+     * to prevent premature API requests before the auth token is recovered from localStorage.
+     */
+    const cleanup = useRef(null);
+
+    if (cleanup.current === null) {
+        // Run on first render and set the cleanup callback
+        cleanup.current = func() || (() => {});
+    }
+
+    // Setup useEffect to cleanup the effect on unmount
+    useEffect(() => {
+        return () => {
+            if (cleanup.current) cleanup.current();
+        };
+    }, []);
 }
 
 export function AuthProvider(props) {
@@ -81,10 +104,9 @@ export function AuthProvider(props) {
             const response = await api.authRefresh();
             updateSession(response.data);
         } catch (e) {
-            // On refresh error: let user reauthenticate
-            logout(
-                "Session expired. Please authenticate before accessing this page."
-            );
+            // It may fail due to short-lasting network problems.
+            // Just log it and try again later.
+            console.error(e);
         }
     }
 
@@ -105,7 +127,7 @@ export function AuthProvider(props) {
     }
 
     // Effect for 401 Not authenticated to handle unexpected session expiration
-    useEffect(() => {
+    useAxiosEffect(() => {
         // Initialize Authorization header on mount
         setTokenForAPI(isAuthenticated && session.token);
         // Set 401 Not Authenticated interceptor when AuthProvider is mounted
@@ -126,10 +148,10 @@ export function AuthProvider(props) {
             api.axios.interceptors.response.eject(interceptor);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    });
 
     // Effect for 403 Forbidden to handle unexpected loss of permissions
-    useEffect(() => {
+    useAxiosEffect(() => {
         // Set 403 Forbidden interceptor when AuthProvider is mounted
         const interceptor = api.axios.interceptors.response.use(
             (_) => _,
@@ -146,7 +168,7 @@ export function AuthProvider(props) {
             api.axios.interceptors.response.eject(interceptor);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    });
 
     // Effect for periodic session refresh
     useEffect(() => {

@@ -99,7 +99,7 @@ export function ConfigProvider(props) {
             return () => {
                 clearInterval(timer);
             };
-        } else return;
+        }
     }, [
         auth.isAuthenticated,
         auth.isAdmin,

@@ -1,27 +1,25 @@
-from authlib.integrations.flask_oauth2 import (
-    AuthorizationServer,
-    ResourceProtector,
-)
+from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
 from authlib.integrations.sqla_oauth2 import (
-    create_query_client_func,
-    create_save_token_func,
-    create_revocation_endpoint,
     create_bearer_token_validator,
+    create_query_client_func,
+    create_revocation_endpoint,
+    create_save_token_func,
 )
 from authlib.oauth2.rfc6749 import grants
-from authlib.oidc.core import UserInfo, grants as oidc_grants
-from werkzeug.security import gen_salt
-from .models import db, User
-from .models import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+from authlib.oidc.core import UserInfo
+from authlib.oidc.core import grants as oidc_grants
 from website import app
+from werkzeug.security import gen_salt
 
+from .models import OAuth2AuthorizationCode, OAuth2Client, OAuth2Token, User, db
 
 DUMMY_JWT_CONFIG = {
-    'key': '',
-    'alg': 'HS256',
-    'iss': 'https://authlib.org',
-    'exp': 3600,
+    "key": "",
+    "alg": "HS256",
+    "iss": "https://authlib.org",
+    "exp": 3600,
 }
+
 
 def exists_nonce(nonce, req):
     exists = OAuth2AuthorizationCode.query.filter_by(
@@ -29,12 +27,14 @@ def exists_nonce(nonce, req):
     ).first()
     return bool(exists)
 
+
 def generate_user_info(user, scope):
     return UserInfo(sub=str(user.id), name=user.username)
 
+
 def create_authorization_code(client, grant_user, request):
     code = gen_salt(48)
-    nonce = request.data.get('nonce')
+    nonce = request.data.get("nonce")
     item = OAuth2AuthorizationCode(
         code=code,
         client_id=client.client_id,
@@ -47,13 +47,15 @@ def create_authorization_code(client, grant_user, request):
     db.session.commit()
     return code
 
+
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def create_authorization_code(self, client, grant_user, request):
         return create_authorization_code(client, grant_user, request)
 
     def parse_authorization_code(self, code, client):
         item = OAuth2AuthorizationCode.query.filter_by(
-            code=code, client_id=client.client_id).first()
+            code=code, client_id=client.client_id
+        ).first()
         if item and not item.is_expired():
             return item
 
@@ -63,6 +65,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
 
     def authenticate_user(self, authorization_code):
         return User.query.get(authorization_code.user_id)
+
 
 class OpenIDCode(oidc_grants.OpenIDCode):
     def exists_nonce(self, nonce, request):
@@ -74,6 +77,7 @@ class OpenIDCode(oidc_grants.OpenIDCode):
     def generate_user_info(self, user, scope):
         return generate_user_info(user, scope)
 
+
 class ImplicitGrant(oidc_grants.OpenIDImplicitGrant):
     def exists_nonce(self, nonce, request):
         return exists_nonce(nonce, request)
@@ -83,6 +87,7 @@ class ImplicitGrant(oidc_grants.OpenIDImplicitGrant):
 
     def generate_user_info(self, user, scope):
         return generate_user_info(user, scope)
+
 
 class HybridGrant(oidc_grants.OpenIDHybridGrant):
     def create_authorization_code(self, client, grant_user, request):

@@ -1,0 +1,19 @@
+FROM python:3.8.5-alpine
+
+COPY docker/OIDC /oidc/
+
+RUN apk add --no-cache gcc musl-dev linux-headers
+
+COPY docker/OIDC/requirements.txt requirements.txt
+
+RUN pip install -r requirements.txt
+
+ENV AUTHLIB_INSECURE_TRANSPORT=1
+
+ENV FLASK_APP=/oidc/website/run.py
+
+EXPOSE 5000
+
+WORKDIR /oidc
+
+CMD ["flask", "run"]

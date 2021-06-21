@@ -91,7 +91,7 @@ export default function SettingsOverview() {
                         <th>Rate limits</th>
                         <td>
                             <FlagBadge
-                                enabled={extendedInfo["rate_limits_enabled"]}
+                                enabled={extendedInfo["rate_limit_enabled"]}
                             />
                         </td>
                     </tr>

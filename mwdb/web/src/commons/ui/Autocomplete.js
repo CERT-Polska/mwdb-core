@@ -28,6 +28,7 @@ export default function Autocomplete({
                     <button
                         key={itemValue(item)}
                         className="dropdown-item"
+                        type="button"
                         onClick={(ev) => {
                             ev.preventDefault();
                             onChange(itemValue(item));

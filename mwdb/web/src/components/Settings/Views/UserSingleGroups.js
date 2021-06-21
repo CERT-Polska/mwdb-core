@@ -57,9 +57,9 @@ export default function UserSingleGroups({ user, getUser }) {
 
     if (Object.keys(user).length === 0) return [];
 
-    let groupItems = user.groups.filter(
-        (group) => group.name !== "public" && group.name !== user.login
-    );
+    let groupItems = user.groups
+        .filter((group) => group.name !== "public" && group.name !== user.login)
+        .sort((groupA, groupB) => groupA.name.localeCompare(groupB.name));
 
     let allGroupItems = allGroups.filter(
         (group) =>

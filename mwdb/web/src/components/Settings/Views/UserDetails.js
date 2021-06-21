@@ -126,6 +126,9 @@ export default function UserDetails({ user, getUser }) {
                         {user.groups &&
                             user.groups
                                 .filter((group) => !group.private)
+                                .sort((groupA, groupB) =>
+                                    groupA.name.localeCompare(groupB.name)
+                                )
                                 .map((group) => (
                                     <GroupBadge
                                         group={group}

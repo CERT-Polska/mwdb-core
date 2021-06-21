@@ -68,7 +68,10 @@ export default function GroupMembers({ group, getGroup }) {
 
     if (Object.keys(group).length === 0) return [];
 
-    let usersItems = group.users.map((user) => ({ login: user }));
+    let usersItems = group.users
+        .map((user) => ({ login: user }))
+        .sort((userA, userB) => userA.login.localeCompare(userB.login));
+
     let allUsersItems = allUsers.filter(
         (v) => !usersItems.map((c) => c.login).includes(v.login)
     );

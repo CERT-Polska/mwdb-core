@@ -17,7 +17,7 @@ from werkzeug.security import gen_salt
 from .models import OAuth2Client, User, db
 from .oauth2 import authorization, require_oauth
 
-bp = Blueprint(__name__, "home")
+bp = Blueprint("home", __name__)
 
 
 def current_user():

@@ -742,6 +742,7 @@ class Object(db.Model):
                 for analysis in (
                     db.session.query(KartonAnalysis)
                     .filter(KartonAnalysis.objects.any(id=self.id))
+                    .order_by(KartonAnalysis.creation_time)
                     .all()
                 )
             ]

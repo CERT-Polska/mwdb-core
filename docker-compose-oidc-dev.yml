@@ -74,6 +74,6 @@ services:
       context: .
       dockerfile: deploy/docker/Dockerfile-oidc-server
     ports:
-      - "127.0.0.1:5000:5000"
-    environment:
-      AUTHLIB_INSECURE_TRANSPORT: 1
+      - "8085:3000"
+    volumes:
+      - "./docker/OIDC:/oidc/OIDC"

@@ -74,6 +74,6 @@ services:
       context: .
       dockerfile: deploy/docker/Dockerfile-oidc-server
     ports:
-      - "8085:3000"
+      - "5000:5000"
     volumes:
       - "./docker/OIDC:/oidc/OIDC"

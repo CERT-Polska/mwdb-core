@@ -9,3 +9,4 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # OAuth 2.0
 app.config["OAUTH2_REFRESH_TOKEN_GENERATOR"] = True
+app.config["SESSION_COOKIE_NAME"] = "session_client"

@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from werkzeug.exceptions import Forbidden
 from werkzeug.routing import BaseConverter
 
-from mwdb.core.app import api, app
+from mwdb.core.app import api, app, oauth
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.log import getLogger, setup_logger
@@ -44,6 +44,7 @@ from mwdb.resources.metakey import (
     MetakeyPermissionResource,
     MetakeyResource,
 )
+from mwdb.resources.oauth import OauthAuthorizeResource, OauthLoginResource
 from mwdb.resources.object import (
     ObjectCountResource,
     ObjectFavoriteResource,
@@ -318,6 +319,10 @@ api.add_resource(UserPendingResource, "/user/<login>/pending")
 api.add_resource(GroupListResource, "/group")
 api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, "/group/<name>/member/<login>")
+
+# Oauth endpoints
+api.add_resource(OauthLoginResource, "/oauth/login")
+api.add_resource(OauthAuthorizeResource, "/oauth/authorize")
 
 # Remote endpoints
 api.add_resource(RemoteListResource, "/remote")

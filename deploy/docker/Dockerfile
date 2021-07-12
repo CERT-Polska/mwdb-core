@@ -5,7 +5,7 @@ LABEL maintainer="info@cert.pl"
 RUN apk add --no-cache postgresql-client postgresql-dev libmagic
 
 COPY requirements.txt docker/plugins/requirements-*.txt /tmp/
-RUN apk add --no-cache -t build libffi libffi-dev py3-cffi build-base python3-dev automake m4 autoconf libtool \
+RUN apk add --no-cache -t build libffi libffi-dev py3-cffi build-base python3-dev automake m4 autoconf libtool gcc g++ musl-dev libffi-dev openssl-dev cargo \
     && BUILD_LIB=1 pip --no-cache-dir install -r /tmp/requirements.txt \
     && ls /tmp/requirements-*.txt | xargs -i,, pip --no-cache-dir install -r ,, \
     && apk del build

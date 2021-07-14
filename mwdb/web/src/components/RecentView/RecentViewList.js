@@ -1,36 +1,71 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useReducer,
+    useRef,
+} from "react";
 import InfiniteScroll from "react-infinite-scroller";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 
+function listStateReducer(state, action) {
+    switch (action.type) {
+        case "unload":
+            return {
+                pageToLoad: 0,
+                loadedPages: 0,
+                hasMorePages: false,
+                elements: [],
+            };
+        case "loadNextPage":
+            return {
+                ...state,
+                pageToLoad: state.loadedPages + 1, // load only one more
+            };
+        case "reload":
+            // unload + loadNextPage
+            return {
+                pageToLoad: 1,
+                loadedPages: 0,
+                hasMorePages: false,
+                elements: [],
+            };
+        case "pageLoaded":
+            return {
+                ...state,
+                loadedPages: state.loadedPages + 1,
+                hasMorePages: action.elements.length !== 0,
+                elements: [...state.elements, ...action.elements],
+            };
+        default:
+            throw new Error(`Incorrect action type: ${action.type}`);
+    }
+}
+
 export default function RecentViewList(props) {
     const api = useContext(APIContext);
+    const [listState, listDispatch] = useReducer(listStateReducer, {
+        pageToLoad: 0,
+        loadedPages: 0,
+        elements: [],
+        hasMorePages: false,
+    });
     const infiniteScroll = useRef(null);
-    // Loaded object items
-    let [elements, setElements] = useState([]);
-    // Loaded page number
-    let [loadedPages, setLoadedPages] = useState(0);
-    // Page number to be loaded
-    let [pageToLoad, setPageToLoad] = useState(0);
-    // There are more pages to load
-    let [hasMorePages, setHasMorePages] = useState(false);
-
-    const pendingLoad = pageToLoad > loadedPages;
-    // We want to load pages sequentially
-    // Don't spawn new callbacks during pending load operation
-    const hasMore = hasMorePages && !pendingLoad;
+    const pendingLoad = listState.pageToLoad > listState.loadedPages;
+    const hasMore = listState.hasMorePages && !pendingLoad;
 
     // If query changes, reset state
     useEffect(() => {
         if (infiniteScroll.current) infiniteScroll.current.pageLoaded = 0;
+        // If there is no submitted query (after mount): do nothing
+        if (props.query === null) return;
         if (!props.query && props.disallowEmpty) {
-            setPageToLoad(0);
-            setHasMorePages(false);
-        } else setPageToLoad(1);
-        setElements([]);
-        setLoadedPages(0);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.query, api.remote]);
+            listDispatch({ type: "unload" });
+        } else {
+            listDispatch({ type: "reload" });
+        }
+    }, [props.query, props.disallowEmpty, api.remote]);
 
     // Load page on request (pageToLoad != loadedPages)
     useEffect(() => {
@@ -38,28 +73,29 @@ export default function RecentViewList(props) {
         if (!pendingLoad)
             // Already synchronized: nothing to load
             return;
-        const pivot = elements.slice(-1)[0];
+        const pivot = listState.elements.slice(-1)[0];
         api.getObjectList(props.type, pivot && pivot.id, props.query)
             .then((response) => {
                 if (cancelled) return;
-                const loadedElements = response.data[`${props.type}s`];
-                setElements((elements) => [...elements, ...loadedElements]);
-                setHasMorePages(loadedElements.length !== 0);
+                const elements = response.data[`${props.type}s`];
+                listDispatch({
+                    type: "pageLoaded",
+                    elements,
+                });
             })
             .catch((error) => {
                 if (cancelled) return;
                 props.setError(error);
-                setHasMorePages(false);
-            })
-            .finally(() => {
-                if (cancelled) return;
-                setLoadedPages((loadedPages) => loadedPages + 1);
+                listDispatch({
+                    type: "pageLoaded",
+                    elements: [],
+                });
             });
         return () => {
             cancelled = true;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pageToLoad, loadedPages]);
+    }, [listState.pageToLoad, listState.loadedPages]);
 
     const Row = props.rowComponent;
     const Header = props.headerComponent;
@@ -79,26 +115,23 @@ export default function RecentViewList(props) {
                 ref={infiniteScroll}
                 loadMore={(page) => {
                     if (!hasMore) return;
-                    setPageToLoad(loadedPages + 1);
+                    listDispatch({ type: "loadNextPage" });
                 }}
                 hasMore={hasMore}
                 element={"tbody"}
             >
-                {elements.map((item, idx) => (
+                {listState.elements.map((item, idx) => (
                     <Row key={idx} addToQuery={props.addToQuery} {...item} />
                 ))}
-                {!elements.length && !pendingLoad ? (
+                {pendingLoad ? (
+                    <tr key="loading" className="d-flex">
+                        <td className="col-12 text-center">Loading...</td>
+                    </tr>
+                ) : !listState.elements.length && props.query !== null ? (
                     <tr key="empty" className="d-flex">
                         <td className="col-12 text-center">
                             There are no elements to show.
                         </td>
-                    </tr>
-                ) : (
-                    []
-                )}
-                {pendingLoad ? (
-                    <tr key="loading" className="d-flex">
-                        <td className="col-12 text-center">Loading...</td>
                     </tr>
                 ) : (
                     []

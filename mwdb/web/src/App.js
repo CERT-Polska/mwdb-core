@@ -139,13 +139,19 @@ export default function App() {
                 <UserSetPassword />
             </Route>
             <ProtectedRoute exact path="/">
-                <RecentSamples />
+                {
+                    /*
+                        BUG: react-router doesn't re-render on search path change
+                        when we have direct component here
+                    */
+                    () => <RecentSamples />
+                }
             </ProtectedRoute>
             <ProtectedRoute exact path="/configs">
-                <RecentConfigs />
+                {() => <RecentConfigs />}
             </ProtectedRoute>
             <ProtectedRoute exact path="/blobs">
-                <RecentBlobs />
+                {() => <RecentBlobs />}
             </ProtectedRoute>
             <ProtectedRoute
                 exact

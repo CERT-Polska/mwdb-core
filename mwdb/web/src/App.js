@@ -161,7 +161,7 @@ export default function App() {
                 <Upload />
             </ProtectedRoute>
             <ProtectedRoute exact path="/search">
-                <Search />
+                {() => <Search />}
             </ProtectedRoute>
             <ProtectedRoute exact path="/configs/stats">
                 <ConfigStats />

@@ -1,10 +1,4 @@
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useReducer,
-    useRef,
-} from "react";
+import React, { useContext, useEffect, useReducer, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 
 import { APIContext } from "@mwdb-web/commons/api/context";

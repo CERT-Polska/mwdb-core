@@ -66,7 +66,7 @@ export default function RecentView(props) {
     }
 
     const addToQuery = (field, value) => {
-        return setCurrentQuery(addFieldToQuery(currentQuery, field, value));
+        return setCurrentQuery(addFieldToQuery(submittedQuery, field, value));
     };
 
     // Synchronize input if currentQuery was changed
@@ -118,7 +118,7 @@ export default function RecentView(props) {
     );
 
     const objectCountMessage =
-        submittedQuery && objectCount ? (
+        submittedQuery && objectCount !== null ? (
             <div className="form-hint">
                 {objectCount}
                 {" results found"}

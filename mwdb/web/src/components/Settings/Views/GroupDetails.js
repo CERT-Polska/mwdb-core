@@ -71,13 +71,17 @@ export default function GroupDetails({ group, updateGroup }) {
                     </GroupItem>
                     <GroupItem label="Members">
                         {group &&
-                            group.users.map((user) => (
-                                <UserBadge
-                                    user={{ login: user }}
-                                    clickable
-                                    basePath={"/settings"}
-                                />
-                            ))}
+                            group.users
+                                .sort((userA, userB) =>
+                                    userA.localeCompare(userB)
+                                )
+                                .map((user) => (
+                                    <UserBadge
+                                        user={{ login: user }}
+                                        clickable
+                                        basePath={"/settings"}
+                                    />
+                                ))}
                     </GroupItem>
                 </tbody>
             </table>

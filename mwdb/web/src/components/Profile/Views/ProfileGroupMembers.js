@@ -31,33 +31,35 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
 
     return (
         <React.Fragment>
-            {workspace.users.sort().map((login, idx) => (
-                <tr className="nested d-flex">
-                    <td className="col-8">
-                        <GroupBadge
-                            key={idx}
-                            group={{
-                                name: login,
-                                private: true,
-                            }}
-                            clickable
-                        />
-                        {workspace.admins.includes(login) && " (admin)"}
-                    </td>
-                    <td className="col-4">
-                        <button
-                            type="button"
-                            className="btn btn-sm btn-danger"
-                            onClick={() => {
-                                setDeleteModalOpen(true);
-                                setRemoveUser(login);
-                            }}
-                        >
-                            Remove
-                        </button>
-                    </td>
-                </tr>
-            ))}
+            {workspace.users
+                .sort((userA, userB) => userA.localeCompare(userB))
+                .map((login, idx) => (
+                    <tr className="nested d-flex">
+                        <td className="col-8">
+                            <GroupBadge
+                                key={idx}
+                                group={{
+                                    name: login,
+                                    private: true,
+                                }}
+                                clickable
+                            />
+                            {workspace.admins.includes(login) && " (admin)"}
+                        </td>
+                        <td className="col-4">
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-danger"
+                                onClick={() => {
+                                    setDeleteModalOpen(true);
+                                    setRemoveUser(login);
+                                }}
+                            >
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                ))}
             <ConfirmationModal
                 isOpen={isDeleteModalOpen}
                 onRequestClose={() => setDeleteModalOpen(false)}

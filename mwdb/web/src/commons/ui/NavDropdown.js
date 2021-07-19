@@ -11,7 +11,14 @@ export default function NavDropdown(props) {
                 role="button"
                 data-toggle="dropdown"
             >
-                <FontAwesomeIcon className="navbar-icon" icon={props.icon} />
+                {props.icon ? (
+                    <FontAwesomeIcon
+                        className="navbar-icon"
+                        icon={props.icon}
+                    />
+                ) : (
+                    []
+                )}
                 {props.title}
                 {props.badge ? (
                     <span

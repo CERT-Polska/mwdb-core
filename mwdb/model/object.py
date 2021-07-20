@@ -4,7 +4,8 @@ from typing import Optional
 from uuid import UUID
 
 from flask import g
-from sqlalchemy import and_, exists
+from sqlalchemy import and_, cast, exists
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql.expression import true
@@ -801,7 +802,9 @@ class Object(db.Model):
         db_metakey = (
             db.session.query(Metakey)
             .filter(
-                Metakey.key == key, Metakey.value == value, Metakey.object_id == self.id
+                Metakey.key == key,
+                Metakey.value == cast(value, JSONB),
+                Metakey.object_id == self.id,
             )
             .first()
         )

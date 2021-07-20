@@ -8,6 +8,8 @@ import { capitalize } from "@mwdb-web/commons/helpers";
 
 import { Tag } from "@mwdb-web/commons/ui";
 
+const DagreD3Plot = React.lazy(() => import("./DagreD3Plot"));
+
 function RelationsNode(props) {
     const typeMapping = {
         file: "file",
@@ -189,8 +191,6 @@ function RelationsPlot(props) {
         for (let node of expandedNodes) expandNode(node);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    const DagreD3Plot = React.lazy(() => import("./DagreD3Plot"));
 
     return (
         <Suspense fallback={<div />}>

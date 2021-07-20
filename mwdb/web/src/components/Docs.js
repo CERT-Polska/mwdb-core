@@ -4,10 +4,11 @@ import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { View } from "@mwdb-web/commons/ui";
 
+const SwaggerUI = React.lazy(() => import("swagger-ui-react"));
+
 export default function Docs() {
     const auth = useContext(AuthContext);
     const [apiSpec, setApiSpec] = useState({});
-    const SwaggerUI = React.lazy(() => import("swagger-ui-react"));
 
     async function updateSpec() {
         const spec = await api.getServerDocs();

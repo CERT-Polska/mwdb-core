@@ -34,23 +34,6 @@ def test_add_sample():
     parse(res['upload_time'])
 
 
-def test_add_sample_legacy():
-    test = MwdbTest()
-    test.login()
-
-    filename = 'filename'
-    file_content = 'content'
-
-    res = test.add_sample_legacy(filename, file_content)
-
-    assert res['file_name'] == filename
-    assert res['file_size'] == len(file_content)
-    assert res['parents'] == []
-    assert res['children'] == []
-    assert res['tags'] == []
-    parse(res['upload_time'])
-
-
 def test_get_sample():
     test = MwdbTest()
     test.login()

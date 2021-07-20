@@ -6,4 +6,6 @@ venv/
 uploads/
 mwdb.ini
 mwdb.example.ini
-
+mwdb/web/build/
+mwdb/web/node_modules/
+mwdb/web/npm-debug.log

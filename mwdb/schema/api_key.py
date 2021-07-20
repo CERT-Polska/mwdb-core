@@ -21,4 +21,4 @@ class APIKeyListItemResponseSchema(APIKeyIdentifierBase):
 
 
 class APIKeyIssueRequestSchema(Schema):
-    name = fields.Str(required=True, allow_none=False)
+    name = fields.Str(missing="", allow_none=False)

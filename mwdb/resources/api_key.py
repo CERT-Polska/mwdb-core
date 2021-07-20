@@ -74,11 +74,8 @@ class APIKeyIssueResource(Resource):
         except NoResultFound:
             raise NotFound("User not found")
 
-        data = request.get_data(as_text=True)
-        if len(data) == 0:
-            key_name = ""
-        else:
-            key_name = loads_schema(data, APIKeyIssueRequestSchema())["name"]
+        data = request.get_data(as_text=True) or "{}"
+        key_name = loads_schema(data, APIKeyIssueRequestSchema())["name"]
 
         api_key = APIKey(
             id=uuid.uuid4(),

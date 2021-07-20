@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useLocation } from "react-router-dom";
 
@@ -23,8 +23,10 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
     const location = useLocation();
     const viewAlert = useViewAlert();
     const [currentApiToken, setCurrentApiToken] = useState({});
-    const [apiKeyToRemove, setApiKeyToRemove] = useState();
+    const [apiKeyToRemove, setApiKeyToRemove] = useState({});
     const [removeModalOpened, setRemoveModalOpened] = useState(false);
+    const [apiKeyNameModalOpened, setApiKeyNameModalOpened] = useState(false);
+    const apiKeyNameRef = useRef(null);
 
     async function getApiToken(apiKeyId) {
         try {
@@ -38,9 +40,9 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
         }
     }
 
-    async function createApiKey() {
+    async function createApiKey(name) {
         try {
-            const response = await api.apiKeyAdd(profile.login);
+            const response = await api.apiKeyAdd(profile.login, name);
             setCurrentApiToken(response.data);
             updateProfile();
             viewAlert.setAlert({
@@ -58,7 +60,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
         try {
             await api.apiKeyRemove(apiKeyId);
             setCurrentApiToken({});
-            setApiKeyToRemove(undefined);
+            setApiKeyToRemove({});
             updateProfile();
             setRemoveModalOpened(false);
             viewAlert.setAlert({
@@ -94,6 +96,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             )}
             {profile.api_keys.map((apiKey) => (
                 <div
+                    key={apiKey.id}
                     className={`card ${
                         location.state && location.state.addedKey === apiKey.id
                             ? "border-success"
@@ -102,8 +105,9 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
                 >
                     <div className="card-body">
                         <h5 className="card-subtitle text-muted">
-                            API key{" "}
-                            <span className="text-monospace">{apiKey.id}</span>
+                            <span className="text-monospace">
+                                {apiKey.name || apiKey.id}
+                            </span>
                         </h5>
                         <p className="card-text">
                             Issued on: <DateString date={apiKey.issued_on} />{" "}
@@ -135,7 +139,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
                             className="card-link text-danger"
                             onClick={(ev) => {
                                 ev.preventDefault();
-                                setApiKeyToRemove(apiKey.id);
+                                setApiKeyToRemove(apiKey);
                                 setRemoveModalOpened(true);
                             }}
                         >
@@ -177,7 +181,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
                         className="nav-link"
                         onClick={(ev) => {
                             ev.preventDefault();
-                            createApiKey();
+                            setApiKeyNameModalOpened(true);
                         }}
                     >
                         <FontAwesomeIcon icon={faPlus} /> Issue new API key
@@ -187,10 +191,28 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             <ConfirmationModal
                 isOpen={removeModalOpened}
                 onRequestClose={() => setRemoveModalOpened(false)}
-                onConfirm={(e) => removeApiKey(apiKeyToRemove)}
-                message={`Remove the API key ${apiKeyToRemove}?`}
+                onConfirm={(e) => removeApiKey(apiKeyToRemove.id)}
+                message={`Remove the API key ${apiKeyToRemove.name}?`}
                 confirmText="Remove"
             />
+            <ConfirmationModal
+                isOpen={apiKeyNameModalOpened}
+                onRequestClose={() => setApiKeyNameModalOpened(false)}
+                buttonStyle="btn-primary"
+                onConfirm={(e) => {
+                    setApiKeyNameModalOpened(false);
+                    const keyName = apiKeyNameRef.current.value;
+                    createApiKey(keyName);
+                }}
+                message={`Name of the API key`}
+                confirmText="Create"
+            >
+                <input
+                    className="form-control"
+                    ref={apiKeyNameRef}
+                    type="text"
+                />
+            </ConfirmationModal>
         </div>
     );
 }

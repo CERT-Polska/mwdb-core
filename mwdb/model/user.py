@@ -23,8 +23,6 @@ class User(db.Model):
     email = db.Column(db.String(128), nullable=False)
 
     password_hash = db.Column(db.String(128))
-    # Legacy "version_uid", todo: remove it when users are ready
-    version_uid = db.Column(db.String(16))
     # Password version (set password link and session token validation)
     # Invalidates set password link or session when password has been changes
     password_ver = db.Column(db.String(16))
@@ -185,10 +183,6 @@ class User(db.Model):
     @staticmethod
     def verify_set_password_token(token):
         return User._verify_token(token, ["password_ver"])
-
-    @staticmethod
-    def verify_legacy_token(token):
-        return User._verify_token(token, ["version_uid"])
 
     def is_member(self, group_id):
         groups = db.session.query(Member.group_id).filter(Member.user_id == self.id)

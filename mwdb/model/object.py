@@ -798,26 +798,22 @@ class Object(db.Model):
     __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
 
     def remove_metakey(self, key, value, check_permissions=True):
-        db_metakey = (
-            db.session.query(Metakey)
-            .filter(
-                Metakey.key == key, Metakey.value == value, Metakey.object_id == self.id
-            )
-            .first()
+        metakey_query = db.session.query(Metakey).filter(
+            Metakey.key == key, Metakey.object_id == self.id
         )
-
-        if db_metakey is None:
-            return False
+        if value:
+            metakey_query = metakey_query.filter(Metakey.value == value)
 
         if check_permissions and not MetakeyDefinition.query_for_set(key).first():
             return False
 
         try:
-            db.session.delete(db_metakey)
+            rows = metakey_query.delete()
             db.session.commit()
+            return rows > 0
         except IntegrityError:
             db.session.refresh(self)
-            if db_metakey in self.meta:
+            if metakey_query.first():
                 raise
         return True
 

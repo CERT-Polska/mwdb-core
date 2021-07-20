@@ -3,7 +3,6 @@ from marshmallow import Schema, fields
 from .object import (
     ObjectCreateRequestSchemaBase,
     ObjectItemResponseSchema,
-    ObjectLegacyMetakeysMixin,
     ObjectListItemResponseSchema,
     ObjectListResponseSchemaBase,
 )
@@ -13,21 +12,10 @@ class ConfigStatsRequestSchema(Schema):
     range = fields.Str(missing="*", allow_none=False)
 
 
-# Merge it with ConfigCreateRequestSchema during legacy upload remove
-class ConfigCreateSpecSchema(Schema):
+class ConfigCreateRequestSchema(ObjectCreateRequestSchemaBase):
     family = fields.Str(required=True, allow_none=False)
     config_type = fields.Str(missing="static", allow_none=False)
     cfg = fields.Dict(required=True, allow_none=False)
-
-
-class ConfigCreateRequestSchema(ObjectCreateRequestSchemaBase, ConfigCreateSpecSchema):
-    pass
-
-
-class ConfigLegacyCreateRequestSchema(
-    ConfigCreateRequestSchema, ObjectLegacyMetakeysMixin
-):
-    pass
 
 
 class ConfigListItemResponseSchema(ObjectListItemResponseSchema):

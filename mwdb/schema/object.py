@@ -1,13 +1,4 @@
-import json
-
-from marshmallow import (
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    pre_load,
-    validates_schema,
-)
+from marshmallow import Schema, ValidationError, fields, post_dump, validates_schema
 
 from .metakey import MetakeyItemRequestSchema
 from .tag import TagItemResponseSchema
@@ -38,30 +29,6 @@ class ObjectCreateRequestSchemaBase(Schema):
     upload_as = fields.Str(missing="*", allow_none=False)
     karton_id = fields.UUID(missing=None)
     karton_arguments = fields.Dict(missing={}, keys=fields.Str(), values=fields.Str())
-
-
-class ObjectLegacyMetakeysMixin(Schema):
-    @pre_load
-    def unpack_metakeys(self, params, **kwargs):
-        """
-        Metakeys are packed into JSON string that need to be deserialized first.
-        Empty string in 'metakeys' field is treated like missing key.
-        Request providing metakeys looks like this:
-        `curl ... -F="metakeys='{"metakeys": [...]}'"`
-        """
-        params = dict(params)
-        if "metakeys" in params:
-            if params["metakeys"]:
-                metakeys_json = json.loads(params["metakeys"])
-                if "metakeys" not in metakeys_json:
-                    raise ValidationError(
-                        "Object provided to 'metakeys' field "
-                        "must contain 'metakeys' key"
-                    )
-                params["metakeys"] = metakeys_json["metakeys"]
-            else:
-                del params["metakeys"]
-        return params
 
 
 class ObjectListItemResponseSchema(Schema):

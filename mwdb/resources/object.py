@@ -1,10 +1,9 @@
-import json
 from uuid import UUID
 
 from flask import g, request
 from flask_restful import Resource
 from luqum.parser import ParseError
-from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -217,8 +216,6 @@ class ObjectItemResource(Resource, ObjectUploader):
     ObjectType = Object
     ItemResponseSchema = ObjectItemResponseSchema
 
-    CreateRequestSchema = None
-
     @requires_authorization
     def get(self, identifier):
         """
@@ -252,41 +249,6 @@ class ObjectItemResource(Resource, ObjectUploader):
             raise NotFound("Object not found")
         schema = self.ItemResponseSchema()
         return schema.dump(obj)
-
-    def _get_upload_args(self, parent_identifier):
-        """
-        Transforms upload arguments mixed into various request fields
-        """
-        if request.is_json:
-            # If request is application/json: all args are in JSON
-            args = json.loads(request.get_data(parse_form_data=True, as_text=True))
-        else:
-            if "json" in request.form:
-                # If request is multipart/form-data:
-                # some args are in JSON and some are part of form
-                args = json.loads(request.form["json"])
-            else:
-                args = {}
-            if request.form.get("metakeys"):
-                args["metakeys"] = request.form["metakeys"]
-            if request.form.get("upload_as"):
-                args["upload_as"] = request.form["upload_as"]
-        args["parent"] = parent_identifier if parent_identifier != "root" else None
-        return args
-
-    @requires_authorization
-    def post(self, identifier):
-        if self.ObjectType is Object:
-            raise MethodNotAllowed()
-
-        schema = self.CreateRequestSchema()
-        obj = load_schema(self._get_upload_args(identifier), schema)
-
-        return self.create_object(obj)
-
-    @requires_authorization
-    def put(self, identifier):
-        return self.post(identifier)
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_objects)

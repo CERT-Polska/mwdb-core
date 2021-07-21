@@ -24,8 +24,8 @@ function KeyNameModal({ isOpen, onConfirm, onClose }) {
     const ref = useRef(null);
 
     function handleClose() {
-        setCurrentKeyName("");
         onClose();
+        setCurrentKeyName("");
     }
 
     function handleConfirm() {

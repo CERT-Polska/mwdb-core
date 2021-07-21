@@ -19,6 +19,7 @@ export default function ConfirmationModal(props) {
         <Modal
             isOpen={props.isOpen}
             onRequestClose={props.onRequestClose}
+            onAfterOpen={props.onAfterOpen}
             style={modalStyle}
         >
             <div className="modal-header">

@@ -21,8 +21,8 @@ def test_profile_change_invalidate():
 
     # "Typical" shouldn't be able to create api key for admin
     with ShouldRaise(status_code=403):
-        typical.api_key_create(admin_login())
-    api_key = typical.api_key_create("typical").json()
+        typical.api_key_create(admin_login(), "test key")
+    api_key = typical.api_key_create("typical", "test key").json()
 
     typical_via_api = MwdbTest()
     typical_via_api.set_auth_token(api_key["token"])
@@ -98,9 +98,15 @@ def test_api_key_management():
     admin = MwdbTest()
     admin.login()
 
-    admin_key = admin.api_key_create(admin_login()).json()
-    typical_key = admin.api_key_create("typical").json()
-    typical_key_2 = admin.api_key_create("typical").json()
+    admin_key = admin.api_key_create(admin_login(), "admin key").json()
+    typical_key = admin.api_key_create("typical", "typical key 1").json()
+    typical_key_2 = admin.api_key_create("typical", "typical key 2").json()
+
+    # It should be possible to create API key without sending any payload
+    # Should fall back to empty name
+    res = admin.session.post(admin.mwdb_url + "/user/typical/api_key")
+    res.raise_for_status()
+    assert res.json()["name"] == ""
 
     typical.set_auth_token(typical_key["token"])
     typical.add_sample()

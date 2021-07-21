@@ -75,8 +75,8 @@ class MwdbTest(object):
     def login(self):
         return self.login_as(admin_login(), os.environ["MWDB_ADMIN_PASSWORD"])
 
-    def api_key_create(self, login):
-        res = self.session.post(self.mwdb_url + "/user/" + login + "/api_key")
+    def api_key_create(self, login, name):
+        res = self.session.post(self.mwdb_url + "/user/" + login + "/api_key", json={"name": name})
         res.raise_for_status()
         return res
 

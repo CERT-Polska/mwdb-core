@@ -1,16 +1,26 @@
 import uuid
 from datetime import datetime
 
-from flask import g
+from flask import g, request
 from flask_restful import Resource
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import APIKey, User, db
-from mwdb.schema.api_key import APIKeyIdentifierBase, APIKeyTokenResponseSchema
+from mwdb.schema.api_key import (
+    APIKeyIdentifierBase,
+    APIKeyIssueRequestSchema,
+    APIKeyTokenResponseSchema,
+)
 
-from . import load_schema, logger, requires_authorization, requires_capabilities
+from . import (
+    load_schema,
+    loads_schema,
+    logger,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 class APIKeyIssueResource(Resource):
@@ -37,6 +47,11 @@ class APIKeyIssueResource(Resource):
               schema:
                 type: string
               description: Owner login for the created API key
+        requestBody:
+            description: Name for the created API key
+            content:
+              application/json:
+                schema: APIKeyIssueRequestSchema
         responses:
             200:
                 description: Identifier and token for created API key
@@ -64,8 +79,12 @@ class APIKeyIssueResource(Resource):
         except NoResultFound:
             raise NotFound("User not found")
 
+        data = request.get_data(as_text=True) or "{}"
+        key_name = loads_schema(data, APIKeyIssueRequestSchema())["name"]
+
         api_key = APIKey(
             id=uuid.uuid4(),
+            name=key_name,
             user_id=api_key_owner.id,
             issued_by=g.auth_user.id,
             issued_on=datetime.now(),
@@ -79,6 +98,7 @@ class APIKeyIssueResource(Resource):
                 "id": api_key.id,
                 "issued_on": api_key.issued_on,
                 "issuer_login": api_key.issuer_login,
+                "name": api_key.name,
                 "token": api_key.generate_token(),
             }
         )
@@ -142,6 +162,7 @@ class APIKeyResource(Resource):
                 "id": api_key.id,
                 "issued_on": api_key.issued_on,
                 "issuer_login": api_key.issuer_login,
+                "name": api_key.name,
                 "token": api_key.generate_token(),
             }
         )

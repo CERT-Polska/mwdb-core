@@ -19,6 +19,44 @@ import {
     useViewAlert,
 } from "@mwdb-web/commons/ui";
 
+function KeyNameModal({ isOpen, onConfirm, onClose }) {
+    const [currentKeyName, setCurrentKeyName] = useState("");
+    const ref = useRef(null);
+
+    function handleConfirm() {
+        onConfirm(currentKeyName);
+        setCurrentKeyName("");
+    }
+
+    return (
+        <ConfirmationModal
+            isOpen={isOpen}
+            onRequestClose={onClose}
+            buttonStyle="btn-primary"
+            onConfirm={handleConfirm}
+            onAfterOpen={() => ref.current.focus()}
+            message={`Name the API key`}
+            confirmText="Create"
+        >
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleConfirm();
+                }}
+            >
+                <input
+                    ref={ref}
+                    className="form-control"
+                    type="text"
+                    placeholder="API key name..."
+                    onChange={(e) => setCurrentKeyName(e.target.value)}
+                    value={currentKeyName}
+                />
+            </form>
+        </ConfirmationModal>
+    );
+}
+
 export default function ProfileAPIKeys({ profile, updateProfile }) {
     const location = useLocation();
     const viewAlert = useViewAlert();
@@ -26,7 +64,10 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
     const [apiKeyToRemove, setApiKeyToRemove] = useState({});
     const [removeModalOpened, setRemoveModalOpened] = useState(false);
     const [apiKeyNameModalOpened, setApiKeyNameModalOpened] = useState(false);
-    const apiKeyNameRef = useRef(null);
+
+    function closeKeyNameModal() {
+        setApiKeyNameModalOpened(false);
+    }
 
     async function getApiToken(apiKeyId) {
         try {
@@ -195,24 +236,14 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
                 message={`Remove the API key ${apiKeyToRemove.name}?`}
                 confirmText="Remove"
             />
-            <ConfirmationModal
+            <KeyNameModal
                 isOpen={apiKeyNameModalOpened}
-                onRequestClose={() => setApiKeyNameModalOpened(false)}
-                buttonStyle="btn-primary"
-                onConfirm={(e) => {
-                    setApiKeyNameModalOpened(false);
-                    const keyName = apiKeyNameRef.current.value;
+                onClose={closeKeyNameModal}
+                onConfirm={(keyName) => {
+                    closeKeyNameModal();
                     createApiKey(keyName);
                 }}
-                message={`Name of the API key`}
-                confirmText="Create"
-            >
-                <input
-                    className="form-control"
-                    ref={apiKeyNameRef}
-                    type="text"
-                />
-            </ConfirmationModal>
+            />
         </div>
     );
 }

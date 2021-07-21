@@ -23,6 +23,11 @@ function KeyNameModal({ isOpen, onConfirm, onClose }) {
     const [currentKeyName, setCurrentKeyName] = useState("");
     const ref = useRef(null);
 
+    function handleClose() {
+        setCurrentKeyName("");
+        onClose();
+    }
+
     function handleConfirm() {
         onConfirm(currentKeyName);
         setCurrentKeyName("");
@@ -31,7 +36,7 @@ function KeyNameModal({ isOpen, onConfirm, onClose }) {
     return (
         <ConfirmationModal
             isOpen={isOpen}
-            onRequestClose={onClose}
+            onRequestClose={handleClose}
             buttonStyle="btn-primary"
             onConfirm={handleConfirm}
             onAfterOpen={() => ref.current.focus()}

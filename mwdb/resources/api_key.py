@@ -47,6 +47,11 @@ class APIKeyIssueResource(Resource):
               schema:
                 type: string
               description: Owner login for the created API key
+        requestBody:
+            description: Name for the created API key
+            content:
+              application/json:
+                schema: APIKeyIssueRequestSchema
         responses:
             200:
                 description: Identifier and token for created API key

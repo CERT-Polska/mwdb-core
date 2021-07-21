@@ -23,95 +23,89 @@ export function RecentRow(props) {
 }
 
 export default function RecentView(props) {
-    /**
-     * There are three types of query states
-     * - currentQuery:   committed query for which we're showing the results - stored in location
-     * - submittedQuery: query submitted by user.
-     *                   If different than currentQuery - we need to fetch the first page and
-     *                   check if query syntax is correct and there are no other errors.
-     * - queryInput:     state of query input
-     */
     const api = useContext(APIContext);
     const history = useHistory();
-    const getLinkForQuery = (query) =>
-        `${history.location.pathname}?${queryString.stringify({
-            ...queryString.parse(history.location.search),
-            q: encodeSearchQuery(query),
-        })}`;
+    // Current query set in URI path
     const currentQuery = decodeSearchQuery(
         (queryString.parse(history.location.search)["q"] || "").trim()
     );
-    const setCurrentQuery = (query) => {
-        history.push(getLinkForQuery(query));
-    };
+    // Submitted query for which we know it's valid and
+    // we can load next parts of results into UI
+    const [submittedQuery, setSubmittedQuery] = useState(null);
+
+    function getQueryURL(query) {
+        const queryPart = queryString.stringify({
+            ...queryString.parse(history.location.search),
+            q: encodeSearchQuery(query),
+        });
+        return `${history.location.pathname}?${queryPart}`;
+    }
 
     // Query input state
-    let [queryInput, setQueryInput] = useState(currentQuery);
-    // Submitted input state
-    // If submittedQuery !== currentQuery: query is uncommitted and needs to be loaded
-    let [submittedQuery, setSubmittedQuery] = useState(currentQuery);
+    const [queryInput, setQueryInput] = useState(currentQuery);
     // General error shown in Alert
-    let [error, setError] = useState(null);
+    const [error, setError] = useState(null);
     // Query error shown under the query bar
-    let [queryError, setQueryError] = useState(null);
-
-    let [objectCount, setObjectCount] = useState(null);
+    const [queryError, setQueryError] = useState(null);
+    const [objectCount, setObjectCount] = useState(null);
 
     const isLocked = !queryError && submittedQuery !== currentQuery;
 
-    const resetErrors = () => {
+    function resetErrors() {
         setError(null);
         setQueryError(null);
-    };
+    }
 
-    const submitQuery = (query) => {
+    function setCurrentQuery(query) {
         // If query is already submitted: do nothing
         if (query === submittedQuery) return;
+        // Optionally convert query if only hash was provided
         query = queryFromHash(query, props.dhashOnly);
-        // Synchronize input
-        setQueryInput(query);
-        resetErrors();
-        // Submit query
-        setSubmittedQuery(query);
-    };
+        // Set query in URL (currentQuery)
+        history.push(getQueryURL(query));
+    }
 
     const addToQuery = (field, value) => {
-        return submitQuery(addFieldToQuery(currentQuery, field, value));
+        return setCurrentQuery(addFieldToQuery(submittedQuery, field, value));
     };
 
-    // Commit submitted query
-    useEffect(() => {
-        let cancelled = false;
-        // If query is already committed: do nothing
-        if (submittedQuery === currentQuery) return;
-        // Make preflight query to check if query is correct
-        api.getObjectCount(props.type, submittedQuery)
-            .then((response) => {
-                if (cancelled) return;
-                // If ok: commit query
-                setCurrentQuery(submittedQuery);
-                setObjectCount(response.data["count"]);
-            })
-            .catch((error) => {
-                if (cancelled) return;
-                setQueryError(error);
-            });
-        return () => {
-            cancelled = true;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [submittedQuery]);
-
-    // Synchronize changed current (committed) query (history back/forward)
+    // Synchronize input if currentQuery was changed
     useEffect(() => {
         setQueryInput(currentQuery);
         resetErrors();
-        setSubmittedQuery(currentQuery);
+    }, [currentQuery]);
+
+    // Submit query if currentQuery was changed
+    useEffect(() => {
+        let cancelled = false;
+        // If query is already submitted: do nothing
+        if (submittedQuery === currentQuery) return;
+        // If query is empty, submit immediately
+        if (!currentQuery) setSubmittedQuery("");
+        else {
+            // Make preflight query to get count of results
+            // and check if query is correct
+            api.getObjectCount(props.type, currentQuery)
+                .then((response) => {
+                    if (cancelled) return;
+                    // If ok: commit query
+                    setSubmittedQuery(currentQuery);
+                    setObjectCount(response.data["count"]);
+                })
+                .catch((error) => {
+                    if (cancelled) return;
+                    setQueryError(error);
+                });
+        }
+        return () => {
+            // Cancel pending requests after unmount/remount
+            cancelled = true;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentQuery]);
 
     const canAddQuickQuery =
-        queryInput && !isLocked && queryInput === currentQuery;
+        queryInput && !isLocked && queryInput === submittedQuery;
 
     const queryErrorMessage = queryError ? (
         <div className="form-hint">
@@ -124,7 +118,7 @@ export default function RecentView(props) {
     );
 
     const objectCountMessage =
-        submittedQuery && objectCount ? (
+        submittedQuery && objectCount !== null ? (
             <div className="form-hint">
                 {objectCount}
                 {" results found"}
@@ -139,7 +133,7 @@ export default function RecentView(props) {
                     className="searchForm"
                     onSubmit={(ev) => {
                         ev.preventDefault();
-                        submitQuery(queryInput);
+                        setCurrentQuery(queryInput);
                     }}
                 >
                     <div className="input-group">
@@ -150,7 +144,7 @@ export default function RecentView(props) {
                                 value="X"
                                 onClick={(ev) => {
                                     ev.preventDefault();
-                                    submitQuery("");
+                                    setCurrentQuery("");
                                 }}
                             />
                         </div>
@@ -180,16 +174,16 @@ export default function RecentView(props) {
                         {queryError ? queryErrorMessage : objectCountMessage}
                         <QuickQuery
                             type={props.type}
-                            query={currentQuery}
+                            query={submittedQuery}
                             canAddQuickQuery={canAddQuickQuery}
-                            submitQuery={(q) => submitQuery(q)}
+                            submitQuery={(q) => setCurrentQuery(q)}
                             addToQuery={addToQuery}
                             setQueryError={setQueryError}
                         />
                     </div>
                 </form>
                 <RecentViewList
-                    query={currentQuery}
+                    query={submittedQuery}
                     type={props.type}
                     rowComponent={props.rowComponent}
                     headerComponent={props.headerComponent}

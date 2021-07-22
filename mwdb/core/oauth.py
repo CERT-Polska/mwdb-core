@@ -41,13 +41,20 @@ class OpenIDSession(OAuth2Session):
             return None
 
         def load_key(header, _):
-            jwk_set = JsonWebKey.import_key_set(self.fetch_jwk_set())
-            try:
-                return jwk_set.find_by_kid(header.get("kid"))
-            except ValueError:
-                # re-try with new jwk set
-                jwk_set = JsonWebKey.import_key_set(self.fetch_jwk_set(force=True))
-                return jwk_set.find_by_kid(header.get("kid"))
+            alg = header.get("alg")
+            if alg in ["HS256", "HS384", "HS512"]:
+                # For HS256: client secret is used for id_token signing
+                return self.client_secret
+            elif alg in ["RS256", "RS384", "RS512"]:
+                jwk_set = JsonWebKey.import_key_set(self.fetch_jwk_set())
+                try:
+                    return jwk_set.find_by_kid(header.get("kid"))
+                except ValueError:
+                    # re-try with new jwk set
+                    jwk_set = JsonWebKey.import_key_set(self.fetch_jwk_set(force=True))
+                    return jwk_set.find_by_kid(header.get("kid"))
+            else:
+                raise RuntimeError(f"Unsupported id_token algorithm: '{alg}'")
 
         claims_params = dict(nonce=nonce, client_id=self.client_id)
         if "access_token" in token:

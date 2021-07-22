@@ -1,20 +1,13 @@
-from mwdb.core.oidc import OpenIDSession
+from mwdb.core.oauth import OpenIDSession
 
 from . import db
-
-
-class OpenIDUser(db.Model):
-    __tablename__ = "openid_user"
-
-    # todo
-    ...
 
 
 class OpenIDProvider(db.Model):
     __tablename__ = "openid_provider"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(64), nullable=False)
+    name = db.Column(db.String(64), nullable=False, unique=True)
     client_id = db.Column(db.String(64), nullable=False)
     client_secret = db.Column(db.String(64), nullable=False)
     authorization_endpoint = db.Column(db.String(128), nullable=False)
@@ -39,13 +32,13 @@ class OpenIDProvider(db.Model):
         client = self._get_client()
         nonce = client.generate_nonce()
         return (
-            nonce,
             *client.create_authorization_url(
-                self.authorization_endpoint, redirect_uri=redirect_uri, nonce=nonce
+                self.authorization_endpoint, nonce=nonce, redirect_uri=redirect_uri
             ),
+            nonce,
         )
 
-    def fetch_id_token(self, code, state, nonce):
+    def fetch_id_token(self, code, state, nonce, redirect_uri):
         client = self._get_client()
-        token = client.fetch_token(code=code, state=state)
+        token = client.fetch_token(code=code, state=state, redirect_uri=redirect_uri)
         return client.parse_id_token(token, nonce)

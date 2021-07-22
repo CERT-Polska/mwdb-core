@@ -72,32 +72,13 @@ class OpenIDCode(oidc_grants.OpenIDCode):
         return exists_nonce(nonce, request)
 
     def get_jwt_config(self, grant):
-        return DUMMY_JWT_CONFIG
-
-    def generate_user_info(self, user, scope):
-        return generate_user_info(user, scope)
-
-
-class ImplicitGrant(oidc_grants.OpenIDImplicitGrant):
-    def exists_nonce(self, nonce, request):
-        return exists_nonce(nonce, request)
-
-    def get_jwt_config(self, grant):
-        return DUMMY_JWT_CONFIG
-
-    def generate_user_info(self, user, scope):
-        return generate_user_info(user, scope)
-
-
-class HybridGrant(oidc_grants.OpenIDHybridGrant):
-    def create_authorization_code(self, client, grant_user, request):
-        return create_authorization_code(client, grant_user, request)
-
-    def exists_nonce(self, nonce, request):
-        return exists_nonce(nonce, request)
-
-    def get_jwt_config(self):
-        return DUMMY_JWT_CONFIG
+        # Sign JWT with client_secret
+        return {
+            "key": grant.request.client.client_secret,
+            "alg": "HS256",
+            "iss": "https://authlib.org",
+            "exp": 3600,
+        }
 
     def generate_user_info(self, user, scope):
         return generate_user_info(user, scope)
@@ -113,9 +94,7 @@ require_oauth = ResourceProtector()
 
 authorization.init_app(app)
 
-# support all openid grants
-authorization.register_grant(ImplicitGrant)
-authorization.register_grant(HybridGrant)
+# support only authorization_code grant
 authorization.register_grant(AuthorizationCodeGrant, [OpenIDCode(require_nonce=True)])
 
 # support revocation

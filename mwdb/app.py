@@ -50,7 +50,11 @@ from mwdb.resources.object import (
     ObjectItemResource,
     ObjectResource,
 )
-from mwdb.resources.oidc import OpenIDAuthorizeResource, OpenIDLoginResource
+from mwdb.resources.oauth import (
+    OpenIDAuthorizeResource,
+    OpenIDLoginResource,
+    OpenIDProviderResource,
+)
 from mwdb.resources.quick_query import QuickQueryItemResource, QuickQueryResource
 from mwdb.resources.relations import ObjectChildResource, RelationsResource
 from mwdb.resources.remotes import (
@@ -321,8 +325,9 @@ api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, "/group/<name>/member/<login>")
 
 # Oauth endpoints
-api.add_resource(OpenIDLoginResource, "/oauth/login")
-api.add_resource(OpenIDAuthorizeResource, "/oauth/authorize")
+api.add_resource(OpenIDProviderResource, "/oauth")
+api.add_resource(OpenIDLoginResource, "/oauth/<provider_name>/login")
+api.add_resource(OpenIDAuthorizeResource, "/oauth/<provider_name>/authorize")
 
 # Remote endpoints
 api.add_resource(RemoteListResource, "/remote")

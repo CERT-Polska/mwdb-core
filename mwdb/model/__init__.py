@@ -13,6 +13,7 @@ from .group import Group, Member  # noqa: E402
 from .karton import KartonAnalysis, karton_object  # noqa: E402
 from .metakey import Metakey, MetakeyDefinition, MetakeyPermission  # noqa: E402
 from .object import Object, ObjectPermission, relation  # noqa: E402
+from .oauth import OpenIDProvider  # noqa: E402
 from .quick_query import QuickQuery  # noqa: E402
 from .tag import Tag, object_tag_table  # noqa: E402
 from .user import User  # noqa: E402
@@ -34,6 +35,7 @@ __all__ = [
     "MetakeyPermission",
     "Object",
     "ObjectPermission",
+    "OpenIDProvider",
     "relation",
     "QuickQuery",
     "Tag",

@@ -16,13 +16,7 @@ from mwdb.schema.oauth import (
     OpenIDProviderListResponseSchema,
 )
 
-from . import (
-    load_schema,
-    loads_schema,
-    logger,
-    requires_authorization,
-    requires_capabilities,
-)
+from . import loads_schema, logger, requires_authorization, requires_capabilities
 
 
 class OpenIDProviderResource(Resource):

@@ -44,16 +44,16 @@ from mwdb.resources.metakey import (
     MetakeyPermissionResource,
     MetakeyResource,
 )
+from mwdb.resources.oauth import (
+    OpenIDAuthorizeResource,
+    OpenIDLoginResource,
+    OpenIDProviderResource,
+)
 from mwdb.resources.object import (
     ObjectCountResource,
     ObjectFavoriteResource,
     ObjectItemResource,
     ObjectResource,
-)
-from mwdb.resources.oauth import (
-    OpenIDAuthorizeResource,
-    OpenIDLoginResource,
-    OpenIDProviderResource,
 )
 from mwdb.resources.quick_query import QuickQueryItemResource, QuickQueryResource
 from mwdb.resources.relations import ObjectChildResource, RelationsResource

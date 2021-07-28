@@ -2,6 +2,7 @@ import datetime
 
 from flask import g
 from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.exc import IntegrityError
 
 from mwdb.core.karton import get_karton_state
 
@@ -84,6 +85,27 @@ class KartonAnalysis(db.Model):
     @classmethod
     def get(cls, analysis_id):
         return db.session.query(KartonAnalysis).filter(KartonAnalysis.id == analysis_id)
+
+    @classmethod
+    def get_or_create(cls, analysis_id, initial_object):
+        analysis = cls.get(analysis_id).first()
+
+        if analysis is not None:
+            return analysis, False
+
+        db.session.begin_nested()
+        analysis = KartonAnalysis(id=analysis_id, objects=[initial_object])
+        is_new = False
+        try:
+            db.session.add(analysis)
+            db.session.commit()
+            is_new = True
+        except IntegrityError:
+            db.session.rollback()
+            analysis = cls.get(analysis_id).first()
+            if analysis is None:
+                raise
+        return analysis, is_new
 
     @classmethod
     def create(cls, analysis_id, initial_object, arguments=None):

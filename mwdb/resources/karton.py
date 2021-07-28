@@ -200,17 +200,11 @@ class KartonAnalysisResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have access
                     to this object.
-
-                    When analysis doesn't exist.
         """
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
-        analysis = KartonAnalysis.get(analysis_id).first()
-        if analysis is None:
-            raise NotFound("Analysis not found or not associated with the object")
-
-        db_object.assign_analysis(analysis)
+        analysis, _ = db_object.assign_analysis(analysis_id)
         schema = KartonItemResponseSchema()
         return schema.dump(analysis)

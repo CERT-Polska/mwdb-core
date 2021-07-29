@@ -102,7 +102,7 @@ class KartonAnalysis(db.Model):
             is_new = True
         except IntegrityError:
             db.session.rollback()
-            analysis = cls.get(analysis_id).first()
+            analysis = cls.get(analysis_id).first()  # Avoid TOCTOU exceptions
             if analysis is None:
                 raise
         return analysis, is_new

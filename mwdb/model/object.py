@@ -767,12 +767,7 @@ class Object(db.Model):
                 # User doesn't have permissions to assign analysis
                 return None
 
-            analysis = KartonAnalysis.get(karton_id).first()
-            if analysis is None:
-                # Analysis with given UUID doesn't exist
-                return None
-
-            is_new = self.assign_analysis(analysis, commit=False)
+            _, is_new = self.assign_analysis(karton_id, commit=False)
 
             if commit:
                 db.session.commit()
@@ -853,16 +848,19 @@ class Object(db.Model):
             db.session.commit()
         return analysis
 
-    def assign_analysis(self, analysis, commit=True):
+    def assign_analysis(self, analysis_id, commit=True):
         """
         Assigns KartonAnalysis to the object
         """
-        if analysis.id in [existing.id for existing in self.analyses]:
-            return False
-        self.analyses.append(analysis)
+        analysis, is_new = KartonAnalysis.get_or_create(analysis_id, self)
+        if not is_new and analysis.id not in [
+            existing.id for existing in self.analyses
+        ]:
+            self.analyses.append(analysis)
+            return analysis, True
         if commit:
             db.session.commit()
-        return True
+        return analysis, is_new
 
     def is_analyzed(self):
         return bool(self.analyses)

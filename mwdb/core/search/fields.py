@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, List, Type, Union
 
+import regex
 from flask import g
 from luqum.tree import Range, Term
 from sqlalchemy import Text, and_, column, exists, func, or_, select
@@ -335,8 +336,8 @@ class JSONField(BaseField):
 
         def jsonpath_escape(field):
             """Escapes field to be correctly represented in jsonpath"""
-            # Escape all double quotes
-            field = field.replace('"', '\\"')
+            # Escape all unescaped double quotes
+            field = regex.sub(r'(?<!\\)(?:\\\\)*\K["]', '\\"', field)
             # Find trailing non-escaped asterisks
             asterisk_r = re.search(r"(?<!\\)(?:\\\\)*([*]+)$", field)
             if not asterisk_r:

@@ -1,5 +1,7 @@
 from typing import Dict, List, Tuple, Type
 
+import regex
+
 from mwdb.model import Comment, Config, File, KartonAnalysis, Object, Tag, TextBlob
 
 from .exceptions import FieldNotQueryableException, MultipleObjectsQueryException
@@ -70,7 +72,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
 def get_field_mapper(
     queried_type: Type[Object], field_selector: str
 ) -> Tuple[BaseField, List[str]]:
-    field_path = field_selector.split(".")
+    field_path = regex.split(r"(?<!\\)(?:\\\\)*\K[.]", field_selector)
 
     # Map object type selector
     if field_path[0] in object_mapping:

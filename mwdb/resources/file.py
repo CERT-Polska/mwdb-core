@@ -28,7 +28,7 @@ class FileUploader(ObjectUploader):
         super().on_reuploaded(object, params)
         hooks.on_reuploaded_file(object)
 
-    def _create_object(self, spec, parent, share_with, metakeys, analysis):
+    def _create_object(self, spec, parent, share_with, metakeys, analysis_id):
         try:
             return File.get_or_create(
                 request.files["file"].filename,
@@ -36,7 +36,7 @@ class FileUploader(ObjectUploader):
                 parent=parent,
                 share_with=share_with,
                 metakeys=metakeys,
-                analysis=analysis,
+                analysis_id=analysis_id,
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a file")

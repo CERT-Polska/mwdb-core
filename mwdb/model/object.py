@@ -490,7 +490,7 @@ class Object(db.Model):
 
     @classmethod
     def _get_or_create(
-        cls, obj, parent=None, metakeys=None, share_with=None, analysis=None
+        cls, obj, parent=None, metakeys=None, share_with=None, analysis_id=None
     ):
         """
         Polymophic get or create pattern, useful in dealing with race condition
@@ -562,8 +562,8 @@ class Object(db.Model):
         if parent:
             new_cls.add_parent(parent, commit=False)
 
-        if analysis:
-            new_cls.assign_analysis(analysis)
+        if analysis_id:
+            new_cls.assign_analysis(analysis_id)
 
         return new_cls, is_new
 

@@ -93,6 +93,7 @@ def test_search_size():
     found_objs = test.search(f'file.size:[1.30kb TO 1.31kb]')
     assert len(found_objs) > 0
 
+
 def test_search_comment():
     test = MwdbTest()
     test.login()
@@ -218,6 +219,36 @@ def test_search_json():
     assert len(found_objs) == 0
 
     found_objs = test.search('config.cfg.array\\*array**:2')
+    assert len(found_objs) == 1
+
+
+def test_search_json_special_chars():
+    test = MwdbTest()
+    test.login()
+
+    value = base62uuid().lower()
+
+    test.add_config(None, "malwarex", {
+        r"array*with*stars\*": [1, 2, 3, value],
+        r"key\with\slashes": value,
+        r"key.with spaces": value,
+        r'key"with quote': value,
+        r'key"with\"quotes': value,
+    })
+
+    found_objs = test.search(f'config.cfg.array\\*with\\*stars\\\\\\**:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.key\\\\with\\\\slashes:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.key\\.with\\ spaces:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.key\\"with\\ quote:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.key"with\\\\"quotes:{value}')
     assert len(found_objs) == 1
 
 

@@ -343,11 +343,11 @@ class JSONField(BaseField):
             if not asterisk_r:
                 asterisks = ""
             else:
-                asterisk_levels = len(asterisk_r.group(0))
+                asterisk_levels = len(asterisk_r.group(1))
                 field = field[:-asterisk_levels]
                 asterisks = asterisk_levels * "[*]"
             # Unescape all escaped asterisks
-            field = re.sub(r"(?<!\\)(?:\\\\)*(\\[*])", "*", field)
+            field = regex.sub(r"(?<!\\)(?:\\\\)*\K(\\[*])", "*", field)
             return f'"{field}"{asterisks}'
 
         """
@@ -361,6 +361,7 @@ class JSONField(BaseField):
             );
         """
         json_path = ".".join(["$"] + [jsonpath_escape(field) for field in remainder])
+        print(json_path, flush=True)
         # Make aliased function call
         json_elements = func.jsonb_path_query(self.column, json_path).alias(
             "json_element"

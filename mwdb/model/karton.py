@@ -87,17 +87,16 @@ class KartonAnalysis(db.Model):
         return db.session.query(KartonAnalysis).filter(KartonAnalysis.id == analysis_id)
 
     @classmethod
-    def get_or_create(cls, analysis_id, initial_object):
+    def get_or_create(cls, analysis_id, initial_object=None):
         analysis = cls.get(analysis_id).first()
 
         if analysis is not None:
             return analysis, False
 
         db.session.begin_nested()
-        analysis = KartonAnalysis(id=analysis_id, objects=[initial_object])
         is_new = False
         try:
-            db.session.add(analysis)
+            analysis = cls.create(analysis_id, initial_object=initial_object)
             db.session.commit()
             is_new = True
         except IntegrityError:
@@ -108,9 +107,10 @@ class KartonAnalysis(db.Model):
         return analysis, is_new
 
     @classmethod
-    def create(cls, analysis_id, initial_object, arguments=None):
+    def create(cls, analysis_id, initial_object=None, arguments=None):
+        objects = [initial_object] if initial_object is not None else []
         analysis = KartonAnalysis(
-            id=analysis_id, arguments=arguments or {}, objects=[initial_object]
+            id=analysis_id, arguments=arguments or {}, objects=objects
         )
         db.session.add(analysis)
         return analysis

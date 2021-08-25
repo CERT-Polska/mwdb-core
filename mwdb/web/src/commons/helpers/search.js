@@ -22,7 +22,7 @@ export function escapeSearchValue(input) {
 }
 
 export function escapeSearchField(field) {
-    return field.replaceAll(/[.\\ *:]/g, "\\$&");
+    return field.replace(/[.\\ *:]/g, "\\$&");
 }
 
 export function makeSearchLink(field, input, noEscape, endpoint) {

@@ -47,12 +47,7 @@ export function makeSearchRangeLink(field, from, to, endpoint) {
 }
 
 export function makeSearchConfigLink(path, value, endpoint) {
-    return makeSearchLink(
-        `cfg.${path.map(escapeSearchField).join(".")}`,
-        value,
-        false,
-        endpoint
-    );
+    return makeSearchLink(`cfg.${path.join(".")}`, value, false, endpoint);
 }
 
 export function makeSearchDateLink(field, date, endpoint) {

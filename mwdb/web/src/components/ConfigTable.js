@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import {
+    escapeSearchField,
     makeSearchLink,
     makeSearchConfigLink,
     makeSearchDateLink,
@@ -132,7 +133,7 @@ export function ConfigRows(props) {
                   parentPath[parentPath.length - 1] + "*",
               ]
             : // Else: just add next key to the path
-              parentPath.concat([configKey]);
+              parentPath.concat([escapeSearchField(configKey)]);
         return (
             <ConfigRow
                 configKey={configKey}

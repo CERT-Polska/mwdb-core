@@ -39,7 +39,7 @@ class Config(Object):
         parent=None,
         metakeys=None,
         share_with=None,
-        analysis=None,
+        analysis_id=None,
     ):
         dhash = config_dhash(cfg)
 
@@ -51,7 +51,7 @@ class Config(Object):
             parent=parent,
             metakeys=metakeys,
             share_with=share_with,
-            analysis=analysis,
+            analysis_id=analysis_id,
         )
 
     def _send_to_karton(self):

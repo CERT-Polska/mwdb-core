@@ -36,7 +36,7 @@ class TextBlob(Object):
         parent=None,
         metakeys=None,
         share_with=None,
-        analysis=None,
+        analysis_id=None,
     ):
         dhash = hashlib.sha256(content.encode("utf-8")).hexdigest()
 
@@ -53,7 +53,7 @@ class TextBlob(Object):
             parent=parent,
             metakeys=metakeys,
             share_with=share_with,
-            analysis=analysis,
+            analysis_id=analysis_id,
         )
         # If object exists yet: we need to refresh last_seen timestamp
         if not is_new:

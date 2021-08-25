@@ -232,7 +232,7 @@ def test_search_json_special_chars():
         r"array*with*stars\*": [1, 2, 3, value],
         r"key\with\slashes": value,
         r"key.with spaces": value,
-        r'key"with quote': value,
+        r'key"with:quote': value,
         r'key"with\"quotes': value,
     })
 
@@ -245,7 +245,7 @@ def test_search_json_special_chars():
     found_objs = test.search(f'config.cfg.key\\.with\\ spaces:{value}')
     assert len(found_objs) == 1
 
-    found_objs = test.search(f'config.cfg.key\\"with\\ quote:{value}')
+    found_objs = test.search(f'config.cfg.key\\"with\\:quote:{value}')
     assert len(found_objs) == 1
 
     found_objs = test.search(f'config.cfg.key"with\\\\"quotes:{value}')

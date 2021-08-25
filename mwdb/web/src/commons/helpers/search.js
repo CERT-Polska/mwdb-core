@@ -21,6 +21,10 @@ export function escapeSearchValue(input) {
     return input;
 }
 
+export function escapeSearchField(field) {
+    return field.replaceAll(/[.\\ *:]/g, "\\$&");
+}
+
 export function makeSearchLink(field, input, noEscape, endpoint) {
     if (input === undefined) return "";
 
@@ -38,6 +42,15 @@ export function makeSearchRangeLink(field, from, to, endpoint) {
         field,
         `[${escapeSearchValue(from)} TO ${escapeSearchValue(to)}]`,
         true,
+        endpoint
+    );
+}
+
+export function makeSearchConfigLink(path, value, endpoint) {
+    return makeSearchLink(
+        `cfg.${path.map(escapeSearchField).join(".")}`,
+        value,
+        false,
         endpoint
     );
 }

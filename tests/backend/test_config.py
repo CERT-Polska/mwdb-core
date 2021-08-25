@@ -1,8 +1,8 @@
 from .relations import *
 
 
-def test_adding_config_with_inblobs():
-    testCase = RelationTestCase()
+def test_adding_config_with_inblobs(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["reading_blobs", "adding_blobs", "adding_configs"])
 
@@ -24,13 +24,13 @@ def test_adding_config_with_inblobs():
         }
     }
 
-    config = Alice.session().add_config(None, "malwarex", config_json)
+    config = Alice.session.add_config(None, "malwarex", config_json)
 
     assert sorted([config["cfg"]["raw_cfg"]["in-blob"], config["cfg"]["peers"]["in-blob"]]) == \
            sorted([config["children"][0]["id"], config["children"][1]["id"]])
 
-    blob1 = Alice.session().get_blob(config["children"][0]["id"])
-    blob2 = Alice.session().get_blob(config["children"][1]["id"])
+    blob1 = Alice.session.get_blob(config["children"][0]["id"])
+    blob2 = Alice.session.get_blob(config["children"][1]["id"])
 
     assert blob1["blob_name"] in ["In blob name", "Peers blob name"] and \
            blob2["blob_name"] in ["In blob name", "Peers blob name"]

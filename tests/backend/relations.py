@@ -23,39 +23,31 @@ class RelationTestEntity(object):
 class RelationTestUser(RelationTestEntity):
     def __init__(self, context, name, capabilities):
         super().__init__(context, name)
-        session = MwdbTest()
-        session.login()
+        session = context.session
         session.register_user(self.identity, self.identity, capabilities)
-
-    def session(self):
-        sess = MwdbTest()
-        sess.login_as(self.identity, self.identity)
-        return sess
+        self.session = MwdbTest()
+        self.session.login_as(self.identity, self.identity)
 
 
 class RelationTestGroup(RelationTestEntity):
     def __init__(self, context, name, capabilities):
         super().__init__(context, name)
-        session = MwdbTest()
-        session.login()
+        session = context.session
         session.create_group(self.identity, capabilities)
 
     def add_member(self, user):
-        session = MwdbTest()
-        session.login()
+        session = self.context.session
         session.add_member(self.identity, user.identity)
 
     def remove_member(self, user):
-        session = MwdbTest()
-        session.login()
+        session = self.context.session
         session.remove_member(self.identity, user.identity)
 
 
 class RelationTestObject(RelationTestEntity):
     def __init__(self, context, name):
         super().__init__(context, name)
-        session = MwdbTest()
-        session.login()
+        session = context.session
         self.dhash = self._create_object(session, self.identity)["id"]
 
     def _create_object(self, session, identity, parent=None, upload_as=None):
@@ -110,10 +102,9 @@ class RelationTestObject(RelationTestEntity):
 
     def create(self, group=None, parent=None, upload_as=None):
         if group is None:
-            session = MwdbTest()
-            session.login()
+            session = self.context.session
         else:
-            session = group.session()
+            session = group.session
 
         self._create_object(
             session, self.identity, parent=parent and parent.dhash, upload_as=upload_as
@@ -121,7 +112,7 @@ class RelationTestObject(RelationTestEntity):
 
     def should_access(self, group):
         try:
-            self._access_object(group.session())
+            self._access_object(group.session)
         except requests.exceptions.HTTPError as e:
             raise Exception(
                 "{}.should_access({}) failed with {}".format(
@@ -131,7 +122,7 @@ class RelationTestObject(RelationTestEntity):
 
     def should_not_access(self, group):
         try:
-            self._access_object(group.session())
+            self._access_object(group.session)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
                 return True
@@ -176,7 +167,8 @@ class RelationTestBlob(RelationTestObject):
 
 
 class RelationTestCase(object):
-    def __init__(self):
+    def __init__(self, session):
+        self.session = session
         self.users = []
         self.groups = []
         self.samples = []

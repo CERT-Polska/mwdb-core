@@ -1,37 +1,23 @@
-import pytest
-
 from .utils import MwdbTest, ShouldRaise, admin_login
 
 
-@pytest.fixture(scope="session", autouse=True)
-def typical_user():
-    test = MwdbTest()
-    test.login()
-    test.register_user("typical", "typical8")
-    test.create_group("very_typical", capabilities=["adding_tags"])
-
-
-def test_profile_change_invalidate():
-    typical = MwdbTest()
-    typical.login_as("typical", "typical8")
-    typical.add_sample()
-
-    admin = MwdbTest()
-    admin.login()
+def test_profile_change_invalidate(typical_session, admin_session):
+    typical_login = typical_session.userinfo["login"]
+    typical_session.add_sample()
 
     # "Typical" shouldn't be able to create api key for admin
     with ShouldRaise(status_code=403):
-        typical.api_key_create(admin_login(), "test key")
-    api_key = typical.api_key_create("typical", "test key").json()
+        typical_session.api_key_create(admin_login(), "test key")
+    api_key = typical_session.api_key_create(typical_login, "test key").json()
 
     typical_via_api = MwdbTest()
     typical_via_api.set_auth_token(api_key["token"])
 
     # All sessions OK
-    typical.recent_samples(1)
+    typical_session.recent_samples(1)
     typical_via_api.recent_samples(1)
 
-    admin.request("PUT", "/user/typical", json={
+    admin_session.request("PUT", "/user/" + typical_login, json={
         "disabled": True
     })
 
@@ -39,72 +25,65 @@ def test_profile_change_invalidate():
     with ShouldRaise(status_code=403):
         typical_via_api.recent_samples(1)
     with ShouldRaise(status_code=401):
-        typical.recent_samples(1)
+        typical_session.recent_samples(1)
 
-    admin.request("PUT", "/user/typical", json={
+    admin_session.request("PUT", "/user/" + typical_login, json={
         "disabled": False
     })
 
     # Password-based session: need to reauth, APIKey-based session: Ok
     typical_via_api.recent_samples(1)
     with ShouldRaise(status_code=401):
-        typical.recent_samples(1)
+        typical_session.recent_samples(1)
 
-    typical.login_as("typical", "typical8")
-    typical.recent_samples(1)
+    typical_session.login_as(typical_login, typical_login)
+    typical_session.recent_samples(1)
 
 
-def test_profile_password_change():
-    typical = MwdbTest()
-    typical.login_as("typical", "typical8")
-    typical.add_sample()
+def test_profile_password_change(typical_session, admin_session):
+    typical_login = typical_session.userinfo["login"]
+    typical_session.add_sample()
 
-    admin = MwdbTest()
-    admin.login()
-
-    set_pass_token = admin.request("GET", "/user/typical/change_password")["token"]
+    set_pass_token = admin_session.request("GET", f"/user/{typical_login}/change_password")["token"]
 
     # Shouldn't be able to use as session token
-    typical.set_auth_token(set_pass_token)
+    typical_session.set_auth_token(set_pass_token)
     with ShouldRaise(status_code=401):
-        typical.recent_samples(1)
+        typical_session.recent_samples(1)
 
-    typical.request("POST", "/auth/change_password", json={
+    typical_session.request("POST", "/auth/change_password", json={
         "password": "very_new_password",
         "token": set_pass_token
     })
 
-    typical.login_as("typical", "very_new_password")
+    typical_session.login_as(typical_login, "very_new_password")
 
     # Valid only once
     with ShouldRaise(status_code=403):
-        typical.request("POST", "/auth/change_password", json={
-            "password": "typical8",
+        typical_session.request("POST", "/auth/change_password", json={
+            "password": typical_login,
             "token": set_pass_token
         })
 
-    set_pass_token = admin.request("GET", "/user/typical/change_password")["token"]
-    typical.request("POST", "/auth/change_password", json={
-        "password": "typical8",
+    set_pass_token = admin_session.request("GET", f"/user/{typical_login}/change_password")["token"]
+    typical_session.request("POST", "/auth/change_password", json={
+        "password": typical_login,
         "token": set_pass_token
     })
-    typical.login_as("typical", "typical8")
-    typical.recent_samples(1)
+    typical_session.login_as(typical_login, typical_login)
+    typical_session.recent_samples(1)
 
 
-def test_api_key_management():
-    typical = MwdbTest()
-
-    admin = MwdbTest()
-    admin.login()
-
-    admin_key = admin.api_key_create(admin_login(), "admin key").json()
-    typical_key = admin.api_key_create("typical", "typical key 1").json()
-    typical_key_2 = admin.api_key_create("typical", "typical key 2").json()
+def test_api_key_management(typical_session, admin_session):
+    typical = typical_session.clone_session()
+    typical_login = typical_session.userinfo["login"]
+    admin_key = admin_session.api_key_create(admin_login(), "admin key").json()
+    typical_key = admin_session.api_key_create(typical_login, "typical key 1").json()
+    typical_key_2 = admin_session.api_key_create(typical_login, "typical key 2").json()
 
     # It should be possible to create API key without sending any payload
     # Should fall back to empty name
-    res = admin.session.post(admin.mwdb_url + "/user/typical/api_key")
+    res = admin_session.session.post(admin_session.mwdb_url + f"/user/{typical_login}/api_key")
     res.raise_for_status()
     assert res.json()["name"] == ""
 
@@ -121,8 +100,8 @@ def test_api_key_management():
     typical.set_auth_token(typical_key_2["token"])
     typical.add_sample()
 
-    admin.api_key_delete(admin_key["id"])
-    admin.api_key_delete(typical_key_2["id"])
+    admin_session.api_key_delete(admin_key["id"])
+    admin_session.api_key_delete(typical_key_2["id"])
 
     with ShouldRaise(status_code=401):
         typical.add_sample()

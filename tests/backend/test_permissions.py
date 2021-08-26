@@ -2,16 +2,16 @@ from .relations import *
 from .utils import *
 
 
-def test_manage_users():
-    testCase = RelationTestCase()
+def test_manage_users(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["manage_users"])
 
     def request(*args, **kwargs):
         with ShouldRaise(status_code=403):
-            Alice.session().request(*args, **kwargs)
-        Bob.session().request(*args, **kwargs)
+            Alice.session.request(*args, **kwargs)
+        Bob.session.request(*args, **kwargs)
 
     user_login = random_name()
     user_email = random_name() + "@" + random_name() + ".com"
@@ -30,8 +30,8 @@ def test_manage_users():
     request("PUT", "/group/{}".format(group_name), json={"capabilities": []})
 
 
-def test_share_queried_objects():
-    testCase = RelationTestCase()
+def test_share_queried_objects(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["share_queried_objects"])
@@ -39,16 +39,16 @@ def test_share_queried_objects():
     Sample = testCase.new_sample("Sample")
 
     with ShouldRaise(status_code=404):
-        Alice.session().get_sample(Sample.dhash)
+        Alice.session.get_sample(Sample.dhash)
 
-    Bob.session().get_sample(Sample.dhash)
+    Bob.session.get_sample(Sample.dhash)
 
     Sample.should_not_access(Alice)
     Sample.should_access(Bob)
 
 
-def test_access_all_objects():
-    testCase = RelationTestCase()
+def test_access_all_objects(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["access_all_objects"])
@@ -63,8 +63,8 @@ def test_access_all_objects():
     ], should_access=[Bob]).test()
 
 
-def test_sharing_objects():
-    testCase = RelationTestCase()
+def test_sharing_objects(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["sharing_objects"])
@@ -72,19 +72,17 @@ def test_sharing_objects():
     Sample = testCase.new_sample("Sample")
     Sample.create(Bob)
 
-    Bob.session().request("GET", "/object/{}/share".format(Sample.dhash))
+    Bob.session.request("GET", "/object/{}/share".format(Sample.dhash))
 
     Sample.should_not_access(Alice)
 
-    Bob.session().request("PUT", "/object/{}/share".format(Sample.dhash), json={"group": Alice.identity})
+    Bob.session.request("PUT", "/object/{}/share".format(Sample.dhash), json={"group": Alice.identity})
 
     Sample.should_access(Alice)
 
 
-def test_adding_tags():
-    session = MwdbTest()
-    session.login()
-    testCase = RelationTestCase()
+def test_adding_tags(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["adding_tags"])
@@ -94,19 +92,17 @@ def test_adding_tags():
     Sample.create(Bob)
 
     with ShouldRaise(status_code=403):
-        Alice.session().add_tag(Sample.dhash, "tag123")
+        Alice.session.add_tag(Sample.dhash, "tag123")
 
-    assert {"tag": "tag123"} not in session.get_tags(Sample.dhash)
+    assert {"tag": "tag123"} not in admin_session.get_tags(Sample.dhash)
 
-    Bob.session().add_tag(Sample.dhash, "tag123")
+    Bob.session.add_tag(Sample.dhash, "tag123")
 
-    assert {"tag": "tag123"} in session.get_tags(Sample.dhash)
+    assert {"tag": "tag123"} in admin_session.get_tags(Sample.dhash)
 
 
-def test_removing_tags():
-    session = MwdbTest()
-    session.login()
-    testCase = RelationTestCase()
+def test_removing_tags(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["removing_tags"])
@@ -115,22 +111,20 @@ def test_removing_tags():
     Sample.create(Alice)
     Sample.create(Bob)
 
-    session.add_tag(Sample.dhash, "tag123")
+    admin_session.add_tag(Sample.dhash, "tag123")
 
     with ShouldRaise(status_code=403):
-        Alice.session().delete_tag(Sample.dhash, "tag123")
+        Alice.session.delete_tag(Sample.dhash, "tag123")
 
-    assert {"tag": "tag123"} in session.get_tags(Sample.dhash)
+    assert {"tag": "tag123"} in admin_session.get_tags(Sample.dhash)
 
-    Bob.session().delete_tag(Sample.dhash, "tag123")
+    Bob.session.delete_tag(Sample.dhash, "tag123")
 
-    assert {"tag": "tag123"} not in session.get_tags(Sample.dhash)
+    assert {"tag": "tag123"} not in admin_session.get_tags(Sample.dhash)
 
 
-def test_adding_comments():
-    session = MwdbTest()
-    session.login()
-    testCase = RelationTestCase()
+def test_adding_comments(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["adding_comments"])
@@ -140,19 +134,17 @@ def test_adding_comments():
     Sample.create(Bob)
 
     with ShouldRaise(status_code=403):
-        Alice.session().add_comment(Sample.dhash, "comment123")
+        Alice.session.add_comment(Sample.dhash, "comment123")
 
-    assert not list(filter(lambda c: c["comment"] == "comment123", session.get_comments(Sample.dhash)))
+    assert not list(filter(lambda c: c["comment"] == "comment123", admin_session.get_comments(Sample.dhash)))
 
-    Bob.session().add_comment(Sample.dhash, "comment123")
+    Bob.session.add_comment(Sample.dhash, "comment123")
 
-    assert list(filter(lambda c: c["comment"] == "comment123", session.get_comments(Sample.dhash)))
+    assert list(filter(lambda c: c["comment"] == "comment123", admin_session.get_comments(Sample.dhash)))
 
 
-def test_removing_comments():
-    session = MwdbTest()
-    session.login()
-    testCase = RelationTestCase()
+def test_removing_comments(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["removing_comments"])
@@ -161,22 +153,20 @@ def test_removing_comments():
     Sample.create(Alice)
     Sample.create(Bob)
 
-    comment_id = session.add_comment(Sample.dhash, "comment123")["id"]
+    comment_id = admin_session.add_comment(Sample.dhash, "comment123")["id"]
 
     with ShouldRaise(status_code=403):
-        Alice.session().delete_comment(Sample.dhash, comment_id)
+        Alice.session.delete_comment(Sample.dhash, comment_id)
 
-    assert list(filter(lambda c: c["comment"] == "comment123", session.get_comments(Sample.dhash)))
+    assert list(filter(lambda c: c["comment"] == "comment123", admin_session.get_comments(Sample.dhash)))
 
-    Bob.session().delete_comment(Sample.dhash, comment_id)
+    Bob.session.delete_comment(Sample.dhash, comment_id)
 
-    assert not list(filter(lambda c: c["comment"] == "comment123", session.get_comments(Sample.dhash)))
+    assert not list(filter(lambda c: c["comment"] == "comment123", admin_session.get_comments(Sample.dhash)))
 
 
-def test_adding_parents():
-    session = MwdbTest()
-    session.login()
-    testCase = RelationTestCase()
+def test_adding_parents(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["adding_parents"])
@@ -189,17 +179,15 @@ def test_adding_parents():
     with ShouldRaise(status_code=403):
         SampleB.create(Alice, SampleA)
 
-    assert session.get_sample(SampleB.dhash)["parents"] == []
+    assert admin_session.get_sample(SampleB.dhash)["parents"] == []
 
     SampleB.create(Bob, SampleA)
 
-    assert session.get_sample(SampleB.dhash)["parents"] != []
+    assert admin_session.get_sample(SampleB.dhash)["parents"] != []
 
 
-def test_removing_objects():
-    session = MwdbTest()
-    session.login()
-    testCase = RelationTestCase()
+def test_removing_objects(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob", capabilities=["removing_objects"])
@@ -216,25 +204,25 @@ def test_removing_objects():
         SampleB()
     ]).create()
 
-    session.add_tag(SampleA.dhash, "tag123")
-    session.add_tag(SampleB.dhash, "tag123")
+    admin_session.add_tag(SampleA.dhash, "tag123")
+    admin_session.add_tag(SampleB.dhash, "tag123")
 
     with ShouldRaise(status_code=403):
-        Alice.session().remove_object(SampleA.dhash)
+        Alice.session.remove_object(SampleA.dhash)
 
-    Bob.session().get_sample(SampleA.dhash)
-
-    with ShouldRaise(status_code=404):
-        Charlie.session().remove_object(SampleA.dhash)
-
-    Bob.session().get_sample(SampleA.dhash)
-
-    Bob.session().remove_object(SampleA.dhash)
+    Bob.session.get_sample(SampleA.dhash)
 
     with ShouldRaise(status_code=404):
-        Bob.session().get_sample(SampleA.dhash)
+        Charlie.session.remove_object(SampleA.dhash)
 
-    Bob.session().get_sample(SampleB.dhash)
+    Bob.session.get_sample(SampleA.dhash)
 
-    assert {"tag": "tag123"} in session.get_tags(SampleB.dhash)
+    Bob.session.remove_object(SampleA.dhash)
+
+    with ShouldRaise(status_code=404):
+        Bob.session.get_sample(SampleA.dhash)
+
+    Bob.session.get_sample(SampleB.dhash)
+
+    assert {"tag": "tag123"} in admin_session.get_tags(SampleB.dhash)
 

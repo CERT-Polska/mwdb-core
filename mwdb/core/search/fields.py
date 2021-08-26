@@ -361,7 +361,6 @@ class JSONField(BaseField):
             );
         """
         json_path = ".".join(["$"] + [jsonpath_escape(field) for field in remainder])
-        print(json_path, flush=True)
         # Make aliased function call
         json_elements = func.jsonb_path_query(self.column, json_path).alias(
             "json_element"

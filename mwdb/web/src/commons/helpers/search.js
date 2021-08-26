@@ -21,6 +21,10 @@ export function escapeSearchValue(input) {
     return input;
 }
 
+export function escapeSearchField(field) {
+    return field.replace(/[.\\ *:]/g, "\\$&");
+}
+
 export function makeSearchLink(field, input, noEscape, endpoint) {
     if (input === undefined) return "";
 
@@ -40,6 +44,10 @@ export function makeSearchRangeLink(field, from, to, endpoint) {
         true,
         endpoint
     );
+}
+
+export function makeSearchConfigLink(path, value, endpoint) {
+    return makeSearchLink(`cfg.${path.join(".")}`, value, false, endpoint);
 }
 
 export function makeSearchDateLink(field, date, endpoint) {

@@ -6,9 +6,8 @@ from .utils import base62uuid
 from .utils import ShouldRaise
 
 
-def test_file_name_search():
-    test = MwdbTest()
-    test.login()
+def test_file_name_search(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = base62uuid()
@@ -24,9 +23,8 @@ def test_file_name_search():
     assert sample_from_search["id"] == sample["id"]
 
 
-def test_wildcard_search():
-    test = MwdbTest()
-    test.login()
+def test_wildcard_search(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = base62uuid()
@@ -58,9 +56,8 @@ def test_wildcard_search():
     assert sample_from_search["id"] == sample["id"]
 
 
-def test_search_tag():
-    test = MwdbTest()
-    test.login()
+def test_search_tag(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = base62uuid()
@@ -78,9 +75,8 @@ def test_search_tag():
     assert sample_from_search["id"] == sample["id"]
 
 
-def test_search_size():
-    test = MwdbTest()
-    test.login()
+def test_search_size(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = b"a"*1337
@@ -94,9 +90,9 @@ def test_search_size():
     assert len(found_objs) > 0
 
 
-def test_search_comment():
-    test = MwdbTest()
-    test.login()
+
+def test_search_comment(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = base62uuid()
@@ -114,9 +110,8 @@ def test_search_comment():
     assert sample_from_search["id"] == sample["id"]
 
 
-def test_search_bin_op():
-    test = MwdbTest()
-    test.login()
+def test_search_bin_op(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = base62uuid()
@@ -134,9 +129,8 @@ def test_search_bin_op():
     assert sample_from_search["id"] == sample["id"]
 
 
-def test_search_metakey():
-    test = MwdbTest()
-    test.login()
+def test_search_metakey(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = base62uuid()
@@ -160,9 +154,8 @@ def test_search_metakey():
     assert sample_from_search["id"] == sample["id"]
 
 
-def test_search_json():
-    test = MwdbTest()
-    test.login()
+def test_search_json(admin_session):
+    test = admin_session
 
     value = base62uuid().lower()
 
@@ -222,9 +215,8 @@ def test_search_json():
     assert len(found_objs) == 1
 
 
-def test_search_json_special_chars():
-    test = MwdbTest()
-    test.login()
+def test_search_json_special_chars(admin_session):
+    test = admin_session
 
     value = base62uuid().lower()
 
@@ -252,9 +244,8 @@ def test_search_json_special_chars():
     assert len(found_objs) == 1
 
 
-def test_search_file_size_unbounded():
-    test = MwdbTest()
-    test.login()
+def test_search_file_size_unbounded(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = b"a" * 1338
@@ -283,9 +274,8 @@ def test_search_file_size_unbounded():
     assert len(found_objs) == 0
 
 
-def test_search_date_time_unbounded():
-    test = MwdbTest()
-    test.login()
+def test_search_date_time_unbounded(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = b"a" * 5000
@@ -309,22 +299,20 @@ def test_search_date_time_unbounded():
         found_objs = test.search(f'upload_time:"<{now}" AND tag:{tag}')
 
 
-def test_search_no_access_to_parent():
-    test = MwdbTest()
-    test.login()
-
+def test_search_no_access_to_parent(admin_session):
     filename = base62uuid()
     file_content = b"a" * 5000
     file2name = base62uuid()
     file2_content = b"a" * 5100
     tag = "no_access_to_parent"
 
-    sample = test.add_sample(filename, file_content)
-    test.add_tag(sample["id"], tag)
-    sample2 = test.add_sample(file2name, file2_content, sample["sha256"])
-    test.add_tag(sample2["id"], tag)
+    sample = admin_session.add_sample(filename, file_content)
+    admin_session.add_tag(sample["id"], tag)
+    sample2 = admin_session.add_sample(file2name, file2_content, sample["sha256"])
+    admin_session.add_tag(sample2["id"], tag)
 
-    test.register_user("test1", "testpass", ["adding_tags"])
+    admin_session.register_user("test1", "testpass", ["adding_tags"])
+    test = MwdbTest()
     test.login_as("test1", "testpass")
 
     sample2 = test.add_sample(file2name, file2_content)
@@ -334,9 +322,8 @@ def test_search_no_access_to_parent():
     assert len(found_objs) == 0
 
 
-def test_child_mixed():
-    test = MwdbTest()
-    test.login()
+def test_child_mixed(admin_session):
+    test = admin_session
 
     filename = base62uuid()
     file_content = b"a" * 7000
@@ -364,11 +351,8 @@ def test_child_mixed():
     assert len(found_objs) == 1 and found_objs[0]["id"] == sample["id"]
 
 
-def test_uploader_query():
-    admin_session = MwdbTest()
-    admin_session.login()
-
-    testCase = RelationTestCase()
+def test_uploader_query(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob")
@@ -392,21 +376,21 @@ def test_uploader_query():
     # Alice looks for own files
     results = [
         result["id"] for result in
-        Alice.session().search(f"uploader:{Alice.identity}")
+        Alice.session.search(f"uploader:{Alice.identity}")
     ]
     assert sorted(results) == sorted([FileA.dhash, FileC.dhash])
     # Bob looks for own files
     results = [
         result["id"] for result in
-        Bob.session().search(f"uploader:{Bob.identity}")
+        Bob.session.search(f"uploader:{Bob.identity}")
     ]
     assert sorted(results) == sorted([FileB.dhash])
     # Alice looks for files uploaded by Bob
-    results = Alice.session().search(f"uploader:{Bob.identity}")
+    results = Alice.session.search(f"uploader:{Bob.identity}")
     assert len(results) == 0
     # Bob looks for files uploaded by Alice
     results = [
         result["id"] for result in
-        Bob.session().search(f"uploader:{Alice.identity}")
+        Bob.session.search(f"uploader:{Alice.identity}")
     ]
     assert sorted(results) == sorted([FileC.dhash])

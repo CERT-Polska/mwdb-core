@@ -2,8 +2,8 @@ from .relations import *
 from .utils import ShouldRaise
 
 
-def test_submit_public():
-    testCase = RelationTestCase()
+def test_submit_public(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob")
@@ -28,8 +28,8 @@ def test_submit_public():
     ], should_access=all_users).test()
 
 
-def test_submit_default_workgroups():
-    testCase = RelationTestCase()
+def test_submit_default_workgroups(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob")
@@ -66,8 +66,8 @@ def test_submit_default_workgroups():
     SampleD(should_access=[Bob, Joe]).test()
 
 
-def test_submit_private():
-    testCase = RelationTestCase()
+def test_submit_private(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob")
@@ -104,8 +104,8 @@ def test_submit_private():
     SampleD(should_access=[Joe]).test()
 
 
-def test_submit_foreign_workgroup():
-    testCase = RelationTestCase()
+def test_submit_foreign_workgroup(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob")

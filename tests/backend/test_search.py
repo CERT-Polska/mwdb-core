@@ -90,6 +90,7 @@ def test_search_size(admin_session):
     assert len(found_objs) > 0
 
 
+
 def test_search_comment(admin_session):
     test = admin_session
 
@@ -211,6 +212,35 @@ def test_search_json(admin_session):
     assert len(found_objs) == 0
 
     found_objs = test.search('config.cfg.array\\*array**:2')
+    assert len(found_objs) == 1
+
+
+def test_search_json_special_chars(admin_session):
+    test = admin_session
+
+    value = base62uuid().lower()
+
+    test.add_config(None, "malwarex", {
+        r"array*with*stars\*": [1, 2, 3, value],
+        r"key\with\slashes": value,
+        r"key.with spaces": value,
+        r'key"with:quote': value,
+        r'key"with\"quotes': value,
+    })
+
+    found_objs = test.search(f'config.cfg.array\\*with\\*stars\\\\\\**:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.key\\\\with\\\\slashes:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.key\\.with\\ spaces:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.key\\"with\\:quote:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.key"with\\\\"quotes:{value}')
     assert len(found_objs) == 1
 
 

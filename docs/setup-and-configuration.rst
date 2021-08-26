@@ -211,6 +211,8 @@ If you want to store files using object storage, open the ``mwdb.ini`` file and 
     s3_storage_region_name = <AWS S3 region name>
     # optional (for TLS)
     s3_storage_secure = 1
+    # optional (for AWS IAM role authentication)
+    s3_storage_iam_auth = 1
 
 
 If you use Docker-based setup, all the configuration can be set using environment variables (e.g. ``MWDB_STORAGE_PROVIDER=s3``).
@@ -263,6 +265,7 @@ Storage settings:
 * ``s3_storage_bucket_name`` (string) - S3 API bucket name for object storage. Required if you use S3-compatible storage.
 * ``s3_storage_region_name`` (string, optional) - S3 API storage region name. Used mainly with AWS S3 storage (default is None).
 * ``s3_storage_secure`` (0 or 1) - Use TLS for S3 API connection (default is ``0``).
+* ``s3_storage_iam_auth`` (0 or 1) - Use AWS IAM role for S3 authentication (default is ``0``). If ``1``, then ``s3_storage_access_key`` and ``s3_storage_secret_key`` aren't required.
 
 Extra features:
 

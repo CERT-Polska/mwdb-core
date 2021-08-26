@@ -122,6 +122,7 @@ export default class HexView extends Component {
                 setOptions={{
                     showInvisibles:
                         this.props.showInvisibles && this.props.mode !== "hex",
+                    useWorker: false,
                 }}
             />
         );

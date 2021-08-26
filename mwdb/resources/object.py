@@ -11,7 +11,6 @@ from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import MetakeyDefinition, Object, db
-from mwdb.model.karton import KartonAnalysis
 from mwdb.schema.object import (
     ObjectCountRequestSchema,
     ObjectCountResponseSchema,
@@ -49,7 +48,8 @@ class ObjectUploader:
     def on_reuploaded(self, object, params):
         hooks.on_reuploaded_object(object)
 
-    def _create_object(self, spec, parent, share_with, metakeys, analysis):
+    def _create_object(self, spec, parent, share_with, metakeys, analysis_id):
+        # To be implemented by specialized uploaders (e.g. FileUploader)
         raise NotImplementedError
 
     def create_object(self, params):
@@ -68,16 +68,18 @@ class ObjectUploader:
             parent_object = None
 
         # Validate metakeys and Karton assignment
-        karton_id = params.get("karton_id")
+        analysis_id = params.get("karton_id")
 
         metakeys = params["metakeys"]
         for metakey in params["metakeys"]:
             key = metakey["key"]
             if key == "karton":
-                if karton_id is not None:
-                    raise BadRequest("Duplicated Karton analysis identifier")
+                if analysis_id is not None:
+                    raise BadRequest(
+                        "You can't provide more than one Karton analysis identifier"
+                    )
                 try:
-                    karton_id = UUID(metakey["value"])
+                    analysis_id = UUID(metakey["value"])
                 except (ValueError, AttributeError):
                     raise BadRequest("'karton' attribute accepts only UUID values")
             elif not MetakeyDefinition.query_for_set(key).first():
@@ -86,23 +88,17 @@ class ObjectUploader:
                     "permissions to set that one"
                 )
 
-        if karton_id is not None:
+        if analysis_id is not None:
             if not g.auth_user.has_rights(Capabilities.karton_assign):
                 raise Forbidden(
-                    "You are not permitted to assign existing Karton analysis to object"
+                    "You are not permitted to assign Karton analysis to object"
                 )
-
-            analysis = KartonAnalysis.get(karton_id).first()
-            if analysis is None:
-                raise NotFound("Karton analysis not found")
-        else:
-            analysis = None
 
         # Validate upload_as argument
         share_with = get_shares_for_upload(params["upload_as"])
 
         item, is_new = self._create_object(
-            params, parent_object, share_with, metakeys, analysis
+            params, parent_object, share_with, metakeys, analysis_id
         )
 
         try:

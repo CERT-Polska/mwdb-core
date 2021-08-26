@@ -76,8 +76,8 @@ function apiKeyGetToken(key_id) {
     return axios.get(`/api_key/${key_id}`);
 }
 
-function apiKeyAdd(login) {
-    return axios.post(`/user/${login}/api_key`);
+function apiKeyAdd(login, name) {
+    return axios.post(`/user/${login}/api_key`, { name });
 }
 
 function apiKeyRemove(key_id) {

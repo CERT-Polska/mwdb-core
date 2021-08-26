@@ -82,7 +82,7 @@ class File(Object):
         parent=None,
         metakeys=None,
         share_with=None,
-        analysis=None,
+        analysis_id=None,
     ):
         file_stream.seek(0, os.SEEK_END)
         file_size = file_stream.tell()
@@ -108,7 +108,7 @@ class File(Object):
             parent=parent,
             metakeys=metakeys,
             share_with=share_with,
-            analysis=analysis,
+            analysis_id=analysis_id,
         )
 
         if is_new:

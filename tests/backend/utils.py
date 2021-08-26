@@ -378,7 +378,6 @@ class MwdbTest(object):
             self.mwdb_url + "/config",
             json={"family": family, "cfg": config_json, "parent": parent},
         )
-        print(self.session.get(self.mwdb_url + "/auth/validate").json())
         res.raise_for_status()
         return res.json()
 

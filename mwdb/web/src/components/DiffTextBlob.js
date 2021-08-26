@@ -5,8 +5,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { split as SplitEditor } from "react-ace";
 import DiffMatchPatch from "diff-match-patch";
 
-import "brace/mode/text";
-import "brace/theme/chrome";
+import "ace-builds/src-noconflict/mode-text";
+import "ace-builds/src-noconflict/theme-chrome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { View } from "@mwdb-web/commons/ui";

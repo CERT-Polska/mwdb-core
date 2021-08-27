@@ -18,6 +18,7 @@ import ssdeep
 from flask_restful import abort
 from flask_sqlalchemy import Pagination
 from minio import Minio
+from minio.credentials import IamAwsProvider
 
 
 def config_dhash(obj):
@@ -154,12 +155,20 @@ def is_subdir(parent, child):
 
 
 def get_minio_client(
-    endpoint: str, access_key: str, secret_key: str, region: str, secure: bool
+    endpoint: str,
+    access_key: str,
+    secret_key: str,
+    region: str,
+    secure: bool,
+    iam_auth: bool,
 ) -> Minio:
-    if endpoint is None or access_key is None or secret_key is None:
+    if endpoint is None:
+        raise RuntimeError("Attempting to get Minio client without an endpoint set")
+    if iam_auth:
+        return Minio(endpoint=endpoint, region=region, credentials=IamAwsProvider())
+    if access_key is None or secret_key is None:
         raise RuntimeError(
-            "Attempting to get Minio client without an "
-            "endpoint/access_key/secret_key set"
+            "Attempting to get Minio client without an access_key/secret_key set"
         )
     return Minio(
         endpoint=endpoint,

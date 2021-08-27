@@ -80,6 +80,8 @@ class MWDBConfig(Config):
     s3_storage_region_name = key(cast=str, required=False)
     # S3 storage Bucket Name
     s3_storage_bucket_name = key(cast=str, required=False)
+    # S3 storage Authorize through IAM role (No credentials)
+    s3_storage_iam_auth = key(cast=intbool, required=False)
 
     # Administrator account login
     admin_login = key(cast=str, required=False, default="admin")

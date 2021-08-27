@@ -120,6 +120,7 @@ class File(Object):
                     app_config.mwdb.s3_storage_secret_key,
                     app_config.mwdb.s3_storage_region_name,
                     app_config.mwdb.s3_storage_secure,
+                    app_config.mwdb.s3_storage_iam_auth,
                 ).put_object(
                     app_config.mwdb.s3_storage_bucket_name,
                     file_obj._calculate_path(),
@@ -207,6 +208,7 @@ class File(Object):
                 app_config.mwdb.s3_storage_secret_key,
                 app_config.mwdb.s3_storage_region_name,
                 app_config.mwdb.s3_storage_secure,
+                app_config.mwdb.s3_storage_iam_auth,
             ).get_object(app_config.mwdb.s3_storage_bucket_name, self._calculate_path())
         elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
             return open(self._calculate_path(), "rb")

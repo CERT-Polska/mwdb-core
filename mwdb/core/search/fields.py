@@ -225,15 +225,15 @@ class AttributeField(BaseField):
         else:
             raise UnsupportedGrammarException("Missing attribute key (meta.<key>:)")
 
-        metakey_definition = AttributeDefinition.query_for_read(
+        attribute_definition = AttributeDefinition.query_for_read(
             key=attribute_key, include_hidden=True
         ).first()
 
-        if metakey_definition is None:
+        if attribute_definition is None:
             raise ObjectNotFoundException(f"No such attribute: {attribute_key}")
 
         if (
-            metakey_definition.hidden
+            attribute_definition.hidden
             and expression.has_wildcard()
             and not g.auth_user.has_rights(Capabilities.reading_all_attributes)
         ):
@@ -242,11 +242,11 @@ class AttributeField(BaseField):
             )
 
         value = get_term_value(expression)
-        metakey_value = Attribute.value[()].astext
+        attribute_value = Attribute.value[()].astext
         if expression.has_wildcard():
-            value_condition = metakey_value.like(value)
+            value_condition = attribute_value.like(value)
         else:
-            value_condition = metakey_value == value
+            value_condition = attribute_value == value
 
         return self.column.any(and_(Attribute.key == attribute_key, value_condition))
 

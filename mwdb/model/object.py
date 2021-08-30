@@ -54,6 +54,7 @@ class ObjectTypeConflictError(Exception):
 
 class ObjectPermission(db.Model):
     __tablename__ = "permission"
+    __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
 
     object_id = db.Column(
         db.Integer,
@@ -484,7 +485,7 @@ class Object(db.Model):
 
     @classmethod
     def _get_or_create(
-        cls, obj, parent=None, metakeys=None, share_with=None, analysis_id=None
+        cls, obj, parent=None, attributes=None, share_with=None, analysis_id=None
     ):
         """
         Polymophic get or create pattern, useful in dealing with race condition
@@ -499,7 +500,7 @@ class Object(db.Model):
         from .group import Group
 
         share_with = share_with or []
-        metakeys = metakeys or []
+        attributes = attributes or []
 
         is_new = False
         new_cls = Object.get(obj.dhash).first()
@@ -530,9 +531,9 @@ class Object(db.Model):
             if new_cls is None:
                 raise ObjectTypeConflictError
 
-        # Add metakeys
-        for metakey in metakeys:
-            new_cls.add_metakey(metakey["key"], metakey["value"], commit=False)
+        # Add attributes
+        for attribute in attributes:
+            new_cls.add_attribute(attribute["key"], attribute["value"], commit=False)
 
         # Share with all specified groups
         for share_group in share_with:
@@ -694,19 +695,19 @@ class Object(db.Model):
                 raise
         return False
 
-    def get_metakeys(
+    def get_attributes(
         self, as_dict=False, check_permissions=True, show_hidden=False, show_karton=True
     ):
         """
-        Gets all object metakeys (attributes)
+        Gets all object attributes
         :param as_dict: |
             Return dict object instead of list of Attribute objects (default: False)
         :param check_permissions: |
             Filter results including current user permissions (default: True)
-        :param show_hidden: Show hidden metakeys
-        :param show_karton: Show Karton metakeys (for compatibility)
+        :param show_hidden: Show hidden attributes
+        :param show_karton: Show Karton attributes (for compatibility)
         """
-        metakeys = (
+        attributes = (
             db.session.query(Attribute)
             .filter(Attribute.object_id == self.id)
             .join(Attribute.template)
@@ -715,7 +716,7 @@ class Object(db.Model):
         if check_permissions and not g.auth_user.has_rights(
             Capabilities.reading_all_attributes
         ):
-            metakeys = metakeys.filter(
+            attributes = attributes.filter(
                 Attribute.key.in_(
                     db.session.query(AttributePermission.key)
                     .filter(AttributePermission.can_read == true())
@@ -724,15 +725,15 @@ class Object(db.Model):
             )
 
         if not show_hidden:
-            metakeys = metakeys.filter(AttributeDefinition.hidden.is_(False))
+            attributes = attributes.filter(AttributeDefinition.hidden.is_(False))
 
-        metakeys = metakeys.order_by(Attribute.id).all()
+        attributes = attributes.order_by(Attribute.id).all()
 
         if show_karton:
-            KartonMetakey = namedtuple("KartonMetakey", ["key", "value"])
+            KartonAttribute = namedtuple("KartonAttribute", ["key", "value"])
 
-            metakeys += [
-                KartonMetakey(key="karton", value=str(analysis.id))
+            attributes += [
+                KartonAttribute(key="karton", value=str(analysis.id))
                 for analysis in (
                     db.session.query(KartonAnalysis)
                     .filter(KartonAnalysis.objects.any(id=self.id))
@@ -742,16 +743,16 @@ class Object(db.Model):
             ]
 
         if not as_dict:
-            return metakeys
+            return attributes
 
-        dict_metakeys = {}
-        for metakey in metakeys:
-            if metakey.key not in dict_metakeys:
-                dict_metakeys[metakey.key] = []
-            dict_metakeys[metakey.key].append(metakey.value)
-        return dict_metakeys
+        dict_attributes = {}
+        for attribute in attributes:
+            if attribute.key not in dict_attributes:
+                dict_attributes[attribute.key] = []
+            dict_attributes[attribute.key].append(attribute.value)
+        return dict_attributes
 
-    def add_metakey(self, key, value, commit=True, check_permissions=True):
+    def add_attribute(self, key, value, commit=True, check_permissions=True):
         if key == "karton":
             karton_id = UUID(value)
 
@@ -768,43 +769,43 @@ class Object(db.Model):
             return is_new
 
         if check_permissions:
-            metakey_definition = AttributeDefinition.query_for_set(key).first()
+            attribute_definition = AttributeDefinition.query_for_set(key).first()
         else:
-            metakey_definition = (
+            attribute_definition = (
                 db.session.query(AttributeDefinition).filter(
                     AttributeDefinition.key == key
                 )
             ).first()
 
-        if not metakey_definition:
+        if not attribute_definition:
             # Attribute needs to be defined first
             return None
 
-        db_metakey = Attribute(key=key, value=value, object_id=self.id)
-        _, is_new = Attribute.get_or_create(db_metakey)
+        db_attribute = Attribute(key=key, value=value, object_id=self.id)
+        _, is_new = Attribute.get_or_create(db_attribute)
         if commit:
             db.session.commit()
         return is_new
 
-    __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
-
-    def remove_metakey(self, key, value, check_permissions=True):
-        metakey_query = db.session.query(Attribute).filter(
+    def remove_attribute(self, key, value, check_permissions=True):
+        attribute_query = db.session.query(Attribute).filter(
             Attribute.key == key, Attribute.object_id == self.id
         )
         if value:
-            metakey_query = metakey_query.filter(Attribute.value == cast(value, JSONB))
+            attribute_query = attribute_query.filter(
+                Attribute.value == cast(value, JSONB)
+            )
 
         if check_permissions and not AttributeDefinition.query_for_set(key).first():
             return False
 
         try:
-            rows = metakey_query.delete(synchronize_session="fetch")
+            rows = attribute_query.delete(synchronize_session="fetch")
             db.session.commit()
             return rows > 0
         except IntegrityError:
             db.session.refresh(self)
-            if metakey_query.first():
+            if attribute_query.first():
                 raise
         return True
 

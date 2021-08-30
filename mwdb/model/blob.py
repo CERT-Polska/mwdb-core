@@ -34,7 +34,7 @@ class TextBlob(Object):
         blob_name,
         blob_type,
         parent=None,
-        metakeys=None,
+        attributes=None,
         share_with=None,
         analysis_id=None,
     ):
@@ -51,7 +51,7 @@ class TextBlob(Object):
         blob_obj, is_new = cls._get_or_create(
             blob_obj,
             parent=parent,
-            metakeys=metakeys,
+            attributes=attributes,
             share_with=share_with,
             analysis_id=analysis_id,
         )

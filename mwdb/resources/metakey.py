@@ -91,7 +91,7 @@ class MetakeyResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        metakeys = db_object.get_metakeys(show_hidden=show_hidden)
+        metakeys = db_object.get_attributes(show_hidden=show_hidden)
         schema = MetakeyListResponseSchema()
         return schema.dump({"metakeys": metakeys})
 
@@ -149,7 +149,7 @@ class MetakeyResource(Resource):
 
         key = obj["key"]
         value = obj["value"]
-        is_new = db_object.add_metakey(key, value)
+        is_new = db_object.add_attribute(key, value)
         if is_new is None:
             raise NotFound(
                 f"Attribute '{key}' is not defined or you have "
@@ -158,7 +158,7 @@ class MetakeyResource(Resource):
 
         db.session.commit()
         db.session.refresh(db_object)
-        metakeys = db_object.get_metakeys()
+        metakeys = db_object.get_attributes()
         schema = MetakeyListResponseSchema()
         return schema.dump({"metakeys": metakeys})
 
@@ -223,7 +223,7 @@ class MetakeyResource(Resource):
         key = obj["key"]
         value = obj.get("value")
 
-        deleted_object = db_object.remove_metakey(key, value)
+        deleted_object = db_object.remove_attribute(key, value)
         if deleted_object is False:
             raise NotFound(
                 f"Attribute '{key}' is not defined or you have "

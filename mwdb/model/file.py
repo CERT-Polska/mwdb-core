@@ -80,7 +80,7 @@ class File(Object):
         file_name,
         file_stream,
         parent=None,
-        metakeys=None,
+        attributes=None,
         share_with=None,
         analysis_id=None,
     ):
@@ -106,7 +106,7 @@ class File(Object):
         file_obj, is_new = cls._get_or_create(
             file_obj,
             parent=parent,
-            metakeys=metakeys,
+            attributes=attributes,
             share_with=share_with,
             analysis_id=analysis_id,
         )

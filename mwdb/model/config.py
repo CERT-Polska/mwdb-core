@@ -37,7 +37,7 @@ class Config(Object):
         family,
         config_type,
         parent=None,
-        metakeys=None,
+        attributes=None,
         share_with=None,
         analysis_id=None,
     ):
@@ -49,7 +49,7 @@ class Config(Object):
         return cls._get_or_create(
             cfg_obj,
             parent=parent,
-            metakeys=metakeys,
+            attributes=attributes,
             share_with=share_with,
             analysis_id=analysis_id,
         )

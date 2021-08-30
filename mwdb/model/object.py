@@ -54,7 +54,6 @@ class ObjectTypeConflictError(Exception):
 
 class ObjectPermission(db.Model):
     __tablename__ = "permission"
-    __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
 
     object_id = db.Column(
         db.Integer,
@@ -216,6 +215,8 @@ class Object(db.Model):
     upload_time = db.Column(
         db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow
     )
+
+    __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
 
     parents = db.relationship(
         "Object",

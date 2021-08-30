@@ -286,7 +286,7 @@ api.add_resource(
 )
 api.add_resource(QuickQueryItemResource, "/quick_query/<int:id>")
 
-# Metakey endpoints
+# Attribute endpoints
 api.add_resource(MetakeyListDefinitionResource, "/meta/list/<any(read, set):access>")
 api.add_resource(
     MetakeyResource, "/<any(file, config, blob, object):type>/<hash64:identifier>/meta"

@@ -14,7 +14,7 @@ from mwdb.core.capabilities import Capabilities
 
 from . import db
 from .karton import KartonAnalysis, karton_object
-from .metakey import Metakey, MetakeyDefinition, MetakeyPermission
+from .metakey import Attribute, AttributeDefinition, AttributePermission
 from .tag import Tag, object_tag_table
 
 relation = db.Table(
@@ -234,7 +234,7 @@ class Object(db.Model):
     )
 
     meta = db.relationship(
-        "Metakey", backref="object", lazy=True, cascade="save-update, merge, delete"
+        "Attribute", backref="object", lazy=True, cascade="save-update, merge, delete"
     )
     comments = db.relationship(
         "Comment",
@@ -700,33 +700,33 @@ class Object(db.Model):
         """
         Gets all object metakeys (attributes)
         :param as_dict: |
-            Return dict object instead of list of Metakey objects (default: False)
+            Return dict object instead of list of Attribute objects (default: False)
         :param check_permissions: |
             Filter results including current user permissions (default: True)
         :param show_hidden: Show hidden metakeys
         :param show_karton: Show Karton metakeys (for compatibility)
         """
         metakeys = (
-            db.session.query(Metakey)
-            .filter(Metakey.object_id == self.id)
-            .join(Metakey.template)
+            db.session.query(Attribute)
+            .filter(Attribute.object_id == self.id)
+            .join(Attribute.template)
         )
 
         if check_permissions and not g.auth_user.has_rights(
             Capabilities.reading_all_attributes
         ):
             metakeys = metakeys.filter(
-                Metakey.key.in_(
-                    db.session.query(MetakeyPermission.key)
-                    .filter(MetakeyPermission.can_read == true())
-                    .filter(g.auth_user.is_member(MetakeyPermission.group_id))
+                Attribute.key.in_(
+                    db.session.query(AttributePermission.key)
+                    .filter(AttributePermission.can_read == true())
+                    .filter(g.auth_user.is_member(AttributePermission.group_id))
                 )
             )
 
         if not show_hidden:
-            metakeys = metakeys.filter(MetakeyDefinition.hidden.is_(False))
+            metakeys = metakeys.filter(AttributeDefinition.hidden.is_(False))
 
-        metakeys = metakeys.order_by(Metakey.id).all()
+        metakeys = metakeys.order_by(Attribute.id).all()
 
         if show_karton:
             KartonMetakey = namedtuple("KartonMetakey", ["key", "value"])
@@ -768,18 +768,20 @@ class Object(db.Model):
             return is_new
 
         if check_permissions:
-            metakey_definition = MetakeyDefinition.query_for_set(key).first()
+            metakey_definition = AttributeDefinition.query_for_set(key).first()
         else:
             metakey_definition = (
-                db.session.query(MetakeyDefinition).filter(MetakeyDefinition.key == key)
+                db.session.query(AttributeDefinition).filter(
+                    AttributeDefinition.key == key
+                )
             ).first()
 
         if not metakey_definition:
             # Attribute needs to be defined first
             return None
 
-        db_metakey = Metakey(key=key, value=value, object_id=self.id)
-        _, is_new = Metakey.get_or_create(db_metakey)
+        db_metakey = Attribute(key=key, value=value, object_id=self.id)
+        _, is_new = Attribute.get_or_create(db_metakey)
         if commit:
             db.session.commit()
         return is_new
@@ -787,13 +789,13 @@ class Object(db.Model):
     __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
 
     def remove_metakey(self, key, value, check_permissions=True):
-        metakey_query = db.session.query(Metakey).filter(
-            Metakey.key == key, Metakey.object_id == self.id
+        metakey_query = db.session.query(Attribute).filter(
+            Attribute.key == key, Attribute.object_id == self.id
         )
         if value:
-            metakey_query = metakey_query.filter(Metakey.value == cast(value, JSONB))
+            metakey_query = metakey_query.filter(Attribute.value == cast(value, JSONB))
 
-        if check_permissions and not MetakeyDefinition.query_for_set(key).first():
+        if check_permissions and not AttributeDefinition.query_for_set(key).first():
             return False
 
         try:

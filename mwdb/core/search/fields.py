@@ -13,8 +13,8 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
     Group,
     Member,
-    Metakey,
-    MetakeyDefinition,
+    Attribute,
+    AttributeDefinition,
     Object,
     ObjectPermission,
     User,
@@ -225,7 +225,7 @@ class AttributeField(BaseField):
         else:
             raise UnsupportedGrammarException("Missing attribute key (meta.<key>:)")
 
-        metakey_definition = MetakeyDefinition.query_for_read(
+        metakey_definition = AttributeDefinition.query_for_read(
             key=attribute_key, include_hidden=True
         ).first()
 
@@ -242,13 +242,13 @@ class AttributeField(BaseField):
             )
 
         value = get_term_value(expression)
-        metakey_value = Metakey.value[()].astext
+        metakey_value = Attribute.value[()].astext
         if expression.has_wildcard():
             value_condition = metakey_value.like(value)
         else:
             value_condition = metakey_value == value
 
-        return self.column.any(and_(Metakey.key == attribute_key, value_condition))
+        return self.column.any(and_(Attribute.key == attribute_key, value_condition))
 
 
 class ShareField(BaseField):

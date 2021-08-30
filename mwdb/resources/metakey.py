@@ -3,7 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import Group, MetakeyDefinition, MetakeyPermission, db
+from mwdb.model import Group, AttributeDefinition, AttributePermission, db
 from mwdb.schema.metakey import (
     MetakeyDefinitionItemRequestArgsSchema,
     MetakeyDefinitionItemRequestBodySchema,
@@ -152,7 +152,7 @@ class MetakeyResource(Resource):
         is_new = db_object.add_metakey(key, value)
         if is_new is None:
             raise NotFound(
-                f"Metakey '{key}' is not defined or you have "
+                f"Attribute '{key}' is not defined or you have "
                 f"insufficient permissions to set it"
             )
 
@@ -226,7 +226,7 @@ class MetakeyResource(Resource):
         deleted_object = db_object.remove_metakey(key, value)
         if deleted_object is False:
             raise NotFound(
-                f"Metakey '{key}' is not defined or you have "
+                f"Attribute '{key}' is not defined or you have "
                 f"insufficient permissions to delete it"
             )
         db.session.commit()
@@ -262,13 +262,13 @@ class MetakeyListDefinitionResource(Resource):
                 description: When used unknown access type (other than read or set)
         """
         if access == "read":
-            metakeys = MetakeyDefinition.query_for_read()
+            metakeys = AttributeDefinition.query_for_read()
         elif access == "set":
-            metakeys = MetakeyDefinition.query_for_set()
+            metakeys = AttributeDefinition.query_for_set()
         else:
             raise BadRequest(f"Unknown desired access type '{access}'")
 
-        metakeys = metakeys.order_by(MetakeyDefinition.key).all()
+        metakeys = metakeys.order_by(AttributeDefinition.key).all()
         schema = MetakeyDefinitionListResponseSchema()
         return schema.dump({"metakeys": metakeys})
 
@@ -298,7 +298,9 @@ class MetakeyListDefinitionManageResource(Resource):
                 description: When user doesn't have `manage_users` capability.
         """
         metakeys = (
-            db.session.query(MetakeyDefinition).order_by(MetakeyDefinition.key).all()
+            db.session.query(AttributeDefinition)
+            .order_by(AttributeDefinition.key)
+            .all()
         )
         schema = MetakeyDefinitionManageListResponseSchema()
         return schema.dump({"metakeys": metakeys})
@@ -337,8 +339,8 @@ class MetakeyDefinitionManageResource(Resource):
                 description: When specified attribute key doesn't exist
         """
         metakey = (
-            db.session.query(MetakeyDefinition)
-            .filter(MetakeyDefinition.key == key)
+            db.session.query(AttributeDefinition)
+            .filter(AttributeDefinition.key == key)
             .first()
         )
         if metakey is None:
@@ -389,7 +391,7 @@ class MetakeyDefinitionManageResource(Resource):
         schema = MetakeyDefinitionItemRequestBodySchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
-        metakey_definition = MetakeyDefinition(
+        metakey_definition = AttributeDefinition(
             key=args_obj["key"],
             url_template=obj["url_template"],
             label=obj["label"],
@@ -446,8 +448,8 @@ class MetakeyDefinitionManageResource(Resource):
 
         metakey_obj = load_schema({"key": key}, MetakeyKeySchema())
         metakey = (
-            db.session.query(MetakeyDefinition)
-            .filter(MetakeyDefinition.key == metakey_obj["key"])
+            db.session.query(AttributeDefinition)
+            .filter(AttributeDefinition.key == metakey_obj["key"])
             .first()
         )
         if metakey is None:
@@ -470,7 +472,7 @@ class MetakeyDefinitionManageResource(Resource):
             metakey.hidden = obj["hidden"]
 
         db.session.commit()
-        logger.info("Metakey updated", extra=obj)
+        logger.info("Attribute updated", extra=obj)
 
         schema = MetakeyDefinitionItemResponseSchema()
         return schema.dump(metakey)
@@ -504,8 +506,8 @@ class MetakeyDefinitionManageResource(Resource):
                 description: When specified attribute key doesn't exist
         """
         metakey = (
-            db.session.query(MetakeyDefinition)
-            .filter(MetakeyDefinition.key == key)
+            db.session.query(AttributeDefinition)
+            .filter(AttributeDefinition.key == key)
             .first()
         )
         if metakey is None:
@@ -567,8 +569,8 @@ class MetakeyPermissionResource(Resource):
         obj = loads_schema(request.get_data(as_text=True), schema)
 
         metakey_definition = (
-            db.session.query(MetakeyDefinition)
-            .filter(MetakeyDefinition.key == args_obj["key"])
+            db.session.query(AttributeDefinition)
+            .filter(AttributeDefinition.key == args_obj["key"])
             .first()
         )
         if metakey_definition is None:
@@ -580,7 +582,7 @@ class MetakeyPermissionResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
-        permission = MetakeyPermission(
+        permission = AttributePermission(
             key=args_obj["key"],
             group_id=group.id,
             can_read=obj["can_read"],
@@ -637,10 +639,10 @@ class MetakeyPermissionResource(Resource):
             raise NotFound("No such group")
 
         metakey_permission = (
-            db.session.query(MetakeyPermission)
+            db.session.query(AttributePermission)
             .filter(
-                MetakeyPermission.key == args_obj["key"],
-                MetakeyPermission.group_id == group.id,
+                AttributePermission.key == args_obj["key"],
+                AttributePermission.group_id == group.id,
             )
             .first()
         )

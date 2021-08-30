@@ -38,7 +38,7 @@ class Group(db.Model):
     )
 
     attributes = db.relationship(
-        "MetakeyPermission",
+        "AttributePermission",
         back_populates="group",
         cascade="all, delete",
         passive_deletes=True,

@@ -10,7 +10,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
-from mwdb.model import MetakeyDefinition, Object, db
+from mwdb.model import AttributeDefinition, Object, db
 from mwdb.schema.object import (
     ObjectCountRequestSchema,
     ObjectCountResponseSchema,
@@ -82,9 +82,9 @@ class ObjectUploader:
                     analysis_id = UUID(metakey["value"])
                 except (ValueError, AttributeError):
                     raise BadRequest("'karton' attribute accepts only UUID values")
-            elif not MetakeyDefinition.query_for_set(key).first():
+            elif not AttributeDefinition.query_for_set(key).first():
                 raise NotFound(
-                    f"Metakey '{key}' not defined or insufficient "
+                    f"Attribute '{key}' not defined or insufficient "
                     "permissions to set that one"
                 )
 

@@ -1,6 +1,6 @@
 {
   "name": "mwdb-web",
-  "version": "2.3.1",
+  "version": "2.5.0",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.0-14",
@@ -11,7 +11,6 @@
     "axios": "^0.21.1",
     "bootstrap": "4.3.1",
     "bootstrap-select": "^1.13.18",
-    "brace": "^0.11.1",
     "d3": "^5.10.0",
     "dagre-d3": "^0.6.3",
     "diff-match-patch": "^1.0.4",
@@ -22,7 +21,7 @@
     "popper.js": "^1.16.1",
     "query-string": "^5.1.1",
     "react": "^16.13.1",
-    "react-ace": "^6.2.0",
+    "react-ace": "^9.4.3",
     "react-bootstrap": "^0.32.1",
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.4.1",

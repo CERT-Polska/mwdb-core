@@ -52,6 +52,13 @@ class MwdbTest(object):
     def __init__(self):
         self.mwdb_url = os.environ.get("MWDB_URL")
         self.session = requests.session()
+        self.userinfo = None
+
+    def clone_session(self):
+        cloned = MwdbTest()
+        cloned.userinfo = self.userinfo
+        cloned.session.headers.update({"Authorization": "Bearer " + self.userinfo["token"]})
+        return cloned
 
     def login_as(self, username, password):
         res = self.session.post(
@@ -59,8 +66,9 @@ class MwdbTest(object):
             json={"login": username, "password": password},
         )
         res.raise_for_status()
-        self.session.headers.update({"Authorization": "Bearer " + res.json()["token"]})
-        return res.json()
+        self.userinfo = res.json()
+        self.session.headers.update({"Authorization": "Bearer " + self.userinfo["token"]})
+        return self.userinfo
 
     def set_auth_token(self, token):
         self.session.headers.update({"Authorization": "Bearer " + token})
@@ -75,8 +83,8 @@ class MwdbTest(object):
     def login(self):
         return self.login_as(admin_login(), os.environ["MWDB_ADMIN_PASSWORD"])
 
-    def api_key_create(self, login):
-        res = self.session.post(self.mwdb_url + "/user/" + login + "/api_key")
+    def api_key_create(self, login, name):
+        res = self.session.post(self.mwdb_url + "/user/" + login + "/api_key", json={"name": name})
         res.raise_for_status()
         return res
 

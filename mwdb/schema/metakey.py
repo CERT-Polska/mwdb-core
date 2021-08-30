@@ -39,6 +39,10 @@ class MetakeyItemRequestSchema(MetakeyKeySchema, MetakeyValueSchema):
     pass
 
 
+class MetakeyItemRemoveRequestSchema(MetakeyKeySchema):
+    value = fields.Str(missing=None)
+
+
 class MetakeyDefinitionItemRequestArgsSchema(MetakeyKeySchema):
     pass
 

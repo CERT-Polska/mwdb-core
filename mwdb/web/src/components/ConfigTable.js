@@ -4,7 +4,12 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 
-import { makeSearchLink, makeSearchDateLink } from "@mwdb-web/commons/helpers";
+import {
+    escapeSearchField,
+    makeSearchLink,
+    makeSearchConfigLink,
+    makeSearchDateLink,
+} from "@mwdb-web/commons/helpers";
 import { Extendable } from "@mwdb-web/commons/extensions";
 import {
     ActionCopyToClipboard,
@@ -50,12 +55,7 @@ export function ConfigRow(props) {
         rawValue = String(value);
         prettyValue = (
             <Link
-                to={makeSearchLink(
-                    `cfg.${path.join(".")}`,
-                    value,
-                    false,
-                    `${remotePath}/configs`
-                )}
+                to={makeSearchConfigLink(path, value, `${remotePath}/configs`)}
             >
                 {String(value)}
             </Link>
@@ -133,7 +133,7 @@ export function ConfigRows(props) {
                   parentPath[parentPath.length - 1] + "*",
               ]
             : // Else: just add next key to the path
-              parentPath.concat([configKey]);
+              parentPath.concat([escapeSearchField(configKey)]);
         return (
             <ConfigRow
                 configKey={configKey}

@@ -25,7 +25,7 @@ class TextBlobUploader(ObjectUploader):
         super().on_reuploaded(object, params)
         hooks.on_reuploaded_text_blob(object)
 
-    def _create_object(self, spec, parent, share_with, metakeys, analysis):
+    def _create_object(self, spec, parent, share_with, metakeys, analysis_id):
         try:
             return TextBlob.get_or_create(
                 spec["content"],
@@ -34,7 +34,7 @@ class TextBlobUploader(ObjectUploader):
                 parent=parent,
                 share_with=share_with,
                 metakeys=metakeys,
-                analysis=analysis,
+                analysis_id=analysis_id,
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a blob")

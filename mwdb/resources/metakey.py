@@ -11,6 +11,7 @@ from mwdb.schema.metakey import (
     MetakeyDefinitionListResponseSchema,
     MetakeyDefinitionManageItemResponseSchema,
     MetakeyDefinitionManageListResponseSchema,
+    MetakeyItemRemoveRequestSchema,
     MetakeyItemRequestSchema,
     MetakeyKeySchema,
     MetakeyListRequestSchema,
@@ -171,6 +172,9 @@ class MetakeyResource(Resource):
             Deletes attribute from specified object.
 
             User must have `removing_attributes` capability.
+
+            If value is not specified, all values under the specified
+            key are removed.
         security:
             - bearerAuth: []
         tags:
@@ -198,7 +202,7 @@ class MetakeyResource(Resource):
               schema:
                 type: string
               description: Value of attribute key object to be deleted
-              required: true
+              required: false
         responses:
             200:
                 description: When metakey was deleted successfully
@@ -209,7 +213,7 @@ class MetakeyResource(Resource):
                     When attribute key is not defined or user doesn't have privileges
                     to set that one.
         """
-        schema = MetakeyItemRequestSchema()
+        schema = MetakeyItemRemoveRequestSchema()
         obj = load_schema(request.args, schema)
 
         db_object = access_object(type, identifier)
@@ -217,7 +221,7 @@ class MetakeyResource(Resource):
             raise NotFound("Object not found")
 
         key = obj["key"]
-        value = obj["value"]
+        value = obj.get("value")
 
         deleted_object = db_object.remove_metakey(key, value)
         if deleted_object is False:

@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import AceEditor from "react-ace";
 
-import "brace/mode/text";
-import "brace/mode/json";
-import "brace/theme/github";
-import "brace/ext/searchbox";
+import "ace-builds/src-noconflict/mode-text";
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/ext-searchbox";
 
 class HexViewNumberRenderer {
     getText(session, row) {
@@ -122,6 +122,7 @@ export default class HexView extends Component {
                 setOptions={{
                     showInvisibles:
                         this.props.showInvisibles && this.props.mode !== "hex",
+                    useWorker: false,
                 }}
             />
         );

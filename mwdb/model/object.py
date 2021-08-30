@@ -491,7 +491,7 @@ class Object(db.Model):
 
     @classmethod
     def _get_or_create(
-        cls, obj, parent=None, metakeys=None, share_with=None, analysis=None
+        cls, obj, parent=None, metakeys=None, share_with=None, analysis_id=None
     ):
         """
         Polymophic get or create pattern, useful in dealing with race condition
@@ -563,8 +563,8 @@ class Object(db.Model):
         if parent:
             new_cls.add_parent(parent, commit=False)
 
-        if analysis:
-            new_cls.assign_analysis(analysis)
+        if analysis_id:
+            new_cls.assign_analysis(analysis_id)
 
         return new_cls, is_new
 
@@ -768,12 +768,7 @@ class Object(db.Model):
                 # User doesn't have permissions to assign analysis
                 return None
 
-            analysis = KartonAnalysis.get(karton_id).first()
-            if analysis is None:
-                # Analysis with given UUID doesn't exist
-                return None
-
-            is_new = self.assign_analysis(analysis, commit=False)
+            _, is_new = self.assign_analysis(karton_id, commit=False)
 
             if commit:
                 db.session.commit()
@@ -799,28 +794,22 @@ class Object(db.Model):
     __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
 
     def remove_metakey(self, key, value, check_permissions=True):
-        db_metakey = (
-            db.session.query(Metakey)
-            .filter(
-                Metakey.key == key,
-                Metakey.value == cast(value, JSONB),
-                Metakey.object_id == self.id,
-            )
-            .first()
+        metakey_query = db.session.query(Metakey).filter(
+            Metakey.key == key, Metakey.object_id == self.id
         )
-
-        if db_metakey is None:
-            return False
+        if value:
+            metakey_query = metakey_query.filter(Metakey.value == cast(value, JSONB))
 
         if check_permissions and not MetakeyDefinition.query_for_set(key).first():
             return False
 
         try:
-            db.session.delete(db_metakey)
+            rows = metakey_query.delete()
             db.session.commit()
+            return rows > 0
         except IntegrityError:
             db.session.refresh(self)
-            if db_metakey in self.meta:
+            if metakey_query.first():
                 raise
         return True
 
@@ -860,16 +849,19 @@ class Object(db.Model):
             db.session.commit()
         return analysis
 
-    def assign_analysis(self, analysis, commit=True):
+    def assign_analysis(self, analysis_id, commit=True):
         """
         Assigns KartonAnalysis to the object
         """
-        if analysis.id in [existing.id for existing in self.analyses]:
-            return False
-        self.analyses.append(analysis)
+        analysis, is_new = KartonAnalysis.get_or_create(analysis_id, self)
+        if not is_new and analysis.id not in [
+            existing.id for existing in self.analyses
+        ]:
+            self.analyses.append(analysis)
+            return analysis, True
         if commit:
             db.session.commit()
-        return True
+        return analysis, is_new
 
     def is_analyzed(self):
         return bool(self.analyses)

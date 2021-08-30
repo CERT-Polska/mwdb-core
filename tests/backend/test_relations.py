@@ -1,8 +1,8 @@
 from .relations import *
 
 
-def test_inheritance():
-    testCase = RelationTestCase()
+def test_inheritance(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob")
@@ -32,8 +32,8 @@ def test_inheritance():
     ).test()
 
 
-def test_mixed_types():
-    testCase = RelationTestCase()
+def test_mixed_types(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
 
@@ -70,8 +70,8 @@ def test_mixed_types():
     ).test()
 
 
-def test_existing_parent():
-    testCase = RelationTestCase()
+def test_existing_parent(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["adding_parents"])
     Bob = testCase.new_user("Bob", capabilities=["adding_parents"])
@@ -124,8 +124,8 @@ def test_existing_parent():
     )
 
 
-def test_cycle_relations():
-    testCase = RelationTestCase()
+def test_cycle_relations(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["adding_parents"])
     Bob = testCase.new_user("Bob", capabilities=["adding_parents"])
@@ -163,8 +163,8 @@ def test_cycle_relations():
     ).test()
 
 
-def test_multiparent_visibility():
-    testCase = RelationTestCase()
+def test_multiparent_visibility(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["adding_parents"])
     Bob = testCase.new_user("Bob")
@@ -192,11 +192,11 @@ def test_multiparent_visibility():
 
     SampleC.create(Bob)
 
-    sample_x = Bob.session().get_sample(SampleX.dhash)
+    sample_x = Bob.session.get_sample(SampleX.dhash)
     parents = list(map(lambda d: d["id"], sample_x["parents"]))
     assert parents == [SampleC.dhash]
 
-    sample_x = Alice.session().get_sample(SampleX.dhash)
+    sample_x = Alice.session.get_sample(SampleX.dhash)
     parents = list(map(lambda d: d["id"], sample_x["parents"]))
     assert sorted(parents) == sorted([SampleA.dhash, SampleB.dhash, SampleC.dhash])
 
@@ -212,8 +212,8 @@ def test_multiparent_visibility():
     SampleC([subtree], should_access=[Alice, Bob]).test()
 
 
-def test_recent_samples():
-    testCase = RelationTestCase()
+def test_recent_samples(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob")
@@ -246,10 +246,10 @@ def test_recent_samples():
         )
 
     alice_recent = recent_filter(
-        map(lambda d: d["id"], Alice.session().recent_samples(1)["files"])
+        map(lambda d: d["id"], Alice.session.recent_samples(1)["files"])
     )
     bob_recent = recent_filter(
-        map(lambda d: d["id"], Bob.session().recent_samples(1)["files"])
+        map(lambda d: d["id"], Bob.session.recent_samples(1)["files"])
     )
 
     assert alice_recent == sorted(
@@ -258,8 +258,8 @@ def test_recent_samples():
     assert bob_recent == sorted([SampleB.dhash, SampleD.dhash])
 
 
-def test_xref_adding():
-    testCase = RelationTestCase()
+def test_xref_adding(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["adding_parents"])
     Bob = testCase.new_user("Bob", capabilities=["adding_parents"])
@@ -288,7 +288,7 @@ def test_xref_adding():
         should_access=[Alice],
     ).test()
 
-    Bob.session().add_xref(SampleB.dhash, SampleD.dhash)
+    Bob.session.add_xref(SampleB.dhash, SampleD.dhash)
 
     SampleA(
         [
@@ -299,12 +299,12 @@ def test_xref_adding():
     ).test()
 
 
-def test_uploader_share():
+def test_uploader_share(admin_session):
     """
     We check if uploader share is added directly instead of
     being inherited from the parent
     """
-    testCase = RelationTestCase()
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["adding_parents"])
     Bob = testCase.new_user("Bob", capabilities=["adding_parents"])
@@ -314,8 +314,8 @@ def test_uploader_share():
     SampleA.create(Alice)
     SampleB.create(Alice, parent=SampleA)
 
-    a_shares = Alice.session().get_shares(SampleA.dhash)["shares"]
-    b_shares = Alice.session().get_shares(SampleB.dhash)["shares"]
+    a_shares = Alice.session.get_shares(SampleA.dhash)["shares"]
+    b_shares = Alice.session.get_shares(SampleB.dhash)["shares"]
 
     # Look for uploader entry in SampleA shares
     assert any(
@@ -343,8 +343,8 @@ def test_uploader_share():
     )
 
 
-def test_removing_relations():
-    testCase = RelationTestCase()
+def test_removing_relations(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["removing_parents"])
     Bob = testCase.new_user("Bob")
@@ -415,8 +415,8 @@ def test_removing_relations():
     ).test()
 
     # Check access for SampleD after removing C -> D relation
-    Alice.session().remove_parent(SampleC.dhash, SampleD.dhash)
-    d_shares = Alice.session().get_shares(SampleD.dhash)["shares"]
+    Alice.session.remove_parent(SampleC.dhash, SampleD.dhash)
+    d_shares = Alice.session.get_shares(SampleD.dhash)["shares"]
     assert any(
         [
             (
@@ -435,7 +435,7 @@ def test_removing_relations():
     SampleG.create(Alice)
 
     # Check access for every children after removing A -> B relation
-    Alice.session().remove_parent(SampleA.dhash, SampleB.dhash)
+    Alice.session.remove_parent(SampleA.dhash, SampleB.dhash)
     SampleG(
         [
             SampleB(
@@ -456,7 +456,7 @@ def test_removing_relations():
     ).test()
 
     # Check access for every children after removing F -> C relation
-    Alice.session().remove_parent(SampleF.dhash, SampleC.dhash)
+    Alice.session.remove_parent(SampleF.dhash, SampleC.dhash)
     SampleC(
         [
             SampleD(should_access=[Alice, Bob]),

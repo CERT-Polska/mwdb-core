@@ -2,22 +2,22 @@ from .relations import *
 from .utils import random_name
 
 
-def test_adding_blobs():
-    testCase = RelationTestCase()
+def test_adding_blobs(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["reading_blobs", "adding_blobs"])
-    blob = Alice.session().add_blob(None, blobname="malwarex.blob", blobtype="inject", content="""
+    blob = Alice.session.add_blob(None, blobname="malwarex.blob", blobtype="inject", content="""
     TESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
     Binary junk: \x00\x01\x02\x03\x04\x05\x07
 
     HELLO WORLD!
     ========""" + random_name() + "XPADDINGX" * 60)
 
-    assert "\x00\x01" in Alice.session().get_blob(blob["id"])["content"]
+    assert "\x00\x01" in Alice.session.get_blob(blob["id"])["content"]
 
 
-def test_blob_permissions():
-    testCase = RelationTestCase()
+def test_blob_permissions(admin_session):
+    testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["reading_blobs", "adding_blobs"])
     Bob = testCase.new_user("Blob")

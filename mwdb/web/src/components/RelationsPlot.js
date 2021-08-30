@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useContext } from "react";
+import React, { Suspense, useState, useLayoutEffect, useContext } from "react";
 import { useHistory } from "react-router";
 
 import queryString from "query-string";
@@ -6,8 +6,9 @@ import queryString from "query-string";
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { capitalize } from "@mwdb-web/commons/helpers";
 
-import DagreD3Plot from "./DagreD3Plot";
 import { Tag } from "@mwdb-web/commons/ui";
+
+const DagreD3Plot = React.lazy(() => import("./DagreD3Plot"));
 
 function RelationsNode(props) {
     const typeMapping = {
@@ -190,15 +191,18 @@ function RelationsPlot(props) {
         for (let node of expandedNodes) expandNode(node);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
     return (
-        <DagreD3Plot
-            width={defaultProps.width}
-            height={height ? height : defaultProps.height}
-            nodes={nodes.nodes}
-            edges={nodes.edges}
-            onNodeClick={onNodeClick}
-            nodeComponent={RelationsNode}
-        />
+        <Suspense fallback={<div />}>
+            <DagreD3Plot
+                width={defaultProps.width}
+                height={height ? height : defaultProps.height}
+                nodes={nodes.nodes}
+                edges={nodes.edges}
+                onNodeClick={onNodeClick}
+                nodeComponent={RelationsNode}
+            />
+        </Suspense>
     );
 }
 

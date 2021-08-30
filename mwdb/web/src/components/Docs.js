@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
-import SwaggerUI from "swagger-ui-react";
+import React, { Suspense, useContext, useEffect, useState } from "react";
 
 import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { View } from "@mwdb-web/commons/ui";
+
+const SwaggerUI = React.lazy(() => import("swagger-ui-react"));
 
 export default function Docs() {
     const auth = useContext(AuthContext);
@@ -28,14 +29,19 @@ export default function Docs() {
 
     return (
         <View ident="docs">
-            <SwaggerUI
-                spec={apiSpec}
-                url=""
-                docExpansion="list"
-                onComplete={(swagger) => {
-                    swagger.preauthorizeApiKey("bearerAuth", auth.user.token);
-                }}
-            />
+            <Suspense fallback={<div>Loading SwaggerUI...</div>}>
+                <SwaggerUI
+                    spec={apiSpec}
+                    url=""
+                    docExpansion="list"
+                    onComplete={(swagger) => {
+                        swagger.preauthorizeApiKey(
+                            "bearerAuth",
+                            auth.user.token
+                        );
+                    }}
+                />
+            </Suspense>
         </View>
     );
 }

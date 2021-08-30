@@ -33,7 +33,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "dhash": StringField(Object.dhash),
         "tag": ListField(Object.tags, Tag.tag),
         "comment": ListField(Object.comments, Comment.comment),
-        "meta": AttributeField(Object.meta),
+        "meta": AttributeField(Object.attributes),
         "shared": ShareField(Object.shares),
         "uploader": UploaderField(Object.related_shares),
         "upload_time": DatetimeField(Object.upload_time),

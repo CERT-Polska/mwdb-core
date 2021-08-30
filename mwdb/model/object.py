@@ -13,8 +13,8 @@ from sqlalchemy.sql.expression import true
 from mwdb.core.capabilities import Capabilities
 
 from . import db
+from .attribute import Attribute, AttributeDefinition, AttributePermission
 from .karton import KartonAnalysis, karton_object
-from .metakey import Attribute, AttributeDefinition, AttributePermission
 from .tag import Tag, object_tag_table
 
 relation = db.Table(
@@ -233,7 +233,7 @@ class Object(db.Model):
         back_populates="parents",
     )
 
-    meta = db.relationship(
+    attributes = db.relationship(
         "Attribute", backref="object", lazy=True, cascade="save-update, merge, delete"
     )
     comments = db.relationship(

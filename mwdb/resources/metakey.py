@@ -3,7 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import Group, AttributeDefinition, AttributePermission, db
+from mwdb.model import AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.metakey import (
     MetakeyDefinitionItemRequestArgsSchema,
     MetakeyDefinitionItemRequestBodySchema,

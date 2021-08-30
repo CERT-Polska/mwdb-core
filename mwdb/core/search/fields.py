@@ -11,10 +11,10 @@ from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
-    Group,
-    Member,
     Attribute,
     AttributeDefinition,
+    Group,
+    Member,
     Object,
     ObjectPermission,
     User,

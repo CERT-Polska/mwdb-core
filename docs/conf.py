@@ -21,7 +21,7 @@ copyright = '2021, CERT Polska'
 author = 'CERT Polska'
 
 # The full version, including alpha/beta/rc tags
-release = '2.4.1'
+release = '2.5.0'
 
 
 # -- General configuration ---------------------------------------------------

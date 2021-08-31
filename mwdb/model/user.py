@@ -12,8 +12,8 @@ from mwdb.core.config import app_config
 
 from . import db
 from .group import Group, Member
-from .object import ObjectPermission, favorites
 from .oauth import OpenIDUserIdentity
+from .object import ObjectPermission, favorites
 
 
 class User(db.Model):

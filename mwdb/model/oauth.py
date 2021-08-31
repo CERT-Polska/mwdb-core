@@ -15,6 +15,12 @@ class OpenIDProvider(db.Model):
     userinfo_endpoint = db.Column(db.String(128), nullable=False)
     jwks_endpoint = db.Column(db.String(128), nullable=True)
 
+    identities = db.relationship(
+        "OpenIDUserIdentity",
+        back_populates="openid_provider",
+        cascade="all, delete-orphan",
+    )
+
     def _get_client(self, state=None):
         return OpenIDSession(
             client_id=self.client_id,
@@ -42,3 +48,18 @@ class OpenIDProvider(db.Model):
         client = self._get_client()
         token = client.fetch_token(code=code, state=state, redirect_uri=redirect_uri)
         return client.parse_id_token(token, nonce)
+
+
+class OpenIDUserIdentity(db.Model):
+    __tablename__ = "openid_identity"
+
+    sub_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    provider_id = db.Column(
+        db.Integer, db.ForeignKey("provider.id"), index=True, autoincrement=True
+    )
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    user = db.relationship("User", back_populates="openid_identities")
+    provider = db.relationship(
+        OpenIDProvider, back_populates="identities", lazy="selectin"
+    )

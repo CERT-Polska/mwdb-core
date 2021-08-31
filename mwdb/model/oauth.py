@@ -17,7 +17,7 @@ class OpenIDProvider(db.Model):
 
     identities = db.relationship(
         "OpenIDUserIdentity",
-        back_populates="openid_provider",
+        back_populates="provider",
         cascade="all, delete-orphan",
     )
 
@@ -55,7 +55,7 @@ class OpenIDUserIdentity(db.Model):
 
     sub_id = db.Column(db.Integer, primary_key=True, nullable=False)
     provider_id = db.Column(
-        db.Integer, db.ForeignKey("provider.id"), index=True, autoincrement=True
+        db.Integer, db.ForeignKey("openid_provider.id"), index=True, autoincrement=True
     )
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 

@@ -7,7 +7,7 @@ from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.model import OpenIDProvider, User, db
+from mwdb.model import OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,
@@ -132,12 +132,15 @@ class OpenIDAuthorizeResource(Resource):
         userinfo = provider.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
-
+        print(userinfo)
         # 'sub' bind should be used instead of 'name'
-        try:
-            user = User.query.filter(User.login == userinfo["name"]).one()
-        except NoResultFound:
-            raise Forbidden("Unknown user")
+        identity = OpenIDUserIdentity.query.filter(
+            OpenIDUserIdentity.sub_id == userinfo["sub"]
+        ).one()
+        if identity is None:
+            raise Forbidden("Unknown identity")
+
+        user = identity.user
 
         if user.pending:
             raise Forbidden(

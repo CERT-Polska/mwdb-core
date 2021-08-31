@@ -2,12 +2,11 @@ import datetime
 
 from flask import request
 from flask_restful import Resource
-from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.model import OpenIDProvider, OpenIDUserIdentity, User, db
+from mwdb.model import OpenIDProvider, OpenIDUserIdentity, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,

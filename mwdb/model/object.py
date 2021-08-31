@@ -797,7 +797,7 @@ class Object(db.Model):
             return False
 
         try:
-            rows = metakey_query.delete()
+            rows = metakey_query.delete(synchronize_session="fetch")
             db.session.commit()
             return rows > 0
         except IntegrityError:

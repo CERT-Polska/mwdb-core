@@ -788,6 +788,28 @@ class Object(db.Model):
             db.session.commit()
         return is_new
 
+    def remove_attribute_by_id(self, attribute_id, check_permissions=True):
+        attribute_query = Attribute.get_by_id(self.id, attribute_id)
+
+        if check_permissions:
+            attribute_query = attribute_query.filter(
+                Attribute.key.in_(
+                    db.session.query(AttributePermission.key)
+                    .filter(AttributePermission.can_set == true())
+                    .filter(g.auth_user.is_member(AttributePermission.group_id))
+                )
+            )
+
+        try:
+            rows = attribute_query.delete(synchronize_session="fetch")
+            db.session.commit()
+            return rows > 0
+        except IntegrityError:
+            db.session.refresh(self)
+            if attribute_query.first():
+                raise
+        return True
+
     def remove_attribute(self, key, value, check_permissions=True):
         attribute_query = db.session.query(Attribute).filter(
             Attribute.key == key, Attribute.object_id == self.id

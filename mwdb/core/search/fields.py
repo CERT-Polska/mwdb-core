@@ -242,10 +242,11 @@ class AttributeField(BaseField):
             )
 
         value = get_term_value(expression)
+        metakey_value = Metakey.value[()].astext
         if expression.has_wildcard():
-            value_condition = Metakey.value.like(value)
+            value_condition = metakey_value.like(value)
         else:
-            value_condition = Metakey.value == value
+            value_condition = metakey_value == value
 
         return self.column.any(and_(Metakey.key == attribute_key, value_condition))
 

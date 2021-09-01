@@ -4,7 +4,8 @@ from typing import Optional
 from uuid import UUID
 
 from flask import g
-from sqlalchemy import and_, exists
+from sqlalchemy import and_, cast, exists
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql.expression import true
@@ -790,13 +791,13 @@ class Object(db.Model):
             Metakey.key == key, Metakey.object_id == self.id
         )
         if value:
-            metakey_query = metakey_query.filter(Metakey.value == value)
+            metakey_query = metakey_query.filter(Metakey.value == cast(value, JSONB))
 
         if check_permissions and not MetakeyDefinition.query_for_set(key).first():
             return False
 
         try:
-            rows = metakey_query.delete()
+            rows = metakey_query.delete(synchronize_session="fetch")
             db.session.commit()
             return rows > 0
         except IntegrityError:

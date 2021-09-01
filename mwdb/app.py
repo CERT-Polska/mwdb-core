@@ -102,7 +102,7 @@ if app_config.mwdb.flask_config_file:
 
 app.url_map.converters["hash64"] = HashConverter
 
-migrate = Migrate(app, db, directory=migrations_dir)
+migrate = Migrate(app, db, directory=migrations_dir, compare_type=True)
 db.init_app(app)
 
 if app_config.mwdb.serve_web:

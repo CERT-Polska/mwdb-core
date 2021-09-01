@@ -1,7 +1,8 @@
 from string import Template
 
 from flask import g
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, cast
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 
 from mwdb.core.capabilities import Capabilities
@@ -21,7 +22,7 @@ class Metakey(db.Model):
         nullable=False,
         index=True,
     )
-    value = db.Column(db.Text, nullable=False, index=True)
+    value = db.Column(JSONB, nullable=False, index=True)
     template = db.relationship("MetakeyDefinition", lazy="joined")
 
     @property
@@ -42,7 +43,9 @@ class Metakey(db.Model):
     @classmethod
     def get(cls, object_id, key, value):
         return db.session.query(cls).filter(
-            (cls.object_id == object_id) & (cls.key == key) & (cls.value == value)
+            (cls.object_id == object_id)
+            & (cls.key == key)
+            & (cls.value == cast(value, JSONB))
         )
 
     @classmethod

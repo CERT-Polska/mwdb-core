@@ -3,9 +3,11 @@ on:
   push:
     branches:
     - master
+    - v*.*.x
   pull_request:
     branches:
     - master
+    - v*.*.x
 jobs:
   lint_core:
     name: Lint mwdb-core core sources

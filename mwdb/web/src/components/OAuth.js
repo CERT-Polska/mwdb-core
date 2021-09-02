@@ -6,6 +6,7 @@ import queryString from "query-string";
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { View, getErrorMessage } from "@mwdb-web/commons/ui";
+import UserLogin from "./UserLogin";
 
 export function OAuthLogin() {
     const api = useContext(APIContext);
@@ -107,4 +108,16 @@ export function OAuthAuthorize() {
     }, []);
 
     return <div>Wait for authorization...</div>;
+}
+
+export function OAuthLinkAccount() {
+    // const api = useContext(APIContext);
+    // const auth = useContext(AuthContext);
+    // const history = useHistory();
+
+    return (
+        <React.Fragment>
+            <UserLogin header="Connect to mwdb account" />
+        </React.Fragment>
+    );
 }

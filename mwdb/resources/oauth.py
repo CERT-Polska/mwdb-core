@@ -131,7 +131,6 @@ class OpenIDAuthorizeResource(Resource):
         userinfo = provider.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
-        print(userinfo)
         # 'sub' bind should be used instead of 'name'
         identity = OpenIDUserIdentity.query.filter(
             OpenIDUserIdentity.sub_id == userinfo["sub"]

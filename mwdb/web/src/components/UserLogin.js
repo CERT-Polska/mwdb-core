@@ -7,7 +7,7 @@ import api from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/extensions";
 import { View } from "@mwdb-web/commons/ui";
 
-export default function UserLogin() {
+export default function UserLogin(props) {
     const auth = useContext(AuthContext);
     const history = useHistory();
 
@@ -31,7 +31,7 @@ export default function UserLogin() {
 
     return (
         <View ident="userLogin" error={loginError}>
-            <h2>Login</h2>
+            <h2>{props.header ? props.header : "Login"}</h2>
             <form
                 onSubmit={(ev) => {
                     ev.preventDefault();

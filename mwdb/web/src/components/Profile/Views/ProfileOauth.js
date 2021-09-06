@@ -7,7 +7,7 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { View, getErrorMessage } from "@mwdb-web/commons/ui";
 
-export function OAuthLogin() {
+export function ProfileOauth() {
     const api = useContext(APIContext);
     const [error, setError] = useState();
     const [providers, setProviders] = useState([]);
@@ -22,7 +22,7 @@ export function OAuthLogin() {
         }
     }
 
-    async function login(provider) {
+    async function bindProvider(provider) {
         try {
             const response = await api.axios.post(`/oauth/${provider}/login`);
             sessionStorage.setItem(
@@ -44,11 +44,19 @@ export function OAuthLogin() {
     }, []);
 
     return (
-        <View error={error}>
+        <div className="container">
+            <h2>OpenID Connect authorization</h2>
+            <p className="lead">
+                OpenID Connect is an alternative form of password-based
+                authentication. They are recommended to use for scripts and
+                other automation instead of plaintext passwords. You can link
+                your account with an external identity provider to use it for
+                authorization on the website in the future.
+            </p>
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
-                    login(chosenProvider);
+                    bindProvider(chosenProvider);
                 }}
             >
                 <select
@@ -67,44 +75,6 @@ export function OAuthLogin() {
                     Login
                 </button>
             </form>
-        </View>
+        </div>
     );
-}
-
-export function OAuthAuthorize() {
-    const api = useContext(APIContext);
-    const auth = useContext(AuthContext);
-    const history = useHistory();
-    // Current query set in URI path
-    const { code, state } = queryString.parse(history.location.search);
-
-    async function authorize() {
-        try {
-            const stateData = sessionStorage.getItem(`openid_${state}`);
-            if (!stateData) {
-                // Invalid authorization state
-            }
-            const { provider, nonce } = JSON.parse(stateData);
-            const response = await api.axios.post(
-                `/oauth/${provider}/authorize`,
-                {
-                    code,
-                    nonce,
-                    state,
-                }
-            );
-            sessionStorage.removeItem(`openid_${state}`);
-            auth.updateSession(response.data);
-            history.push("/");
-        } catch (e) {
-            history.push("/oauth/login", { error: getErrorMessage(e) });
-        }
-    }
-
-    useEffect(() => {
-        authorize();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    return <div>Wait for authorization...</div>;
 }

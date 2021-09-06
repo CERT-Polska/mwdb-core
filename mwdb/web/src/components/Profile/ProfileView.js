@@ -16,6 +16,7 @@ import ProfileGroup from "./Views/ProfileGroup";
 import ProfileGroups from "./Views/ProfileGroups";
 import ProfileGroupMembers from "./Views/ProfileGroupMembers";
 import { useViewAlert } from "../../commons/ui";
+import { ProfileOauth } from "./Views/ProfileOauth";
 
 function ProfileNav() {
     return (
@@ -35,6 +36,9 @@ function ProfileNav() {
                 </NavLink>
                 <NavLink exact to="/profile/api-keys" className="nav-link">
                     API keys
+                </NavLink>
+                <NavLink exact to="/profile/oauth" className="nav-link">
+                    OpenID Connect
                 </NavLink>
             </div>
             <hr />
@@ -99,6 +103,9 @@ export default function ProfileView() {
                         </Route>
                         <Route exact path="/profile/reset-password">
                             <ProfileResetPassword profile={profile} />
+                        </Route>
+                        <Route exact path="/profile/oauth">
+                            <ProfileOauth profile={profile} />
                         </Route>
                     </Switch>
                 </div>

@@ -23,11 +23,7 @@ import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
 import SettingsView from "./components/Settings/SettingsView";
 
-import {
-    OAuthLogin,
-    OAuthAuthorize,
-    OAuthLinkAccount,
-} from "./components/OAuth";
+import { OAuthLogin, OAuthAuthorize } from "./components/OAuth";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -149,9 +145,6 @@ export default function App() {
             </Route>
             <Route exact path="/oauth/authorize">
                 <OAuthAuthorize />
-            </Route>
-            <Route exact path="/oauth/link">
-                <OAuthLinkAccount />
             </Route>
             <ProtectedRoute exact path="/">
                 {

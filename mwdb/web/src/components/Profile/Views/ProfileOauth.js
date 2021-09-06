@@ -1,15 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router";
-
-import queryString from "query-string";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
-import { AuthContext } from "@mwdb-web/commons/auth";
-import { View, getErrorMessage } from "@mwdb-web/commons/ui";
+
+import { useViewAlert } from "@mwdb-web/commons/ui";
 
 export function ProfileOauth() {
     const api = useContext(APIContext);
-    const [error, setError] = useState();
+    const viewAlert = useViewAlert();
     const [providers, setProviders] = useState([]);
     const [chosenProvider, setChosenProvider] = useState();
 
@@ -17,8 +14,8 @@ export function ProfileOauth() {
         try {
             const response = await api.axios.get("/oauth");
             setProviders(response.data["providers"]);
-        } catch (e) {
-            setError(e);
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 
@@ -33,8 +30,8 @@ export function ProfileOauth() {
                 })
             );
             window.location = response.data["authorization_url"];
-        } catch (e) {
-            setError(e);
+        } catch (error) {
+            viewAlert.setAlert({ error });
         }
     }
 

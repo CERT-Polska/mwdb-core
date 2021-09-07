@@ -24,7 +24,9 @@ export function OAuthLogin() {
 
     async function login(provider) {
         try {
-            const response = await api.axios.post(`/oauth/${provider}/login`);
+            const response = await api.axios.post(
+                `/oauth/${provider}/authenticate`
+            );
             sessionStorage.setItem(
                 `openid_${response.data["state"]}`,
                 JSON.stringify({

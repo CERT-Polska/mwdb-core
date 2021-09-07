@@ -1,6 +1,6 @@
 import datetime
 
-from flask import request
+from flask import g, request
 from flask_restful import Resource
 from werkzeug.exceptions import Forbidden, NotFound
 
@@ -78,7 +78,7 @@ class OpenIDProviderResource(Resource):
         db.session.commit()
 
 
-class OpenIDLoginResource(Resource):
+class OpenIDAuthenticateResource(Resource):
     def post(self, provider_name):
         """
         ---
@@ -163,4 +163,55 @@ class OpenIDAuthorizeResource(Resource):
                 "capabilities": user.capabilities,
                 "groups": user.group_names,
             }
+        )
+
+
+class OpenIDBindAccountResource(Resource):
+    @requires_authorization
+    def post(self, provider_name):
+        """
+        ---
+        summary: Bind existing mwdb account with OpenID identity
+        description: |
+            TODO
+        tags:
+            - auth
+        parameters:
+            - in: path
+              name: provider_name
+              schema:
+                type: string
+              description: OpenID provider name.
+        requestBody:
+            description: OpenID Connect request state
+            content:
+              application/json:
+                schema: OpenIDAuthorizeRequestSchema
+        responses:
+            200:
+                description: When OpenID identity was successively binded to mwdb account
+        """
+        provider = (
+            db.session.query(OpenIDProvider)
+            .filter(OpenIDProvider.name == provider_name)
+            .first()
+        )
+        if not provider:
+            raise NotFound(f"Requested provider name '{provider_name}' not found")
+
+        schema = OpenIDAuthorizeRequestSchema()
+        obj = loads_schema(request.get_data(as_text=True), schema)
+        redirect_uri = f"{app_config.mwdb.base_url}/oauth/authorize"
+        userinfo = provider.fetch_id_token(
+            obj["code"], obj["state"], obj["nonce"], redirect_uri
+        )
+        identity = OpenIDUserIdentity(
+            sub_id=userinfo["sub"], provider_id=provider.id, user_id=g.auth_user.id
+        )
+        db.session.add(identity)
+        db.session.commit()
+
+        logger.info(
+            "Oauth identity was successively authenticated",
+            extra={"user": g.auth_user.login, "provider": provider.name},
         )

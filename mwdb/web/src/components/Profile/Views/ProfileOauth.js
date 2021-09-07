@@ -21,12 +21,16 @@ export function ProfileOauth() {
 
     async function bindProvider(provider) {
         try {
-            const response = await api.axios.post(`/oauth/${provider}/login`);
+            const response = await api.axios.post(
+                `/oauth/${provider}/authenticate`
+            );
             sessionStorage.setItem(
                 `openid_${response.data["state"]}`,
                 JSON.stringify({
                     provider: provider,
                     nonce: response.data["nonce"],
+                    action: "bind_account",
+                    expiration: new Date() + 5,
                 })
             );
             window.location = response.data["authorization_url"];

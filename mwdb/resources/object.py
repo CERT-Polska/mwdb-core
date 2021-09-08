@@ -10,7 +10,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
-from mwdb.model import MetakeyDefinition, Object, db
+from mwdb.model import AttributeDefinition, Object, db
 from mwdb.schema.object import (
     ObjectCountRequestSchema,
     ObjectCountResponseSchema,
@@ -48,7 +48,7 @@ class ObjectUploader:
     def on_reuploaded(self, object, params):
         hooks.on_reuploaded_object(object)
 
-    def _create_object(self, spec, parent, share_with, metakeys, analysis_id):
+    def _create_object(self, spec, parent, share_with, attributes, analysis_id):
         # To be implemented by specialized uploaders (e.g. FileUploader)
         raise NotImplementedError
 
@@ -70,21 +70,21 @@ class ObjectUploader:
         # Validate metakeys and Karton assignment
         analysis_id = params.get("karton_id")
 
-        metakeys = params["metakeys"]
-        for metakey in params["metakeys"]:
-            key = metakey["key"]
+        attributes = params["metakeys"]
+        for attribute in params["metakeys"]:
+            key = attribute["key"]
             if key == "karton":
                 if analysis_id is not None:
                     raise BadRequest(
                         "You can't provide more than one Karton analysis identifier"
                     )
                 try:
-                    analysis_id = UUID(metakey["value"])
+                    analysis_id = UUID(attribute["value"])
                 except (ValueError, AttributeError):
                     raise BadRequest("'karton' attribute accepts only UUID values")
-            elif not MetakeyDefinition.query_for_set(key).first():
+            elif not AttributeDefinition.query_for_set(key).first():
                 raise NotFound(
-                    f"Metakey '{key}' not defined or insufficient "
+                    f"Attribute '{key}' not defined or insufficient "
                     "permissions to set that one"
                 )
 
@@ -98,7 +98,7 @@ class ObjectUploader:
         share_with = get_shares_for_upload(params["upload_as"])
 
         item, is_new = self._create_object(
-            params, parent_object, share_with, metakeys, analysis_id
+            params, parent_object, share_with, attributes, analysis_id
         )
 
         try:

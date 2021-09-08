@@ -25,7 +25,7 @@ class TextBlobUploader(ObjectUploader):
         super().on_reuploaded(object, params)
         hooks.on_reuploaded_text_blob(object)
 
-    def _create_object(self, spec, parent, share_with, metakeys, analysis_id):
+    def _create_object(self, spec, parent, share_with, attributes, analysis_id):
         try:
             return TextBlob.get_or_create(
                 spec["content"],
@@ -33,7 +33,7 @@ class TextBlobUploader(ObjectUploader):
                 spec["blob_type"],
                 parent=parent,
                 share_with=share_with,
-                metakeys=metakeys,
+                attributes=attributes,
                 analysis_id=analysis_id,
             )
         except ObjectTypeConflictError:

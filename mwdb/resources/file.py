@@ -28,14 +28,14 @@ class FileUploader(ObjectUploader):
         super().on_reuploaded(object, params)
         hooks.on_reuploaded_file(object)
 
-    def _create_object(self, spec, parent, share_with, metakeys, analysis_id):
+    def _create_object(self, spec, parent, share_with, attributes, analysis_id):
         try:
             return File.get_or_create(
                 request.files["file"].filename,
                 request.files["file"].stream,
                 parent=parent,
                 share_with=share_with,
-                metakeys=metakeys,
+                attributes=attributes,
                 analysis_id=analysis_id,
             )
         except ObjectTypeConflictError:
@@ -147,7 +147,7 @@ class FileResource(ObjectResource, FileUploader):
             403:
                 description: |
                     No permissions to perform additional operations
-                    (e.g. adding parent, metakeys)
+                    (e.g. adding parent, attributes)
             404:
                 description: |
                     One of attribute keys doesn't exist
@@ -268,7 +268,7 @@ class FileItemResource(ObjectItemResource, FileUploader):
             403:
                 description: |
                     No permissions to perform additional operations
-                    (e.g. adding parent, metakeys)
+                    (e.g. adding parent, attributes)
             404:
                 description: |
                     One of attribute keys doesn't exist or user doesn't have

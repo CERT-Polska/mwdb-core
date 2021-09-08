@@ -48,7 +48,9 @@ def send_file_to_karton(file) -> str:
             headers={"type": "sample", "kind": "raw", "quality": feed_quality},
             payload={
                 "sample": Resource(file.file_name, path=path, sha256=file.sha256),
-                "attributes": file.get_metakeys(as_dict=True, check_permissions=False),
+                "attributes": file.get_attributes(
+                    as_dict=True, check_permissions=False
+                ),
             },
             priority=task_priority,
         )
@@ -68,7 +70,7 @@ def send_config_to_karton(config) -> str:
         payload={
             "config": config.cfg,
             "dhash": config.dhash,
-            "attributes": config.get_metakeys(as_dict=True, check_permissions=False),
+            "attributes": config.get_attributes(as_dict=True, check_permissions=False),
         },
     )
     producer.send_task(task)
@@ -84,7 +86,7 @@ def send_blob_to_karton(blob) -> str:
         payload={
             "content": blob.content,
             "dhash": blob.dhash,
-            "attributes": blob.get_metakeys(as_dict=True, check_permissions=False),
+            "attributes": blob.get_attributes(as_dict=True, check_permissions=False),
         },
     )
     producer.send_task(task)

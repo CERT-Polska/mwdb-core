@@ -70,23 +70,38 @@ class ObjectUploader:
         # Validate metakeys and Karton assignment
         analysis_id = params.get("karton_id")
 
-        attributes = params["metakeys"]
-        for attribute in params["metakeys"]:
-            key = attribute["key"]
-            if key == "karton":
-                if analysis_id is not None:
-                    raise BadRequest(
-                        "You can't provide more than one Karton analysis identifier"
+        if params["metakeys"]:
+            # If 'metakeys' are defined: keep legacy behavior
+            if "attributes" in params and params["attributes"]:
+                raise BadRequest("'attributes' and 'metakeys' options can't be mixed")
+
+            attributes = params["metakeys"]
+            for attribute in params["metakeys"]:
+                key = attribute["key"]
+                if key == "karton":
+                    if analysis_id is not None:
+                        raise BadRequest(
+                            "You can't provide more than one Karton analysis identifier"
+                        )
+                    try:
+                        analysis_id = UUID(attribute["value"])
+                    except (ValueError, AttributeError):
+                        raise BadRequest("'karton' attribute accepts only UUID values")
+                elif not AttributeDefinition.query_for_set(key).first():
+                    raise NotFound(
+                        f"Attribute '{key}' not defined or insufficient "
+                        "permissions to set that one"
                     )
-                try:
-                    analysis_id = UUID(attribute["value"])
-                except (ValueError, AttributeError):
-                    raise BadRequest("'karton' attribute accepts only UUID values")
-            elif not AttributeDefinition.query_for_set(key).first():
-                raise NotFound(
-                    f"Attribute '{key}' not defined or insufficient "
-                    "permissions to set that one"
-                )
+        else:
+            # If not, rely on 'attributes'
+            attributes = params["attributes"]
+            for attribute in params["attributes"]:
+                key = attribute["key"]
+                if not AttributeDefinition.query_for_set(key).first():
+                    raise NotFound(
+                        f"Attribute '{key}' not defined or insufficient "
+                        "permissions to set that one"
+                    )
 
         if analysis_id is not None:
             if not g.auth_user.has_rights(Capabilities.karton_assign):

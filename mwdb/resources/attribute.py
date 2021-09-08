@@ -10,7 +10,7 @@ from mwdb.schema.attribute import (
     AttributeDefinitionListRequestSchema,
     AttributeDefinitionListResponseSchema,
     AttributeDefinitionUpdateRequestSchema,
-    AttributeItemResponseSchema,
+    AttributeItemRequestSchema,
     AttributeListRequestSchema,
     AttributeListResponseSchema,
     AttributePermissionDeleteRequestSchema,
@@ -138,7 +138,7 @@ class AttributeListResource(Resource):
                     When attribute key is not defined or user doesn't have
                     privileges to set that one.
         """
-        schema = AttributeItemResponseSchema()
+        schema = AttributeItemRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
         db_object = access_object(type, identifier)

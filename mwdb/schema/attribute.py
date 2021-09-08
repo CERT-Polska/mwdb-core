@@ -36,7 +36,7 @@ class AttributeListRequestSchema(Schema):
 
 
 class AttributeItemRequestSchema(AttributeKeySchema, AttributeValueSchema):
-    id = fields.Integer(required=True, allow_none=False)
+    pass
 
 
 class AttributeDefinitionListRequestSchema(Schema):
@@ -70,7 +70,7 @@ class AttributePermissionDeleteRequestSchema(Schema):
 
 
 class AttributeItemResponseSchema(AttributeKeySchema, AttributeValueSchema):
-    pass
+    id = fields.Integer(required=True, allow_none=False)
 
 
 class AttributeListResponseSchema(Schema):

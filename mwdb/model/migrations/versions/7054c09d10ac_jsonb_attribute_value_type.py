@@ -1,7 +1,7 @@
 """JSONB attribute value type
 
 Revision ID: 7054c09d10ac
-Revises: 4f0405411201
+Revises: 3648d869ef45
 Create Date: 2021-07-20 16:19:43.171111
 
 """

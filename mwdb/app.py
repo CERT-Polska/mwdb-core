@@ -47,8 +47,8 @@ from mwdb.resources.metakey import (
 from mwdb.resources.oauth import (
     OpenIDAuthenticateResource,
     OpenIDAuthorizeResource,
-    OpenIDProviderResource,
     OpenIDBindAccountResource,
+    OpenIDProviderResource,
 )
 from mwdb.resources.object import (
     ObjectCountResource,

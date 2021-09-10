@@ -27,11 +27,15 @@ export function OAuthLogin() {
             const response = await api.axios.post(
                 `/oauth/${provider}/authenticate`
             );
+            let expirationTime = new Date();
+            expirationTime.setTime(expirationTime.getTime() + 5 * 60 * 1000);
             sessionStorage.setItem(
                 `openid_${response.data["state"]}`,
                 JSON.stringify({
                     provider: provider,
                     nonce: response.data["nonce"],
+                    action: "login",
+                    expiration: expirationTime,
                 })
             );
             window.location = response.data["authorization_url"];
@@ -86,20 +90,33 @@ export function OAuthAuthorize() {
             if (!stateData) {
                 // Invalid authorization state
             }
-            const { provider, nonce } = JSON.parse(stateData);
-            const response = await api.axios.post(
-                `/oauth/${provider}/authorize`,
-                {
-                    code,
-                    nonce,
-                    state,
+            let { provider, nonce, action, expiration } = JSON.parse(stateData);
+            expiration = Date.parse(expiration);
+            if (expiration > Date.now()) {
+                if (action === "login") {
+                    const response = await api.axios.post(
+                        `/oauth/${provider}/authorize`,
+                        {
+                            code,
+                            nonce,
+                            state,
+                        }
+                    );
+                    sessionStorage.removeItem(`openid_${state}`);
+                    auth.updateSession(response.data);
+                    history.push("/");
+                } else if (action === "bind_account") {
+                    await api.axios.post(`/oauth/${provider}/bind_account`, {
+                        code,
+                        nonce,
+                        state,
+                    });
+                    sessionStorage.removeItem(`openid_${state}`);
+                    history.push("/profile/oauth");
                 }
-            );
-            sessionStorage.removeItem(`openid_${state}`);
-            auth.updateSession(response.data);
-            history.push("/");
+            }
         } catch (e) {
-            history.push("/oauth/login", { error: getErrorMessage(e) });
+            history.push("/", { error: getErrorMessage(e) });
         }
     }
 

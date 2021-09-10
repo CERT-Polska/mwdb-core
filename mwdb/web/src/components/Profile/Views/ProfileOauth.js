@@ -24,13 +24,15 @@ export function ProfileOauth() {
             const response = await api.axios.post(
                 `/oauth/${provider}/authenticate`
             );
+            let expirationTime = new Date();
+            expirationTime.setTime(expirationTime.getTime() + 5 * 60 * 1000);
             sessionStorage.setItem(
                 `openid_${response.data["state"]}`,
                 JSON.stringify({
                     provider: provider,
                     nonce: response.data["nonce"],
                     action: "bind_account",
-                    expiration: new Date() + 5,
+                    expiration: expirationTime,
                 })
             );
             window.location = response.data["authorization_url"];

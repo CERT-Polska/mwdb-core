@@ -48,6 +48,7 @@ from mwdb.resources.oauth import (
     OpenIDAuthenticateResource,
     OpenIDAuthorizeResource,
     OpenIDProviderResource,
+    OpenIDBindAccountResource,
 )
 from mwdb.resources.object import (
     ObjectCountResource,
@@ -328,6 +329,7 @@ api.add_resource(GroupMemberResource, "/group/<name>/member/<login>")
 api.add_resource(OpenIDProviderResource, "/oauth")
 api.add_resource(OpenIDAuthenticateResource, "/oauth/<provider_name>/authenticate")
 api.add_resource(OpenIDAuthorizeResource, "/oauth/<provider_name>/authorize")
+api.add_resource(OpenIDBindAccountResource, "/oauth/<provider_name>/bind_account")
 
 # Remote endpoints
 api.add_resource(RemoteListResource, "/remote")

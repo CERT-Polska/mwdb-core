@@ -189,7 +189,7 @@ class OpenIDBindAccountResource(Resource):
                 schema: OpenIDAuthorizeRequestSchema
         responses:
             200:
-                description: When OpenID identity was successively binded to mwdb account
+                description: When OpenID identity was successively bound to mwdb account
         """
         provider = (
             db.session.query(OpenIDProvider)

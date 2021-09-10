@@ -4,7 +4,8 @@ from typing import Optional
 from uuid import UUID
 
 from flask import g
-from sqlalchemy import and_, exists
+from sqlalchemy import and_, cast, exists
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, contains_eager
 from sqlalchemy.sql.expression import true
@@ -12,8 +13,8 @@ from sqlalchemy.sql.expression import true
 from mwdb.core.capabilities import Capabilities
 
 from . import db
+from .attribute import Attribute, AttributeDefinition, AttributePermission
 from .karton import KartonAnalysis, karton_object
-from .metakey import Metakey, MetakeyDefinition, MetakeyPermission
 from .tag import Tag, object_tag_table
 
 relation = db.Table(
@@ -215,6 +216,8 @@ class Object(db.Model):
         db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow
     )
 
+    __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
+
     parents = db.relationship(
         "Object",
         secondary=relation,
@@ -232,8 +235,8 @@ class Object(db.Model):
         back_populates="parents",
     )
 
-    meta = db.relationship(
-        "Metakey", backref="object", lazy=True, cascade="save-update, merge, delete"
+    attributes = db.relationship(
+        "Attribute", backref="object", lazy=True, cascade="save-update, merge, delete"
     )
     comments = db.relationship(
         "Comment",
@@ -392,11 +395,6 @@ class Object(db.Model):
         return new_devisor
 
     def uninherit_share(self, share_to_remove, new_devisor=None, visited=None):
-        print(
-            f"Uninheriting share for '{share_to_remove.group_name}' "
-            f"({share_to_remove.access_reason})",
-            flush=True,
-        )
         # Break the c-c-c-cycles
         visited = visited or set()
         if self in visited:
@@ -405,14 +403,12 @@ class Object(db.Model):
             visited.add(self)
         # Get our share for the same group as share_to_remove
         our_share = self.get_share_for_group(share_to_remove.group_id)
-        print("our_share", our_share, flush=True)
         # If it doesn't exist or it's unrelated: just return
         if not our_share or not our_share.inherits(share_to_remove):
             return
         # Find new devisor different than share_to_remove
         if new_devisor is None:
             new_devisor = self._find_another_devisor(share_to_remove)
-        print("new_devisor", new_devisor, flush=True)
         # If there's nothing to change (same share is given by another parent): return
         if new_devisor is share_to_remove:
             return
@@ -490,7 +486,7 @@ class Object(db.Model):
 
     @classmethod
     def _get_or_create(
-        cls, obj, parent=None, metakeys=None, share_with=None, analysis_id=None
+        cls, obj, parent=None, attributes=None, share_with=None, analysis_id=None
     ):
         """
         Polymophic get or create pattern, useful in dealing with race condition
@@ -505,7 +501,7 @@ class Object(db.Model):
         from .group import Group
 
         share_with = share_with or []
-        metakeys = metakeys or []
+        attributes = attributes or []
 
         is_new = False
         new_cls = Object.get(obj.dhash).first()
@@ -536,9 +532,9 @@ class Object(db.Model):
             if new_cls is None:
                 raise ObjectTypeConflictError
 
-        # Add metakeys
-        for metakey in metakeys:
-            new_cls.add_metakey(metakey["key"], metakey["value"], commit=False)
+        # Add attributes
+        for attribute in attributes:
+            new_cls.add_attribute(attribute["key"], attribute["value"], commit=False)
 
         # Share with all specified groups
         for share_group in share_with:
@@ -700,45 +696,45 @@ class Object(db.Model):
                 raise
         return False
 
-    def get_metakeys(
+    def get_attributes(
         self, as_dict=False, check_permissions=True, show_hidden=False, show_karton=True
     ):
         """
-        Gets all object metakeys (attributes)
+        Gets all object attributes
         :param as_dict: |
-            Return dict object instead of list of Metakey objects (default: False)
+            Return dict object instead of list of Attribute objects (default: False)
         :param check_permissions: |
             Filter results including current user permissions (default: True)
-        :param show_hidden: Show hidden metakeys
-        :param show_karton: Show Karton metakeys (for compatibility)
+        :param show_hidden: Show hidden attributes
+        :param show_karton: Show Karton attributes (for compatibility)
         """
-        metakeys = (
-            db.session.query(Metakey)
-            .filter(Metakey.object_id == self.id)
-            .join(Metakey.template)
+        attributes = (
+            db.session.query(Attribute)
+            .filter(Attribute.object_id == self.id)
+            .join(Attribute.template)
         )
 
         if check_permissions and not g.auth_user.has_rights(
             Capabilities.reading_all_attributes
         ):
-            metakeys = metakeys.filter(
-                Metakey.key.in_(
-                    db.session.query(MetakeyPermission.key)
-                    .filter(MetakeyPermission.can_read == true())
-                    .filter(g.auth_user.is_member(MetakeyPermission.group_id))
+            attributes = attributes.filter(
+                Attribute.key.in_(
+                    db.session.query(AttributePermission.key)
+                    .filter(AttributePermission.can_read == true())
+                    .filter(g.auth_user.is_member(AttributePermission.group_id))
                 )
             )
 
         if not show_hidden:
-            metakeys = metakeys.filter(MetakeyDefinition.hidden.is_(False))
+            attributes = attributes.filter(AttributeDefinition.hidden.is_(False))
 
-        metakeys = metakeys.order_by(Metakey.id).all()
+        attributes = attributes.order_by(Attribute.id).all()
 
         if show_karton:
-            KartonMetakey = namedtuple("KartonMetakey", ["key", "value"])
+            KartonAttribute = namedtuple("KartonAttribute", ["key", "value"])
 
-            metakeys += [
-                KartonMetakey(key="karton", value=str(analysis.id))
+            attributes += [
+                KartonAttribute(key="karton", value=str(analysis.id))
                 for analysis in (
                     db.session.query(KartonAnalysis)
                     .filter(KartonAnalysis.objects.any(id=self.id))
@@ -748,16 +744,16 @@ class Object(db.Model):
             ]
 
         if not as_dict:
-            return metakeys
+            return attributes
 
-        dict_metakeys = {}
-        for metakey in metakeys:
-            if metakey.key not in dict_metakeys:
-                dict_metakeys[metakey.key] = []
-            dict_metakeys[metakey.key].append(metakey.value)
-        return dict_metakeys
+        dict_attributes = {}
+        for attribute in attributes:
+            if attribute.key not in dict_attributes:
+                dict_attributes[attribute.key] = []
+            dict_attributes[attribute.key].append(attribute.value)
+        return dict_attributes
 
-    def add_metakey(self, key, value, commit=True, check_permissions=True):
+    def add_attribute(self, key, value, commit=True, check_permissions=True):
         if key == "karton":
             karton_id = UUID(value)
 
@@ -774,41 +770,43 @@ class Object(db.Model):
             return is_new
 
         if check_permissions:
-            metakey_definition = MetakeyDefinition.query_for_set(key).first()
+            attribute_definition = AttributeDefinition.query_for_set(key).first()
         else:
-            metakey_definition = (
-                db.session.query(MetakeyDefinition).filter(MetakeyDefinition.key == key)
+            attribute_definition = (
+                db.session.query(AttributeDefinition).filter(
+                    AttributeDefinition.key == key
+                )
             ).first()
 
-        if not metakey_definition:
+        if not attribute_definition:
             # Attribute needs to be defined first
             return None
 
-        db_metakey = Metakey(key=key, value=value, object_id=self.id)
-        _, is_new = Metakey.get_or_create(db_metakey)
+        db_attribute = Attribute(key=key, value=value, object_id=self.id)
+        _, is_new = Attribute.get_or_create(db_attribute)
         if commit:
             db.session.commit()
         return is_new
 
-    __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
-
-    def remove_metakey(self, key, value, check_permissions=True):
-        metakey_query = db.session.query(Metakey).filter(
-            Metakey.key == key, Metakey.object_id == self.id
+    def remove_attribute(self, key, value, check_permissions=True):
+        attribute_query = db.session.query(Attribute).filter(
+            Attribute.key == key, Attribute.object_id == self.id
         )
         if value:
-            metakey_query = metakey_query.filter(Metakey.value == value)
+            attribute_query = attribute_query.filter(
+                Attribute.value == cast(value, JSONB)
+            )
 
-        if check_permissions and not MetakeyDefinition.query_for_set(key).first():
+        if check_permissions and not AttributeDefinition.query_for_set(key).first():
             return False
 
         try:
-            rows = metakey_query.delete()
+            rows = attribute_query.delete(synchronize_session="fetch")
             db.session.commit()
             return rows > 0
         except IntegrityError:
             db.session.refresh(self)
-            if metakey_query.first():
+            if attribute_query.first():
                 raise
         return True
 

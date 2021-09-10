@@ -1,7 +1,8 @@
 from string import Template
 
 from flask import g
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, cast
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 
 from mwdb.core.capabilities import Capabilities
@@ -9,20 +10,20 @@ from mwdb.core.capabilities import Capabilities
 from . import db
 
 
-class Metakey(db.Model):
-    __tablename__ = "metakey"
+class Attribute(db.Model):
+    __tablename__ = "attribute"
     __table_args__ = (UniqueConstraint("object_id", "key", "value"),)
 
     id = db.Column(db.Integer, primary_key=True)
     object_id = db.Column(db.Integer, db.ForeignKey("object.id"), nullable=False)
     key = db.Column(
         db.String(64),
-        db.ForeignKey("metakey_definition.key", ondelete="CASCADE"),
+        db.ForeignKey("attribute_definition.key", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    value = db.Column(db.Text, nullable=False, index=True)
-    template = db.relationship("MetakeyDefinition", lazy="joined")
+    value = db.Column(JSONB, nullable=False, index=True)
+    template = db.relationship("AttributeDefinition", lazy="joined")
 
     @property
     def url(self):
@@ -42,7 +43,9 @@ class Metakey(db.Model):
     @classmethod
     def get(cls, object_id, key, value):
         return db.session.query(cls).filter(
-            (cls.object_id == object_id) & (cls.key == key) & (cls.value == value)
+            (cls.object_id == object_id)
+            & (cls.key == key)
+            & (cls.value == cast(value, JSONB))
         )
 
     @classmethod
@@ -74,12 +77,12 @@ class Metakey(db.Model):
         return new_cls, is_new
 
 
-class MetakeyPermission(db.Model):
-    __tablename__ = "metakey_permission"
+class AttributePermission(db.Model):
+    __tablename__ = "attribute_permission"
 
     key = db.Column(
         db.String(64),
-        db.ForeignKey("metakey_definition.key", ondelete="CASCADE"),
+        db.ForeignKey("attribute_definition.key", ondelete="CASCADE"),
         primary_key=True,
         index=True,
     )
@@ -91,12 +94,14 @@ class MetakeyPermission(db.Model):
         index=True,
     )
     __table_args__ = (
-        db.Index("ix_metakey_permission_metakey_group", "key", "group_id", unique=True),
+        db.Index(
+            "ix_attribute_permission_attribute_group", "key", "group_id", unique=True
+        ),
     )
     can_read = db.Column(db.Boolean, nullable=False)
     can_set = db.Column(db.Boolean, nullable=False)
     template = db.relationship(
-        "MetakeyDefinition",
+        "AttributeDefinition",
         foreign_keys=[key],
         lazy="joined",
         back_populates="permissions",
@@ -113,8 +118,8 @@ class MetakeyPermission(db.Model):
         return self.group.name
 
 
-class MetakeyDefinition(db.Model):
-    __tablename__ = "metakey_definition"
+class AttributeDefinition(db.Model):
+    __tablename__ = "attribute_definition"
 
     key = db.Column(db.String(64), primary_key=True)
     label = db.Column(db.String(64), nullable=False)
@@ -122,13 +127,13 @@ class MetakeyDefinition(db.Model):
     url_template = db.Column(db.Text, nullable=False)
     hidden = db.Column(db.Boolean, nullable=False, default=False)
     permissions = db.relationship(
-        "MetakeyPermission",
+        "AttributePermission",
         lazy="joined",
         back_populates="template",
         cascade="all, delete",
     )
-    metakey = db.relationship(
-        "Metakey",
+    attribute = db.relationship(
+        "Attribute",
         back_populates="template",
         cascade="all, delete",
     )
@@ -141,19 +146,19 @@ class MetakeyDefinition(db.Model):
         :param key: Query for specific key (default: all matching keys)
         :param include_hidden: Include hidden keys
         """
-        query = db.session.query(MetakeyDefinition)
+        query = db.session.query(AttributeDefinition)
 
         if key is not None:
-            query = query.filter(MetakeyDefinition.key == key)
+            query = query.filter(AttributeDefinition.key == key)
 
         if not include_hidden:
-            query = query.filter(MetakeyDefinition.hidden.isnot(True))
+            query = query.filter(AttributeDefinition.hidden.isnot(True))
 
         if not g.auth_user.has_rights(Capabilities.reading_all_attributes):
             query = (
-                query.join(MetakeyDefinition.permissions)
-                .filter(MetakeyPermission.can_read.is_(True))
-                .filter(g.auth_user.is_member(MetakeyPermission.group_id))
+                query.join(AttributeDefinition.permissions)
+                .filter(AttributePermission.can_read.is_(True))
+                .filter(g.auth_user.is_member(AttributePermission.group_id))
             )
         return query
 
@@ -164,15 +169,15 @@ class MetakeyDefinition(db.Model):
 
         :param key: Query for specific key (default: all matching keys)
         """
-        query = db.session.query(MetakeyDefinition)
+        query = db.session.query(AttributeDefinition)
 
         if key is not None:
-            query = query.filter(MetakeyDefinition.key == key)
+            query = query.filter(AttributeDefinition.key == key)
 
         if not g.auth_user.has_rights(Capabilities.adding_all_attributes):
             query = (
-                query.join(MetakeyDefinition.permissions)
-                .filter(MetakeyPermission.can_set.is_(True))
-                .filter(g.auth_user.is_member(MetakeyPermission.group_id))
+                query.join(AttributeDefinition.permissions)
+                .filter(AttributePermission.can_set.is_(True))
+                .filter(g.auth_user.is_member(AttributePermission.group_id))
             )
         return query

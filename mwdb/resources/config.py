@@ -88,7 +88,7 @@ class ConfigUploader(ObjectUploader):
         super().on_reuploaded(object, params)
         hooks.on_reuploaded_config(object)
 
-    def _get_embedded_blob(self, in_blob, share_with, metakeys):
+    def _get_embedded_blob(self, in_blob, share_with, attributes):
         if isinstance(in_blob, dict):
             schema = BlobCreateSpecSchema()
             blob_spec = load_schema(in_blob, schema)
@@ -100,7 +100,7 @@ class ConfigUploader(ObjectUploader):
                     blob_spec["blob_type"],
                     parent=None,
                     share_with=share_with,
-                    metakeys=metakeys,
+                    attributes=attributes,
                 )
             except ObjectTypeConflictError:
                 raise Conflict("Object already exists and is not a blob")
@@ -115,7 +115,7 @@ class ConfigUploader(ObjectUploader):
                 "'in-blob' key must be set to blob SHA256 hash or blob specification"
             )
 
-    def _create_object(self, spec, parent, share_with, metakeys, analysis_id):
+    def _create_object(self, spec, parent, share_with, attributes, analysis_id):
         try:
             blobs = []
             config = dict(spec["cfg"])
@@ -125,7 +125,7 @@ class ConfigUploader(ObjectUploader):
                     if not g.auth_user.has_rights(Capabilities.adding_blobs):
                         raise Forbidden("You are not permitted to add blob objects")
                     blob_obj = self._get_embedded_blob(
-                        second["in-blob"], share_with, metakeys
+                        second["in-blob"], share_with, attributes
                     )
                     config[first]["in-blob"] = blob_obj.dhash
                     blobs.append(blob_obj)
@@ -138,7 +138,7 @@ class ConfigUploader(ObjectUploader):
                 spec["config_type"],
                 parent=parent,
                 share_with=share_with,
-                metakeys=metakeys,
+                attributes=attributes,
                 analysis_id=analysis_id,
             )
 

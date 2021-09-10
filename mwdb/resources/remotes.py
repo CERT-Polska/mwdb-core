@@ -253,7 +253,7 @@ class RemoteConfigPullResource(RemotePullResource):
             403:
                 description: |
                     No permissions to perform additional operations
-                    (e.g. adding parent, metakeys)
+                    (e.g. adding parent, attributes)
             404:
                 description: |
                     When the name of the remote instance is not figured

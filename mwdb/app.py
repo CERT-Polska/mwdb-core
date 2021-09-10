@@ -107,7 +107,7 @@ if app_config.mwdb.flask_config_file:
 
 app.url_map.converters["hash64"] = HashConverter
 
-migrate = Migrate(app, db, directory=migrations_dir)
+migrate = Migrate(app, db, directory=migrations_dir, compare_type=True)
 db.init_app(app)
 
 if app_config.mwdb.serve_web:
@@ -291,7 +291,7 @@ api.add_resource(
 )
 api.add_resource(QuickQueryItemResource, "/quick_query/<int:id>")
 
-# Metakey endpoints
+# Attribute endpoints
 api.add_resource(MetakeyListDefinitionResource, "/meta/list/<any(read, set):access>")
 api.add_resource(
     MetakeyResource, "/<any(file, config, blob, object):type>/<hash64:identifier>/meta"

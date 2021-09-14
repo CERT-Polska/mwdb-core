@@ -85,12 +85,12 @@ export function OAuthAuthorize() {
     const { code, state } = queryString.parse(history.location.search);
 
     async function authorize() {
+        const stateData = sessionStorage.getItem(`openid_${state}`);
+        if (!stateData) {
+            history.push("/", { error: "Invalid state data" });
+        }
+        let { provider, nonce, action, expiration } = JSON.parse(stateData);
         try {
-            const stateData = sessionStorage.getItem(`openid_${state}`);
-            if (!stateData) {
-                // Invalid authorization state
-            }
-            let { provider, nonce, action, expiration } = JSON.parse(stateData);
             expiration = Date.parse(expiration);
             if (expiration > Date.now()) {
                 if (action === "login") {
@@ -112,11 +112,15 @@ export function OAuthAuthorize() {
                         state,
                     });
                     sessionStorage.removeItem(`openid_${state}`);
-                    history.push("/profile/oauth");
+                    history.push("/profile/oauth", {
+                        success: "New external identity successfully added",
+                    });
                 }
             }
         } catch (e) {
-            history.push("/", { error: getErrorMessage(e) });
+            if (action === "bind_account")
+                history.push("/profile/oauth", { error: getErrorMessage(e) });
+            else history.push("/", { error: getErrorMessage(e) });
         }
     }
 

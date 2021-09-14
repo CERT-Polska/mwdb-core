@@ -45,6 +45,7 @@ from mwdb.resources.metakey import (
     MetakeyResource,
 )
 from mwdb.resources.oauth import (
+    OpenIDAccountIdentitiesResource,
     OpenIDAuthenticateResource,
     OpenIDAuthorizeResource,
     OpenIDBindAccountResource,
@@ -327,6 +328,7 @@ api.add_resource(GroupMemberResource, "/group/<name>/member/<login>")
 
 # Oauth endpoints
 api.add_resource(OpenIDProviderResource, "/oauth")
+api.add_resource(OpenIDAccountIdentitiesResource, "/oauth/identities")
 api.add_resource(OpenIDAuthenticateResource, "/oauth/<provider_name>/authenticate")
 api.add_resource(OpenIDAuthorizeResource, "/oauth/<provider_name>/authorize")
 api.add_resource(OpenIDBindAccountResource, "/oauth/<provider_name>/bind_account")

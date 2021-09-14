@@ -215,3 +215,24 @@ class OpenIDBindAccountResource(Resource):
             "Oauth identity was successively authenticated",
             extra={"user": g.auth_user.login, "provider": provider.name},
         )
+
+
+class OpenIDAccountIdentitiesResource(Resource):
+    @requires_authorization
+    def get(self):
+        """
+        ---
+        summary: List OpenID bound external identities
+        description: |
+            TODO
+        tags:
+            - auth
+        responses:
+            200:
+                description: Returns list of accounts OpenID bound identities
+                content:
+                  application/json:
+                    schema: OpenIDProviderListResponseSchema
+        """
+        print("IDENTITIES")
+        print(g.auth_user.openid_identities)

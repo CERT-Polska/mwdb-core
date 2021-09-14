@@ -2,13 +2,17 @@ import React, { useContext, useEffect, useState } from "react";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 
-import { useViewAlert } from "@mwdb-web/commons/ui";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { ConfirmationModal, useViewAlert } from "@mwdb-web/commons/ui";
 
 export function ProfileOauth() {
     const api = useContext(APIContext);
     const viewAlert = useViewAlert();
     const [providers, setProviders] = useState([]);
     const [chosenProvider, setChosenProvider] = useState();
+    const [addModalOpen, setAddModalOpen] = useState(false);
 
     async function getProviders() {
         try {
@@ -56,28 +60,53 @@ export function ProfileOauth() {
                 your account with an external identity provider to use it for
                 authorization on the website in the future.
             </p>
-            <form
-                onSubmit={(e) => {
+            <b>Actions:</b>
+            <ul className="nav flex-column">
+                <li className="nav-item">
+                    <a
+                        href="#new-api-key"
+                        className="nav-link"
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setAddModalOpen(true);
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faPlus} /> Connect with external
+                        identity
+                    </a>
+                </li>
+            </ul>
+
+            <ConfirmationModal
+                isOpen={addModalOpen}
+                onRequestClose={() => setAddModalOpen(false)}
+                message="Choose OpenID Provider to connect"
+                onConfirm={(e) => {
                     e.preventDefault();
                     bindProvider(chosenProvider);
                 }}
+                buttonStyle="btn-info"
+                confirmText="Bind"
             >
-                <select
-                    className="custom-select"
-                    value={chosenProvider}
-                    onChange={(ev) => setChosenProvider(ev.target.value)}
-                >
-                    <option value="" hidden>
-                        Select provider...
-                    </option>
-                    {providers.map((provider) => (
-                        <option value={provider}>{provider}</option>
-                    ))}
-                </select>
-                <button type="submit" className="btn btn-outline-success">
-                    Login
-                </button>
-            </form>
+                <form onSubmit={(e) => {}}>
+                    <div>
+                        <select
+                            className="custom-select"
+                            value={chosenProvider}
+                            onChange={(ev) =>
+                                setChosenProvider(ev.target.value)
+                            }
+                        >
+                            <option value="" hidden>
+                                Select provider...
+                            </option>
+                            {providers.map((provider) => (
+                                <option value={provider}>{provider}</option>
+                            ))}
+                        </select>
+                    </div>
+                </form>
+            </ConfirmationModal>
         </div>
     );
 }

@@ -132,9 +132,10 @@ class OpenIDAuthorizeResource(Resource):
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         # 'sub' bind should be used instead of 'name'
-        identity = OpenIDUserIdentity.query.filter(
-            OpenIDUserIdentity.sub_id == userinfo["sub"]
-        ).one()
+        identity = db.session.query(OpenIDUserIdentity).filter(
+            OpenIDUserIdentity.sub_id == userinfo["sub"],
+            OpenIDUserIdentity.provider_id == provider.id,
+        ).first()
         if identity is None:
             raise Forbidden("Unknown identity")
 
@@ -154,7 +155,7 @@ class OpenIDAuthorizeResource(Resource):
 
         auth_token = user.generate_session_token()
 
-        logger.info("User logged in", extra={"login": user.login})
+        logger.info("User logged in via OpenID Provider", extra={"login": user.login, "provider": provider_name})
         schema = AuthSuccessResponseSchema()
         return schema.dump(
             {
@@ -212,7 +213,7 @@ class OpenIDBindAccountResource(Resource):
         db.session.commit()
 
         logger.info(
-            "Oauth identity was successively authenticated",
+            "Account was successfully bound with OpenID Identity",
             extra={"user": g.auth_user.login, "provider": provider.name},
         )
 
@@ -225,6 +226,8 @@ class OpenIDAccountIdentitiesResource(Resource):
         summary: List OpenID bound external identities
         description: |
             TODO
+        security:
+            - bearerAuth: []
         tags:
             - auth
         responses:

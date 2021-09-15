@@ -27,8 +27,7 @@ export function OAuthLogin() {
             const response = await api.axios.post(
                 `/oauth/${provider}/authenticate`
             );
-            let expirationTime = new Date();
-            expirationTime.setTime(expirationTime.getTime() + 5 * 60 * 1000);
+            const expirationTime = Date.now() + 5 * 60 * 1000;
             sessionStorage.setItem(
                 `openid_${response.data["state"]}`,
                 JSON.stringify({
@@ -89,9 +88,9 @@ export function OAuthAuthorize() {
         if (!stateData) {
             history.push("/", { error: "Invalid state data" });
         }
-        let { provider, nonce, action, expiration } = JSON.parse(stateData);
+        const { provider, nonce, action, expiration } = JSON.parse(stateData);
         try {
-            expiration = Date.parse(expiration);
+            expiration = new Date(expiration);
             if (expiration > Date.now()) {
                 if (action === "login") {
                     const response = await api.axios.post(

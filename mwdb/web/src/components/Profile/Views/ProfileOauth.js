@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { ConfirmationModal, useViewAlert } from "@mwdb-web/commons/ui";
 
-export function ProfileOauth() {
+export function ProfileOAuth() {
     const api = useContext(APIContext);
     const viewAlert = useViewAlert();
     const [providers, setProviders] = useState([]);

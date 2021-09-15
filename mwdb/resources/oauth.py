@@ -132,10 +132,14 @@ class OpenIDAuthorizeResource(Resource):
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         # 'sub' bind should be used instead of 'name'
-        identity = db.session.query(OpenIDUserIdentity).filter(
-            OpenIDUserIdentity.sub_id == userinfo["sub"],
-            OpenIDUserIdentity.provider_id == provider.id,
-        ).first()
+        identity = (
+            db.session.query(OpenIDUserIdentity)
+            .filter(
+                OpenIDUserIdentity.sub_id == userinfo["sub"],
+                OpenIDUserIdentity.provider_id == provider.id,
+            )
+            .first()
+        )
         if identity is None:
             raise Forbidden("Unknown identity")
 
@@ -155,7 +159,10 @@ class OpenIDAuthorizeResource(Resource):
 
         auth_token = user.generate_session_token()
 
-        logger.info("User logged in via OpenID Provider", extra={"login": user.login, "provider": provider_name})
+        logger.info(
+            "User logged in via OpenID Provider",
+            extra={"login": user.login, "provider": provider_name},
+        )
         schema = AuthSuccessResponseSchema()
         return schema.dump(
             {
@@ -226,8 +233,6 @@ class OpenIDAccountIdentitiesResource(Resource):
         summary: List OpenID bound external identities
         description: |
             TODO
-        security:
-            - bearerAuth: []
         tags:
             - auth
         responses:
@@ -237,5 +242,7 @@ class OpenIDAccountIdentitiesResource(Resource):
                   application/json:
                     schema: OpenIDProviderListResponseSchema
         """
-        print("IDENTITIES")
-        print(g.auth_user.openid_identities)
+        identities = [
+            identity.provider.name for identity in g.auth_user.openid_identities
+        ]
+        return OpenIDProviderListResponseSchema().dump({"providers": identities})

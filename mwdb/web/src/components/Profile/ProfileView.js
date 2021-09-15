@@ -16,7 +16,7 @@ import ProfileGroup from "./Views/ProfileGroup";
 import ProfileGroups from "./Views/ProfileGroups";
 import ProfileGroupMembers from "./Views/ProfileGroupMembers";
 import { useViewAlert } from "../../commons/ui";
-import { ProfileOauth } from "./Views/ProfileOauth";
+import { ProfileOAuth } from "./Views/ProfileOAuth";
 
 function ProfileNav() {
     return (
@@ -105,7 +105,7 @@ export default function ProfileView() {
                             <ProfileResetPassword profile={profile} />
                         </Route>
                         <Route exact path="/profile/oauth">
-                            <ProfileOauth profile={profile} />
+                            <ProfileOAuth profile={profile} />
                         </Route>
                     </Switch>
                 </div>

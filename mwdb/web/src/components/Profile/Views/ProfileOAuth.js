@@ -5,19 +5,27 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { ConfirmationModal, useViewAlert } from "@mwdb-web/commons/ui";
+import { ConfirmationModal, useViewAlert, ShowIf } from "@mwdb-web/commons/ui";
 
 export function ProfileOAuth() {
     const api = useContext(APIContext);
     const viewAlert = useViewAlert();
     const [providers, setProviders] = useState([]);
+    const [identities, setIdentities] = useState([]);
     const [chosenProvider, setChosenProvider] = useState();
     const [addModalOpen, setAddModalOpen] = useState(false);
 
     async function getProviders() {
         try {
-            const response = await api.axios.get("/oauth");
-            setProviders(response.data["providers"]);
+            const providersResponse = await api.axios.get("/oauth");
+            const identitiesResponse = await api.axios.get("/oauth/identities");
+            const identitiesData = identitiesResponse.data["providers"];
+            setIdentities(identitiesData);
+            setProviders(
+                providersResponse.data["providers"].filter(
+                    (p) => identitiesData.indexOf(p) === -1
+                )
+            );
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -49,7 +57,7 @@ export function ProfileOAuth() {
         getProviders();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
+    console.log(identities);
     return (
         <div className="container">
             <h2>OpenID Connect authorization</h2>
@@ -60,23 +68,58 @@ export function ProfileOAuth() {
                 your account with an external identity provider to use it for
                 authorization on the website in the future.
             </p>
-            <b>Actions:</b>
-            <ul className="nav flex-column">
-                <li className="nav-item">
-                    <a
-                        href="#new-api-key"
-                        className="nav-link"
-                        onClick={(ev) => {
-                            ev.preventDefault();
-                            setAddModalOpen(true);
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faPlus} /> Connect with external
-                        identity
-                    </a>
-                </li>
-            </ul>
-
+            {identities.length ? (
+                <p className="font-weight-bold">
+                    Here is the list of connected identity providers:
+                </p>
+            ) : (
+                <p className="font-weight-bold">
+                    Currently not associated with any external identity
+                    provider.
+                </p>
+            )}
+            <ShowIf condition={identities.length}>
+                {identities.map((identity) => (
+                    <div key={identity} className="card">
+                        <div className="card-body">
+                            <h5 className="card-subtitle text-muted">
+                                <span className="text-monospace list-inline-item">
+                                    {identity}
+                                </span>
+                            </h5>
+                        </div>
+                    </div>
+                ))}
+            </ShowIf>
+            {providers.length ? (
+                <div className="row">
+                    <b>Actions:</b>
+                    <ul className="nav flex-column">
+                        <li className="nav-item">
+                            <a
+                                href="#new-api-key"
+                                className="nav-link"
+                                onClick={(ev) => {
+                                    ev.preventDefault();
+                                    setAddModalOpen(true);
+                                }}
+                            >
+                                <FontAwesomeIcon icon={faPlus} /> Connect with
+                                external identity
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            ) : (
+                [
+                    <div>
+                        <p className="font-weight-bold">
+                            There is no more identity provider with which you
+                            can link your account.
+                        </p>
+                    </div>,
+                ]
+            )}
             <ConfirmationModal
                 isOpen={addModalOpen}
                 onRequestClose={() => setAddModalOpen(false)}

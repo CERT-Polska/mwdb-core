@@ -90,7 +90,7 @@ export function OAuthAuthorize() {
         }
         const { provider, nonce, action, expiration } = JSON.parse(stateData);
         try {
-            expiration = new Date(expiration);
+            const expiration = new Date(expiration);
             if (expiration > Date.now()) {
                 if (action === "login") {
                     const response = await api.axios.post(

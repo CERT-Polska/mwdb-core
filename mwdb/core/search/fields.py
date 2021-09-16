@@ -6,7 +6,7 @@ from typing import Any, List, Type, Union
 import regex
 from flask import g
 from luqum.tree import Range, Term
-from sqlalchemy import Text, String, and_, column, exists, func, or_, select, cast
+from sqlalchemy import String, Text, and_, cast, column, exists, func, or_, select
 from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 
 from mwdb.core.capabilities import Capabilities

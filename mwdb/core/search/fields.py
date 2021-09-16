@@ -6,7 +6,7 @@ from typing import Any, List, Type, Union
 import regex
 from flask import g
 from luqum.tree import Range, Term
-from sqlalchemy import Text, and_, column, exists, func, or_, select
+from sqlalchemy import String, Text, and_, cast, column, exists, func, or_, select
 from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 
 from mwdb.core.capabilities import Capabilities
@@ -171,7 +171,7 @@ class UUIDField(BaseField):
         value = get_term_value(expression)
 
         if expression.has_wildcard():
-            raise UnsupportedGrammarException("Wildcards are not allowed here")
+            return self.column.any(cast(self.value_column, String).like(value))
 
         try:
             uuid_value = uuid.UUID(value)

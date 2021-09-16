@@ -31,6 +31,7 @@ services:
       MWDB_MAIL_FROM: "noreply@mwdb.dev"
       MWDB_RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
       MWDB_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+      MWDB_ENABLE_OIDC: 1
       MWDB_ENABLE_REGISTRATION: 1
       # Uncomment if you want to test S3 functions
       # MWDB_STORAGE_PROVIDER: s3

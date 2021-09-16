@@ -117,7 +117,7 @@ class OpenIDAuthenticateResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        redirect_uri = f"{app_config.mwdb.base_url}/oauth/authorize"
+        redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
         url, state, nonce = provider.create_authorization_url(redirect_uri)
 
         schema = OpenIDLoginResponseSchema()
@@ -136,7 +136,7 @@ class OpenIDAuthorizeResource(Resource):
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
-        redirect_uri = f"{app_config.mwdb.base_url}/oauth/authorize"
+        redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
         userinfo = provider.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
@@ -218,7 +218,7 @@ class OpenIDBindAccountResource(Resource):
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
-        redirect_uri = f"{app_config.mwdb.base_url}/oauth/authorize"
+        redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
         userinfo = provider.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )

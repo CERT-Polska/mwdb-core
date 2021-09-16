@@ -22,7 +22,7 @@ def upgrade():
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("name", sa.String(length=64), nullable=False),
         sa.Column("client_id", sa.String(length=64), nullable=False),
-        sa.Column("client_secret", sa.String(length=64), nullable=False),
+        sa.Column("client_secret", sa.String(length=64), nullable=True),
         sa.Column("authorization_endpoint", sa.String(length=128), nullable=False),
         sa.Column("token_endpoint", sa.String(length=128), nullable=False),
         sa.Column("userinfo_endpoint", sa.String(length=128), nullable=False),

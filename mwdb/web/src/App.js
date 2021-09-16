@@ -143,7 +143,7 @@ export default function App() {
             <Route exact path="/oauth/login">
                 <OAuthLogin />
             </Route>
-            <Route exact path="/oauth/authorize">
+            <Route exact path="/oauth/callback">
                 <OAuthAuthorize />
             </Route>
             <ProtectedRoute exact path="/">

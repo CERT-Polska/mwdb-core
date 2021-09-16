@@ -92,7 +92,7 @@ export function ProfileOAuth() {
                 ))}
             </ShowIf>
             {providers.length ? (
-                <div className="row">
+                <div>
                     <b>Actions:</b>
                     <ul className="nav flex-column">
                         <li className="nav-item">

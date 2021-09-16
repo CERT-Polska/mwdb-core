@@ -66,13 +66,22 @@ class OpenIDProviderResource(Resource):
         schema = OpenIDProviderCreateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
+        client_secret = None
+        if obj["client_secret"]:
+            client_secret = obj["client_secret"]
+
+        jwks_endpoint = None
+        if obj["jwks_endpoint"]:
+            jwks_endpoint = obj["jwks_endpoint"]
+
         provider = OpenIDProvider(
             name=obj["name"],
             client_id=obj["client_id"],
-            client_secret=obj["client_secret"],
-            authorization_endpoint="http://127.0.0.1:5000/oauth/authorize",
-            token_endpoint="http://oidc-server:5000/oauth/token",
-            userinfo_endpoint="http://oidc-server:5000/userinfo",
+            client_secret=client_secret,
+            authorization_endpoint=obj["authorization_endpoint"],
+            token_endpoint=obj["token_endpoint"],
+            userinfo_endpoint=obj["userinfo_endpoint"],
+            jwks_endpoint=jwks_endpoint,
         )
         db.session.add(provider)
         db.session.commit()

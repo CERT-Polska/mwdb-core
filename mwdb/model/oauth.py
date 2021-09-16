@@ -9,7 +9,7 @@ class OpenIDProvider(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(64), nullable=False, unique=True)
     client_id = db.Column(db.String(64), nullable=False)
-    client_secret = db.Column(db.String(64), nullable=False)
+    client_secret = db.Column(db.String(64), nullable=True)
     authorization_endpoint = db.Column(db.String(128), nullable=False)
     token_endpoint = db.Column(db.String(128), nullable=False)
     userinfo_endpoint = db.Column(db.String(128), nullable=False)

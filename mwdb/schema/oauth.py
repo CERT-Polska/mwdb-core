@@ -4,8 +4,11 @@ from marshmallow import Schema, fields
 class OpenIDProviderCreateRequestSchema(Schema):
     name = fields.Str(required=True, allow_none=False)
     client_id = fields.Str(required=True, allow_none=False)
-    client_secret = fields.Str(required=True, allow_none=False)
-    # ... TODO more fields
+    client_secret = fields.Str(required=True, allow_none=True)
+    authorization_endpoint = fields.Str(required=True, allow_none=False)
+    token_endpoint = fields.Str(required=True, allow_none=False)
+    userinfo_endpoint = fields.Str(required=True, allow_none=False)
+    jwks_endpoint = fields.Str(required=True, allow_none=True)
 
 
 class OpenIDAuthorizeRequestSchema(Schema):

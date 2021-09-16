@@ -171,7 +171,7 @@ class UUIDField(BaseField):
         value = get_term_value(expression)
 
         if expression.has_wildcard():
-            return self.column.any(cast(self.value_column, String()).like(value))
+            return self.column.any(cast(self.value_column, String).like(value))
 
         try:
             uuid_value = uuid.UUID(value)

@@ -53,9 +53,16 @@ class OpenIDProvider(db.Model):
 class OpenIDUserIdentity(db.Model):
     __tablename__ = "openid_identity"
 
-    sub_id = db.Column(db.Integer, primary_key=True, nullable=False)
-    provider_id = db.Column(db.Integer, db.ForeignKey("openid_provider.id"), index=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    sub_id = db.Column(db.String(256), primary_key=True, nullable=False)
+    provider_id = db.Column(
+        db.Integer,
+        db.ForeignKey("openid_provider.id"),
+        primary_key=True,
+        nullable=False,
+    )
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id"), primary_key=True, nullable=False
+    )
 
     user = db.relationship("User", back_populates="openid_identities")
     provider = db.relationship(

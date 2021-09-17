@@ -89,6 +89,7 @@ export function OAuthAuthorize() {
             history.push("/", { error: "Invalid state data" });
         }
         const { provider, nonce, action, expiration } = JSON.parse(stateData);
+        sessionStorage.removeItem(`openid_${state}`);
         try {
             const expirationTime = new Date(expiration);
             if (expirationTime > Date.now()) {
@@ -101,25 +102,25 @@ export function OAuthAuthorize() {
                             state,
                         }
                     );
-                    sessionStorage.removeItem(`openid_${state}`);
                     auth.updateSession(response.data);
-                    history.push("/");
+                    history.replace("/");
                 } else if (action === "bind_account") {
                     await api.axios.post(`/oauth/${provider}/bind_account`, {
                         code,
                         nonce,
                         state,
                     });
-                    sessionStorage.removeItem(`openid_${state}`);
-                    history.push("/profile/oauth", {
+                    history.replace("/profile/oauth", {
                         success: "New external identity successfully added",
                     });
                 }
             }
         } catch (e) {
             if (action === "bind_account")
-                history.push("/profile/oauth", { error: getErrorMessage(e) });
-            else history.push("/", { error: getErrorMessage(e) });
+                history.replace("/profile/oauth", {
+                    error: getErrorMessage(e),
+                });
+            else history.replace("/", { error: getErrorMessage(e) });
         }
     }
 

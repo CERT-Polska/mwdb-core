@@ -57,7 +57,7 @@ export function ProfileOAuth() {
         getProviders();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    console.log(identities);
+
     return (
         <div className="container">
             <h2>OpenID Connect authorization</h2>

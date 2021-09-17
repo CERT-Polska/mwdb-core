@@ -24,7 +24,7 @@ class OpenIDProviderResource(Resource):
         ---
         summary: List OpenID Connect providers
         description: |
-            TODO
+            List registered OpenID Connect providers
         tags:
             - auth
         responses:
@@ -49,7 +49,7 @@ class OpenIDProviderResource(Resource):
         ---
         summary: Register new OIDC provider
         description: |
-            TODO
+            Register new OpenID Connect provider
         security:
             - bearerAuth: []
         tags:
@@ -93,7 +93,7 @@ class OpenIDAuthenticateResource(Resource):
         ---
         summary: Login using OpenID Connect
         description: |
-            TODO
+            Authenticate with the use of specific OpenID Connect provider
         tags:
             - auth
         parameters:
@@ -188,9 +188,9 @@ class OpenIDBindAccountResource(Resource):
     def post(self, provider_name):
         """
         ---
-        summary: Bind existing mwdb account with OpenID identity
+        summary: Bind mwdb account with OpenID provider
         description: |
-            TODO
+            Bind authenticated mwdb account with an expernat OpenID provider
         tags:
             - auth
         parameters:
@@ -222,6 +222,7 @@ class OpenIDBindAccountResource(Resource):
         userinfo = provider.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
+        # TODO validation to identity
         identity = OpenIDUserIdentity(
             sub_id=userinfo["sub"], provider_id=provider.id, user_id=g.auth_user.id
         )
@@ -241,7 +242,7 @@ class OpenIDAccountIdentitiesResource(Resource):
         ---
         summary: List OpenID bound external identities
         description: |
-            TODO
+            List of related identities to authenticated mwdb account
         tags:
             - auth
         responses:

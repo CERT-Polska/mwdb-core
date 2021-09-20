@@ -252,6 +252,10 @@ class Object(db.Model):
         "User", secondary=favorites, back_populates="favorites", lazy="joined"
     )
 
+    commentators = db.relationship(
+        "User", secondary="comment", back_populates="commented_objects", lazy="selectin"
+    )
+
     shares = db.relationship(
         "ObjectPermission",
         lazy="dynamic",

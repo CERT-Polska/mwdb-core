@@ -449,3 +449,27 @@ class RelationField(BaseField):
                 "Only subquery is allowed for relation field"
             )
         return self.column.any(Object.id.in_(expression.subquery))
+
+
+class CommentatorField(BaseField):
+    def __init__(self, column, value_column):
+        super().__init__(column)
+        self.value_column = value_column
+
+    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
+        if remainder:
+            raise FieldNotQueryableException(
+                f"Field doesn't have subfields: {'.'.join(remainder)}"
+            )
+        if expression.has_wildcard():
+            raise UnsupportedGrammarException(
+                "Wildcards are not allowed for commentator field"
+            )
+
+        value = get_term_value(expression)
+
+        user = db.session.query(User).filter(User.login == value).first()
+        if user is None:
+            raise ObjectNotFoundException(f"No such user: {value}")
+
+        return self.column.any(self.value_column == value)

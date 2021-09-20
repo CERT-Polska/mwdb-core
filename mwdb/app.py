@@ -44,6 +44,13 @@ from mwdb.resources.metakey import (
     MetakeyPermissionResource,
     MetakeyResource,
 )
+from mwdb.resources.oauth import (
+    OpenIDAccountIdentitiesResource,
+    OpenIDAuthenticateResource,
+    OpenIDAuthorizeResource,
+    OpenIDBindAccountResource,
+    OpenIDProviderResource,
+)
 from mwdb.resources.object import (
     ObjectCountResource,
     ObjectFavoriteResource,
@@ -318,6 +325,14 @@ api.add_resource(UserPendingResource, "/user/<login>/pending")
 api.add_resource(GroupListResource, "/group")
 api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, "/group/<name>/member/<login>")
+
+# OAuth endpoints
+if app_config.mwdb.enable_oidc:
+    api.add_resource(OpenIDProviderResource, "/oauth")
+    api.add_resource(OpenIDAccountIdentitiesResource, "/oauth/identities")
+    api.add_resource(OpenIDAuthenticateResource, "/oauth/<provider_name>/authenticate")
+    api.add_resource(OpenIDAuthorizeResource, "/oauth/<provider_name>/authorize")
+    api.add_resource(OpenIDBindAccountResource, "/oauth/<provider_name>/bind_account")
 
 # Remote endpoints
 api.add_resource(RemoteListResource, "/remote")

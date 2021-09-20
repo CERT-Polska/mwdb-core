@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
+import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 
 import ProfileDetails from "./Views/ProfileDetails";
@@ -16,8 +17,11 @@ import ProfileGroup from "./Views/ProfileGroup";
 import ProfileGroups from "./Views/ProfileGroups";
 import ProfileGroupMembers from "./Views/ProfileGroupMembers";
 import { useViewAlert } from "../../commons/ui";
+import { ProfileOAuth } from "./Views/ProfileOAuth";
 
 function ProfileNav() {
+    const config = useContext(ConfigContext);
+
     return (
         <div>
             <strong>
@@ -36,6 +40,13 @@ function ProfileNav() {
                 <NavLink exact to="/profile/api-keys" className="nav-link">
                     API keys
                 </NavLink>
+                {config.config["is_oidc_enabled"] ? (
+                    <NavLink exact to="/profile/oauth" className="nav-link">
+                        OpenID Connect
+                    </NavLink>
+                ) : (
+                    []
+                )}
             </div>
             <hr />
         </div>
@@ -99,6 +110,9 @@ export default function ProfileView() {
                         </Route>
                         <Route exact path="/profile/reset-password">
                             <ProfileResetPassword profile={profile} />
+                        </Route>
+                        <Route exact path="/profile/oauth">
+                            <ProfileOAuth profile={profile} />
                         </Route>
                     </Switch>
                 </div>

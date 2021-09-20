@@ -104,6 +104,8 @@ class MWDBConfig(Config):
     enable_maintenance = key(cast=intbool, required=False, default=False)
     enable_hooks = key(cast=intbool, required=False, default=True)
     enable_karton = key(cast=intbool, required=False, default=False)
+    # Feature flag: OIDC is under development
+    enable_oidc = key(cast=intbool, required=False, default=False)
 
     mail_smtp = key(cast=str, required=False)
     mail_from = key(cast=str, required=False, default="noreply@mwdb")

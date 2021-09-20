@@ -12,6 +12,7 @@ from mwdb.core.config import app_config
 
 from . import db
 from .group import Group, Member
+from .oauth import OpenIDUserIdentity
 from .object import ObjectPermission, favorites
 
 
@@ -47,6 +48,12 @@ class User(db.Model):
     )
     groups = association_proxy(
         "memberships", "group", creator=lambda group: Member(group=group)
+    )
+    openid_identities = db.relationship(
+        OpenIDUserIdentity,
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
     permissions = db.relationship(
         "ObjectPermission",

@@ -82,7 +82,8 @@ class Service(Api):
 
     def add_resource(self, resource, *urls, undocumented=False, **kwargs):
         super().add_resource(resource, *urls, **kwargs)
-        self.spec.path(resource=resource, api=self, app=self.flask_app)
+        if not undocumented:
+            self.spec.path(resource=resource, api=self, app=self.flask_app)
 
     def relative_url_for(self, resource, **values):
         path = self.url_for(resource, **values)

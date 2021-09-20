@@ -2,7 +2,8 @@ import datetime
 
 from flask import g, request
 from flask_restful import Resource
-from werkzeug.exceptions import Forbidden, NotFound
+from sqlalchemy import and_, exists
+from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -222,7 +223,17 @@ class OpenIDBindAccountResource(Resource):
         userinfo = provider.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
-        # TODO validation to identity
+        if db.session.query(
+            exists().where(
+                and_(
+                    OpenIDUserIdentity.sub_id == userinfo["sub"],
+                    OpenIDUserIdentity.provider_id == provider.id,
+                    OpenIDUserIdentity.user_id == g.auth_user.id,
+                )
+            )
+        ).scalar():
+            raise Conflict("Provider is already bound")
+
         identity = OpenIDUserIdentity(
             sub_id=userinfo["sub"], provider_id=provider.id, user_id=g.auth_user.id
         )

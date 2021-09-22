@@ -181,7 +181,7 @@ class KartonAnalysisResource(Resource):
         ---
         summary: Assign Karton analysis to the object
         description: |
-            Assigns existing Karton analysis to the object
+            Assigns new or existing Karton analysis to the object
 
             Requires `karton_assign` capability.
         security:

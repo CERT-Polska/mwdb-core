@@ -99,6 +99,11 @@ export default function Navigation() {
                             Register user
                         </Link>
                     </li>
+                    <li className="nav-item">
+                        <Link className="nav-link" to={"/oauth/login"}>
+                            OAuth authentication
+                        </Link>
+                    </li>
                 </React.Fragment>
             ) : (
                 []

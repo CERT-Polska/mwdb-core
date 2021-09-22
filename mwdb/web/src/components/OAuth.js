@@ -1,17 +1,20 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router";
+import { Link } from "react-router-dom";
 
 import queryString from "query-string";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { View, getErrorMessage } from "@mwdb-web/commons/ui";
+import { ConfirmationModal, ShowIf } from "@mwdb-web/commons/ui";
 
 export function OAuthLogin() {
     const api = useContext(APIContext);
     const [error, setError] = useState();
     const [providers, setProviders] = useState([]);
     const [chosenProvider, setChosenProvider] = useState();
+    const [isRedirectModalOpen, setRedirectModalOpen] = useState(false);
 
     async function getProviders() {
         try {
@@ -50,28 +53,45 @@ export function OAuthLogin() {
 
     return (
         <View error={error}>
-            <form
-                onSubmit={(e) => {
+            <h2>External authentication</h2>
+            <p>
+                Select below the identity provider associated with your mwdb
+                account. By clicking on the identity provider below you will be
+                redirected to its authentication page.
+            </p>
+            <ShowIf condition={providers.length}>
+                {providers.map((provider) => (
+                    <div className="d-flex justify-content-center">
+                        <div className="col-6 text-center">
+                            <Link
+                                href="#"
+                                className="card btn-outline-secondary text-decoration-none"
+                                onClick={(ev) => {
+                                    setChosenProvider(provider);
+                                    setRedirectModalOpen(true);
+                                }}
+                            >
+                                <div className="card-body">
+                                    <h5>{provider}</h5>
+                                </div>
+                            </Link>
+                        </div>
+                    </div>
+                ))}
+            </ShowIf>
+            <ConfirmationModal
+                isOpen={isRedirectModalOpen}
+                onRequestClose={() => {
+                    setRedirectModalOpen(false);
+                    setChosenProvider("");
+                }}
+                onConfirm={(e) => {
                     e.preventDefault();
                     login(chosenProvider);
                 }}
-            >
-                <select
-                    className="custom-select"
-                    value={chosenProvider}
-                    onChange={(ev) => setChosenProvider(ev.target.value)}
-                >
-                    <option value="" hidden>
-                        Select provider...
-                    </option>
-                    {providers.map((provider) => (
-                        <option value={provider}>{provider}</option>
-                    ))}
-                </select>
-                <button type="submit" className="btn btn-outline-success">
-                    Login
-                </button>
-            </form>
+                message={`Are you sure you want to redirect to ${chosenProvider} attribute`}
+                buttonStyle="btn-danger"
+            />
         </View>
     );
 }

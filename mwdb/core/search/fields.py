@@ -451,7 +451,7 @@ class RelationField(BaseField):
         return self.column.any(Object.id.in_(expression.subquery))
 
 
-class CommentatorField(BaseField):
+class CommentAuthorField(BaseField):
     def __init__(self, column, value_column):
         super().__init__(column)
         self.value_column = value_column
@@ -463,7 +463,7 @@ class CommentatorField(BaseField):
             )
         if expression.has_wildcard():
             raise UnsupportedGrammarException(
-                "Wildcards are not allowed for commentator field"
+                "Wildcards are not allowed for comment_author field"
             )
 
         value = get_term_value(expression)

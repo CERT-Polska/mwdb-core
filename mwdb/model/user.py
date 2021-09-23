@@ -64,7 +64,7 @@ class User(db.Model):
     )
 
     commented_objects = db.relationship(
-        "Object", secondary="comment", back_populates="commentators", lazy="selectin"
+        "Object", secondary="comment", back_populates="comment_authors", lazy="selectin"
     )
 
     comments = db.relationship(

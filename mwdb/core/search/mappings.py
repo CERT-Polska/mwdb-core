@@ -17,7 +17,7 @@ from .exceptions import FieldNotQueryableException, MultipleObjectsQueryExceptio
 from .fields import (
     AttributeField,
     BaseField,
-    CommentatorField,
+    CommentAuthorField,
     DatetimeField,
     FavoritesField,
     JSONField,
@@ -51,7 +51,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "child": RelationField(Object.children),
         "favorites": FavoritesField(Object.followers),
         "karton": UUIDField(Object.analyses, KartonAnalysis.id),
-        "commentator": CommentatorField(Object.commentators, User.login),
+        "comment_author": CommentAuthorField(Object.comment_authors, User.login),
     },
     File.__name__: {
         "name": StringField(File.file_name),

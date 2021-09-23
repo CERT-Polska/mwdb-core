@@ -293,14 +293,14 @@ The above query returns the favorite objects of specific user.
 
     Only system administrator with "manage_users" capabilities can search for other users favorites.
 
-Commentator field (\ ``commentator:``\ )
+Comment author field (\ ``comment_author:``\ )
 ------------------------------------------------------------
 
-Typing the field ``commentator:`` you can search for objects commented by selected user.
+Typing the field ``comment_author:`` you can search for objects commented by selected user.
 
 .. code-block::
 
-   commentator:<user login>
+   comment_author:<user login>
 
 The above query returns the objects commented by user <user login>.
 
@@ -309,7 +309,7 @@ The above query returns the objects commented by user <user login>.
     Remember that you can only search using logins for users registered in mwdb.
     Otherwise you receive error massage: ``No such user: <login>``.
 
-    Wildcards are not allowed for field ``commentator:``.
+    Wildcards are not allowed for field ``comment_author:``.
 
 Group access queries (\ ``shared:`` and ``uploader:``\ )
 ------------------------------------------------------------

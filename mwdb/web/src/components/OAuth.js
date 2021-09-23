@@ -67,6 +67,7 @@ export function OAuthLogin() {
                                 href="#"
                                 className="card btn-outline-secondary text-decoration-none"
                                 onClick={(ev) => {
+                                    ev.preventDefault();
                                     setChosenProvider(provider);
                                     setRedirectModalOpen(true);
                                 }}
@@ -89,7 +90,7 @@ export function OAuthLogin() {
                     e.preventDefault();
                     login(chosenProvider);
                 }}
-                message={`Are you sure you want to redirect to ${chosenProvider} attribute`}
+                message={`Are you sure you want to redirect to ${chosenProvider} provider`}
                 buttonStyle="btn-danger"
             />
         </View>

@@ -253,7 +253,7 @@ class Object(db.Model):
     )
 
     comment_authors = db.relationship(
-        "User", secondary="comment", back_populates="commented_objects", lazy="selectin"
+        "User", secondary="comment", back_populates="commented_objects"
     )
 
     shares = db.relationship(

@@ -306,8 +306,7 @@ The above query returns the objects commented by user <user login>.
 
 .. warning::
 
-    Remember that you can only search using logins for users registered in mwdb.
-    Otherwise you receive error massage: ``No such user: <login>``.
+    Comment authors are kept only for existing users, so you can't search for comments from deleted accounts.
 
     Wildcards are not allowed for field ``comment_author:``.
 

@@ -181,13 +181,30 @@ class KartonAnalysisResource(Resource):
         ---
         summary: Assign Karton analysis to the object
         description: |
-            Assigns Karton object to existing Karton analysis
+            Assigns new or existing Karton analysis to the object
 
             Requires `karton_assign` capability.
         security:
             - bearerAuth: []
         tags:
             - karton
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of target object
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Object identifier
+            - in: path
+              name: analysis_id
+              schema:
+                type: string
+              description: Analysis identifier
         responses:
             200:
                 description: Information about analysis status

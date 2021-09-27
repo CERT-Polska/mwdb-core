@@ -93,13 +93,20 @@ export default function Navigation() {
         <Extendable ident="navbar">
             {!auth.isAuthenticated &&
             config.config["is_registration_enabled"] ? (
-                <React.Fragment>
-                    <li className="nav-item">
-                        <Link className="nav-link" to={"/register"}>
-                            Register user
-                        </Link>
-                    </li>
-                </React.Fragment>
+                <li className="nav-item">
+                    <Link className="nav-link" to={"/register"}>
+                        Register user
+                    </Link>
+                </li>
+            ) : (
+                []
+            )}
+            {!auth.isAuthenticated && config.config["is_oidc_enabled"] ? (
+                <li className="nav-item">
+                    <Link className="nav-link" to={"/oauth/login"}>
+                        OAuth authentication
+                    </Link>
+                </li>
             ) : (
                 []
             )}

@@ -252,6 +252,10 @@ class Object(db.Model):
         "User", secondary=favorites, back_populates="favorites", lazy="joined"
     )
 
+    comment_authors = db.relationship(
+        "User", secondary="comment", back_populates="commented_objects"
+    )
+
     shares = db.relationship(
         "ObjectPermission",
         lazy="dynamic",
@@ -877,7 +881,7 @@ class Object(db.Model):
             existing.id for existing in self.analyses
         ]:
             self.analyses.append(analysis)
-            return analysis, True
+
         if commit:
             db.session.commit()
         return analysis, is_new

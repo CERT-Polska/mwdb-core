@@ -59,6 +59,7 @@ class ServerInfoResource(Resource):
                 "is_maintenance_set": app_config.mwdb.enable_maintenance,
                 "is_registration_enabled": app_config.mwdb.enable_registration,
                 "is_karton_enabled": app_config.mwdb.enable_karton,
+                "is_oidc_enabled": app_config.mwdb.enable_oidc,
                 "recaptcha_site_key": app_config.mwdb.recaptcha_site_key,
             }
         )

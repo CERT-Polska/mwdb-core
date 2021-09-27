@@ -1,0 +1,88 @@
+# Docker Compose file for mwdb-core development environment
+
+version: "3.3"
+services:
+  minio:
+    image: minio/minio
+    command: server /data
+    volumes:
+      - /tmp/minio:/data
+    ports:
+      - "127.0.0.1:9000:9000"
+    environment:
+      - MINIO_ACCESS_KEY=mwdb-test-access
+      - MINIO_SECRET_KEY=mwdb-test-key
+  mwdb:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    restart: on-failure
+    env_file:
+      # NOTE: use gen_vars.sh in order to generate this file
+      - mwdb-vars.env
+    environment:
+      UWSGI_PY_AUTORELOAD: 1
+      UWSGI_ENABLE_THREADS: 1
+      MWDB_MAIL_SMTP: "mailhog:1025"
+      MWDB_MAIL_FROM: "noreply@mwdb.dev"
+      MWDB_RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+      MWDB_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+      MWDB_ENABLE_OIDC: 1
+      MWDB_ENABLE_REGISTRATION: 1
+      # Uncomment if you want to test S3 functions
+      # MWDB_STORAGE_PROVIDER: s3
+      # MWDB_HASH_PATHING: 0
+      # MWDB_S3_STORAGE_ENDPOINT: "minio:9000"
+      # MWDB_S3_STORAGE_ACCESS_KEY: "mwdb-test-access"
+      # MWDB_S3_STORAGE_SECRET_KEY: "mwdb-test-key"
+      # MWDB_S3_STORAGE_BUCKET_NAME: "mwdb"
+    volumes:
+      - "./docker/mail_templates:/app/mail_templates"
+      - "./mwdb:/app/mwdb"
+  mwdb-web:
+    depends_on:
+      - mwdb
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile-web-dev
+    ports:
+      - "80:3000"
+    environment:
+      HOST: 0.0.0.0
+      REACT_APP_API_URL: "/api/"
+    volumes:
+      - "./mwdb/web/public:/app/public"
+      - "./mwdb/web/src:/app/src"
+    restart: on-failure
+  postgres:
+    image: postgres
+    restart: always
+    env_file:
+      # NOTE: use gen_vars.sh in order to generate this file
+      - postgres-vars.env
+  redis:
+    image: redis:alpine
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "127.0.0.1:8025:8025"
+  keycloak_postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: bn_keycloak
+      POSTGRES_DB: bitnami_keycloak
+      POSTGRES_PASSWORD: bn_keycloak_password
+  keycloak:
+    image: bitnami/keycloak:latest
+    depends_on:
+      - keycloak_postgres
+    environment:
+      KEYCLOAK_DATABASE_HOST: keycloak_postgres
+      KEYCLOAK_DATABASE_PASSWORD: bn_keycloak_password
+    ports:
+      - "127.0.0.1:8080:8080"

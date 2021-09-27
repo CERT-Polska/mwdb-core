@@ -63,6 +63,10 @@ class User(db.Model):
         "Object", secondary=favorites, back_populates="followers", lazy="joined"
     )
 
+    commented_objects = db.relationship(
+        "Object", secondary="comment", back_populates="comment_authors"
+    )
+
     comments = db.relationship(
         "Comment",
         back_populates="author",

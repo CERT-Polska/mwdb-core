@@ -2,12 +2,22 @@ from typing import Dict, List, Tuple, Type
 
 import regex
 
-from mwdb.model import Comment, Config, File, KartonAnalysis, Object, Tag, TextBlob
+from mwdb.model import (
+    Comment,
+    Config,
+    File,
+    KartonAnalysis,
+    Object,
+    Tag,
+    TextBlob,
+    User,
+)
 
 from .exceptions import FieldNotQueryableException, MultipleObjectsQueryException
 from .fields import (
     AttributeField,
     BaseField,
+    CommentAuthorField,
     DatetimeField,
     FavoritesField,
     JSONField,
@@ -41,6 +51,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "child": RelationField(Object.children),
         "favorites": FavoritesField(Object.followers),
         "karton": UUIDField(Object.analyses, KartonAnalysis.id),
+        "comment_author": CommentAuthorField(Object.comment_authors, User.login),
     },
     File.__name__: {
         "name": StringField(File.file_name),

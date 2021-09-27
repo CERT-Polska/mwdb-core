@@ -293,6 +293,22 @@ The above query returns the favorite objects of specific user.
 
     Only system administrator with "manage_users" capabilities can search for other users favorites.
 
+Comment author field (\ ``comment_author:``\ )
+------------------------------------------------------------
+
+Typing the field ``comment_author:`` you can search for objects commented by selected user.
+
+.. code-block::
+
+   comment_author:<user login>
+
+The above query returns the objects commented by user <user login>.
+
+.. warning::
+
+    Comment authors are kept only for existing users, so you can't search for comments from deleted accounts.
+
+    Wildcards are not allowed for field ``comment_author:``.
 
 Group access queries (\ ``shared:`` and ``uploader:``\ )
 ------------------------------------------------------------

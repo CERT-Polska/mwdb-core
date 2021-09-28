@@ -115,7 +115,7 @@ class ConfigUploader(ObjectUploader):
                 "'in-blob' key must be set to blob SHA256 hash or blob specification"
             )
 
-    def _create_object(self, spec, parent, share_with, attributes, analysis_id):
+    def _create_object(self, spec, parent, share_with, attributes, analysis_id, tags):
         try:
             blobs = []
             config = dict(spec["cfg"])
@@ -140,6 +140,7 @@ class ConfigUploader(ObjectUploader):
                 share_with=share_with,
                 attributes=attributes,
                 analysis_id=analysis_id,
+                tags=tags,
             )
 
             for blob in blobs:

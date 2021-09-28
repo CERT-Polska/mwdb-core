@@ -486,7 +486,13 @@ class Object(db.Model):
 
     @classmethod
     def _get_or_create(
-        cls, obj, parent=None, attributes=None, share_with=None, analysis_id=None
+        cls,
+        obj,
+        parent=None,
+        attributes=None,
+        share_with=None,
+        analysis_id=None,
+        tags=None,
     ):
         """
         Polymophic get or create pattern, useful in dealing with race condition
@@ -502,6 +508,7 @@ class Object(db.Model):
 
         share_with = share_with or []
         attributes = attributes or []
+        tags = tags or []
 
         is_new = False
         new_cls = Object.get(obj.dhash).first()
@@ -560,6 +567,11 @@ class Object(db.Model):
 
         if analysis_id:
             new_cls.assign_analysis(analysis_id)
+
+        # Add tags to object if specified
+        for tag in tags:
+            tag_name = tag["tag"]
+            new_cls.add_tag(tag_name)
 
         return new_cls, is_new
 

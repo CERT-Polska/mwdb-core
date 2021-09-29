@@ -134,6 +134,10 @@ class FileResource(ObjectResource, FileUploader):
                           type: array
                           items:
                             $ref: '#/components/schemas/MetakeyItemRequest'
+                        tags:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/TagRequest'
                         upload_as:
                           type: string
                       schema: ObjectCreateRequestSchemaBase

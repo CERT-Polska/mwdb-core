@@ -133,6 +133,8 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                       metakeys:
                         - key: string
                           value: string
+                      tags:
+                        - tag: string
         responses:
             200:
                 description: Text blob uploaded succesfully

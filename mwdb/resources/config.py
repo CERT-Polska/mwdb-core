@@ -244,6 +244,8 @@ class ConfigResource(ObjectResource, ConfigUploader):
                       metakeys:
                        - key: string
                          value: string
+                      tags:
+                       - tag: string
         responses:
             200:
                 description: Information about uploaded config

@@ -7,7 +7,7 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.model import OpenIDProvider, OpenIDUserIdentity, db
+from mwdb.model import OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,
@@ -163,6 +163,60 @@ class OpenIDAuthorizeResource(Resource):
 
         if user.disabled:
             raise Forbidden("User account is disabled.")
+
+        user.logged_on = datetime.datetime.now()
+        db.session.commit()
+
+        auth_token = user.generate_session_token()
+
+        logger.info(
+            "User logged in via OpenID Provider",
+            extra={"login": user.login, "provider": provider_name},
+        )
+        schema = AuthSuccessResponseSchema()
+        return schema.dump(
+            {
+                "login": user.login,
+                "token": auth_token,
+                "capabilities": user.capabilities,
+                "groups": user.group_names,
+            }
+        )
+
+
+class OpenIDRegisterUserResource(Resource):
+    def post(self, provider_name):
+        provider = (
+            db.session.query(OpenIDProvider)
+            .filter(OpenIDProvider.name == provider_name)
+            .first()
+        )
+        if not provider:
+            raise NotFound(f"Requested provider name '{provider_name}' not found")
+
+        schema = OpenIDAuthorizeRequestSchema()
+        obj = loads_schema(request.get_data(as_text=True), schema)
+        redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
+        userinfo = provider.fetch_id_token(
+            obj["code"], obj["state"], obj["nonce"], redirect_uri
+        )
+        # register user with information from provider
+        user_name = "".join(
+            [character for character in userinfo["name"] if character.isalnum()]
+        )
+
+        user = User.create(
+            user_name,
+            userinfo["email"],
+            "Registered via OpenID Connect protocol",
+            pending=False,
+            feed_quality="low",
+        )
+
+        identity = OpenIDUserIdentity(
+            sub_id=userinfo["sub"], provider_id=provider.id, user_id=user.id
+        )
+        db.session.add(identity)
 
         user.logged_on = datetime.datetime.now()
         db.session.commit()

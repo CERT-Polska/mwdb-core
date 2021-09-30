@@ -97,7 +97,7 @@ export function ProfileOAuth() {
                     <ul className="nav flex-column">
                         <li className="nav-item">
                             <a
-                                href="#new-api-key"
+                                href="#bind-oauth-account"
                                 className="nav-link"
                                 onClick={(ev) => {
                                     ev.preventDefault();

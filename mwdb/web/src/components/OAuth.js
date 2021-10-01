@@ -28,9 +28,7 @@ export function OAuthLogin() {
 
     async function authenticate(provider, action) {
         try {
-            const response = await api.axios.post(
-                `/oauth/${provider}/authenticate`
-            );
+            const response = await api.oauthAuthenticate(provider);
             const expirationTime = Date.now() + 5 * 60 * 1000;
             sessionStorage.setItem(
                 `openid_${response.data["state"]}`,
@@ -158,23 +156,22 @@ export function OAuthAuthorize() {
         sessionStorage.removeItem(`openid_${state}`);
         try {
             const expirationTime = new Date(expiration);
-            if (expirationTime > Date.now()) {
-                const response = await api.axios.post(
-                    `/oauth/${provider}/${action}`,
-                    {
-                        code,
-                        nonce,
-                        state,
-                    }
-                );
-                if (action === "bind_account") {
-                    history.replace("/profile/oauth", {
-                        success: "New external identity successfully added",
-                    });
-                } else {
-                    auth.updateSession(response.data);
-                    history.replace("/");
-                }
+            if (Date.now() > expirationTime)
+                throw new Error("Session expired. Please try again.");
+            const response = await api.oauthCallback(
+                provider,
+                action,
+                code,
+                nonce,
+                state
+            );
+            if (action === "bind_account") {
+                history.replace("/profile/oauth", {
+                    success: "New external identity successfully added",
+                });
+            } else {
+                auth.updateSession(response.data);
+                history.replace("/");
             }
         } catch (e) {
             if (action === "bind_account")

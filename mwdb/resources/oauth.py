@@ -3,7 +3,7 @@ from uuid import UUID
 
 from flask import g, request
 from flask_restful import Resource
-from sqlalchemy import and_, exists
+from sqlalchemy import and_, exists, or_
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
@@ -311,9 +311,11 @@ class OpenIDBindAccountResource(Resource):
         if db.session.query(
             exists().where(
                 and_(
-                    OpenIDUserIdentity.sub_id == userinfo["sub"],
                     OpenIDUserIdentity.provider_id == provider.id,
-                    OpenIDUserIdentity.user_id == g.auth_user.id,
+                    or_(
+                        OpenIDUserIdentity.user_id == g.auth_user.id,
+                        OpenIDUserIdentity.sub_id == userinfo["sub"],
+                    ),
                 )
             )
         ).scalar():

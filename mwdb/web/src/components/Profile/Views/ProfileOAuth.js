@@ -33,9 +33,7 @@ export function ProfileOAuth() {
 
     async function bindProvider(provider) {
         try {
-            const response = await api.axios.post(
-                `/oauth/${provider}/authenticate`
-            );
+            const response = await api.oauthAuthenticate(provider);
             let expirationTime = new Date();
             expirationTime.setTime(expirationTime.getTime() + 5 * 60 * 1000);
             sessionStorage.setItem(

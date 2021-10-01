@@ -72,6 +72,18 @@ function authGroups() {
     return axios.get("/auth/groups");
 }
 
+function oauthAuthenticate(provider) {
+    return axios.post(`/oauth/${provider}/authenticate`);
+}
+
+function oauthCallback(provider, action, code, nonce, state) {
+    return axios.post(`/oauth/${provider}/${action}`, {
+        code,
+        nonce,
+        state,
+    });
+}
+
 function apiKeyGetToken(key_id) {
     return axios.get(`/api_key/${key_id}`);
 }
@@ -481,6 +493,8 @@ export default {
     getServerAdminInfo,
     authLogin,
     authGroups,
+    oauthAuthenticate,
+    oauthCallback,
     authRefresh,
     authSetPassword,
     authRequestPasswordChange,

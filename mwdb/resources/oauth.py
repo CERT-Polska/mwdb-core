@@ -1,13 +1,14 @@
 import datetime
+from uuid import UUID
 
 from flask import g, request
 from flask_restful import Resource
 from sqlalchemy import and_, exists
-from werkzeug.exceptions import Conflict, Forbidden, NotFound
+from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.model import OpenIDProvider, OpenIDUserIdentity, User, db
+from mwdb.model import Group, OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,
@@ -15,8 +16,15 @@ from mwdb.schema.oauth import (
     OpenIDProviderCreateRequestSchema,
     OpenIDProviderListResponseSchema,
 )
+from mwdb.schema.user import UserLoginSchemaBase
 
-from . import loads_schema, logger, requires_authorization, requires_capabilities
+from . import (
+    load_schema,
+    loads_schema,
+    logger,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 class OpenIDProviderResource(Resource):
@@ -201,16 +209,39 @@ class OpenIDRegisterUserResource(Resource):
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         # register user with information from provider
-        user_name = "".join(
-            [character for character in userinfo["name"] if character.isalnum()]
-        )
+        user_login = None
+
+        possible_logins = []
+        if "preferred_username" in userinfo:
+            possible_logins.append(userinfo["preferred_username"])
+        if "nickname" in userinfo:
+            possible_logins.append(userinfo["nickname"])
+        if "name" in userinfo:
+            possible_logins.append(userinfo["name"])
+
+        for login in possible_logins:
+            try:
+                user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
+                potential_existing_name = (
+                    db.session.query(Group).filter(Group.name == login).first()
+                )
+                if potential_existing_name is None:
+                    user_login = user_login_obj["login"]
+                    break
+            except BadRequest:
+                continue
+        if user_login is None:
+            user_login = UUID(userinfo["sub"]).hex
+
+        if "email" in userinfo.keys():
+            user_email = userinfo["email"]
+        else:
+            user_email = f'{UUID(userinfo["sub"]).hex}@mwdb.local'
 
         user = User.create(
-            user_name,
-            userinfo["email"],
+            user_login,
+            user_email,
             "Registered via OpenID Connect protocol",
-            pending=False,
-            feed_quality="low",
         )
 
         identity = OpenIDUserIdentity(

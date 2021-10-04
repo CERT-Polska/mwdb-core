@@ -219,7 +219,7 @@ class OpenIDRegisterUserResource(Resource):
                 )
             )
         ).scalar():
-            raise Conflict("User with selected provider is already bound")
+            raise Conflict("User with selected provider is already bound.")
 
         possible_logins = []
         if "preferred_username" in userinfo:
@@ -329,7 +329,7 @@ class OpenIDBindAccountResource(Resource):
                 )
             )
         ).scalar():
-            raise Conflict("Provider is already bound")
+            raise Conflict("Provider identity is already bound with mwdb account.")
 
         identity = OpenIDUserIdentity(
             sub_id=userinfo["sub"], provider_id=provider.id, user_id=g.auth_user.id

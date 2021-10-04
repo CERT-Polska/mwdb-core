@@ -178,7 +178,7 @@ export function OAuthAuthorize() {
                 history.replace("/profile/oauth", {
                     error: getErrorMessage(e),
                 });
-            else history.replace("/", { error: getErrorMessage(e) });
+            else history.replace("/oauth/login", { error: getErrorMessage(e) });
         }
     }
 

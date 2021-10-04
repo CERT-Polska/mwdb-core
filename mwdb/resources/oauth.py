@@ -211,6 +211,16 @@ class OpenIDRegisterUserResource(Resource):
         # register user with information from provider
         user_login = None
 
+        if db.session.query(
+            exists().where(
+                and_(
+                    OpenIDUserIdentity.provider_id == provider.id,
+                    OpenIDUserIdentity.sub_id == userinfo["sub"],
+                )
+            )
+        ).scalar():
+            raise Conflict("User with selected provider is already bound")
+
         possible_logins = []
         if "preferred_username" in userinfo:
             possible_logins.append(userinfo["preferred_username"])

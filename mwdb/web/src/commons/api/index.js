@@ -84,6 +84,14 @@ function oauthCallback(provider, action, code, nonce, state) {
     });
 }
 
+function oauthGetProviders() {
+    return axios.get("/oauth");
+}
+
+function oauthGetIdentities() {
+    return axios.get("/oauth/identities");
+}
+
 function apiKeyGetToken(key_id) {
     return axios.get(`/api_key/${key_id}`);
 }
@@ -496,6 +504,8 @@ export default {
     oauthAuthenticate,
     oauthCallback,
     authRefresh,
+    oauthGetProviders,
+    oauthGetIdentities,
     authSetPassword,
     authRequestPasswordChange,
     authRecoverPassword,

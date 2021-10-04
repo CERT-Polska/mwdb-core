@@ -17,8 +17,8 @@ export function ProfileOAuth() {
 
     async function getProviders() {
         try {
-            const providersResponse = await api.axios.get("/oauth");
-            const identitiesResponse = await api.axios.get("/oauth/identities");
+            const providersResponse = await api.oauthGetProviders();
+            const identitiesResponse = await api.oauthGetIdentities();
             const identitiesData = identitiesResponse.data["providers"];
             setIdentities(identitiesData);
             setProviders(

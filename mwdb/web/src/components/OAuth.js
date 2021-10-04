@@ -19,7 +19,7 @@ export function OAuthLogin() {
 
     async function getProviders() {
         try {
-            const response = await api.axios.get("/oauth");
+            const response = await api.oauthGetProviders();
             setProviders(response.data["providers"]);
         } catch (e) {
             setError(e);

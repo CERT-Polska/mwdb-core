@@ -571,7 +571,7 @@ class Object(db.Model):
         # Add tags to object if specified
         for tag in tags:
             tag_name = tag["tag"]
-            new_cls.add_tag(tag_name)
+            new_cls.add_tag(tag_name, commit=False)
 
         return new_cls, is_new
 
@@ -662,29 +662,35 @@ class Object(db.Model):
             for tag in db.session.query(Tag).filter(Tag.objects.any(id=self.id)).all()
         ]
 
-    def add_tag(self, tag_name):
+    def add_tag(self, tag_name, commit=True):
         """
         Adds new tag to object.
         :param tag_name: tag string
+        :param commit: Commit transaction after operation
         :return: True if tag wasn't added yet
         """
         db_tag = Tag()
         db_tag.tag = tag_name
-        db_tag, is_new_tag = Tag.get_or_create(db_tag)
+        db_tag, _ = Tag.get_or_create(db_tag)
 
+        is_new = False
+        db.session.begin_nested()
         try:
             if db_tag not in self.tags:
                 self.tags.append(db_tag)
-                db.session.flush()
                 db.session.commit()
-                return True
+                is_new = True
         except IntegrityError:
+            db.session.rollback()
             db.session.refresh(self)
             if db_tag not in self.tags:
                 raise
-        return False
 
-    def remove_tag(self, tag_name):
+        if commit:
+            db.session.commit()
+        return is_new
+
+    def remove_tag(self, tag_name, commit=True):
         """
         Removes tag from object
         :param tag_name: tag string
@@ -696,17 +702,22 @@ class Object(db.Model):
         else:
             db_tag = db_tag.one()
 
+        is_removed = False
+        db.session.begin_nested()
         try:
             if db_tag in self.tags:
                 self.tags.remove(db_tag)
-                db.session.flush()
                 db.session.commit()
-                return True
+                is_removed = True
         except IntegrityError:
+            db.session.rollback()
             db.session.refresh(self)
             if db_tag in self.tags:
                 raise
-        return False
+
+        if commit:
+            db.session.commit()
+        return is_removed
 
     def get_attributes(
         self, as_dict=False, check_permissions=True, show_hidden=False, show_karton=True

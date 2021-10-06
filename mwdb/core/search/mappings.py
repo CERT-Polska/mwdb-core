@@ -20,6 +20,7 @@ from .fields import (
     CommentAuthorField,
     DatetimeField,
     FavoritesField,
+    HotSamplesField,
     JSONField,
     ListField,
     RelationField,
@@ -63,6 +64,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "sha512": StringField(File.sha512),
         "ssdeep": StringField(File.ssdeep),
         "crc32": StringField(File.crc32),
+        "hot_samples": HotSamplesField(File.id),
     },
     Config.__name__: {
         "type": StringField(Config.config_type),

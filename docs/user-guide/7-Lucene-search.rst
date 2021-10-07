@@ -310,6 +310,21 @@ The above query returns the objects commented by user <user login>.
 
     Wildcards are not allowed for field ``comment_author:``.
 
+Hot sample field (\ ``hot_samples:``\ )
+------------------------------------------------------------
+
+Using the field ``hot_samples:`` you can search for the most frequently uploaded files.
+
+.. code-block::
+
+   hot_samples: n
+
+The above query returns **n** files which were the most uploaded by different users.
+
+.. warning::
+
+    Wildcards are not allowed for field ``hot_samples:``.
+
 Group access queries (\ ``shared:`` and ``uploader:``\ )
 ------------------------------------------------------------
 

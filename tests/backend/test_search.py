@@ -5,6 +5,8 @@ from .relations import *
 from .utils import base62uuid
 from .utils import ShouldRaise
 from .utils import rand_string
+import random
+from requests.exceptions import RequestException
 
 
 def test_file_name_search(admin_session):
@@ -185,6 +187,11 @@ def test_search_json(admin_session):
 
     value = base62uuid().lower()
 
+    array_value_1 = random.randint(0, int(1e9))
+    array_value_2 = array_value_1 + 1
+    array_value_3 = array_value_1 + 2
+
+
     test.add_config(None, "malwarex", {
         "plain": value,
         "list": [
@@ -194,10 +201,10 @@ def test_search_json(admin_session):
             "field": value
         },
         "array": [
-            1, 2, 3
+            array_value_1, array_value_2, array_value_2
         ],
         "array*array": [
-            1, [2, 3]
+            array_value_1, [array_value_2, array_value_3]
         ]
     })
 
@@ -216,10 +223,10 @@ def test_search_json(admin_session):
     found_objs = test.search(f'config.cfg:*{value}*')
     assert len(found_objs) == 1
 
-    found_objs = test.search(f'config.cfg.array*:1')
+    found_objs = test.search(f'config.cfg.array*:{array_value_1}')
     assert len(found_objs) == 1
 
-    found_objs = test.search(f'config.cfg.array:"*1, 2*"')
+    found_objs = test.search(f'config.cfg.array:"*{array_value_1}, {array_value_2}*"')
     assert len(found_objs) == 1
 
     found_objs = test.search(f'config.cfg.list.dict_in_list*:{value}')
@@ -231,13 +238,13 @@ def test_search_json(admin_session):
     found_objs = test.search('config.cfg:"*\\"dict_in_list\\": \\"xxx\\"*"')
     assert len(found_objs) == 0
 
-    found_objs = test.search('config.cfg.array\\*array*:1')
+    found_objs = test.search(f'config.cfg.array\\*array*:{array_value_1}')
     assert len(found_objs) == 1
 
-    found_objs = test.search('config.cfg.array\\*array*:2')
+    found_objs = test.search(f'config.cfg.array\\*array*:{array_value_2}')
     assert len(found_objs) == 0
 
-    found_objs = test.search('config.cfg.array\\*array**:2')
+    found_objs = test.search(f'config.cfg.array\\*array**:{array_value_2}')
     assert len(found_objs) == 1
 
 
@@ -304,9 +311,9 @@ def test_search_date_time_unbounded(admin_session):
     test = admin_session
 
     filename = base62uuid()
-    file_content = b"a" * 5000
+    file_content = b"a" * 5000 + rand_string(10).encode("utf-8")
     file2name = base62uuid()
-    file2_content = b"a" * 5100
+    file2_content = b"a" * 5100 + rand_string(10).encode("utf-8")
     tag = "date_time_unbounded_search"
 
     now = datetime.datetime.now()
@@ -337,9 +344,11 @@ def test_search_no_access_to_parent(admin_session):
     sample2 = admin_session.add_sample(file2name, file2_content, sample["sha256"])
     admin_session.add_tag(sample2["id"], tag)
 
-    admin_session.register_user("test1", "testpass", ["adding_tags"])
+    test_user = random_name()
+    admin_session.register_user(test_user, test_user, ["adding_tags"])
+
     test = MwdbTest()
-    test.login_as("test1", "testpass")
+    test.login_as(test_user, test_user)
 
     sample2 = test.add_sample(file2name, file2_content)
     test.add_tag(sample2["id"], tag)

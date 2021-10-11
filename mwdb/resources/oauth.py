@@ -1,10 +1,11 @@
 import datetime
-from uuid import UUID
+import hashlib
 
 from flask import g, request
 from flask_restful import Resource
+from marshmallow import ValidationError
 from sqlalchemy import and_, exists, or_
-from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
+from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -219,37 +220,37 @@ class OpenIDRegisterUserResource(Resource):
                 )
             )
         ).scalar():
-            raise Conflict("User with selected provider is already bound.")
+            raise Conflict("User is already bound with selected provider.")
 
-        possible_logins = []
-        if "preferred_username" in userinfo:
-            possible_logins.append(userinfo["preferred_username"])
-        if "nickname" in userinfo:
-            possible_logins.append(userinfo["nickname"])
-        if "name" in userinfo:
-            possible_logins.append(userinfo["name"])
+        login_claims = ["preferred_username", "nickname", "name"]
 
-        for login in possible_logins:
-            try:
-                user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
-                potential_existing_name = (
-                    db.session.query(Group).filter(Group.name == login).first()
-                )
-                if potential_existing_name is None:
-                    user_login = user_login_obj["login"]
-                    break
-            except BadRequest:
+        for claim in login_claims:
+            username = userinfo.get(claim)
+            if not username:
                 continue
-        if user_login is None:
-            user_login = UUID(userinfo["sub"]).hex
+            try:
+                UserLoginSchemaBase().load({"login": username})
+            except ValidationError:
+                continue
+            already_exists = db.session.query(
+                exists().where(Group.name == username)
+            ).scalar()
+            if not already_exists:
+                break
+
+        # If no candidates in claims: try fallback login
+        else:
+            # If no candidates in claims: try fallback login
+            sub_md5 = hashlib.md5(userinfo["sub"].encode("utf-8")).hexdigest()[:8]
+            username = f"{provider_name}-{sub_md5}"
 
         if "email" in userinfo.keys():
             user_email = userinfo["email"]
         else:
-            user_email = f'{UUID(userinfo["sub"]).hex}@mwdb.local'
+            user_email = f'{userinfo["sub"]}@mwdb.local'
 
         user = User.create(
-            user_login,
+            username,
             user_email,
             "Registered via OpenID Connect protocol",
         )

@@ -316,7 +316,7 @@ def test_search_date_time_unbounded(admin_session):
     file2_content = b"a" * 5100 + rand_string(10).encode("utf-8")
     tag = "date_time_unbounded_search"
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     now = now.strftime("%Y-%m-%d %H:%M:%S")
     sample = test.add_sample(filename, file_content)
     test.add_tag(sample["id"], tag)

@@ -15,28 +15,27 @@ export function OAuthLogin() {
     const [providers, setProviders] = useState([]);
     const [chosenProvider, setChosenProvider] = useState();
     const [isRedirectModalOpen, setRedirectModalOpen] = useState(false);
+    const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
 
     async function getProviders() {
         try {
-            const response = await api.axios.get("/oauth");
+            const response = await api.oauthGetProviders();
             setProviders(response.data["providers"]);
         } catch (e) {
             setError(e);
         }
     }
 
-    async function login(provider) {
+    async function authenticate(provider, action) {
         try {
-            const response = await api.axios.post(
-                `/oauth/${provider}/authenticate`
-            );
+            const response = await api.oauthAuthenticate(provider);
             const expirationTime = Date.now() + 5 * 60 * 1000;
             sessionStorage.setItem(
                 `openid_${response.data["state"]}`,
                 JSON.stringify({
                     provider: provider,
                     nonce: response.data["nonce"],
-                    action: "login",
+                    action: action,
                     expiration: expirationTime,
                 })
             );
@@ -57,7 +56,21 @@ export function OAuthLogin() {
             <p>
                 Select below the identity provider associated with your mwdb
                 account. By clicking on the identity provider below you will be
-                redirected to its authentication page.
+                redirected to its authentication page. <br />
+                If you don't have an account associated with any of these
+                providers you can do this in the profile details. <br />
+                Alternatively, you can register a new account through an
+                external identity provider by{" "}
+                <Link
+                    href="#new-oauth-user"
+                    onClick={(ev) => {
+                        ev.preventDefault();
+                        setRegisterModalOpen(true);
+                    }}
+                >
+                    clicking here
+                </Link>
+                .
             </p>
             <ShowIf condition={providers.length}>
                 {providers.map((provider) => (
@@ -88,11 +101,41 @@ export function OAuthLogin() {
                 }}
                 onConfirm={(e) => {
                     e.preventDefault();
-                    login(chosenProvider);
+                    authenticate(chosenProvider, "authorize");
                 }}
                 message={`Are you sure you want to redirect to ${chosenProvider} provider`}
                 buttonStyle="btn-danger"
             />
+            <ConfirmationModal
+                isOpen={isRegisterModalOpen}
+                onRequestClose={() => setRegisterModalOpen(false)}
+                message="Choose OpenID Provider to register user"
+                onConfirm={(e) => {
+                    e.preventDefault();
+                    authenticate(chosenProvider, "register");
+                }}
+                buttonStyle="btn-info"
+                confirmText="Submit"
+            >
+                <form onSubmit={(e) => {}}>
+                    <div>
+                        <select
+                            className="custom-select"
+                            value={chosenProvider}
+                            onChange={(ev) =>
+                                setChosenProvider(ev.target.value)
+                            }
+                        >
+                            <option value="" hidden>
+                                Select provider...
+                            </option>
+                            {providers.map((provider) => (
+                                <option value={provider}>{provider}</option>
+                            ))}
+                        </select>
+                    </div>
+                </form>
+            </ConfirmationModal>
         </View>
     );
 }
@@ -113,35 +156,29 @@ export function OAuthAuthorize() {
         sessionStorage.removeItem(`openid_${state}`);
         try {
             const expirationTime = new Date(expiration);
-            if (expirationTime > Date.now()) {
-                if (action === "login") {
-                    const response = await api.axios.post(
-                        `/oauth/${provider}/authorize`,
-                        {
-                            code,
-                            nonce,
-                            state,
-                        }
-                    );
-                    auth.updateSession(response.data);
-                    history.replace("/");
-                } else if (action === "bind_account") {
-                    await api.axios.post(`/oauth/${provider}/bind_account`, {
-                        code,
-                        nonce,
-                        state,
-                    });
-                    history.replace("/profile/oauth", {
-                        success: "New external identity successfully added",
-                    });
-                }
+            if (Date.now() > expirationTime)
+                throw new Error("Session expired. Please try again.");
+            const response = await api.oauthCallback(
+                provider,
+                action,
+                code,
+                nonce,
+                state
+            );
+            if (action === "bind_account") {
+                history.replace("/profile/oauth", {
+                    success: "New external identity successfully added",
+                });
+            } else {
+                auth.updateSession(response.data);
+                history.replace("/");
             }
         } catch (e) {
             if (action === "bind_account")
                 history.replace("/profile/oauth", {
                     error: getErrorMessage(e),
                 });
-            else history.replace("/", { error: getErrorMessage(e) });
+            else history.replace("/oauth/login", { error: getErrorMessage(e) });
         }
     }
 

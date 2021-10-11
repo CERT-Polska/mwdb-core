@@ -4,7 +4,7 @@ COPY ./mwdb/web /app
 COPY ./docker/plugins /plugins
 
 RUN cd /app \
-    && npm ci --unsafe-perm . $(find /plugins -name 'package.json' -printf "%h\n" | sort -u) \
+    && npm install --unsafe-perm . $(find /plugins -name 'package.json' -printf "%h\n" | sort -u) \
     && CI=true npm run build \
     && npm cache clean --force
 

@@ -4,6 +4,7 @@ import datetime
 from .relations import *
 from .utils import base62uuid
 from .utils import ShouldRaise
+from .utils import rand_string
 
 
 def test_file_name_search(admin_session):
@@ -73,6 +74,31 @@ def test_search_tag(admin_session):
 
     sample_from_search = test.get_sample(first_found_obj["id"])
     assert sample_from_search["id"] == sample["id"]
+
+
+def test_search_by_tags_transactional_added(admin_session):
+    test = admin_session
+
+    filename = base62uuid()
+    file_content = base62uuid()
+    tag_1 = rand_string(15)
+    tag_2 = rand_string(15)
+    tags = [{"tag": tag_1}, {"tag": tag_2}]
+
+    sample = test.add_sample(filename, file_content, tags=tags)
+
+    found_obj_by_tag_1 = test.search(f'tag:{tag_1}')
+    found_obj_by_tag_2 = test.search(f'tag:{tag_2}')
+    assert len(found_obj_by_tag_1) > 0
+    assert len(found_obj_by_tag_2) > 0
+
+    first_found_obj = found_obj_by_tag_1[0]
+    second_found_obj = found_obj_by_tag_2[0]
+
+    sample_search_1 = test.get_sample(first_found_obj["id"])
+    sample_search_2 = test.get_sample(second_found_obj["id"])
+    assert sample_search_1["id"] == sample["id"]
+    assert sample_search_2["id"] == sample["id"]
 
 
 def test_search_size(admin_session):

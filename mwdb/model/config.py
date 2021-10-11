@@ -40,6 +40,7 @@ class Config(Object):
         attributes=None,
         share_with=None,
         analysis_id=None,
+        tags=None,
     ):
         dhash = config_dhash(cfg)
 
@@ -52,6 +53,7 @@ class Config(Object):
             attributes=attributes,
             share_with=share_with,
             analysis_id=analysis_id,
+            tags=tags,
         )
 
     def _send_to_karton(self):

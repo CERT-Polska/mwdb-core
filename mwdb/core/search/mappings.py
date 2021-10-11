@@ -27,6 +27,7 @@ from .fields import (
     ShareField,
     SizeField,
     StringField,
+    UploadCountField,
     UploaderField,
     UUIDField,
 )
@@ -65,6 +66,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "ssdeep": StringField(File.ssdeep),
         "crc32": StringField(File.crc32),
         "hot_samples": HotSamplesField(File.id),
+        "upload_count": UploadCountField(File.upload_count),
     },
     Config.__name__: {
         "type": StringField(Config.config_type),

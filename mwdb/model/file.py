@@ -5,7 +5,8 @@ import shutil
 import tempfile
 
 from itsdangerous import BadSignature, SignatureExpired, TimedJSONWebSignatureSerializer
-from sqlalchemy import or_
+from sqlalchemy import and_, distinct, func, or_, select
+from sqlalchemy.orm import column_property
 from werkzeug.utils import secure_filename
 
 from mwdb.core.config import StorageProviderType, app_config
@@ -20,7 +21,7 @@ from mwdb.core.util import (
 )
 
 from . import db
-from .object import Object
+from .object import AccessType, Object, ObjectPermission
 
 
 class EmptyFileError(ValueError):
@@ -41,6 +42,15 @@ class File(Object):
     sha512 = db.Column(db.String(128), nullable=False, index=True)
     # ssdeep is nullable due to lack of support in earlier versions
     ssdeep = db.Column(db.String(255), nullable=True, index=True)
+
+    upload_count = column_property(
+        select([func.count(distinct(ObjectPermission.related_user_id))]).where(
+            and_(
+                ObjectPermission.object_id == id,
+                ObjectPermission.reason_type == AccessType.ADDED,
+            )
+        )
+    )
 
     __mapper_args__ = {
         "polymorphic_identity": __tablename__,

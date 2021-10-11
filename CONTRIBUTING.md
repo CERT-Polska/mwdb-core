@@ -73,3 +73,39 @@ $ git push origin [your_branch_name]
    wait for review.
 
 That's it! Thank you very much, we appreciate you help.
+
+## Running tests manually
+
+1. Run Docker-Compose environment (e.g. dev)
+
+```
+docker-compose -f docker-compose-dev.yml up -d
+```
+
+2. Go to `tests/backend` and install necessary requirements (virtualenv recommended)
+
+```
+(venv) tests/backend$ pip install -r requirements.txt 
+```
+
+3. Export variables from `mwdb-vars.env` and set `MWDB_URL` to API endpoint
+
+```
+(venv) tests/backend$ export MWDB_ADMIN_LOGIN=admin
+(venv) tests/backend$ export MWDB_ADMIN_PASSWORD=(password)
+(venv) tests/backend$ export MWDB_URL=http://127.0.0.1/api
+```
+
+4. Run `pytest` to perform tests
+
+```
+(venv) tests/backend$ pytest -k attributes
+========================================================================================================= test session starts ==========================================================================================================
+platform linux -- Python 3.8.10, pytest-6.2.5, py-1.10.0, pluggy-1.0.0
+rootdir: /home/psrok1/mwdb-core
+collected 78 items / 72 deselected / 6 selected                                                                                                                                                                                        
+
+test_attributes.py ......                                                                                                                                                                                                        [100%]
+
+=================================================================================================== 6 passed, 72 deselected in 3.64s ===================================================================================================
+```

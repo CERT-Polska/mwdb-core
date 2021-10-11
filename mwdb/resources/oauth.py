@@ -210,8 +210,6 @@ class OpenIDRegisterUserResource(Resource):
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         # register user with information from provider
-        user_login = None
-
         if db.session.query(
             exists().where(
                 and_(

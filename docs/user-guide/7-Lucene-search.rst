@@ -317,13 +317,31 @@ Using the field ``hot_samples:`` you can search for the most frequently uploaded
 
 .. code-block::
 
-   hot_samples: n
+   hot_samples:n
 
 The above query returns **n** files which were the most uploaded by different users.
 
 .. warning::
 
     Wildcards are not allowed for field ``hot_samples:``.
+
+Upload count field (\ ``upload_count:``\ )
+------------------------------------------------------------
+
+Typing the field ``upload_count:`` you can search for files using upload information.
+
+.. code-block::
+
+   upload_count:n
+
+The above query returns files which were uploaded by **n**  different users.
+
+The wildcards are supported for field ``upload_count:``. For example:
+If you want to search for samples which were uploaded by 5 and more different users, use undermentioned search statement:
+
+.. code-block::
+
+   upload_count:["5 TO *]
 
 Group access queries (\ ``shared:`` and ``uploader:``\ )
 ------------------------------------------------------------

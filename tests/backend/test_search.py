@@ -4,6 +4,7 @@ import datetime
 from .relations import *
 from .utils import base62uuid
 from .utils import ShouldRaise
+from .utils import rand_string
 
 
 def test_file_name_search(admin_session):
@@ -320,6 +321,38 @@ def test_search_no_access_to_parent(admin_session):
 
     found_objs = test.search(f'parent:(file.size:5000) AND tag:{tag}')
     assert len(found_objs) == 0
+
+
+def test_search_upload_count(admin_session):
+    filename = base62uuid()
+    file_content = b"a" * 10 + rand_string(10).encode("utf-8")
+    tag = rand_string(15)
+
+    # create 3 test users
+    test_users = []
+    for _ in range(3):
+        user_name = random_name()
+        user_password = random_name()
+        admin_session.register_user(user_name, user_password, ["adding_tags"])
+        test_users.append({'user_name': user_name, 'user_password': user_password})
+
+    users_session = MwdbTest()
+    for user in test_users:
+        users_session.login_as(user['user_name'], user['user_password'])
+        sample = users_session.add_sample(filename, file_content)
+        users_session.add_tag(sample["id"], tag)
+
+    found_samples = admin_session.search(f'tag:{tag} AND file.upload_count:{len(test_users)}')
+    assert len(found_samples) == 1
+
+    found_samples = users_session.search(f'tag:{tag} AND file.upload_count:[{len(test_users)} TO *]')
+    assert len(found_samples) == 1
+
+    found_samples = users_session.search(f'tag:{tag} AND file.upload_count:[* TO {len(test_users)}]')
+    assert len(found_samples) == 1
+
+    found_samples = users_session.search(f'tag:{tag} AND file.upload_count:{{{len(test_users)} TO *]')
+    assert len(found_samples) == 0
 
 
 def test_child_mixed(admin_session):

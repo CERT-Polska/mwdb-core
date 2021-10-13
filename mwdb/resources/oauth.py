@@ -77,7 +77,7 @@ class OpenIDProviderResource(Resource):
         jwks_endpoint = None
         if obj["jwks_endpoint"]:
             jwks_endpoint = obj["jwks_endpoint"]
-
+        # TODO query if provider already registered
         provider = OpenIDProvider(
             name=obj["name"],
             client_id=obj["client_id"],

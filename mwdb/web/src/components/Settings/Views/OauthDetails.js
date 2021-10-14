@@ -31,7 +31,7 @@ export default function OAuthDetails() {
         <div className="container">
             <h2>OpenID Connect identity providers</h2>
             <p className="lead">
-                Here are the list of registered external identity providers.
+                Here are the list of registered external identity providers:
             </p>
             {providers.length ? (
                 <React.Fragment>

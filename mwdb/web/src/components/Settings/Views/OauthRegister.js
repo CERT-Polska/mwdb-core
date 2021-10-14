@@ -42,7 +42,7 @@ export default function OAuthRegister() {
             );
             viewAlert.redirectToAlert({
                 target: `/settings/oauth`,
-                success: "Provider registered successfully.",
+                success: "Provider registered successfully",
             });
         } catch (error) {
             viewAlert.setAlert({ error });
@@ -51,7 +51,7 @@ export default function OAuthRegister() {
 
     return (
         <div className="container">
-            <h2>Register new identity privider</h2>
+            <h2>Register new identity provider</h2>
             <form
                 onSubmit={(ev) => {
                     ev.preventDefault();

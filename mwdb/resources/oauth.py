@@ -77,7 +77,14 @@ class OpenIDProviderResource(Resource):
         jwks_endpoint = None
         if obj["jwks_endpoint"]:
             jwks_endpoint = obj["jwks_endpoint"]
-        # TODO query if provider already registered
+
+        if db.session.query(
+            exists().where(and_(OpenIDProvider.name == obj["name"]))
+        ).scalar():
+            raise Conflict(
+                "The identity provider is already registered with the given name"
+            )
+
         provider = OpenIDProvider(
             name=obj["name"],
             client_id=obj["client_id"],

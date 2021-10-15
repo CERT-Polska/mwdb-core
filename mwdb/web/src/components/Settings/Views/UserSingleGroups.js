@@ -13,18 +13,18 @@ export let GroupMemberList = (props) => (
 );
 
 export default function UserSingleGroups({ user, getUser }) {
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const [allGroups, setAllGroups] = useState([]);
 
     async function addMember(group) {
         try {
             await api.addGroupMember(group, user.login);
             getUser();
-            viewAlert.setAlert({
+            setAlert({
                 success: `User successfully added to '${group}' group.`,
             });
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
@@ -32,11 +32,11 @@ export default function UserSingleGroups({ user, getUser }) {
         try {
             await api.removeGroupMember(group, user.login);
             getUser();
-            viewAlert.setAlert({
+            setAlert({
                 success: `User successfully removed from '${group}' group.`,
             });
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
@@ -45,11 +45,11 @@ export default function UserSingleGroups({ user, getUser }) {
             let response = await api.getGroups();
             setAllGroups(response.data.groups);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
-    const getAllGroups = useCallback(updateAllGroups, []);
+    const getAllGroups = useCallback(updateAllGroups, [setAlert]);
 
     useEffect(() => {
         getAllGroups();

@@ -148,7 +148,7 @@ export function RecentBlobHeader() {
     );
 }
 
-export default (props) => {
+export default function RecentBlobs(props) {
     let location = useLocation();
     const diffWith = queryString.parse(location.search)["diff"];
     return (
@@ -170,4 +170,4 @@ export default (props) => {
             />
         </React.Fragment>
     );
-};
+}

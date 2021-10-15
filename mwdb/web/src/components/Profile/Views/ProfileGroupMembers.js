@@ -10,7 +10,7 @@ import {
 } from "@mwdb-web/commons/ui";
 
 function ProfileGroupItems({ workspace, updateWorkspace }) {
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [removeUser, setRemoveUser] = useState(null);
 
@@ -18,11 +18,11 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
         try {
             await api.removeGroupMember(workspace.name, login);
             updateWorkspace();
-            viewAlert.setAlert({
+            setAlert({
                 success: `Member '${login}' successfully removed.`,
             });
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         } finally {
             setDeleteModalOpen(false);
             setRemoveUser(null);
@@ -74,7 +74,7 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
 
 export default function ProfileGroupMembers({ profile }) {
     const auth = useContext(AuthContext);
-    const viewAlert = useViewAlert();
+    const { redirectToAlert } = useViewAlert();
     const { group: groupName } = useParams();
     const [workspaces, setWorkspaces] = useState();
 
@@ -83,13 +83,13 @@ export default function ProfileGroupMembers({ profile }) {
             const response = await api.authGroups();
             setWorkspaces(response.data["groups"]);
         } catch (error) {
-            viewAlert.redirectToAlert({
+            redirectToAlert({
                 target: "/profile",
                 error,
             });
         }
     }
-    const getWorkspaces = useCallback(updateWorkspaces, []);
+    const getWorkspaces = useCallback(updateWorkspaces, [redirectToAlert]);
 
     useEffect(() => {
         getWorkspaces();

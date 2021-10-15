@@ -5,12 +5,6 @@ import { APIContext } from "./context";
 
 export function APIProvider(props) {
     return (
-        <APIContext.Provider
-            value={{
-                ...api,
-            }}
-        >
-            {props.children}
-        </APIContext.Provider>
+        <APIContext.Provider value={api}>{props.children}</APIContext.Provider>
     );
 }

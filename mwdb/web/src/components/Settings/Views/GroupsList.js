@@ -40,7 +40,7 @@ function GroupItem(props) {
 }
 
 export default function GroupsList() {
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const [groups, setGroups] = useState([]);
     const [activePage, setActivePage] = useState(1);
     const [groupFilter, setGroupFilter] = useState("");
@@ -50,11 +50,11 @@ export default function GroupsList() {
             const response = await api.getGroups();
             setGroups(response.data["groups"]);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
-    const getGroups = useCallback(updateGroups, []);
+    const getGroups = useCallback(updateGroups, [setAlert]);
 
     useEffect(() => {
         getGroups();

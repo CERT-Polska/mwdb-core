@@ -10,7 +10,7 @@ import GroupMembers from "./GroupMembers";
 
 export default function GroupView() {
     const location = useLocation();
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const { name } = useParams();
     const [group, setGroup] = useState({});
 
@@ -19,11 +19,11 @@ export default function GroupView() {
             const response = await api.getGroup(name);
             setGroup(response.data);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
-    const getGroup = useCallback(updateGroup, [name]);
+    const getGroup = useCallback(updateGroup, [name, setAlert]);
 
     useEffect(() => {
         getGroup();

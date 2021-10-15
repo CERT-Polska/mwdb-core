@@ -109,14 +109,12 @@ export function ProfileOAuth() {
                     </ul>
                 </div>
             ) : (
-                [
-                    <div>
-                        <p className="font-weight-bold">
-                            There is no more identity provider with which you
-                            can link your account.
-                        </p>
-                    </div>,
-                ]
+                <div>
+                    <p className="font-weight-bold">
+                        There is no more identity provider with which you can
+                        link your account.
+                    </p>
+                </div>
             )}
             <ConfirmationModal
                 isOpen={addModalOpen}

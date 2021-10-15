@@ -84,6 +84,26 @@ function oauthCallback(provider, action, code, nonce, state) {
     });
 }
 
+function oauthRegisterProvider(
+    name,
+    client_id,
+    client_secret,
+    authorization_endpoint,
+    token_endpoint,
+    userinfo_endpoint,
+    jwks_endpoint
+) {
+    return axios.post(`/oauth`, {
+        name,
+        client_id,
+        client_secret,
+        authorization_endpoint,
+        token_endpoint,
+        userinfo_endpoint,
+        jwks_endpoint,
+    });
+}
+
 function oauthGetProviders() {
     return axios.get("/oauth");
 }
@@ -503,9 +523,10 @@ export default {
     authGroups,
     oauthAuthenticate,
     oauthCallback,
-    authRefresh,
+    oauthRegisterProvider,
     oauthGetProviders,
     oauthGetIdentities,
+    authRefresh,
     authSetPassword,
     authRequestPasswordChange,
     authRecoverPassword,

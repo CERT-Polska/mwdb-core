@@ -6,7 +6,6 @@ from .utils import base62uuid
 from .utils import ShouldRaise
 from .utils import rand_string
 import random
-from requests.exceptions import RequestException
 
 
 def test_file_name_search(admin_session):

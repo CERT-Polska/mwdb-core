@@ -101,6 +101,9 @@ export function AuthProvider(props) {
 
     async function refreshSession() {
         try {
+            // If not authenticated: just ignore that call
+            // refreshSession is called by 403 Forbidden interceptor
+            if (!isAuthenticated) return;
             const response = await api.authRefresh();
             updateSession(response.data);
         } catch (e) {

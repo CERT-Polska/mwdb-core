@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { View, AdministrativeRoute } from "@mwdb-web/commons/ui";
+import { View, AdministrativeRoute, ShowIf } from "@mwdb-web/commons/ui";
 import GroupsList from "./Views/GroupsList";
 import UsersList from "./Views/UsersList";
 import UsersPendingList from "./Views/UsersPendingList";
@@ -19,6 +19,8 @@ import AccessControl from "./Views/AccessControl";
 import GroupView from "./Views/GroupView";
 import AttributeView from "./Views/AttributeView";
 import SettingsOverview from "./Views/SettingsOverview";
+import OAuthDetails from "./Views/OauthDetails";
+import OAuthRegister from "./Views/OauthRegister";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -32,27 +34,25 @@ function SettingsNav() {
                           Overview
                       </NavLink>,
                   ],
-                  ...(config.config["is_registration_enabled"]
-                      ? [
-                            <NavLink
-                                exact
-                                to="/settings/pending"
-                                className="nav-link"
-                            >
-                                Pending registrations
-                                {config.pendingUsers.length ? (
-                                    <span
-                                        className="badge badge-pill badge-warning"
-                                        style={{ marginLeft: "8px" }}
-                                    >
-                                        {config.pendingUsers.length}
-                                    </span>
-                                ) : (
-                                    []
-                                )}
-                            </NavLink>,
-                        ]
-                      : []),
+                  <ShowIf condition={config.config["is_registration_enabled"]}>
+                      <NavLink
+                          exact
+                          to="/settings/pending"
+                          className="nav-link"
+                      >
+                          Pending registrations
+                          {config.pendingUsers.length ? (
+                              <span
+                                  className="badge badge-pill badge-warning"
+                                  style={{ marginLeft: "8px" }}
+                              >
+                                  {config.pendingUsers.length}
+                              </span>
+                          ) : (
+                              []
+                          )}
+                      </NavLink>
+                  </ShowIf>,
                   <NavLink
                       exact
                       to="/settings/capabilities"
@@ -69,6 +69,11 @@ function SettingsNav() {
                   <NavLink to="/settings/attributes" className="nav-link">
                       Attributes
                   </NavLink>,
+                  <ShowIf condition={config.config["is_oidc_enabled"]}>
+                      <NavLink to="/settings/oauth" className="nav-link">
+                          OpenID Connect
+                      </NavLink>
+                  </ShowIf>,
               ]
             : []),
     ];
@@ -153,6 +158,15 @@ export default function SettingsView() {
                                 path="/settings/capabilities"
                             >
                                 <AccessControl />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute exact path="/settings/oauth">
+                                <OAuthDetails />
+                            </AdministrativeRoute>
+                            <AdministrativeRoute
+                                exact
+                                path="/settings/oauth/register"
+                            >
+                                <OAuthRegister />
                             </AdministrativeRoute>
 
                             <AdministrativeRoute

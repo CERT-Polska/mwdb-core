@@ -93,6 +93,7 @@ class File(Object):
         attributes=None,
         share_with=None,
         analysis_id=None,
+        tags=None,
     ):
         file_stream.seek(0, os.SEEK_END)
         file_size = file_stream.tell()
@@ -119,6 +120,7 @@ class File(Object):
             attributes=attributes,
             share_with=share_with,
             analysis_id=analysis_id,
+            tags=tags,
         )
 
         if is_new:

@@ -10,7 +10,7 @@ from marshmallow import (
 )
 
 from .metakey import MetakeyItemRequestSchema
-from .tag import TagItemResponseSchema
+from .tag import TagItemResponseSchema, TagRequestSchema
 from .utils import UTCDateTime
 
 
@@ -38,6 +38,7 @@ class ObjectCreateRequestSchemaBase(Schema):
     upload_as = fields.Str(missing="*", allow_none=False)
     karton_id = fields.UUID(missing=None)
     karton_arguments = fields.Dict(missing={}, keys=fields.Str(), values=fields.Str())
+    tags = fields.Nested(TagRequestSchema, many=True, missing=[])
 
 
 class ObjectLegacyMetakeysMixin(Schema):

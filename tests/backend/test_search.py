@@ -5,6 +5,7 @@ from .relations import *
 from .utils import base62uuid
 from .utils import ShouldRaise
 from .utils import rand_string
+import random
 
 
 def test_file_name_search(admin_session):
@@ -74,6 +75,31 @@ def test_search_tag(admin_session):
 
     sample_from_search = test.get_sample(first_found_obj["id"])
     assert sample_from_search["id"] == sample["id"]
+
+
+def test_search_by_tags_transactional_added(admin_session):
+    test = admin_session
+
+    filename = base62uuid()
+    file_content = base62uuid()
+    tag_1 = rand_string(15)
+    tag_2 = rand_string(15)
+    tags = [{"tag": tag_1}, {"tag": tag_2}]
+
+    sample = test.add_sample(filename, file_content, tags=tags)
+
+    found_obj_by_tag_1 = test.search(f'tag:{tag_1}')
+    found_obj_by_tag_2 = test.search(f'tag:{tag_2}')
+    assert len(found_obj_by_tag_1) > 0
+    assert len(found_obj_by_tag_2) > 0
+
+    first_found_obj = found_obj_by_tag_1[0]
+    second_found_obj = found_obj_by_tag_2[0]
+
+    sample_search_1 = test.get_sample(first_found_obj["id"])
+    sample_search_2 = test.get_sample(second_found_obj["id"])
+    assert sample_search_1["id"] == sample["id"]
+    assert sample_search_2["id"] == sample["id"]
 
 
 def test_search_size(admin_session):
@@ -160,6 +186,11 @@ def test_search_json(admin_session):
 
     value = base62uuid().lower()
 
+    array_value_1 = random.randint(0, int(1e9))
+    array_value_2 = array_value_1 + 1
+    array_value_3 = array_value_1 + 2
+
+
     test.add_config(None, "malwarex", {
         "plain": value,
         "list": [
@@ -169,10 +200,10 @@ def test_search_json(admin_session):
             "field": value
         },
         "array": [
-            1, 2, 3
+            array_value_1, array_value_2, array_value_2
         ],
         "array*array": [
-            1, [2, 3]
+            array_value_1, [array_value_2, array_value_3]
         ]
     })
 
@@ -191,10 +222,10 @@ def test_search_json(admin_session):
     found_objs = test.search(f'config.cfg:*{value}*')
     assert len(found_objs) == 1
 
-    found_objs = test.search(f'config.cfg.array*:1')
+    found_objs = test.search(f'config.cfg.array*:{array_value_1}')
     assert len(found_objs) == 1
 
-    found_objs = test.search(f'config.cfg.array:"*1, 2*"')
+    found_objs = test.search(f'config.cfg.array:"*{array_value_1}, {array_value_2}*"')
     assert len(found_objs) == 1
 
     found_objs = test.search(f'config.cfg.list.dict_in_list*:{value}')
@@ -206,13 +237,13 @@ def test_search_json(admin_session):
     found_objs = test.search('config.cfg:"*\\"dict_in_list\\": \\"xxx\\"*"')
     assert len(found_objs) == 0
 
-    found_objs = test.search('config.cfg.array\\*array*:1')
+    found_objs = test.search(f'config.cfg.array\\*array*:{array_value_1}')
     assert len(found_objs) == 1
 
-    found_objs = test.search('config.cfg.array\\*array*:2')
+    found_objs = test.search(f'config.cfg.array\\*array*:{array_value_2}')
     assert len(found_objs) == 0
 
-    found_objs = test.search('config.cfg.array\\*array**:2')
+    found_objs = test.search(f'config.cfg.array\\*array**:{array_value_2}')
     assert len(found_objs) == 1
 
 
@@ -279,12 +310,12 @@ def test_search_date_time_unbounded(admin_session):
     test = admin_session
 
     filename = base62uuid()
-    file_content = b"a" * 5000
+    file_content = b"a" * 5000 + rand_string(10).encode("utf-8")
     file2name = base62uuid()
-    file2_content = b"a" * 5100
+    file2_content = b"a" * 5100 + rand_string(10).encode("utf-8")
     tag = "date_time_unbounded_search"
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     now = now.strftime("%Y-%m-%d %H:%M:%S")
     sample = test.add_sample(filename, file_content)
     test.add_tag(sample["id"], tag)
@@ -312,9 +343,11 @@ def test_search_no_access_to_parent(admin_session):
     sample2 = admin_session.add_sample(file2name, file2_content, sample["sha256"])
     admin_session.add_tag(sample2["id"], tag)
 
-    admin_session.register_user("test1", "testpass", ["adding_tags"])
+    test_user = random_name()
+    admin_session.register_user(test_user, test_user, ["adding_tags"])
+
     test = MwdbTest()
-    test.login_as("test1", "testpass")
+    test.login_as(test_user, test_user)
 
     sample2 = test.add_sample(file2name, file2_content)
     test.add_tag(sample2["id"], tag)

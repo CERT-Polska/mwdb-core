@@ -17,8 +17,8 @@ export function ProfileOAuth() {
 
     async function getProviders() {
         try {
-            const providersResponse = await api.axios.get("/oauth");
-            const identitiesResponse = await api.axios.get("/oauth/identities");
+            const providersResponse = await api.oauthGetProviders();
+            const identitiesResponse = await api.oauthGetIdentities();
             const identitiesData = identitiesResponse.data["providers"];
             setIdentities(identitiesData);
             setProviders(
@@ -33,9 +33,7 @@ export function ProfileOAuth() {
 
     async function bindProvider(provider) {
         try {
-            const response = await api.axios.post(
-                `/oauth/${provider}/authenticate`
-            );
+            const response = await api.oauthAuthenticate(provider);
             let expirationTime = new Date();
             expirationTime.setTime(expirationTime.getTime() + 5 * 60 * 1000);
             sessionStorage.setItem(
@@ -97,7 +95,7 @@ export function ProfileOAuth() {
                     <ul className="nav flex-column">
                         <li className="nav-item">
                             <a
-                                href="#new-api-key"
+                                href="#bind-oauth-account"
                                 className="nav-link"
                                 onClick={(ev) => {
                                     ev.preventDefault();
@@ -111,14 +109,12 @@ export function ProfileOAuth() {
                     </ul>
                 </div>
             ) : (
-                [
-                    <div>
-                        <p className="font-weight-bold">
-                            There is no more identity provider with which you
-                            can link your account.
-                        </p>
-                    </div>,
-                ]
+                <div>
+                    <p className="font-weight-bold">
+                        There is no more identity provider with which you can
+                        link your account.
+                    </p>
+                </div>
             )}
             <ConfirmationModal
                 isOpen={addModalOpen}

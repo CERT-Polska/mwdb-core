@@ -206,7 +206,7 @@ class MwdbTest(object):
         return res.json()
 
     def add_sample(
-        self, filename=None, content=None, parent=None, metakeys=None, upload_as=None
+        self, filename=None, content=None, parent=None, metakeys=None, upload_as=None, tags=None
     ):
         if filename is None:
             filename = str(uuid.uuid4())
@@ -225,6 +225,7 @@ class MwdbTest(object):
                             "parent": parent,
                             "metakeys": metakeys or [],
                             "upload_as": upload_as or "*",
+                            "tags": tags or [],
                         }
                     ),
                 ),
@@ -373,10 +374,10 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.content
 
-    def add_config(self, parent, family, config_json):
+    def add_config(self, parent, family, config_json, tags=None):
         res = self.session.post(
             self.mwdb_url + "/config",
-            json={"family": family, "cfg": config_json, "parent": parent},
+            json={"family": family, "cfg": config_json, "parent": parent, "tags": tags or []},
         )
         res.raise_for_status()
         return res.json()
@@ -396,7 +397,7 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def add_blob(self, parent, blobname=None, blobtype=None, content=None):
+    def add_blob(self, parent, blobname=None, blobtype=None, content=None, tags=None):
         res = self.session.post(
             self.mwdb_url + "/blob",
             json={
@@ -404,6 +405,7 @@ class MwdbTest(object):
                 "blob_type": blobtype or "inject",
                 "content": content or str(uuid.uuid4()),
                 "parent": parent,
+                "tags": tags or [],
             },
         )
         res.raise_for_status()

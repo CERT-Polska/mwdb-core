@@ -72,6 +72,46 @@ function authGroups() {
     return axios.get("/auth/groups");
 }
 
+function oauthAuthenticate(provider) {
+    return axios.post(`/oauth/${provider}/authenticate`);
+}
+
+function oauthCallback(provider, action, code, nonce, state) {
+    return axios.post(`/oauth/${provider}/${action}`, {
+        code,
+        nonce,
+        state,
+    });
+}
+
+function oauthRegisterProvider(
+    name,
+    client_id,
+    client_secret,
+    authorization_endpoint,
+    token_endpoint,
+    userinfo_endpoint,
+    jwks_endpoint
+) {
+    return axios.post(`/oauth`, {
+        name,
+        client_id,
+        client_secret,
+        authorization_endpoint,
+        token_endpoint,
+        userinfo_endpoint,
+        jwks_endpoint,
+    });
+}
+
+function oauthGetProviders() {
+    return axios.get("/oauth");
+}
+
+function oauthGetIdentities() {
+    return axios.get("/oauth/identities");
+}
+
 function apiKeyGetToken(key_id) {
     return axios.get(`/api_key/${key_id}`);
 }
@@ -481,6 +521,11 @@ export default {
     getServerAdminInfo,
     authLogin,
     authGroups,
+    oauthAuthenticate,
+    oauthCallback,
+    oauthRegisterProvider,
+    oauthGetProviders,
+    oauthGetIdentities,
     authRefresh,
     authSetPassword,
     authRequestPasswordChange,

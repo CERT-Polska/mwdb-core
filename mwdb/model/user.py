@@ -137,7 +137,10 @@ class User(db.Model):
         user.reset_sessions()
 
         if not pending:
-            user.registered_by = g.auth_user.id
+            if not g.auth_user:
+                user.registered_by = None
+            else:
+                user.registered_by = g.auth_user.id
             user.registered_on = datetime.datetime.utcnow()
         else:
             user.requested_on = datetime.datetime.utcnow()

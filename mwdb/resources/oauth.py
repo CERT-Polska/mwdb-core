@@ -1,13 +1,15 @@
 import datetime
+import hashlib
 
 from flask import g, request
 from flask_restful import Resource
-from sqlalchemy import and_, exists
+from marshmallow import ValidationError
+from sqlalchemy import and_, exists, or_
 from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.model import OpenIDProvider, OpenIDUserIdentity, db
+from mwdb.model import Group, OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,
@@ -15,6 +17,7 @@ from mwdb.schema.oauth import (
     OpenIDProviderCreateRequestSchema,
     OpenIDProviderListResponseSchema,
 )
+from mwdb.schema.user import UserLoginSchemaBase
 
 from . import loads_schema, logger, requires_authorization, requires_capabilities
 
@@ -74,6 +77,13 @@ class OpenIDProviderResource(Resource):
         jwks_endpoint = None
         if obj["jwks_endpoint"]:
             jwks_endpoint = obj["jwks_endpoint"]
+
+        if db.session.query(
+            exists().where(and_(OpenIDProvider.name == obj["name"]))
+        ).scalar():
+            raise Conflict(
+                "The identity provider is already registered with the given name"
+            )
 
         provider = OpenIDProvider(
             name=obj["name"],
@@ -184,6 +194,91 @@ class OpenIDAuthorizeResource(Resource):
         )
 
 
+class OpenIDRegisterUserResource(Resource):
+    def post(self, provider_name):
+        provider = (
+            db.session.query(OpenIDProvider)
+            .filter(OpenIDProvider.name == provider_name)
+            .first()
+        )
+        if not provider:
+            raise NotFound(f"Requested provider name '{provider_name}' not found")
+
+        schema = OpenIDAuthorizeRequestSchema()
+        obj = loads_schema(request.get_data(as_text=True), schema)
+        redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
+        userinfo = provider.fetch_id_token(
+            obj["code"], obj["state"], obj["nonce"], redirect_uri
+        )
+        # register user with information from provider
+        if db.session.query(
+            exists().where(
+                and_(
+                    OpenIDUserIdentity.provider_id == provider.id,
+                    OpenIDUserIdentity.sub_id == userinfo["sub"],
+                )
+            )
+        ).scalar():
+            raise Conflict("User is already bound with selected provider.")
+
+        login_claims = ["preferred_username", "nickname", "name"]
+
+        for claim in login_claims:
+            username = userinfo.get(claim)
+            if not username:
+                continue
+            try:
+                UserLoginSchemaBase().load({"login": username})
+            except ValidationError:
+                continue
+            already_exists = db.session.query(
+                exists().where(Group.name == username)
+            ).scalar()
+            if not already_exists:
+                break
+
+        # If no candidates in claims: try fallback login
+        else:
+            # If no candidates in claims: try fallback login
+            sub_md5 = hashlib.md5(userinfo["sub"].encode("utf-8")).hexdigest()[:8]
+            username = f"{provider_name}-{sub_md5}"
+
+        if "email" in userinfo.keys():
+            user_email = userinfo["email"]
+        else:
+            user_email = f'{userinfo["sub"]}@mwdb.local'
+
+        user = User.create(
+            username,
+            user_email,
+            "Registered via OpenID Connect protocol",
+        )
+
+        identity = OpenIDUserIdentity(
+            sub_id=userinfo["sub"], provider_id=provider.id, user_id=user.id
+        )
+        db.session.add(identity)
+
+        user.logged_on = datetime.datetime.now()
+        db.session.commit()
+
+        auth_token = user.generate_session_token()
+
+        logger.info(
+            "User logged in via OpenID Provider",
+            extra={"login": user.login, "provider": provider_name},
+        )
+        schema = AuthSuccessResponseSchema()
+        return schema.dump(
+            {
+                "login": user.login,
+                "token": auth_token,
+                "capabilities": user.capabilities,
+                "groups": user.group_names,
+            }
+        )
+
+
 class OpenIDBindAccountResource(Resource):
     @requires_authorization
     def post(self, provider_name):
@@ -226,13 +321,15 @@ class OpenIDBindAccountResource(Resource):
         if db.session.query(
             exists().where(
                 and_(
-                    OpenIDUserIdentity.sub_id == userinfo["sub"],
                     OpenIDUserIdentity.provider_id == provider.id,
-                    OpenIDUserIdentity.user_id == g.auth_user.id,
+                    or_(
+                        OpenIDUserIdentity.user_id == g.auth_user.id,
+                        OpenIDUserIdentity.sub_id == userinfo["sub"],
+                    ),
                 )
             )
         ).scalar():
-            raise Conflict("Provider is already bound")
+            raise Conflict("Provider identity is already bound with mwdb account.")
 
         identity = OpenIDUserIdentity(
             sub_id=userinfo["sub"], provider_id=provider.id, user_id=g.auth_user.id

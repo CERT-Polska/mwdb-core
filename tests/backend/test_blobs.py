@@ -1,5 +1,5 @@
 from .relations import *
-from .utils import random_name
+from .utils import random_name, rand_string
 
 
 def test_adding_blobs(admin_session):
@@ -44,3 +44,31 @@ def test_blob_permissions(admin_session):
         BlobB(should_access=[Alice, Bob]),
         BlobC(should_access=[Alice, Bob])
     ], should_access=[Alice, Bob]).test()
+
+
+def test_blog_search_by_tags_transactional_added(admin_session):
+    test = admin_session
+
+    blob_name = rand_string(15)
+    tag_1 = rand_string(15)
+    tag_2 = rand_string(15)
+    tags = [{"tag": tag_1}, {"tag": tag_2}]
+
+    blob = test.add_blob(None, blobname=blob_name, blobtype="inject", content="""
+    Binary junk: \x00\x01\x02\x03\x04\x05\x07
+    HELLO WORLD!
+    ========""" + random_name(), tags=tags)
+
+    blobs_found_by_tag_1 = test.search(f'tag:{tag_1}')
+    blobs_found_by_tag_2 = test.search(f'tag:{tag_2}')
+    assert len(blobs_found_by_tag_1) > 0
+    assert len(blobs_found_by_tag_2) > 0
+
+    first_found_obj = blobs_found_by_tag_1[0]
+    second_found_obj = blobs_found_by_tag_2[0]
+
+    blob_search_1 = test.get_blob(first_found_obj["id"])
+    blob_search_2 = test.get_blob(second_found_obj["id"])
+
+    assert blob_search_1["id"] == blob["id"]
+    assert blob_search_2["id"] == blob["id"]

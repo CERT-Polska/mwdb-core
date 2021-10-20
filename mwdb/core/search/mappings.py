@@ -22,6 +22,7 @@ from .fields import (
     FavoritesField,
     JSONField,
     ListField,
+    MultiField,
     RelationField,
     ShareField,
     SizeField,
@@ -63,11 +64,13 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "sha512": StringField(File.sha512),
         "ssdeep": StringField(File.ssdeep),
         "crc32": StringField(File.crc32),
+        "multi": MultiField(File.id),
     },
     Config.__name__: {
         "type": StringField(Config.config_type),
         "family": StringField(Config.family),
         "cfg": JSONField(Config.cfg),
+        "multi": MultiField(Config.id),
     },
     TextBlob.__name__: {
         "name": StringField(TextBlob.blob_name),
@@ -76,6 +79,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "content": StringField(TextBlob._content),
         "first_seen": DatetimeField(TextBlob.upload_time),
         "last_seen": DatetimeField(TextBlob.last_seen),
+        "multi": MultiField(TextBlob.id),
     },
 }
 

@@ -13,10 +13,13 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
     Attribute,
     AttributeDefinition,
+    Config,
+    File,
     Group,
     Member,
     Object,
     ObjectPermission,
+    TextBlob,
     User,
     db,
 )
@@ -473,3 +476,69 @@ class CommentAuthorField(BaseField):
             raise ObjectNotFoundException(f"No such user: {value}")
 
         return self.column.any(self.value_column == value)
+
+
+class MultiField(BaseField):
+    @staticmethod
+    def get_column(queried_type: Type[Object], value: str):
+        if queried_type is File:
+            if re.match(r"^[0-9a-fA-F]{8}$", value):
+                return File.crc32
+            elif re.match(r"^[0-9a-fA-F]{32}$", value):
+                return File.md5
+            elif re.match(r"^[0-9a-fA-F]{40}$", value):
+                return File.sha1
+            elif re.match(r"^[0-9a-fA-F]{64}$", value):
+                return File.sha256
+            elif re.match(r"^[0-9a-fA-F]{128}$", value):
+                return File.sha512
+            else:
+                raise ObjectNotFoundException(f"{value} is not valid hash value")
+        elif queried_type is TextBlob:
+            if re.match(r"^[0-9a-fA-F]{64}$", value):
+                return TextBlob.dhash
+            else:
+                return TextBlob._content
+        elif queried_type is Config:
+            if re.match(r"^[0-9a-fA-F]{64}$", value):
+                return Config.dhash
+            else:
+                return Config._cfg
+        else:
+            raise ObjectNotFoundException(
+                f"{queried_type.__name__} is not valid data type"
+            )
+
+    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
+
+        string_column = ["TextBlob._content"]
+        json_column = ["Config._cfg"]
+
+        if remainder:
+            raise FieldNotQueryableException(
+                f"Field doesn't have subfields: {'.'.join(remainder)}"
+            )
+
+        value = get_term_value(expression).strip()
+        values_list = re.split("\\s+", value)
+
+        condition = None
+        for value in values_list:
+            column = MultiField.get_column(self.field_type, value)
+
+            if str(column) in string_column:
+                value = f"%{value}%"
+                condition = or_(condition, (column.like(value)))
+            elif str(column) in json_column:
+                value = f"%{value}%"
+                condition = or_(condition, (cast(column, String).like(value)))
+            else:
+                # hashes values
+                condition = or_(condition, (column == value))
+
+        if expression.has_wildcard():
+            raise UnsupportedGrammarException(
+                "Wildcards are not allowed for multi field"
+            )
+        else:
+            return condition

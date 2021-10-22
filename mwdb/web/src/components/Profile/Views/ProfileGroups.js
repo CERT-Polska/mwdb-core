@@ -4,7 +4,7 @@ import api from "@mwdb-web/commons/api";
 import { GroupBadge, useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function ProfileGroups({ profile }) {
-    const viewAlert = useViewAlert();
+    const { redirectToAlert } = useViewAlert();
     const [workspaces, setWorkspaces] = useState();
 
     async function updateWorkspaces() {
@@ -12,14 +12,14 @@ export default function ProfileGroups({ profile }) {
             const response = await api.authGroups();
             setWorkspaces(response.data["groups"]);
         } catch (error) {
-            viewAlert.redirectToAlert({
+            redirectToAlert({
                 target: "/profile",
                 error,
             });
         }
     }
 
-    const getWorkspaces = useCallback(updateWorkspaces, []);
+    const getWorkspaces = useCallback(updateWorkspaces, [redirectToAlert]);
 
     useEffect(() => {
         getWorkspaces();

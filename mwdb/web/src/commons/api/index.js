@@ -513,7 +513,7 @@ function resubmitKartonAnalysis(id) {
     return axios.post(`/object/${id}/karton`);
 }
 
-export default {
+const api = {
     axios,
     getApiForEnvironment,
     getServerDocs,
@@ -611,3 +611,4 @@ export default {
     getKartonAnalysisStatus,
     resubmitKartonAnalysis,
 };
+export default api;

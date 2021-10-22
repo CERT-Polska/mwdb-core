@@ -37,9 +37,8 @@ class AttributePermissionsBox extends Component {
                 read: this.props.permissions[groupName].read,
                 set: this.props.permissions[groupName].set,
             };
-        changedPermissions[groupName][permission] = !changedPermissions[
-            groupName
-        ][permission];
+        changedPermissions[groupName][permission] =
+            !changedPermissions[groupName][permission];
         this.setState({ changedPermissions });
     }
 
@@ -98,8 +97,7 @@ class AttributePermissionsBox extends Component {
                                                         ) ? (
                                                             <span
                                                                 style={{
-                                                                    color:
-                                                                        "red",
+                                                                    color: "red",
                                                                 }}
                                                             >
                                                                 *
@@ -139,8 +137,7 @@ class AttributePermissionsBox extends Component {
                                                         ) ? (
                                                             <span
                                                                 style={{
-                                                                    color:
-                                                                        "red",
+                                                                    color: "red",
                                                                 }}
                                                             >
                                                                 *
@@ -243,7 +240,7 @@ class AttributePermissionsBox extends Component {
 
 export function AttributesPermissions({ attribute, getAttribute }) {
     const { metakey } = useParams();
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const [allGroups, setAllGroups] = useState([]);
     const [permissions, setPermissions] = useState({});
     const [modalSpec, setModalSpec] = useState({});
@@ -254,7 +251,7 @@ export function AttributesPermissions({ attribute, getAttribute }) {
             await api.setMetakeyPermission(attribute.key, group, false, false);
             getAttribute();
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
@@ -269,7 +266,7 @@ export function AttributesPermissions({ attribute, getAttribute }) {
             getAttribute();
             setModalOpen(false);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
@@ -289,7 +286,7 @@ export function AttributesPermissions({ attribute, getAttribute }) {
             getAttribute();
             setModalOpen(false);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
@@ -303,16 +300,16 @@ export function AttributesPermissions({ attribute, getAttribute }) {
         });
     }
 
-    async function updateAllGroups() {
+    const updateAllGroups = useCallback(async () => {
         try {
-            let response = await api.getGroups();
+            const response = await api.getGroups();
             setAllGroups(response.data.groups);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
-    }
+    }, [setAlert]);
 
-    async function updateAttributePermissions() {
+    const updateAttributePermissions = useCallback(async () => {
         let response = await api.getMetakeyDefinition(metakey);
         let attributePermissions = {};
         for (let permission of response.data.permissions)
@@ -321,14 +318,17 @@ export function AttributesPermissions({ attribute, getAttribute }) {
                 set: permission["can_set"],
             };
         setPermissions(attributePermissions);
-    }
+    }, [metakey]);
 
     function handleUpdate() {
         updateAllGroups();
         updateAttributePermissions();
     }
 
-    const getUpdate = useCallback(handleUpdate, [attribute]);
+    const getUpdate = useCallback(handleUpdate, [
+        updateAllGroups,
+        updateAttributePermissions,
+    ]);
 
     useEffect(() => {
         getUpdate();

@@ -23,7 +23,7 @@ function AttributeItem({ name, label, description, template }) {
 }
 
 export default function AttributesList() {
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const [attributes, setAttributes] = useState([]);
     const [activePage, setActivePage] = useState(1);
     const [attributeFilter, setAttributeFilter] = useState("");
@@ -38,11 +38,11 @@ export default function AttributesList() {
                 }))
             );
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
-    const getAttributes = useCallback(updateAttributes, []);
+    const getAttributes = useCallback(updateAttributes, [setAlert]);
 
     useEffect(() => {
         getAttributes();

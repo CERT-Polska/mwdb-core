@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { Alert, getErrorMessage } from "./ErrorBoundary";
 import { Extendable } from "../extensions";
@@ -17,38 +17,41 @@ function ViewAlert(props) {
 export function useViewAlert() {
     const history = useHistory();
 
-    function setAlert({ success, error: rawError, warning, state }) {
-        const { pathname, search } = history.location;
-        const error = rawError && getErrorMessage(rawError);
-        history.replace(
-            { pathname, search },
-            {
-                ...history.location.state,
+    const setAlert = useCallback(
+        ({ success, error: rawError, warning, state }) => {
+            const { pathname, search } = history.location;
+            const error = rawError && getErrorMessage(rawError);
+            history.replace(
+                { pathname, search },
+                {
+                    ...history.location.state,
+                    ...(state || {}),
+                    success,
+                    error,
+                    warning,
+                }
+            );
+        },
+        [history]
+    );
+
+    const redirectToAlert = useCallback(
+        ({ success, error: rawError, warning, target, state }) => {
+            const error = rawError && getErrorMessage(rawError);
+            history.push(target, {
                 ...(state || {}),
                 success,
                 error,
                 warning,
-            }
-        );
-    }
+            });
+        },
+        [history]
+    );
 
-    function redirectToAlert({
-        success,
-        error: rawError,
-        warning,
-        target,
-        state,
-    }) {
-        const error = rawError && getErrorMessage(rawError);
-        history.push(target, {
-            ...(state || {}),
-            success,
-            error,
-            warning,
-        });
-    }
-
-    return { setAlert, redirectToAlert };
+    return useMemo(
+        () => ({ setAlert, redirectToAlert }),
+        [setAlert, redirectToAlert]
+    );
 }
 
 export default function View(props) {

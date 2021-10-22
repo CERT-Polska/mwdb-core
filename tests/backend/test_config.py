@@ -40,7 +40,6 @@ def test_adding_config_with_inblobs(admin_session):
 def test_config_search_by_tags_transactional_added(admin_session):
     test = admin_session
 
-    # blob_name = rand_string(15)
     config_json = {
         "cnc": [1, 2, 3],
         "raw_cfg": {
@@ -78,3 +77,63 @@ def test_config_search_by_tags_transactional_added(admin_session):
 
     assert config_search_1["id"] == config["id"]
     assert config_search_2["id"] == config["id"]
+
+
+def test_config_search_multi(admin_session):
+    test = admin_session
+
+    config_json_insert_1 = rand_string(15)
+    config_json_1 = {
+        "cnc": [1, 2, config_json_insert_1],
+        "raw_cfg": {
+            "in-blob": {
+                "blob_name": "In blob name",
+                "blob_type": "Blob type",
+                "content": "Blob content"
+            }
+        },
+        "peers": {
+            "in-blob": {
+                "blob_name": "Peers blob name",
+                "blob_type": "Peers blob type",
+                "content": "Hello"
+            }
+        }
+    }
+
+    config_json_insert_2 = rand_string(15)
+    config_json_2 = {
+        "cnc": [1, 3, config_json_insert_2],
+        "raw_cfg": {
+            "in-blob": {
+                "blob_name": "In blob name",
+                "blob_type": "Blob type",
+                "content": "Blob content"
+            }
+        },
+        "peers": {
+            "in-blob": {
+                "blob_name": "Peers blob name",
+                "blob_type": "Peers blob type",
+                "content": "Hello world"
+            }
+        }
+    }
+
+    config_1 = test.add_config(None, "malwarex", config_json_1)
+    config_2 = test.add_config(None, "malwarex", config_json_2)
+
+    # config cfg and dhash search
+    query = f'config.multi:"{config_json_insert_1} {config_2["id"]}"'
+    found_objs = test.search(query)
+    assert len(found_objs) == 2
+
+    # only cfg content search in multi field
+    query = f'config.multi:"{config_json_insert_1}"'
+    found_obj = test.search(query)[0]
+    assert found_obj["id"] == config_1["id"]
+
+    # only blog dhash search in multi field
+    query = f'config.multi:"{config_2["id"]}"'
+    found_obj = test.search(query)[0]
+    assert config_2["id"] == found_obj["id"]

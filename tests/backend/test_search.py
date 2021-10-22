@@ -428,3 +428,28 @@ def test_uploader_query(admin_session):
         Bob.session.search(f"uploader:{Alice.identity}")
     ]
     assert sorted(results) == sorted([FileC.dhash])
+
+def test_search_multi(admin_session):
+    test = admin_session
+
+    # multi hashes search
+    samples = []
+    for i in range(5):
+        filename = base62uuid()
+        file_content = base62uuid()
+        sample = test.add_sample(filename, file_content)
+        samples.append(sample)
+
+    query = f'file.multi:"{samples[0].get("sha512")} {samples[1].get("md5")} {samples[2].get("sha1")} {samples[3].get("sha256")} {samples[4].get("crc32")}"'
+    found_objs = test.search(query)
+    assert len(found_objs) == 5
+
+    # incorrect hash check
+    incorrect_hash = samples[0].get("sha512")[:-2]
+    with ShouldRaise(status_code=400):
+        found_objs = test.search(f'file.multi:"{incorrect_hash}"')
+
+    # wildcard in hash
+    wildcard_hash = samples[0].get("sha512")[:-100] + "*"
+    with ShouldRaise(status_code=400):
+        found_objs = test.search(f'file.multi:"{wildcard_hash}"')

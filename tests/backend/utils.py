@@ -297,7 +297,7 @@ class MwdbTest(object):
 
     def add_attribute(self, identifier, key, value):
         res = self.session.post(
-            self.mwdb_url + "/object/" + identifier + "/meta",
+            self.mwdb_url + "/object/" + identifier + "/attribute",
             json={"key": key, "value": value},
         )
         res.raise_for_status()
@@ -305,7 +305,7 @@ class MwdbTest(object):
 
     def get_attributes(self, identifier, show_hidden=False):
         res = self.session.get(
-            self.mwdb_url + "/object/" + identifier + "/meta",
+            self.mwdb_url + "/object/" + identifier + "/attribute",
             params={"hidden": int(show_hidden)},
         )
         res.raise_for_status()
@@ -313,11 +313,12 @@ class MwdbTest(object):
 
     def add_attribute_definition(self, key, template, hidden=False):
         res = self.session.post(
-            self.mwdb_url + "/meta/manage/" + key,
+            self.mwdb_url + "/attribute",
             json={
+                "key": key,
                 "label": "",
                 "description": "",
-                "template": template,
+                "url_template": template,
                 "hidden": hidden,
             },
         )
@@ -325,42 +326,42 @@ class MwdbTest(object):
         return res.json()
 
     def get_attribute_definitions(self):
-        res = self.session.get(self.mwdb_url + "/meta/manage")
+        res = self.session.get(self.mwdb_url + "/attribute", params={"access": "manage"})
         res.raise_for_status()
         return res.json()
 
     def get_attribute(self, key):
-        res = self.session.get(self.mwdb_url + "/meta/manage/" + key)
+        res = self.session.get(self.mwdb_url + "/attribute/" + key)
         res.raise_for_status()
         return res.json()
 
     def remove_attribute_definition(self, key):
-        res = self.session.delete(self.mwdb_url + "/meta/manage/" + key)
+        res = self.session.delete(self.mwdb_url + "/attribute/" + key)
         res.raise_for_status()
         return res
 
     def add_attribute_permission(self, key, group, can_read, can_set):
         res = self.session.put(
-            self.mwdb_url + "/meta/manage/" + key + "/permissions/" + group,
-            json={"can_read": can_read, "can_set": can_set},
+            self.mwdb_url + "/attribute/" + key + "/permissions",
+            json={"can_read": can_read, "can_set": can_set, "group_name": group},
         )
         res.raise_for_status()
         return res.json()
 
     def remove_attribute_permission(self, key, group):
         res = self.session.delete(
-            self.mwdb_url + "/meta/manage/" + key + "/permissions/" + group
+            self.mwdb_url + "/attribute/" + key + "/permissions", params={"group_name": group}
         )
         res.raise_for_status()
         return res.json()
 
     def get_readable_attributes(self):
-        res = self.session.get(self.mwdb_url + "/meta/list/read")
+        res = self.session.get(self.mwdb_url + "/attribute", params={"access": "read"})
         res.raise_for_status()
         return res.json()
 
     def get_settable_attributes(self):
-        res = self.session.get(self.mwdb_url + "/meta/list/set")
+        res = self.session.get(self.mwdb_url + "/attribute", params={"access": "set"})
         res.raise_for_status()
         return res.json()
 

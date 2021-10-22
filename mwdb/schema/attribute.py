@@ -85,7 +85,9 @@ class AttributeDefinitionItemResponseSchema(AttributeKeySchema):
 
 
 class AttributeDefinitionListResponseSchema(Schema):
-    attribute_definitions = fields.Nested(AttributeItemResponseSchema, many=True)
+    attribute_definitions = fields.Nested(
+        AttributeDefinitionItemResponseSchema, many=True
+    )
 
 
 class AttributePermissionItemResponseSchema(Schema):

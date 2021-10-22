@@ -288,12 +288,6 @@ class AttributeDefinitionListResource(Resource):
             - bearerAuth: []
         tags:
             - attribute
-        parameters:
-            - in: path
-              name: key
-              schema:
-                type: string
-              description: Attribute key
         requestBody:
             description: Attribute key definition
             content:

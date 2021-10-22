@@ -74,31 +74,34 @@ export default function TagBox() {
     const [modalIsOpen, setModalIsOpen] = useState(null);
     const [tagToRemove, setTagToRemove] = useState(false);
 
+    const objectId = context.object.id;
+    const setObjectError = context.setObjectError;
+
     async function updateTags() {
         try {
-            let response = await api.getObjectTags(context.object.id);
+            let response = await api.getObjectTags(objectId);
             let tags = response.data;
             setTags(tags);
         } catch (error) {
-            context.setObjectError(error);
+            setObjectError(error);
         }
     }
 
     async function handleTagSubmit(tag) {
         try {
-            await api.addObjectTag(context.object.id, tag);
+            await api.addObjectTag(objectId, tag);
             updateTags();
         } catch (error) {
-            context.setObjectError(error);
+            setObjectError(error);
         }
     }
 
     async function tagRemove(tag) {
         try {
-            await api.removeObjectTag(context.object.id, tag);
+            await api.removeObjectTag(objectId, tag);
             updateTags();
         } catch (error) {
-            context.setObjectError(error);
+            setObjectError(error);
         } finally {
             setModalIsOpen(false);
         }
@@ -109,7 +112,7 @@ export default function TagBox() {
         setTagToRemove(tag);
     }
 
-    const getTags = useCallback(updateTags, [context.object.id]);
+    const getTags = useCallback(updateTags, [api, objectId, setObjectError]);
 
     useEffect(() => {
         getTags();

@@ -100,23 +100,26 @@ function SharesBox() {
     const [shareReceiver, setShareReceiver] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const objectId = context.object.id;
+    const setObjectError = context.setObjectError;
+
     async function updateShares() {
         try {
-            let response = await api.getObjectShares(context.object.id);
+            let response = await api.getObjectShares(objectId);
             setGroups(response.data.groups);
             setItems(response.data.shares);
         } catch (error) {
-            context.setObjectError(error);
+            setObjectError(error);
         }
     }
 
     async function doShare(group) {
         try {
             setIsModalOpen(false);
-            await api.shareObjectWith(context.object.id, group);
+            await api.shareObjectWith(objectId, group);
             updateShares();
         } catch (error) {
-            context.setObjectError(error);
+            setObjectError(error);
         }
     }
 
@@ -125,7 +128,11 @@ function SharesBox() {
         setShareReceiver(group);
     }
 
-    const getShares = useCallback(updateShares, [context.object.id]);
+    const getShares = useCallback(updateShares, [
+        api,
+        objectId,
+        setObjectError,
+    ]);
 
     useEffect(() => {
         getShares();

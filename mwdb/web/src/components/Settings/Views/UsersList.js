@@ -70,7 +70,7 @@ function UserItem(props) {
 }
 
 export default function UsersList() {
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const [users, setUsers] = useState([]);
     const [activePage, setActivePage] = useState(1);
     const [userFilter, setUserFilter] = useState("");
@@ -80,11 +80,11 @@ export default function UsersList() {
             const response = await api.getUsers();
             setUsers(response.data["users"]);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
-    const getUsers = useCallback(updateUsers, []);
+    const getUsers = useCallback(updateUsers, [setAlert]);
 
     useEffect(() => {
         getUsers();

@@ -2,11 +2,12 @@ import React from "react";
 import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 
 export default function RecentInnerRow(props) {
-    const classNames = (props.narrowOnly
-        ? ["d-lg-none", "d-flex"]
-        : props.wideOnly
-        ? ["d-none", "d-lg-flex"]
-        : ["d-flex"]
+    const classNames = (
+        props.narrowOnly
+            ? ["d-lg-none", "d-flex"]
+            : props.wideOnly
+            ? ["d-none", "d-lg-flex"]
+            : ["d-flex"]
     ).concat(props.copyable ? ["flickerable"] : []);
     return (
         <div className={classNames.join(" ")}>

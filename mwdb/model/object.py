@@ -728,6 +728,7 @@ class Object(db.Model):
     ):
         """
         Gets all object attributes
+
         :param as_dict: |
             Return dict object instead of list of Attribute objects (default: False)
         :param check_permissions: |
@@ -780,8 +781,10 @@ class Object(db.Model):
             dict_attributes[attribute.key].append(attribute.value)
         return dict_attributes
 
-    def add_attribute(self, key, value, commit=True, check_permissions=True):
-        if key == "karton":
+    def add_attribute(
+        self, key, value, commit=True, check_permissions=True, include_karton=True
+    ):
+        if include_karton and key == "karton":
             karton_id = UUID(value)
 
             if check_permissions and not g.auth_user.has_rights(

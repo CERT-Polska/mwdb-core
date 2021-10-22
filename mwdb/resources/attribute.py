@@ -89,7 +89,9 @@ class AttributeListResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        attributes = db_object.get_attributes(show_hidden=show_hidden)
+        attributes = db_object.get_attributes(
+            show_hidden=show_hidden, show_karton=False
+        )
         schema = AttributeListResponseSchema()
         return schema.dump({"attributes": attributes})
 
@@ -147,7 +149,7 @@ class AttributeListResource(Resource):
 
         key = obj["key"]
         value = obj["value"]
-        is_new = db_object.add_attribute(key, value)
+        is_new = db_object.add_attribute(key, value, include_karton=False)
         if is_new is None:
             raise NotFound(
                 f"Attribute '{key}' is not defined or you have "
@@ -156,7 +158,7 @@ class AttributeListResource(Resource):
 
         db.session.commit()
         db.session.refresh(db_object)
-        attributes = db_object.get_attributes()
+        attributes = db_object.get_attributes(show_karton=False)
         schema = AttributeListResponseSchema()
         return schema.dump({"attributes": attributes})
 

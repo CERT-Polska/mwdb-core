@@ -206,7 +206,7 @@ class MwdbTest(object):
         return res.json()
 
     def add_sample(
-        self, filename=None, content=None, parent=None, metakeys=None, upload_as=None, tags=None
+        self, filename=None, content=None, parent=None, attributes=None, upload_as=None, tags=None
     ):
         if filename is None:
             filename = str(uuid.uuid4())
@@ -223,7 +223,7 @@ class MwdbTest(object):
                     json.dumps(
                         {
                             "parent": parent,
-                            "metakeys": metakeys or [],
+                            "attributes": attributes or [],
                             "upload_as": upload_as or "*",
                             "tags": tags or [],
                         }

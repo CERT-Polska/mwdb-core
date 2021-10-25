@@ -26,7 +26,7 @@ function PluginItems(props) {
 
 export default function SettingsOverview() {
     const config = useContext(ConfigContext);
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const [extendedInfo, setExtendedInfo] = useState();
 
     async function updateExtendedInfo() {
@@ -34,7 +34,7 @@ export default function SettingsOverview() {
             const response = await api.getServerAdminInfo();
             setExtendedInfo(response.data);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
@@ -46,7 +46,7 @@ export default function SettingsOverview() {
         );
     }
 
-    const getExtendedInfo = useCallback(updateExtendedInfo, []);
+    const getExtendedInfo = useCallback(updateExtendedInfo, [setAlert]);
 
     useEffect(() => {
         getExtendedInfo();

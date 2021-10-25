@@ -20,8 +20,7 @@ export function ProtectedRoute({ children, condition, ...props }) {
                         pathname: "/login",
                         state: {
                             prevLocation: location,
-                            error:
-                                "You need to authenticate before accessing this page",
+                            error: "You need to authenticate before accessing this page",
                         },
                     }}
                 />

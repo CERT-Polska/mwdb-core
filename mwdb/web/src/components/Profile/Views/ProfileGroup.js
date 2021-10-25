@@ -21,7 +21,7 @@ function ProfileItem(props) {
 
 export default function ProfileGroup({ profile }) {
     const auth = useContext(AuthContext);
-    const viewAlert = useViewAlert();
+    const { redirectToAlert } = useViewAlert();
     const { group: groupName } = useParams();
     const [workspaces, setWorkspaces] = useState();
 
@@ -30,14 +30,14 @@ export default function ProfileGroup({ profile }) {
             const response = await api.authGroups();
             setWorkspaces(response.data["groups"]);
         } catch (error) {
-            viewAlert.redirectToAlert({
+            redirectToAlert({
                 target: "/profile",
                 error,
             });
         }
     }
 
-    const getWorkspaces = useCallback(updateWorkspaces, []);
+    const getWorkspaces = useCallback(updateWorkspaces, [redirectToAlert]);
 
     useEffect(() => {
         getWorkspaces();

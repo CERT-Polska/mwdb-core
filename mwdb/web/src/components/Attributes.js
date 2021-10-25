@@ -140,11 +140,13 @@ function ObjectAttributes(props) {
     const context = useContext(ObjectContext);
 
     const [attributes, setAttributes] = useState([]);
+    const objectId = context.object.id;
+    const setObjectError = context.setObjectError;
 
     async function updateAttributes() {
-        if (typeof context.object.id === "undefined") return;
+        if (typeof objectId === "undefined") return;
         try {
-            let response = await api.getObjectMetakeys(context.object.id);
+            let response = await api.getObjectMetakeys(objectId);
             let aggregated = response.data.metakeys.reduce((agg, m) => {
                 let label = m.label || m.key;
                 return {
@@ -154,21 +156,25 @@ function ObjectAttributes(props) {
             }, {});
             setAttributes(aggregated);
         } catch (error) {
-            context.setObjectError(error);
+            setObjectError(error);
         }
     }
 
     async function addAttribute(key, value) {
         try {
-            await api.addObjectMetakey(context.object.id, key, value);
+            await api.addObjectMetakey(objectId, key, value);
             await updateAttributes();
             props.onRequestModalClose();
         } catch (error) {
-            context.setObjectError(error);
+            setObjectError(error);
         }
     }
 
-    const getAttributes = useCallback(updateAttributes, [context.object.id]);
+    const getAttributes = useCallback(updateAttributes, [
+        objectId,
+        api,
+        setObjectError,
+    ]);
 
     useEffect(() => {
         getAttributes();

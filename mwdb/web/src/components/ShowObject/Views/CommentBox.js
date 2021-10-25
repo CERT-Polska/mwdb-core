@@ -121,32 +121,35 @@ function CommentBox() {
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [commentToRemove, setCommentToRemove] = useState("");
 
+    const objectId = context.object.id;
+    const setObjectError = context.setObjectError;
+
     async function updateComments() {
         try {
-            let response = await api.getObjectComments(context.object.id);
+            let response = await api.getObjectComments(objectId);
             setComments(response.data);
         } catch (error) {
-            context.setObjectError(error);
+            setObjectError(error);
         }
     }
 
     async function submitComment(comment) {
         if (comment) {
             try {
-                await api.addObjectComment(context.object.id, comment);
+                await api.addObjectComment(objectId, comment);
                 updateComments();
             } catch (error) {
-                context.setObjectError(error);
+                setObjectError(error);
             }
         }
     }
 
     async function removeComment(comment_id) {
         try {
-            await api.removeObjectComment(context.object.id, comment_id);
+            await api.removeObjectComment(objectId, comment_id);
             updateComments();
         } catch (error) {
-            context.setObjectError(error);
+            setObjectError(error);
         } finally {
             setDeleteModalOpen(false);
         }
@@ -157,7 +160,11 @@ function CommentBox() {
         setCommentToRemove(comment_id);
     }
 
-    const getComments = useCallback(updateComments, [context.object.id]);
+    const getComments = useCallback(updateComments, [
+        api,
+        objectId,
+        setObjectError,
+    ]);
 
     useEffect(() => {
         getComments();

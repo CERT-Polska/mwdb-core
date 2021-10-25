@@ -21,9 +21,8 @@ function RelationsBox(props) {
     const context = useContext(ObjectContext);
     const remotePath = useRemotePath();
     const [isAttributeAddModalOpen, setAttributeAddModalOpen] = useState(false);
-    const [isAttributeDeleteModalOpen, setAttributeDeleteModalOpen] = useState(
-        false
-    );
+    const [isAttributeDeleteModalOpen, setAttributeDeleteModalOpen] =
+        useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
     const [relationToRemove, setRelationToRemove] = useState({});
     const [modalError, setModalError] = useState("");

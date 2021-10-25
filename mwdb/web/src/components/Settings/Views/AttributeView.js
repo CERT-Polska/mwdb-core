@@ -7,7 +7,7 @@ import { AttributesPermissions } from "./AttributePermissions";
 
 export default function AttributeView() {
     const location = useLocation();
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const { metakey } = useParams();
     const [attribute, setAttribute] = useState({});
 
@@ -16,11 +16,11 @@ export default function AttributeView() {
             let response = await api.getMetakeyDefinition(metakey);
             setAttribute(response.data);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
-    const getAttribute = useCallback(updateAttribute, [metakey]);
+    const getAttribute = useCallback(updateAttribute, [metakey, setAlert]);
 
     useEffect(() => {
         getAttribute();

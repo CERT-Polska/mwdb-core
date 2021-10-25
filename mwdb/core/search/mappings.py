@@ -34,7 +34,7 @@ from .fields import (
 object_mapping: Dict[str, Type[Object]] = {
     "file": File,
     "object": Object,
-    "static": Config,
+    "static": Config,  # legacy
     "config": Config,
     "blob": TextBlob,
 }
@@ -44,7 +44,8 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "dhash": StringField(Object.dhash),
         "tag": ListField(Object.tags, Tag.tag),
         "comment": ListField(Object.comments, Comment.comment),
-        "meta": AttributeField(Object.attributes),
+        "meta": AttributeField(Object.attributes),  # legacy
+        "attribute": AttributeField(Object.attributes),
         "shared": ShareField(Object.shares),
         "uploader": UploaderField(Object.related_shares),
         "upload_time": DatetimeField(Object.upload_time),

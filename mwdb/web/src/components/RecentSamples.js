@@ -118,11 +118,13 @@ export function RecentFileHeader() {
     );
 }
 
-export default (props) => (
-    <RecentView
-        type="file"
-        rowComponent={RecentFileRow}
-        headerComponent={RecentFileHeader}
-        {...props}
-    />
-);
+export default function RecentSamples(props) {
+    return (
+        <RecentView
+            type="file"
+            rowComponent={RecentFileRow}
+            headerComponent={RecentFileHeader}
+            {...props}
+        />
+    );
+}

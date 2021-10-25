@@ -728,6 +728,7 @@ class Object(db.Model):
     ):
         """
         Gets all object attributes
+
         :param as_dict: |
             Return dict object instead of list of Attribute objects (default: False)
         :param check_permissions: |
@@ -780,8 +781,10 @@ class Object(db.Model):
             dict_attributes[attribute.key].append(attribute.value)
         return dict_attributes
 
-    def add_attribute(self, key, value, commit=True, check_permissions=True):
-        if key == "karton":
+    def add_attribute(
+        self, key, value, commit=True, check_permissions=True, include_karton=True
+    ):
+        if include_karton and key == "karton":
             karton_id = UUID(value)
 
             if check_permissions and not g.auth_user.has_rights(
@@ -814,6 +817,28 @@ class Object(db.Model):
         if commit:
             db.session.commit()
         return is_new
+
+    def remove_attribute_by_id(self, attribute_id, check_permissions=True):
+        attribute_query = Attribute.get_by_id(self.id, attribute_id)
+
+        if check_permissions:
+            attribute_query = attribute_query.filter(
+                Attribute.key.in_(
+                    db.session.query(AttributePermission.key)
+                    .filter(AttributePermission.can_set == true())
+                    .filter(g.auth_user.is_member(AttributePermission.group_id))
+                )
+            )
+
+        try:
+            rows = attribute_query.delete(synchronize_session="fetch")
+            db.session.commit()
+            return rows > 0
+        except IntegrityError:
+            db.session.refresh(self)
+            if attribute_query.first():
+                raise
+        return True
 
     def remove_attribute(self, key, value, check_permissions=True):
         attribute_query = db.session.query(Attribute).filter(

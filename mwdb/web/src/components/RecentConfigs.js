@@ -118,12 +118,14 @@ export function RecentConfigHeader() {
     );
 }
 
-export default (props) => (
-    <RecentView
-        type="config"
-        rowComponent={RecentConfigRow}
-        headerComponent={RecentConfigHeader}
-        dhashOnly
-        {...props}
-    />
-);
+export default function RecentConfigs(props) {
+    return (
+        <RecentView
+            type="config"
+            rowComponent={RecentConfigRow}
+            headerComponent={RecentConfigHeader}
+            dhashOnly
+            {...props}
+        />
+    );
+}

@@ -58,6 +58,31 @@ def get_term_value(node: Term) -> str:
         return node.unescaped_value
 
 
+def make_jsonpath(field_path: List[str]) -> str:
+    """
+    Makes jsonpath from field path
+    key.array*.child => $."key"."array"[*]."child"
+    """
+
+    def jsonpath_escape(field):
+        """Escapes field to be correctly represented in jsonpath"""
+        # Escape all unescaped double quotes
+        field = regex.sub(r'(?<!\\)(?:\\\\)*\K["]', '\\"', field)
+        # Find trailing non-escaped asterisks
+        asterisk_r = re.search(r"(?<!\\)(?:\\\\)*([*]+)$", field)
+        if not asterisk_r:
+            asterisks = ""
+        else:
+            asterisk_levels = len(asterisk_r.group(1))
+            field = field[:-asterisk_levels]
+            asterisks = asterisk_levels * "[*]"
+        # Unescape all escaped asterisks
+        field = regex.sub(r"(?<!\\)(?:\\\\)*\K(\\[*])", "*", field)
+        return f'"{field}"{asterisks}'
+
+    return ".".join(["$"] + [jsonpath_escape(field) for field in field_path])
+
+
 class BaseField:
     accepts_range = False
     accepts_subquery = False
@@ -218,15 +243,12 @@ class FavoritesField(BaseField):
 
 class AttributeField(BaseField):
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if len(remainder) > 1:
-            raise FieldNotQueryableException(
-                f"Attribute doesn't have subfields: {'.'.join(remainder[1:])}"
-            )
-
         if remainder:
             attribute_key = remainder[0]
         else:
-            raise UnsupportedGrammarException("Missing attribute key (meta.<key>:)")
+            raise UnsupportedGrammarException(
+                "Missing attribute key (attribute.<key>:)"
+            )
 
         attribute_definition = AttributeDefinition.query_for_read(
             key=attribute_key, include_hidden=True
@@ -245,12 +267,22 @@ class AttributeField(BaseField):
             )
 
         value = get_term_value(expression)
-        attribute_value = Attribute.value[()].astext
+        json_path = make_jsonpath(remainder[1:])
+        # Make aliased function call
+        json_elements = func.jsonb_path_query(Attribute.value, json_path).alias(
+            "json_element"
+        )
+        # Use #>>'{}' to extract value as text
+        json_element = column("json_element").operate(
+            JSONPATH_ASTEXT, "{}", result_type=Text
+        )
         if expression.has_wildcard():
-            value_condition = attribute_value.like(value)
+            condition = json_element.like(value)
         else:
-            value_condition = attribute_value == value
-
+            condition = json_element == value
+        value_condition = exists(
+            select([1]).select_from(json_elements).where(condition)
+        )
         return self.column.any(and_(Attribute.key == attribute_key, value_condition))
 
 
@@ -337,23 +369,6 @@ class UploaderField(BaseField):
 class JSONField(BaseField):
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
         value = get_term_value(expression)
-
-        def jsonpath_escape(field):
-            """Escapes field to be correctly represented in jsonpath"""
-            # Escape all unescaped double quotes
-            field = regex.sub(r'(?<!\\)(?:\\\\)*\K["]', '\\"', field)
-            # Find trailing non-escaped asterisks
-            asterisk_r = re.search(r"(?<!\\)(?:\\\\)*([*]+)$", field)
-            if not asterisk_r:
-                asterisks = ""
-            else:
-                asterisk_levels = len(asterisk_r.group(1))
-                field = field[:-asterisk_levels]
-                asterisks = asterisk_levels * "[*]"
-            # Unescape all escaped asterisks
-            field = regex.sub(r"(?<!\\)(?:\\\\)*\K(\\[*])", "*", field)
-            return f'"{field}"{asterisks}'
-
         """
         Target query:
             select cfg from static_config
@@ -364,7 +379,7 @@ class JSONField(BaseField):
                 where json_element  #>> '{}' like '2'
             );
         """
-        json_path = ".".join(["$"] + [jsonpath_escape(field) for field in remainder])
+        json_path = make_jsonpath(remainder)
         # Make aliased function call
         json_elements = func.jsonb_path_query(self.column, json_path).alias(
             "json_element"

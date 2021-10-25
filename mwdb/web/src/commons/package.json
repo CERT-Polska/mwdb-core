@@ -2,7 +2,7 @@
     "name": "@mwdb-web/commons",
     "main": "index.js",
     "private": true,
-    "version": "2.5.0",
+    "version": "2.6.0",
     "peerDependencies": {
         "@fortawesome/react-fontawesome": "*",
         "bootstrap-select": "*",

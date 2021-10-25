@@ -16,6 +16,13 @@ from mwdb.core.util import token_hex
 from mwdb.model import APIKey, User, db
 from mwdb.paths import migrations_dir
 from mwdb.resources.api_key import APIKeyIssueResource, APIKeyResource
+from mwdb.resources.attribute import (
+    AttributeDefinitionListResource,
+    AttributeDefinitionResource,
+    AttributeListResource,
+    AttributePermissionResource,
+    AttributeResource,
+)
 from mwdb.resources.auth import (
     AuthGroupListResource,
     ChangePasswordResource,
@@ -295,6 +302,20 @@ api.add_resource(
 api.add_resource(QuickQueryItemResource, "/quick_query/<int:id>")
 
 # Attribute endpoints
+api.add_resource(
+    AttributeListResource,
+    "/<any(file, config, blob, object):type>/<hash64:identifier>/attribute",
+)
+api.add_resource(
+    AttributeResource,
+    "/<any(file, config, blob, object):type>/<hash64:identifier>"
+    "/attribute/<int:attribute_id>",
+)
+api.add_resource(AttributeDefinitionListResource, "/attribute")
+api.add_resource(AttributeDefinitionResource, "/attribute/<key>")
+api.add_resource(AttributePermissionResource, "/attribute/<key>/permissions")
+
+# Attribute (metakey) deprecated endpoints
 api.add_resource(MetakeyListDefinitionResource, "/meta/list/<any(read, set):access>")
 api.add_resource(
     MetakeyResource, "/<any(file, config, blob, object):type>/<hash64:identifier>/meta"

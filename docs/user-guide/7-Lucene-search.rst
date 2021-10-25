@@ -364,6 +364,52 @@ Nested searches can be performed as well. If you want to find object which is pa
 
    child:(tag:emotet AND child:(config.family:emotet))
 
+Multi field (\ ``multi:``\ )
+------------------------------------------------------------
+
+Search engine supports ``multi:`` special field that is useful for filtering out objects using multiple
+type of object attributes.
+
+Depending on type of object, we can use field ``multi:`` applying various object attributes separated by spaces.
+Types of attributes are automatically recognised.
+Below allowable attributes were listed for different type of objects, which can be used in building query.
+
+* File (sample)
+
+  * all hashes values of file content
+
+* Config
+
+  * hash sha256 values - dhash
+  * all or extract of JSON configuration content
+
+* Blob
+
+  * hash sha256 values - dhash
+  * all or extract of Blob content
+
+
+If you want to search for samples that have 0cb988d042a7f28dd5fe2b55b3f5ac7a ``md5`` value or
+3b0ee981 ``crc32`` value use below query.
+
+.. code-block::
+
+   multi:"0cb988d042a7f28dd5fe2b55b3f5ac7a 3b0ee981"
+
+If you want to search for configs that have JSON configuration content which contain strings "abcd" or "xyz" or
+
+``sha256`` value eb1c78d4994f7a107f78dec529988900e3601852ae0bfdefb3e15967c6d8f127 - use below query
+
+.. code-block::
+
+   multi:"abcd xyz eb1c78d4994f7a107f78dec529988900e3601852ae0bfdefb3e15967c6d8f127"
+
+.. warning::
+
+    Multi-query terms separated by spaces must be surrounded by double quotes.
+
+    Wildcards are not allowed for field ``multi:``. They are automatically used for Config JSON configuration content and Blob content.
+
 Quick queries
 -------------
 

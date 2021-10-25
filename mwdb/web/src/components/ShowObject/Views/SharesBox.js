@@ -1,57 +1,99 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
+import { first, isEqual } from "lodash";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import {
-    RefString,
     DateString,
     ConfirmationModal,
     Autocomplete,
+    ShareReasonString,
 } from "@mwdb-web/commons/ui";
 
-function ShareItem(props) {
-    const context = useContext(ObjectContext);
+function groupShares(shares) {
+    function timeCompare(a, b) {
+        const a_time = Date.parse(a.access_time);
+        const b_time = Date.parse(b.access_time);
+        // The same dhash order by time
+        if (a_time > b_time) return 1;
+        if (a_time < b_time) return -1;
+        return 0;
+    }
+    // Sort by time
+    const shares_by_time = shares.sort(timeCompare);
+    // Group by reason
+    const shares_by_reason = {};
+    shares_by_time.forEach((share) => {
+        const {
+            related_object_dhash,
+            related_object_type,
+            related_user_login,
+            reason_type,
+        } = share;
+        const reasonKey = `${related_object_dhash} ${related_object_type} ${related_user_login} ${reason_type}`;
+        if (!shares_by_reason[reasonKey]) shares_by_reason[reasonKey] = [share];
+        else {
+            shares_by_reason[reasonKey].push(share);
+        }
+    });
+    // Sort by first reason time
+    return Object.values(shares_by_reason)
+        .map((shares) => {
+            const firstShare = shares[0];
+            const reason = {
+                reasonType: firstShare.reason_type,
+                relatedObjectDHash: firstShare.related_object_dhash,
+                relatedObjectType: firstShare.related_object_type,
+                relatedUserLogin: firstShare.related_user_login,
+            };
+            return { reason, shares, access_time: firstShare.access_time };
+        })
+        .sort(timeCompare);
+}
+
+function ShareGroupItem({ reason, shares }) {
     const remotePath = useRemotePath();
-    let fieldStyle = {
-        wordBreak: "break-all",
-    };
-    const isCurrentObject = props.related_object_dhash === context.object.id;
-    const isUploader = props.related_user_login === props.group_name;
-
-    if (!isCurrentObject) fieldStyle.backgroundColor = "lightgray";
-
     return (
-        <tr style={fieldStyle}>
-            <td>
-                <Link
-                    to={makeSearchLink(
-                        "uploader",
-                        props.group_name,
-                        false,
-                        `${remotePath}/search`
-                    )}
-                >
-                    {props.group_name}
-                </Link>
-                {isCurrentObject && isUploader && (
-                    <span className="ml-2">(uploader)</span>
-                )}
-            </td>
-            <td>
-                <RefString
-                    reason_type={props.reason_type}
-                    related_object_dhash={props.related_object_dhash}
-                    related_object_type={props.related_object_type}
-                    related_user_login={props.related_user_login}
-                />
-            </td>
-            <td>
-                <DateString date={props.access_time} />
-            </td>
-        </tr>
+        <table className="table table-striped table-bordered wrap-table share-table">
+            <thead>
+                <tr>
+                    <th colSpan="2">
+                        <ShareReasonString {...reason} />
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {shares.map((share) => {
+                    const isUploader =
+                        share.related_user_login === share.group_name;
+                    return (
+                        <tr className="d-flex">
+                            <td className="col-6">
+                                <Link
+                                    to={makeSearchLink(
+                                        "uploader",
+                                        share.group_name,
+                                        false,
+                                        `${remotePath}/search`
+                                    )}
+                                >
+                                    {share.group_name}
+                                </Link>
+                                {isUploader && (
+                                    <span className="ml-2">(uploader)</span>
+                                )}
+                            </td>
+                            <td className="col">
+                                <DateString date={share.access_time} />
+                            </td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
     );
 }
 
@@ -138,6 +180,8 @@ function SharesBox() {
         getShares();
     }, [getShares]);
 
+    const groupedItems = groupShares(items);
+
     return (
         <div className="card card-default">
             <ConfirmationModal
@@ -154,54 +198,9 @@ function SharesBox() {
                     <div className="align-self-center media-body">Shares</div>
                 </div>
             </div>
-            <table className="table table-striped table-bordered wrap-table">
-                <thead>
-                    <tr>
-                        <th key="group">Group name</th>
-                        <th key="reason">Reason</th>
-                        <th key="timestamp">Access time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {items
-                        .sort((a, b) => {
-                            if (
-                                a.related_object_dhash !==
-                                b.related_object_dhash
-                            ) {
-                                // Current object should be on top
-                                if (
-                                    b.related_object_dhash === context.object.id
-                                )
-                                    return 1;
-                                if (
-                                    a.related_object_dhash === context.object.id
-                                )
-                                    return -1;
-                                // Inherited entries order by dhash
-                                if (
-                                    a.related_object_dhash >
-                                    b.related_object_dhash
-                                )
-                                    return 1;
-                                if (
-                                    a.related_object_dhash <
-                                    b.related_object_dhash
-                                )
-                                    return -1;
-                            }
-                            const a_time = Date.parse(a.access_time);
-                            const b_time = Date.parse(b.access_time);
-                            // The same dhash order by time
-                            if (a_time > b_time) return 1;
-                            if (a_time < b_time) return -1;
-                            return 0;
-                        })
-                        .map((item, idx) => (
-                            <ShareItem key={idx} {...item} />
-                        ))}
-                </tbody>
-            </table>
+            {groupedItems.map((sharesGroup) => (
+                <ShareGroupItem {...sharesGroup} />
+            ))}
             {!api.remote ? (
                 <ShareForm onSubmit={handleShare} groups={groups} />
             ) : (

@@ -324,6 +324,26 @@ a.blob {
     list-style-position: inside;
 }
 
+.show-object {
+    padding: 0 1.25rem;
+}
+
+.show-object table.table {
+    margin-bottom: 0;
+}
+
+table.table.share-table {
+    border-top: none;
+}
+
+table.table.share-table thead th {
+    border-top: none;
+}
+
+.card {
+    margin-top: 0.75rem;
+}
+
 /* Navigation icons */
 .nav-item svg,
 .detailed-view-header svg {

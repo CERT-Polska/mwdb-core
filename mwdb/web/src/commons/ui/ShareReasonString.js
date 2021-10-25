@@ -4,30 +4,30 @@ import { useRemotePath } from "@mwdb-web/commons/remotes";
 import ObjectLink from "./ObjectLink";
 import { makeSearchLink } from "../helpers";
 
-export default function RefString(props) {
+export default function ShareReasonString({
+    reasonType,
+    relatedObjectDHash,
+    relatedObjectType,
+    relatedUserLogin,
+}) {
     const remotePath = useRemotePath();
     const reasonText =
-        props.reason_type.charAt(0).toUpperCase() +
-        props.reason_type.slice(1).toLowerCase();
-    const objLink = props.related_object_dhash ? (
-        <ObjectLink
-            type={props.related_object_type}
-            id={props.related_object_dhash}
-            inline
-        />
+        reasonType.charAt(0).toUpperCase() + reasonType.slice(1).toLowerCase();
+    const objLink = relatedObjectDHash ? (
+        <ObjectLink type={relatedObjectType} id={relatedObjectDHash} inline />
     ) : (
         <span className="text-muted">(object deleted)</span>
     );
-    const userLink = props.related_user_login ? (
+    const userLink = relatedUserLogin ? (
         <Link
             to={makeSearchLink(
                 "uploader",
-                props.related_user_login,
+                relatedUserLogin,
                 false,
                 `${remotePath}/search`
             )}
         >
-            {props.related_user_login}
+            {relatedUserLogin}
         </Link>
     ) : (
         <span className="text-muted">(deleted)</span>
@@ -35,7 +35,7 @@ export default function RefString(props) {
 
     return (
         <div>
-            {reasonText} {objLink} by {userLink}
+            {reasonText} by {userLink}: {objLink}
         </div>
     );
 }

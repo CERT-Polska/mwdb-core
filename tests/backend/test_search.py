@@ -387,6 +387,9 @@ def test_search_upload_count(admin_session):
     found_samples = users_session.search(f'tag:{tag} AND file.upload_count:{{{len(test_users)} TO *]')
     assert len(found_samples) == 0
 
+    found_samples = users_session.search(f'tag:{tag} AND file.upload_count:[* TO {len(test_users)}}}')
+    assert len(found_samples) == 0
+
 
 def test_child_mixed(admin_session):
     test = admin_session

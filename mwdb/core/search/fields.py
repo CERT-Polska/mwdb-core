@@ -6,26 +6,13 @@ from typing import Any, List, Type, Union
 import regex
 from flask import g
 from luqum.tree import Range, Term
-from sqlalchemy import (
-    String,
-    Text,
-    and_,
-    cast,
-    column,
-    desc,
-    distinct,
-    exists,
-    func,
-    or_,
-    select,
-)
+from sqlalchemy import String, Text, and_, cast, column, exists, func, or_, select
 from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
     Attribute,
     AttributeDefinition,
-    File,
     Group,
     Member,
     Object,
@@ -488,45 +475,6 @@ class CommentAuthorField(BaseField):
         return self.column.any(self.value_column == value)
 
 
-class HotSamplesField(BaseField):
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field hot_samples doesn't have subfields: {'.'.join(remainder)}"
-            )
-        if expression.has_wildcard():
-            raise UnsupportedGrammarException(
-                "Wildcards are not allowed for hot_samples field"
-            )
-
-        value = get_term_value(expression)
-
-        try:
-            value = int(value)
-            if value <= 0:
-                raise ValueError
-        except ValueError:
-            raise UnsupportedGrammarException(
-                "Field hot_samples accepts only correct positive integer values"
-            )
-
-        hot_samples_ids = (
-            db.session.query(File.id)
-            .outerjoin(ObjectPermission, File.id == ObjectPermission.object_id)
-            .filter(ObjectPermission.reason_type == AccessType.ADDED)
-            .group_by(Object.id, File.id)
-            .order_by(
-                desc(func.count(distinct(ObjectPermission.related_user_id))),
-                File.file_name,
-            )
-            .limit(value)
-        )
-
-        hot_samples_ids = list(map(lambda x: x[0], hot_samples_ids))
-
-        return self.column.in_(hot_samples_ids)
-
-
 class UploadCountField(BaseField):
     accepts_range = True
 
@@ -544,7 +492,7 @@ class UploadCountField(BaseField):
             except ValueError:
                 raise UnsupportedGrammarException(
                     "Field upload_count accepts statements with "
-                    + "only correct positive integer values"
+                    "only correct positive integer values"
                 )
             return value
 

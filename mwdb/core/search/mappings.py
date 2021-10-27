@@ -53,6 +53,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "favorites": FavoritesField(Object.followers),
         "karton": UUIDField(Object.analyses, KartonAnalysis.id),
         "comment_author": CommentAuthorField(Object.comment_authors, User.login),
+        "upload_count": UploadCountField(Object.upload_count),
     },
     File.__name__: {
         "name": StringField(File.file_name),
@@ -64,7 +65,6 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "sha512": StringField(File.sha512),
         "ssdeep": StringField(File.ssdeep),
         "crc32": StringField(File.crc32),
-        "upload_count": UploadCountField(File.upload_count),
     },
     Config.__name__: {
         "type": StringField(Config.config_type),

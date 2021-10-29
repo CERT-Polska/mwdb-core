@@ -611,4 +611,3 @@ class MultiField(BaseField):
             )
         else:
             return condition
-

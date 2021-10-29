@@ -55,7 +55,7 @@ function ProfileNav() {
 
 export default function ProfileView() {
     const auth = useContext(AuthContext);
-    const viewAlert = useViewAlert();
+    const { redirectToAlert } = useViewAlert();
     const user = useParams().user || auth.user.login;
     const [profile, setProfile] = useState();
 
@@ -64,14 +64,14 @@ export default function ProfileView() {
             const response = await api.getUserProfile(user);
             setProfile(response.data);
         } catch (error) {
-            viewAlert.redirectToAlert({
+            redirectToAlert({
                 target: "/profile",
                 error,
             });
         }
     }
 
-    const getProfile = useCallback(updateProfile, [user]);
+    const getProfile = useCallback(updateProfile, [user, redirectToAlert]);
 
     useEffect(() => {
         getProfile();

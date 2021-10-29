@@ -12,7 +12,7 @@ import UserSingleGroups from "./UserSingleGroups";
 
 export default function UserView() {
     const location = useLocation();
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
     const { login } = useParams();
     const [user, setUser] = useState({});
 
@@ -21,11 +21,11 @@ export default function UserView() {
             const response = await api.getUser(login);
             setUser(response.data);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
-    const getUser = useCallback(updateUser, [login]);
+    const getUser = useCallback(updateUser, [login, setAlert]);
 
     useEffect(() => {
         getUser();

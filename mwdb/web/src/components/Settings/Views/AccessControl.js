@@ -86,13 +86,15 @@ function CapabilityChangeCard({ groups, onSubmit }) {
     const [chosenCapabilities, setChosenCapabilities] = useState();
 
     const capabilities = Object.keys(capabilitiesList);
-    const selectedCaps = chosenCapabilities || [];
     const originalCaps = chosenGroup.capabilities || [];
     const changedCaps = capabilities.filter(
-        (cap) => selectedCaps.includes(cap) !== originalCaps.includes(cap)
+        (cap) =>
+            (chosenCapabilities || []).includes(cap) !==
+            originalCaps.includes(cap)
     );
     const selectHandler = useCallback(
         (e, clickedIndex, isSelected) => {
+            const selectedCaps = chosenCapabilities || [];
             if (isSelected)
                 setChosenCapabilities(
                     selectedCaps.concat(capabilities[clickedIndex])
@@ -104,7 +106,7 @@ function CapabilityChangeCard({ groups, onSubmit }) {
                     )
                 );
         },
-        [selectedCaps, capabilities]
+        [chosenCapabilities, capabilities]
     );
 
     function dismissChanges() {
@@ -149,6 +151,7 @@ function CapabilityChangeCard({ groups, onSubmit }) {
                     onChange={selectHandler}
                 >
                     {capabilities.map((cap) => {
+                        const selectedCaps = chosenCapabilities || [];
                         const changed = changedCaps.includes(cap);
                         const selected = selectedCaps.includes(cap);
                         return (
@@ -196,7 +199,7 @@ function CapabilityChangeCard({ groups, onSubmit }) {
 
 export default function AccessControl() {
     const [groups, setGroups] = useState(null);
-    const viewAlert = useViewAlert();
+    const { setAlert } = useViewAlert();
 
     const [isChangeModalOpen, setChangeModalOpen] = useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
@@ -213,7 +216,7 @@ export default function AccessControl() {
             );
             setGroups(groupList);
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         }
     }
 
@@ -222,18 +225,18 @@ export default function AccessControl() {
             setDisabledModalButton(true);
             await api.updateGroup(group, { capabilities });
             await updateGroups();
-            viewAlert.setAlert({
+            setAlert({
                 success: `Group '${group}' capabilities successfully changed`,
             });
         } catch (error) {
-            viewAlert.setAlert({ error });
+            setAlert({ error });
         } finally {
             setDisabledModalButton(false);
             setChangeModalOpen(false);
         }
     }
 
-    const getGroups = useCallback(updateGroups, []);
+    const getGroups = useCallback(updateGroups, [setAlert]);
 
     useEffect(() => {
         getGroups();

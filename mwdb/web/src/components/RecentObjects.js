@@ -78,12 +78,14 @@ export function RecentObjectHeader() {
     );
 }
 
-export default (props) => (
-    <RecentView
-        type="object"
-        rowComponent={RecentObjectRow}
-        headerComponent={RecentObjectHeader}
-        dhashOnly
-        {...props}
-    />
-);
+export default function RecentObjects(props) {
+    return (
+        <RecentView
+            type="object"
+            rowComponent={RecentObjectRow}
+            headerComponent={RecentObjectHeader}
+            dhashOnly
+            {...props}
+        />
+    );
+}

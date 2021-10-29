@@ -1,4 +1,10 @@
-import React, { useEffect, useReducer, useContext } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useReducer,
+    useContext,
+    useMemo,
+} from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -33,26 +39,34 @@ function objectStateReducer(state, action) {
     }
 }
 
-export default function ShowObject(props) {
+export default function ShowObject({
+    ident,
+    objectType,
+    objectId,
+    headerIcon,
+    headerCaption,
+    defaultTab,
+    children,
+    searchEndpoint,
+}) {
     const api = useContext(APIContext);
     const [objectState, setObjectState] = useReducer(
         objectStateReducer,
         initialObjectState
     );
 
-    function setObjectError(error) {
-        setObjectState({
-            type: objectError,
-            error,
-        });
-    }
+    const setObjectError = useCallback(
+        (error) =>
+            setObjectState({
+                type: objectError,
+                error,
+            }),
+        []
+    );
 
-    async function updateObject() {
+    const updateObject = useCallback(async () => {
         try {
-            let response = await api.getObject(
-                props.objectType,
-                props.objectId
-            );
+            let response = await api.getObject(objectType, objectId);
             setObjectState({
                 type: objectUpdate,
                 object: response.data,
@@ -60,12 +74,11 @@ export default function ShowObject(props) {
         } catch (error) {
             setObjectError(error);
         }
-    }
+    }, [api, objectType, objectId, setObjectError]);
 
     useEffect(() => {
         updateObject();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.objectId]);
+    }, [updateObject]);
 
     const objectLayout = objectState.object ? (
         <div className="card-body">
@@ -76,18 +89,14 @@ export default function ShowObject(props) {
                             <div className="card">
                                 <Extendable ident="showObjectPresenter">
                                     <div className="card-header detailed-view-header">
-                                        <FontAwesomeIcon
-                                            icon={props.headerIcon}
-                                        />
-                                        {props.headerCaption}
+                                        <FontAwesomeIcon icon={headerIcon} />
+                                        {headerCaption}
                                     </div>
                                     <ObjectBox
-                                        defaultTab={
-                                            props.defaultTab || "details"
-                                        }
+                                        defaultTab={defaultTab || "details"}
                                     >
                                         <Extendable ident="showObjectTabs">
-                                            {props.children}
+                                            {children}
                                         </Extendable>
                                     </ObjectBox>
                                 </Extendable>
@@ -110,18 +119,21 @@ export default function ShowObject(props) {
         []
     );
 
+    const context = useMemo(
+        () => ({
+            object: objectState.object,
+            objectError: objectState.objectError,
+            objectType: objectType,
+            searchEndpoint: searchEndpoint,
+            updateObject,
+            setObjectError,
+        }),
+        [objectState, objectType, searchEndpoint, updateObject, setObjectError]
+    );
+
     return (
-        <ObjectContext.Provider
-            value={{
-                object: objectState.object,
-                objectError: objectState.objectError,
-                objectType: props.objectType,
-                searchEndpoint: props.searchEndpoint,
-                updateObject,
-                setObjectError,
-            }}
-        >
-            <View fluid ident={props.ident} error={objectState.objectError}>
+        <ObjectContext.Provider value={context}>
+            <View fluid ident={ident} error={objectState.objectError}>
                 {objectLayout}
             </View>
         </ObjectContext.Provider>

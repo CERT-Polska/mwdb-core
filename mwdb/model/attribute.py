@@ -49,6 +49,12 @@ class Attribute(db.Model):
         )
 
     @classmethod
+    def get_by_id(cls, object_id, attribute_id):
+        return db.session.query(cls).filter(
+            (cls.object_id == object_id) & (cls.id == attribute_id)
+        )
+
+    @classmethod
     def get_or_create(cls, obj):
         """
         Polymophic get or create pattern, useful in dealing with race condition

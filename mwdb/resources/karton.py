@@ -1,6 +1,6 @@
 from flask import request
 from flask_restful import Resource
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import BadRequest, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import KartonAnalysis, Object
@@ -10,7 +10,13 @@ from mwdb.schema.karton import (
     KartonSubmitAnalysisRequestSchema,
 )
 
-from . import access_object, loads_schema, requires_authorization, requires_capabilities
+from . import (
+    access_object,
+    is_valid_uuid,
+    loads_schema,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 class KartonObjectResource(Resource):
@@ -211,6 +217,8 @@ class KartonAnalysisResource(Resource):
                 content:
                   application/json:
                     schema: KartonItemResponseSchema
+            400:
+                description: When analysis_id is not UUID value
             403:
                 description: When user doesn't have `karton_assign` capability.
             404:
@@ -221,6 +229,9 @@ class KartonAnalysisResource(Resource):
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
+
+        if not is_valid_uuid(analysis_id):
+            raise BadRequest("ValidationError: analysis_id must be UUID value")
 
         analysis, _ = db_object.assign_analysis(analysis_id)
         schema = KartonItemResponseSchema()

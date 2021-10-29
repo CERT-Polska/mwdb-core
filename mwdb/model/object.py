@@ -4,10 +4,10 @@ from typing import Optional
 from uuid import UUID
 
 from flask import g
-from sqlalchemy import and_, cast, exists
+from sqlalchemy import and_, cast, distinct, exists, func, select
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import aliased, contains_eager
+from sqlalchemy.orm import aliased, column_property, contains_eager
 from sqlalchemy.sql.expression import true
 
 from mwdb.core.capabilities import Capabilities
@@ -214,6 +214,16 @@ class Object(db.Model):
     dhash = db.Column(db.String(64), unique=True, index=True, nullable=False)
     upload_time = db.Column(
         db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow
+    )
+
+    upload_count = column_property(
+        select([func.count(distinct(ObjectPermission.related_user_id))]).where(
+            and_(
+                ObjectPermission.object_id == id,
+                ObjectPermission.reason_type == AccessType.ADDED,
+            )
+        ),
+        deferred=True,
     )
 
     __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}

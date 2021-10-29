@@ -41,7 +41,6 @@ If you want to learn more about setting up your own mwdb-core instance or mwdb.c
 If you have any problems, bugs or feature requests related to MWDB, you're encouraged to create a GitHub issue. If you have other questions, question is related strictly with mwdb.cert.pl service or you want to contact the current maintainers directly, you can email:
 
 - Paweł Srokosz (psrok1@cert.pl)
-- Jarosław Jedynak (msm@cert.pl)
 - CERT.PL (info@cert.pl)
 
 ## License

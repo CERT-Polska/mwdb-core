@@ -94,9 +94,9 @@ def test_config_search_multi(admin_session):
         },
         "peers": {
             "in-blob": {
-                "blob_name": "Peers blob name",
-                "blob_type": "Peers blob type",
-                "content": "Hello"
+                           "blob_name": "Peers blob name",
+                           "blob_type": "Peers blob type",
+                            "content": "Hello"
             }
         }
     }
@@ -137,3 +137,57 @@ def test_config_search_multi(admin_session):
     query = f'config.multi:"{config_2["id"]}"'
     found_obj = test.search(query)[0]
     assert config_2["id"] == found_obj["id"]
+
+
+def test_config_search_upload_count(admin_session):
+    value_1 = rand_string()
+    value_2 = rand_string()
+    config_json = {
+        "cnc": [1, 2, 3],
+        "raw_cfg": {
+            "in-blob": {
+                "blob_name": value_1,
+                "blob_type": "Blob type",
+                "content": "Blob content"
+            }
+        },
+        "peers": {
+            "in-blob": {
+                "blob_name": "Peers blob name",
+                "blob_type": "Peers blob type",
+                "content": value_2
+            }
+        }
+    }
+
+    tag = rand_string(15)
+
+    # create 2 test users
+    test_users = []
+    for _ in range(2):
+        user_name = random_name()
+        user_password = random_name()
+        admin_session.register_user(user_name, user_password, ["adding_tags", "adding_configs", "adding_blobs"])
+        test_users.append({'user_name': user_name, 'user_password': user_password})
+
+    users_session = MwdbTest()
+    for user in test_users:
+        users_session.login_as(user['user_name'], user['user_password'])
+        config = users_session.add_config(None, "malwarex", config_json)
+        users_session.add_tag(config["id"], tag)
+
+    found_configs = admin_session.search(f'tag:{tag} AND config.upload_count:{len(test_users)}')
+    assert len(found_configs) == 1
+
+    found_configs = users_session.search(f'tag:{tag} AND config.upload_count:[{len(test_users)} TO *]')
+    assert len(found_configs) == 1
+
+    found_configs = users_session.search(f'tag:{tag} AND config.upload_count:[* TO {len(test_users)}]')
+    assert len(found_configs) == 1
+
+    found_configs = users_session.search(f'tag:{tag} AND config.upload_count:{{{len(test_users)} TO *]')
+    assert len(found_configs) == 0
+
+    found_configs = users_session.search(f'tag:{tag} AND config.upload_count:[* TO {len(test_users)}}}')
+    assert len(found_configs) == 0
+

@@ -27,6 +27,7 @@ from .fields import (
     ShareField,
     SizeField,
     StringField,
+    UploadCountField,
     UploaderField,
     UUIDField,
 )
@@ -54,6 +55,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "favorites": FavoritesField(Object.followers),
         "karton": UUIDField(Object.analyses, KartonAnalysis.id),
         "comment_author": CommentAuthorField(Object.comment_authors, User.login),
+        "upload_count": UploadCountField(Object.upload_count),
     },
     File.__name__: {
         "name": StringField(File.file_name),

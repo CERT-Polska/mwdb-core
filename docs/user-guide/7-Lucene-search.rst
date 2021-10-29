@@ -310,6 +310,27 @@ The above query returns the objects commented by user <user login>.
 
     Wildcards are not allowed for field ``comment_author:``.
 
+
+Upload count field (\ ``upload_count:``\ )
+------------------------------------------------------------
+
+Typing the field ``upload_count:`` you can search for objects using upload information that are related with **n**
+different users uploads. Using that query, you can spot objects that might be most interesting within your dataset.
+
+   upload_count:n
+
+
+The wildcards ranges are supported for field ``upload_count:``.
+
+For example:
+If you want to search for samples which were uploaded by 5 and more different users, use undermentioned search statement.
+It's also highly recommended to combine ``upload_count`` with ``upload_time`` query,
+so you can select only samples that were uploaded within the specific period of time:
+
+.. code-block::
+
+   upload_count:["5 TO *] AND upload_time:[2021-06-01 TO 2021-06-30]
+
 Group access queries (\ ``shared:`` and ``uploader:``\ )
 ------------------------------------------------------------
 

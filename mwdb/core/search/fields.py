@@ -488,3 +488,57 @@ class CommentAuthorField(BaseField):
             raise ObjectNotFoundException(f"No such user: {value}")
 
         return self.column.any(self.value_column == value)
+
+
+class UploadCountField(BaseField):
+    accepts_range = True
+
+    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
+        if remainder:
+            raise FieldNotQueryableException(
+                f"Field doesn't have subfields: {'.'.join(remainder)}"
+            )
+
+        def parse_upload_value(value):
+            try:
+                value = int(value)
+                if value <= 0:
+                    raise ValueError
+            except ValueError:
+                raise UnsupportedGrammarException(
+                    "Field upload_count accepts statements with "
+                    "only correct positive integer values"
+                )
+            return value
+
+        if isinstance(expression, Range):
+            low_value = expression.low.value
+            high_value = expression.high.value
+
+            if low_value != "*":
+                low_value = parse_upload_value(low_value)
+            if high_value != "*":
+                high_value = parse_upload_value(high_value)
+
+            low_condition = (
+                self.column >= low_value
+                if expression.include_low
+                else self.column > low_value
+            )
+            high_condition = (
+                self.column <= high_value
+                if expression.include_high
+                else self.column < high_value
+            )
+
+            if high_value == "*" and low_value == "*":
+                return True
+            if high_value == "*":
+                return low_condition
+            if low_value == "*":
+                return high_condition
+
+            return and_(low_condition, high_condition)
+        else:
+            upload_value = parse_upload_value(expression.value)
+            return self.column == upload_value

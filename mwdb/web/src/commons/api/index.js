@@ -60,8 +60,8 @@ function authSetPassword(token, password) {
     return axios.post(`/auth/change_password`, { token, password });
 }
 
-function authRequestPasswordChange() {
-    return axios.post(`/auth/request_password_change`);
+function authRequestPasswordChange(login) {
+    return axios.post(`/auth/request_password_change/${login}`);
 }
 
 function authRecoverPassword(login, email, recaptcha) {

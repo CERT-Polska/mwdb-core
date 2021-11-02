@@ -7,7 +7,7 @@ from sqlalchemy import exists, func
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import false
-from werkzeug.exceptions import Conflict, Forbidden, InternalServerError
+from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -22,9 +22,15 @@ from mwdb.schema.auth import (
     AuthValidateTokenResponseSchema,
 )
 from mwdb.schema.group import GroupListResponseSchema
-from mwdb.schema.user import UserSuccessResponseSchema
+from mwdb.schema.user import UserLoginSchemaBase, UserSuccessResponseSchema
 
-from . import loads_schema, logger, requires_authorization, requires_capabilities
+from . import (
+    load_schema,
+    loads_schema,
+    logger,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 def verify_recaptcha(recaptcha_token):
@@ -230,7 +236,7 @@ class ChangePasswordResource(Resource):
 class RequestPasswordChangeResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_profile)
-    def post(self):
+    def post(self, login):
         """
         ---
         summary: Get password change link for the current user
@@ -261,16 +267,20 @@ class RequestPasswordChangeResource(Resource):
                 When SMTP server is unavailable or not properly configured
                 on the server.
         """
-        login = g.auth_user.login
-        email = g.auth_user.email
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
+        user = (
+            db.session.query(User).filter(User.login == user_login_obj["login"]).first()
+        )
+        if not user:
+            raise NotFound("Invalid login or password.")
 
         try:
             send_email_notification(
                 "recover",
                 "Change password in MWDB",
-                email,
+                recipient_email=user.email,
                 base_url=app_config.mwdb.base_url,
-                login=login,
+                login=user.login,
                 set_password_token=g.auth_user.generate_set_password_token().decode(
                     "utf-8"
                 ),

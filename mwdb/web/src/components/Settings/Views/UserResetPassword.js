@@ -14,7 +14,7 @@ export default function UserResetPassword({ user }) {
     async function resetPassword() {
         setPending(true);
         try {
-            await api.authRequestPasswordChange();
+            await api.authRequestPasswordChange(user.login);
             viewAlert.redirectToAlert({
                 target: `/settings/user/${user.login}`,
                 success: `Password reset link was successfully sent to '${user.email}'.`,

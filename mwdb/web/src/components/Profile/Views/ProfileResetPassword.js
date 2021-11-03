@@ -11,7 +11,7 @@ export default function ProfileResetPassword({ profile }) {
     async function resetPassword() {
         setPending(true);
         try {
-            await api.authRequestPasswordChange(profile.login);
+            await api.authRequestPasswordChange();
             viewAlert.redirectToAlert({
                 target: "/profile",
                 success:

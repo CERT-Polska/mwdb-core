@@ -60,8 +60,8 @@ function authSetPassword(token, password) {
     return axios.post(`/auth/change_password`, { token, password });
 }
 
-function authRequestPasswordChange(login) {
-    return axios.post(`/auth/request_password_change/${login}`);
+function authRequestPasswordChange() {
+    return axios.post(`/auth/request_password_change`);
 }
 
 function authRecoverPassword(login, email, recaptcha) {
@@ -304,6 +304,10 @@ function generateApiToken(login, expiration) {
 
 function generateSetPasswordToken(login) {
     return axios.get(`/user/${login}/change_password`);
+}
+
+function userRequestPasswordChange(login) {
+    return axios.post(`/user/${login}/request_password_change`);
 }
 
 function setUserDisabled(login, disabled) {
@@ -572,6 +576,7 @@ const api = {
     getUserProfile,
     generateApiToken,
     generateSetPasswordToken,
+    userRequestPasswordChange,
     setUserDisabled,
     createUser,
     registerUser,

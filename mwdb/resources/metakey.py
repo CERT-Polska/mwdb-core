@@ -154,7 +154,7 @@ class MetakeyResource(Resource):
         value = obj["value"]
 
         if key == "karton" and not is_valid_uuid(value):
-            raise BadRequest("ValidationError: for karton attribute value must be UUID")
+            raise BadRequest("'karton' attribute accepts only UUID values")
 
         is_new = db_object.add_attribute(key, value)
         if is_new is None:

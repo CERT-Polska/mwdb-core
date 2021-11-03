@@ -231,7 +231,7 @@ class KartonAnalysisResource(Resource):
             raise NotFound("Object not found")
 
         if not is_valid_uuid(analysis_id):
-            raise BadRequest("ValidationError: analysis_id must be UUID value")
+            raise BadRequest("'karton' attribute accepts only UUID values")
 
         analysis, _ = db_object.assign_analysis(analysis_id)
         schema = KartonItemResponseSchema()

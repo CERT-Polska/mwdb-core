@@ -6,6 +6,8 @@ import tempfile
 
 from itsdangerous import BadSignature, SignatureExpired, TimedJSONWebSignatureSerializer
 from sqlalchemy import or_
+from sqlalchemy.dialects.postgresql.array import ARRAY
+from sqlalchemy.ext.mutable import MutableList
 from werkzeug.utils import secure_filename
 
 from mwdb.core.config import StorageProviderType, app_config
@@ -41,6 +43,9 @@ class File(Object):
     sha512 = db.Column(db.String(128), nullable=False, index=True)
     # ssdeep is nullable due to lack of support in earlier versions
     ssdeep = db.Column(db.String(255), nullable=True, index=True)
+    alt_names = db.Column(
+        MutableList.as_mutable(ARRAY(db.String)), nullable=False, server_default="{}"
+    )
 
     __mapper_args__ = {
         "polymorphic_identity": __tablename__,

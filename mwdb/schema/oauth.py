@@ -17,6 +17,10 @@ class OpenIDAuthorizeRequestSchema(Schema):
     nonce = fields.Str(required=True, allow_none=False)
 
 
+class OpenIDProviderSuccessResponseSchema(Schema):
+    name = fields.Str(required=True, allow_none=False)
+
+
 class OpenIDProviderListResponseSchema(Schema):
     providers = fields.List(fields.Str(), required=True, allow_none=False)
 

@@ -118,6 +118,15 @@ class File(Object):
             tags=tags,
         )
 
+        # Check if add new alternative file name
+        if not is_new:
+            original_filename = secure_filename(file_name)
+            if (
+                file_obj.file_name != original_filename
+                and original_filename not in file_obj.alt_names
+            ):
+                file_obj.alt_names.append(original_filename)
+
         if is_new:
             file_stream.seek(0, os.SEEK_SET)
             if app_config.mwdb.storage_provider == StorageProviderType.S3:

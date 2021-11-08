@@ -1,7 +1,7 @@
 from string import Template
 
 from flask import g
-from sqlalchemy import UniqueConstraint, cast
+from sqlalchemy import cast, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 
@@ -12,7 +12,10 @@ from . import db
 
 class Attribute(db.Model):
     __tablename__ = "attribute"
-    __table_args__ = (UniqueConstraint("object_id", "key", "value"),)
+    __table_args__ = (
+        db.Index('ix_attribute_unique', "key", func.md5("value::text"), unique=True),
+        db.Index('ix_attribute_value', "value", postgresql_using="gin"),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     object_id = db.Column(db.Integer, db.ForeignKey("object.id"), nullable=False)
@@ -22,7 +25,7 @@ class Attribute(db.Model):
         nullable=False,
         index=True,
     )
-    value = db.Column(JSONB, nullable=False, index=True)
+    value = db.Column(JSONB, nullable=False)
     template = db.relationship("AttributeDefinition", lazy="joined")
 
     @property

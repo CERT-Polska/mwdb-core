@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { useViewAlert } from "@mwdb-web/commons/ui";
 
-export default function OAuthDetails() {
+export default function OauthListProviders() {
     const api = useContext(APIContext);
     const viewAlert = useViewAlert();
     const [providers, setProviders] = useState([]);
@@ -36,15 +36,19 @@ export default function OAuthDetails() {
             {providers.length ? (
                 <React.Fragment>
                     {providers.map((provider) => (
-                        <div key={provider} className="card">
+                        <Link
+                            key={provider}
+                            to={`/settings/oauth/${provider}`}
+                            className="card btn-outline-secondary text-decoration-none"
+                        >
                             <div className="card-body">
-                                <h5 className="card-subtitle text-muted">
+                                <h5>
                                     <span className="text-monospace list-inline-item">
                                         {provider}
                                     </span>
                                 </h5>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </React.Fragment>
             ) : (

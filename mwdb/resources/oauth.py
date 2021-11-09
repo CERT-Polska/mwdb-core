@@ -185,11 +185,6 @@ class OpenIDSingleProviderResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        name = obj["name"]
-        if name is not None:
-            print(name)
-            provider.name = name
-
         client_id = obj["client_id"]
         if client_id is not None:
             provider.client_id = client_id
@@ -215,10 +210,54 @@ class OpenIDSingleProviderResource(Resource):
             provider.jwks_endpoint = jwks_endpoint
 
         db.session.commit()
-        logger.info("Provider updated", extra={"user": provider.name})
+
+        logger.info("Provider updated", extra={"name": provider_name})
 
         schema = OpenIDProviderSuccessResponseSchema()
         return schema.dump({"name": provider.name})
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def delete(self, provider_name):
+        """
+        ---
+        summary: Delete registered OIDC provider
+        description: |
+            Remove registered OIDC provider form database.
+        security:
+            - bearerAuth: []
+        tags:
+            - auth
+        parameters:
+            - in: path
+              name: provider_name
+              schema:
+                type: string
+              description: OpenID provider name.
+        responses:
+            200:
+                description: When provider was removed successfully
+                content:
+                  application/json:
+                    schema: OpenIDProviderSuccessResponseSchema
+            403:
+                description: When user doesn't have `manage_users` capability.
+            404:
+                description: When provider doesn't exist
+        """
+        provider = (
+            db.session.query(OpenIDProvider)
+            .filter(OpenIDProvider.name == provider_name)
+            .first()
+        )
+        if not provider:
+            raise NotFound(f"Requested provider name '{provider_name}' not found")
+        db.session.delete(provider)
+        db.session.commit()
+
+        logger.info("Provider was deleted", extra={"provider": provider_name})
+        schema = OpenIDProviderSuccessResponseSchema()
+        return schema.dump({"name": provider_name})
 
 
 class OpenIDAuthenticateResource(Resource):
@@ -410,6 +449,8 @@ class OpenIDBindAccountResource(Resource):
         summary: Bind mwdb account with OpenID provider
         description: |
             Bind authenticated mwdb account with an expernat OpenID provider
+        security:
+            - bearerAuth: []
         tags:
             - auth
         parameters:
@@ -474,6 +515,8 @@ class OpenIDAccountIdentitiesResource(Resource):
         summary: List OpenID bound external identities
         description: |
             List of related identities to authenticated mwdb account
+        security:
+            - bearerAuth: []
         tags:
             - auth
         responses:

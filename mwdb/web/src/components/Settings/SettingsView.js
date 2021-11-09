@@ -19,8 +19,9 @@ import AccessControl from "./Views/AccessControl";
 import GroupView from "./Views/GroupView";
 import AttributeView from "./Views/AttributeView";
 import SettingsOverview from "./Views/SettingsOverview";
-import OAuthDetails from "./Views/OauthDetails";
+import OauthListProviders from "./Views/OauthListProviders";
 import OAuthRegister from "./Views/OauthRegister";
+import OauthProvider from "./Views/OauthProvider";
 
 function SettingsNav() {
     const auth = useContext(AuthContext);
@@ -160,7 +161,7 @@ export default function SettingsView() {
                                 <AccessControl />
                             </AdministrativeRoute>
                             <AdministrativeRoute exact path="/settings/oauth">
-                                <OAuthDetails />
+                                <OauthListProviders />
                             </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
@@ -168,7 +169,12 @@ export default function SettingsView() {
                             >
                                 <OAuthRegister />
                             </AdministrativeRoute>
-
+                            <AdministrativeRoute
+                                exact
+                                path="/settings/oauth/:name"
+                            >
+                                <OauthProvider />
+                            </AdministrativeRoute>
                             <AdministrativeRoute
                                 exact
                                 path="/settings/attributes"

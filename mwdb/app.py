@@ -58,6 +58,7 @@ from mwdb.resources.oauth import (
     OpenIDBindAccountResource,
     OpenIDProviderResource,
     OpenIDRegisterUserResource,
+    OpenIDSingleProviderResource,
 )
 from mwdb.resources.object import (
     ObjectCountResource,
@@ -352,6 +353,7 @@ api.add_resource(GroupMemberResource, "/group/<name>/member/<login>")
 if app_config.mwdb.enable_oidc:
     api.add_resource(OpenIDProviderResource, "/oauth")
     api.add_resource(OpenIDAccountIdentitiesResource, "/oauth/identities")
+    api.add_resource(OpenIDSingleProviderResource, "/oauth/<provider_name>")
     api.add_resource(OpenIDAuthenticateResource, "/oauth/<provider_name>/authenticate")
     api.add_resource(OpenIDAuthorizeResource, "/oauth/<provider_name>/authorize")
     api.add_resource(OpenIDBindAccountResource, "/oauth/<provider_name>/bind_account")

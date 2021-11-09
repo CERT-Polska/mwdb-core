@@ -11,10 +11,28 @@ class OpenIDProviderCreateRequestSchema(Schema):
     jwks_endpoint = fields.Str(required=True, allow_none=True)
 
 
+class OpenIDProviderItemResponseSchema(OpenIDProviderCreateRequestSchema):
+    pass
+
+
+class OpenIDProviderUpdateRequestSchema(Schema):
+    name = fields.Str(missing=None)
+    client_id = fields.Str(missing=None)
+    client_secret = fields.Str(missing=None)
+    authorization_endpoint = fields.Str(missing=None)
+    token_endpoint = fields.Str(missing=None)
+    userinfo_endpoint = fields.Str(missing=None)
+    jwks_endpoint = fields.Str(missing=None)
+
+
 class OpenIDAuthorizeRequestSchema(Schema):
     code = fields.Str(required=True, allow_none=False)
     state = fields.Str(required=True, allow_none=False)
     nonce = fields.Str(required=True, allow_none=False)
+
+
+class OpenIDProviderSuccessResponseSchema(Schema):
+    name = fields.Str(required=True, allow_none=False)
 
 
 class OpenIDProviderListResponseSchema(Schema):

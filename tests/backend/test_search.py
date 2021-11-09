@@ -58,6 +58,42 @@ def test_wildcard_search(admin_session):
     assert sample_from_search["id"] == sample["id"]
 
 
+def test_file_alternative_name_search(admin_session):
+    test = admin_session
+
+    filename_main = base62uuid()
+    filename_alt_1 = base62uuid()
+    filename_alt_2 = base62uuid()
+
+    file_content = base62uuid()
+
+    # upload the same sample with different names
+    test.add_sample(filename_main, file_content)
+    test.add_sample(filename_alt_1, file_content)
+    test.add_sample(filename_alt_2, file_content)
+
+    # simple search
+    found_objs_1 = test.search(f'file.name:{filename_main}')
+    assert len(found_objs_1) == 1
+    found_objs_2 = test.search(f'file.name:{filename_alt_1}')
+    assert len(found_objs_2) == 1
+    found_objs_3 = test.search(f'file.name:{filename_alt_2}')
+    assert len(found_objs_3) == 1
+
+    assert found_objs_1 == found_objs_2
+    assert found_objs_1 == found_objs_3
+
+    # wildcard search
+    found_objs_1_with_wildcard = test.search(f'file.name:*{filename_main[:len(filename_main)// 2]}*')
+    found_objs_2_with_wildcard = test.search(f'file.name:*{filename_alt_1[len(filename_alt_1) // 2:]}*')
+    found_objs_3_with_wildcard = test.search(f'file.name:*{filename_alt_2[:len(filename_alt_2) // 2]}*')
+    assert len(found_objs_1_with_wildcard) == 1
+    assert len(found_objs_2_with_wildcard) == 1
+    assert len(found_objs_3_with_wildcard) == 1
+    assert found_objs_1_with_wildcard == found_objs_2_with_wildcard
+    assert found_objs_1_with_wildcard == found_objs_3_with_wildcard
+
+
 def test_search_tag(admin_session):
     test = admin_session
 

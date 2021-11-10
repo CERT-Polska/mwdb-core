@@ -122,7 +122,7 @@ class OpenIDSingleProviderResource(Resource):
               description: OpenID provider name.
         responses:
             200:
-                description: When provider was removed successfully
+                description: Information about registered provider
                 content:
                   application/json:
                     schema: OpenIDProviderItemResponseSchema
@@ -166,7 +166,7 @@ class OpenIDSingleProviderResource(Resource):
                 schema: OpenIDProviderUpdateRequestSchema
         responses:
             200:
-                description: When provider was removed successfully
+                description: When provider was updated successfully
                 content:
                   application/json:
                     schema: OpenIDProviderSuccessResponseSchema

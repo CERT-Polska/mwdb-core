@@ -74,19 +74,19 @@ def test_file_alternative_name_search(admin_session):
 
     # simple search
     found_objs_1 = test.search(f'file.name:{filename_main}')
-    assert len(found_objs_1) == 1
     found_objs_2 = test.search(f'file.name:{filename_alt_1}')
-    assert len(found_objs_2) == 1
     found_objs_3 = test.search(f'file.name:{filename_alt_2}')
-    assert len(found_objs_3) == 1
 
+    assert len(found_objs_1) == 1
+    assert len(found_objs_2) == 1
+    assert len(found_objs_3) == 1
     assert found_objs_1 == found_objs_2
     assert found_objs_1 == found_objs_3
 
     # wildcard search
-    found_objs_1_with_wildcard = test.search(f'file.name:*{filename_main[:len(filename_main)// 2]}*')
-    found_objs_2_with_wildcard = test.search(f'file.name:*{filename_alt_1[len(filename_alt_1) // 2:]}*')
-    found_objs_3_with_wildcard = test.search(f'file.name:*{filename_alt_2[:len(filename_alt_2) // 2]}*')
+    found_objs_1_with_wildcard = test.search(f'file.name:{filename_main[:len(filename_main)// 2]}*')
+    found_objs_2_with_wildcard = test.search(f'file.name:*{filename_alt_1[len(filename_alt_1) // 2:]}')
+    found_objs_3_with_wildcard = test.search(f'file.name:*{filename_alt_2[1:len(filename_alt_2)-1]}*')
     assert len(found_objs_1_with_wildcard) == 1
     assert len(found_objs_2_with_wildcard) == 1
     assert len(found_objs_3_with_wildcard) == 1

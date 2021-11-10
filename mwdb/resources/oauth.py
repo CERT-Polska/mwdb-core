@@ -211,7 +211,7 @@ class OpenIDSingleProviderResource(Resource):
 
         db.session.commit()
 
-        logger.info("Provider updated", extra={"name": provider_name})
+        logger.info("Provider updated", extra={"provider": provider_name})
 
         schema = OpenIDProviderSuccessResponseSchema()
         return schema.dump({"name": provider.name})

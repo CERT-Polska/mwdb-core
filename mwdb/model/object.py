@@ -525,50 +525,57 @@ class Object(db.Model):
         tags = tags or []
 
         is_new = False
-        new_cls = Object.get(obj.dhash).first()
+        created_object = Object.get(obj.dhash).first()
 
         # Object with the specified dhash doesn't exist - create it
-        if new_cls is None:
+        if created_object is None:
             db.session.begin_nested()
 
-            new_cls = obj
+            created_object = obj
             try:
                 # Try to create the requested object
-                new_cls.upload_time = datetime.datetime.utcnow()
-                db.session.add(new_cls)
-                db.session.flush()
+                created_object.upload_time = datetime.datetime.utcnow()
+                db.session.add(created_object)
                 db.session.commit()
                 is_new = True
             except IntegrityError:
                 # Object creation failed - probably a race condition
                 db.session.rollback()
-                new_cls = Object.get(obj.dhash).first()
-                if new_cls is None:
+                created_object = Object.get(obj.dhash).first()
+                # If object still doesn't exist, IntegrityError is not
+                # caused by concurrent upload: re-raise exception
+                if created_object is None:
                     raise
 
-        # Ensure that existing object has the expected type
-        if new_cls is not isinstance(obj, cls):
-            # If Object has been fetched, fetch typed instance
-            new_cls = cls.get(obj.dhash).first()
-            if new_cls is None:
+        if not is_new:
+            # If Object already exists, try to fetch typed instance
+            # to ensure that there is no type conflict
+            created_object = cls.get(obj.dhash).first()
+            if created_object is None:
                 raise ObjectTypeConflictError
 
         # Add attributes
         for attribute in attributes:
-            new_cls.add_attribute(attribute["key"], attribute["value"], commit=False)
+            created_object.add_attribute(
+                attribute["key"], attribute["value"], commit=False
+            )
 
         # Share with all specified groups
         for share_group in share_with:
-            new_cls.give_access(
-                share_group.id, AccessType.ADDED, new_cls, g.auth_user, commit=False
+            created_object.give_access(
+                share_group.id,
+                AccessType.ADDED,
+                created_object,
+                g.auth_user,
+                commit=False,
             )
 
         # Share with all groups that access all objects
         for all_access_group in Group.all_access_groups():
-            new_cls.give_access(
+            created_object.give_access(
                 all_access_group.id,
                 AccessType.ADDED,
-                new_cls,
+                created_object,
                 g.auth_user,
                 commit=False,
             )
@@ -577,17 +584,17 @@ class Object(db.Model):
         # Inherited share entries must be added AFTER we add share entries
         # related with upload itself
         if parent:
-            new_cls.add_parent(parent, commit=False)
+            created_object.add_parent(parent, commit=False)
 
         if analysis_id:
-            new_cls.assign_analysis(analysis_id)
+            created_object.assign_analysis(analysis_id)
 
         # Add tags to object if specified
         for tag in tags:
             tag_name = tag["tag"]
-            new_cls.add_tag(tag_name, commit=False)
+            created_object.add_tag(tag_name, commit=False)
 
-        return new_cls, is_new
+        return created_object, is_new
 
     @classmethod
     def access(cls, identifier, requestor=None):

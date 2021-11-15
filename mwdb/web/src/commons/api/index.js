@@ -318,6 +318,10 @@ function generateSetPasswordToken(login) {
     return axios.get(`/user/${login}/change_password`);
 }
 
+function userRequestPasswordChange(login) {
+    return axios.post(`/user/${login}/request_password_change`);
+}
+
 function setUserDisabled(login, disabled) {
     return axios.put(`/user/${login}`, { disabled });
 }
@@ -587,6 +591,7 @@ const api = {
     getUserProfile,
     generateApiToken,
     generateSetPasswordToken,
+    userRequestPasswordChange,
     setUserDisabled,
     createUser,
     registerUser,

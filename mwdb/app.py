@@ -92,6 +92,7 @@ from mwdb.resources.user import (
     UserListResource,
     UserPendingResource,
     UserProfileResource,
+    UserRequestPasswordChangeResource,
     UserResource,
 )
 
@@ -341,6 +342,9 @@ api.add_resource(
 api.add_resource(UserListResource, "/user")
 api.add_resource(UserResource, "/user/<login>")
 api.add_resource(UserProfileResource, "/profile/<login>")
+api.add_resource(
+    UserRequestPasswordChangeResource, "/user/<login>/request_password_change"
+)
 api.add_resource(UserGetPasswordChangeTokenResource, "/user/<login>/change_password")
 api.add_resource(UserPendingResource, "/user/<login>/pending")
 

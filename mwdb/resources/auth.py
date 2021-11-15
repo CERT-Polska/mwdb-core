@@ -236,8 +236,11 @@ class RequestPasswordChangeResource(Resource):
         summary: Get password change link for the current user
         description: |
             Requests password change link for currently authenticated user.
+
             Link expires after setting a new password or after 14 days.
+
             Link is sent to the e-mail address set in user's profile.
+
             Requires `manage_profile` capability.
         security:
             - bearerAuth: []

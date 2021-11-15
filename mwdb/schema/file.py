@@ -54,6 +54,7 @@ class FileListResponseSchema(ObjectListResponseSchemaBase, FileListItemResponseS
 
 class FileItemResponseSchema(ObjectItemResponseSchema):
     file_name = fields.Str(required=True, allow_none=False)
+    alt_names = fields.List(fields.Str(required=True, allow_none=False))
     file_size = fields.Int(required=True, allow_none=False)
     file_type = fields.Str(required=True, allow_none=False)
 

@@ -53,6 +53,20 @@ def test_get_sample(admin_session):
     parse(res['upload_time'])
 
 
+def test_get_sample_2_times_uploaded(admin_session):
+    filename_1 = rand_string()
+    filename_2 = rand_string()
+    file_content = rand_string()
+
+    sample_1 = admin_session.add_sample(filename_1, file_content)
+    admin_session.add_sample(filename_2, file_content)
+    res = admin_session.get_sample(sample_1['id'])
+
+    assert res['file_name'] == filename_1
+    assert res['alt_names'] == [filename_2]
+    parse(res['upload_time'])
+
+
 def test_search(admin_session):
     filename = rand_string()
     file_content = rand_string()

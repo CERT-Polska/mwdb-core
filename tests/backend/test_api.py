@@ -2,7 +2,7 @@ import pytest
 import requests
 from dateutil.parser import parse
 
-from .utils import rand_string
+from .utils import rand_string, ShouldRaise
 
 
 def test_login(admin_session):
@@ -191,3 +191,11 @@ def test_download_sample_with_token(admin_session):
     downloaded = r.text
 
     assert downloaded == expected
+
+
+def test_object_conflict(admin_session):
+    name = rand_string()
+    content = rand_string()
+    admin_session.add_sample(name, content)
+    with ShouldRaise(status_code=409):
+        admin_session.add_blob(None, name, name, content)

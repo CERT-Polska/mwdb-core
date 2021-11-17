@@ -23,6 +23,7 @@ from mwdb.schema.metakey import (
 
 from . import (
     access_object,
+    is_valid_uuid,
     load_schema,
     loads_schema,
     logger,
@@ -132,6 +133,8 @@ class MetakeyResource(Resource):
                 content:
                   application/json:
                     schema: MetakeyListResponseSchema
+            400:
+                description: For karton attribute when value is not UUID
             404:
                 description: |
                     When object doesn't exist or user doesn't have
@@ -149,6 +152,10 @@ class MetakeyResource(Resource):
 
         key = obj["key"]
         value = obj["value"]
+
+        if key == "karton" and not is_valid_uuid(value):
+            raise BadRequest("'karton' attribute accepts only UUID values")
+
         is_new = db_object.add_attribute(key, value)
         if is_new is None:
             raise NotFound(

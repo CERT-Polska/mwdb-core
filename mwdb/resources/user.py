@@ -230,6 +230,78 @@ class UserPendingResource(Resource):
         return schema.dump({"login": user_login_obj["login"]})
 
 
+class UserRequestPasswordChangeResource(Resource):
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def post(self, login):
+        """
+        ---
+        summary: Get password change link for specific user
+        description: |
+            Requests password change link for specific user.
+
+            Link expires after setting a new password or after 14 days.
+
+            Link is sent to the e-mail address set in user's profile.
+
+            Requires `manage_users` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - user
+        parameters:
+            - in: path
+              name: login
+              required: true
+              schema:
+                type: string
+              description: Login of specific user
+        responses:
+            200:
+              description: |
+                When password change link was successfully sent to the user's e-mail
+              content:
+                application/json:
+                  schema: UserSuccessResponseSchema
+            403:
+              description: |
+                When user doesn't have required capability
+            404:
+              description: |
+                When user doesn't exists.
+            500:
+              description: |
+                When SMTP server is unavailable or not properly configured
+                on the server.
+        """
+        user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
+        user = (
+            db.session.query(User).filter(User.login == user_login_obj["login"]).first()
+        )
+        if not user:
+            raise NotFound("User doesn't exist")
+
+        try:
+            send_email_notification(
+                "recover",
+                "Change password in MWDB",
+                recipient_email=user.email,
+                base_url=app_config.mwdb.base_url,
+                login=user.login,
+                set_password_token=user.generate_set_password_token().decode("utf-8"),
+            )
+        except MailError:
+            logger.exception("Can't send e-mail notification")
+            raise InternalServerError(
+                "SMTP server needed to fulfill this request is"
+                " not configured or unavailable."
+            )
+
+        schema = UserSuccessResponseSchema()
+        logger.info("Requested password change token", extra={"user": login})
+        return schema.dump({"login": login})
+
+
 class UserGetPasswordChangeTokenResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)

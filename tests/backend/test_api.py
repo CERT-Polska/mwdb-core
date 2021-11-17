@@ -2,7 +2,7 @@ import pytest
 import requests
 from dateutil.parser import parse
 
-from .utils import rand_string
+from .utils import rand_string, ShouldRaise
 
 
 def test_login(admin_session):
@@ -50,6 +50,20 @@ def test_get_sample(admin_session):
     assert res['parents'] == []
     assert res['children'] == []
     assert res['tags'] == []
+    parse(res['upload_time'])
+
+
+def test_get_sample_2_times_uploaded(admin_session):
+    filename_1 = rand_string()
+    filename_2 = rand_string()
+    file_content = rand_string()
+
+    sample_1 = admin_session.add_sample(filename_1, file_content)
+    admin_session.add_sample(filename_2, file_content)
+    res = admin_session.get_sample(sample_1['id'])
+
+    assert res['file_name'] == filename_1
+    assert res['alt_names'] == [filename_2]
     parse(res['upload_time'])
 
 
@@ -177,3 +191,11 @@ def test_download_sample_with_token(admin_session):
     downloaded = r.text
 
     assert downloaded == expected
+
+
+def test_object_conflict(admin_session):
+    name = rand_string()
+    content = rand_string()
+    admin_session.add_sample(name, content)
+    with ShouldRaise(status_code=409):
+        admin_session.add_blob(None, name, name, content)

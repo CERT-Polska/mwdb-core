@@ -81,7 +81,7 @@ export default function ShowObject({
     }, [updateObject]);
 
     const objectLayout = objectState.object ? (
-        <div className="card-body">
+        <div className="show-object">
             <Extendable ident="showObject">
                 <div className="row">
                     <div className="col-md-7">
@@ -101,14 +101,14 @@ export default function ShowObject({
                                     </ObjectBox>
                                 </Extendable>
                             </div>
-                            <ShareBox />
+                            <AttributesBox />
                         </Extendable>
                     </div>
                     <div className="col-md-5">
                         <Extendable ident="showObjectRightColumn">
                             <TagBox />
                             <MultiRelationsBox />
-                            <AttributesBox />
+                            <ShareBox />
                             <CommentBox />
                         </Extendable>
                     </div>

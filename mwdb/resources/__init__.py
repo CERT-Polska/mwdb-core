@@ -1,3 +1,4 @@
+import uuid
 from functools import wraps
 from json import JSONDecodeError
 
@@ -128,3 +129,11 @@ def get_shares_for_upload(upload_as):
         share_with = [share_group, Group.get_by_name(g.auth_user.login)]
 
     return share_with
+
+
+def is_valid_uuid(value):
+    try:
+        uuid.UUID(value)
+    except ValueError:
+        return False
+    return True

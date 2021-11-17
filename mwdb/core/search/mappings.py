@@ -20,6 +20,7 @@ from .fields import (
     CommentAuthorField,
     DatetimeField,
     FavoritesField,
+    FileNameField,
     JSONField,
     ListField,
     MultiField,
@@ -58,7 +59,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "upload_count": UploadCountField(Object.upload_count),
     },
     File.__name__: {
-        "name": StringField(File.file_name),
+        "name": FileNameField(File.file_name),
         "size": SizeField(File.file_size),
         "type": StringField(File.file_type),
         "md5": StringField(File.md5),

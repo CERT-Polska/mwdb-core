@@ -3,8 +3,8 @@ OAuth-based authentication
 
 .. versionadded:: 2.6.0
 
-MWDB starting from version 2.6.0 allows allows you to log in using an external identity provider.
-The OpenID Connect protocol was used for this and it was integrated with the mwdb authentication system.
+MWDB starting from version 2.6.0 allows you to log in using an external identity provider.
+The OpenID Connect protocol was used for this and it was integrated with the MWDB authentication system.
 
 .. warning::
 

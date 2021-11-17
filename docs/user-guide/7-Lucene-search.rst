@@ -393,21 +393,21 @@ type of object attributes.
 
 Depending on type of object, we can use field ``multi:`` applying various object attributes separated by spaces.
 Types of attributes are automatically recognised.
-Below allowable attributes were listed for different type of objects, which can be used in building query.
+Below allowable attributes were listed for different type of objects, which can be used in query building.
 
 * File (sample)
 
-  * all hashes values of file content
+  * all hashes values
 
 * Config
 
-  * hash sha256 values - dhash
-  * all or extract of JSON configuration content
+  * dhash values
+  * extract of configuration content
 
 * Blob
 
-  * hash sha256 values - dhash
-  * all or extract of Blob content
+  * dhash values
+  * extract of Blob content
 
 
 If you want to search for samples that have 0cb988d042a7f28dd5fe2b55b3f5ac7a ``md5`` value or
@@ -417,9 +417,15 @@ If you want to search for samples that have 0cb988d042a7f28dd5fe2b55b3f5ac7a ``m
 
    multi:"0cb988d042a7f28dd5fe2b55b3f5ac7a 3b0ee981"
 
-If you want to search for configs that have JSON configuration content which contain strings "abcd" or "xyz" or
+If query contains only hashes, field ``multi:`` can be omitted.
 
-``sha256`` value eb1c78d4994f7a107f78dec529988900e3601852ae0bfdefb3e15967c6d8f127 - use below query
+.. code-block::
+
+   0cb988d042a7f28dd5fe2b55b3f5ac7a eb1c78d4994f7a107f78dec529988900e3601852ae0bfdefb3e15967c6d8f127
+
+If you want to search for Configs that have configuration content which contain strings "abcd" or "xyz" or
+
+``dhash`` value eb1c78d4994f7a107f78dec529988900e3601852ae0bfdefb3e15967c6d8f127 - use below query
 
 .. code-block::
 
@@ -427,9 +433,9 @@ If you want to search for configs that have JSON configuration content which con
 
 .. warning::
 
-    Multi-query terms separated by spaces must be surrounded by double quotes.
+    Multi-query terms containing extract of Config configuration or Blob content must be separated by spaces end surrounded by double quotes. Field ``multi:`` also has to be explicitly used.
 
-    Wildcards are not allowed for field ``multi:``. They are automatically used for Config JSON configuration content and Blob content.
+    Wildcards are not allowed for field ``multi:``. They are automatically used for Config configuration and Blob content.
 
 Quick queries
 -------------

@@ -449,8 +449,6 @@ class OpenIDBindAccountResource(Resource):
         summary: Bind mwdb account with OpenID provider
         description: |
             Bind authenticated mwdb account with an expernat OpenID provider
-        security:
-            - bearerAuth: []
         tags:
             - auth
         parameters:

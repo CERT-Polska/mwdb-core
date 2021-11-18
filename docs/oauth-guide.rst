@@ -1,5 +1,5 @@
 OAuth-based authentication
-==============
+==========================
 
 .. versionadded:: 2.6.0
 

@@ -26,6 +26,7 @@ Features
    developer-guide
    remotes-guide
    karton-guide
+   oauth-guide
 
 Indices and tables
 ==================

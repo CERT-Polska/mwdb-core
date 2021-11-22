@@ -13,6 +13,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
     Attribute,
     AttributeDefinition,
+    File,
     Group,
     Member,
     Object,
@@ -542,3 +543,29 @@ class UploadCountField(BaseField):
         else:
             upload_value = parse_upload_value(expression.value)
             return self.column == upload_value
+
+
+class FileNameField(BaseField):
+    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
+        if remainder:
+            raise FieldNotQueryableException(
+                f"Field doesn't have subfields: {'.'.join(remainder)}"
+            )
+
+        value = get_term_value(expression)
+
+        if expression.has_wildcard():
+            sub_query = db.session.query(
+                File.id.label("f_id"), func.unnest(File.alt_names).label("alt_name")
+            ).subquery()
+            file_id_matching = (
+                db.session.query(File.id)
+                .join(sub_query, sub_query.c.f_id == File.id)
+                .filter(sub_query.c.alt_name.like(value))
+            )
+
+            condition = or_(self.column.like(value), File.id.in_(file_id_matching))
+            return condition
+        else:
+            condition = or_((self.column == value), File.alt_names.any(value))
+            return condition

@@ -20,7 +20,7 @@ import GroupView from "./Views/GroupView";
 import AttributeView from "./Views/AttributeView";
 import SettingsOverview from "./Views/SettingsOverview";
 import OAuthListProviders from "./Views/OAuthListProviders";
-import OAuthRegister from "./Views/OauthRegister";
+import OAuthRegister from "./Views/OAuthRegister";
 import OAuthProvider from "./Views/OAuthProvider";
 
 function SettingsNav() {

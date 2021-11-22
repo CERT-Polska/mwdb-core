@@ -81,7 +81,7 @@ export default function OAuthProvider() {
             </nav>
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
-                    <ProviderItem label="Client id">
+                    <ProviderItem label="Client ID">
                         <EditableItem
                             name="client_id"
                             type="client_id"
@@ -121,7 +121,7 @@ export default function OAuthProvider() {
                             onSubmit={handleSubmit}
                         />
                     </ProviderItem>
-                    <ProviderItem label="Jwks endpoint">
+                    <ProviderItem label="JWKS endpoint">
                         <EditableItem
                             name="jwks_endpoint"
                             type="jwks_endpoint"

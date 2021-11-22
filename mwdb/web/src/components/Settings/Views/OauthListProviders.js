@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { useViewAlert } from "@mwdb-web/commons/ui";
 
-export default function OauthListProviders() {
+export default function OAuthListProviders() {
     const api = useContext(APIContext);
     const viewAlert = useViewAlert();
     const [providers, setProviders] = useState([]);

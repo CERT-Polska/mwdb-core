@@ -18,7 +18,7 @@ function ProviderItem(props) {
     );
 }
 
-export default function OauthProvider() {
+export default function OAuthProvider() {
     const viewAlert = useViewAlert();
     const { name } = useParams();
     const [provider, setProvider] = useState({});
@@ -152,7 +152,7 @@ export default function OauthProvider() {
                 disabled={isDeleteModalDisabled}
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleRemoveProvider}
-                message={`Are you sure you want to remove ${provider.name} provider from mwdb`}
+                message={`Are you sure you want to remove ${provider.name} provider from MWDB`}
                 buttonStyle="btn-danger"
             />
         </div>

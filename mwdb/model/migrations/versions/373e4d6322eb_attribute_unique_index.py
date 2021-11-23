@@ -1,7 +1,7 @@
 """MD5-based attribute unique index
 
 Revision ID: 373e4d6322eb
-Revises: 243dede4eb74
+Revises: 4b0733973847
 Create Date: 2021-11-08 19:04:29.357726
 
 """
@@ -10,7 +10,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "373e4d6322eb"
-down_revision = "243dede4eb74"
+down_revision = "4b0733973847"
 branch_labels = None
 depends_on = None
 

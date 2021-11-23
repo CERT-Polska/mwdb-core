@@ -217,6 +217,7 @@ If you want to store files using object storage, open the ``mwdb.ini`` file and 
 
 If you use Docker-based setup, all the configuration can be set using environment variables (e.g. ``MWDB_STORAGE_PROVIDER=s3``).
 
+
 Advanced configuration
 ----------------------
 

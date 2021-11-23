@@ -58,6 +58,7 @@ from mwdb.resources.oauth import (
     OpenIDBindAccountResource,
     OpenIDProviderResource,
     OpenIDRegisterUserResource,
+    OpenIDSingleProviderResource,
 )
 from mwdb.resources.object import (
     ObjectCountResource,
@@ -91,6 +92,7 @@ from mwdb.resources.user import (
     UserListResource,
     UserPendingResource,
     UserProfileResource,
+    UserRequestPasswordChangeResource,
     UserResource,
 )
 
@@ -340,6 +342,9 @@ api.add_resource(
 api.add_resource(UserListResource, "/user")
 api.add_resource(UserResource, "/user/<login>")
 api.add_resource(UserProfileResource, "/profile/<login>")
+api.add_resource(
+    UserRequestPasswordChangeResource, "/user/<login>/request_password_change"
+)
 api.add_resource(UserGetPasswordChangeTokenResource, "/user/<login>/change_password")
 api.add_resource(UserPendingResource, "/user/<login>/pending")
 
@@ -352,6 +357,7 @@ api.add_resource(GroupMemberResource, "/group/<name>/member/<login>")
 if app_config.mwdb.enable_oidc:
     api.add_resource(OpenIDProviderResource, "/oauth")
     api.add_resource(OpenIDAccountIdentitiesResource, "/oauth/identities")
+    api.add_resource(OpenIDSingleProviderResource, "/oauth/<provider_name>")
     api.add_resource(OpenIDAuthenticateResource, "/oauth/<provider_name>/authenticate")
     api.add_resource(OpenIDAuthorizeResource, "/oauth/<provider_name>/authorize")
     api.add_resource(OpenIDBindAccountResource, "/oauth/<provider_name>/bind_account")

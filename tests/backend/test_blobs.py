@@ -74,6 +74,46 @@ def test_blog_search_by_tags_transactional_added(admin_session):
     assert blob_search_2["id"] == blob["id"]
 
 
+def test_blob_search_multi(admin_session):
+    test = admin_session
+
+    blob_name_1 = rand_string(15)
+    blob_content_insert_1 = rand_string(15)
+    blob_content_1 = """
+    Binary junk: \x00\x01\x02\x03\x04\x05\x07
+    HELLO WORLD!
+    ========""" + blob_content_insert_1 + """
+    HELLO WORLD
+    """
+
+    blob_name_2 = rand_string(15)
+    blob_content_insert_2 = rand_string(15)
+    blob_content_2 = """
+    Binary junk: \x00\x01\x02\x03\x04\x05\x07
+    HELLO WORLD!
+    ========""" + blob_content_insert_2 + """
+    HELLO WORLD
+    """
+
+    blob_1 = test.add_blob(None, blobname=blob_name_1, blobtype="inject", content=blob_content_1)
+    blob_2 = test.add_blob(None, blobname=blob_name_2, blobtype="inject", content=blob_content_2)
+
+    # blob content and dhash search
+    query = f'blob.multi:"{blob_content_insert_1} {blob_2["id"]}"'
+    found_objs = test.search(query)
+    assert len(found_objs) == 2
+
+    # only blog content search in multi field
+    query = f'blob.multi:"{blob_content_insert_1}"'
+    found_obj = test.search(query)[0]
+    assert found_obj["id"] == blob_1["id"]
+
+    # only blog dhash search in multi field
+    query = f'blob.multi:"{blob_2["id"]}"'
+    found_obj = test.search(query)[0]
+    assert blob_2["id"] == found_obj["id"]
+
+
 def test_blob_search_upload_count(admin_session):
     blob_name = rand_string(15)
     blob_content = """
@@ -113,3 +153,4 @@ def test_blob_search_upload_count(admin_session):
 
     found_configs = users_session.search(f'tag:{tag} AND blob.upload_count:[* TO {len(test_users)}}}')
     assert len(found_configs) == 0
+

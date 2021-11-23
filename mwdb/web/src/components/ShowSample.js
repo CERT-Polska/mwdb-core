@@ -67,6 +67,31 @@ function SampleDetails() {
                     </td>
                 </tr>
                 <tr className="flickerable">
+                    <th>Variant file names</th>
+                    <td id="variant_file_names">
+                        {context.object.alt_names.map((alt_name) => (
+                            <div>
+                                <Link
+                                    to={makeSearchLink(
+                                        "name",
+                                        alt_name,
+                                        false,
+                                        `${remotePath}/`
+                                    )}
+                                >
+                                    {alt_name}
+                                </Link>
+                                <span className="ml-2">
+                                    <ActionCopyToClipboard
+                                        text={alt_name}
+                                        tooltipMessage="Copy file name to clipboard"
+                                    />
+                                </span>
+                            </div>
+                        ))}
+                    </td>
+                </tr>
+                <tr className="flickerable">
                     <th>File size</th>
                     <td id="file_size">
                         <Link

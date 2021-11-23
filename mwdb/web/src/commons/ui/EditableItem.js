@@ -9,6 +9,7 @@ export default function EditableItem({
     children,
     defaultValue,
     onSubmit,
+    masked,
     ...props
 }) {
     const [value, setValue] = useState(defaultValue);
@@ -74,7 +75,11 @@ export default function EditableItem({
                                 : "align-middle"
                         }
                     >
-                        {defaultValue}
+                        {masked ? (
+                            <span>{"•".repeat(defaultValue.length)}</span>
+                        ) : (
+                            <span>{defaultValue}</span>
+                        )}
                     </span>
                     <button
                         className="float-right align-middle btn shadow-none"

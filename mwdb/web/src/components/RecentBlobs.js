@@ -165,7 +165,6 @@ export default function RecentBlobs(props) {
                 type="blob"
                 rowComponent={RecentBlobRow}
                 headerComponent={RecentBlobHeader}
-                dhashOnly
                 {...props}
             />
         </React.Fragment>

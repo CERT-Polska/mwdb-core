@@ -84,7 +84,6 @@ export default function RecentObjects(props) {
             type="object"
             rowComponent={RecentObjectRow}
             headerComponent={RecentObjectHeader}
-            dhashOnly
             {...props}
         />
     );

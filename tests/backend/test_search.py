@@ -58,6 +58,42 @@ def test_wildcard_search(admin_session):
     assert sample_from_search["id"] == sample["id"]
 
 
+def test_file_alternative_name_search(admin_session):
+    test = admin_session
+
+    filename_main = base62uuid()
+    filename_alt_1 = base62uuid()
+    filename_alt_2 = base62uuid()
+
+    file_content = base62uuid()
+
+    # upload the same sample with different names
+    test.add_sample(filename_main, file_content)
+    test.add_sample(filename_alt_1, file_content)
+    test.add_sample(filename_alt_2, file_content)
+
+    # simple search
+    found_objs_1 = test.search(f'file.name:{filename_main}')
+    found_objs_2 = test.search(f'file.name:{filename_alt_1}')
+    found_objs_3 = test.search(f'file.name:{filename_alt_2}')
+
+    assert len(found_objs_1) == 1
+    assert len(found_objs_2) == 1
+    assert len(found_objs_3) == 1
+    assert found_objs_1 == found_objs_2
+    assert found_objs_1 == found_objs_3
+
+    # wildcard search
+    found_objs_1_with_wildcard = test.search(f'file.name:{filename_main[:len(filename_main)// 2]}*')
+    found_objs_2_with_wildcard = test.search(f'file.name:*{filename_alt_1[len(filename_alt_1) // 2:]}')
+    found_objs_3_with_wildcard = test.search(f'file.name:*{filename_alt_2[1:len(filename_alt_2)-1]}*')
+    assert len(found_objs_1_with_wildcard) == 1
+    assert len(found_objs_2_with_wildcard) == 1
+    assert len(found_objs_3_with_wildcard) == 1
+    assert found_objs_1_with_wildcard == found_objs_2_with_wildcard
+    assert found_objs_1_with_wildcard == found_objs_3_with_wildcard
+
+
 def test_search_tag(admin_session):
     test = admin_session
 
@@ -463,3 +499,28 @@ def test_uploader_query(admin_session):
         Bob.session.search(f"uploader:{Alice.identity}")
     ]
     assert sorted(results) == sorted([FileC.dhash])
+
+def test_search_multi(admin_session):
+    test = admin_session
+
+    # multi hashes search
+    samples = []
+    for i in range(5):
+        filename = base62uuid()
+        file_content = base62uuid()
+        sample = test.add_sample(filename, file_content)
+        samples.append(sample)
+
+    query = f'file.multi:"{samples[0].get("sha512")} {samples[1].get("md5")} {samples[2].get("sha1")} {samples[3].get("sha256")} {samples[4].get("crc32")}"'
+    found_objs = test.search(query)
+    assert len(found_objs) == 5
+
+    # incorrect hash check
+    incorrect_hash = samples[0].get("sha512")[:-2]
+    with ShouldRaise(status_code=400):
+        found_objs = test.search(f'file.multi:"{incorrect_hash}"')
+
+    # wildcard in hash
+    wildcard_hash = samples[0].get("sha512")[:-100] + "*"
+    with ShouldRaise(status_code=400):
+        found_objs = test.search(f'file.multi:"{wildcard_hash}"')

@@ -108,6 +108,18 @@ function oauthGetProviders() {
     return axios.get("/oauth");
 }
 
+function oauthGetSingleProvider(provider_name) {
+    return axios.get(`/oauth/${provider_name}`);
+}
+
+function oauthUpdateSingleProvider(name, value) {
+    return axios.put(`/oauth/${name}`, value);
+}
+
+function oauthRemoveSingleProvider(name) {
+    return axios.delete(`/oauth/${name}`);
+}
+
 function oauthGetIdentities() {
     return axios.get("/oauth/identities");
 }
@@ -304,6 +316,10 @@ function generateApiToken(login, expiration) {
 
 function generateSetPasswordToken(login) {
     return axios.get(`/user/${login}/change_password`);
+}
+
+function userRequestPasswordChange(login) {
+    return axios.post(`/user/${login}/request_password_change`);
 }
 
 function setUserDisabled(login, disabled) {
@@ -525,6 +541,9 @@ const api = {
     oauthCallback,
     oauthRegisterProvider,
     oauthGetProviders,
+    oauthGetSingleProvider,
+    oauthUpdateSingleProvider,
+    oauthRemoveSingleProvider,
     oauthGetIdentities,
     authRefresh,
     authSetPassword,
@@ -572,6 +591,7 @@ const api = {
     getUserProfile,
     generateApiToken,
     generateSetPasswordToken,
+    userRequestPasswordChange,
     setUserDisabled,
     createUser,
     registerUser,

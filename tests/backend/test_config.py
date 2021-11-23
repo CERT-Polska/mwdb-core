@@ -94,9 +94,9 @@ def test_config_search_multi(admin_session):
         },
         "peers": {
             "in-blob": {
-                 "blob_name": "Peers blob name",
-                 "blob_type": "Peers blob type",
-                 "content": "Hello"
+                "blob_name": "Peers blob name",
+                "blob_type": "Peers blob type",
+                "content": "Hello"
             }
         }
     }

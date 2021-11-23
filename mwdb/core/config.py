@@ -45,6 +45,8 @@ def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
 class MWDBConfig(Config):
     # PostgreSQL database URI
     postgres_uri = key(cast=str, required=True)
+    # PostgreSQL database statement_timeout parameter
+    db_statement_timeout = key(cast=int, required=False, default=False)
     # Flask secret key
     secret_key = key(cast=str, required=True)
     # Redis database URI

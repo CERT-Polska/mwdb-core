@@ -1,4 +1,5 @@
-from .utils import ShouldRaise, random_name
+from pytest import fixture
+from .utils import ShouldRaise, random_name, rand_string
 
 
 def test_attribute_add(admin_session):
@@ -124,3 +125,79 @@ def test_attribute_definition_remove(admin_session, attr_session):
     assert len(attrs) == 0
     with ShouldRaise(404):
         admin_session.get_attribute(attr_name)
+
+
+@fixture(scope="module")
+def random_attribute(admin_session, attr_session):
+    """
+    Fixture with pre-created attribute key for value testing
+    """
+    sample_id = attr_session.add_sample()["id"]
+    attr_name = random_name().lower()
+    admin_session.add_attribute_definition(attr_name, "", hidden=False)
+    admin_session.add_attribute_permission(attr_name, group=attr_session.userinfo["login"], can_read=True, can_set=True)
+    return sample_id, attr_name
+
+
+def test_huge_json_attributes(admin_session, attr_session, random_attribute):
+    sample_id, attr_name = random_attribute
+    attr_value = {
+        "value": rand_string(128 * 1024),
+        "nested": {
+            "value": rand_string(128 * 1024)
+        }
+    }
+    attr_session.add_attribute(sample_id, attr_name, attr_value)
+    stored_attributes = [
+        attr["value"]
+        for attr in attr_session.get_attributes(sample_id)["attributes"]
+        if attr["key"] == attr_name
+        and isinstance(attr["value"], dict)
+        and sorted(attr["value"].keys()) == sorted(["nested", "value"])
+    ]
+    assert any(stored_attr == attr_value for stored_attr in stored_attributes)
+
+
+def test_basic_attribute_uniqueness(admin_session, attr_session, random_attribute):
+    sample_id, attr_name = random_attribute
+    attr_value = random_name()
+    attr_session.add_attribute(sample_id, attr_name, attr_value)
+    attr_session.add_attribute(sample_id, attr_name, attr_value)
+    stored_attributes = [
+        attr["value"]
+        for attr in attr_session.get_attributes(sample_id)["attributes"]
+        if attr["key"] == attr_name
+        and attr["value"] == attr_value
+    ]
+    assert len(stored_attributes) == 1
+
+
+def test_json_attribute_uniqueness(admin_session, attr_session, random_attribute):
+    sample_id, attr_name = random_attribute
+    unique_value = random_name()
+    first_value = {
+        "c": [3, 2, 1],
+        "a": [1, 2, 3],
+        "nested": {
+            "nested_abc": unique_value,
+            "abc_nested": unique_value
+        }
+    }
+    second_value = {
+        "nested": {
+            "abc_nested": unique_value,
+            "nested_abc": unique_value
+        },
+        "a": [1, 2, 3],
+        "c": [3, 2, 1],
+    }
+    assert first_value == second_value
+    attr_session.add_attribute(sample_id, attr_name, first_value)
+    attr_session.add_attribute(sample_id, attr_name, second_value)
+    stored_attributes = [
+        attr["value"]
+        for attr in attr_session.get_attributes(sample_id)["attributes"]
+        if attr["key"] == attr_name
+        and attr["value"] == first_value == second_value
+    ]
+    assert len(stored_attributes) == 1

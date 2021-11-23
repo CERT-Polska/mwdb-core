@@ -579,7 +579,6 @@ class MultiField(BaseField):
             )
 
     def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-
         string_column = ["TextBlob._content"]
         json_column = ["Config._cfg"]
 

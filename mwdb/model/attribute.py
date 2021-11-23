@@ -13,8 +13,15 @@ from . import db
 class Attribute(db.Model):
     __tablename__ = "attribute"
     __table_args__ = (
-        db.Index('ix_attribute_unique', "key", func.md5("value::text"), unique=True),
-        db.Index('ix_attribute_value', "value", postgresql_using="gin"),
+        # Assumes that JSONB key ordering is stable
+        db.Index(
+            "ix_attribute_unique",
+            "object_id",
+            "key",
+            func.md5("value::text"),
+            unique=True,
+        ),
+        db.Index("ix_attribute_value", "value", postgresql_using="gin"),
     )
 
     id = db.Column(db.Integer, primary_key=True)

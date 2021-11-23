@@ -95,6 +95,7 @@ export default function OAuthProvider() {
                             type="client_secret"
                             defaultValue={provider.client_secret}
                             onSubmit={handleSubmit}
+                            masked
                         />
                     </ProviderItem>
                     <ProviderItem label="Authorization endpoint">

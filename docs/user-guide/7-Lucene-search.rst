@@ -385,6 +385,58 @@ Nested searches can be performed as well. If you want to find object which is pa
 
    child:(tag:emotet AND child:(config.family:emotet))
 
+Multi field (\ ``multi:``\ )
+------------------------------------------------------------
+
+Search engine supports ``multi:`` special field that is useful for filtering out objects using multiple
+type of object attributes.
+
+Depending on type of object, we can use field ``multi:`` applying various object attributes separated by spaces.
+Types of attributes are automatically recognised.
+Below allowable attributes were listed for different type of objects, which can be used in query building.
+
+* File (sample)
+
+  * all hashes values
+
+* Config
+
+  * dhash values
+  * extract of configuration content
+
+* Blob
+
+  * dhash values
+  * extract of Blob content
+
+
+If you want to search for samples that have 0cb988d042a7f28dd5fe2b55b3f5ac7a ``md5`` value or
+3b0ee981 ``crc32`` value use below query.
+
+.. code-block::
+
+   multi:"0cb988d042a7f28dd5fe2b55b3f5ac7a 3b0ee981"
+
+If query contains only hashes, field ``multi:`` can be omitted.
+
+.. code-block::
+
+   0cb988d042a7f28dd5fe2b55b3f5ac7a eb1c78d4994f7a107f78dec529988900e3601852ae0bfdefb3e15967c6d8f127
+
+If you want to search for Configs that have configuration content which contain strings "abcd" or "xyz" or
+
+``dhash`` value eb1c78d4994f7a107f78dec529988900e3601852ae0bfdefb3e15967c6d8f127 - use below query
+
+.. code-block::
+
+   multi:"abcd xyz eb1c78d4994f7a107f78dec529988900e3601852ae0bfdefb3e15967c6d8f127"
+
+.. warning::
+
+    Multi-query terms containing extract of Config configuration or Blob content must be separated by spaces end surrounded by double quotes. Field ``multi:`` also has to be explicitly used.
+
+    Wildcards are not allowed for field ``multi:``. They are automatically used for Config configuration and Blob content.
+
 Quick queries
 -------------
 

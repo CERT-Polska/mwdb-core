@@ -59,20 +59,20 @@ export function makeSearchDateLink(field, date, endpoint) {
     );
 }
 
-export function queryFromHash(query, dhashOnly) {
-    // SHA256
-    if (/^[0-9a-fA-F]{64}$/g.test(query))
-        if (dhashOnly) return `dhash:${query.toLowerCase()}`;
-        else return `sha256:${query.toLowerCase()}`;
-    // No SHA256 and dhashOnly? Time to stop
-    if (dhashOnly) return query;
-    // SHA1
-    if (/^[0-9a-fA-F]{40}$/g.test(query)) return `sha1:${query.toLowerCase()}`;
-    // MD5
-    if (/^[0-9a-fA-F]{32}$/g.test(query)) return `md5:${query.toLowerCase()}`;
-    // SHA512
-    if (/^[0-9a-fA-F]{128}$/g.test(query))
-        return `sha512:${query.toLowerCase()}`;
+export function isHash(element) {
+    return (
+        /^[0-9a-fA-F]{8}$/g.test(element) ||
+        /^[0-9a-fA-F]{32}$/g.test(element) ||
+        /^[0-9a-fA-F]{40}$/g.test(element) ||
+        /^[0-9a-fA-F]{64}$/g.test(element) ||
+        /^[0-9a-fA-F]{128}$/g.test(element)
+    );
+}
+
+export function multiFromHashes(query) {
+    const elements = query.split(/\s+/);
+    if (elements.every(isHash))
+        return `multi:"${elements.join(" ").toLowerCase()}"`;
     return query;
 }
 

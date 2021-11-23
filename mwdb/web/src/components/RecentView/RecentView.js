@@ -7,7 +7,7 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import {
     encodeSearchQuery,
     decodeSearchQuery,
-    queryFromHash,
+    multiFromHashes,
     addFieldToQuery,
 } from "@mwdb-web/commons/helpers";
 import { View } from "@mwdb-web/commons/ui";
@@ -59,8 +59,8 @@ export default function RecentView(props) {
     function setCurrentQuery(query) {
         // If query is already submitted: do nothing
         if (query === submittedQuery) return;
-        // Optionally convert query if only hash was provided
-        query = queryFromHash(query, props.dhashOnly);
+        // Optionally convert query if only hash or hashes were provided
+        query = multiFromHashes(query);
         // Set query in URL (currentQuery)
         history.push(getQueryURL(query));
     }

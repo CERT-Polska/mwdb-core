@@ -4,7 +4,8 @@ from functools import partial
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_restful import Api
-from werkzeug.exceptions import HTTPException
+from sqlalchemy.exc import OperationalError
+from werkzeug.exceptions import GatewayTimeout, HTTPException
 
 from mwdb.version import app_version
 
@@ -68,6 +69,9 @@ class Service(Api):
         logger = log.getLogger()
         if isinstance(e, HTTPException):
             logger.error(str(e))
+        elif isinstance(e, OperationalError):
+            logger.error(str(e))
+            raise GatewayTimeout("Request canceled due to statement timeout")
         else:
             logger.exception("Unhandled exception occurred")
 

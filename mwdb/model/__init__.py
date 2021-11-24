@@ -2,8 +2,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 from mwdb.core.config import app_config
 
-if app_config.mwdb.db_statement_timeout:
-    st_timeout = app_config.mwdb.db_statement_timeout
+if app_config.mwdb.statement_timeout:
+    st_timeout = app_config.mwdb.statement_timeout
     db = SQLAlchemy(
         engine_options={
             "connect_args": {"options": f"-c statement_timeout={st_timeout}"}

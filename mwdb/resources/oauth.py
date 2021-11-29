@@ -37,6 +37,9 @@ class OpenIDProviderResource(Resource):
                 content:
                   application/json:
                     schema: OpenIDProviderListResponseSchema
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         providers = [
             name
@@ -66,6 +69,9 @@ class OpenIDProviderResource(Resource):
         responses:
             200:
                 description: When provider is successfully added
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = OpenIDProviderCreateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -119,6 +125,9 @@ class OpenIDAuthenticateResource(Resource):
                 content:
                   application/json:
                     schema: OpenIDLoginResponseSchema
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         provider = (
             db.session.query(OpenIDProvider)
@@ -303,6 +312,9 @@ class OpenIDBindAccountResource(Resource):
         responses:
             200:
                 description: When OpenID identity was successively bound to mwdb account
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         provider = (
             db.session.query(OpenIDProvider)
@@ -359,6 +371,9 @@ class OpenIDAccountIdentitiesResource(Resource):
                 content:
                   application/json:
                     schema: OpenIDProviderListResponseSchema
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         identities = [
             identity.provider.name for identity in g.auth_user.openid_identities

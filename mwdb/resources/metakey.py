@@ -78,6 +78,9 @@ class MetakeyResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have
                     access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = MetakeyListRequestSchema()
         obj = load_schema(request.args, schema)
@@ -142,6 +145,9 @@ class MetakeyResource(Resource):
 
                     When attribute key is not defined or user doesn't have
                     privileges to set that one.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = MetakeyItemRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -219,6 +225,9 @@ class MetakeyResource(Resource):
                     to this object.
                     When attribute key is not defined or user doesn't have privileges
                     to set that one.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = MetakeyItemRemoveRequestSchema()
         obj = load_schema(request.args, schema)
@@ -267,6 +276,9 @@ class MetakeyListDefinitionResource(Resource):
                     schema: MetakeyDefinitionListResponseSchema
             400:
                 description: When used unknown access type (other than read or set)
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         if access == "read":
             metakeys = AttributeDefinition.query_for_read()
@@ -303,6 +315,9 @@ class MetakeyListDefinitionManageResource(Resource):
                     schema: MetakeyDefinitionManageListResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         metakeys = (
             db.session.query(AttributeDefinition)
@@ -344,6 +359,9 @@ class MetakeyDefinitionManageResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When specified attribute key doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         metakey = (
             db.session.query(AttributeDefinition)
@@ -391,6 +409,9 @@ class MetakeyDefinitionManageResource(Resource):
                     When one of attribute definition fields is missing or incorrect.
             403:
                 description: When user doesn't have `manage_users` capability.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = MetakeyDefinitionItemRequestArgsSchema()
         args_obj = load_schema({"key": key}, schema)
@@ -449,6 +470,9 @@ class MetakeyDefinitionManageResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When metakey doesn't exist.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = MetakeyUpdateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -511,6 +535,9 @@ class MetakeyDefinitionManageResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When specified attribute key doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         metakey = (
             db.session.query(AttributeDefinition)
@@ -568,6 +595,9 @@ class MetakeyPermissionResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When attribute key or group doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = MetakeyPermissionSetRequestArgsSchema()
         args_obj = load_schema({"key": key, "group_name": group_name}, schema)
@@ -635,6 +665,9 @@ class MetakeyPermissionResource(Resource):
             404:
                 description: |
                     When attribute key or group or group permission doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = MetakeyPermissionSetRequestArgsSchema()
         args_obj = load_schema({"key": key, "group_name": group_name}, schema)

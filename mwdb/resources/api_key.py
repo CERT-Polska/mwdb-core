@@ -64,6 +64,9 @@ class APIKeyIssueResource(Resource):
             404:
                 description: |
                     If provided login doesn't exist.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         if (
             not g.auth_user.has_rights(Capabilities.manage_users)
@@ -143,6 +146,9 @@ class APIKeyResource(Resource):
                 description: |
                     When API key doesn't exist or user doesn't own the key and
                     doesn't have the `manage_users` capability.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         obj = load_schema({"id": api_key_id}, APIKeyIdentifierBase())
 
@@ -202,6 +208,9 @@ class APIKeyResource(Resource):
                 description: |
                     When API key doesn't exist or user doesn't own the key and
                     doesn't have the `manage_users` capability.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         obj = load_schema({"id": api_key_id}, APIKeyIdentifierBase())
 

@@ -74,6 +74,9 @@ class LoginResource(Resource):
               description: |
                 When credentials are invalid, account is inactive
                 or system is set into maintenance mode.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AuthLoginRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -147,6 +150,9 @@ class RegisterResource(Resource):
                 description: When user login or group name already exists.
             500:
                 description: When ReCAPTCHA verification service is unavailable.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         if not app_config.mwdb.enable_registration:
             raise Forbidden("User registration is not enabled.")
@@ -211,6 +217,9 @@ class ChangePasswordResource(Resource):
                     doesn't match the policy
             403:
                 description: When set password token is no longer valid
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AuthSetPasswordRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -323,6 +332,9 @@ class RecoverPasswordResource(Resource):
                 description: |
                     When SMTP server is unavailable or not properly configured
                     on the server.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AuthRecoverPasswordRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -384,6 +396,9 @@ class RefreshTokenResource(Resource):
               content:
                 application/json:
                   schema: AuthSuccessResponseSchema
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         user = g.auth_user
 
@@ -451,6 +466,9 @@ class AuthGroupListResource(Resource):
                 content:
                   application/json:
                     schema: GroupListResponseSchema
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         objs = (
             db.session.query(Group)

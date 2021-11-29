@@ -141,7 +141,7 @@ Your MWDB instance will be available on port 5000 (use ``--port`` to change that
    Remember to run ``mwdb-core configure`` after each version upgrade to apply database migrations
 
 
-Alternative setup using Docker Compose
+Alternative setup with Docker Compose
 --------------------------------------
 
 The quickest way setup MWDB is to just clone the repository and use Docker-Compose. We recommend this method **only for testing** because it can be a bit more difficult to install extensions and integrate with other services.

@@ -72,6 +72,9 @@ class OpenIDProviderResource(Resource):
         responses:
             200:
                 description: When provider is successfully added
+            409:
+                description: |
+                    This OIDC provider is already registered.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -135,7 +138,10 @@ class OpenIDSingleProviderResource(Resource):
             403:
                 description: When user doesn't have `manage_users` capability.
             404:
-                description: When provider doesn't exist
+                description: Requested provider doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         provider = (
             db.session.query(OpenIDProvider)
@@ -179,7 +185,10 @@ class OpenIDSingleProviderResource(Resource):
             403:
                 description: When user doesn't have `manage_users` capability.
             404:
-                description: When provider doesn't exist
+                description: Requested provider doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = OpenIDProviderUpdateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -250,6 +259,9 @@ class OpenIDSingleProviderResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When provider doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         provider = (
             db.session.query(OpenIDProvider)
@@ -287,6 +299,8 @@ class OpenIDAuthenticateResource(Resource):
                 content:
                   application/json:
                     schema: OpenIDLoginResponseSchema
+            404:
+                description: Requested provider doesn't exist
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -476,6 +490,10 @@ class OpenIDBindAccountResource(Resource):
         responses:
             200:
                 description: When OpenID identity was successively bound to mwdb account
+            404:
+                description: Requested provider doesn't exist
+            409:
+                description: When Provider identity is already bound with mwdb account
             503:
                 description: |
                     Request canceled due to database statement timeout.

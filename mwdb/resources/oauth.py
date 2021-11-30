@@ -15,7 +15,10 @@ from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,
     OpenIDLoginResponseSchema,
     OpenIDProviderCreateRequestSchema,
+    OpenIDProviderItemResponseSchema,
     OpenIDProviderListResponseSchema,
+    OpenIDProviderSuccessResponseSchema,
+    OpenIDProviderUpdateRequestSchema,
 )
 from mwdb.schema.user import UserLoginSchemaBase
 
@@ -102,6 +105,165 @@ class OpenIDProviderResource(Resource):
         )
         db.session.add(provider)
         db.session.commit()
+
+
+class OpenIDSingleProviderResource(Resource):
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def get(self, provider_name):
+        """
+        ---
+        summary: Get provider information
+        description: |
+            Get registered OIDC provider information.
+        security:
+            - bearerAuth: []
+        tags:
+            - auth
+        parameters:
+            - in: path
+              name: provider_name
+              schema:
+                type: string
+              description: OpenID provider name.
+        responses:
+            200:
+                description: Information about registered provider
+                content:
+                  application/json:
+                    schema: OpenIDProviderItemResponseSchema
+            403:
+                description: When user doesn't have `manage_users` capability.
+            404:
+                description: When provider doesn't exist
+        """
+        provider = (
+            db.session.query(OpenIDProvider)
+            .filter(OpenIDProvider.name == provider_name)
+            .first()
+        )
+        if not provider:
+            raise NotFound(f"Requested provider name '{provider_name}' not found")
+        schema = OpenIDProviderItemResponseSchema()
+        return schema.dump(provider)
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def put(self, provider_name):
+        """
+        ---
+        summary: Modify registered OIDC provider
+        description: |
+            Modify registered OIDC provider.
+        security:
+            - bearerAuth: []
+        tags:
+            - auth
+        parameters:
+            - in: path
+              name: provider_name
+              schema:
+                type: string
+              description: OpenID provider name.
+        requestBody:
+            description: OpenID Connect configuration
+            content:
+              application/json:
+                schema: OpenIDProviderUpdateRequestSchema
+        responses:
+            200:
+                description: When provider was updated successfully
+                content:
+                  application/json:
+                    schema: OpenIDProviderSuccessResponseSchema
+            403:
+                description: When user doesn't have `manage_users` capability.
+            404:
+                description: When provider doesn't exist
+        """
+        schema = OpenIDProviderUpdateRequestSchema()
+        obj = loads_schema(request.get_data(as_text=True), schema)
+        provider = (
+            db.session.query(OpenIDProvider)
+            .filter(OpenIDProvider.name == provider_name)
+            .first()
+        )
+        if not provider:
+            raise NotFound(f"Requested provider name '{provider_name}' not found")
+
+        client_id = obj["client_id"]
+        if client_id is not None:
+            provider.client_id = client_id
+
+        client_secret = obj["client_secret"]
+        if client_secret is not None:
+            provider.client_secret = client_secret
+
+        authorization_endpoint = obj["authorization_endpoint"]
+        if authorization_endpoint is not None:
+            provider.authorization_endpoint = authorization_endpoint
+
+        token_endpoint = obj["token_endpoint"]
+        if token_endpoint is not None:
+            provider.token_endpoint = token_endpoint
+
+        userinfo_endpoint = obj["userinfo_endpoint"]
+        if userinfo_endpoint is not None:
+            provider.userinfo_endpoint = userinfo_endpoint
+
+        jwks_endpoint = obj["jwks_endpoint"]
+        if jwks_endpoint is not None:
+            provider.jwks_endpoint = jwks_endpoint
+
+        db.session.commit()
+
+        logger.info("Provider updated", extra={"provider": provider_name})
+
+        schema = OpenIDProviderSuccessResponseSchema()
+        return schema.dump({"name": provider.name})
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.manage_users)
+    def delete(self, provider_name):
+        """
+        ---
+        summary: Delete registered OIDC provider
+        description: |
+            Remove registered OIDC provider form database.
+        security:
+            - bearerAuth: []
+        tags:
+            - auth
+        parameters:
+            - in: path
+              name: provider_name
+              schema:
+                type: string
+              description: OpenID provider name.
+        responses:
+            200:
+                description: When provider was removed successfully
+                content:
+                  application/json:
+                    schema: OpenIDProviderSuccessResponseSchema
+            403:
+                description: When user doesn't have `manage_users` capability.
+            404:
+                description: When provider doesn't exist
+        """
+        provider = (
+            db.session.query(OpenIDProvider)
+            .filter(OpenIDProvider.name == provider_name)
+            .first()
+        )
+        if not provider:
+            raise NotFound(f"Requested provider name '{provider_name}' not found")
+        db.session.delete(provider)
+        db.session.commit()
+
+        logger.info("Provider was deleted", extra={"provider": provider_name})
+        schema = OpenIDProviderSuccessResponseSchema()
+        return schema.dump({"name": provider_name})
 
 
 class OpenIDAuthenticateResource(Resource):
@@ -296,6 +458,8 @@ class OpenIDBindAccountResource(Resource):
         summary: Bind mwdb account with OpenID provider
         description: |
             Bind authenticated mwdb account with an expernat OpenID provider
+        security:
+            - bearerAuth: []
         tags:
             - auth
         parameters:
@@ -363,6 +527,8 @@ class OpenIDAccountIdentitiesResource(Resource):
         summary: List OpenID bound external identities
         description: |
             List of related identities to authenticated mwdb account
+        security:
+            - bearerAuth: []
         tags:
             - auth
         responses:

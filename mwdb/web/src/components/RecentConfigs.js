@@ -124,7 +124,6 @@ export default function RecentConfigs(props) {
             type="config"
             rowComponent={RecentConfigRow}
             headerComponent={RecentConfigHeader}
-            dhashOnly
             {...props}
         />
     );

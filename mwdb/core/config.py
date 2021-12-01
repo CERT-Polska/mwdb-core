@@ -63,6 +63,8 @@ class MWDBConfig(Config):
     storage_provider = key(
         cast=storage_provider_from_str, required=False, default="disk"
     )
+    # File upload timeout
+    file_upload_timeout = key(cast=int, required=False, default=60000)
     # Folder for uploads
     uploads_folder = key(cast=path, required=False)
     # Should we break up the uploads into different folders for example:

@@ -166,7 +166,9 @@ export default function App() {
                 path="/upload"
                 condition={auth.hasCapability(Capability.addingFiles)}
             >
-                <Upload />
+                <Upload
+                    fileUploadTimeout={config.config["file_upload_timeout"]}
+                />
             </ProtectedRoute>
             <ProtectedRoute exact path="/search">
                 {() => <Search />}

@@ -130,7 +130,8 @@ class Upload extends Component {
                 this.state.file,
                 this.parentFromQuery || this.state.parent,
                 this.sharingModeToUploadParam(),
-                this.state.attributes
+                this.state.attributes,
+                this.props.fileUploadTimeout
             );
             this.sha256 = response.data.sha256;
             this.props.history.replace("/file/" + this.sha256, {

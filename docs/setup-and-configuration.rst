@@ -31,7 +31,7 @@ It's highly recommended to create a fresh `virtualenv <https://docs.python.org/3
    (venv) ~/mwdb$
 
 .. note::
-   If you are a bit overwhelmed by setting up PostgreSQL database and you are looking for quick setup method just for testing: first make sure you have Docker and Docker-Compose installed and go to the `Alternative setup using Docker-Compose <#Alternative-setup-using-Docker-Compose>`_.
+   If you are a bit overwhelmed by setting up PostgreSQL database and you are looking for quick setup method just for testing: first make sure you have Docker and Docker-Compose installed and go to the `Alternative setup with Docker-Compose <#Alternative-setup-with-Docker-Compose>`_.
 
    You can also setup temporary PostgreSQL database container using Docker image:
 

@@ -12,10 +12,12 @@ import {
     ConfirmationModal,
     ActionCopyToClipboard,
 } from "@mwdb-web/commons/ui";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import {
     FirstAnalysisBanner,
     KartonAttributeRenderer,
 } from "./AttributeKarton";
+import { useHistory } from "react-router-dom";
 
 let attributeRenderers = {
     karton: KartonAttributeRenderer,
@@ -29,6 +31,7 @@ function DefaultAttributeRenderer(props) {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
+    const history = useHistory();
 
     const [collapsed, setCollapsed] = useState(true);
     const [isOpenDeleteModal, setOpenDeleteModal] = useState(false);
@@ -53,7 +56,6 @@ function DefaultAttributeRenderer(props) {
     }
 
     const visibleValues = collapsed ? props.values.slice(0, 3) : props.values;
-
     return (
         <tr key={props.label}>
             <th
@@ -70,7 +72,13 @@ function DefaultAttributeRenderer(props) {
                 ) : (
                     []
                 )}{" "}
-                {props.label}
+                <span
+                    data-toggle="tooltip"
+                    title={props.name}
+                    style={{ cursor: "pointer" }}
+                >
+                    {props.label}
+                </span>
             </th>
             <td className="flickerable">
                 {visibleValues.map((attr) => (
@@ -86,11 +94,34 @@ function DefaultAttributeRenderer(props) {
                                 tooltipMessage="Copy value to clipboard"
                             />
                         </span>
+                        <span
+                            className="ml-2"
+                            data-toggle="tooltip"
+                            title="Search for that attribute values"
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                history.push(
+                                    makeSearchLink(
+                                        `meta.${props.name}`,
+                                        attr.value,
+                                        false
+                                    )
+                                );
+                            }}
+                        >
+                            <i>
+                                <FontAwesomeIcon
+                                    icon="search"
+                                    size="sm"
+                                    style={{ cursor: "pointer" }}
+                                />
+                            </i>
+                        </span>
                         {auth.hasCapability(Capability.removingAttributes) && (
                             <span
                                 className="ml-2"
                                 data-toggle="tooltip"
-                                title="Remove attribute value from this object."
+                                title="Remove attribute value from this object"
                                 onClick={() => {
                                     setAttributeToRemote({
                                         key: attr.key,
@@ -181,7 +212,6 @@ function ObjectAttributes(props) {
     }, [getAttributes]);
 
     if (!attributes) return [];
-
     return (
         <Extendable
             ident="attributesList"
@@ -211,6 +241,7 @@ function ObjectAttributes(props) {
                             return (
                                 <Attribute
                                     key={key}
+                                    name={key}
                                     label={label}
                                     values={values}
                                     object={context.object}

@@ -199,3 +199,10 @@ def test_object_conflict(admin_session):
     admin_session.add_sample(name, content)
     with ShouldRaise(status_code=409):
         admin_session.add_blob(None, name, name, content)
+
+
+def test_zero_starting_crc32(admin_session):
+    name = rand_string()
+    content = b'\xf7\xb8\xb4\xab\x6b\x35\x31\x8a'
+    sample = admin_session.add_sample(name, content)
+    assert sample["crc32"] == "000d06ec"

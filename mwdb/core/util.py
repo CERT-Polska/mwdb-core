@@ -120,7 +120,7 @@ def calc_crc32(stream):
     if csum is not None:
         csum = csum & 0xFFFFFFFF
 
-    return "{:x}".format(csum)
+    return "{:08x}".format(csum)
 
 
 def paginate_fast(q, page, per_page):

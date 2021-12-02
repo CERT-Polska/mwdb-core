@@ -240,6 +240,7 @@ function ObjectAttributes(props) {
                                 DefaultAttributeRenderer;
                             return (
                                 <Attribute
+                                    key={key}
                                     name={key}
                                     label={label}
                                     values={values}

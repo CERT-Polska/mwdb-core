@@ -61,6 +61,7 @@ class ServerInfoResource(Resource):
                 "is_karton_enabled": app_config.mwdb.enable_karton,
                 "is_oidc_enabled": app_config.mwdb.enable_oidc,
                 "recaptcha_site_key": app_config.mwdb.recaptcha_site_key,
+                "statement_timeout": app_config.mwdb.statement_timeout,
             }
         )
 

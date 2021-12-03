@@ -36,6 +36,9 @@ class ShareGroupListResource(Resource):
                 content:
                   application/json:
                     schema: ShareGroupListResponseSchema
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         if g.auth_user.has_rights(Capabilities.sharing_objects):
             groups = db.session.query(Group.name)
@@ -93,6 +96,9 @@ class ShareResource(Resource):
                 description: |
                     When object doesn't exist
                     or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         if g.auth_user.has_rights(Capabilities.sharing_objects):
             groups = db.session.query(Group.name)
@@ -161,6 +167,9 @@ class ShareResource(Resource):
                 description: |
                     When object or group doesn't exist
                     or user doesn't have access to.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = ShareRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)

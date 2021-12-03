@@ -187,6 +187,9 @@ class ObjectResource(Resource):
                     or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         if "page" in request.args:
             logger.warning("'%s' used legacy 'page' parameter", g.auth_user.login)
@@ -260,6 +263,9 @@ class ObjectItemResource(Resource, ObjectUploader):
                 description: |
                     When object doesn't exist or user doesn't have access
                     to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         obj = self.ObjectType.access(identifier)
         if obj is None:
@@ -331,6 +337,9 @@ class ObjectItemResource(Resource, ObjectUploader):
                 description: |
                     When object doesn't exist or user doesn't have
                     access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         obj = self.ObjectType.access(identifier)
 
@@ -376,6 +385,9 @@ class ObjectCountResource(Resource):
                 description: |
                     When wrong parameters were provided
                     or syntax error occurred in Lucene query
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = ObjectCountRequestSchema()
         obj = load_schema(request.args, schema)
@@ -431,6 +443,9 @@ class ObjectFavoriteResource(Resource):
                 description: When user doesn't have `personalize` capability.
             404:
                 description: When object doesn't exist.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
 
         user = g.auth_user
@@ -481,6 +496,9 @@ class ObjectFavoriteResource(Resource):
                 description: When user doesn't have `personalize` capability.
             404:
                 description: When object doesn't exist.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
 
         user = g.auth_user

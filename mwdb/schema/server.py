@@ -13,6 +13,7 @@ class ServerInfoResponseSchema(Schema):
     is_karton_enabled = fields.Boolean(required=True, allow_none=False)
     is_oidc_enabled = fields.Boolean(required=True, allow_none=False)
     recaptcha_site_key = fields.Str(required=True, allow_none=True)
+    request_timeout = fields.Int(required=True, allow_none=False)
 
 
 class ServerAdminInfoResponseSchema(Schema):

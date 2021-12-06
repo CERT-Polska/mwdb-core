@@ -58,7 +58,8 @@ class MWDBConfig(Config):
     base_url = key(cast=str, required=False, default="http://127.0.0.1")
     # Flask additional settings file (optional)
     flask_config_file = key(cast=path, required=False)
-
+    # Axios request timeout
+    request_timeout = key(cast=int, required=False, default=8000)
     # Which storage provider to use (options: disk or s3)
     storage_provider = key(
         cast=storage_provider_from_str, required=False, default="disk"

@@ -62,7 +62,7 @@ function AttributeRenderer({
     const attributeLabel = attributeDefinition.label || attributeKey;
 
     const attributeValues = visibleValues.map((attribute) => {
-        let value;
+        let valueRender, valueRaw;
         if (typeof attribute.value === "string") {
             // URL templates are supported only for string values
             const url = attributeDefinition["url_template"]
@@ -72,19 +72,21 @@ function AttributeRenderer({
                   )
                 : null;
             if (url) {
-                value = <a href={url}>{attribute.value}</a>;
+                valueRender = <a href={url}>{attribute.value}</a>;
             } else {
-                value = <span>{attribute.value}</span>;
+                valueRender = <span>{attribute.value}</span>;
             }
+            valueRaw = attribute.value;
         } else {
-            value = <pre>{JSON.stringify(attribute.value, null, 4)}</pre>;
+            valueRender = <pre>{JSON.stringify(attribute.value, null, 4)}</pre>;
+            valueRaw = JSON.stringify(attribute.value);
         }
         return (
             <div key={attribute.id}>
-                {value}
+                {valueRender}
                 <span className="ml-2">
                     <ActionCopyToClipboard
-                        text={String(attribute.value)}
+                        text={valueRaw}
                         tooltipMessage="Copy value to clipboard"
                     />
                 </span>
@@ -97,7 +99,7 @@ function AttributeRenderer({
                         history.push(
                             makeSearchLink(
                                 `attribute.${attributeKey}`,
-                                String(attribute.value),
+                                valueRaw,
                                 false
                             )
                         );

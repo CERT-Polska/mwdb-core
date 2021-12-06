@@ -39,6 +39,9 @@ class QuickQueryResource(Resource):
                 description: When user doesn't have `personalize` capability.
             400:
                 description: When query is invalid
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = QuickQuerySchemaBase()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -80,6 +83,9 @@ class QuickQueryResource(Resource):
                     schema:
                       type: array
                       items: QuickQueryResponseSchema
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         quick_queries = (
             db.session.query(QuickQuery)
@@ -117,6 +123,9 @@ class QuickQueryItemResource(Resource):
                 description: When user doesn't have `personalize` capability.
             404:
                 description: When query was not found.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         quick_query = (
             db.session.query(QuickQuery)

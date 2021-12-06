@@ -52,6 +52,9 @@ class TagListResource(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/TagItemResponse'
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = TagListRequestSchema()
         obj = load_schema(request.args, schema)
@@ -115,6 +118,9 @@ class TagResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have
                     access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = access_object(type, identifier)
         if db_object is None:
@@ -171,6 +177,9 @@ class TagResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have
                     access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = TagRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -241,6 +250,9 @@ class TagResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have
                     access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
 
         schema = TagRequestSchema()

@@ -43,6 +43,9 @@ class SearchResource(Resource):
                         $ref: '#/components/schemas/ObjectListItemResponse'
             400:
                 description: When request body or query syntax is invalid
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = SearchRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)

@@ -75,6 +75,9 @@ class AttributeListResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have
                     access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AttributeListRequestSchema()
         obj = load_schema(request.args, schema)
@@ -139,6 +142,9 @@ class AttributeListResource(Resource):
 
                     When attribute key is not defined or user doesn't have
                     privileges to set that one.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AttributeItemRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -206,6 +212,9 @@ class AttributeResource(Resource):
                     When attribute key is not defined or user doesn't have privileges
                     to set that one.
                     When attribute is already deleted
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = access_object(type, identifier)
         if db_object is None:
@@ -252,6 +261,9 @@ class AttributeDefinitionListResource(Resource):
                 description: |
                     When requested `manage` access
                     but user doesn't have 'manage_users' capability
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AttributeDefinitionListRequestSchema()
         obj = load_schema(request.args, schema)
@@ -306,6 +318,9 @@ class AttributeDefinitionListResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             409:
                 description: If attribute key is already defined
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AttributeDefinitionCreateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -364,6 +379,9 @@ class AttributeDefinitionResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When specified attribute key doesn't exist
+            503:
+                description: |
+                   Request canceled due to database statement timeout.
         """
         attribute_definition = (
             db.session.query(AttributeDefinition)
@@ -413,6 +431,9 @@ class AttributeDefinitionResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When attribute doesn't exist.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AttributeDefinitionUpdateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -474,6 +495,9 @@ class AttributeDefinitionResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When specified attribute key doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         attribute_definition = (
             db.session.query(AttributeDefinition)
@@ -518,6 +542,9 @@ class AttributePermissionResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When attribute key doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         attribute_definition = (
             db.session.query(AttributeDefinition)
@@ -569,6 +596,9 @@ class AttributePermissionResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When attribute key or group doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AttributePermissionUpdateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -630,6 +660,9 @@ class AttributePermissionResource(Resource):
             404:
                 description: |
                     When attribute key or group or group permission doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = AttributePermissionDeleteRequestSchema()
         obj = load_schema(request.args, schema)

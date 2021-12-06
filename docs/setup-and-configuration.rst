@@ -31,7 +31,7 @@ It's highly recommended to create a fresh `virtualenv <https://docs.python.org/3
    (venv) ~/mwdb$
 
 .. note::
-   If you are a bit overwhelmed by setting up PostgreSQL database and you are looking for quick setup method just for testing: first make sure you have Docker and Docker-Compose installed and go to the `Alternative setup using Docker-Compose <#Alternative-setup-using-Docker-Compose>`_.
+   If you are a bit overwhelmed by setting up PostgreSQL database and you are looking for quick setup method just for testing: first make sure you have Docker and Docker-Compose installed and go to the `Alternative setup with Docker-Compose <#Alternative-setup-with-Docker-Compose>`_.
 
    You can also setup temporary PostgreSQL database container using Docker image:
 
@@ -141,7 +141,7 @@ Your MWDB instance will be available on port 5000 (use ``--port`` to change that
    Remember to run ``mwdb-core configure`` after each version upgrade to apply database migrations
 
 
-Alternative setup using Docker Compose
+Alternative setup with Docker Compose
 --------------------------------------
 
 The quickest way setup MWDB is to just clone the repository and use Docker-Compose. We recommend this method **only for testing** because it can be a bit more difficult to install extensions and integrate with other services.
@@ -241,6 +241,8 @@ Basic settings:
 * ``uploads_folder`` (string, required) - Path where MWDB stores uploaded files
 * ``file_upload_timeout`` (integer) - File upload process will be terminated if it takes more than this parameter value in milliseconds. Default value is 60000 ms.
 * ``base_url`` (string) - Base URL of MWDB web application, used for registration mail templates. Default is ``http://127.0.0.1``
+* ``statement_timeout`` (integer) - Database statement_timeout parameter. Database server aborts any statement that takes more than the specified number of milliseconds.
+
 
 Web application settings:
 

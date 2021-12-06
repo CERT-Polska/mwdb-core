@@ -51,6 +51,9 @@ class CommentResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have access
                     to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = access_object(type, identifier)
         if not db_object:
@@ -104,6 +107,9 @@ class CommentResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have access
                     to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = CommentRequestSchema()
 
@@ -168,6 +174,9 @@ class CommentDeleteResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have access
                     to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = access_object(type, identifier)
         if db_object is None:

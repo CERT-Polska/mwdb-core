@@ -184,6 +184,9 @@ class RemoteFilePullResource(RemotePullResource):
                     in the application config
             409:
                 description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         remote = RemoteAPI(remote_name)
         response = remote.request("GET", f"file/{identifier}")
@@ -260,6 +263,9 @@ class RemoteConfigPullResource(RemotePullResource):
                     in the application config
             409:
                 description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         remote = RemoteAPI(remote_name)
         config_spec = remote.request("GET", f"config/{identifier}").json()
@@ -354,6 +360,9 @@ class RemoteTextBlobPullResource(RemotePullResource):
                     in the application config
             409:
                 description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         remote = RemoteAPI(remote_name)
         spec = remote.request("GET", f"blob/{identifier}").json()
@@ -410,6 +419,9 @@ class RemoteFilePushResource(RemotePullResource):
                 description: |
                     When the name of the remote instance is not figured
                     in the application config or object doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = File.access(identifier)
         if db_object is None:
@@ -470,6 +482,9 @@ class RemoteConfigPushResource(RemotePullResource):
                 description: |
                     When the name of the remote instance is not figured
                     in the application config or object doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = Config.access(identifier)
         if db_object is None:
@@ -547,6 +562,9 @@ class RemoteTextBlobPushResource(RemotePullResource):
                 description: |
                     When the name of the remote instance is not figured
                     in the application config or object doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = TextBlob.access(identifier)
         if db_object is None:

@@ -240,6 +240,8 @@ Basic settings:
 * ``secret_key`` (string, required) - Secret key used by Flask application and to sign authentication tokens. Change of that value will invalidate all sessions and all registered API keys.
 * ``uploads_folder`` (string, required) - Path where MWDB stores uploaded files
 * ``base_url`` (string) - Base URL of MWDB web application, used for registration mail templates. Default is ``http://127.0.0.1``
+* ``statement_timeout`` (integer) - Database statement_timeout parameter. Database server aborts any statement that takes more than the specified number of milliseconds.
+
 
 Web application settings:
 

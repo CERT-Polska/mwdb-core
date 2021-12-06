@@ -49,6 +49,9 @@ class ConfigStatsResource(Resource):
                 content:
                   application/json:
                     schema: ConfigStatsResponseSchema
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = ConfigStatsRequestSchema()
         params = load_schema(request.args, schema)
@@ -200,6 +203,9 @@ class ConfigResource(ObjectResource, ConfigUploader):
                     or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().get()
 
@@ -265,6 +271,9 @@ class ConfigResource(ObjectResource, ConfigUploader):
                     or user doesn't have permission to share objects with that group
             409:
                 description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = ConfigCreateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -304,6 +313,9 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
                 description: |
                     When config doesn't exist, object is not a config
                     or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().get(identifier)
 
@@ -399,6 +411,9 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
                     with that group
             409:
                 description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().put(identifier)
 
@@ -431,5 +446,8 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
                 description: |
                     When config doesn't exist, object is not a config or
                     user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().delete(identifier)

@@ -95,6 +95,9 @@ class FileResource(ObjectResource, FileUploader):
                     or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().get()
 
@@ -162,6 +165,9 @@ class FileResource(ObjectResource, FileUploader):
                     or user doesn't have permission to share objects with that group
             409:
                 description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = FileCreateRequestSchema()
         obj = load_schema(request.form.to_dict(), schema)
@@ -201,6 +207,9 @@ class FileItemResource(ObjectItemResource, FileUploader):
                 description: |
                     When file doesn't exist, object is not a file
                     or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().get(identifier)
 
@@ -283,6 +292,9 @@ class FileItemResource(ObjectItemResource, FileUploader):
                     permission to share objects with that group
             409:
                 description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().post(identifier)
 
@@ -315,6 +327,9 @@ class FileItemResource(ObjectItemResource, FileUploader):
                 description: |
                     When file doesn't exist, object is not a file
                     or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().delete(identifier)
 
@@ -362,6 +377,9 @@ class FileDownloadResource(Resource):
                 description: |
                     When file doesn't exist, object is not a file
                     or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         access_token = request.args.get("token")
 
@@ -419,6 +437,9 @@ class FileDownloadResource(Resource):
                 description: |
                     When file doesn't exist, object is not a file
                     or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         file = File.access(identifier)
         if file is None:

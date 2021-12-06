@@ -91,7 +91,6 @@ export function ConfigProvider(props) {
     useEffect(() => {
         if (Number.isInteger(serverConfig.config["request_timeout"])) {
             api.axios.defaults.timeout = serverConfig.config["request_timeout"];
-            console.log(api.axios.defaults.timeout);
         }
     }, [serverConfig]);
 

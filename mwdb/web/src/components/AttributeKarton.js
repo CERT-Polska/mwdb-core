@@ -190,7 +190,11 @@ function KartonAttributeRow(props) {
     );
 }
 
-export function FirstAnalysisBanner(props) {
+export function FirstAnalysisBanner({
+    attributes,
+    onUpdateAttributes,
+    object,
+}) {
     const [submitted, setSubmitted] = useState(false);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
@@ -198,11 +202,11 @@ export function FirstAnalysisBanner(props) {
         Capability.kartonReanalyze
     );
 
-    if (!isReanalysisAvailable || !props.attributes) return [];
+    if (!isReanalysisAvailable || !attributes) return [];
 
     if (
-        Object.keys(props.attributes).some((label) =>
-            props.attributes[label].some((attr) => attr.key === "karton")
+        Object.keys(attributes).some((label) =>
+            attributes[label].some((attr) => attr.key === "karton")
         )
     )
         return [];
@@ -211,9 +215,9 @@ export function FirstAnalysisBanner(props) {
         ev.preventDefault();
         setSubmitted(true);
         try {
-            await api.resubmitKartonAnalysis(props.object.id);
+            await api.resubmitKartonAnalysis(object.id);
             // Update attributes
-            props.onUpdateAttributes();
+            onUpdateAttributes();
         } catch (error) {
             context.setObjectError(error);
         }
@@ -234,7 +238,7 @@ export function FirstAnalysisBanner(props) {
     );
 }
 
-export function KartonAttributeRenderer(props) {
+export function KartonAttributeRenderer({ values, onUpdateAttributes }) {
     const [maxItems, setMaxItems] = useState(3);
     const [completedItems, setCompletedItems] = useState([]);
     const [visibleItems, setVisibleItems] = useState([]);
@@ -247,10 +251,8 @@ export function KartonAttributeRenderer(props) {
     );
 
     useEffect(() => {
-        setVisibleItems(
-            props.values.slice(0, maxItems).map((attr) => attr.value)
-        );
-    }, [maxItems, props.values]);
+        setVisibleItems(values.slice(0, maxItems).map((attr) => attr.value));
+    }, [maxItems, values]);
 
     useEffect(() => {
         // User can reanalyze if all visible items are completed
@@ -267,9 +269,9 @@ export function KartonAttributeRenderer(props) {
         setCanReanalyze(false);
         // Trigger reanalysis
         try {
-            await api.resubmitKartonAnalysis(props.object.id);
+            await api.resubmitKartonAnalysis(context.object.id);
             // Update attributes
-            props.onUpdateAttributes();
+            onUpdateAttributes();
         } catch (error) {
             context.setObjectError(error);
         }
@@ -299,7 +301,7 @@ export function KartonAttributeRenderer(props) {
         <KartonAttributeRow
             key={item}
             uid={item}
-            object={props.object}
+            object={context.object}
             onCompleted={(uid) => {
                 setCompletedItems((completed) => completed.concat([uid]));
             }}
@@ -307,11 +309,11 @@ export function KartonAttributeRenderer(props) {
     ));
 
     return (
-        <tr key={props.label}>
+        <tr key="Karton analysis">
             <th>Karton analysis</th>
             <td>
                 {attributesRows}
-                {maxItems < props.values.length ? (
+                {maxItems < values.length ? (
                     <Link to="#" onClick={showMore}>
                         <span className="badge badge-primary">more...</span>
                     </Link>

@@ -186,8 +186,8 @@ function getObjectShares(id) {
     return axios.get(`/object/${id}/share`);
 }
 
-function getObjectMetakeys(id) {
-    return axios.get(`/object/${id}/meta`);
+function getObjectAttributes(id) {
+    return axios.get(`/object/${id}/attribute`);
 }
 
 function removeObject(id) {
@@ -212,14 +212,12 @@ function removeObjectComment(id, comment_id) {
     return axios.delete(`/object/${id}/comment/${comment_id}`);
 }
 
-function addObjectMetakey(id, key, value) {
-    return axios.post(`/object/${id}/meta`, { key, value });
+function addObjectAttribute(object_id, key, value) {
+    return axios.post(`/object/${object_id}/attribute`, { key, value });
 }
 
-function removeObjectMetakey(type, id, key, value) {
-    return axios.delete(`/${type}/${id}/meta`, {
-        params: { key: key, value: value },
-    });
+function removeObjectAttribute(object_id, attribute_id) {
+    return axios.delete(`/object/${object_id}/attribute/${attribute_id}`);
 }
 
 function addObjectFavorite(id) {
@@ -361,6 +359,63 @@ function getReadableMetakeyDefinitions() {
     return axios.get("/meta/list/read");
 }
 
+function getAttributeDefinitions(access) {
+    return axios.get("/attribute", {
+        params: { access },
+    });
+}
+
+function getAttributeDefinition(key) {
+    return axios.get(`/attribute/${key}`);
+}
+
+function addAttributeDefinition(key, label, description, url_template, hidden) {
+    return axios.post("/attribute", {
+        key,
+        label,
+        description,
+        url_template,
+        hidden,
+    });
+}
+
+function updateAttributeDefinition(
+    key,
+    label,
+    description,
+    url_template,
+    hidden
+) {
+    return axios.post(`/attribute/${key}`, {
+        label,
+        description,
+        url_template,
+        hidden,
+    });
+}
+
+function removeAttributeDefinition(key) {
+    return axios.delete(`/attribute/${key}`);
+}
+
+function getAttributePermissions(key) {
+    return axios.get(`/attribute/${key}/permissions`);
+}
+
+function setAttributePermission(key, group_name, can_read, can_set) {
+    return axios.put(`/attribute/${key}/permissions`, {
+        group_name,
+        can_read,
+        can_set,
+    });
+}
+
+function deleteAttributePermission(key, group_name) {
+    return axios.delete(`/attribute/${key}/permissions/`, {
+        params: { group_name },
+    });
+}
+
 function getSettableMetakeyDefinitions() {
     return axios.get("/meta/list/set");
 }
@@ -498,8 +553,8 @@ function getRemoteObjectShares(remote, id) {
     return axios.get(`/remote/${remote}/api/object/${id}/share`);
 }
 
-function getRemoteObjectMetakeys(remote, id) {
-    return axios.get(`/remote/${remote}/api/object/${id}/meta`);
+function getRemoteObjectAttributes(remote, id) {
+    return axios.get(`/remote/${remote}/api/object/${id}/attribute`);
 }
 
 function downloadRemoteFile(remote, id) {
@@ -560,14 +615,11 @@ const api = {
     getObjectTags,
     getObjectComments,
     getObjectShares,
-    getObjectMetakeys,
     removeObject,
     addObjectTag,
     removeObjectTag,
     addObjectComment,
     removeObjectComment,
-    addObjectMetakey,
-    removeObjectMetakey,
     addObjectFavorite,
     removeObjectFavorite,
     shareObjectWith,
@@ -606,6 +658,17 @@ const api = {
     updateMetakeyDefinition,
     setMetakeyPermission,
     deleteMetakeyPermission,
+    getObjectAttributes,
+    addObjectAttribute,
+    removeObjectAttribute,
+    getAttributeDefinitions,
+    getAttributeDefinition,
+    addAttributeDefinition,
+    updateAttributeDefinition,
+    removeAttributeDefinition,
+    getAttributePermissions,
+    setAttributePermission,
+    deleteAttributePermission,
     downloadFile,
     requestFileDownloadLink,
     uploadFile,
@@ -624,7 +687,7 @@ const api = {
     getRemoteObjectComments,
     getRemoteObjectRelations,
     getRemoteObjectShares,
-    getRemoteObjectMetakeys,
+    getRemoteObjectAttributes,
     downloadRemoteFile,
     requestRemoteFileDownloadLink,
     getKartonAnalysesList,

@@ -8,19 +8,19 @@ import { AttributesPermissions } from "./AttributePermissions";
 export default function AttributeView() {
     const location = useLocation();
     const { setAlert } = useViewAlert();
-    const { metakey } = useParams();
+    const { attributeKey } = useParams();
     const [attribute, setAttribute] = useState({});
 
     async function updateAttribute() {
         try {
-            let response = await api.getMetakeyDefinition(metakey);
+            let response = await api.getAttributeDefinition(attributeKey);
             setAttribute(response.data);
         } catch (error) {
             setAlert({ error });
         }
     }
 
-    const getAttribute = useCallback(updateAttribute, [metakey, setAlert]);
+    const getAttribute = useCallback(updateAttribute, [attributeKey, setAlert]);
 
     useEffect(() => {
         getAttribute();
@@ -44,7 +44,7 @@ export default function AttributeView() {
                     {location.pathname.split("/").length > 4 && (
                         <li className="breadcrumb-item active">
                             <Switch>
-                                <AdministrativeRoute path="/settings/attribute/:metakey/permissions">
+                                <AdministrativeRoute path="/settings/attribute/:attributeKey/permissions">
                                     Permissions
                                 </AdministrativeRoute>
                             </Switch>
@@ -53,7 +53,10 @@ export default function AttributeView() {
                 </ol>
             </nav>
             <Switch>
-                <AdministrativeRoute exact path="/settings/attribute/:metakey">
+                <AdministrativeRoute
+                    exact
+                    path="/settings/attribute/:attributeKey"
+                >
                     <AttributeDetails
                         attribute={attribute}
                         getAttribute={updateAttribute}
@@ -61,7 +64,7 @@ export default function AttributeView() {
                 </AdministrativeRoute>
                 <AdministrativeRoute
                     exact
-                    path="/settings/attribute/:metakey/permissions"
+                    path="/settings/attribute/:attributeKey/permissions"
                 >
                     <AttributesPermissions
                         attribute={attribute}

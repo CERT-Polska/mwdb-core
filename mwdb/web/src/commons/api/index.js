@@ -355,10 +355,6 @@ function removeUser(login) {
     return axios.delete(`/user/${login}`);
 }
 
-function getReadableMetakeyDefinitions() {
-    return axios.get("/meta/list/read");
-}
-
 function getAttributeDefinitions(access) {
     return axios.get("/attribute", {
         params: { access },
@@ -386,7 +382,7 @@ function updateAttributeDefinition(
     url_template,
     hidden
 ) {
-    return axios.post(`/attribute/${key}`, {
+    return axios.put(`/attribute/${key}`, {
         label,
         description,
         url_template,
@@ -410,60 +406,10 @@ function setAttributePermission(key, group_name, can_read, can_set) {
     });
 }
 
-function deleteAttributePermission(key, group_name) {
-    return axios.delete(`/attribute/${key}/permissions/`, {
+function removeAttributePermission(key, group_name) {
+    return axios.delete(`/attribute/${key}/permissions`, {
         params: { group_name },
     });
-}
-
-function getSettableMetakeyDefinitions() {
-    return axios.get("/meta/list/set");
-}
-
-function getMetakeyDefinitions() {
-    return axios.get(`/meta/manage`);
-}
-
-function getMetakeyDefinition(key) {
-    return axios.get(`/meta/manage/${key}`);
-}
-
-function removeMetakeyDefinition(key) {
-    return axios.delete(`/meta/manage/${key}`);
-}
-
-function addMetakeyDefinition(key, label, description, template, hidden) {
-    return axios.post(`/meta/manage/${key}`, {
-        key,
-        label,
-        description,
-        template,
-        hidden,
-    });
-}
-
-function updateMetakeyDefinition(
-    key,
-    { label, description, template, hidden }
-) {
-    return axios.put(`/meta/manage/${key}`, {
-        label,
-        description,
-        template,
-        hidden,
-    });
-}
-
-function setMetakeyPermission(key, group_name, can_read, can_set) {
-    return axios.put(`/meta/manage/${key}/permissions/${group_name}`, {
-        group_name,
-        can_read,
-        can_set,
-    });
-}
-
-function deleteMetakeyPermission(key, group_name) {
-    return axios.delete(`/meta/manage/${key}/permissions/${group_name}`);
 }
 
 function downloadFile(id) {
@@ -479,7 +425,7 @@ async function requestFileDownloadLink(id) {
     return `${baseURL}/file/${id}/download?token=${response.data.token}`;
 }
 
-function uploadFile(file, parent, upload_as, metakeys) {
+function uploadFile(file, parent, upload_as, attributes) {
     let formData = new FormData();
     formData.append("file", file);
     formData.append(
@@ -487,7 +433,7 @@ function uploadFile(file, parent, upload_as, metakeys) {
         JSON.stringify({
             parent: parent || null,
             upload_as: upload_as,
-            metakeys: metakeys,
+            attributes: attributes,
         })
     );
     return axios.post(`/file`, formData, { timeout: 60 * 1000 });
@@ -649,15 +595,6 @@ const api = {
     registerUser,
     updateUser,
     removeUser,
-    getReadableMetakeyDefinitions,
-    getSettableMetakeyDefinitions,
-    getMetakeyDefinitions,
-    getMetakeyDefinition,
-    removeMetakeyDefinition,
-    addMetakeyDefinition,
-    updateMetakeyDefinition,
-    setMetakeyPermission,
-    deleteMetakeyPermission,
     getObjectAttributes,
     addObjectAttribute,
     removeObjectAttribute,
@@ -668,7 +605,7 @@ const api = {
     removeAttributeDefinition,
     getAttributePermissions,
     setAttributePermission,
-    deleteAttributePermission,
+    removeAttributePermission,
     downloadFile,
     requestFileDownloadLink,
     uploadFile,

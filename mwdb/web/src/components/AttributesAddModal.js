@@ -79,7 +79,9 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                                 .map((attr) => (
                                     <option key={attr} value={attr}>
                                         {attributeDefinitions[attr].label ||
-                                            attributeDefinitions[attr].key}
+                                            attributeDefinitions[attr].key}{" "}
+                                        {attributeDefinitions[attr].label &&
+                                            `(${attributeDefinitions[attr].key})`}
                                     </option>
                                 ))}
                         </select>

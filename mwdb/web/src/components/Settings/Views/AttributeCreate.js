@@ -6,10 +6,10 @@ import { useViewAlert } from "@mwdb-web/commons/ui";
 export default function AttributeCreate() {
     const viewAlert = useViewAlert();
     const [values, setValues] = useState({
-        metakey: "",
+        attributeKey: "",
         label: "",
         description: "",
-        template: "",
+        url_template: "",
         hidden: false,
     });
 
@@ -27,15 +27,15 @@ export default function AttributeCreate() {
 
     async function createAttribute() {
         try {
-            await api.addMetakeyDefinition(
-                values.metakey,
+            await api.addAttributeDefinition(
+                values.attributeKey,
                 values.label,
                 values.description,
-                values.template,
+                values["url_template"],
                 values.hidden
             );
             viewAlert.redirectToAlert({
-                target: `/settings/attribute/${values.metakey}`,
+                target: `/settings/attribute/${values.attributeKey}`,
                 success: "Attribute created successfully.",
             });
         } catch (error) {
@@ -56,8 +56,8 @@ export default function AttributeCreate() {
                     <label>Key</label>
                     <input
                         type="text"
-                        name="metakey"
-                        value={values.metakey}
+                        name="attributeKey"
+                        value={values.attributeKey}
                         onChange={handleInputChange}
                         className="form-control"
                         required
@@ -98,8 +98,8 @@ export default function AttributeCreate() {
                     <label>URL template</label>
                     <input
                         type="text"
-                        name="template"
-                        value={values.template}
+                        name="url_template"
+                        value={values["url_template"]}
                         onChange={handleInputChange}
                         className="form-control"
                     />

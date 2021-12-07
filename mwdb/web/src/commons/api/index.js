@@ -424,7 +424,7 @@ async function requestFileDownloadLink(id) {
     return `${baseURL}/file/${id}/download?token=${response.data.token}`;
 }
 
-function uploadFile(file, parent, upload_as, metakeys) {
+function uploadFile(file, parent, upload_as, metakeys, fileUploadTimeout) {
     let formData = new FormData();
     formData.append("file", file);
     formData.append(
@@ -435,7 +435,7 @@ function uploadFile(file, parent, upload_as, metakeys) {
             metakeys: metakeys,
         })
     );
-    return axios.post(`/file`, formData, { timeout: 60 * 1000 });
+    return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
 }
 
 function getRemoteNames() {

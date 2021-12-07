@@ -78,60 +78,70 @@ function AttributeRenderer({
             }
             valueRaw = attribute.value;
         } else {
-            valueRender = <pre>{JSON.stringify(attribute.value, null, 4)}</pre>;
+            valueRender = (
+                <pre className="attribute-object">
+                    {"(object)"} {JSON.stringify(attribute.value, null, 4)}
+                </pre>
+            );
             valueRaw = JSON.stringify(attribute.value);
         }
         return (
-            <div key={attribute.id}>
+            <div key={attribute.id} className="d-flex">
                 {valueRender}
-                <span className="ml-2">
-                    <ActionCopyToClipboard
-                        text={valueRaw}
-                        tooltipMessage="Copy value to clipboard"
-                    />
-                </span>
-                <span
-                    className="ml-2"
-                    data-toggle="tooltip"
-                    title="Search for that attribute values"
-                    onClick={(ev) => {
-                        ev.preventDefault();
-                        history.push(
-                            makeSearchLink(
-                                `attribute.${attributeKey}`,
-                                valueRaw,
-                                false
-                            )
-                        );
-                    }}
-                >
-                    <i>
-                        <FontAwesomeIcon
-                            icon="search"
-                            size="sm"
-                            style={{ cursor: "pointer" }}
+                <div className="d-flex align-items-center">
+                    <span className="ml-2">
+                        <ActionCopyToClipboard
+                            text={valueRaw}
+                            tooltipMessage="Copy value to clipboard"
                         />
-                    </i>
-                </span>
-                {auth.hasCapability(Capability.removingAttributes) && (
-                    <span
-                        className="ml-2"
-                        data-toggle="tooltip"
-                        title="Remove attribute value from this object"
-                        onClick={() => {
-                            setAttributeIdToRemove(attribute.id);
-                            setOpenDeleteModal(true);
-                        }}
-                    >
-                        <i>
-                            <FontAwesomeIcon
-                                icon={"trash"}
-                                size="sm"
-                                style={{ cursor: "pointer" }}
-                            />
-                        </i>
                     </span>
-                )}
+                    {typeof attribute.value === "string" ? (
+                        <span
+                            className="ml-2"
+                            data-toggle="tooltip"
+                            title="Search for that attribute values"
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                history.push(
+                                    makeSearchLink(
+                                        `attribute.${attributeKey}`,
+                                        valueRaw,
+                                        false
+                                    )
+                                );
+                            }}
+                        >
+                            <i>
+                                <FontAwesomeIcon
+                                    icon="search"
+                                    size="sm"
+                                    style={{ cursor: "pointer" }}
+                                />
+                            </i>
+                        </span>
+                    ) : (
+                        []
+                    )}
+                    {auth.hasCapability(Capability.removingAttributes) && (
+                        <span
+                            className="ml-2"
+                            data-toggle="tooltip"
+                            title="Remove attribute value from this object"
+                            onClick={() => {
+                                setAttributeIdToRemove(attribute.id);
+                                setOpenDeleteModal(true);
+                            }}
+                        >
+                            <i>
+                                <FontAwesomeIcon
+                                    icon={"trash"}
+                                    size="sm"
+                                    style={{ cursor: "pointer" }}
+                                />
+                            </i>
+                        </span>
+                    )}
+                </div>
                 <ConfirmationModal
                     buttonStyle="btn-danger"
                     confirmText="Yes"

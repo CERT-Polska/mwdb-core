@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
@@ -181,6 +182,12 @@ function SharesBox() {
 
     const groupedItems = groupShares(items);
 
+    const lockColor = {
+        color: items.filter((share) => share.group_name === "public")
+            ? "green"
+            : "grey",
+    };
+
     return (
         <div className="card card-default">
             <ConfirmationModal
@@ -195,6 +202,12 @@ function SharesBox() {
             <div className="card-header">
                 <div className="media">
                     <div className="align-self-center media-body">Shares</div>
+                    <FontAwesomeIcon
+                        icon="lock"
+                        pull="left"
+                        size="1x"
+                        style={lockColor}
+                    />
                 </div>
             </div>
             {groupedItems.map((sharesGroup) => (

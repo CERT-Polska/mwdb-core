@@ -37,6 +37,7 @@ class Attribute(db.Model):
 
     @property
     def url(self):
+        # deprecated, left for metakey compatibility
         if self.template.url_template:
             s = Template(self.template.url_template)
             return s.safe_substitute(value=self.value)

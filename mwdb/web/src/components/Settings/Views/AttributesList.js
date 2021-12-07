@@ -4,19 +4,25 @@ import { Link } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import { PagedList, useViewAlert } from "@mwdb-web/commons/ui";
 
-function AttributeItem({ name, label, description, template }) {
+function AttributeItem({ attribute }) {
     return (
         <tr>
             <td>
-                <Link to={`/settings/attribute/${name}`}>{name}</Link>
+                <Link to={`/settings/attribute/${attribute.key}`}>
+                    {attribute.key}
+                </Link>
                 &nbsp;
-                {label && <span>({label})</span>}
+                {attribute.label && <span>({attribute.label})</span>}
             </td>
             <td>
-                {description || <div className="text-muted">(Not defined)</div>}
+                {attribute.description || (
+                    <div className="text-muted">(Not defined)</div>
+                )}
             </td>
             <td>
-                {template || <div className="text-muted">(Not defined)</div>}
+                {attribute["url_template"] || (
+                    <div className="text-muted">(Not defined)</div>
+                )}
             </td>
         </tr>
     );
@@ -30,11 +36,10 @@ export default function AttributesList() {
 
     async function updateAttributes() {
         try {
-            const response = await api.getMetakeyDefinitions();
+            const response = await api.getAttributeDefinitions("manage");
             setAttributes(
-                response.data["metakeys"].map((attribute) => ({
+                response.data["attribute_definitions"].map((attribute) => ({
                     ...attribute,
-                    name: attribute.key,
                 }))
             );
         } catch (error) {
@@ -63,7 +68,9 @@ export default function AttributesList() {
             <PagedList
                 listItem={AttributeItem}
                 columnNames={["Key (Label)", "Description", "URL Template"]}
-                items={items.slice((activePage - 1) * 10, activePage * 10)}
+                items={items
+                    .slice((activePage - 1) * 10, activePage * 10)
+                    .map((attribute) => ({ attribute }))}
                 itemCount={items.length}
                 activePage={activePage}
                 filterValue={attributeFilter}

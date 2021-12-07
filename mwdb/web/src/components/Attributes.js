@@ -297,6 +297,9 @@ function ObjectAttributes(props) {
                         .sort()
                         .map((key) => {
                             const definition = attributeDefinitions[key];
+                            if (!definition)
+                                // definition not yet loaded
+                                return [];
                             const values = attributes[key];
                             let Attribute =
                                 attributeRenderers[key] || AttributeRenderer;

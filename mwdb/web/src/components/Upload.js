@@ -285,7 +285,21 @@ class Upload extends Component {
                                     {this.state.attributes.map((attr, idx) => (
                                         <tr key={idx} className="centered">
                                             <th>{attr.key}</th>
-                                            <td>{attr.value}</td>
+                                            <td>
+                                                {typeof attr.value ===
+                                                "string" ? (
+                                                    attr.value
+                                                ) : (
+                                                    <pre className="attribute-object">
+                                                        {"(object)"}{" "}
+                                                        {JSON.stringify(
+                                                            attr.value,
+                                                            null,
+                                                            4
+                                                        )}
+                                                    </pre>
+                                                )}
+                                            </td>
                                             <td>
                                                 <input
                                                     value="Dismiss"

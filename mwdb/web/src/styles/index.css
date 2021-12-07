@@ -163,6 +163,11 @@ div.quick-query-bar {
     border-left-color: var(--info);
 }
 
+pre.attribute-object {
+    margin-bottom: 0;
+    display: inline-block;
+}
+
 /***
 	Material Design Switches for Bootstrap 4 and Material Design Bootstrap (MDB)
 	by djibe

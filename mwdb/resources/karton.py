@@ -54,6 +54,9 @@ class KartonObjectResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have access
                     to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = access_object(type, identifier)
         if db_object is None:
@@ -109,6 +112,9 @@ class KartonObjectResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have access
                     to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = KartonSubmitAnalysisRequestSchema()
         obj = loads_schema(request.get_data(as_text=True) or "{}", schema)
@@ -164,6 +170,9 @@ class KartonAnalysisResource(Resource):
 
                     When analysis doesn't exist or is not associated with
                     the object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = access_object(type, identifier)
         if db_object is None:
@@ -225,6 +234,9 @@ class KartonAnalysisResource(Resource):
                 description: |
                     When object doesn't exist or user doesn't have access
                     to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         db_object = access_object(type, identifier)
         if db_object is None:

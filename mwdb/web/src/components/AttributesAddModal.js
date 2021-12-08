@@ -1,133 +1,196 @@
-import React, { Component } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 
 import api from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
-export default class AttributesAddModal extends Component {
-    state = {
-        attributes: [],
-        attributeKey: "",
-        attributeValue: "",
-    };
+import AceEditor from "react-ace";
 
-    attributesForm = React.createRef();
+import "ace-builds/src-noconflict/mode-text";
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/ext-searchbox";
 
-    static contextType = AuthContext;
+export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
+    const [attributeDefinitions, setAttributeDefinitions] = useState({});
+    const [attributeKey, setAttributeKey] = useState("");
+    const [attributeValue, setAttributeValue] = useState("");
+    const [attributeType, setAttributeType] = useState("string");
+    const [error, setError] = useState(null);
+    const attributeForm = useRef(null);
 
-    handleSubmit = (event) => {
-        if (event) event.preventDefault();
-        if (
-            !this.attributesForm.current ||
-            !this.attributesForm.current.reportValidity()
-        )
-            return;
-        this.props.onAdd(
-            this.state.attributeKey.toLowerCase(),
-            this.state.attributeValue
-        );
-    };
-
-    async updateAttributesList() {
-        try {
-            let response = await api.getSettableMetakeyDefinitions();
-            let attributes = {};
-            for (let attribute of response.data.metakeys) {
-                attributes[attribute.label || attribute.key] = attribute;
+    function handleSubmit(ev) {
+        if (ev) ev.preventDefault();
+        if (!attributeForm.current.reportValidity()) return;
+        let value = attributeValue;
+        if (attributeType === "object") {
+            try {
+                value = JSON.parse(attributeValue);
+            } catch (e) {
+                setError(e.toString());
+                return;
             }
-            this.setState({ attributes });
+        }
+        onAdd(attributeKey, value);
+    }
+
+    function handleKeyChange(ev) {
+        setAttributeKey(ev.target.value);
+        setError(null);
+    }
+
+    function handleValueChange(ev) {
+        setAttributeValue(ev.target.value);
+        setError(null);
+    }
+
+    function handleTypeChange(ev) {
+        setAttributeType(ev.target.value);
+        setError(null);
+    }
+
+    async function updateAttributeDefinitions() {
+        try {
+            const response = await api.getAttributeDefinitions("set");
+            const keyDefinitions = response.data[
+                "attribute_definitions"
+            ].reduce(
+                (agg, definition) => ({
+                    ...agg,
+                    [definition.key]: definition,
+                }),
+                {}
+            );
+            setAttributeDefinitions(keyDefinitions);
         } catch (error) {
-            console.error(error);
-            this.setState({ error });
+            setError(error.toString());
         }
     }
 
-    handleAttributeChange = (ev) => {
-        let chosenAttribute = ev.target.value;
-        this.setState({
-            chosenAttribute,
-            attributeKey: this.state.attributes[chosenAttribute].key,
-        });
-    };
+    const getAttributeDefinitions = useCallback(updateAttributeDefinitions, []);
 
-    handleValueChange = (ev) => {
-        this.setState({ attributeValue: ev.target.value });
-    };
+    useEffect(() => {
+        getAttributeDefinitions();
+    }, [getAttributeDefinitions]);
 
-    get attributeHint() {
-        if (!this.state.chosenAttribute) return undefined;
-        return this.state.attributes[this.state.chosenAttribute].description;
-    }
-
-    componentDidMount() {
-        this.updateAttributesList();
-    }
-
-    componentDidUpdate(prevProps) {
-        if (prevProps.isOpen !== this.props.isOpen) this.updateAttributesList();
-    }
-
-    render() {
-        return (
-            <ConfirmationModal
-                buttonStyle="btn-success"
-                confirmText="Add"
-                message="Add attribute"
-                isOpen={this.props.isOpen}
-                onRequestClose={this.props.onRequestClose}
-                onConfirm={this.handleSubmit}
-            >
-                {!this.context.hasCapability(Capability.addingAllAttributes) &&
-                !Object.keys(this.state.attributes).length ? (
-                    <div>
-                        Sorry, there are no attributes you can set at this
-                        moment.
+    return (
+        <ConfirmationModal
+            buttonStyle="btn-success"
+            confirmText="Add"
+            message="Add attribute"
+            isOpen={isOpen}
+            onRequestClose={onRequestClose}
+            onConfirm={handleSubmit}
+        >
+            {error ? (
+                <div
+                    className="alert alert-danger"
+                    style={{ "max-width": "300px" }}
+                >
+                    {error}
+                </div>
+            ) : (
+                []
+            )}
+            {!Object.keys(attributeDefinitions).length ? (
+                <div>
+                    Sorry, there are no attributes you can set at this moment.
+                </div>
+            ) : (
+                <form onSubmit={handleSubmit} ref={attributeForm}>
+                    <div className="form-group">
+                        <label>Attribute</label>
+                        <select
+                            className="form-control"
+                            onChange={handleKeyChange}
+                            value={attributeKey}
+                            required
+                        >
+                            <option key="" value="">
+                                &nbsp;
+                            </option>
+                            {Object.keys(attributeDefinitions)
+                                .sort()
+                                .map((attr) => (
+                                    <option key={attr} value={attr}>
+                                        {attributeDefinitions[attr].label ||
+                                            attributeDefinitions[attr].key}{" "}
+                                        {attributeDefinitions[attr].label &&
+                                            `(${attributeDefinitions[attr].key})`}
+                                    </option>
+                                ))}
+                        </select>
+                        {attributeDefinitions[attributeKey] &&
+                        attributeDefinitions[attributeKey].description ? (
+                            <div className="form-hint">
+                                {attributeDefinitions[attributeKey].description}
+                            </div>
+                        ) : (
+                            []
+                        )}
                     </div>
-                ) : (
-                    <form
-                        ref={this.attributesForm}
-                        onSubmit={this.handleSubmit}
-                    >
-                        <div className="form-group">
-                            <label>Attribute</label>
-                            <select
-                                className="form-control"
-                                onChange={this.handleAttributeChange}
-                                value={this.state.chosenAttribute}
-                                required
+                    <div className="form-group">
+                        <div className="form-check form-check-inline">
+                            <input
+                                className="form-check-input"
+                                type="radio"
+                                id="value-string"
+                                name="value-type"
+                                checked={attributeType === "string"}
+                                value="string"
+                                onClick={handleTypeChange}
+                            />
+                            <label
+                                className="form-check-label"
+                                htmlFor="value-string"
                             >
-                                <option key="" value="">
-                                    &nbsp;
-                                </option>
-                                {Object.keys(this.state.attributes)
-                                    .sort()
-                                    .map((attr) => (
-                                        <option key={attr} value={attr}>
-                                            {attr}
-                                        </option>
-                                    ))}
-                            </select>
-                            {this.attributeHint ? (
-                                <div class="form-hint">
-                                    {this.attributeHint}
-                                </div>
-                            ) : (
-                                []
-                            )}
+                                String
+                            </label>
                         </div>
-                        <div className="form-group">
-                            <label>Value</label>
+                        <div className="form-check form-check-inline">
+                            <input
+                                className="form-check-input"
+                                type="radio"
+                                id="value-object"
+                                name="value-type"
+                                checked={attributeType === "object"}
+                                value="object"
+                                onClick={handleTypeChange}
+                            />
+                            <label
+                                className="form-check-label"
+                                htmlFor="value-object"
+                            >
+                                Object
+                            </label>
+                        </div>
+                    </div>
+                    <div className="form-group">
+                        <label>Value</label>
+                        {attributeType === "string" ? (
                             <input
                                 type="text"
                                 className="form-control"
-                                onChange={this.handleValueChange}
-                                value={this.state.attributeValue}
+                                onChange={handleValueChange}
+                                value={attributeValue}
                                 required
                             />
-                        </div>
-                    </form>
-                )}
-            </ConfirmationModal>
-        );
-    }
+                        ) : (
+                            <AceEditor
+                                mode="json"
+                                theme="github"
+                                wrapEnabled
+                                onChange={(input) => setAttributeValue(input)}
+                                value={attributeValue}
+                                width="300px"
+                                height="150px"
+                                setOptions={{
+                                    useWorker: false,
+                                }}
+                            />
+                        )}
+                    </div>
+                </form>
+            )}
+        </ConfirmationModal>
+    );
 }

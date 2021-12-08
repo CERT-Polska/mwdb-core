@@ -36,6 +36,9 @@ class DownloadResource(Resource):
                       format: binary
             403:
                 description: When file download token is no longer valid
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         file_obj = File.get_by_download_token(access_token)
         if not file_obj:
@@ -77,6 +80,9 @@ class RequestSampleDownloadResource(Resource):
                 description: |
                     When file doesn't exist, object is not a file
                     or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         file = File.access(identifier)
         if file is None:

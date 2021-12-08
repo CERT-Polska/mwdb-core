@@ -66,6 +66,9 @@ class UserListResource(Resource):
                     schema: UserListResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         pending = bool(request.args.get("pending", False))
         objs = db.session.query(User).filter(User.pending == pending).all()
@@ -107,6 +110,9 @@ class UserPendingResource(Resource):
                 description: |
                     When SMTP server is unavailable or not properly
                     configured on the server.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
@@ -177,6 +183,9 @@ class UserPendingResource(Resource):
                 description: |
                     When SMTP server is unavailable or not properly configured
                     on the server.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 
@@ -273,6 +282,9 @@ class UserRequestPasswordChangeResource(Resource):
               description: |
                 When SMTP server is unavailable or not properly configured
                 on the server.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
         user = (
@@ -333,6 +345,9 @@ class UserGetPasswordChangeTokenResource(Resource):
                   schema: UserSetPasswordTokenResponseSchema
             404:
                 description: When specified user doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         try:
             user = User.query.filter(User.login == login).one()
@@ -377,6 +392,9 @@ class UserResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When user doesn't exist.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         obj = db.session.query(User).filter(User.login == login).first()
         if obj is None:
@@ -425,6 +443,9 @@ class UserResource(Resource):
                 description: |
                     When SMTP server is unavailable or not properly configured
                     on the server.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = UserCreateRequestSchema()
 
@@ -514,6 +535,9 @@ class UserResource(Resource):
                     or modified user is pending.
             404:
                 description: When user doesn't exist.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = UserUpdateRequestSchema()
 
@@ -585,6 +609,9 @@ class UserResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When user doesn't exist.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         if g.auth_user.login == login:
             raise Forbidden("You can't remove yourself from the database.")
@@ -631,6 +658,9 @@ class UserProfileResource(Resource):
                     schema: UserProfileResponseSchema
             404:
                 description: When user doesn't exist or is not a member of user's group
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())
 

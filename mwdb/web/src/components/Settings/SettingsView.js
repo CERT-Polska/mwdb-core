@@ -190,8 +190,8 @@ export default function SettingsView() {
                             <AdministrativeRoute
                                 exact
                                 path={[
-                                    "/settings/attribute/:metakey",
-                                    "/settings/attribute/:metakey/permissions",
+                                    "/settings/attribute/:attributeKey",
+                                    "/settings/attribute/:attributeKey/permissions",
                                 ]}
                             >
                                 <AttributeView />

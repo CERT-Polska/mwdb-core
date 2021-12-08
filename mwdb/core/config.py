@@ -45,6 +45,8 @@ def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
 class MWDBConfig(Config):
     # PostgreSQL database URI
     postgres_uri = key(cast=str, required=True)
+    # PostgreSQL database statement_timeout parameter
+    statement_timeout = key(cast=int, required=False, default=0)
     # Flask secret key
     secret_key = key(cast=str, required=True)
     # Redis database URI
@@ -63,6 +65,8 @@ class MWDBConfig(Config):
     storage_provider = key(
         cast=storage_provider_from_str, required=False, default="disk"
     )
+    # File upload timeout
+    file_upload_timeout = key(cast=int, required=False, default=60000)
     # Folder for uploads
     uploads_folder = key(cast=path, required=False)
     # Should we break up the uploads into different folders for example:

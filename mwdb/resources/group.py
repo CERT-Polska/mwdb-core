@@ -49,6 +49,9 @@ class GroupListResource(Resource):
                     schema: GroupListResponseSchema
             403:
                 description: When user doesn't have `manage_users` capability.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         objs = (
             db.session.query(Group).options(
@@ -90,6 +93,9 @@ class GroupResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When group doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         obj = (
             db.session.query(Group)
@@ -138,6 +144,9 @@ class GroupResource(Resource):
                 description: When user doesn't have `manage_users` capability
             409:
                 description: When group exists yet
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = GroupCreateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -201,6 +210,9 @@ class GroupResource(Resource):
                     or group is immutable
             404:
                 description: When group doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = GroupUpdateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -270,6 +282,9 @@ class GroupResource(Resource):
                 description: When user doesn't have `manage_users` capability.
             404:
                 description: When group doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         group = (db.session.query(Group).filter(Group.name == name)).first()
 
@@ -329,6 +344,9 @@ class GroupMemberResource(Resource):
                     group is immutable or user is pending
             404:
                 description: When user or group doesn't exist
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
 
@@ -413,6 +431,9 @@ class GroupMemberResource(Resource):
                 description: When user or group doesn't exist
             409:
                 description: When member is already added
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
 
@@ -494,6 +515,9 @@ class GroupMemberResource(Resource):
                 description: When user or group doesn't exist
             409:
                 description: When member is already removed
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         group_name_obj = load_schema({"name": name}, GroupNameSchemaBase())
         user_login_obj = load_schema({"login": login}, UserLoginSchemaBase())

@@ -92,6 +92,9 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                     or syntax error occurred in Lucene query
             404:
                 description: When user doesn't have access to the `older_than` object
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().get()
 
@@ -149,6 +152,9 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                 description: Specified group doesn't exist
             409:
                 description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         schema = BlobCreateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -188,6 +194,9 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
                 description: |
                     When blob doesn't exist, object is not a blob
                     or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().get(identifier)
 
@@ -276,6 +285,9 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
                 description: Specified group doesn't exist
             409:
                 description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().put(identifier)
 
@@ -308,5 +320,8 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
                 description: |
                     When blob doesn't exist, object is not a blob
                     or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
         """
         return super().delete(identifier)

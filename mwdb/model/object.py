@@ -838,7 +838,9 @@ class Object(db.Model):
     def remove_attribute_by_id(self, attribute_id, check_permissions=True):
         attribute_query = Attribute.get_by_id(self.id, attribute_id)
 
-        if check_permissions:
+        if check_permissions and not g.auth_user.has_rights(
+            Capabilities.adding_all_attributes
+        ):
             attribute_query = attribute_query.filter(
                 Attribute.key.in_(
                     db.session.query(AttributePermission.key)

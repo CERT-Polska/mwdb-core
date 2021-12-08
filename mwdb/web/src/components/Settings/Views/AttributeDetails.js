@@ -33,7 +33,13 @@ export function AttributeDetails({ attribute, getAttribute }) {
             newValue.hidden = false;
         }
         try {
-            await api.updateMetakeyDefinition(attribute.key, newValue);
+            await api.updateAttributeDefinition(
+                attribute.key,
+                newValue.label,
+                newValue.description,
+                newValue["url_template"],
+                newValue.hidden
+            );
         } catch (error) {
             viewAlert.setAlert({ error });
         } finally {
@@ -44,7 +50,7 @@ export function AttributeDetails({ attribute, getAttribute }) {
     async function handleRemoveAttribute() {
         try {
             setDeleteModalDisabled(true);
-            await api.removeMetakeyDefinition(attribute.key);
+            await api.removeAttributeDefinition(attribute.key);
             viewAlert.redirectToAlert({
                 target: "/settings/attributes",
                 success: `Attribute '${attribute.key}' successfully removed.`,
@@ -74,8 +80,8 @@ export function AttributeDetails({ attribute, getAttribute }) {
                     </AttributeItem>
                     <AttributeItem label="URL Template">
                         <EditableItem
-                            name="template"
-                            defaultValue={attribute.template}
+                            name="url_template"
+                            defaultValue={attribute["url_template"]}
                             onSubmit={handleSubmit}
                         />
                     </AttributeItem>

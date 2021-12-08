@@ -62,6 +62,7 @@ class ServerInfoResource(Resource):
                 "is_oidc_enabled": app_config.mwdb.enable_oidc,
                 "recaptcha_site_key": app_config.mwdb.recaptcha_site_key,
                 "request_timeout": app_config.mwdb.request_timeout,
+                "file_upload_timeout": app_config.mwdb.file_upload_timeout,
                 "statement_timeout": app_config.mwdb.statement_timeout,
             }
         )

@@ -454,7 +454,7 @@ class AttributeDefinitionResource(Resource):
         if description is not None:
             attribute_definition.description = description
 
-        url_template = obj["template"]
+        url_template = obj["url_template"]
         if url_template is not None:
             attribute_definition.url_template = url_template
 

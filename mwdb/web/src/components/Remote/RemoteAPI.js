@@ -19,7 +19,8 @@ export default function RemoteAPI({ children }) {
             getObjectRelations: (id) =>
                 api.getRemoteObjectRelations(remote, id),
             getObjectShares: (id) => api.getRemoteObjectShares(remote, id),
-            getObjectMetakeys: (id) => api.getRemoteObjectMetakeys(remote, id),
+            getObjectAttributes: (id) =>
+                api.getRemoteObjectAttributes(remote, id),
             downloadFile: (id) => api.downloadRemoteFile(remote, id),
             requestFileDownloadLink: (id) =>
                 api.requestRemoteFileDownloadLink(remote, id),

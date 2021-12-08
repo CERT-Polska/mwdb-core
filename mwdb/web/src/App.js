@@ -11,7 +11,7 @@ import ShowSample from "./components/ShowSample";
 import ShowConfig from "./components/ShowConfig";
 import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
-import Upload from "./components/Upload";
+import UploadWithTimeout from "./components/Upload";
 import UserLogin from "./components/UserLogin";
 import UserRegister from "./components/UserRegister";
 import UserSetPassword from "./components/UserSetPassword";
@@ -166,7 +166,7 @@ export default function App() {
                 path="/upload"
                 condition={auth.hasCapability(Capability.addingFiles)}
             >
-                <Upload />
+                <UploadWithTimeout />
             </ProtectedRoute>
             <ProtectedRoute exact path="/search">
                 {() => <Search />}

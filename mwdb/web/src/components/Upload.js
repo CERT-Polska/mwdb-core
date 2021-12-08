@@ -1,4 +1,4 @@
-import React, { Component, useCallback } from "react";
+import React, { Component, useCallback, useContext } from "react";
 import { withRouter } from "react-router";
 import { useDropzone } from "react-dropzone";
 import queryString from "query-string";
@@ -9,6 +9,7 @@ import AttributesAddModal from "./AttributesAddModal";
 import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { Autocomplete, DataTable, View } from "@mwdb-web/commons/ui";
+import { ConfigContext } from "@mwdb-web/commons/config";
 
 function UploadDropzone(props) {
     const onDrop = props.onDrop;
@@ -130,7 +131,8 @@ class Upload extends Component {
                 this.state.file,
                 this.parentFromQuery || this.state.parent,
                 this.sharingModeToUploadParam(),
-                this.state.attributes
+                this.state.attributes,
+                this.props.fileUploadTimeout
             );
             this.sha256 = response.data.sha256;
             this.props.history.replace("/file/" + this.sha256, {
@@ -283,7 +285,21 @@ class Upload extends Component {
                                     {this.state.attributes.map((attr, idx) => (
                                         <tr key={idx} className="centered">
                                             <th>{attr.key}</th>
-                                            <td>{attr.value}</td>
+                                            <td>
+                                                {typeof attr.value ===
+                                                "string" ? (
+                                                    attr.value
+                                                ) : (
+                                                    <pre className="attribute-object">
+                                                        {"(object)"}{" "}
+                                                        {JSON.stringify(
+                                                            attr.value,
+                                                            null,
+                                                            4
+                                                        )}
+                                                    </pre>
+                                                )}
+                                            </td>
                                             <td>
                                                 <input
                                                     value="Dismiss"
@@ -328,4 +344,14 @@ class Upload extends Component {
     }
 }
 
-export default withRouter(Upload);
+function UploadWithTimeout(props) {
+    const config = useContext(ConfigContext);
+    return (
+        <Upload
+            fileUploadTimeout={config.config["file_upload_timeout"]}
+            {...props}
+        />
+    );
+}
+
+export default withRouter(UploadWithTimeout);

@@ -177,6 +177,13 @@ function CommentBox() {
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={() => {
                     removeComment(commentToRemove);
+                    // if last comment on page is removed
+                    if (
+                        activePage !== 1 &&
+                        (comments.length - 1) % itemsCountPerPage === 0
+                    ) {
+                        setActivePage((p) => p - 1);
+                    }
                 }}
                 message="Remove the comment?"
                 confirmText="Remove"

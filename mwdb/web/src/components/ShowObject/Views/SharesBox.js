@@ -200,6 +200,7 @@ function SharesBox() {
             <div className="card-header">
                 <div className="media">
                     <div className="align-self-center media-body">Shares</div>
+                    // Icon showing the sharing status of the object
                     <FontAwesomeIcon
                         icon={lockIcon}
                         pull="left"

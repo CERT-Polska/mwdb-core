@@ -182,11 +182,9 @@ function SharesBox() {
 
     const groupedItems = groupShares(items);
 
-    const lockColor = {
-        color: items.filter((share) => share.group_name === "public")
-            ? "green"
-            : "grey",
-    };
+    const lockIcon = items.filter((share) => share.group_name === "public")
+        ? "lock-open"
+        : "lock";
 
     return (
         <div className="card card-default">
@@ -203,10 +201,10 @@ function SharesBox() {
                 <div className="media">
                     <div className="align-self-center media-body">Shares</div>
                     <FontAwesomeIcon
-                        icon="lock"
+                        icon={lockIcon}
                         pull="left"
                         size="1x"
-                        style={lockColor}
+                        style={{ color: "grey" }}
                     />
                 </div>
             </div>

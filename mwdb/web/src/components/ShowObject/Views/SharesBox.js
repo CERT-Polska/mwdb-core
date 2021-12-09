@@ -182,6 +182,7 @@ function SharesBox() {
 
     const groupedItems = groupShares(items);
 
+    // Icon showing the sharing status of the object
     const lockIcon = items.filter((share) => share.group_name === "public")
         ? "lock-open"
         : "lock";
@@ -200,7 +201,6 @@ function SharesBox() {
             <div className="card-header">
                 <div className="media">
                     <div className="align-self-center media-body">Shares</div>
-                    // Icon showing the sharing status of the object
                     <FontAwesomeIcon
                         icon={lockIcon}
                         pull="left"

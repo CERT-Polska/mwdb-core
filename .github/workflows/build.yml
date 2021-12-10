@@ -43,12 +43,6 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        if: ${{ github.event_name == 'push' }}
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build and push mwdb-core image
         uses: docker/build-push-action@v2
         with:
@@ -57,7 +51,6 @@ jobs:
             certpl/mwdb:${{ github.sha }}
             certpl/mwdb:master
           outputs: type=docker,dest=./mwdb-image
-          push: ${{ github.event_name == 'push' }}
       - name: Upload mwdb-core image
         uses: actions/upload-artifact@v2 
         with:
@@ -76,12 +69,6 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        if: ${{ github.event_name == 'push' }}
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build and push mwdb-core image
         uses: docker/build-push-action@v2
         with:
@@ -90,7 +77,6 @@ jobs:
             certpl/mwdb-web:${{ github.sha }}
             certpl/mwdb-web:master
           outputs: type=docker,dest=./mwdb-web-image
-          push: ${{ github.event_name == 'push' }}
       - name: Upload mwdb-core web image
         uses: actions/upload-artifact@v2 
         with:
@@ -116,7 +102,6 @@ jobs:
           tags: |
             certpl/mwdb-tests:${{ github.sha }}
           outputs: type=docker,dest=./mwdb-tests-image
-          push: false
       - name: Upload test image
         uses: actions/upload-artifact@v2 
         with:
@@ -142,7 +127,6 @@ jobs:
           tags: |
             certpl/mwdb-web-tests:${{ github.sha }}
           outputs: type=docker,dest=./mwdb-web-tests-image
-          push: false
       - name: Upload test image
         uses: actions/upload-artifact@v2
         with:
@@ -214,3 +198,28 @@ jobs:
           docker-compose -f docker-compose-e2e.yml up -d web-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t web-tests
           ([ $(docker wait mwdb-core_web-tests_1) == 0 ])
+  push_images:
+    needs: [test_backend_e2e, test_frontend_e2e]
+    name: Push images on Docker Hub
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Import and push images
+        run: |
+          docker load --input ./mwdb-image/mwdb-image
+          docker load --input ./mwdb-web-image/mwdb-web-image
+          docker tag certpl/mwdb:$GITHUB_SHA certpl/mwdb:master
+          docker tag certpl/mwdb-web:$GITHUB_SHA certpl/mwdb-web:master
+          docker push --all-tags certpl/mwdb:$GITHUB_SHA
+          docker push --all-tags certpl/mwdb-web:$GITHUB_SHA

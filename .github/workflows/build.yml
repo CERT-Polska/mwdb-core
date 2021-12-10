@@ -37,7 +37,7 @@ jobs:
     name: Build mwdb-core core image
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
+      - name: Check out repository for ${{github.ref_name}}
         uses: actions/checkout@v2
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -52,8 +52,8 @@ jobs:
             certpl/mwdb:master
           cache-from: |
             type=registry,ref=certpl/mwdb:master
-            type=gha,scope=mwdb
-          cache-to: type=gha,scope=mwdb,mode=max
+            type=gha,scope=${{github.ref_name}}-mwdb
+          cache-to: type=gha,scope=${{github.ref_name}}-mwdb,mode=max
           outputs: type=docker,dest=./mwdb-image
       - name: Upload mwdb-core image
         uses: actions/upload-artifact@v2 
@@ -82,8 +82,8 @@ jobs:
             certpl/mwdb-web:master
           cache-from: |
             type=registry,ref=certpl/mwdb-web:master
-            type=gha,scope=mwdb-web
-          cache-to: type=gha,scope=mwdb-web,mode=max
+            type=gha,scope=${{github.ref_name}}-mwdb-web
+          cache-to: type=gha,scope=${{github.ref_name}}-mwdb-web,mode=max
           outputs: type=docker,dest=./mwdb-web-image
       - name: Upload mwdb-core web image
         uses: actions/upload-artifact@v2 

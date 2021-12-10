@@ -56,9 +56,10 @@ jobs:
           tags: |
             certpl/mwdb:${{ github.sha }}
             certpl/mwdb:master
+          outputs: type=docker,dest=./docker-images
           push: ${{ github.event_name == 'push' }}
-      - name: Store mwdb-core image
-        run: docker save -o ./mwdb-image certpl/mwdb:${{ github.sha }}
+      - name: ls
+        run: ls ./docker-images/
       - name: Upload mwdb-core image
         uses: actions/upload-artifact@v2 
         with:

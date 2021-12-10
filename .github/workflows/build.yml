@@ -50,6 +50,10 @@ jobs:
           tags: |
             certpl/mwdb:${{ github.sha }}
             certpl/mwdb:master
+          cache-from: |
+            type=registry,ref=certpl/mwdb:master
+            type=gha,scope=${{github.ref_name}}-mwdb
+          cache-to: type=gha,scope=${{github.ref_name}}-mwdb,mode=max
           outputs: type=docker,dest=./mwdb-image
       - name: Upload mwdb-core image
         uses: actions/upload-artifact@v2 
@@ -76,6 +80,10 @@ jobs:
           tags: |
             certpl/mwdb-web:${{ github.sha }}
             certpl/mwdb-web:master
+          cache-from: |
+            type=registry,ref=certpl/mwdb-web:master
+            type=gha,scope=${{github.ref_name}}-mwdb-web
+          cache-to: type=gha,scope=${{github.ref_name}}-mwdb-web,mode=max
           outputs: type=docker,dest=./mwdb-web-image
       - name: Upload mwdb-core web image
         uses: actions/upload-artifact@v2 
@@ -101,6 +109,10 @@ jobs:
           context: tests/backend
           tags: |
             certpl/mwdb-tests:${{ github.sha }}
+          cache-from: |
+            type=registry,ref=certpl/mwdb-tests:master
+            type=gha,scope=${{github.ref_name}}-mwdb-tests
+          cache-to: type=gha,scope=${{github.ref_name}}-mwdb-tests,mode=max
           outputs: type=docker,dest=./mwdb-tests-image
       - name: Upload test image
         uses: actions/upload-artifact@v2 
@@ -126,6 +138,10 @@ jobs:
           context: tests/frontend
           tags: |
             certpl/mwdb-web-tests:${{ github.sha }}
+          cache-from: |
+            type=registry,ref=certpl/mwdb-web-tests:master
+            type=gha,scope=${{github.ref_name}}-mwdb-web-tests
+          cache-to: type=gha,scope=${{github.ref_name}}-mwdb-web-tests,mode=max
           outputs: type=docker,dest=./mwdb-web-tests-image
       - name: Upload test image
         uses: actions/upload-artifact@v2
@@ -219,9 +235,13 @@ jobs:
         run: |
           docker load --input ./mwdb-image/mwdb-image
           docker load --input ./mwdb-web-image/mwdb-web-image
+          docker load --input ./mwdb-tests-image/mwdb-tests-image
+          docker load --input ./mwdb-web-tests-image/mwdb-web-tests-image
           docker tag certpl/mwdb:$GITHUB_SHA certpl/mwdb:master
           docker tag certpl/mwdb-web:$GITHUB_SHA certpl/mwdb-web:master
-          docker push certpl/mwdb:$GITHUB_SHA
-          docker push certpl/mwdb-web:$GITHUB_SHA
-          docker push certpl/mwdb:master
-          docker push certpl/mwdb-web:master
+          docker tag certpl/mwdb-tests:$GITHUB_SHA certpl/mwdb-tests:master
+          docker tag certpl/mwdb-web-tests:$GITHUB_SHA certpl/mwdb-web-tests:master
+          docker push --all-tags certpl/mwdb
+          docker push --all-tags certpl/mwdb-web
+          docker push --all-tags certpl/mwdb-tests
+          docker push --all-tags certpl/mwdb-web-tests

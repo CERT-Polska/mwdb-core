@@ -114,6 +114,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./tests/backend/Dockerfile
+          context: tests/backend
           tags: |
             certpl/mwdb-tests:${{ github.sha }}
           push: false
@@ -140,6 +141,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./tests/frontend/Dockerfile
+          context: tests/frontend
           tags: |
             certpl/mwdb-web-tests:${{ github.sha }}
           push: false

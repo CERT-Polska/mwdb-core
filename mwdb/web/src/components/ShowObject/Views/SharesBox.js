@@ -183,9 +183,13 @@ function SharesBox() {
     const groupedItems = groupShares(items);
 
     // Icon showing the sharing status of the object
-    const lockIcon = items.filter((share) => share.group_name === "public")
+    const lockIcon = items.some((share) => share.group_name === "public")
         ? "lock-open"
         : "lock";
+
+    const lockTooltip = items.some((share) => share.group_name === "public")
+        ? "Object is shared with public"
+        : "Object is not shared with public";
 
     return (
         <div className="card card-default">
@@ -201,12 +205,14 @@ function SharesBox() {
             <div className="card-header">
                 <div className="media">
                     <div className="align-self-center media-body">Shares</div>
-                    <FontAwesomeIcon
-                        icon={lockIcon}
-                        pull="left"
-                        size="1x"
-                        style={{ color: "grey" }}
-                    />
+                    <span data-toggle="tooltip" title={lockTooltip}>
+                        <FontAwesomeIcon
+                            icon={lockIcon}
+                            pull="left"
+                            size="1x"
+                            style={{ color: "grey", cursor: "pointer" }}
+                        />
+                    </span>
                 </div>
             </div>
             {groupedItems.map((sharesGroup) => (

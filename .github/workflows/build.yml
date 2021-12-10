@@ -50,9 +50,7 @@ jobs:
           tags: |
             certpl/mwdb:${{ github.sha }}
             certpl/mwdb:master
-          cache-from: |
-            type=registry,ref=certpl/mwdb:master
-            type=gha
+          cache-from: type=gha
           cache-to: type=gha,mode=max
           outputs: type=docker,dest=./mwdb-image
       - name: Upload mwdb-core image
@@ -80,9 +78,7 @@ jobs:
           tags: |
             certpl/mwdb-web:${{ github.sha }}
             certpl/mwdb-web:master
-          cache-from: |
-            type=registry,ref=certpl/mwdb-web:master
-            type=gha
+          cache-from: type=gha
           cache-to: type=gha,mode=max
           outputs: type=docker,dest=./mwdb-web-image
       - name: Upload mwdb-core web image

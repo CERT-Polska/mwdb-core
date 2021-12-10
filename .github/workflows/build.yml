@@ -56,10 +56,8 @@ jobs:
           tags: |
             certpl/mwdb:${{ github.sha }}
             certpl/mwdb:master
-          outputs: type=docker,dest=./docker-images
+          outputs: type=docker,dest=./mwdb-image
           push: ${{ github.event_name == 'push' }}
-      - name: ls
-        run: ls ./docker-images/
       - name: Upload mwdb-core image
         uses: actions/upload-artifact@v2 
         with:
@@ -91,9 +89,8 @@ jobs:
           tags: |
             certpl/mwdb-web:${{ github.sha }}
             certpl/mwdb-web:master
+          outputs: type=docker,dest=./mwdb-web-image
           push: ${{ github.event_name == 'push' }}
-      - name: Store mwdb-core web image
-        run: docker save -o ./mwdb-web-image certpl/mwdb-web:${{ github.sha }}
       - name: Upload mwdb-core web image
         uses: actions/upload-artifact@v2 
         with:
@@ -118,9 +115,8 @@ jobs:
           context: tests/backend
           tags: |
             certpl/mwdb-tests:${{ github.sha }}
+          outputs: type=docker,dest=./mwdb-tests-image
           push: false
-      - name: Store test image
-        run: docker save -o ./mwdb-tests-image certpl/mwdb-tests:${{ github.sha }}
       - name: Upload test image
         uses: actions/upload-artifact@v2 
         with:
@@ -145,9 +141,8 @@ jobs:
           context: tests/frontend
           tags: |
             certpl/mwdb-web-tests:${{ github.sha }}
+          outputs: type=docker,dest=./mwdb-web-tests-image
           push: false
-      - name: Store test image
-        run: docker save -o ./mwdb-web-tests-image certpl/mwdb-web-tests:${{ github.sha }}
       - name: Upload test image
         uses: actions/upload-artifact@v2
         with:

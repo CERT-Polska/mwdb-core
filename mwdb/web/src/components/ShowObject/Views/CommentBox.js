@@ -160,6 +160,17 @@ function CommentBox() {
         setCommentToRemove(comment_id);
     }
 
+    function updateActivePage(
+        activePage,
+        comments,
+        itemsCountPerPage,
+        setActivePage
+    ) {
+        // if removed item is last on page
+        if (activePage !== 1 && (comments.length - 1) % itemsCountPerPage === 0)
+            setActivePage((p) => p - 1);
+    }
+
     const getComments = useCallback(updateComments, [
         api,
         objectId,
@@ -177,13 +188,12 @@ function CommentBox() {
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={() => {
                     removeComment(commentToRemove);
-                    // if last comment on page is removed
-                    if (
-                        activePage !== 1 &&
-                        (comments.length - 1) % itemsCountPerPage === 0
-                    ) {
-                        setActivePage((p) => p - 1);
-                    }
+                    updateActivePage(
+                        activePage,
+                        comments,
+                        itemsCountPerPage,
+                        setActivePage
+                    );
                 }}
                 message="Remove the comment?"
                 confirmText="Remove"

@@ -8,6 +8,7 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { updateActivePage } from "@mwdb-web/commons/helpers";
 
 function Comment(props) {
     return (
@@ -160,17 +161,6 @@ function CommentBox() {
         setCommentToRemove(comment_id);
     }
 
-    function updateActivePage(
-        activePage,
-        comments,
-        itemsCountPerPage,
-        setActivePage
-    ) {
-        // if removed item is last on page
-        if (activePage !== 1 && (comments.length - 1) % itemsCountPerPage === 0)
-            setActivePage((p) => p - 1);
-    }
-
     const getComments = useCallback(updateComments, [
         api,
         objectId,
@@ -190,7 +180,7 @@ function CommentBox() {
                     removeComment(commentToRemove);
                     updateActivePage(
                         activePage,
-                        comments,
+                        comments.length,
                         itemsCountPerPage,
                         setActivePage
                     );

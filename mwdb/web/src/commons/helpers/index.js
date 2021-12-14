@@ -3,6 +3,7 @@ import _ from "lodash";
 export { default as downloadData } from "./download";
 export * from "./search";
 export * from "./filesize";
+export * from "./paginate";
 
 export const capitalize = (s) => {
     if (typeof s !== "string") return "";

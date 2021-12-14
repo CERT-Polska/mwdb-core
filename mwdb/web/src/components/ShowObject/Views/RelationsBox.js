@@ -15,6 +15,7 @@ import {
 } from "@mwdb-web/commons/ui";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import RelationsAddModal from "../Actions/RelationsAddModal";
+import { updateActivePage } from "@mwdb-web/commons/helpers";
 
 function paginateParentChildren(
     parents,
@@ -57,6 +58,7 @@ function RelationsBox(props) {
     const [disabledModalButton, setDisabledModalButton] = useState(false);
     const [relationToRemove, setRelationToRemove] = useState({});
     const [modalError, setModalError] = useState("");
+    let updateRelationsActivePage = props.updateRelationsActivePage;
 
     async function addObjectRelations(relation, value) {
         try {
@@ -240,12 +242,13 @@ function RelationsBox(props) {
                 isOpen={isAttributeDeleteModalOpen}
                 disabled={disabledModalButton}
                 onRequestClose={() => setAttributeDeleteModalOpen(false)}
-                onConfirm={() =>
+                onConfirm={() => {
                     removeObjectRelations(
                         relationToRemove.relation,
                         relationToRemove.id
-                    )
-                }
+                    );
+                    updateRelationsActivePage();
+                }}
                 message="Are you sure you want to delete this relation?"
                 buttonStyle="btn btn-danger"
                 confirmText="yes"
@@ -271,21 +274,28 @@ function TypedRelationsBox(props) {
         itemsCountPerPage
     );
 
-    if (parentsFiltered.length + childrenFiltered.length > 0)
+    let typedRelationsCount = parentsFiltered.length + childrenFiltered.length;
+
+    if (typedRelationsCount > 0)
         return (
             <div>
                 <RelationsBox
                     header={props.header}
+                    updateRelationsActivePage={() =>
+                        updateActivePage(
+                            activePage,
+                            typedRelationsCount,
+                            itemsCountPerPage,
+                            setActivePage
+                        )
+                    }
                     {...{ parents, children }}
                 />
-                {parentsFiltered.length + childrenFiltered.length >
-                    itemsCountPerPage && (
+                {typedRelationsCount > itemsCountPerPage && (
                     <Pagination
                         activePage={activePage}
                         itemsCountPerPage={itemsCountPerPage}
-                        totalItemsCount={
-                            parentsFiltered.length + childrenFiltered.length
-                        }
+                        totalItemsCount={typedRelationsCount}
                         pageRangeDisplayed={5}
                         onChange={setActivePage}
                         itemClass="page-item"

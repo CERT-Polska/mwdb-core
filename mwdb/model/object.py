@@ -622,6 +622,7 @@ class Object(db.Model):
         # In that case we want only those parents to which requestor has access.
         stmtp = (
             db.session.query(Object)
+            .join(relation, relation.c.parent_id == Object.id)
             .filter(
                 Object.id.in_(
                     db.session.query(relation.c.parent_id).filter(
@@ -629,6 +630,7 @@ class Object(db.Model):
                     )
                 )
             )
+            .order_by(relation.c.creation_time.desc())
             .filter(requestor.has_access_to_object(Object.id))
         )
         stmtp = stmtp.subquery()

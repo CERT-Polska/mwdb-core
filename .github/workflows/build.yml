@@ -102,7 +102,7 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Build and push mwdb-core image
+      - name: Build and push mwdb-tests image
         uses: docker/build-push-action@v2
         with:
           file: ./tests/backend/Dockerfile
@@ -131,7 +131,7 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Build and push mwdb-core image
+      - name: Build and push mwdb-web-tests image
         uses: docker/build-push-action@v2
         with:
           file: ./tests/frontend/Dockerfile
@@ -231,17 +231,70 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Import and push images
-        run: |
-          docker load --input ./mwdb-image/mwdb-image
-          docker load --input ./mwdb-web-image/mwdb-web-image
-          docker load --input ./mwdb-tests-image/mwdb-tests-image
-          docker load --input ./mwdb-web-tests-image/mwdb-web-tests-image
-          docker tag certpl/mwdb:$GITHUB_SHA certpl/mwdb:master
-          docker tag certpl/mwdb-web:$GITHUB_SHA certpl/mwdb-web:master
-          docker tag certpl/mwdb-tests:$GITHUB_SHA certpl/mwdb-tests:master
-          docker tag certpl/mwdb-web-tests:$GITHUB_SHA certpl/mwdb-web-tests:master
-          docker push --all-tags certpl/mwdb
-          docker push --all-tags certpl/mwdb-web
-          docker push --all-tags certpl/mwdb-tests
-          docker push --all-tags certpl/mwdb-web-tests
+      - name: Build and push mwdb-core image
+        uses: docker/build-push-action@v2
+        with:
+          file: ./deploy/docker/Dockerfile
+          tags: |
+            certpl/mwdb:master
+          cache-from: |
+            type=registry,ref=certpl/mwdb:master
+            type=gha,scope=${{github.ref_name}}-mwdb
+          cache-to: |
+            type=registry,ref=certpl/mwdb:master,mode=max
+          push: true
+      - name: Build and push mwdb-core web image
+        uses: docker/build-push-action@v2
+        with:
+          file: ./deploy/docker/Dockerfile-web
+          tags: |
+            certpl/mwdb-web:master
+          cache-from: |
+            type=registry,ref=certpl/mwdb-web:master
+            type=gha,scope=${{github.ref_name}}-mwdb-web
+          cache-to: |
+            type=registry,ref=certpl/mwdb-web:master,mode=max
+          push: true
+  push_test_images:
+    needs: [test_backend_e2e, test_frontend_e2e]
+    name: Push test images on Docker Hub
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push mwdb-tests image
+        uses: docker/build-push-action@v2
+        with:
+          file: ./tests/backend/Dockerfile
+          context: tests/backend
+          tags: |
+            certpl/mwdb-tests:master
+          cache-from: |
+            type=registry,ref=certpl/mwdb-tests:master
+            type=gha,scope=${{github.ref_name}}-mwdb-tests
+          cache-to: |
+            type=registry,ref=certpl/mwdb-tests:master,mode=max
+          push: true
+      - name: Build and push mwdb-web-tests image
+        uses: docker/build-push-action@v2
+        with:
+          file: ./tests/frontend/Dockerfile
+          context: tests/frontend
+          tags: |
+            certpl/mwdb-web-tests:master
+          cache-from: |
+            type=registry,ref=certpl/mwdb-web-tests:master
+            type=gha,scope=${{github.ref_name}}-mwdb-web-tests
+          cache-to: |
+            type=registry,ref=certpl/mwdb-web-tests:master,mode=max
+          push: true

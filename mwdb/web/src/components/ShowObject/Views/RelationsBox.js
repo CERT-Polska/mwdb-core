@@ -280,7 +280,7 @@ function TypedRelationsBox(props) {
         return (
             <div>
                 <RelationsBox
-                    header={props.header}
+                    header={`${props.header}: ${typedRelationsCount}`}
                     updateRelationsActivePage={() =>
                         updateActivePage(
                             activePage,

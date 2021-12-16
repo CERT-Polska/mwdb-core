@@ -49,6 +49,8 @@ jobs:
           cache-from: |
             type=registry,ref=certpl/mwdb:master
             type=gha,scope=${{github.ref_name}}-mwdb
+          cache-to: |
+            type=registry,ref=certpl/mwdb:${{ github.event.release.tag_name }},mode=max
           push: true
       - name: Build and push mwdb-core web image
         uses: docker/build-push-action@v2
@@ -59,4 +61,6 @@ jobs:
           cache-from: |
             type=registry,ref=certpl/mwdb-web:master
             type=gha,scope=${{github.ref_name}}-mwdb-web
+          cache-to: |
+            type=registry,ref=certpl/mwdb-web:${{ github.event.release.tag_name }},mode=max
           push: true

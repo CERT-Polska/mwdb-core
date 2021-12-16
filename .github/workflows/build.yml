@@ -73,7 +73,7 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Build and push mwdb-core image
+      - name: Build and push mwdb-core web image
         uses: docker/build-push-action@v2
         with:
           file: ./deploy/docker/Dockerfile-web

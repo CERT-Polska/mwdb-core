@@ -242,6 +242,7 @@ Basic settings:
 * ``file_upload_timeout`` (integer) - File upload process will be terminated if it takes more than this parameter value in milliseconds. Default value is 60000 ms.
 * ``base_url`` (string) - Base URL of MWDB web application, used for registration mail templates. Default is ``http://127.0.0.1``
 * ``statement_timeout`` (integer) - Database statement_timeout parameter. Database server aborts any statement that takes more than the specified number of milliseconds.
+* ``request_timeout`` (integer) - HTTP request will be terminated if it takes more than this parameter value in milliseconds. Default value is 20000 ms.
 
 
 Web application settings:

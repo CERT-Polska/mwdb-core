@@ -8,6 +8,7 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { updateActivePage } from "@mwdb-web/commons/helpers";
 
 function Comment(props) {
     return (
@@ -177,6 +178,12 @@ function CommentBox() {
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={() => {
                     removeComment(commentToRemove);
+                    updateActivePage(
+                        activePage,
+                        comments.length,
+                        itemsCountPerPage,
+                        setActivePage
+                    );
                 }}
                 message="Remove the comment?"
                 confirmText="Remove"

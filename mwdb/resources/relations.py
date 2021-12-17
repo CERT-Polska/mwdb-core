@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import Conflict, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import Object, db
@@ -99,6 +99,8 @@ class ObjectChildResource(Resource):
                 description: |
                     When one of objects doesn't exist or user
                     doesn't have access to object.
+            409:
+                description: Relation already exists.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -111,7 +113,9 @@ class ObjectChildResource(Resource):
         if child_object is None:
             raise NotFound("Child object not found")
 
-        child_object.add_parent(parent_object, commit=False)
+        result = child_object.add_parent(parent_object, commit=False)
+        if not result:
+            raise Conflict("Relation alredy exists")
 
         db.session.commit()
         logger.info(
@@ -154,13 +158,15 @@ class ObjectChildResource(Resource):
                 type: string
         responses:
             200:
-                description: When relation was successfully added
+                description: When relation was successfully removed.
             403:
-                description: When user doesn't have `adding_parents` capability.
+                description: When user doesn't have `removing_parents` capability.
             404:
                 description: |
                     When one of objects doesn't exist or user
                     doesn't have access to object.
+            409:
+                description: Relation does not exist.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -173,7 +179,10 @@ class ObjectChildResource(Resource):
         if child_object is None:
             raise NotFound("Child object not found")
 
-        child_object.remove_parent(parent_object)
+        result = child_object.remove_parent(parent_object)
+        if not result:
+            raise Conflict("Relation does not exist")
+
         logger.info(
             "Child removed",
             extra={"parent": parent_object.dhash, "child": child_object.dhash},

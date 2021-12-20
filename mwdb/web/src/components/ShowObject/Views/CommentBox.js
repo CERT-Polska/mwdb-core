@@ -12,7 +12,7 @@ import { updateActivePage } from "@mwdb-web/commons/helpers";
 
 function Comment(props) {
     return (
-        <li className="media" style={{ wordBreak: "break-all" }}>
+        <li className="media" style={{ wordWrap: "break-word" }}>
             <div className="align-self-center mr-3">
                 <Identicon data={props.author} size="45" />
             </div>

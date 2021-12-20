@@ -163,7 +163,7 @@ class ObjectChildResource(Resource):
                 description: When user doesn't have `removing_parents` capability.
             404:
                 description: |
-                    When one of objects doesn't exist or user
+                    When relation or one of objects doesn't exist or user
                     doesn't have access to object.
             409:
                 description: Relation does not exist.
@@ -181,7 +181,7 @@ class ObjectChildResource(Resource):
 
         result = child_object.remove_parent(parent_object)
         if not result:
-            raise Conflict("Relation does not exist")
+            raise NotFound("Relation not found")
 
         logger.info(
             "Child removed",

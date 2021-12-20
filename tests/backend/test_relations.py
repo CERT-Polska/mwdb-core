@@ -479,7 +479,7 @@ def test_removing_not_existing_relation(admin_session):
     file_content_2 = base62uuid()
     sample_2 = test.add_sample(filename_2, file_content_2)
     
-    with ShouldRaise(status_code=409):
+    with ShouldRaise(status_code=404):
         test.remove_parent(sample_1['sha256'], sample_2['sha256'])
 
 

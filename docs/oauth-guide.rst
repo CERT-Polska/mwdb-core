@@ -1,5 +1,5 @@
-OAuth-based authentication
-==========================
+OpenID Connect authentication (Single Sign-On)
+==============================================
 
 .. versionadded:: 2.6.0
 

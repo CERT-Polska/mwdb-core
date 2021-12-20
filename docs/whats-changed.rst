@@ -7,17 +7,140 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrade mwdb-core to latest version`.
 
+v2.6.0
+------
+
+This release implements multiple feature requests and improvements. The most noteworthy are support for OpenID Connect authentication
+and new Attribute API that allows to store whole JSON objects as attribute values.
+
+Another noticeable change is redesigned Shares box. In addition, we swapped the positions of Attributes box and Shares box, so
+main part of view contains the most important information about object. In future, we plan to enrich attributes with extended
+rendering features, so you can place and visualize complete analysis report just by using Attributes feature. If you have any
+ideas regarding that, [let us know by creating an issue](https://github.com/CERT-Polska/mwdb-core/issues) !
+
+Complete changelog can be found here: [v2.6.0 changelog](https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.6.0)
+
+[New feature] Support for OpenID Connect authentication
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Users can bind their MWDB accounts with external identity provider, so they can authenticate via corporate Single Sign-On.
+
+Feature was tested on Keycloak, but feature should support other OpenID Providers as well.
+
+For more instructions, read :ref:`OpenID Connect authentication (Single Sign-On)`.
+
+[New feature] New Attribute API - support for JSON values
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before 2.6.0, attributes supported only relatively short key-value string pairs and there were no good place for complex
+structures like:
+
+- enrichments from other services
+- file static analysis information like code signing, sections, list of resources
+- information about produced dumps from sandbox
+- apivectors (https://malpedia.caad.fkie.fraunhofer.de/apiqr/)
+
+That's why we decided to migrate from plain strings to [JSONB type](https://www.postgresql.org/docs/14/datatype-json.html)
+in internal attribute value representation. We also designed a new Attribute API to operate on JSON objects rather than
+simple values.
+
+// view
+
+Attribute API is the new set of endpoints and request fields. You can easily recognize them as we name them `attributes`
+instead of `meta(keys)`.
+
+// swagger
+
+For compatibility reasons: deprecated Metakey API just coerces object values to strings. Keep in mind that strings
+`'{"foo": "bar"}'` and objects `{"foo": "bar"}` are indistinguishable after type coercion, so don't use that API for
+attribute keys that are intended to contain JSON objects.
+
+Because of used representation, JSON dictionaries are not ordered. Attribute key still behaves as set: all values under the same attribute key are guaranteed to be unique and
+when we try to add the same value twice, the second one won't be added.
+
+Attribute API exposes attribute value identifier that can be used for removing the specific attribute value. Metakeys were identified directly by `key, value` tuple
+but it wasn't convenient for objects because these values can be pretty huge.
+
+// identifier
+
+// todo: mwdblib support
+
+More information can be found in [#413 feature draft on Github](https://github.com/CERT-Polska/mwdb-core/issues/413). At the time of
+2.6.0 release, not all planned Attribute API extensions are implemented, but we're going to deliver them in future.
+
+[New feature] Configurable timeouts in MWDB Core
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before 2.6.0, all MWDB Core timeouts were hardcoded directly in Web client code:
+
+- 8 seconds timeout for API endpoints
+- 60 seconds timeout for file upload
+
+Timeout only interrupted HTTP request processing, but all SQL statements were still
+processed on the backend. In addition, it wasn't enforced for other REST API clients.
+
+In 2.6.0, we introduced set of timeouts that are configured on backend side:
+
+- ``statement_timeout`` (integer) - If set, database server aborts any SQL statement that takes more than the specified number of milliseconds.
+- ``file_upload_timeout`` (integer) - File upload process will be terminated by Web client if it takes more than this parameter value in milliseconds. Default value is 60000 ms.
+- ``request_timeout`` (integer) - HTTP request will be terminated by Web client if it takes more than this parameter value in milliseconds. Default value is 20000 ms.
+
+If you want to enforce effective timeout on the backend, set ``statement_timeout`` to non-zero value, but keep in mind that it may interrupt some long-running operations.
+Other timeouts are suggestions for REST API client (exposed via ``/api/server``) and are set on Web client level.
+
+Default Web timeout is now a bit longer and set to 20 seconds instead of 8 seconds.
+
+[New feature] Storing alternative names for sample
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MWDB stores all unique names for sample that it was uploaded with. They are exposed via "Variant file names" field in Web UI object view.
+
+// screen
+
+[New feature] Transactional tag adding along with object upload
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From 2.6.0 you can include tags as additional upload arguments. Previously that feature was supported only for attributes.
+
+In that way, new object will appear in repository with all tags set via single database transaction, so you can avoid
+race-conditions when tags are required immediately after object is spawned.
+
+// todo mwdblib support
+
+[New feature] New search features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2.6.0 release comes with new handful search fields:
+
+- ```comment_author:<login>``` search field that allows to search for objects commented by selected user
+- ```upload_count:<number>``` search field that allows to search for objects related with more than N different user uploads.
+- ```multi:``` search field that allows to search for multiple hashes separated by spaces
+
+The last one is used by Web client to automatically transform copy-pasted hashes, placed in search field.
+
+// gif with search field
+
+v2.5.0
+------
+
+Small release that includes minor improvements on Karton integrations and other existing features.
+
+Complete changelog can be found here: [v2.5.0 changelog](https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.5.0)
+
+v2.4.0
+------
+
+Small release that includes minor improvements of existing features.
+
+Complete changelog can be found here: [v2.4.0 changelog](https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.4.0)
+
 v2.3.0
 ------
 
-.. warning::
-
-    This is Release Candidate. Some features may work slightly different in stable release.
-
-    If something is missing here, feel free to report it by `creating a new issue <https://github.com/CERT-Polska/mwdb-core/issues/new?assignees=&labels=&template=feature_request.md>`_
-
-This release is focused mainly on MWDB administration improvements and further UI refactoring. 
+This release is focused mainly on MWDB administration improvements and further UI refactoring.
 In addiition, Karton integration is now available out-of-the-box, without need of extra plugins.
+
+Complete changelog can be found here: [v2.3.0 changelog](https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.3.0)
 
 [New feature] Built-in Karton integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,6 +189,8 @@ v2.2.0
 In 2.2.0 frontend part was heavily refactored, so some Web plugins may stop working properly without proper upgrade.
 
 Follow the sections below to learn about the most important changes.
+
+Complete changelog can be found here: [v2.2.0 changelog](https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.2.0)
 
 [New feature] Remote API feature
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -188,3 +188,4 @@ class CommentDeleteResource(Resource):
             db.session.delete(db_comment)
             logger.info("comment deleted", extra={"comment": comment_id})
             db.session.commit()
+            hooks.on_removed_comment(db_object, db_comment)

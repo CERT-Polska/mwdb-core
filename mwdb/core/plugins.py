@@ -87,7 +87,23 @@ class PluginHookBase(object):
         pass
 
     @hook_handler_method
+    def on_removed_tag(self, object: Object, tag: Tag):
+        pass
+
+    @hook_handler_method
     def on_created_comment(self, object: Object, comment: Comment):
+        pass
+
+    @hook_handler_method
+    def on_removed_comment(self, object: Object, comment: Comment):
+        pass
+
+    @hook_handler_method
+    def on_created_relation(self, parent: Object, child: Object):
+        pass
+
+    @hook_handler_method
+    def on_removed_relation(self, parent: Object, child: Object):
         pass
 
 

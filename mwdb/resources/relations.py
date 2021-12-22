@@ -2,6 +2,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.plugins import hooks
 from mwdb.model import Object, db
 from mwdb.schema.relations import RelationsResponseSchema
 
@@ -114,6 +115,7 @@ class ObjectChildResource(Resource):
         child_object.add_parent(parent_object, commit=False)
 
         db.session.commit()
+        hooks.on_created_relation(parent_object, child_object)
         logger.info(
             "Child added",
             extra={"parent": parent_object.dhash, "child": child_object.dhash},
@@ -174,6 +176,7 @@ class ObjectChildResource(Resource):
             raise NotFound("Child object not found")
 
         child_object.remove_parent(parent_object)
+        hooks.on_removed_relation(parent_object, child_object)
         logger.info(
             "Child removed",
             extra={"parent": parent_object.dhash, "child": child_object.dhash},

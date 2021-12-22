@@ -267,5 +267,6 @@ class TagResource(Resource):
 
         logger.info("Tag removed", extra={"tag": tag_name, "dhash": db_object.dhash})
         db.session.refresh(db_object)
+        hooks.on_removed_tag(db_object, tag_name)
         schema = TagItemResponseSchema(many=True)
         return schema.dump(db_object.tags)

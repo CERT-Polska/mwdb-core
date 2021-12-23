@@ -16,9 +16,9 @@ and new Attribute API that allows to store whole JSON objects as attribute value
 Another noticeable change is redesigned Shares box. In addition, we swapped the positions of Attributes box and Shares box, so
 main part of view contains the most important information about object. In future, we plan to enrich attributes with extended
 rendering features, so you can place and visualize complete analysis report just by using Attributes feature. If you have any
-ideas regarding that, [let us know by creating an issue](https://github.com/CERT-Polska/mwdb-core/issues) !
+ideas regarding that, `let us know by creating an issue <https://github.com/CERT-Polska/mwdb-core/issues>`_!
 
-Complete changelog can be found here: [v2.6.0 changelog](https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.6.0)
+Complete changelog can be found here: `v2.6.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.6.0>`_.
 
 [New feature] Support for OpenID Connect authentication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -38,18 +38,26 @@ structures like:
 - enrichments from other services
 - file static analysis information like code signing, sections, list of resources
 - information about produced dumps from sandbox
-- apivectors (https://malpedia.caad.fkie.fraunhofer.de/apiqr/)
+- `apivectors <https://malpedia.caad.fkie.fraunhofer.de/apiqr/>`_
 
-That's why we decided to migrate from plain strings to [JSONB type](https://www.postgresql.org/docs/14/datatype-json.html)
+That's why we decided to migrate from plain strings to `JSONB type <https://www.postgresql.org/docs/14/datatype-json.html>`_.
 in internal attribute value representation. We also designed a new Attribute API to operate on JSON objects rather than
 simple values.
 
-// view
+.. image:: ../_static/json-attribute-add.png
+   :target: ../_static/json-attribute-add.png
+   :alt: Adding JSON attribute
+
+.. image:: ../_static/json-attribute.png
+   :target: ../_static/json-attribute.png
+   :alt: JSON attribute
 
 Attribute API is the new set of endpoints and request fields. You can easily recognize them as we name them `attributes`
 instead of `meta(keys)`.
 
-// swagger
+.. image:: ../_static/attribute-swagger.png
+   :target: ../_static/attribute-swagger.png
+   :alt: Attribute API in Docs
 
 For compatibility reasons: deprecated Metakey API just coerces object values to strings. Keep in mind that strings
 `'{"foo": "bar"}'` and objects `{"foo": "bar"}` are indistinguishable after type coercion, so don't use that API for
@@ -61,11 +69,13 @@ when we try to add the same value twice, the second one won't be added.
 Attribute API exposes attribute value identifier that can be used for removing the specific attribute value. Metakeys were identified directly by `key, value` tuple
 but it wasn't convenient for objects because these values can be pretty huge.
 
-// identifier
+.. image:: ../_static/json-attribute-response.png
+   :target: ../_static/json-attribute-response.png
+   :alt: Attribute API response with exposed id
 
 // todo: mwdblib support
 
-More information can be found in [#413 feature draft on Github](https://github.com/CERT-Polska/mwdb-core/issues/413). At the time of
+More information can be found in `#413 feature draft on Github <https://github.com/CERT-Polska/mwdb-core/issues/413>`_. At the time of
 2.6.0 release, not all planned Attribute API extensions are implemented, but we're going to deliver them in future.
 
 [New feature] Configurable timeouts in MWDB Core
@@ -95,7 +105,9 @@ Default Web timeout is now a bit longer and set to 20 seconds instead of 8 secon
 
 MWDB stores all unique names for sample that it was uploaded with. They are exposed via "Variant file names" field in Web UI object view.
 
-// screen
+.. image:: ../_static/alt_names.png
+   :target: ../_static/alt_names.png
+   :alt: Variant file names in sample view
 
 [New feature] Transactional tag adding along with object upload
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,14 +137,14 @@ v2.5.0
 
 Small release that includes minor improvements on Karton integrations and other existing features.
 
-Complete changelog can be found here: [v2.5.0 changelog](https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.5.0)
+Complete changelog can be found here: `v2.5.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.5.0>`_.
 
 v2.4.0
 ------
 
 Small release that includes minor improvements of existing features.
 
-Complete changelog can be found here: [v2.4.0 changelog](https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.4.0)
+Complete changelog can be found here: `v2.4.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.4.0>`_.
 
 v2.3.0
 ------
@@ -140,7 +152,7 @@ v2.3.0
 This release is focused mainly on MWDB administration improvements and further UI refactoring.
 In addiition, Karton integration is now available out-of-the-box, without need of extra plugins.
 
-Complete changelog can be found here: [v2.3.0 changelog](https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.3.0)
+Complete changelog can be found here: `v2.3.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.3.0>`_.
 
 [New feature] Built-in Karton integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

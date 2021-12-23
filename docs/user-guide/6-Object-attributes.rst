@@ -82,7 +82,7 @@ Attributes can be added during object upload. It's really useful if you want to 
 
 Another use case is passing source feed identifier with the uploaded file.
 
-The same operations can be performed using mwdblib. Due to backwards compatibility reasons, attributes are called ``metakeys`` in API, but it's the same feature. Let's explore the attributes in mwdb.cert.pl:
+The same operations can be performed using mwdblib. Let's explore the attributes in mwdb.cert.pl:
 
 .. code-block:: python
 

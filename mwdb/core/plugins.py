@@ -55,11 +55,19 @@ class PluginHookBase(object):
         pass
 
     @hook_handler_method
+    def on_removed_object(self, object: Object):
+        pass
+
+    @hook_handler_method
     def on_created_file(self, file: File):
         pass
 
     @hook_handler_method
     def on_reuploaded_file(self, file: File):
+        pass
+
+    @hook_handler_method
+    def on_removed_file(self, file: File):
         pass
 
     @hook_handler_method
@@ -71,11 +79,19 @@ class PluginHookBase(object):
         pass
 
     @hook_handler_method
+    def on_removed_config(self, config: Config):
+        pass
+
+    @hook_handler_method
     def on_created_text_blob(self, blob: TextBlob):
         pass
 
     @hook_handler_method
     def on_reuploaded_text_blob(self, blob: TextBlob):
+        pass
+
+    @hook_handler_method
+    def on_removed_text_blob(self, blob: TextBlob):
         pass
 
     @hook_handler_method

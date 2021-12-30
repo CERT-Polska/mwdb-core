@@ -236,6 +236,9 @@ class ObjectItemResource(Resource, ObjectUploader):
 
     CreateRequestSchema = None
 
+    def call_specialised_remove_hook(self, obj):
+        pass
+
     @requires_authorization
     def get(self, identifier):
         """
@@ -348,6 +351,9 @@ class ObjectItemResource(Resource, ObjectUploader):
 
         db.session.delete(obj)
         db.session.commit()
+
+        self.call_specialise_removed_hook(obj)
+        hooks.on_removed_object(obj)
 
 
 class ObjectCountResource(Resource):

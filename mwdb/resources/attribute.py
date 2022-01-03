@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.plugins import hooks
 from mwdb.model import AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.attribute import (
     AttributeDefinitionCreateRequestSchema,
@@ -344,6 +345,7 @@ class AttributeDefinitionListResource(Resource):
         db.session.add(attribute_definition)
         db.session.commit()
 
+        hooks.on_created_attribute_key(attribute_definition)
         schema = AttributeDefinitionItemResponseSchema()
         return schema.dump(attribute_definition)
 
@@ -464,6 +466,7 @@ class AttributeDefinitionResource(Resource):
 
         db.session.commit()
         logger.info("Attribute updated", extra=obj)
+        hooks.on_updated_attribute_key(attribute_definition)
 
         schema = AttributeDefinitionItemResponseSchema()
         return schema.dump(attribute_definition)
@@ -508,6 +511,7 @@ class AttributeDefinitionResource(Resource):
             raise NotFound("No such attribute key")
         db.session.delete(attribute_definition)
         db.session.commit()
+        hooks.on_removed_attribute_key(attribute_definition)
 
 
 class AttributePermissionResource(Resource):

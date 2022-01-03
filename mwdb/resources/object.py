@@ -352,7 +352,7 @@ class ObjectItemResource(Resource, ObjectUploader):
         db.session.delete(obj)
         db.session.commit()
 
-        self.call_specialise_removed_hook(obj)
+        self.call_specialised_remove_hook(obj)
         hooks.on_removed_object(obj)
 
 

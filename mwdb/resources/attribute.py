@@ -4,7 +4,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
-from mwdb.model import AttributeDefinition, AttributePermission, Group, db
+from mwdb.model import Attribute, AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.attribute import (
     AttributeDefinitionCreateRequestSchema,
     AttributeDefinitionItemResponseSchema,
@@ -165,7 +165,10 @@ class AttributeListResource(Resource):
 
         db.session.commit()
         db.session.refresh(db_object)
-        attributes = db_object.get_attributes(show_karton=False)
+        attributes = db_object.get_attributes(show_hidden=True)
+        new_attribute = next((attr for attr in attributes if attr.key == key), None)
+        if new_attribute:
+            hooks.on_created_attribute(db_object, new_attribute)
         schema = AttributeListResponseSchema()
         return schema.dump({"attributes": attributes})
 
@@ -221,6 +224,7 @@ class AttributeResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
+        attribute_to_delete = Attribute.get_by_id(db_object.id, attribute_id).first()
         is_deleted = db_object.remove_attribute_by_id(attribute_id)
         if is_deleted is False:
             raise NotFound(
@@ -228,6 +232,7 @@ class AttributeResource(Resource):
                 "insufficient permissions to delete it"
             )
         db.session.commit()
+        hooks.on_removed_attribute(db_object, attribute_to_delete)
 
 
 class AttributeDefinitionListResource(Resource):

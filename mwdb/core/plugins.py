@@ -9,7 +9,7 @@ from mwdb.core.config import app_config
 from mwdb.core.log import getLogger
 from mwdb.core.util import is_subdir
 from mwdb.model import Comment, Config, File, Object, Tag, TextBlob
-from mwdb.model.attribute import AttributeDefinition
+from mwdb.model.attribute import Attribute, AttributeDefinition
 
 logger = getLogger()
 
@@ -133,6 +133,14 @@ class PluginHookBase(object):
 
     @hook_handler_method
     def on_removed_attribute_key(self, attribute_def: AttributeDefinition):
+        pass
+
+    @hook_handler_method
+    def on_created_attribute(self, object: Object, attribute: Attribute):
+        pass
+
+    @hook_handler_method
+    def on_removed_attribute(self, object: Object, attribute: Attribute):
         pass
 
 

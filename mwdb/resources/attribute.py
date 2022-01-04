@@ -166,9 +166,9 @@ class AttributeListResource(Resource):
         db.session.commit()
         db.session.refresh(db_object)
         attributes = db_object.get_attributes(show_hidden=True)
-        new_attribute = next((attr for attr in attributes if attr.key == key), None)
-        if new_attribute:
-            hooks.on_created_attribute(db_object, new_attribute)
+        attribute = next((attr for attr in attributes if attr.key == key), None)
+        if attribute:
+            hooks.on_created_attribute(db_object, attribute)
         schema = AttributeListResponseSchema()
         return schema.dump({"attributes": attributes})
 

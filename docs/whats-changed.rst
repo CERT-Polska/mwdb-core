@@ -115,7 +115,14 @@ From 2.6.0 you can include tags as additional upload arguments. Previously that 
 In that way, new object will appear in repository with all tags set via single database transaction, so you can avoid
 race-conditions when tags are required immediately after object is spawned.
 
-// todo mwdblib support
+.. code-block:: python
+
+    from mwdblib import MWDB  # >= 4.0.0
+
+    mwdb = MWDB()
+    ...
+    mwdb.upload_file("sample", contents, tags=["vt:unknown"])
+
 
 [New feature] New search features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,8 +134,6 @@ race-conditions when tags are required immediately after object is spawned.
 - ```multi:``` search field that allows to search for multiple hashes separated by spaces
 
 The last one is used by Web client to automatically transform copy-pasted hashes, placed in search field.
-
-// gif with search field
 
 v2.5.0
 ------

@@ -90,30 +90,77 @@ The same operations can be performed using mwdblib. Let's explore the attributes
 
    mwdb = MWDB(api_key=..., api_url=...)
    file_object = mwdb.query_file("d9f00cc51e1c107881ebeaa0fd4f022a")
-   print(file_object.metakeys)
+   print(file_object.attributes)
 
    # {'from': ['http://45.95.168.97/bins/sora.x86'],
    #  'karton': ['da83d95a-0564-4d32-8fea-ff61ac7396d1']}
 
-To add a new attribute to the existing object, use `MWDBObject.add_metakey <https://mwdblib.readthedocs.io/en/latest/mwdbtypes.html#mwdblib.MWDBObject.add_metakey>`_ function. Example below will fail in mwdb.cert.pl because attribute ``test-key`` is probably undefined, but you can try it on your own instance!
+To add a new attribute to the existing object, use `MWDBObject.add_attribute <https://mwdblib.readthedocs.io/en/latest/mwdbtypes.html#mwdblib.MWDBObject.add_attribute>`_ function. Example below will fail in mwdb.cert.pl because attribute ``test-key`` is probably undefined, but you can try it on your own instance!
 
 .. code-block:: python
 
-   file_object.add_metakey("test-key", "test-value")
-   print(file_object.metakeys)
+   file_object.add_attribute("test-key", "test-value")
+   print(file_object.attributes)
    # {'from': ['http://45.95.168.97/bins/sora.x86'],
    #  'karton': ['da83d95a-0564-4d32-8fea-ff61ac7396d1'],
    #  'test-key': ['test-value']}
 
-To pass an attribute value during upload, you can set it via ``metakeys`` argument using `MWDB.upload_file <https://mwdblib.readthedocs.io/en/latest/mwdblib.html#mwdblib.MWDB.upload_file>`_ routine.
+To pass an attribute value during upload, you can set it via ``attributes`` argument using `MWDB.upload_file <https://mwdblib.readthedocs.io/en/latest/mwdblib.html#mwdblib.MWDB.upload_file>`_ routine.
 
 .. code-block:: python
 
    mwdb.upload_file("infected.zip", 
                     zip_contents, 
-                    metakeys={
+                    attributes={
                         "test-key": "test-value"
                     })
+
+JSON-like attribute values
+--------------------------
+
+Starting from 2.6.0, MWDB Core attribute values are not limited to be plain strings, but also JSON-like objects.
+
+.. image:: ../_static/json-attribute-add.png
+   :target: ../_static/json-attribute-add.png
+   :alt: Adding JSON attribute
+
+.. image:: ../_static/json-attribute.png
+   :target: ../_static/json-attribute.png
+   :alt: JSON attribute
+
+Using JSON attributes, you can easily store complex data like:
+
+- enrichments from other services
+- file static analysis information like code signing, sections, list of resources
+- information about produced dumps from sandbox
+
+.. code-block:: python
+
+   file_object.add_attribute(
+       "dumps", {
+           "fffb0000_1908f226280751a1": {
+               "apivector": "A45oA36CA7BA15iAgA6gA3CABQAEA3IAAQQA5CAGBkACA4QA6JIAAICISIMhY]Us",
+               "families": [
+                   "isfb"
+               ],
+               "similarity": 0.35330578512396693
+           },
+           "fffa0000_568d29558bebb4d8": {
+               "apivector": "A119CABQAEACA4QAAgA4BEA21QwMEhYQUM",
+               "families": [
+                   "isfb"
+               ],
+               "similarity": 0.3490675028882654
+           }
+       }
+   )
+
+You can also search for parts of object value using JSON queries, like for configuration contents:
+
+.. code-block::
+
+    attribute.dumps.fffb0000_1908f226280751a1.families*:isfb
+
 
 Removing attributes from objects
 --------------------------------

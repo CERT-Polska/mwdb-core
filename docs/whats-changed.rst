@@ -73,8 +73,6 @@ but it wasn't convenient for objects because these values can be pretty huge.
    :target: ../_static/json-attribute-response.png
    :alt: Attribute API response with exposed id
 
-// todo: mwdblib support
-
 More information can be found in `#413 feature draft on Github <https://github.com/CERT-Polska/mwdb-core/issues/413>`_. At the time of
 2.6.0 release, not all planned Attribute API extensions are implemented, but we're going to deliver them in future.
 

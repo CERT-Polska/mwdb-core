@@ -52,8 +52,8 @@ jobs:
             certpl/mwdb:master
           cache-from: |
             type=registry,ref=certpl/mwdb:master
-            type=gha,scope=${{github.ref_name}}-mwdb
-          cache-to: type=gha,scope=${{github.ref_name}}-mwdb,mode=max
+            type=gha,scope=gha-${{github.ref_name}}-mwdb
+          cache-to: type=gha,scope=gha-${{github.ref_name}}-mwdb,mode=max
           outputs: type=docker,dest=./mwdb-image
       - name: Upload mwdb-core image
         uses: actions/upload-artifact@v2 
@@ -82,8 +82,8 @@ jobs:
             certpl/mwdb-web:master
           cache-from: |
             type=registry,ref=certpl/mwdb-web:master
-            type=gha,scope=${{github.ref_name}}-mwdb-web
-          cache-to: type=gha,scope=${{github.ref_name}}-mwdb-web,mode=max
+            type=gha,scope=gha-${{github.ref_name}}-mwdb-web
+          cache-to: type=gha,scope=gha-${{github.ref_name}}-mwdb-web,mode=max
           outputs: type=docker,dest=./mwdb-web-image
       - name: Upload mwdb-core web image
         uses: actions/upload-artifact@v2 
@@ -111,8 +111,8 @@ jobs:
             certpl/mwdb-tests:${{ github.sha }}
           cache-from: |
             type=registry,ref=certpl/mwdb-tests:master
-            type=gha,scope=${{github.ref_name}}-mwdb-tests
-          cache-to: type=gha,scope=${{github.ref_name}}-mwdb-tests,mode=max
+            type=gha,scope=gha-${{github.ref_name}}-mwdb-tests
+          cache-to: type=gha,scope=gha-${{github.ref_name}}-mwdb-tests,mode=max
           outputs: type=docker,dest=./mwdb-tests-image
       - name: Upload test image
         uses: actions/upload-artifact@v2 
@@ -140,8 +140,8 @@ jobs:
             certpl/mwdb-web-tests:${{ github.sha }}
           cache-from: |
             type=registry,ref=certpl/mwdb-web-tests:master
-            type=gha,scope=${{github.ref_name}}-mwdb-web-tests
-          cache-to: type=gha,scope=${{github.ref_name}}-mwdb-web-tests,mode=max
+            type=gha,scope=gha-${{github.ref_name}}-mwdb-web-tests
+          cache-to: type=gha,scope=gha-${{github.ref_name}}-mwdb-web-tests,mode=max
           outputs: type=docker,dest=./mwdb-web-tests-image
       - name: Upload test image
         uses: actions/upload-artifact@v2
@@ -239,7 +239,7 @@ jobs:
             certpl/mwdb:master
           cache-from: |
             type=registry,ref=certpl/mwdb:master
-            type=gha,scope=${{github.ref_name}}-mwdb
+            type=gha,scope=gha-${{github.ref_name}}-mwdb
           cache-to: |
             type=registry,ref=certpl/mwdb:master,mode=max
           push: true
@@ -251,7 +251,7 @@ jobs:
             certpl/mwdb-web:master
           cache-from: |
             type=registry,ref=certpl/mwdb-web:master
-            type=gha,scope=${{github.ref_name}}-mwdb-web
+            type=gha,scope=gha-${{github.ref_name}}-mwdb-web
           cache-to: |
             type=registry,ref=certpl/mwdb-web:master,mode=max
           push: true
@@ -283,7 +283,7 @@ jobs:
             certpl/mwdb-tests:master
           cache-from: |
             type=registry,ref=certpl/mwdb-tests:master
-            type=gha,scope=${{github.ref_name}}-mwdb-tests
+            type=gha,scope=gha-${{github.ref_name}}-mwdb-tests
           cache-to: |
             type=registry,ref=certpl/mwdb-tests:master,mode=max
           push: true
@@ -296,7 +296,7 @@ jobs:
             certpl/mwdb-web-tests:master
           cache-from: |
             type=registry,ref=certpl/mwdb-web-tests:master
-            type=gha,scope=${{github.ref_name}}-mwdb-web-tests
+            type=gha,scope=gha-${{github.ref_name}}-mwdb-web-tests
           cache-to: |
             type=registry,ref=certpl/mwdb-web-tests:master,mode=max
           push: true

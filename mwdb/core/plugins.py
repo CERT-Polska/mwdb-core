@@ -10,6 +10,8 @@ from mwdb.core.log import getLogger
 from mwdb.core.util import is_subdir
 from mwdb.model import Comment, Config, File, Object, Tag, TextBlob
 from mwdb.model.attribute import Attribute, AttributeDefinition
+from mwdb.model.group import Group
+from mwdb.model.user import User
 
 logger = getLogger()
 
@@ -141,6 +143,42 @@ class PluginHookBase(object):
 
     @hook_handler_method
     def on_removed_attribute(self, object: Object, attribute: Attribute):
+        pass
+
+    @hook_handler_method
+    def on_created_user(self, user: User):
+        pass
+
+    @hook_handler_method
+    def on_removed_user(self, user: User):
+        pass
+
+    @hook_handler_method
+    def on_updated_user(self, user: User):
+        pass
+
+    @hook_handler_method
+    def on_created_group(self, group: Group):
+        pass
+
+    @hook_handler_method
+    def on_removed_group(self, group: Group):
+        pass
+
+    @hook_handler_method
+    def on_updated_group(self, group: Group):
+        pass
+
+    @hook_handler_method
+    def on_created_membership(self, group: Group, user: User):
+        pass
+
+    @hook_handler_method
+    def on_removed_membership(self, group: Group, user: User):
+        pass
+
+    @hook_handler_method
+    def on_updated_membership(self, group: Group, user: User):
         pass
 
 

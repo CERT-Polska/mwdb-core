@@ -197,6 +197,7 @@ class TagResource(Resource):
         tag = next((t for t in db_object.tags if t.tag == tag_name), None)
         if is_new and tag:
             hooks.on_created_tag(db_object, tag)
+            hooks.on_changed_object(db_object)
         elif tag:
             hooks.on_reuploaded_tag(db_object, tag)
 
@@ -272,5 +273,6 @@ class TagResource(Resource):
         db.session.refresh(db_object)
         if is_removed and tag_to_delete:
             hooks.on_removed_tag(db_object, tag_to_delete)
+            hooks.on_changed_object(db_object)
         schema = TagItemResponseSchema(many=True)
         return schema.dump(db_object.tags)

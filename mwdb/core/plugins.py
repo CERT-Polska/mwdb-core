@@ -181,6 +181,10 @@ class PluginHookBase(object):
     def on_updated_membership(self, group: Group, user: User):
         pass
 
+    @hook_handler_method
+    def on_changed_object(self, object: Object):
+        pass
+
 
 class PluginHookHandler(PluginHookBase):
     def __init__(self):

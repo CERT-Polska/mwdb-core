@@ -116,6 +116,11 @@ class ObjectChildResource(Resource):
 
         db.session.commit()
         hooks.on_created_relation(parent_object, child_object)
+        if parent_object is not child_object:
+            hooks.on_changed_object(parent_object)
+            hooks.on_changed_object(child_object)
+        else:
+            hooks.on_changed_object(parent_object)
         logger.info(
             "Child added",
             extra={"parent": parent_object.dhash, "child": child_object.dhash},
@@ -177,6 +182,11 @@ class ObjectChildResource(Resource):
 
         child_object.remove_parent(parent_object)
         hooks.on_removed_relation(parent_object, child_object)
+        if parent_object is not child_object:
+            hooks.on_changed_object(parent_object)
+            hooks.on_changed_object(child_object)
+        else:
+            hooks.on_changed_object(parent_object)
         logger.info(
             "Child removed",
             extra={"parent": parent_object.dhash, "child": child_object.dhash},

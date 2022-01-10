@@ -169,6 +169,7 @@ class AttributeListResource(Resource):
         attribute = next((attr for attr in attributes if attr.key == key), None)
         if attribute:
             hooks.on_created_attribute(db_object, attribute)
+            hooks.on_changed_object(db_object)
         schema = AttributeListResponseSchema()
         return schema.dump({"attributes": attributes})
 
@@ -233,6 +234,7 @@ class AttributeResource(Resource):
             )
         db.session.commit()
         hooks.on_removed_attribute(db_object, attribute_to_delete)
+        hooks.on_changed_object(db_object)
 
 
 class AttributeDefinitionListResource(Resource):

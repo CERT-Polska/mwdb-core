@@ -169,3 +169,54 @@ After applying above modifications to ``__init__.py``, let's restart ``mwdb-core
 Webhooks can be used to automatically analyze the uploaded file in sandbox. The good example is `mwdb-plugin-drakvuf <https://github.com/CERT-Polska/mwdb-plugin-drakvuf>`_ which implements webhook that sends all uploaded files to the `Drakvuf Sandbox <https://github.com/CERT-Polska/drakvuf-sandbox>`_ for analysis.
 
 Check out `mwdb-plugin-drakvuf <https://github.com/CERT-Polska/mwdb-plugin-drakvuf>`_ on Github!
+
+Available hooks
+--------------
+A lot of hooks have been implemented in MWDB. Each of these hooks is triggered when particular event accurs in system.
+
+
+List of available hooks and events triggered these hooks.
+
+* ``on_created_object(self, object: Object)``  - object was uploaded (file, blob or config) or pulled from remoted resource
+* ``on_reuploaded_object(self, object: Object)``  - object was again uploaded or pulled from remote resource
+* ``on_removed_object(self, object: Object)`` - object was deleted
+* ``on_created_file(self, file: File)`` - file was uploaded or pulled from remoted resource
+* ``on_reuploaded_file(self, file: File):`` - file was again uploaded or pulled from remote resource
+* ``on_removed_file(self, file: File)`` - file was deleted
+* ``on_created_config(self, config: Config)`` - config was uploaded or pulled from remoted resource
+* ``on_reuploaded_config(self, config: Config)`` - config was again uploaded or pulled from remote resource
+* ``on_removed_config(self, config: Config)`` - config was deleted
+* ``on_created_text_blob(self, blob: TextBlob)`` - text blob was uploaded or pulled from remoted resource
+* ``on_reuploaded_text_blob(self, blob: TextBlob)`` - text blob was again uploaded or pulled from remote resource
+* ``on_removed_text_blob(self, blob: TextBlob)`` - text blob was deleted
+* ``on_created_tag(self, object: Object, tag: Tag)`` - a new tag was created and assigned to object
+* ``on_reuploaded_tag(self, object: Object, tag: Tag)`` - tag was again assigned to object
+* ``on_removed_tag(self, object: Object, tag: Tag)`` - tag was removed from object
+* ``on_created_comment(self, object: Object, comment: Comment)`` - a new comment was created and assigned to object
+* ``on_removed_comment(self, object: Object, comment: Comment)`` - comment was removed from object
+* ``on_created_relation(self, parent: Object, child: Object)`` - relation between parent and child objects was added
+* ``on_removed_relation(self, parent: Object, child: Object)`` - relation between parent and child objects was removed
+* ``on_created_attribute_key(self, attribute_def: AttributeDefinition)`` - attribute definition was created
+* ``on_updated_attribute_key(self, attribute_def: AttributeDefinition)`` - attribute definition was updated
+* ``on_removed_attribute_key(self, attribute_def: AttributeDefinition)`` - attribute definition was removed
+* ``on_created_attribute(self, object: Object, attribute: Attribute)`` - attribute was assigned to object
+* ``on_removed_attribute(self, object: Object, attribute: Attribute)`` - attribute was removed from object
+* ``on_created_user(self, user: User)`` - a new user account was created
+* ``on_removed_user(self, user: User)`` - user account was removed
+* ``on_updated_user(self, user: User)`` - user account was updated
+* ``on_created_group(self, group: Group)`` - a new group was created. Also when a new user is registered and his private group is created
+* ``on_removed_group(self, group: Group)`` - group was removed. Also when a user is deleted and his private group is removed
+* ``on_updated_group(self, group: Group)`` - group attributes where updated
+* ``on_created_membership(self, group: Group, user: User)`` - user was added to the group
+* ``on_removed_membership(self, group: Group, user: User)`` - user was removed from the group
+* ``on_updated_membership(self, group: Group, user: User)`` - membership was updated
+* ``on_changed_object(self, object: Object)`` - this hook is triggered when one of the undermentioned events takes place:
+
+  * a new tag was created and assigned to object
+  * tag was removed from object
+  * a new comment was created and assigned to object
+  * comment was removed from object
+  * relation between parent and child objects was added
+  * relation between parent and child objects was removed
+  * attribute was assigned to object
+  * attribute was removed from object

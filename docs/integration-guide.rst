@@ -201,7 +201,7 @@ List of available hooks and events triggered these hooks.
 * ``on_removed_attribute_key(self, attribute_def: AttributeDefinition)`` - attribute definition was removed
 * ``on_created_attribute(self, object: Object, attribute: Attribute)`` - attribute was assigned to object
 * ``on_removed_attribute(self, object: Object, attribute: Attribute)`` - attribute was removed from object
-* ``on_created_user(self, user: User)`` - a new user account was created
+* ``on_created_user(self, user: User)`` - a new user account was created (also using OpenID Provider)
 * ``on_removed_user(self, user: User)`` - user account was removed
 * ``on_updated_user(self, user: User)`` - user account was updated
 * ``on_created_group(self, group: Group)`` - a new group was created. Also when a new user is registered and his private group is created

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
 import {
@@ -11,6 +12,10 @@ import {
 } from "@mwdb-web/commons/ui";
 
 function GroupItem(props) {
+    const lockAttributes = props.immutable
+        ? { icon: "lock", tip: "Group is immutable" }
+        : { icon: "lock-open", tip: "Group is mutable" };
+
     return (
         <tr key={props.name}>
             <td>
@@ -19,6 +24,14 @@ function GroupItem(props) {
                         {props.name}
                     </HighlightText>
                 </Link>
+                <span data-toggle="tooltip" title={lockAttributes.tip}>
+                    <FontAwesomeIcon
+                        icon={lockAttributes.icon}
+                        pull="left"
+                        size="1x"
+                        style={{ color: "grey" }}
+                    />
+                </span>
             </td>
             <td>
                 {props.name === "public" ? (

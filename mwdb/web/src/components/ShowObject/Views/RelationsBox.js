@@ -58,7 +58,7 @@ function RelationsBox(props) {
     const [disabledModalButton, setDisabledModalButton] = useState(false);
     const [relationToRemove, setRelationToRemove] = useState({});
     const [modalError, setModalError] = useState("");
-    let updateRelationsActivePage = props.updateRelationsActivePage;
+    const updateRelationsActivePage = props.updateRelationsActivePage;
 
     async function addObjectRelations(relation, value) {
         try {

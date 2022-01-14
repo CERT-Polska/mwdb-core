@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from werkzeug.exceptions import Conflict, NotFound
+from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import Object, db
@@ -99,8 +99,6 @@ class ObjectChildResource(Resource):
                 description: |
                     When one of objects doesn't exist or user
                     doesn't have access to object.
-            409:
-                description: Relation already exists.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -113,9 +111,7 @@ class ObjectChildResource(Resource):
         if child_object is None:
             raise NotFound("Child object not found")
 
-        result = child_object.add_parent(parent_object, commit=False)
-        if not result:
-            raise Conflict("Relation alredy exists")
+        child_object.add_parent(parent_object, commit=False)
 
         db.session.commit()
         logger.info(

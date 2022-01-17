@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { ConfigContext } from "@mwdb-web/commons/config";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import {
@@ -13,15 +12,9 @@ import {
     ActionCopyToClipboard,
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import {
-    FirstAnalysisBanner,
-    KartonAttributeRenderer,
-} from "./AttributeKarton";
 import { useHistory } from "react-router-dom";
 
-let attributeRenderers = {
-    karton: KartonAttributeRenderer,
-};
+let attributeRenderers = {};
 
 for (let extraRenderers of fromPlugin("attributeRenderers")) {
     attributeRenderers = { ...attributeRenderers, ...extraRenderers };
@@ -197,7 +190,6 @@ function AttributeRenderer({
 
 function ObjectAttributes(props) {
     const api = useContext(APIContext);
-    const config = useContext(ConfigContext);
     const context = useContext(ObjectContext);
 
     const [attributeDefinitions, setAttributeDefinitions] = useState({});
@@ -282,15 +274,6 @@ function ObjectAttributes(props) {
             onUpdateAttributes={updateAttributes}
             object={context.object}
         >
-            {config.config["is_karton_enabled"] ? (
-                <FirstAnalysisBanner
-                    attributes={attributes}
-                    object={context.object}
-                    onUpdateAttributes={updateAttributes}
-                />
-            ) : (
-                []
-            )}
             {Object.keys(attributes).length > 0 ? (
                 <DataTable>
                     {Object.keys(attributes)

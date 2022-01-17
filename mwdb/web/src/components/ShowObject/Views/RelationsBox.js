@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
+import Pagination from "react-js-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
@@ -14,6 +15,37 @@ import {
 } from "@mwdb-web/commons/ui";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import RelationsAddModal from "../Actions/RelationsAddModal";
+import { updateActivePage } from "@mwdb-web/commons/helpers";
+
+function paginateParentChildren(
+    parents,
+    children,
+    activePage,
+    itemsCountPerPage
+) {
+    const elementFrom = (activePage - 1) * itemsCountPerPage;
+    const elementTo = activePage * itemsCountPerPage;
+    const parentsFrom = elementFrom;
+    const parentsTo = elementTo;
+    let childrenFrom;
+    let childrenTo;
+
+    if (parents.length < elementTo) {
+        childrenFrom = elementFrom - parents.length;
+        if (childrenFrom < 0) {
+            childrenFrom = 0;
+        }
+        childrenTo = elementTo - parents.length;
+    } else {
+        childrenFrom = 0;
+        childrenTo = 0;
+    }
+
+    const selectedParents = parents.slice(parentsFrom, parentsTo);
+    const selectedChildren = children.slice(childrenFrom, childrenTo);
+
+    return [selectedParents, selectedChildren];
+}
 
 function RelationsBox(props) {
     const api = useContext(APIContext);
@@ -26,6 +58,7 @@ function RelationsBox(props) {
     const [disabledModalButton, setDisabledModalButton] = useState(false);
     const [relationToRemove, setRelationToRemove] = useState({});
     const [modalError, setModalError] = useState("");
+    const updateRelationsActivePage = props.updateRelationsActivePage;
 
     async function addObjectRelations(relation, value) {
         try {
@@ -209,12 +242,13 @@ function RelationsBox(props) {
                 isOpen={isAttributeDeleteModalOpen}
                 disabled={disabledModalButton}
                 onRequestClose={() => setAttributeDeleteModalOpen(false)}
-                onConfirm={() =>
+                onConfirm={() => {
                     removeObjectRelations(
                         relationToRemove.relation,
                         relationToRemove.id
-                    )
-                }
+                    );
+                    updateRelationsActivePage();
+                }}
                 message="Are you sure you want to delete this relation?"
                 buttonStyle="btn btn-danger"
                 confirmText="yes"
@@ -225,11 +259,50 @@ function RelationsBox(props) {
 }
 
 function TypedRelationsBox(props) {
-    const parents = props.parents.filter((e) => e.type === props.type);
-    const children = props.children.filter((e) => e.type === props.type);
-    if (parents.length + children.length > 0)
+    const parentsFiltered = props.parents.filter((e) => e.type === props.type);
+    const childrenFiltered = props.children.filter(
+        (e) => e.type === props.type
+    );
+
+    const itemsCountPerPage = props.itemsCountPerPage;
+    const [activePage, setActivePage] = useState(1);
+
+    let [parents, children] = paginateParentChildren(
+        parentsFiltered,
+        childrenFiltered,
+        activePage,
+        itemsCountPerPage
+    );
+
+    let typedRelationsCount = parentsFiltered.length + childrenFiltered.length;
+
+    if (typedRelationsCount > 0)
         return (
-            <RelationsBox header={props.header} {...{ parents, children }} />
+            <div>
+                <RelationsBox
+                    header={`${props.header}: ${typedRelationsCount}`}
+                    updateRelationsActivePage={() =>
+                        updateActivePage(
+                            activePage,
+                            typedRelationsCount,
+                            itemsCountPerPage,
+                            setActivePage
+                        )
+                    }
+                    {...{ parents, children }}
+                />
+                {typedRelationsCount > itemsCountPerPage && (
+                    <Pagination
+                        activePage={activePage}
+                        itemsCountPerPage={itemsCountPerPage}
+                        totalItemsCount={typedRelationsCount}
+                        pageRangeDisplayed={5}
+                        onChange={setActivePage}
+                        itemClass="page-item"
+                        linkClass="page-link"
+                    />
+                )}
+            </div>
         );
     else return <div />;
 }
@@ -238,21 +311,26 @@ export default function MultiRelationsBox() {
     const context = useContext(ObjectContext);
     let parents = context.object.parents;
     let children = context.object.children;
+    const itemsCountPerPage = 5;
+
     return parents && children && parents.length + children.length > 0 ? (
         <div>
             <TypedRelationsBox
                 header="Related samples"
                 type="file"
+                itemsCountPerPage={itemsCountPerPage}
                 {...{ parents, children }}
             />
             <TypedRelationsBox
                 header="Related configs"
                 type="static_config"
+                itemsCountPerPage={itemsCountPerPage}
                 {...{ parents, children }}
             />
             <TypedRelationsBox
                 header="Related blobs"
                 type="text_blob"
+                itemsCountPerPage={itemsCountPerPage}
                 {...{ parents, children }}
             />
         </div>

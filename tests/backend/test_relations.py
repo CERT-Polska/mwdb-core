@@ -466,18 +466,3 @@ def test_removing_relations(admin_session):
         should_access=[Alice],
         should_not_access=[Bob],
     ).test()
-
-
-def test_removing_not_existing_relation(admin_session):
-    test = admin_session
-    
-    filename_1 = base62uuid()
-    file_content_1 = base62uuid()
-    sample_1 = test.add_sample(filename_1, file_content_1)
-    
-    filename_2 = base62uuid()
-    file_content_2 = base62uuid()
-    sample_2 = test.add_sample(filename_2, file_content_2)
-    
-    with ShouldRaise(status_code=404):
-        test.remove_parent(sample_1['sha256'], sample_2['sha256'])

@@ -13,8 +13,8 @@ import {
 
 function GroupItem(props) {
     const lockAttributes = props.immutable
-        ? { icon: "lock", tip: "Group is immutable" }
-        : { icon: "lock-open", tip: "Group is mutable" };
+        ? { icon: "lock", tip: "Immutable group" }
+        : { icon: "lock-open", tip: "Mutable group" };
 
     return (
         <tr key={props.name}>

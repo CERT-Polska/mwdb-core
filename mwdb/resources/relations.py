@@ -154,9 +154,9 @@ class ObjectChildResource(Resource):
                 type: string
         responses:
             200:
-                description: When relation was successfully added
+                description: When relation was successfully removed.
             403:
-                description: When user doesn't have `adding_parents` capability.
+                description: When user doesn't have `removing_parents` capability.
             404:
                 description: |
                     When one of objects doesn't exist or user
@@ -173,7 +173,11 @@ class ObjectChildResource(Resource):
         if child_object is None:
             raise NotFound("Child object not found")
 
-        child_object.remove_parent(parent_object)
+        result = child_object.remove_parent(parent_object)
+        if not result:
+            # Relation already removed
+            return
+
         logger.info(
             "Child removed",
             extra={"parent": parent_object.dhash, "child": child_object.dhash},

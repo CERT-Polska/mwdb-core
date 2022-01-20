@@ -3,6 +3,7 @@ from werkzeug.exceptions import Conflict
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import limiter
 from mwdb.model import TextBlob
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import (
@@ -45,6 +46,12 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
     ObjectType = TextBlob
     ListResponseSchema = BlobListResponseSchema
     ItemResponseSchema = BlobItemResponseSchema
+
+    decorators = [
+        limiter.limit("4 per day", methods=["GET"]),
+        limiter.limit("2 per minute", methods=["GET"]),
+        limiter.limit("1 per day", methods=["POST"]),
+    ]
 
     @requires_authorization
     def get(self):

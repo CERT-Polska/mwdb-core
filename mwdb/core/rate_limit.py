@@ -1,9 +1,11 @@
 import time
 
 import redis
-from flask import g
+from flask import g, request
+from flask_limiter import Limiter
 from werkzeug.exceptions import TooManyRequests
 
+from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 
 
@@ -30,3 +32,20 @@ def rate_limit(key, duration, limit):
 
     if count > limit:
         raise TooManyRequestsWithRetryAfter(duration - int(current_time % duration))
+
+
+def rate_limit_enabled():
+    if app_config.mwdb.enable_rate_limit and not g.auth_user.has_rights(
+        Capabilities.unlimited_requests
+    ):
+        return True
+    else:
+        return False
+
+
+limiter = Limiter(
+    key_func=lambda: f"{g.auth_user.login}-{request.method}"
+    if rate_limit_enabled()
+    else None,
+    storage_uri="redis://redis/",
+)

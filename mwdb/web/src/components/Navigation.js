@@ -196,8 +196,6 @@ export default function Navigation() {
         []
     );
 
-    console.log(config.config);
-
     const remoteNavItems =
         config.isReady && auth.isAuthenticated ? (
             <Extendable ident="navbarAuthenticated">

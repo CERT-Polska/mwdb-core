@@ -196,6 +196,8 @@ export default function Navigation() {
         []
     );
 
+    console.log(config.config);
+
     const remoteNavItems =
         config.isReady && auth.isAuthenticated ? (
             <Extendable ident="navbarAuthenticated">
@@ -243,7 +245,7 @@ export default function Navigation() {
             <Link className="navbar-brand" to="/">
                 <Extendable ident="navbarLogo">
                     <img src={logo} alt="logo" className="logo" />
-                    mwdb
+                    {config.config["instance_name"]}
                 </Extendable>
             </Link>
             <button

@@ -59,7 +59,7 @@ def get_limit_decorators(resource):
         "get": "1000/10second 2000/minute 6000/5minute 10000/15minute",
         "post": "100/10second 1000/minute 3000/5minute 6000/15minute",
         "put": "100/10second 1000/minute 3000/5minute 6000/15minute",
-        "delete": "100/10second 1000/minute 3000/5minute 6000/15minute"
+        "delete": "100/10second 1000/minute 3000/5minute 6000/15minute",
     }
     # rate limit update from config
     for field in app_config.mwdb_limiter.get_registered_properties():

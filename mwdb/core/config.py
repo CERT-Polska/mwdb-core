@@ -130,9 +130,22 @@ class KartonConfig(Config):
     config_path = key(cast=str, required=False, default=None)
 
 
+@section("mwdb_limiter")
+class MwdbLimiterConfig(Config):
+    # textblob
+    textblob_get = key(cast=str, required=False, default=None)
+    textblob_post = key(cast=str, required=False, default=None)
+    # textblobitem
+    textblobitem_delete = key(cast=str, required=False, default=None)
+    # file
+    file_get = key(cast=str, required=False, default=None)
+    file_post = key(cast=str, required=False, default=None)
+
+
 class AppConfig(Config):
     mwdb = group_key(MWDBConfig)
     karton = group_key(KartonConfig)
+    mwdb_limiter = group_key(MwdbLimiterConfig)
 
 
 def _config_sources():

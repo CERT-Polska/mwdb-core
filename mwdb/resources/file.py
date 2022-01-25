@@ -4,6 +4,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unaut
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import File
 from mwdb.model.file import EmptyFileError
 from mwdb.model.object import ObjectTypeConflictError
@@ -49,6 +50,8 @@ class FileResource(ObjectResource, FileUploader):
     ObjectType = File
     ListResponseSchema = FileListResponseSchema
     ItemResponseSchema = FileItemResponseSchema
+
+    decorators = get_limit_decorators("file")
 
     @requires_authorization
     def get(self):

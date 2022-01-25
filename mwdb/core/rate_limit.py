@@ -49,3 +49,28 @@ limiter = Limiter(
     else None,
     storage_uri="redis://redis/",
 )
+
+
+def get_limit_decorators(resource):
+    # default rate limit values
+    decorators_dir = {
+        "get": "1000/minute",
+        "post": "1000/minute",
+        "put": "1000/minute",
+        "delete": "1000/minute",
+    }
+    # rate limit update from config
+    for field in app_config.mwdb_limiter.get_registered_properties():
+        _resource, method = field.split("_")
+        if _resource == resource:
+            limits = app_config.get_key("mwdb_limiter", field)
+            if limits is not None:
+                decorators_dir[method] = limits
+
+    decorators = []
+
+    for key, value in decorators_dir.items():
+        for limit in value.split():
+            decorators.append(limiter.limit(limit, methods=[key]))
+
+    return decorators

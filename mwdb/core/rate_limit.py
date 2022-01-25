@@ -35,8 +35,10 @@ def rate_limit(key, duration, limit):
 
 
 def rate_limit_enabled():
-    if app_config.mwdb.enable_rate_limit and not g.auth_user.has_rights(
-        Capabilities.unlimited_requests
+    if (
+        app_config.mwdb.enable_rate_limit
+        and g.auth_user is not None
+        and not g.auth_user.has_rights(Capabilities.unlimited_requests)
     ):
         return True
     else:
@@ -53,11 +55,11 @@ limiter = Limiter(
 
 def get_limit_decorators(resource):
     # default rate limit values
-    decorators_dir = {
-        "get": "1000/minute",
-        "post": "1000/minute",
-        "put": "1000/minute",
-        "delete": "1000/minute",
+    limits_dir = {
+        "get": "1000/10second 2000/minute 6000/5minute 10000/15minute",
+        "post": "100/10second 1000/minute 3000/5minute 6000/15minute",
+        "put": "100/10second 1000/minute 3000/5minute 6000/15minute",
+        "delete": "100/10second 1000/minute 3000/5minute 6000/15minute"
     }
     # rate limit update from config
     for field in app_config.mwdb_limiter.get_registered_properties():
@@ -65,12 +67,12 @@ def get_limit_decorators(resource):
         if _resource == resource:
             limits = app_config.get_key("mwdb_limiter", field)
             if limits is not None:
-                decorators_dir[method] = limits
+                limits_dir[method] = limits
 
-    decorators = []
+    limit_decorators = []
 
-    for key, value in decorators_dir.items():
+    for key, value in limits_dir.items():
         for limit in value.split():
-            decorators.append(limiter.limit(limit, methods=[key]))
+            limit_decorators.append(limiter.limit(limit, methods=[key]))
 
-    return decorators
+    return limit_decorators

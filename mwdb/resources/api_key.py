@@ -25,7 +25,7 @@ from . import (
 
 
 class APIKeyIssueResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_profile)
@@ -111,7 +111,7 @@ class APIKeyIssueResource(Resource):
 
 
 class APIKeyResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_profile)

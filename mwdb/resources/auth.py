@@ -238,7 +238,7 @@ class ChangePasswordResource(Resource):
 
 
 class RequestPasswordChangeResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_profile)
@@ -381,7 +381,7 @@ class RecoverPasswordResource(Resource):
 
 
 class RefreshTokenResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def post(self):
@@ -423,7 +423,7 @@ class RefreshTokenResource(Resource):
 
 
 class ValidateTokenResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def get(self):
@@ -456,7 +456,7 @@ class ValidateTokenResource(Resource):
 
 
 class AuthGroupListResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def get(self):

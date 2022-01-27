@@ -31,7 +31,7 @@ from . import (
 
 
 class AttributeListResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def get(self, type, identifier):
@@ -173,7 +173,7 @@ class AttributeListResource(Resource):
 
 
 class AttributeResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     @requires_capabilities("removing_attributes")
@@ -235,7 +235,7 @@ class AttributeResource(Resource):
 
 
 class AttributeDefinitionListResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def get(self):
@@ -356,7 +356,7 @@ class AttributeDefinitionListResource(Resource):
 
 
 class AttributeDefinitionResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -520,7 +520,7 @@ class AttributeDefinitionResource(Resource):
 
 
 class AttributePermissionResource(Resource):
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)

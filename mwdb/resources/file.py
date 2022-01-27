@@ -51,7 +51,7 @@ class FileResource(ObjectResource, FileUploader):
     ListResponseSchema = FileListResponseSchema
     ItemResponseSchema = FileItemResponseSchema
 
-    decorators = get_limit_decorators(__qualname__)
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def get(self):

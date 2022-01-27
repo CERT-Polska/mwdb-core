@@ -134,7 +134,10 @@ def assign_request_id():
 
 @app.after_request
 def log_request(response):
-    response_time = datetime.utcnow() - g.request_start_time
+    if hasattr(g, "request_start_time"):
+        response_time = datetime.utcnow() - g.request_start_time
+    else:
+        response_time = None
     response_size = response.calculate_content_length()
 
     getLogger().info(

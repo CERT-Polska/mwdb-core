@@ -12,6 +12,7 @@ from werkzeug.exceptions import Conflict, Forbidden, InternalServerError
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.auth import (
     AuthLoginRequestSchema,
@@ -237,6 +238,8 @@ class ChangePasswordResource(Resource):
 
 
 class RequestPasswordChangeResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_profile)
     def post(self):
@@ -378,6 +381,8 @@ class RecoverPasswordResource(Resource):
 
 
 class RefreshTokenResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     def post(self):
         """
@@ -418,6 +423,8 @@ class RefreshTokenResource(Resource):
 
 
 class ValidateTokenResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     def get(self):
         """
@@ -449,6 +456,8 @@ class ValidateTokenResource(Resource):
 
 
 class AuthGroupListResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     def get(self):
         """

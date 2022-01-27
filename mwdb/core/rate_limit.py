@@ -24,7 +24,7 @@ limiter = Limiter(
 )
 
 
-def get_limit_decorators(resource):
+def get_limit_decorators(resource_class_name):
     # default rate limit values
     rate_limits = {
         "get": "1000/10second 2000/minute 6000/5minute 10000/15minute",
@@ -32,6 +32,9 @@ def get_limit_decorators(resource):
         "put": "100/10second 1000/minute 3000/5minute 6000/15minute",
         "delete": "100/10second 1000/minute 3000/5minute 6000/15minute",
     }
+
+    resource = resource_class_name.split("Resource")[0].lower()
+
     # rate limit update from config
     for field in app_config.mwdb_limiter.get_registered_properties():
         _resource, method = field.split("_")

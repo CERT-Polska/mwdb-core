@@ -47,7 +47,7 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
     ListResponseSchema = BlobListResponseSchema
     ItemResponseSchema = BlobItemResponseSchema
 
-    decorators = get_limit_decorators("textblob")
+    decorators = get_limit_decorators(__qualname__)
 
     @requires_authorization
     def get(self):
@@ -170,7 +170,7 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
     ItemResponseSchema = BlobItemResponseSchema
     CreateRequestSchema = BlobLegacyCreateRequestSchema
 
-    decorators = get_limit_decorators("textblobitem")
+    decorators = get_limit_decorators(__qualname__)
 
     @requires_authorization
     def get(self, identifier):

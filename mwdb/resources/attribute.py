@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.attribute import (
     AttributeDefinitionCreateRequestSchema,
@@ -30,6 +31,8 @@ from . import (
 
 
 class AttributeListResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     def get(self, type, identifier):
         """
@@ -170,6 +173,8 @@ class AttributeListResource(Resource):
 
 
 class AttributeResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     @requires_capabilities("removing_attributes")
     def delete(self, type, identifier, attribute_id):
@@ -230,6 +235,8 @@ class AttributeResource(Resource):
 
 
 class AttributeDefinitionListResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     def get(self):
         """
@@ -349,6 +356,8 @@ class AttributeDefinitionListResource(Resource):
 
 
 class AttributeDefinitionResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, key):
@@ -511,6 +520,8 @@ class AttributeDefinitionResource(Resource):
 
 
 class AttributePermissionResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, key):

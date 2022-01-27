@@ -7,6 +7,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import APIKey, User, db
 from mwdb.schema.api_key import (
     APIKeyIdentifierBase,
@@ -24,6 +25,8 @@ from . import (
 
 
 class APIKeyIssueResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_profile)
     def post(self, login):
@@ -108,6 +111,8 @@ class APIKeyIssueResource(Resource):
 
 
 class APIKeyResource(Resource):
+    decorators = get_limit_decorators(__qualname__)
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_profile)
     def get(self, api_key_id):

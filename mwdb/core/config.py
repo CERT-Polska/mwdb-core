@@ -132,11 +132,55 @@ class KartonConfig(Config):
 
 @section("mwdb_limiter")
 class MwdbLimiterConfig(Config):
-    # textblob
+    # APIKeyIssueResource
+    apikeyissue_post = key(cast=str, required=False, default=None)
+
+    # APIKeyResource
+    apikey_get = key(cast=str, required=False, default=None)
+    apikey_delete = key(cast=str, required=False, default=None)
+
+    # AttributeListResource
+    attributelist_get = key(cast=str, required=False, default=None)
+    attributelist_post = key(cast=str, required=False, default=None)
+
+    # AttributeResource
+    attribute_delete = key(cast=str, required=False, default=None)
+
+    # AttributeDefinitionListResource
+    attributedefinitionlist_get = key(cast=str, required=False, default=None)
+    attributedefinitionlist_post = key(cast=str, required=False, default=None)
+
+    # AttributeDefinitionResource
+    attributedefinition_get = key(cast=str, required=False, default=None)
+    attributedefinition_put = key(cast=str, required=False, default=None)
+    attributedefinition_delete = key(cast=str, required=False, default=None)
+
+    # AttributePermissionResource
+    attributepermission_get = key(cast=str, required=False, default=None)
+    attributepermission_put = key(cast=str, required=False, default=None)
+    attributepermission_delete = key(cast=str, required=False, default=None)
+
+    # RequestPasswordChangeResource
+    requestpasswordchange_post = key(cast=str, required=False, default=None)
+
+    # RefreshTokenResource
+    refreshtoken_post = key(cast=str, required=False, default=None)
+
+    # ValidateTokenResource
+    validatetoken_get = key(cast=str, required=False, default=None)
+
+    # AuthGroupListResource
+    authgrouplist_get = key(cast=str, required=False, default=None)
+
+    # TextBlobResource
     textblob_get = key(cast=str, required=False, default=None)
     textblob_post = key(cast=str, required=False, default=None)
-    # textblobitem
+
+    # TextBlobItemResource
+    textblobitem_get = key(cast=str, required=False, default=None)
+    textblobitem_put = key(cast=str, required=False, default=None)
     textblobitem_delete = key(cast=str, required=False, default=None)
+
     # file
     file_get = key(cast=str, required=False, default=None)
     file_post = key(cast=str, required=False, default=None)

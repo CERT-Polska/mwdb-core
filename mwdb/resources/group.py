@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.group import (
     GroupCreateRequestSchema,
@@ -27,6 +28,8 @@ from . import (
 
 
 class GroupListResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self):
@@ -63,6 +66,8 @@ class GroupListResource(Resource):
 
 
 class GroupResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, name):
@@ -303,6 +308,8 @@ class GroupResource(Resource):
 
 
 class GroupMemberResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def post(self, name, login):

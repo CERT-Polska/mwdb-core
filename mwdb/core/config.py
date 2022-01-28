@@ -181,9 +181,50 @@ class MwdbLimiterConfig(Config):
     textblobitem_put = key(cast=str, required=False, default=None)
     textblobitem_delete = key(cast=str, required=False, default=None)
 
-    # file
+    # CommentResource
+    comment_get = key(cast=str, required=False, default=None)
+    comment_post = key(cast=str, required=False, default=None)
+
+    # CommentDeleteResource
+    commentdelete_delete = key(cast=str, required=False, default=None)
+
+    # ConfigStatsResource
+    configstats_get = key(cast=str, required=False, default=None)
+
+    # ConfigResource
+    config_get = key(cast=str, required=False, default=None)
+    config_post = key(cast=str, required=False, default=None)
+
+    # ConfigItemResource
+    configItem_get = key(cast=str, required=False, default=None)
+    configItem_put = key(cast=str, required=False, default=None)
+    configItem_delete = key(cast=str, required=False, default=None)
+
+    # FileResource
     file_get = key(cast=str, required=False, default=None)
     file_post = key(cast=str, required=False, default=None)
+
+    # FileItemResource
+    fileitem_get = key(cast=str, required=False, default=None)
+    fileitem_post = key(cast=str, required=False, default=None)
+    fileitem_delete = key(cast=str, required=False, default=None)
+
+    # FileDownloadResource
+    filedownload_post = key(cast=str, required=False, default=None)
+
+    # GroupListResource
+    grouplist_get = key(cast=str, required=False, default=None)
+
+    # GroupResource
+    group_get = key(cast=str, required=False, default=None)
+    group_post = key(cast=str, required=False, default=None)
+    group_put = key(cast=str, required=False, default=None)
+    group_delete = key(cast=str, required=False, default=None)
+
+    # GroupMemberResource
+    groupmember_post = key(cast=str, required=False, default=None)
+    groupmember_put = key(cast=str, required=False, default=None)
+    groupmember_delete = key(cast=str, required=False, default=None)
 
 
 class AppConfig(Config):

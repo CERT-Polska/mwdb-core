@@ -183,6 +183,8 @@ class FileItemResource(ObjectItemResource, FileUploader):
     ItemResponseSchema = FileItemResponseSchema
     CreateRequestSchema = FileLegacyCreateRequestSchema
 
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, identifier):
         """
@@ -338,6 +340,9 @@ class FileItemResource(ObjectItemResource, FileUploader):
 
 
 class FileDownloadResource(Resource):
+
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     def get(self, identifier):
         """
         ---

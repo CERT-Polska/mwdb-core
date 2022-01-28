@@ -7,6 +7,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import Config, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobCreateSpecSchema
@@ -24,6 +25,8 @@ from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
 class ConfigStatsResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self):
         """
@@ -155,6 +158,8 @@ class ConfigUploader(ObjectUploader):
 
 
 class ConfigResource(ObjectResource, ConfigUploader):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     ObjectType = Config
     ListResponseSchema = ConfigListResponseSchema
     ItemResponseSchema = ConfigItemResponseSchema
@@ -282,6 +287,8 @@ class ConfigResource(ObjectResource, ConfigUploader):
 
 
 class ConfigItemResource(ObjectItemResource, ConfigUploader):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
     CreateRequestSchema = ConfigLegacyCreateRequestSchema

@@ -9,6 +9,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import Config, File, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobItemResponseSchema
@@ -21,6 +22,8 @@ from . import get_shares_for_upload, loads_schema, logger, requires_authorizatio
 
 
 class RemoteListResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self):
         """
@@ -144,6 +147,8 @@ class RemoteFilePullResource(RemotePullResource):
     on_created = hooks.on_created_file
     on_reuploaded = hooks.on_reuploaded_file
 
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def post(self, remote_name, identifier):
         """
@@ -218,6 +223,8 @@ class RemoteConfigPullResource(RemotePullResource):
 
     on_created = hooks.on_created_config
     on_reuploaded = hooks.on_reuploaded_config
+
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def post(self, remote_name, identifier):
@@ -321,6 +328,8 @@ class RemoteTextBlobPullResource(RemotePullResource):
     on_created = hooks.on_created_text_blob
     on_reuploaded = hooks.on_reuploaded_text_blob
 
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def post(self, remote_name, identifier):
         """
@@ -384,6 +393,8 @@ class RemoteTextBlobPullResource(RemotePullResource):
 
 
 class RemoteFilePushResource(RemotePullResource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def post(self, remote_name, identifier):
         """
@@ -447,6 +458,8 @@ class RemoteFilePushResource(RemotePullResource):
 
 
 class RemoteConfigPushResource(RemotePullResource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def post(self, remote_name, identifier):
         """
@@ -527,6 +540,8 @@ class RemoteConfigPushResource(RemotePullResource):
 
 
 class RemoteTextBlobPushResource(RemotePullResource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def post(self, remote_name, identifier):
         """

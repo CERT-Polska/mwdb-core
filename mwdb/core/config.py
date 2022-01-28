@@ -226,6 +226,99 @@ class MwdbLimiterConfig(Config):
     groupmember_put = key(cast=str, required=False, default=None)
     groupmember_delete = key(cast=str, required=False, default=None)
 
+    # KartonObjectResource
+    kartonobject_get = key(cast=str, required=False, default=None)
+    kartonobject_post = key(cast=str, required=False, default=None)
+
+    # KartonAnalysisResource
+    kartonanalysis_get = key(cast=str, required=False, default=None)
+    kartonanalysis_put = key(cast=str, required=False, default=None)
+
+    # MetakeyResource
+    metakey_get = key(cast=str, required=False, default=None)
+    metakey_post = key(cast=str, required=False, default=None)
+    metakey_delete = key(cast=str, required=False, default=None)
+
+    # MetakeyListDefinitionResource
+    metakeylistdefinition_get = key(cast=str, required=False, default=None)
+
+    # MetakeyListDefinitionManageResource
+    metakeylistdefinitionmanage_get = key(cast=str, required=False, default=None)
+
+    # MetakeyDefinitionManageResource
+    metakeydefinitionmanage_get = key(cast=str, required=False, default=None)
+    metakeydefinitionmanage_post = key(cast=str, required=False, default=None)
+    metakeydefinitionmanage_put = key(cast=str, required=False, default=None)
+    metakeydefinitionmanage_delete = key(cast=str, required=False, default=None)
+
+    # MetakeyPermissionResource
+    metakeypermission_put = key(cast=str, required=False, default=None)
+    metakeypermission_delete = key(cast=str, required=False, default=None)
+
+    # OpenIDProviderResource
+    openidprovider_post = key(cast=str, required=False, default=None)
+
+    # OpenIDSingleProviderResource
+    openidsingleprovider_get = key(cast=str, required=False, default=None)
+    openidsingleprovider_put = key(cast=str, required=False, default=None)
+    openidsingleprovider_delete = key(cast=str, required=False, default=None)
+
+    # OpenIDBindAccountResource
+    openidbindaccount_post = key(cast=str, required=False, default=None)
+    # OpenIDAccountIdentitiesResource
+    openidaccountidentities_get = key(cast=str, required=False, default=None)
+
+    # ObjectResource
+    object_get = key(cast=str, required=False, default=None)
+
+    # ObjectItemResource
+    objectItem_get = key(cast=str, required=False, default=None)
+    objectItem_post = key(cast=str, required=False, default=None)
+    objectItem_put = key(cast=str, required=False, default=None)
+    objectItem_delete = key(cast=str, required=False, default=None)
+
+    # ObjectCountResource
+    objectcount_get = key(cast=str, required=False, default=None)
+
+    # ObjectFavoriteResource
+    objectfavorite_put = key(cast=str, required=False, default=None)
+    objectfavorite_delete = key(cast=str, required=False, default=None)
+
+    # QuickQueryResource
+    quickquery_get = key(cast=str, required=False, default=None)
+    quickquery_post = key(cast=str, required=False, default=None)
+
+    # QuickQueryItemResource
+    quickqueryitem_delete = key(cast=str, required=False, default=None)
+
+    # RelationsResource
+    relations_get = key(cast=str, required=False, default=None)
+
+    # ObjectChildResource
+    objectchild_put = key(cast=str, required=False, default=None)
+    objectchild_delete = key(cast=str, required=False, default=None)
+
+    # RemoteListResource
+    remotelist_get = key(cast=str, required=False, default=None)
+
+    # RemoteFilePullResource post
+    remotefilepull_post = key(cast=str, required=False, default=None)
+
+    # RemoteConfigPullResource post
+    remoteconfigpull_post = key(cast=str, required=False, default=None)
+
+    # RemoteTextBlobPullResource post
+    remotetextblobpull_post = key(cast=str, required=False, default=None)
+
+    # RemoteFilePushResource post
+    remotefilepush_post = key(cast=str, required=False, default=None)
+
+    # RemoteConfigPushResource post
+    remoteconfigpush_post = key(cast=str, required=False, default=None)
+
+    # RemoteTextBlobPushResource post
+    remotetextblobpush_post = key(cast=str, required=False, default=None)
+
 
 class AppConfig(Config):
     mwdb = group_key(MWDBConfig)

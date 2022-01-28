@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import KartonAnalysis, Object
 from mwdb.schema.karton import (
     KartonItemResponseSchema,
@@ -20,6 +21,8 @@ from . import (
 
 
 class KartonObjectResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, type, identifier):
         """
@@ -129,6 +132,8 @@ class KartonObjectResource(Resource):
 
 
 class KartonAnalysisResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, type, identifier, analysis_id):
         """

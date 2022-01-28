@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.metakey import (
     MetakeyDefinitionItemRequestArgsSchema,
@@ -33,6 +34,8 @@ from . import (
 
 
 class MetakeyResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, type, identifier):
         """
@@ -249,6 +252,8 @@ class MetakeyResource(Resource):
 
 
 class MetakeyListDefinitionResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, access):
         """
@@ -293,6 +298,8 @@ class MetakeyListDefinitionResource(Resource):
 
 
 class MetakeyListDefinitionManageResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self):
@@ -329,6 +336,8 @@ class MetakeyListDefinitionManageResource(Resource):
 
 
 class MetakeyDefinitionManageResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, key):
@@ -551,6 +560,8 @@ class MetakeyDefinitionManageResource(Resource):
 
 
 class MetakeyPermissionResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def put(self, key, group_name):

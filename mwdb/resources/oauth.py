@@ -9,6 +9,7 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import Group, OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.oauth import (
@@ -26,6 +27,8 @@ from . import loads_schema, logger, requires_authorization, requires_capabilitie
 
 
 class OpenIDProviderResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     def get(self):
         """
         ---
@@ -111,6 +114,8 @@ class OpenIDProviderResource(Resource):
 
 
 class OpenIDSingleProviderResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, provider_name):
@@ -465,6 +470,8 @@ class OpenIDRegisterUserResource(Resource):
 
 
 class OpenIDBindAccountResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def post(self, provider_name):
         """
@@ -538,6 +545,8 @@ class OpenIDBindAccountResource(Resource):
 
 
 class OpenIDAccountIdentitiesResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self):
         """

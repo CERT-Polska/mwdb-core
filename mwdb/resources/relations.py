@@ -2,6 +2,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import Object, db
 from mwdb.schema.relations import RelationsResponseSchema
 
@@ -9,6 +10,8 @@ from . import access_object, logger, requires_authorization, requires_capabiliti
 
 
 class RelationsResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, type, identifier):
         """
@@ -57,6 +60,8 @@ class RelationsResource(Resource):
 
 
 class ObjectChildResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.adding_parents)
     def put(self, type, parent, child):

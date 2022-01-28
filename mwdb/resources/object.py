@@ -9,6 +9,7 @@ from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFoun
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import AttributeDefinition, Object, db
 from mwdb.schema.object import (
@@ -141,6 +142,8 @@ class ObjectResource(Resource):
     ObjectType = Object
     ListResponseSchema = ObjectListResponseSchema
 
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self):
         """
@@ -233,8 +236,9 @@ class ObjectResource(Resource):
 class ObjectItemResource(Resource, ObjectUploader):
     ObjectType = Object
     ItemResponseSchema = ObjectItemResponseSchema
-
     CreateRequestSchema = None
+
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def get(self, identifier):
@@ -351,6 +355,8 @@ class ObjectItemResource(Resource, ObjectUploader):
 
 
 class ObjectCountResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, type):
         """
@@ -414,6 +420,8 @@ class ObjectCountResource(Resource):
 
 
 class ObjectFavoriteResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.personalize)
     def put(self, identifier):

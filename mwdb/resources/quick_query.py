@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import QuickQuery, db
 from mwdb.schema.quick_query import QuickQueryResponseSchema, QuickQuerySchemaBase
 
@@ -10,6 +11,8 @@ from . import loads_schema, logger, requires_authorization, requires_capabilitie
 
 
 class QuickQueryResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.personalize)
     def post(self, type):
@@ -98,6 +101,8 @@ class QuickQueryResource(Resource):
 
 
 class QuickQueryItemResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.personalize)
     def delete(self, id):

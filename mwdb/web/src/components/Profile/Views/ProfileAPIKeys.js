@@ -166,9 +166,9 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
                                     style={{ margin: "8pt 0" }}
                                 >
                                     <b>
-                                        The key will be shown only once, copy
-                                        its value because it will not be visible
-                                        again.
+                                        Api key token will be shown only once,
+                                        copy its value because it will not be
+                                        visible again.
                                     </b>
                                 </div>
                                 <div

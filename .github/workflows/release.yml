@@ -46,11 +46,6 @@ jobs:
           file: ./deploy/docker/Dockerfile
           tags: |
             certpl/mwdb:${{ github.event.release.tag_name }}
-          cache-from: |
-            type=registry,ref=certpl/mwdb:master
-            type=gha,scope=${{github.ref_name}}-mwdb
-          cache-to: |
-            type=registry,ref=certpl/mwdb:${{ github.event.release.tag_name }},mode=max
           push: true
           context: .
       - name: Build and push mwdb-core web image
@@ -59,10 +54,5 @@ jobs:
           file: ./deploy/docker/Dockerfile-web
           tags: |
             certpl/mwdb-web:${{ github.event.release.tag_name }}
-          cache-from: |
-            type=registry,ref=certpl/mwdb-web:master
-            type=gha,scope=${{github.ref_name}}-mwdb-web
-          cache-to: |
-            type=registry,ref=certpl/mwdb-web:${{ github.event.release.tag_name }},mode=max
           push: true
           context: .

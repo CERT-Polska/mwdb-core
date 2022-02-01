@@ -5,6 +5,7 @@ from mwdb.core.app import api
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import get_plugin_info
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.schema.server import (
     ServerAdminInfoResponseSchema,
     ServerInfoResponseSchema,
@@ -69,6 +70,8 @@ class ServerInfoResource(Resource):
 
 
 class ServerAdminInfoResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self):
@@ -104,6 +107,8 @@ class ServerAdminInfoResource(Resource):
 
 
 class ServerDocsResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self):
         """

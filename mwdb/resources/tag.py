@@ -5,6 +5,7 @@ from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import ObjectPermission, Tag, db, object_tag_table
 from mwdb.schema.tag import (
     TagItemResponseSchema,
@@ -23,6 +24,8 @@ from . import (
 
 
 class TagListResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self):
         """
@@ -82,6 +85,8 @@ class TagListResource(Resource):
 
 
 class TagResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, type, identifier):
         """

@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import Group, User, db
 from mwdb.model.object import AccessType
 from mwdb.schema.share import (
@@ -16,6 +17,8 @@ from . import access_object, loads_schema, logger, requires_authorization
 
 
 class ShareGroupListResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self):
         """
@@ -60,6 +63,8 @@ class ShareGroupListResource(Resource):
 
 
 class ShareResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, type, identifier):
         """

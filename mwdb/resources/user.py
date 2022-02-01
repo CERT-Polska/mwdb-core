@@ -10,6 +10,7 @@ from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFou
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
+from mwdb.core.rate_limit import get_limit_decorators
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.user import (
     UserCreateRequestSchema,
@@ -34,6 +35,8 @@ from . import (
 
 
 class UserListResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self):
@@ -77,6 +80,8 @@ class UserListResource(Resource):
 
 
 class UserPendingResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_capabilities(Capabilities.manage_users)
     def post(self, login):
         """
@@ -240,6 +245,8 @@ class UserPendingResource(Resource):
 
 
 class UserRequestPasswordChangeResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def post(self, login):
@@ -315,6 +322,8 @@ class UserRequestPasswordChangeResource(Resource):
 
 
 class UserGetPasswordChangeTokenResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, login):
@@ -362,6 +371,8 @@ class UserGetPasswordChangeTokenResource(Resource):
 
 
 class UserResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, login):
@@ -633,6 +644,8 @@ class UserResource(Resource):
 
 
 class UserProfileResource(Resource):
+    decorators = get_limit_decorators(__qualname__)  # noqa: F821
+
     @requires_authorization
     def get(self, login):
         """

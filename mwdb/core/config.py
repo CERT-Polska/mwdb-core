@@ -301,23 +301,69 @@ class MwdbLimiterConfig(Config):
     # RemoteListResource
     remotelist_get = key(cast=str, required=False, default=None)
 
-    # RemoteFilePullResource post
+    # RemoteFilePullResource
     remotefilepull_post = key(cast=str, required=False, default=None)
 
-    # RemoteConfigPullResource post
+    # RemoteConfigPullResource
     remoteconfigpull_post = key(cast=str, required=False, default=None)
 
-    # RemoteTextBlobPullResource post
+    # RemoteTextBlobPullResource
     remotetextblobpull_post = key(cast=str, required=False, default=None)
 
-    # RemoteFilePushResource post
+    # RemoteFilePushResource
     remotefilepush_post = key(cast=str, required=False, default=None)
 
-    # RemoteConfigPushResource post
+    # RemoteConfigPushResource
     remoteconfigpush_post = key(cast=str, required=False, default=None)
 
-    # RemoteTextBlobPushResource post
+    # RemoteTextBlobPushResource
     remotetextblobpush_post = key(cast=str, required=False, default=None)
+
+    # SearchResource
+    search_post = key(cast=str, required=False, default=None)
+
+    # ServerAdminInfoResource
+    serveradmininfo_get = key(cast=str, required=False, default=None)
+
+    # ServerDocsResource
+    serverdocs_get = key(cast=str, required=False, default=None)
+
+    # ShareGroupListResource
+    sharegrouplist_get = key(cast=str, required=False, default=None)
+
+    # ShareResource
+    share_get = key(cast=str, required=False, default=None)
+    share_put = key(cast=str, required=False, default=None)
+
+    # TagListResource
+    taglist_get = key(cast=str, required=False, default=None)
+
+    # TagResource
+    tag_get = key(cast=str, required=False, default=None)
+    tag_put = key(cast=str, required=False, default=None)
+    tag_delete = key(cast=str, required=False, default=None)
+
+    # UserListResource
+    userlist_get = key(cast=str, required=False, default=None)
+
+    # UserPendingResource
+    userpending_post = key(cast=str, required=False, default=None)
+    userpending_delete = key(cast=str, required=False, default=None)
+
+    # UserRequestPasswordChangeResource
+    userrequestpasswordchange_post = key(cast=str, required=False, default=None)
+
+    # UserGetPasswordChangeTokenResource
+    usergetpasswordchangetoken_get = key(cast=str, required=False, default=None)
+
+    # UserResource
+    user_get = key(cast=str, required=False, default=None)
+    user_post = key(cast=str, required=False, default=None)
+    user_put = key(cast=str, required=False, default=None)
+    user_delete = key(cast=str, required=False, default=None)
+
+    # UserProfileResource
+    userprofile_get = key(cast=str, required=False, default=None)
 
 
 class AppConfig(Config):

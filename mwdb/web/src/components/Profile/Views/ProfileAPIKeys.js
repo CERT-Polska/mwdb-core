@@ -2,13 +2,7 @@ import React, { useState, useRef } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useLocation } from "react-router-dom";
 
-import {
-    faCopy,
-    faChevronUp,
-    faChevronDown,
-    faPlus,
-    faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";

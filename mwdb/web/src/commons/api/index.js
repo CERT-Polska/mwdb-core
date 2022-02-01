@@ -124,10 +124,6 @@ function oauthGetIdentities() {
     return axios.get("/oauth/identities");
 }
 
-function apiKeyGetToken(key_id) {
-    return axios.get(`/api_key/${key_id}`);
-}
-
 function apiKeyAdd(login, name) {
     return axios.post(`/user/${login}/api_key`, { name });
 }
@@ -550,7 +546,6 @@ const api = {
     authSetPassword,
     authRequestPasswordChange,
     authRecoverPassword,
-    apiKeyGetToken,
     apiKeyAdd,
     apiKeyRemove,
     getObject,

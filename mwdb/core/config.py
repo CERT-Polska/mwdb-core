@@ -58,6 +58,8 @@ class MWDBConfig(Config):
     web_folder = key(cast=path, required=False, default=None)
     # Base application URL, accessible for users
     base_url = key(cast=str, required=False, default="http://127.0.0.1")
+    # MWDB local instance name
+    instance_name = key(cast=str, required=False, default="mwdb")
     # Flask additional settings file (optional)
     flask_config_file = key(cast=path, required=False)
     # Axios request timeout

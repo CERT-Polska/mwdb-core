@@ -12,6 +12,9 @@ postgres_uri = {{ postgres_uri }}
 secret_key = {{ secret_key }}
 uploads_folder = {{ uploads_folder }}
 base_url = {{ base_url }}
+file_upload_timeout = {{ file_upload_timeout }}
+statement_timeout = {{ statement_timeout }}
+request_timeout = {{ request_timeout }}
 
 ### Web application settings
 
@@ -118,3 +121,120 @@ base_url = {{ base_url }}
 
 # recaptcha_site_key = <site key>
 # recaptcha_secret = <secret>
+
+[mwdb_limiter]
+
+### Rate limit settings for endpoints
+
+## This values override default values for HTTP methods for particular endpoints.
+## Each endpoint is designated by resource name (lowercase) plus underscore character and HTTP method. 
+## Estimated value can contain many conditions separated by space - for example: 1000/10second 2000/minute 6000/5minute
+
+# apikeyissue_post = 1000/10second 2000/minute 6000/5minute
+# apikey_get = 
+# apikey_delete = 
+# attributelist_get = 
+# attributelist_post = 
+# attribute_delete = 
+# attributedefinitionlist_get = 
+# attributedefinitionlist_post = 
+# attributedefinition_get = 
+# attributedefinition_put = 
+# attributedefinition_delete = 
+# attributepermission_get = 
+# attributepermission_put = 
+# attributepermission_delete = 
+# requestpasswordchange_post = 
+# refreshtoken_post = 
+# validatetoken_get = 
+# authgrouplist_get = 
+# textblob_get = 
+# textblob_post = 
+# textblobitem_get = 
+# textblobitem_put = 
+# textblobitem_delete = 
+# comment_get = 
+# comment_post = 
+# commentdelete_delete = 
+# configstats_get = 
+# config_get = 
+# config_post = 
+# configitem_get = 
+# configitem_put = 
+# configitem_delete = 
+# file_get = 
+# file_post = 
+# fileitem_get = 
+# fileitem_post = 
+# fileitem_delete = 
+# filedownload_post = 
+# grouplist_get = 
+# group_get = 
+# group_post = 
+# group_put = 
+# group_delete = 
+# groupmember_post = 
+# groupmember_put = 
+# groupmember_delete = 
+# kartonobject_get = 
+# kartonobject_post = 
+# kartonanalysis_get = 
+# kartonanalysis_put = 
+# metakey_get = 
+# metakey_post = 
+# metakey_delete = 
+# metakeylistdefinition_get = 
+# metakeylistdefinitionmanage_get = 
+# metakeydefinitionmanage_get = 
+# metakeydefinitionmanage_post = 
+# metakeydefinitionmanage_put = 
+# metakeydefinitionmanage_delete = 
+# metakeypermission_put = 
+# metakeypermission_delete = 
+# openidprovider_post = 
+# openidsingleprovider_get = 
+# openidsingleprovider_put = 
+# openidsingleprovider_delete = 
+# openidbindaccount_post = 
+# openidaccountidentities_get = 
+# object_get = 
+# objectItem_get = 
+# objectItem_post =
+# objectItem_put = 
+# objectItem_delete = 
+# objectcount_get = 
+# objectfavorite_put = 
+# objectfavorite_delete = 
+# quickquery_get = 
+# quickquery_post = 
+# quickqueryitem_delete = 
+# relations_get = 
+# objectchild_put = 
+# objectchild_delete = 
+# remotelist_get = 
+# remotefilepull_post = 
+# remoteconfigpull_post = 
+# remotetextblobpull_post = 
+# remotefilepush_post = 
+# remoteconfigpush_post = 
+# remotetextblobpush_post = 
+# search_post = 
+# serveradmininfo_get = 
+# serverdocs_get = 
+# sharegrouplist_get = 
+# share_get = 
+# share_put = 
+# taglist_get = 
+# tag_get = 
+# tag_put = 
+# tag_delete = 
+# userlist_get =
+# userpending_post = 
+# userpending_delete = 
+# userrequestpasswordchange_post = 
+# usergetpasswordchangetoken_get = 
+# user_get = 
+# user_post = 
+# user_put = 
+# user_delete = 
+# userprofile_get = 

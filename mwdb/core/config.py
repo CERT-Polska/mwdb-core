@@ -196,9 +196,9 @@ class MwdbLimiterConfig(Config):
     config_post = key(cast=str, required=False, default=None)
 
     # ConfigItemResource
-    configItem_get = key(cast=str, required=False, default=None)
-    configItem_put = key(cast=str, required=False, default=None)
-    configItem_delete = key(cast=str, required=False, default=None)
+    configitem_get = key(cast=str, required=False, default=None)
+    configitem_put = key(cast=str, required=False, default=None)
+    configitem_delete = key(cast=str, required=False, default=None)
 
     # FileResource
     file_get = key(cast=str, required=False, default=None)

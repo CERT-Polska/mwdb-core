@@ -172,10 +172,10 @@ Check out `mwdb-plugin-drakvuf <https://github.com/CERT-Polska/mwdb-plugin-drakv
 
 Available hooks
 --------------
-A lot of hooks have been implemented in MWDB. Each of these hooks is triggered when particular event accurs in system.
+A lot of hooks have been implemented in MWDB. Each of these hooks is triggered when particular event occurs in system.
 
 
-List of available hooks and events triggered these hooks.
+List of available hooks and events triggering these hooks.
 
 * ``on_created_object(self, object: Object)``  - object was uploaded (file, blob or config) or pulled from remoted resource
 * ``on_reuploaded_object(self, object: Object)``  - object was again uploaded or pulled from remote resource

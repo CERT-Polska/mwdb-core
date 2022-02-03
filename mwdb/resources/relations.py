@@ -112,19 +112,20 @@ class ObjectChildResource(Resource):
         if child_object is None:
             raise NotFound("Child object not found")
 
-        child_object.add_parent(parent_object, commit=False)
+        is_added = child_object.add_parent(parent_object, commit=False)
 
         db.session.commit()
-        hooks.on_created_relation(parent_object, child_object)
-        if parent_object is not child_object:
-            hooks.on_changed_object(parent_object)
-            hooks.on_changed_object(child_object)
-        else:
-            hooks.on_changed_object(parent_object)
-        logger.info(
-            "Child added",
-            extra={"parent": parent_object.dhash, "child": child_object.dhash},
-        )
+        if is_added:
+            hooks.on_created_relation(parent_object, child_object)
+            if parent_object is not child_object:
+                hooks.on_changed_object(parent_object)
+                hooks.on_changed_object(child_object)
+            else:
+                hooks.on_changed_object(parent_object)
+            logger.info(
+                "Child added",
+                extra={"parent": parent_object.dhash, "child": child_object.dhash},
+            )
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_parents)

@@ -117,7 +117,7 @@ class ObjectChildResource(Resource):
         db.session.commit()
         if is_added:
             hooks.on_created_relation(parent_object, child_object)
-            if parent_object is not child_object:
+            if parent_object.id != child_object.id:
                 hooks.on_changed_object(parent_object)
                 hooks.on_changed_object(child_object)
             else:
@@ -187,7 +187,7 @@ class ObjectChildResource(Resource):
             return
 
         hooks.on_removed_relation(parent_object, child_object)
-        if parent_object is not child_object:
+        if parent_object.id != child_object.id:
             hooks.on_changed_object(parent_object)
             hooks.on_changed_object(child_object)
         else:

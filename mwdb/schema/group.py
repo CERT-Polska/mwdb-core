@@ -50,6 +50,7 @@ class GroupItemResponseSchema(GroupNameSchemaBase):
     private = fields.Boolean(required=True)
     default = fields.Boolean(required=True)
     workspace = fields.Boolean(required=True)
+    immutable = fields.Boolean(required=True)
     users = fields.List(
         fields.Str(), attribute="user_logins", required=True, allow_none=False
     )

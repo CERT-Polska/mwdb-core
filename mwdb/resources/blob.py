@@ -172,6 +172,9 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
 
     decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
+    def call_specialised_remove_hook(self, text_blob):
+        hooks.on_removed_text_blob(text_blob)
+
     @requires_authorization
     def get(self, identifier):
         """

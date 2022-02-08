@@ -57,6 +57,7 @@ class ServerInfoResource(Resource):
             {
                 "server_version": app_build_version,
                 "is_authenticated": bool(g.auth_user),
+                "instance_name": app_config.mwdb.instance_name,
                 "is_maintenance_set": app_config.mwdb.enable_maintenance,
                 "is_registration_enabled": app_config.mwdb.enable_registration,
                 "is_karton_enabled": app_config.mwdb.enable_karton,

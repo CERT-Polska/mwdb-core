@@ -132,6 +132,7 @@ class CommentResource(Resource):
 
         db.session.refresh(comment)
         hooks.on_created_comment(db_object, comment)
+        hooks.on_changed_object(db_object)
         schema = CommentItemResponseSchema()
         return schema.dump(comment)
 
@@ -193,3 +194,5 @@ class CommentDeleteResource(Resource):
             db.session.delete(db_comment)
             logger.info("comment deleted", extra={"comment": comment_id})
             db.session.commit()
+            hooks.on_removed_comment(db_object, db_comment)
+            hooks.on_changed_object(db_object)

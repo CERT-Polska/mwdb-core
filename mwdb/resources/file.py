@@ -185,6 +185,9 @@ class FileItemResource(ObjectItemResource, FileUploader):
 
     decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
+    def call_specialised_remove_hook(self, file):
+        hooks.on_removed_file(file)
+
     @requires_authorization
     def get(self, identifier):
         """

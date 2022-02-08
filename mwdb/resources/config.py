@@ -293,6 +293,9 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
     ItemResponseSchema = ConfigItemResponseSchema
     CreateRequestSchema = ConfigLegacyCreateRequestSchema
 
+    def call_specialised_remove_hook(self, config):
+        hooks.on_removed_config(config)
+
     @requires_authorization
     def get(self, identifier):
         """

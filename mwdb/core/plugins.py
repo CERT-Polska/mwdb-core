@@ -9,6 +9,9 @@ from mwdb.core.config import app_config
 from mwdb.core.log import getLogger
 from mwdb.core.util import is_subdir
 from mwdb.model import Comment, Config, File, Object, Tag, TextBlob
+from mwdb.model.attribute import Attribute, AttributeDefinition
+from mwdb.model.group import Group
+from mwdb.model.user import User
 
 logger = getLogger()
 
@@ -55,11 +58,19 @@ class PluginHookBase(object):
         pass
 
     @hook_handler_method
+    def on_removed_object(self, object: Object):
+        pass
+
+    @hook_handler_method
     def on_created_file(self, file: File):
         pass
 
     @hook_handler_method
     def on_reuploaded_file(self, file: File):
+        pass
+
+    @hook_handler_method
+    def on_removed_file(self, file: File):
         pass
 
     @hook_handler_method
@@ -71,11 +82,19 @@ class PluginHookBase(object):
         pass
 
     @hook_handler_method
+    def on_removed_config(self, config: Config):
+        pass
+
+    @hook_handler_method
     def on_created_text_blob(self, blob: TextBlob):
         pass
 
     @hook_handler_method
     def on_reuploaded_text_blob(self, blob: TextBlob):
+        pass
+
+    @hook_handler_method
+    def on_removed_text_blob(self, blob: TextBlob):
         pass
 
     @hook_handler_method
@@ -87,7 +106,83 @@ class PluginHookBase(object):
         pass
 
     @hook_handler_method
+    def on_removed_tag(self, object: Object, tag: Tag):
+        pass
+
+    @hook_handler_method
     def on_created_comment(self, object: Object, comment: Comment):
+        pass
+
+    @hook_handler_method
+    def on_removed_comment(self, object: Object, comment: Comment):
+        pass
+
+    @hook_handler_method
+    def on_created_relation(self, parent: Object, child: Object):
+        pass
+
+    @hook_handler_method
+    def on_removed_relation(self, parent: Object, child: Object):
+        pass
+
+    @hook_handler_method
+    def on_created_attribute_key(self, attribute_def: AttributeDefinition):
+        pass
+
+    @hook_handler_method
+    def on_updated_attribute_key(self, attribute_def: AttributeDefinition):
+        pass
+
+    @hook_handler_method
+    def on_removed_attribute_key(self, attribute_def: AttributeDefinition):
+        pass
+
+    @hook_handler_method
+    def on_created_attribute(self, object: Object, attribute: Attribute):
+        pass
+
+    @hook_handler_method
+    def on_removed_attribute(self, object: Object, attribute: Attribute):
+        pass
+
+    @hook_handler_method
+    def on_created_user(self, user: User):
+        pass
+
+    @hook_handler_method
+    def on_removed_user(self, user: User):
+        pass
+
+    @hook_handler_method
+    def on_updated_user(self, user: User):
+        pass
+
+    @hook_handler_method
+    def on_created_group(self, group: Group):
+        pass
+
+    @hook_handler_method
+    def on_removed_group(self, group: Group):
+        pass
+
+    @hook_handler_method
+    def on_updated_group(self, group: Group):
+        pass
+
+    @hook_handler_method
+    def on_created_membership(self, group: Group, user: User):
+        pass
+
+    @hook_handler_method
+    def on_removed_membership(self, group: Group, user: User):
+        pass
+
+    @hook_handler_method
+    def on_updated_membership(self, group: Group, user: User):
+        pass
+
+    @hook_handler_method
+    def on_changed_object(self, object: Object):
         pass
 
 

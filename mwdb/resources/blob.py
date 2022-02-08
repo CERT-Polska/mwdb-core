@@ -167,6 +167,9 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
     ItemResponseSchema = BlobItemResponseSchema
     CreateRequestSchema = BlobLegacyCreateRequestSchema
 
+    def call_specialised_remove_hook(self, text_blob):
+        hooks.on_removed_text_blob(text_blob)
+
     @requires_authorization
     def get(self, identifier):
         """

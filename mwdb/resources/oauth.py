@@ -9,6 +9,7 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
+from mwdb.core.plugins import hooks
 from mwdb.model import Group, OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.oauth import (
@@ -449,6 +450,12 @@ class OpenIDRegisterUserResource(Resource):
 
         auth_token = user.generate_session_token()
 
+        user_private_group = next(
+            (g for g in user.groups if g.name == user.login), None
+        )
+        hooks.on_created_user(user)
+        if user_private_group:
+            hooks.on_created_group(user_private_group)
         logger.info(
             "User logged in via OpenID Provider",
             extra={"login": user.login, "provider": provider_name},

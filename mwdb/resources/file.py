@@ -180,6 +180,9 @@ class FileItemResource(ObjectItemResource, FileUploader):
     ItemResponseSchema = FileItemResponseSchema
     CreateRequestSchema = FileLegacyCreateRequestSchema
 
+    def call_specialised_remove_hook(self, file):
+        hooks.on_removed_file(file)
+
     @requires_authorization
     def get(self, identifier):
         """

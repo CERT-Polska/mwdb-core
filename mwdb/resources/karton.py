@@ -14,6 +14,7 @@ from . import (
     access_object,
     is_valid_uuid,
     loads_schema,
+    logger,
     requires_authorization,
     requires_capabilities,
 )
@@ -248,3 +249,63 @@ class KartonAnalysisResource(Resource):
         analysis, _ = db_object.assign_analysis(analysis_id)
         schema = KartonItemResponseSchema()
         return schema.dump(analysis)
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.removing_karton)
+    def delete(self, type, identifier, analysis_id):
+        """
+        ---
+        summary: Remove Karton analysis from the object
+        description: |
+            Remove existing Karton analysis from the object
+
+            Requires `removing_karton` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - karton
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of target object
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Object identifier
+            - in: path
+              name: analysis_id
+              schema:
+                type: string
+              description: Analysis identifier
+        responses:
+            200:
+                description: When analysis was successfully removed from object
+            400:
+                description: When analysis_id is not UUID value
+            403:
+                description: When user doesn't have `karton_assign` capability.
+            404:
+                description: |
+                    When object doesn't exist or user doesn't have access
+                    to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        db_object = access_object(type, identifier)
+        if db_object is None:
+            raise NotFound("Object not found")
+
+        if not is_valid_uuid(analysis_id):
+            raise BadRequest("'karton' attribute accepts only UUID values")
+
+        result = db_object.remove_analysis(analysis_id)
+        if result:
+            logger.info(
+                "Analysis removed from object",
+                extra={"object": db_object.dhash, "analysis id": analysis_id},
+            )

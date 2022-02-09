@@ -10,6 +10,7 @@ from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFou
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
+from mwdb.core.plugins import hooks
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.user import (
     UserCreateRequestSchema,
@@ -492,6 +493,13 @@ class UserResource(Resource):
 
         db.session.commit()
 
+        user_private_group = next(
+            (g for g in user.groups if g.name == user.login), None
+        )
+        hooks.on_created_user(user)
+        if user_private_group:
+            hooks.on_created_group(user_private_group)
+
         logger.info("User created", extra={"user": user.login})
         schema = UserSuccessResponseSchema()
         return schema.dump({"login": user.login})
@@ -574,6 +582,7 @@ class UserResource(Resource):
             user.reset_sessions()
 
         db.session.commit()
+        hooks.on_updated_user(user)
         logger.info("User updated", extra=obj)
 
         schema = UserSuccessResponseSchema()
@@ -626,6 +635,8 @@ class UserResource(Resource):
         db.session.delete(group)
         db.session.commit()
 
+        hooks.on_removed_user(user)
+        hooks.on_removed_group(group)
         logger.info("User was deleted", extra={"user": login})
 
         schema = UserSuccessResponseSchema()

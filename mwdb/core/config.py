@@ -274,10 +274,10 @@ class MwdbLimiterConfig(Config):
     object_get = key(cast=str, required=False, default=None)
 
     # ObjectItemResource
-    objectItem_get = key(cast=str, required=False, default=None)
-    objectItem_post = key(cast=str, required=False, default=None)
-    objectItem_put = key(cast=str, required=False, default=None)
-    objectItem_delete = key(cast=str, required=False, default=None)
+    objectitem_get = key(cast=str, required=False, default=None)
+    objectitem_post = key(cast=str, required=False, default=None)
+    objectitem_put = key(cast=str, required=False, default=None)
+    objectitem_delete = key(cast=str, required=False, default=None)
 
     # ObjectCountResource
     objectcount_get = key(cast=str, required=False, default=None)

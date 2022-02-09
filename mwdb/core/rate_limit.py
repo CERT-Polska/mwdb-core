@@ -1,26 +1,27 @@
 from flask import g, request
 from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 
 
-def rate_limit_enabled():
-    if (
-        app_config.mwdb.enable_rate_limit
-        and g.auth_user is not None
-        and not g.auth_user.has_rights(Capabilities.unlimited_requests)
+def is_rate_limit_disabled():
+    if not app_config.mwdb.enable_rate_limit:
+        return True
+    elif g.auth_user is not None and g.auth_user.has_rights(
+        Capabilities.unlimited_requests
     ):
         return True
-    else:
-        return False
+    return False
 
 
 limiter = Limiter(
     key_func=lambda: f"{g.auth_user.login}-{request.method}"
-    if rate_limit_enabled()
-    else None,
-    storage_uri="redis://redis/",
+    if g.auth_user
+    else f"{get_remote_address()}-{request.method}",
+    storage_uri=app_config.mwdb.redis_uri,
+    headers_enabled=True,
 )
 
 
@@ -54,6 +55,7 @@ def get_limit_decorators(resource_class_name):
                     methods=[method],
                     error_message=f"Request limit: {limit} "
                     f"for {method} method was exceeded!",
+                    exempt_when=is_rate_limit_disabled,
                 )
             )
 

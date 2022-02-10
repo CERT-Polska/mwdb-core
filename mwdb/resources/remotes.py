@@ -9,7 +9,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import get_limit_decorators
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Config, File, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobItemResponseSchema
@@ -21,9 +21,8 @@ from mwdb.version import app_build_version
 from . import get_shares_for_upload, loads_schema, logger, requires_authorization
 
 
+@rate_limited_resource
 class RemoteListResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     def get(self):
         """
@@ -88,6 +87,7 @@ class RemoteAPI:
         return response
 
 
+@rate_limited_resource
 class RemoteAPIResource(Resource):
     def do_request(self, method, remote_name, remote_path):
         remote = RemoteAPI(remote_name)
@@ -140,14 +140,13 @@ class RemotePullResource(Resource):
         return schema.dump(item)
 
 
+@rate_limited_resource
 class RemoteFilePullResource(RemotePullResource):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema
 
     on_created = hooks.on_created_file
     on_reuploaded = hooks.on_reuploaded_file
-
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def post(self, remote_name, identifier):
@@ -217,14 +216,13 @@ class RemoteFilePullResource(RemotePullResource):
         return self.create_pulled_object(item, is_new)
 
 
+@rate_limited_resource
 class RemoteConfigPullResource(RemotePullResource):
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
 
     on_created = hooks.on_created_config
     on_reuploaded = hooks.on_reuploaded_config
-
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def post(self, remote_name, identifier):
@@ -321,14 +319,13 @@ class RemoteConfigPullResource(RemotePullResource):
         return self.create_pulled_object(item, is_new)
 
 
+@rate_limited_resource
 class RemoteTextBlobPullResource(RemotePullResource):
     ObjectType = TextBlob
     ItemResponseSchema = BlobItemResponseSchema
 
     on_created = hooks.on_created_text_blob
     on_reuploaded = hooks.on_reuploaded_text_blob
-
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def post(self, remote_name, identifier):
@@ -392,9 +389,8 @@ class RemoteTextBlobPullResource(RemotePullResource):
         return self.create_pulled_object(item, is_new)
 
 
+@rate_limited_resource
 class RemoteFilePushResource(RemotePullResource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     def post(self, remote_name, identifier):
         """
@@ -457,9 +453,8 @@ class RemoteFilePushResource(RemotePullResource):
         return response
 
 
+@rate_limited_resource
 class RemoteConfigPushResource(RemotePullResource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     def post(self, remote_name, identifier):
         """
@@ -539,9 +534,8 @@ class RemoteConfigPushResource(RemotePullResource):
         return response
 
 
+@rate_limited_resource
 class RemoteTextBlobPushResource(RemotePullResource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     def post(self, remote_name, identifier):
         """

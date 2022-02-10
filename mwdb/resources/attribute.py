@@ -4,7 +4,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import get_limit_decorators
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Attribute, AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.attribute import (
     AttributeDefinitionCreateRequestSchema,
@@ -31,9 +31,8 @@ from . import (
 )
 
 
+@rate_limited_resource
 class AttributeListResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     def get(self, type, identifier):
         """
@@ -177,9 +176,8 @@ class AttributeListResource(Resource):
         return schema.dump({"attributes": attributes})
 
 
+@rate_limited_resource
 class AttributeResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     @requires_capabilities("removing_attributes")
     def delete(self, type, identifier, attribute_id):
@@ -242,9 +240,8 @@ class AttributeResource(Resource):
         hooks.on_changed_object(db_object)
 
 
+@rate_limited_resource
 class AttributeDefinitionListResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     def get(self):
         """
@@ -364,9 +361,8 @@ class AttributeDefinitionListResource(Resource):
         return schema.dump(attribute_definition)
 
 
+@rate_limited_resource
 class AttributeDefinitionResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, key):
@@ -530,9 +526,8 @@ class AttributeDefinitionResource(Resource):
         hooks.on_removed_attribute_key(attribute_definition)
 
 
+@rate_limited_resource
 class AttributePermissionResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, key):

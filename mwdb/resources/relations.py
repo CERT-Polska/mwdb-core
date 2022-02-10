@@ -3,16 +3,15 @@ from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import get_limit_decorators
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Object, db
 from mwdb.schema.relations import RelationsResponseSchema
 
 from . import access_object, logger, requires_authorization, requires_capabilities
 
 
+@rate_limited_resource
 class RelationsResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     def get(self, type, identifier):
         """
@@ -60,9 +59,8 @@ class RelationsResource(Resource):
         return relations.dump(db_object)
 
 
+@rate_limited_resource
 class ObjectChildResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     @requires_capabilities(Capabilities.adding_parents)
     def put(self, type, parent, child):

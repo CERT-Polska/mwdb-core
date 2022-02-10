@@ -6,7 +6,7 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import get_limit_decorators
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.group import (
     GroupCreateRequestSchema,
@@ -28,9 +28,8 @@ from . import (
 )
 
 
+@rate_limited_resource
 class GroupListResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self):
@@ -66,9 +65,8 @@ class GroupListResource(Resource):
         return schema.dump({"groups": objs})
 
 
+@rate_limited_resource
 class GroupResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, name):
@@ -311,9 +309,8 @@ class GroupResource(Resource):
         return schema.dump({"name": name})
 
 
+@rate_limited_resource
 class GroupMemberResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def post(self, name, login):

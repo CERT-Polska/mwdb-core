@@ -3,7 +3,7 @@ from flask_restful import Resource
 from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest
 
-from mwdb.core.rate_limit import get_limit_decorators
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import Object
 from mwdb.schema.object import ObjectListItemResponseSchema
@@ -12,9 +12,8 @@ from mwdb.schema.search import SearchRequestSchema
 from . import deprecated, loads_schema, requires_authorization
 
 
+@rate_limited_resource
 class SearchResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @deprecated
     @requires_authorization
     def post(self):

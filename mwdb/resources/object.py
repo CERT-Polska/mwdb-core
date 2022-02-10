@@ -9,7 +9,7 @@ from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFoun
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import get_limit_decorators
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import AttributeDefinition, Object, db
 from mwdb.model.tag import Tag
@@ -144,11 +144,10 @@ class ObjectUploader:
         return schema.dump(item)
 
 
+@rate_limited_resource
 class ObjectResource(Resource):
     ObjectType = Object
     ListResponseSchema = ObjectListResponseSchema
-
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     @requires_authorization
     def get(self):
@@ -239,12 +238,11 @@ class ObjectResource(Resource):
         return schema.dump(objects, many=True)
 
 
+@rate_limited_resource
 class ObjectItemResource(Resource, ObjectUploader):
     ObjectType = Object
     ItemResponseSchema = ObjectItemResponseSchema
     CreateRequestSchema = None
-
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
 
     def call_specialised_remove_hook(self, obj):
         pass
@@ -366,9 +364,8 @@ class ObjectItemResource(Resource, ObjectUploader):
         hooks.on_removed_object(obj)
 
 
+@rate_limited_resource
 class ObjectCountResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     def get(self, type):
         """
@@ -431,9 +428,8 @@ class ObjectCountResource(Resource):
         return schema.dump({"count": result})
 
 
+@rate_limited_resource
 class ObjectFavoriteResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     @requires_capabilities(Capabilities.personalize)
     def put(self, identifier):

@@ -5,7 +5,7 @@ from mwdb.core.app import api
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import get_plugin_info
-from mwdb.core.rate_limit import get_limit_decorators
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.schema.server import (
     ServerAdminInfoResponseSchema,
     ServerInfoResponseSchema,
@@ -16,6 +16,7 @@ from mwdb.version import app_build_version
 from . import requires_authorization, requires_capabilities
 
 
+@rate_limited_resource
 class PingResource(Resource):
     def get(self):
         """
@@ -37,6 +38,7 @@ class PingResource(Resource):
         return schema.dump({"status": "ok"})
 
 
+@rate_limited_resource
 class ServerInfoResource(Resource):
     def get(self):
         """
@@ -70,9 +72,8 @@ class ServerInfoResource(Resource):
         )
 
 
+@rate_limited_resource
 class ServerAdminInfoResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self):
@@ -107,9 +108,8 @@ class ServerAdminInfoResource(Resource):
         )
 
 
+@rate_limited_resource
 class ServerDocsResource(Resource):
-    decorators = get_limit_decorators(__qualname__)  # noqa: F821
-
     @requires_authorization
     def get(self):
         """

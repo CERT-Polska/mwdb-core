@@ -25,7 +25,7 @@ limiter = Limiter(
 )
 
 
-def get_limit_decorators(resource_class_name):
+def rate_limited_resource(resource_class):
     # default rate limit values
     rate_limits = {
         "get": "1000/10second 2000/minute 6000/5minute 10000/15minute",
@@ -33,22 +33,17 @@ def get_limit_decorators(resource_class_name):
         "put": "100/10second 1000/minute 3000/5minute 6000/15minute",
         "delete": "100/10second 1000/minute 3000/5minute 6000/15minute",
     }
-
-    resource = resource_class_name.split("Resource")[0].lower()
-
-    # rate limit update from config
-    for field in app_config.mwdb_limiter.get_registered_properties():
-        _resource, method = field.split("_")
-        if _resource == resource:
-            limits = app_config.get_key("mwdb_limiter", field)
-            if limits is not None:
-                rate_limits[method] = limits
-
     limit_decorators = []
+    http_methods_in_resource = [func.lower() for func in resource_class.methods]
 
-    for key, value in rate_limits.items():
-        method = key.upper()
-        for limit in value.split():
+    for method in http_methods_in_resource:
+        field = resource_class.__qualname__.split("Resource")[0].lower() + "_" + method
+        limits = app_config.get_key("mwdb_limiter", field)
+
+        if not limits:
+            limits = rate_limits[method]
+
+        for limit in limits.split():
             limit_decorators.append(
                 limiter.limit(
                     limit,
@@ -58,5 +53,6 @@ def get_limit_decorators(resource_class_name):
                     exempt_when=is_rate_limit_disabled,
                 )
             )
+    resource_class.decorators = limit_decorators
 
-    return limit_decorators
+    return resource_class

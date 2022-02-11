@@ -305,8 +305,7 @@ Default limits were applied for HTTP methods. The default values are as below:
 * DELETE method: 100/10second 1000/minute 3000/5minute 6000/15minute
 
 User can override these limits for individual endpoints by placing new limits in ``mwdb.ini`` - in section ``[mwdb_limiter]``.
-Each line in ``[mwdb_limiter]`` section should have a pattern - ``resourcename_httpmethod = limit_values_space_separated``.
-
+Each line in ``[mwdb_limiter]`` section should have a pattern - ``<resourcename>_<httpmethod> = limit_values_space_separated``.
 
 Example rate-limit records in mwdb.ini file are as below
 
@@ -324,7 +323,3 @@ Above records establish request rate limits for endpoints:
 * DELETE /api/attribute/<key> to values: 10 per minute and 100 per hour
 
 Other endpoints are limited by default limits.
-
-.. note::
-
-   Complete list of possible rate-limit parameters is placed in ``mwdb-core\mwdb\core\config.py`` file - section ``mwdb_limiter``.

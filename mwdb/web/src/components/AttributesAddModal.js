@@ -67,6 +67,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
     }
 
     const getAttributeDefinitions = useCallback(updateAttributeDefinitions, []);
+    const attributesAvailable = Object.keys(attributeDefinitions).length != 0;
 
     useEffect(() => {
         getAttributeDefinitions();
@@ -80,6 +81,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             isOpen={isOpen}
             onRequestClose={onRequestClose}
             onConfirm={handleSubmit}
+            confirmEnabled={attributesAvailable}
         >
             {error ? (
                 <div
@@ -91,7 +93,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             ) : (
                 []
             )}
-            {!Object.keys(attributeDefinitions).length ? (
+            {!attributesAvailable ? (
                 <div>
                     Sorry, there are no attributes you can set at this moment.
                 </div>

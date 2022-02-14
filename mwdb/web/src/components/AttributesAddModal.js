@@ -67,7 +67,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
     }
 
     const getAttributeDefinitions = useCallback(updateAttributeDefinitions, []);
-    const attributesAvailable = Object.keys(attributeDefinitions).length != 0;
+    const attributesAvailable = Object.keys(attributeDefinitions).length !== 0;
 
     useEffect(() => {
         getAttributeDefinitions();

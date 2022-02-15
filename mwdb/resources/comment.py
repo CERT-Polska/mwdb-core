@@ -173,8 +173,8 @@ class CommentDeleteResource(Resource):
                 description: When user doesn't have the `removing_comments` capability.
             404:
                 description: |
-                    When object doesn't exist or user doesn't have access
-                    to this object.
+                    When object or comment doesn't exist, user doesn't have access
+                    to this object or comment doesn't belong to this object.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -185,9 +185,11 @@ class CommentDeleteResource(Resource):
 
         db_comment = db.session.query(Comment).filter(Comment.id == comment_id).first()
 
-        if db_comment is not None:
+        if db_comment is not None and db_comment in db_object.comments:
             db.session.delete(db_comment)
             logger.info("comment deleted", extra={"comment": comment_id})
             db.session.commit()
             hooks.on_removed_comment(db_object, db_comment)
             hooks.on_changed_object(db_object)
+        else:
+            raise NotFound("Comment not found")

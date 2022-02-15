@@ -81,7 +81,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             isOpen={isOpen}
             onRequestClose={onRequestClose}
             onConfirm={handleSubmit}
-            confirmEnabled={attributesAvailable}
+            confirmDisabled={!attributesAvailable}
         >
             {error ? (
                 <div

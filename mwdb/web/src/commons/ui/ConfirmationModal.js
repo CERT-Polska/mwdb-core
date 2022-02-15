@@ -54,7 +54,7 @@ export default function ConfirmationModal(props) {
                     className={`btn ${props.buttonStyle || "btn-danger"}`}
                     data-dismiss="modal"
                     onClick={props.onConfirm}
-                    disabled={props.disabled || !props.confirmEnabled}
+                    disabled={props.disabled || props.confirmDisabled}
                 >
                     {props.confirmText || "Yes"}
                 </button>

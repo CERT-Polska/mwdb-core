@@ -323,3 +323,7 @@ Above records establish request rate limits for endpoints:
 * DELETE /api/attribute/<key> to values: 10 per minute and 100 per hour
 
 Other endpoints are limited by default limits.
+
+.. note::
+
+   Complete list of possible rate-limit parameters is placed in ``mwdb-core\mwdb\core\templates\mwdb.ini.tmpl`` file - section ``mwdb_limiter``.

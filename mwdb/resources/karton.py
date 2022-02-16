@@ -287,11 +287,11 @@ class KartonAnalysisResource(Resource):
             400:
                 description: When analysis_id is not UUID value
             403:
-                description: When user doesn't have `karton_assign` capability.
+                description: When user doesn't have `removing_karton` capability.
             404:
                 description: |
-                    When object doesn't exist or user doesn't have access
-                    to this object.
+                    When object or analysis doesn't exist, user doesn't have access
+                    to this object or analysis is not assigned to this object.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -309,3 +309,5 @@ class KartonAnalysisResource(Resource):
                 "Analysis removed from object",
                 extra={"object": db_object.dhash, "analysis id": analysis_id},
             )
+        else:
+            raise NotFound("Analysis not found")

@@ -10,6 +10,7 @@ import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { Autocomplete, DataTable, View } from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
+import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 
 function UploadDropzone(props) {
     const onDrop = props.onDrop;
@@ -181,6 +182,7 @@ class Upload extends Component {
                 success={this.state.success}
                 showIf={this.state.groups !== null}
             >
+                <Extendable ident="uploadForm">
                 <form>
                     <UploadDropzone
                         file={this.state.file}
@@ -334,6 +336,7 @@ class Upload extends Component {
                         />
                     </div>
                 </form>
+                </Extendable>
                 <AttributesAddModal
                     isOpen={this.state.isAttributeModalOpen}
                     onRequestClose={this.onRequestAttributeModalClose}

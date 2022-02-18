@@ -14,14 +14,14 @@ apispec[yaml,validation]==3.3.1
 bcrypt==3.1.4
 python-magic==0.4.18
 luqum==0.7.4
-logmatic-python==0.1.7
+python-json-logger==2.0.2
 click==7.1.2
 click-default-group==1.2.2
 PyYAML==5.4
 redis==3.2.1
 minio==7.1.0
 typed-config==0.2.1
-karton-core==4.2.0
+karton-core==4.3.0
 Authlib==0.15.4
 prance==0.21.8.0  # apispec unpinned dependency
 regex==2021.7.6

@@ -243,6 +243,7 @@ Basic settings:
 * ``file_upload_timeout`` (integer) - File upload process will be terminated if it takes more than this parameter value in milliseconds. Default value is 60000 ms.
 * ``statement_timeout`` (integer) - Database statement_timeout parameter. Database server aborts any statement that takes more than the specified number of milliseconds.
 * ``request_timeout`` (integer) - HTTP request will be terminated if it takes more than this parameter value in milliseconds. Default value is 20000 ms.
+* ``instance_name`` - (string) - custom name for local MWDB instance. Default value is "mwdb".
 
 
 Web application settings:
@@ -250,6 +251,10 @@ Web application settings:
 
 * ``serve_web`` (0 or 1) - By default, web application is served by mwdb-core application (\ ``1``\ ). If you want mwdb-core to serve only API and host web application by yourself (e.g. using nginx), you can turn off serving static files by setting this option to ``0``.
 * ``web_folder`` (string) - Path to web application static files. By default, web application files are served from pre-compiled bundle embedded to Python package. If you want to use plugins that are incorporating additional frontend features, you need to rebuild the web application and serve them from your own path.
+* ``flask_config_file`` (string) - additional file containing Flask configuration (.py)
+* ``admin_login`` (string) - administrator account name
+* ``admin_password`` (string) - initial password for administrator account
+
 
 Plugin settings:
 
@@ -280,12 +285,18 @@ Extra features:
 * ``enable_maintenance`` (0 or 1) - Turns on maintenance mode, making MWDB unavailable for users other than ``admin``. Default is ``0``.
 * ``enable_json_logger`` (0 or 1) - Enables JSON logging which may be more convenient for automated log processing. Default is ``0``.
 * ``redis_uri`` (string) - Redis database connection string, required by rate limiter.
+* ``remotes`` (comma separated strings) - list of MWDB remotes (experimental)
+* ``enable_hooks`` (0 or 1) - enable plugin hooks
+* ``enable_oidc`` (0 or 1) - enable OIDC (experimental)
 
 Registration feature settings:
 
 
 * ``mail_smtp`` (string) - SMTP connection string (\ ``host:port``\ )
 * ``mail_from`` (string) - ``From`` field value used in e-mails sent by MWDB
+* ``mail_username`` (string) - SMTP user name
+* ``mail_password`` (string) - SMTP user password
+* ``mail_tls`` (0 or 1) - Enable STARTTLS
 * ``mail_templates_folder`` (string) - Path to the directory containing custom mail templates
 * ``recaptcha_site_key`` (string) - ReCAPTCHA site key. If not set - ReCAPTCHA won't be required for registration.
 * ``recaptcha_secret`` (string) - ReCAPTCHA secret key. If not set - ReCAPTCHA won't be required for registration.

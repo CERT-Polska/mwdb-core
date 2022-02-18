@@ -25,4 +25,5 @@ karton-core==4.3.0
 Authlib==0.15.4
 prance==0.21.8.0  # apispec unpinned dependency
 regex==2021.7.6
+itsdangerous==2.0.1
 Flask-Limiter==2.1.3

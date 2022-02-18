@@ -4,7 +4,6 @@ import os
 import shutil
 import tempfile
 
-from itsdangerous import BadSignature, SignatureExpired, TimedJSONWebSignatureSerializer
 from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
@@ -285,13 +284,10 @@ class File(Object):
 
     @staticmethod
     def get_by_download_token(download_token):
-        try:
-            download_req = verify_token(download_token)
-            return File.get(download_req["identifier"]).first()
-        except SignatureExpired:
+        download_req = verify_token(download_token)
+        if not download_req:
             return None
-        except BadSignature:
-            return None
+        return File.get(download_req["identifier"]).first()
 
     def _send_to_karton(self):
         return send_file_to_karton(self)

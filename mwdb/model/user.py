@@ -3,12 +3,11 @@ import os
 
 import bcrypt
 from flask import g
-from itsdangerous import BadSignature, SignatureExpired, TimedJSONWebSignatureSerializer
 from sqlalchemy import and_
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm.exc import NoResultFound
 
-from mwdb.core.config import app_config
+from mwdb.core.auth import generate_token, verify_token
 
 from . import db
 from .group import Group, Member
@@ -151,24 +150,19 @@ class User(db.Model):
         return user
 
     def _generate_token(self, fields, expiration):
-        s = TimedJSONWebSignatureSerializer(
-            app_config.mwdb.secret_key, expires_in=expiration
-        )
-        return s.dumps(
+        token = generate_token(
             dict(
                 [("login", self.login)]
                 + [(field, getattr(self, field)) for field in fields]
-            )
+            ),
+            expiration,
         )
+        return token
 
     @staticmethod
     def _verify_token(token, fields):
-        s = TimedJSONWebSignatureSerializer(app_config.mwdb.secret_key)
-        try:
-            data = s.loads(token)
-        except SignatureExpired:
-            return None
-        except BadSignature:
+        data = verify_token(token)
+        if token is None:
             return None
 
         try:

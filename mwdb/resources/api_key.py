@@ -102,7 +102,7 @@ class APIKeyIssueResource(Resource):
                 "issued_on": api_key.issued_on,
                 "issuer_login": api_key.issuer_login,
                 "name": api_key.name,
-                "token": api_key.generate_token(),
+                "token": api_key._generate_token(),
             }
         )
 

@@ -10,6 +10,7 @@ from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from werkzeug.utils import secure_filename
 
+from mwdb.core.auth import generate_token, verify_token
 from mwdb.core.config import StorageProviderType, app_config
 from mwdb.core.karton import send_file_to_karton
 from mwdb.core.util import (
@@ -280,16 +281,12 @@ class File(Object):
             self.upload_stream = None
 
     def generate_download_token(self):
-        serializer = TimedJSONWebSignatureSerializer(
-            app_config.mwdb.secret_key, expires_in=60
-        )
-        return serializer.dumps({"identifier": self.sha256})
+        return generate_token({"identifier": self.sha256}, expiration=60)
 
     @staticmethod
     def get_by_download_token(download_token):
-        serializer = TimedJSONWebSignatureSerializer(app_config.mwdb.secret_key)
         try:
-            download_req = serializer.loads(download_token)
+            download_req = verify_token(download_token)
             return File.get(download_req["identifier"]).first()
         except SignatureExpired:
             return None

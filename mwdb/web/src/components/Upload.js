@@ -183,159 +183,159 @@ class Upload extends Component {
                 showIf={this.state.groups !== null}
             >
                 <Extendable ident="uploadForm">
-                <form>
-                    <UploadDropzone
-                        file={this.state.file}
-                        onDrop={(file) => this.setState({ file })}
-                    />
-                    <div className="form-group">
-                        {this.context.hasCapability(
-                            Capability.addingParents
-                        ) ? (
+                    <form>
+                        <UploadDropzone
+                            file={this.state.file}
+                            onDrop={(file) => this.setState({ file })}
+                        />
+                        <div className="form-group">
+                            {this.context.hasCapability(
+                                Capability.addingParents
+                            ) ? (
+                                <div className="input-group mb-3">
+                                    <div className="input-group-prepend">
+                                        <label className="input-group-text">
+                                            Parent
+                                        </label>
+                                    </div>
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        style={{ fontSize: "medium" }}
+                                        placeholder="(Optional) Type parent identifier..."
+                                        value={
+                                            this.parentFromQuery ||
+                                            this.state.parent
+                                        }
+                                        onChange={this.handleParentChange}
+                                        disabled={!!this.parentFromQuery}
+                                    />
+                                    <div className="input-group-append">
+                                        <input
+                                            className="btn btn-outline-danger"
+                                            type="button"
+                                            value="Clear"
+                                            onClick={this.handleParentClear}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                []
+                            )}
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label className="input-group-text">
-                                        Parent
+                                        Share with
                                     </label>
                                 </div>
-                                <input
-                                    className="form-control"
-                                    type="text"
-                                    style={{ fontSize: "medium" }}
-                                    placeholder="(Optional) Type parent identifier..."
-                                    value={
-                                        this.parentFromQuery ||
-                                        this.state.parent
-                                    }
-                                    onChange={this.handleParentChange}
-                                    disabled={!!this.parentFromQuery}
-                                />
-                                <div className="input-group-append">
-                                    <input
-                                        className="btn btn-outline-danger"
-                                        type="button"
-                                        value="Clear"
-                                        onClick={this.handleParentClear}
-                                    />
+                                <select
+                                    className="custom-select"
+                                    value={this.state.shareWith}
+                                    onChange={this.updateSharingMode}
+                                >
+                                    {this.state.groups && this.state.groups.length
+                                        ? [
+                                              <option value="default">
+                                                  All my groups
+                                              </option>,
+                                              <option value="single">
+                                                  Single group...
+                                              </option>,
+                                          ]
+                                        : []}
+                                    <option value="public">Everybody</option>
+                                    <option value="private">Only me</option>
+                                </select>
+                                <div className="form-hint">
+                                    {this.getSharingModeHint()}
                                 </div>
                             </div>
-                        ) : (
-                            []
-                        )}
-                        <div className="input-group mb-3">
-                            <div className="input-group-prepend">
-                                <label className="input-group-text">
-                                    Share with
-                                </label>
-                            </div>
-                            <select
-                                className="custom-select"
-                                value={this.state.shareWith}
-                                onChange={this.updateSharingMode}
-                            >
-                                {this.state.groups && this.state.groups.length
-                                    ? [
-                                          <option value="default">
-                                              All my groups
-                                          </option>,
-                                          <option value="single">
-                                              Single group...
-                                          </option>,
-                                      ]
-                                    : []}
-                                <option value="public">Everybody</option>
-                                <option value="private">Only me</option>
-                            </select>
-                            <div className="form-hint">
-                                {this.getSharingModeHint()}
-                            </div>
+                            {this.state.shareWith === "single" ? (
+                                <div className="mb-3">
+                                    <Autocomplete
+                                        value={this.state.group}
+                                        items={this.state.groups.filter(
+                                            (item) =>
+                                                item
+                                                    .toLowerCase()
+                                                    .indexOf(
+                                                        this.state.group.toLowerCase()
+                                                    ) !== -1
+                                        )}
+                                        onChange={(value) =>
+                                            this.setState({ group: value })
+                                        }
+                                        className="form-control"
+                                        style={{ fontSize: "medium" }}
+                                        placeholder="Type group name..."
+                                        prependChildren
+                                    >
+                                        <div className="input-group-prepend">
+                                            <label className="input-group-text">
+                                                Group name
+                                            </label>
+                                        </div>
+                                    </Autocomplete>
+                                </div>
+                            ) : (
+                                []
+                            )}
+                            {this.state.attributes.length > 0 ? (
+                                <div>
+                                    <h5>Attributes</h5>
+                                    <DataTable>
+                                        {this.state.attributes.map((attr, idx) => (
+                                            <tr key={idx} className="centered">
+                                                <th>{attr.key}</th>
+                                                <td>
+                                                    {typeof attr.value ===
+                                                    "string" ? (
+                                                        attr.value
+                                                    ) : (
+                                                        <pre className="attribute-object">
+                                                            {"(object)"}{" "}
+                                                            {JSON.stringify(
+                                                                attr.value,
+                                                                null,
+                                                                4
+                                                            )}
+                                                        </pre>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        value="Dismiss"
+                                                        className="btn btn-danger"
+                                                        type="button"
+                                                        onClick={() =>
+                                                            this.onAttributeRemove(
+                                                                idx
+                                                            )
+                                                        }
+                                                    />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </DataTable>
+                                </div>
+                            ) : (
+                                []
+                            )}
+                            <input
+                                value="Upload File"
+                                className="btn btn-success"
+                                type="button"
+                                onClick={this.handleSubmit}
+                                disabled={!this.state.file}
+                            />
+                            <input
+                                value="Add attribute"
+                                className="btn btn-success"
+                                type="button"
+                                onClick={this.handleAttributeModalOpen}
+                            />
                         </div>
-                        {this.state.shareWith === "single" ? (
-                            <div className="mb-3">
-                                <Autocomplete
-                                    value={this.state.group}
-                                    items={this.state.groups.filter(
-                                        (item) =>
-                                            item
-                                                .toLowerCase()
-                                                .indexOf(
-                                                    this.state.group.toLowerCase()
-                                                ) !== -1
-                                    )}
-                                    onChange={(value) =>
-                                        this.setState({ group: value })
-                                    }
-                                    className="form-control"
-                                    style={{ fontSize: "medium" }}
-                                    placeholder="Type group name..."
-                                    prependChildren
-                                >
-                                    <div className="input-group-prepend">
-                                        <label className="input-group-text">
-                                            Group name
-                                        </label>
-                                    </div>
-                                </Autocomplete>
-                            </div>
-                        ) : (
-                            []
-                        )}
-                        {this.state.attributes.length > 0 ? (
-                            <div>
-                                <h5>Attributes</h5>
-                                <DataTable>
-                                    {this.state.attributes.map((attr, idx) => (
-                                        <tr key={idx} className="centered">
-                                            <th>{attr.key}</th>
-                                            <td>
-                                                {typeof attr.value ===
-                                                "string" ? (
-                                                    attr.value
-                                                ) : (
-                                                    <pre className="attribute-object">
-                                                        {"(object)"}{" "}
-                                                        {JSON.stringify(
-                                                            attr.value,
-                                                            null,
-                                                            4
-                                                        )}
-                                                    </pre>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <input
-                                                    value="Dismiss"
-                                                    className="btn btn-danger"
-                                                    type="button"
-                                                    onClick={() =>
-                                                        this.onAttributeRemove(
-                                                            idx
-                                                        )
-                                                    }
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </DataTable>
-                            </div>
-                        ) : (
-                            []
-                        )}
-                        <input
-                            value="Upload File"
-                            className="btn btn-success"
-                            type="button"
-                            onClick={this.handleSubmit}
-                            disabled={!this.state.file}
-                        />
-                        <input
-                            value="Add attribute"
-                            className="btn btn-success"
-                            type="button"
-                            onClick={this.handleAttributeModalOpen}
-                        />
-                    </div>
-                </form>
+                    </form>
                 </Extendable>
                 <AttributesAddModal
                     isOpen={this.state.isAttributeModalOpen}

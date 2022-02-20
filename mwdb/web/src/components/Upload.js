@@ -10,7 +10,7 @@ import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { Autocomplete, DataTable, View } from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
+import { Extendable } from "@mwdb-web/commons/extensions";
 
 function UploadDropzone(props) {
     const onDrop = props.onDrop;

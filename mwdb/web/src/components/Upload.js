@@ -233,7 +233,8 @@ class Upload extends Component {
                                     value={this.state.shareWith}
                                     onChange={this.updateSharingMode}
                                 >
-                                    {this.state.groups && this.state.groups.length
+                                    {this.state.groups &&
+                                    this.state.groups.length
                                         ? [
                                               <option value="default">
                                                   All my groups
@@ -284,38 +285,43 @@ class Upload extends Component {
                                 <div>
                                     <h5>Attributes</h5>
                                     <DataTable>
-                                        {this.state.attributes.map((attr, idx) => (
-                                            <tr key={idx} className="centered">
-                                                <th>{attr.key}</th>
-                                                <td>
-                                                    {typeof attr.value ===
-                                                    "string" ? (
-                                                        attr.value
-                                                    ) : (
-                                                        <pre className="attribute-object">
-                                                            {"(object)"}{" "}
-                                                            {JSON.stringify(
-                                                                attr.value,
-                                                                null,
-                                                                4
-                                                            )}
-                                                        </pre>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    <input
-                                                        value="Dismiss"
-                                                        className="btn btn-danger"
-                                                        type="button"
-                                                        onClick={() =>
-                                                            this.onAttributeRemove(
-                                                                idx
-                                                            )
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {this.state.attributes.map(
+                                            (attr, idx) => (
+                                                <tr
+                                                    key={idx}
+                                                    className="centered"
+                                                >
+                                                    <th>{attr.key}</th>
+                                                    <td>
+                                                        {typeof attr.value ===
+                                                        "string" ? (
+                                                            attr.value
+                                                        ) : (
+                                                            <pre className="attribute-object">
+                                                                {"(object)"}{" "}
+                                                                {JSON.stringify(
+                                                                    attr.value,
+                                                                    null,
+                                                                    4
+                                                                )}
+                                                            </pre>
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            value="Dismiss"
+                                                            className="btn btn-danger"
+                                                            type="button"
+                                                            onClick={() =>
+                                                                this.onAttributeRemove(
+                                                                    idx
+                                                                )
+                                                            }
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            )
+                                        )}
                                     </DataTable>
                                 </div>
                             ) : (

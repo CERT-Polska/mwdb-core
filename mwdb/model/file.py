@@ -280,11 +280,13 @@ class File(Object):
             self.upload_stream = None
 
     def generate_download_token(self):
-        return generate_token({"identifier": self.sha256}, expiration=60)
+        return generate_token(
+            {"identifier": self.sha256}, scope="download_file", expiration=60
+        )
 
     @staticmethod
     def get_by_download_token(download_token):
-        download_req = verify_token(download_token)
+        download_req = verify_token(download_token, scope="download_file")
         if not download_req:
             return None
         return File.get(download_req["identifier"]).first()

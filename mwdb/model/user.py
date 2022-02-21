@@ -149,19 +149,20 @@ class User(db.Model):
             db.session.commit()
         return user
 
-    def _generate_token(self, fields, expiration):
+    def _generate_token(self, fields, scope, expiration):
         token = generate_token(
             dict(
                 [("login", self.login)]
                 + [(field, getattr(self, field)) for field in fields]
             ),
+            scope,
             expiration,
         )
         return token
 
     @staticmethod
-    def _verify_token(token, fields):
-        data = verify_token(token)
+    def _verify_token(token, fields, scope):
+        data = verify_token(token, scope)
         if token is None:
             return None
 
@@ -180,23 +181,31 @@ class User(db.Model):
 
     def generate_session_token(self):
         return self._generate_token(
-            ["password_ver", "identity_ver"], expiration=24 * 3600
+            ["password_ver", "identity_ver"], scope="session", expiration=24 * 3600
         )
 
     def generate_set_password_token(self):
-        return self._generate_token(["password_ver"], expiration=14 * 24 * 3600)
+        return self._generate_token(
+            ["password_ver"], scope="set_password", expiration=14 * 24 * 3600
+        )
 
     @staticmethod
     def verify_session_token(token):
-        return User._verify_token(token, ["password_ver", "identity_ver"])
+        return User._verify_token(
+            token, ["password_ver", "identity_ver"], scope="session"
+        )
 
     @staticmethod
     def verify_set_password_token(token):
-        return User._verify_token(token, ["password_ver"])
+        return User._verify_token(
+            token,
+            ["password_ver"],
+            scope="set_password",
+        )
 
     @staticmethod
     def verify_legacy_token(token):
-        return User._verify_token(token, ["version_uid"])
+        return User._verify_token(token, ["version_uid"], scope="legacy_token")
 
     def is_member(self, group_id):
         groups = db.session.query(Member.group_id).filter(Member.user_id == self.id)

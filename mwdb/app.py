@@ -169,7 +169,7 @@ def require_auth():
         g.auth_user = User.verify_session_token(token)
         # Not a session token? Maybe APIKey token
         if g.auth_user is None:
-            g.auth_user = APIKey._verify_token(token)
+            g.auth_user = APIKey.verify_token(token)
         # Still nothing? Maybe legacy API key
         if g.auth_user is None:
             g.auth_user = User.verify_legacy_token(token)

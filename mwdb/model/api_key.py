@@ -27,8 +27,8 @@ class APIKey(db.Model):
         return self.issuer and self.issuer.login
 
     @staticmethod
-    def _verify_token(token):
-        data = verify_token(token)
+    def verify_token(token):
+        data = verify_token(token, scope="api_key")
 
         if "api_key_id" not in data:
             return None
@@ -42,5 +42,9 @@ class APIKey(db.Model):
 
         return api_key_obj.user
 
-    def _generate_token(self):
-        return generate_token({"login": self.user.login, "api_key_id": str(self.id)})
+    def generate_token(self):
+        return generate_token(
+            {"login": self.user.login, "api_key_id": str(self.id)},
+            scope="api_key",
+            expiration=60,
+        )

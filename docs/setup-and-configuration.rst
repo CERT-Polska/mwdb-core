@@ -300,3 +300,41 @@ Registration feature settings:
 * ``mail_templates_folder`` (string) - Path to the directory containing custom mail templates
 * ``recaptcha_site_key`` (string) - ReCAPTCHA site key. If not set - ReCAPTCHA won't be required for registration.
 * ``recaptcha_secret`` (string) - ReCAPTCHA secret key. If not set - ReCAPTCHA won't be required for registration.
+
+
+Rate limit configuration
+----------------------
+
+mwdb-core service has implemented rate limiting feature. Each limit for HTTP method can contain a few conditions (space separated).
+
+Default limits were applied for HTTP methods. The default values are as below:
+
+
+* GET method: 1000/10second 2000/minute 6000/5minute 10000/15minute
+* POST method: 100/10second 1000/minute 3000/5minute 6000/15minute
+* PUT method: 100/10second 1000/minute 3000/5minute 6000/15minute
+* DELETE method: 100/10second 1000/minute 3000/5minute 6000/15minute
+
+User can override these limits for individual endpoints by placing new limits in ``mwdb.ini`` - in section ``[mwdb_limiter]``.
+Each line in ``[mwdb_limiter]`` section should have a pattern - ``<resourcename>_<httpmethod> = limit_values_space_separated``.
+
+Example rate-limit records in mwdb.ini file are as below
+
+.. code-block::
+
+    [mwdb_limiter]
+    file_get = 100/10second
+    textblob_post = 10/second 1000/minute 3000/15minute
+    attributedefinition_delete = 10/minute 100/hour
+
+Above records establish request rate limits for endpoints:
+
+* GET /api/file to value: 100 per 10 seconds
+* POST /api/blob to values: 10 per second, 1000 per minute and 3000 per 15 minutes
+* DELETE /api/attribute/<key> to values: 10 per minute and 100 per hour
+
+Other endpoints are limited by default limits.
+
+.. note::
+
+   Complete list of possible rate-limit parameters is placed in ``mwdb-core\mwdb\core\templates\mwdb.ini.tmpl`` file - section ``mwdb_limiter``.

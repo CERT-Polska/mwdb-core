@@ -132,9 +132,16 @@ class KartonConfig(Config):
     config_path = key(cast=str, required=False, default=None)
 
 
+@section("mwdb_limiter")
+class MWDBLimiterConfig(Config):
+    # Section keys are read dynamically (<resourcename>_<method>)
+    pass
+
+
 class AppConfig(Config):
     mwdb = group_key(MWDBConfig)
     karton = group_key(KartonConfig)
+    mwdb_limiter = group_key(MWDBLimiterConfig)
 
 
 def _config_sources():

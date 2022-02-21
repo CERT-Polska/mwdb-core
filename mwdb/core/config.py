@@ -133,7 +133,7 @@ class KartonConfig(Config):
 
 
 @section("mwdb_limiter")
-class MwdbLimiterConfig(Config):
+class MWDBLimiterConfig(Config):
     # Section keys are read dynamically (<resourcename>_<method>)
     pass
 
@@ -141,7 +141,7 @@ class MwdbLimiterConfig(Config):
 class AppConfig(Config):
     mwdb = group_key(MWDBConfig)
     karton = group_key(KartonConfig)
-    mwdb_limiter = group_key(MwdbLimiterConfig)
+    mwdb_limiter = group_key(MWDBLimiterConfig)
 
 
 def _config_sources():

@@ -17,9 +17,11 @@ def is_rate_limit_disabled():
 
 
 limiter = Limiter(
-    key_func=lambda: f"{g.auth_user.login}-{request.method}"
-    if g.auth_user
-    else f"{get_remote_address()}-{request.method}",
+    key_func=lambda: (
+        f"{g.auth_user.login}-{request.method}"
+        if g.auth_user
+        else f"{get_remote_address()}-{request.method}"
+    ),
     storage_uri=app_config.mwdb.redis_uri,
     headers_enabled=True,
 )
@@ -48,8 +50,9 @@ def rate_limited_resource(resource_class):
                 limiter.limit(
                     limit,
                     methods=[method],
-                    error_message=f"Request limit: {limit} "
-                    f"for {method} method was exceeded!",
+                    error_message=(
+                        f"Request limit: {limit} for {method} method was exceeded!"
+                    ),
                     exempt_when=is_rate_limit_disabled,
                 )
             )

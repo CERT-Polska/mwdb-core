@@ -209,9 +209,9 @@ export default function KartonAnalysisBox() {
         }
     }
 
-    async function removeAnalysis(analysis_id) {
+    async function removeAnalysis(analysisId) {
         try {
-            await api.removeKartonAnalysisFromObject(objectId, analysis_id);
+            await api.removeKartonAnalysisFromObject(objectId, analysisId);
             updateAnalyses();
         } catch (error) {
             setObjectError(error);
@@ -220,8 +220,8 @@ export default function KartonAnalysisBox() {
         }
     }
 
-    function handleRemoveAnalysis(analysis_id) {
-        setAnalysisToRemove(analysis_id);
+    function handleRemoveAnalysis(analysisId) {
+        setAnalysisToRemove(analysisId);
         setDeleteModalOpen(true);
     }
 

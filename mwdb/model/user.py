@@ -163,7 +163,7 @@ class User(db.Model):
     @staticmethod
     def _verify_token(token, fields, scope):
         data = verify_token(token, scope)
-        if token is None:
+        if data is None:
             return None
 
         try:

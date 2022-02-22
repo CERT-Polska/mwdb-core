@@ -30,6 +30,9 @@ class APIKey(db.Model):
     def verify_token(token):
         data = verify_token(token, scope="api_key")
 
+        if data is None:
+            return None
+
         if "api_key_id" not in data:
             return None
 

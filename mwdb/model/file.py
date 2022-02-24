@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from werkzeug.utils import secure_filename
 
-from mwdb.core.auth import generate_token, verify_token
+from mwdb.core.auth import AuthScope, generate_token, verify_token
 from mwdb.core.config import StorageProviderType, app_config
 from mwdb.core.karton import send_file_to_karton
 from mwdb.core.util import (
@@ -281,12 +281,14 @@ class File(Object):
 
     def generate_download_token(self):
         return generate_token(
-            {"identifier": self.sha256}, scope="download_file", expiration=60
+            {"identifier": self.sha256},
+            scope=AuthScope.download_file.value,
+            expiration=60,
         )
 
     @staticmethod
     def get_by_download_token(download_token):
-        download_req = verify_token(download_token, scope="download_file")
+        download_req = verify_token(download_token, scope=AuthScope.download_file.value)
         if not download_req:
             return None
         return File.get(download_req["identifier"]).first()

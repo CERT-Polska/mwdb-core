@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm.exc import NoResultFound
 
-from mwdb.core.auth import generate_token, verify_token
+from mwdb.core.auth import AuthScope, generate_token, verify_token
 
 from . import db
 
@@ -28,13 +28,13 @@ class APIKey(db.Model):
 
     @staticmethod
     def verify_token(token):
-        data = verify_token(token, scope="api_key")
+        data = verify_token(token, scope=AuthScope.api_key.value)
 
         if data is None:
-            return None
-
-        if "api_key_id" not in data:
-            return None
+            # check for legacy API Token
+            data = verify_token(token, scope=AuthScope.legacy_api_key.value)
+            if "api_key_id" not in data:
+                return None
 
         try:
             api_key_obj = APIKey.query.filter(
@@ -48,6 +48,6 @@ class APIKey(db.Model):
     def generate_token(self):
         return generate_token(
             {"login": self.user.login, "api_key_id": str(self.id)},
-            scope="api_key",
+            scope=AuthScope.api_key.value,
             expiration=60,
         )

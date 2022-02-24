@@ -7,7 +7,7 @@ from sqlalchemy import and_
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm.exc import NoResultFound
 
-from mwdb.core.auth import generate_token, verify_token
+from mwdb.core.auth import AuthScope, generate_token, verify_token
 
 from . import db
 from .group import Group, Member
@@ -165,9 +165,9 @@ class User(db.Model):
         data = verify_token(token, scope)
         if data is None:
             return None
-
+        print(data)
         try:
-            user_obj = User.query.filter(User.login == data["login"]).one()
+            user_obj = User.query.filter(User.login == data["sub"]).one()
         except NoResultFound:
             return None
 
@@ -181,18 +181,22 @@ class User(db.Model):
 
     def generate_session_token(self):
         return self._generate_token(
-            ["password_ver", "identity_ver"], scope="session", expiration=24 * 3600
+            ["password_ver", "identity_ver"],
+            scope=AuthScope.session.value,
+            expiration=24 * 3600,
         )
 
     def generate_set_password_token(self):
         return self._generate_token(
-            ["password_ver"], scope="set_password", expiration=14 * 24 * 3600
+            ["password_ver"],
+            scope=AuthScope.set_password.value,
+            expiration=14 * 24 * 3600,
         )
 
     @staticmethod
     def verify_session_token(token):
         return User._verify_token(
-            token, ["password_ver", "identity_ver"], scope="session"
+            token, ["password_ver", "identity_ver"], scope=AuthScope.session.value
         )
 
     @staticmethod
@@ -200,12 +204,14 @@ class User(db.Model):
         return User._verify_token(
             token,
             ["password_ver"],
-            scope="set_password",
+            scope=AuthScope.set_password.value,
         )
 
     @staticmethod
     def verify_legacy_token(token):
-        return User._verify_token(token, ["version_uid"], scope="legacy_token")
+        return User._verify_token(
+            token, ["version_uid"], scope=AuthScope.legacy_token.value
+        )
 
     def is_member(self, group_id):
         groups = db.session.query(Member.group_id).filter(Member.user_id == self.id)

@@ -9,7 +9,7 @@ from marshmallow import (
     validates_schema,
 )
 
-from .attribute import AttributeItemRequestSchema
+from .attribute import AttributeItemRequestSchema, AttributeItemResponseSchema
 from .metakey import MetakeyItemRequestSchema
 from .tag import TagItemResponseSchema, TagRequestSchema
 from .utils import UTCDateTime
@@ -106,6 +106,9 @@ class ObjectItemResponseSchema(Schema):
     )
     children = fields.Nested(
         ObjectListItemResponseSchema, many=True, required=True, allow_none=False
+    )
+    attributes = fields.Nested(
+        AttributeItemResponseSchema, many=True, required=True, allow_none=False
     )
 
 

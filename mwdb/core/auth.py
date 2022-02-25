@@ -16,7 +16,8 @@ class AuthScope(Enum):
 
 
 def generate_token(fields, scope, expiration=24 * 3600):
-    payload = {
+    token_claims = {
+        **fields,
         "exp": (
             datetime.datetime.now(tz=datetime.timezone.utc)
             + datetime.timedelta(seconds=expiration)
@@ -27,22 +28,24 @@ def generate_token(fields, scope, expiration=24 * 3600):
     }
 
     if "login" in fields.keys():
-        payload["sub"] = fields["login"]
+        token_claims["sub"] = fields["login"]
+    payload = {**fields, **token_claims}
     token = jwt.encode(payload, app_config.mwdb.secret_key, algorithm="HS512")
     return token
 
 
 def verify_token(token, scope):
     try:
+        ver_aud = scope != "legacy_api_key"
         data = jwt.decode(
             token,
-            app_config.mwdb.secret_key,
+            key=app_config.mwdb.secret_key,
             algorithms=["HS512"],
+            audience=app_config.mwdb.base_url,
+            options={"verify_aud": ver_aud},
         )
         # check for legacy api key
         if scope != "legacy_api_key":
-            if data["aud"] != app_config.mwdb.base_url:
-                return None
             if data["scope"] != scope:
                 return None
 

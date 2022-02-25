@@ -165,7 +165,7 @@ class User(db.Model):
         data = verify_token(token, scope)
         if data is None:
             return None
-        print(data)
+
         try:
             user_obj = User.query.filter(User.login == data["sub"]).one()
         except NoResultFound:

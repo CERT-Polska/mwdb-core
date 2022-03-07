@@ -175,6 +175,15 @@ export default function KartonAnalysisBox() {
         getAnalyses();
     }, [getAnalyses]);
 
+    useEffect(() => {
+        const updateInterval = setInterval(() => {
+            getAnalyses();
+        }, 10000);
+        return () => {
+            clearInterval(updateInterval);
+        };
+    }, [getAnalyses]);
+
     async function submitAnalysis(ev) {
         ev.preventDefault();
         setResubmitPending(true);

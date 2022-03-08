@@ -173,9 +173,6 @@ export default function KartonAnalysisBox() {
 
     useEffect(() => {
         getAnalyses();
-    }, [getAnalyses]);
-
-    useEffect(() => {
         const updateInterval = setInterval(() => {
             getAnalyses();
         }, 10000);

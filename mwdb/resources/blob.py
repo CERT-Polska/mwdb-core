@@ -3,6 +3,7 @@ from werkzeug.exceptions import Conflict
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import TextBlob
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import (
@@ -41,6 +42,7 @@ class TextBlobUploader(ObjectUploader):
             raise Conflict("Object already exists and is not a blob")
 
 
+@rate_limited_resource
 class TextBlobResource(ObjectResource, TextBlobUploader):
     ObjectType = TextBlob
     ListResponseSchema = BlobListResponseSchema
@@ -162,6 +164,7 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
         return self.create_object(obj)
 
 
+@rate_limited_resource
 class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
     ObjectType = TextBlob
     ItemResponseSchema = BlobItemResponseSchema

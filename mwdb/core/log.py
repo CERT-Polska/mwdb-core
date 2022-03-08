@@ -1,7 +1,7 @@
 import logging
 
-import logmatic
 from flask import g
+from pythonjsonlogger import jsonlogger
 
 from .config import app_config
 
@@ -44,9 +44,10 @@ def setup_logger():
     handler = logging.StreamHandler()
 
     if enable_json_logger:
-        formatter = logmatic.JsonFormatter(
+        formatter = jsonlogger.JsonFormatter(
             fmt="%(filename) %(funcName) %(levelname) "
-            "%(lineno) %(module) %(threadName) %(message)"
+            "%(lineno) %(module) %(threadName) %(message)",
+            timestamp=True,
         )
     else:
         formatter = InlineFormatter(

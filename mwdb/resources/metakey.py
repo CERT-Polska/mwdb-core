@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.metakey import (
     MetakeyDefinitionItemRequestArgsSchema,
@@ -32,6 +33,7 @@ from . import (
 )
 
 
+@rate_limited_resource
 class MetakeyResource(Resource):
     @requires_authorization
     def get(self, type, identifier):
@@ -248,6 +250,7 @@ class MetakeyResource(Resource):
         db.session.commit()
 
 
+@rate_limited_resource
 class MetakeyListDefinitionResource(Resource):
     @requires_authorization
     def get(self, access):
@@ -292,6 +295,7 @@ class MetakeyListDefinitionResource(Resource):
         return schema.dump({"metakeys": metakeys})
 
 
+@rate_limited_resource
 class MetakeyListDefinitionManageResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -328,6 +332,7 @@ class MetakeyListDefinitionManageResource(Resource):
         return schema.dump({"metakeys": metakeys})
 
 
+@rate_limited_resource
 class MetakeyDefinitionManageResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -550,6 +555,7 @@ class MetakeyDefinitionManageResource(Resource):
         db.session.commit()
 
 
+@rate_limited_resource
 class MetakeyPermissionResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)

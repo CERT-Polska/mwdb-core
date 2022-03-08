@@ -17,8 +17,10 @@ import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/extensions";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
+import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
-function KartonAnalysisRow({ analysis }) {
+function KartonAnalysisRow({ analysis, removeAnalysis }) {
+    const auth = useContext(AuthContext);
     const queueStatusBadge = (queueStatus) => {
         const badgeStyle = queueStatus === "Started" ? "success" : "secondary";
         return (
@@ -119,6 +121,25 @@ function KartonAnalysisRow({ analysis }) {
                         tooltipMessage="Copy analysis id to clipboard"
                     />
                 </span>
+
+                {auth.hasCapability(Capability.removingKarton) && (
+                    <span
+                        className="ml-2"
+                        data-toggle="tooltip"
+                        title="Remove Karton analysis from this object"
+                        onClick={() => {
+                            removeAnalysis(analysis.id);
+                        }}
+                    >
+                        <i>
+                            <FontAwesomeIcon
+                                icon={"trash"}
+                                size="sm"
+                                style={{ cursor: "pointer" }}
+                            />
+                        </i>
+                    </span>
+                )}
             </div>
             <div id={`collapse${analysis.id}`} className="collapse">
                 <div className="card-body">
@@ -148,6 +169,8 @@ function KartonAnalysisRow({ analysis }) {
 export default function KartonAnalysisBox() {
     const [analyses, setAnalyses] = useState([]);
     const [isResubmitPending, setResubmitPending] = useState(false);
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [analysisToRemove, setAnalysisToRemove] = useState(null);
 
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
@@ -186,9 +209,35 @@ export default function KartonAnalysisBox() {
         }
     }
 
+    async function removeAnalysis(analysisId) {
+        try {
+            await api.removeKartonAnalysisFromObject(objectId, analysisId);
+            updateAnalyses();
+        } catch (error) {
+            setObjectError(error);
+        } finally {
+            setDeleteModalOpen(false);
+        }
+    }
+
+    function handleRemoveAnalysis(analysisId) {
+        setAnalysisToRemove(analysisId);
+        setDeleteModalOpen(true);
+    }
+
     return (
         <Extendable ident="kartonAnalysisBox">
             <div className="card card-default">
+                <ConfirmationModal
+                    isOpen={isDeleteModalOpen}
+                    onRequestClose={() => setDeleteModalOpen(false)}
+                    onConfirm={() => {
+                        removeAnalysis(analysisToRemove);
+                    }}
+                    message="Remove the analysis from object?"
+                    confirmText="Remove"
+                />
+
                 <div className="card-header">
                     Karton analyses
                     <Link
@@ -216,6 +265,9 @@ export default function KartonAnalysisBox() {
                                     <td>
                                         <KartonAnalysisRow
                                             analysis={analysis}
+                                            removeAnalysis={
+                                                handleRemoveAnalysis
+                                            }
                                         />
                                     </td>
                                 </tr>

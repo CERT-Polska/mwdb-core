@@ -183,9 +183,13 @@ class CommentDeleteResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        db_comment = db.session.query(Comment).filter(Comment.id == comment_id).first()
+        db_comment = (
+            db.session.query(Comment)
+            .filter(Comment.id == comment_id, Comment.object_id == db_object.id)
+            .first()
+        )
 
-        if db_comment is not None and db_comment in db_object.comments:
+        if db_comment is not None:
             db.session.delete(db_comment)
             logger.info("comment deleted", extra={"comment": comment_id})
             db.session.commit()

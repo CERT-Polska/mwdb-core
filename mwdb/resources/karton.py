@@ -251,7 +251,7 @@ class KartonAnalysisResource(Resource):
         return schema.dump(analysis)
 
     @requires_authorization
-    @requires_capabilities(Capabilities.removing_karton)
+    @requires_capabilities(Capabilities.karton_unassign)
     def delete(self, type, identifier, analysis_id):
         """
         ---
@@ -259,7 +259,7 @@ class KartonAnalysisResource(Resource):
         description: |
             Remove existing Karton analysis from the object
 
-            Requires `removing_karton` capability.
+            Requires `karton_unassign` capability.
         security:
             - bearerAuth: []
         tags:
@@ -287,7 +287,7 @@ class KartonAnalysisResource(Resource):
             400:
                 description: When analysis_id is not UUID value
             403:
-                description: When user doesn't have `removing_karton` capability.
+                description: When user doesn't have `karton_unassign` capability.
             404:
                 description: |
                     When object or analysis doesn't exist, user doesn't have access

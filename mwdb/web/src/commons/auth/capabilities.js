@@ -23,7 +23,7 @@ export const Capability = {
     personalize: "personalize",
     kartonAssign: "karton_assign",
     kartonReanalyze: "karton_reanalyze",
-    removingKarton: "removing_karton",
+    removingKarton: "karton_unassign",
 };
 
 export let capabilitiesList = {

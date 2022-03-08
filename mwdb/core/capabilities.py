@@ -44,7 +44,7 @@ class Capabilities(object):
     # Can resubmit object to Karton
     karton_reanalyze = "karton_reanalyze"
     # Can remove Karton analysis from the object
-    removing_karton = "removing_karton"
+    karton_unassign = "karton_unassign"
 
     @classmethod
     def all(cls):

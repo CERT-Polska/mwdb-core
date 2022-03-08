@@ -9,20 +9,19 @@ from mwdb.core.config import app_config
 class AuthScope(Enum):
     session = "session"
     api_key = "api_key"
-    legacy_api_key = "legacy_api_key"
     set_password = "set_password"
     download_file = "download_file"
-    legacy_token = "legacy_token"
 
 
 def generate_token(fields, scope, expiration=24 * 3600):
+    issued_at = datetime.datetime.now(tz=datetime.timezone.utc)
     token_claims = {
         **fields,
         "exp": (
-            datetime.datetime.now(tz=datetime.timezone.utc)
+            issued_at
             + datetime.timedelta(seconds=expiration)
         ),
-        "iat": datetime.datetime.now(tz=datetime.timezone.utc),
+        "iat": issued_at,
         "aud": app_config.mwdb.base_url,
         "scope": scope,
     }
@@ -34,23 +33,29 @@ def generate_token(fields, scope, expiration=24 * 3600):
     return token
 
 
-def verify_token(token, scope):
+def verify_token(token: str, scope: AuthScope) -> bool:
     try:
-        ver_aud = scope != "legacy_api_key"
         data = jwt.decode(
             token,
             key=app_config.mwdb.secret_key,
             algorithms=["HS512"],
             audience=app_config.mwdb.base_url,
-            options={"verify_aud": ver_aud},
+            options={"verify_aud": True},
         )
-        # check for legacy api key
-        if scope != "legacy_api_key":
-            if data["scope"] != scope:
-                return None
+        if data["scope"] != scope.value:
+            return None
 
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidSignatureError:
+    except jwt.InvalidTokenError:
         return None
     return data
+    
+    def verify_legacy_token(token: str, required_fields: Set[str]) -> bool:
+       try:
+          data = jwt.decode(
+             token,
+             key=app_config.mwdb.secret_key,
+             algorithms=["HS512"],
+          )
+          if set(data.keys()) != required_keys:
+              return None
+          ...

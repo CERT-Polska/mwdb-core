@@ -282,13 +282,13 @@ class File(Object):
     def generate_download_token(self):
         return generate_token(
             {"identifier": self.sha256},
-            scope=AuthScope.download_file.value,
+            scope=AuthScope.download_file,
             expiration=60,
         )
 
     @staticmethod
     def get_by_download_token(download_token):
-        download_req = verify_token(download_token, scope=AuthScope.download_file.value)
+        download_req = verify_token(download_token, scope=AuthScope.download_file)
         if not download_req:
             return None
         return File.get(download_req["identifier"]).first()

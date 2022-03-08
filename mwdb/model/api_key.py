@@ -28,13 +28,11 @@ class APIKey(db.Model):
 
     @staticmethod
     def verify_token(token):
-        data = verify_token(token, scope=AuthScope.api_key.value)
+        data = verify_token(token, scope=AuthScope.api_key)
 
         if data is None:
             # check for legacy API Token
-            data = verify_token(token, scope=AuthScope.legacy_api_key.value)
-            if "api_key_id" not in data:
-                return None
+            data = verify_legacy_token(token, required_fields={"login", "api_key_id"})
 
         try:
             api_key_obj = APIKey.query.filter(
@@ -48,6 +46,5 @@ class APIKey(db.Model):
     def generate_token(self):
         return generate_token(
             {"login": self.user.login, "api_key_id": str(self.id)},
-            scope=AuthScope.api_key.value,
-            expiration=60,
+            scope=AuthScope.api_key,
         )

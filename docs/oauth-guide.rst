@@ -50,8 +50,8 @@ During client registration, you may need information listed below (example for K
 
 
 .. note::
-    Using the OpenID Connect protocol requires the appropriate set  value `` base_url`` in configuration.
-    This value is used for generating ``redirect_uri`` therefore it is essential for authentication in that way.
+    Using the OpenID Connect protocol requires `` base_url`` to be set in configuration.
+    This value is used for generating ``redirect_uri`` therefore it is essential to authenticate that way.
 
 Current configuration is pretty minimal. In future versions it may be extended with ``roles`` for automatic
 group/permission assignment or Single Logout parameters.

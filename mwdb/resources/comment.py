@@ -4,6 +4,7 @@ from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Comment, db
 from mwdb.schema.comment import CommentItemResponseSchema, CommentRequestSchema
 
@@ -16,6 +17,7 @@ from . import (
 )
 
 
+@rate_limited_resource
 class CommentResource(Resource):
     @requires_authorization
     def get(self, type, identifier):
@@ -134,6 +136,7 @@ class CommentResource(Resource):
         return schema.dump(comment)
 
 
+@rate_limited_resource
 class CommentDeleteResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.removing_comments)

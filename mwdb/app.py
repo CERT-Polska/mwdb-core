@@ -6,11 +6,9 @@ from werkzeug.exceptions import Forbidden
 from werkzeug.routing import BaseConverter
 
 from mwdb.core.app import api, app
-from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.log import getLogger, setup_logger
 from mwdb.core.plugins import PluginAppContext, load_plugins
-from mwdb.core.rate_limit import rate_limit
 from mwdb.core.static import static_blueprint
 from mwdb.core.util import token_hex
 from mwdb.model import APIKey, User, db
@@ -187,35 +185,6 @@ def require_auth():
 
         if g.auth_user.disabled:
             raise Forbidden("User has been disabled.")
-
-        if app_config.mwdb.enable_rate_limit and not g.auth_user.has_rights(
-            Capabilities.unlimited_requests
-        ):
-            """
-            Single sample view in malwarefront generates 7 requests (6 GET, 1 POST)
-            """
-            if request.method == "GET":
-                """
-                DownloadResource is token-based and shouldn't be limited
-                """
-                if request.endpoint != api.endpoint_for(DownloadResource):
-                    # 1000 per 10 seconds
-                    rate_limit("get-request", 10, 1000)
-                    # 2000 per 1 minute
-                    rate_limit("get-request", 60, 2000)
-                    # 6000 per 5 minutes
-                    rate_limit("get-request", 5 * 60, 6000)
-                    # 10000 per 15 minutes
-                    rate_limit("get-request", 15 * 60, 10000)
-            else:
-                # 10 per 10 seconds
-                rate_limit("set-request", 10, 10)
-                # 30 per 1 minute
-                rate_limit("set-request", 60, 30)
-                # 100 per 5 minutes
-                rate_limit("set-request", 5 * 60, 100)
-                # 200 per 15 minutes
-                rate_limit("set-request", 15 * 60, 200)
 
 
 # Server health endpoints

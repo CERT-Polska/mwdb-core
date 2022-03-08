@@ -51,4 +51,4 @@ For more information, read [LICENSE](LICENSE) file.
 
 In case of any questions regarding the license send an e-mail to info@cert.pl.
 
-![Co-financed by the Connecting Europe Facility by of the European Union](https://www.cert.pl/wp-content/uploads/2019/02/en_horizontal_cef_logo-1.png)
+![Co-financed by the Connecting Europe Facility by of the European Union](https://www.cert.pl/uploads/2019/02/en_horizontal_cef_logo-e1550495232540.png)

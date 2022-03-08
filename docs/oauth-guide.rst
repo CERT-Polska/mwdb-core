@@ -48,6 +48,11 @@ During client registration, you may need information listed below (example for K
 - Valid Redirect URLs: ``https://<mwdb core url>/oauth/callback``
 - Minimal required scope: ``email, profile``
 
+
+.. note::
+    Using the OpenID Connect protocol requires the appropriate set  value `` base_url`` in configuration.
+    This value is used for generating ``redirect_uri`` therefore it is essential for authentication in that way.
+
 Current configuration is pretty minimal. In future versions it may be extended with ``roles`` for automatic
 group/permission assignment or Single Logout parameters.
 

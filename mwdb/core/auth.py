@@ -1,5 +1,6 @@
 import datetime
 from enum import Enum
+from typing import Set
 
 import jwt
 
@@ -17,13 +18,10 @@ def generate_token(fields, scope, expiration=24 * 3600):
     issued_at = datetime.datetime.now(tz=datetime.timezone.utc)
     token_claims = {
         **fields,
-        "exp": (
-            issued_at
-            + datetime.timedelta(seconds=expiration)
-        ),
+        "exp": (issued_at + datetime.timedelta(seconds=expiration)),
         "iat": issued_at,
         "aud": app_config.mwdb.base_url,
-        "scope": scope,
+        "scope": scope.value,
     }
 
     if "login" in fields.keys():
@@ -48,14 +46,18 @@ def verify_token(token: str, scope: AuthScope) -> bool:
     except jwt.InvalidTokenError:
         return None
     return data
-    
-    def verify_legacy_token(token: str, required_fields: Set[str]) -> bool:
-       try:
-          data = jwt.decode(
-             token,
-             key=app_config.mwdb.secret_key,
-             algorithms=["HS512"],
-          )
-          if set(data.keys()) != required_keys:
-              return None
-          ...
+
+
+def verify_legacy_token(token: str, required_fields: Set[str]) -> bool:
+    try:
+        data = jwt.decode(
+            token,
+            key=app_config.mwdb.secret_key,
+            algorithms=["HS512"],
+        )
+        if set(data.keys()) != required_fields:
+            return None
+
+    except jwt.InvalidTokenError:
+        return None
+    return data

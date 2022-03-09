@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm.exc import NoResultFound
 
-from mwdb.core.auth import AuthScope, generate_token, verify_token
+from mwdb.core.auth import AuthScope, generate_token, verify_legacy_token, verify_token
 
 from . import db
 

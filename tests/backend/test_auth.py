@@ -137,3 +137,49 @@ def test_jwt_legacy_api_keys(admin_session):
     session.set_auth_token(pre2_7_token)
     response = session.request("get", "/server")
     assert response["is_authenticated"]
+
+
+def test_invalid_jwt(admin_session):
+    secret_key = "e2e-testing-key"
+    correct_claims = jwt.decode(admin_session.auth_token, options={"verify_signature": False})
+
+    session = MwdbTest()
+
+    # Test if JWT is correctly validated
+    incorrect_audience = {**correct_claims, "aud": "http://evil.com"}
+    session.set_auth_token(jwt.encode(incorrect_audience, secret_key, algorithm="HS512"))
+    response = session.request("get", "/server")
+    assert not response["is_authenticated"]
+
+    too_late_iat = {**correct_claims, "iat": correct_claims["iat"] + 7200, "exp": correct_claims["exp"] + 7200}
+    session.set_auth_token(jwt.encode(too_late_iat, secret_key, algorithm="HS512"))
+    response = session.request("get", "/server")
+    assert not response["is_authenticated"]
+
+    expired_jwt = {**correct_claims, "exp": correct_claims["iat"]}
+    session.set_auth_token(jwt.encode(expired_jwt, secret_key, algorithm="HS512"))
+    response = session.request("get", "/server")
+    assert not response["is_authenticated"]
+
+    wrong_scope_jwt = {**correct_claims, "scope": "420_no_scope"}
+    session.set_auth_token(jwt.encode(wrong_scope_jwt, secret_key, algorithm="HS512"))
+    response = session.request("get", "/server")
+    assert not response["is_authenticated"]
+
+    # Test missing fields to check if old token doesn't cause ISE 500
+    only_login_jwt = {"login": "admin"}
+    session.set_auth_token(jwt.encode(only_login_jwt, secret_key, algorithm="HS512"))
+    response = session.request("get", "/server")
+    assert not response["is_authenticated"]
+
+    missing_scope_jwt = {**correct_claims}
+    del missing_scope_jwt["scope"]
+    session.set_auth_token(jwt.encode(missing_scope_jwt, secret_key, algorithm="HS512"))
+    response = session.request("get", "/server")
+    assert not response["is_authenticated"]
+
+    missing_sub_jwt = {**correct_claims}
+    del missing_sub_jwt["sub"]
+    session.set_auth_token(jwt.encode(missing_sub_jwt, secret_key, algorithm="HS512"))
+    response = session.request("get", "/server")
+    assert not response["is_authenticated"]

@@ -53,11 +53,12 @@ class MwdbTest(object):
         self.mwdb_url = os.environ.get("MWDB_URL")
         self.session = requests.session()
         self.userinfo = None
+        self.auth_token = None
 
     def clone_session(self):
         cloned = MwdbTest()
         cloned.userinfo = self.userinfo
-        cloned.session.headers.update({"Authorization": "Bearer " + self.userinfo["token"]})
+        cloned.set_auth_token(self.userinfo["token"])
         return cloned
 
     def login_as(self, username, password):
@@ -67,10 +68,11 @@ class MwdbTest(object):
         )
         res.raise_for_status()
         self.userinfo = res.json()
-        self.session.headers.update({"Authorization": "Bearer " + self.userinfo["token"]})
+        self.set_auth_token(self.userinfo["token"])
         return self.userinfo
 
     def set_auth_token(self, token):
+        self.auth_token = token
         self.session.headers.update({"Authorization": "Bearer " + token})
 
     def request(self, method, endpoint, params=None, json=None):

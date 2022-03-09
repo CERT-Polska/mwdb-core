@@ -209,7 +209,19 @@ class User(db.Model):
 
     @staticmethod
     def verify_legacy_token(token):
-        return verify_legacy_token(token, required_fields={"version_uid"})
+        data = verify_legacy_token(token, required_fields={"login", "version_uid"})
+        if data is None:
+            return None
+
+        try:
+            user_obj = User.query.filter(User.login == data["login"]).one()
+        except NoResultFound:
+            return None
+
+        if user_obj.version_uid != data["version_uid"]:
+            return None
+
+        return user_obj
 
     def is_member(self, group_id):
         groups = db.session.query(Member.group_id).filter(Member.user_id == self.id)

@@ -1,6 +1,8 @@
 import os
+
 import jwt
-from .utils import MwdbTest, ShouldRaise, admin_login
+
+from .utils import MwdbTest, ShouldRaise, admin_login, rand_string
 
 
 def test_profile_change_invalidate(typical_session, admin_session):
@@ -19,9 +21,7 @@ def test_profile_change_invalidate(typical_session, admin_session):
     typical_session.recent_samples(1)
     typical_via_api.recent_samples(1)
 
-    admin_session.request("PUT", "/user/" + typical_login, json={
-        "disabled": True
-    })
+    admin_session.request("PUT", "/user/" + typical_login, json={"disabled": True})
 
     # Password-based session: invalidated, APIKey-based session: forbidden
     with ShouldRaise(status_code=403):
@@ -29,9 +29,7 @@ def test_profile_change_invalidate(typical_session, admin_session):
     with ShouldRaise(status_code=401):
         typical_session.recent_samples(1)
 
-    admin_session.request("PUT", "/user/" + typical_login, json={
-        "disabled": False
-    })
+    admin_session.request("PUT", "/user/" + typical_login, json={"disabled": False})
 
     # Password-based session: need to reauth, APIKey-based session: Ok
     typical_via_api.recent_samples(1)
@@ -46,32 +44,39 @@ def test_profile_password_change(typical_session, admin_session):
     typical_login = typical_session.userinfo["login"]
     typical_session.add_sample()
 
-    set_pass_token = admin_session.request("GET", f"/user/{typical_login}/change_password")["token"]
+    set_pass_token = admin_session.request(
+        "GET", f"/user/{typical_login}/change_password"
+    )["token"]
 
     # Shouldn't be able to use as session token
     typical_session.set_auth_token(set_pass_token)
     with ShouldRaise(status_code=401):
         typical_session.recent_samples(1)
 
-    typical_session.request("POST", "/auth/change_password", json={
-        "password": "very_new_password",
-        "token": set_pass_token
-    })
+    typical_session.request(
+        "POST",
+        "/auth/change_password",
+        json={"password": "very_new_password", "token": set_pass_token},
+    )
 
     typical_session.login_as(typical_login, "very_new_password")
 
     # Valid only once
     with ShouldRaise(status_code=403):
-        typical_session.request("POST", "/auth/change_password", json={
-            "password": typical_login,
-            "token": set_pass_token
-        })
+        typical_session.request(
+            "POST",
+            "/auth/change_password",
+            json={"password": typical_login, "token": set_pass_token},
+        )
 
-    set_pass_token = admin_session.request("GET", f"/user/{typical_login}/change_password")["token"]
-    typical_session.request("POST", "/auth/change_password", json={
-        "password": typical_login,
-        "token": set_pass_token
-    })
+    set_pass_token = admin_session.request(
+        "GET", f"/user/{typical_login}/change_password"
+    )["token"]
+    typical_session.request(
+        "POST",
+        "/auth/change_password",
+        json={"password": typical_login, "token": set_pass_token},
+    )
     typical_session.login_as(typical_login, typical_login)
     typical_session.recent_samples(1)
 
@@ -85,7 +90,9 @@ def test_api_key_management(typical_session, admin_session):
 
     # It should be possible to create API key without sending any payload
     # Should fall back to empty name
-    res = admin_session.session.post(admin_session.mwdb_url + f"/user/{typical_login}/api_key")
+    res = admin_session.session.post(
+        admin_session.mwdb_url + f"/user/{typical_login}/api_key"
+    )
     res.raise_for_status()
     assert res.json()["name"] == ""
 
@@ -113,7 +120,7 @@ def test_jwt_legacy_api_keys(admin_session):
     secret_key = "e2e-testing-key"
     api_key_id = admin_session.api_key_create("admin", "testing-key").json()["id"]
 
-    pre2_0_payload = {"login": "admin", "version_uid": None}
+    pre2_0_payload = {"login": "admin", "version_uid": rand_string(16)}
     pre2_7_payload = {"login": "admin", "api_key_id": api_key_id}
 
     pre2_0_token = jwt.encode(pre2_0_payload, secret_key, algorithm="HS512")

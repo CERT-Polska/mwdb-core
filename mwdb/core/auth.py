@@ -1,6 +1,6 @@
 import datetime
 from enum import Enum
-from typing import Set
+from typing import Any, Set
 
 import jwt
 
@@ -31,7 +31,7 @@ def generate_token(fields, scope, expiration=24 * 3600):
     return token
 
 
-def verify_token(token: str, scope: AuthScope) -> bool:
+def verify_token(token: str, scope: AuthScope) -> Any:
     try:
         data = jwt.decode(
             token,
@@ -48,7 +48,7 @@ def verify_token(token: str, scope: AuthScope) -> bool:
     return data
 
 
-def verify_legacy_token(token: str, required_fields: Set[str]) -> bool:
+def verify_legacy_token(token: str, required_fields: Set[str]) -> Any:
     try:
         data = jwt.decode(
             token,

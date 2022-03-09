@@ -120,7 +120,7 @@ def test_jwt_legacy_api_keys(admin_session):
     secret_key = "e2e-testing-key"
     api_key_id = admin_session.api_key_create("admin", "testing-key").json()["id"]
 
-    pre2_0_payload = {"login": "admin", "version_uid": rand_string(16)}
+    pre2_0_payload = {"login": "admin", "version_uid": None}
     pre2_7_payload = {"login": "admin", "api_key_id": api_key_id}
 
     pre2_0_token = jwt.encode(pre2_0_payload, secret_key, algorithm="HS512")

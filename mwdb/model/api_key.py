@@ -33,6 +33,8 @@ class APIKey(db.Model):
         if data is None:
             # check for legacy API Token
             data = verify_legacy_token(token, required_fields={"login", "api_key_id"})
+            if data is None:
+                return None
 
         try:
             api_key_obj = APIKey.query.filter(

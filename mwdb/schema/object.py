@@ -9,6 +9,8 @@ from marshmallow import (
     validates_schema,
 )
 
+from mwdb.model import Object
+
 from .attribute import AttributeItemRequestSchema, AttributeItemResponseSchema
 from .metakey import MetakeyItemRequestSchema
 from .tag import TagItemResponseSchema, TagRequestSchema
@@ -110,6 +112,18 @@ class ObjectItemResponseSchema(Schema):
     attributes = fields.Nested(
         AttributeItemResponseSchema, many=True, required=True, allow_none=False
     )
+
+    @post_dump
+    def get_accessible_attributes(self, data, **kwargs):
+        """
+        Replace all object attributes for attributes accessible for current user
+        """
+        object_hash = data["id"]
+        object_attributes = Object.get(object_hash).first().get_attributes()
+        schema = AttributeItemResponseSchema()
+        attributes_serialized = schema.dump(object_attributes, many=True)
+        data["attributes"] = attributes_serialized
+        return data
 
 
 class ObjectCountResponseSchema(Schema):

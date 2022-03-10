@@ -151,11 +151,6 @@ def test_invalid_jwt(admin_session):
     response = session.request("get", "/server")
     assert not response["is_authenticated"]
 
-    too_late_iat = {**correct_claims, "iat": correct_claims["iat"] + 7200, "exp": correct_claims["exp"] + 7200}
-    session.set_auth_token(jwt.encode(too_late_iat, secret_key, algorithm="HS512"))
-    response = session.request("get", "/server")
-    assert not response["is_authenticated"]
-
     expired_jwt = {**correct_claims, "exp": correct_claims["iat"]}
     session.set_auth_token(jwt.encode(expired_jwt, secret_key, algorithm="HS512"))
     response = session.request("get", "/server")

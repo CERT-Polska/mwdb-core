@@ -160,12 +160,14 @@ Remember that exclusive range is not allowed for date-time field so this is not 
 Query syntax: relative timestamps
 ------------------------
 
+.. versionadded:: 2.7.0
+
 It is also possible to use upload_time in relation to current time.
 For example, if you want to search for objects uploaded during last 2 hours:
 
 .. code-block::
 
-   upload_time:2h
+   upload_time:>=2h or upload_time:[2h TO *]
 
 
 This way of time definition contains value and relative time format.
@@ -184,6 +186,21 @@ Below are listed acceptable relative time symbols:
 .. warning::
 
    Bring awareness to symbols **m** and **M**. They means quite different period time. Other symbols can be used as uppercase or lowercase letters.
+
+
+During defining relative time you can combine different time symbols.
+For example, if you want to search for objects uploaded earlier then 1 mounths and 5 days ago:
+
+.. code-block::
+
+   upload_time:<=1m5d or upload_time:[* TO 1m5d]
+
+
+It is possible to use relative timestamps and timestamps. 
+
+.. code-block::
+
+   upload_time:[2022-02-01 TO 1m10d]
 
 
 Basic search fields

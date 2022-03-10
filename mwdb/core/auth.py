@@ -40,7 +40,7 @@ def verify_token(token: str, scope: AuthScope) -> Any:
             audience=app_config.mwdb.base_url,
             options={"verify_aud": True},
         )
-        if data["scope"] != scope.value:
+        if data.get("scope") != scope.value:
             return None
 
     except jwt.InvalidTokenError:

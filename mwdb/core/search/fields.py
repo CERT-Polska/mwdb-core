@@ -426,7 +426,7 @@ class DatetimeField(BaseField):
         elif field in ["S", "s"]:
             field = "seconds"
         else:
-            raise UnsupportedGrammarException("Datatime field invalid")
+            raise UnsupportedGrammarException("Invalid date-time format")
         return field, value
 
     def _get_border_time(self, expression_value):
@@ -478,25 +478,31 @@ class DatetimeField(BaseField):
             if expression.low.value == "*" and expression.high.value == "*":
                 return True
             if expression.low.value == "*":
-                high = self._get_date_range(expression.high)[1]
+                if self._is_relative_time(expression.high.value):
+                    high = self._get_border_time(expression.high.value)
+                else:
+                    high = self._get_date_range(expression.high)[1]
                 return self.column < high
             if expression.high.value == "*":
-                low = self._get_date_range(expression.low)[0]
+                if self._is_relative_time(expression.low.value):
+                    low = self._get_border_time(expression.low.value)
+                else:
+                    low = self._get_date_range(expression.low)[0]
                 return self.column >= low
-
-            low = self._get_date_range(expression.low)[0]
-            high = self._get_date_range(expression.high)[1]
+            if self._is_relative_time(expression.low.value):
+                low = self._get_border_time(expression.low.value)
+            else:
+                low = self._get_date_range(expression.low)[0]
+            if self._is_relative_time(expression.high.value):
+                high = self._get_border_time(expression.high.value)
+            else:
+                high = self._get_date_range(expression.high)[1]
         else:
             if expression.has_wildcard():
                 raise UnsupportedGrammarException(
                     "Wildcards are not allowed for date-time field"
                 )
-
-            if self._is_relative_time(expression.value):
-                border_time = self._get_border_time(expression.value)
-                return self.column >= border_time
-            else:
-                low, high = self._get_date_range(expression)
+            low, high = self._get_date_range(expression)
 
         return and_(self.column >= low, self.column < high)
 

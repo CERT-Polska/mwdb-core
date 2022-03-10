@@ -40,7 +40,10 @@ def verify_token(token: str, scope: AuthScope) -> Any:
             audience=app_config.mwdb.base_url,
             options={"verify_aud": True},
         )
-        if data.get("scope") != scope.value or "sub" not in data:
+        if data.get("scope") != scope.value:
+            return None
+
+        if scope.value != "download_file" and "sub" not in data:
             return None
 
     except jwt.InvalidTokenError:

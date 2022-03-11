@@ -403,40 +403,33 @@ class DatetimeField(BaseField):
         pattern = r"^(\d+[yYmWwDdHhMSs])+$"
         return re.search(pattern, expression_value)
 
-    def _split_time_field_value(self, expression_value):
-        """
-        Split expression_value into field and value parts.
-        For example '12h' -> ('hours', 12)
-        """
-        value = int(re.findall(r"^\d+", expression_value)[0])
-        field = re.findall(r"[yYmWwDdHhMSs]$", expression_value)[0]
-
-        if field in ["y", "Y"]:
-            field = "years"
-        elif field in ["m"]:
-            field = "months"
-        elif field in ["W", "w"]:
-            field = "weeks"
-        elif field in ["D", "d"]:
-            field = "days"
-        elif field in ["H", "h"]:
-            field = "hours"
-        elif field in ["M"]:
-            field = "minutes"
-        elif field in ["S", "s"]:
-            field = "seconds"
+    def _get_field_for_unit(self, unit):
+        if unit in ["y", "Y"]:
+            unit = "years"
+        elif unit in ["m"]:
+            unit = "months"
+        elif unit in ["W", "w"]:
+            unit = "weeks"
+        elif unit in ["D", "d"]:
+            unit = "days"
+        elif unit in ["H", "h"]:
+            unit = "hours"
+        elif unit in ["M"]:
+            unit = "minutes"
+        elif unit in ["S", "s"]:
+            unit = "seconds"
         else:
             raise UnsupportedGrammarException("Invalid date-time format")
-        return field, value
+        return unit
 
     def _get_border_time(self, expression_value):
-        pattern = r"\d+[yYmWwDdHhMSs]"
+        pattern = r"(\d+)([yYmWwDdHhMSs])"
         conditions = re.findall(pattern, expression_value)
         delta_dict = {}
-        for condition in conditions:
-            field, value = self._split_time_field_value(condition)
+        for value, unit in conditions:
+            field = self._get_field_for_unit(unit)
             if field not in delta_dict.keys():
-                delta_dict.update({field: value})
+                delta_dict.update({field: int(value)})
         border_time = datetime.now(tz=timezone.utc) - relativedelta(**delta_dict)
         return border_time
 

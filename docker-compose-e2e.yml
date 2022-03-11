@@ -14,6 +14,9 @@ services:
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - mwdb-vars.env
+    environment:
+      # Hardcoded secret key for consistent JWT testing
+      - MWDB_SECRET_KEY=e2e-testing-key
   mwdb-web:
     depends_on:
       - mwdb

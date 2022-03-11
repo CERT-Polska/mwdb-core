@@ -943,3 +943,36 @@ class Object(db.Model):
             if analysis.status == "running":
                 return "running"
         return "finished"
+
+    def remove_analysis(self, analysis_id, commit=True):
+        """
+        Removes analysis from object
+        :param analysis_id: uuid
+        :return: True if analysis was removed
+        """
+        db_analysis = db.session.query(KartonAnalysis).filter(
+            KartonAnalysis.id == analysis_id
+        )
+        db_analysis = db_analysis.first()
+        if db_analysis is None:
+            return False
+
+        is_removed = False
+        db.session.begin_nested()
+        try:
+            if db_analysis in self.analyses:
+                self.analyses.remove(db_analysis)
+                db.session.commit()
+                is_removed = True
+        except IntegrityError:
+            db.session.rollback()
+            db.session.refresh(self)
+            if db_analysis in self.analyses:
+                raise
+        # delete analysis if no objects associated
+        if db_analysis.objects == []:
+            db.session.delete(db_analysis)
+
+        if commit:
+            db.session.commit()
+        return is_removed

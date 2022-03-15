@@ -137,7 +137,7 @@ class UserPendingResource(Resource):
                 user.email,
                 base_url=app_config.mwdb.base_url,
                 login=user.login,
-                set_password_token=user.generate_set_password_token().decode("utf-8"),
+                set_password_token=user.generate_set_password_token()
             )
         except MailError:
             logger.exception("Can't send e-mail notification")

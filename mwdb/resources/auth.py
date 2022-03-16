@@ -292,9 +292,7 @@ class RequestPasswordChangeResource(Resource):
                 email,
                 base_url=app_config.mwdb.base_url,
                 login=login,
-                set_password_token=g.auth_user.generate_set_password_token().decode(
-                    "utf-8"
-                ),
+                set_password_token=g.auth_user.generate_set_password_token()
             )
         except MailError:
             logger.exception("Can't send e-mail notification")
@@ -376,7 +374,7 @@ class RecoverPasswordResource(Resource):
                 user.email,
                 base_url=app_config.mwdb.base_url,
                 login=user.login,
-                set_password_token=user.generate_set_password_token().decode("utf-8"),
+                set_password_token=user.generate_set_password_token()
             )
         except MailError:
             logger.exception("Can't send e-mail notification")

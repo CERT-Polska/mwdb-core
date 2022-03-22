@@ -14,11 +14,10 @@ class AuthScope(Enum):
     download_file = "download_file"
 
 
-def generate_token(fields, scope, expiration=24 * 3600):
+def generate_token(fields, scope, expiration=None):
     issued_at = datetime.datetime.now(tz=datetime.timezone.utc)
     token_claims = {
         **fields,
-        "exp": (issued_at + datetime.timedelta(seconds=expiration)),
         "iat": issued_at,
         "aud": app_config.mwdb.base_url,
         "scope": scope.value,
@@ -26,6 +25,8 @@ def generate_token(fields, scope, expiration=24 * 3600):
 
     if "login" in fields.keys():
         token_claims["sub"] = fields["login"]
+    if expiration is not None:
+        token_claims["exp"] = issued_at + datetime.timedelta(seconds=expiration)
     payload = {**fields, **token_claims}
     token = jwt.encode(payload, app_config.mwdb.secret_key, algorithm="HS512")
     return token

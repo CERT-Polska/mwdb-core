@@ -3,10 +3,12 @@ on:
   push:
     branches:
     - master
+    - ci/*
     - v[23456789].*.*
   pull_request:
     branches:
     - master
+    - ci/*
     - v[23456789].*.*
 jobs:
   lint_core:
@@ -212,7 +214,6 @@ jobs:
     needs: [test_backend_e2e, test_frontend_e2e]
     name: Push images on Docker Hub
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -229,29 +230,22 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./deploy/docker/Dockerfile
-          tags: |
-            certpl/mwdb:master
-          cache-from: |
-            type=registry,ref=certpl/mwdb:master
-          cache-to: |
-            type=registry,ref=certpl/mwdb:master,mode=max
+          tags: certpl/mwdb:master
           push: true
+          cache-from: type=registry,ref=certpl/mwdb:master-buildcache
+          cache-to: type=registry,ref=certpl/mwdb:master-buildcache,mode=max
       - name: Build and push mwdb-core web image
         uses: docker/build-push-action@v2
         with:
           file: ./deploy/docker/Dockerfile-web
-          tags: |
-            certpl/mwdb-web:master
-          cache-from: |
-            type=registry,ref=certpl/mwdb-web:master
-          cache-to: |
-            type=registry,ref=certpl/mwdb-web:master,mode=max
+          tags: certpl/mwdb-web:master
           push: true
+          cache-from: type=registry,ref=certpl/mwdb-web:master
+          cache-to: type=registry,ref=certpl/mwdb-web:master,mode=max
   push_test_images:
     needs: [test_backend_e2e, test_frontend_e2e]
     name: Push test images on Docker Hub
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' }}
     env:
       DOCKER_BUILDKIT: 1
     steps:

@@ -3,12 +3,10 @@ on:
   push:
     branches:
     - master
-    - ci/*
     - v[23456789].*.*
   pull_request:
     branches:
     - master
-    - ci/*
     - v[23456789].*.*
 jobs:
   lint_core:

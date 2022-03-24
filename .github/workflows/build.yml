@@ -53,7 +53,7 @@ jobs:
             certpl/mwdb:${{ github.sha }}
             certpl/mwdb:master
           cache-from: |
-            type=registry,ref=certpl/mwdb:master
+            type=registry,ref=certpl/mwdb:buildcache
           outputs: type=docker,dest=./mwdb-image
       - name: Upload mwdb-core image
         uses: actions/upload-artifact@v2 
@@ -81,7 +81,7 @@ jobs:
             certpl/mwdb-web:${{ github.sha }}
             certpl/mwdb-web:master
           cache-from: |
-            type=registry,ref=certpl/mwdb-web:master
+            type=registry,ref=certpl/mwdb-web:buildcache
           outputs: type=docker,dest=./mwdb-web-image
       - name: Upload mwdb-core web image
         uses: actions/upload-artifact@v2 
@@ -108,7 +108,7 @@ jobs:
           tags: |
             certpl/mwdb-tests:${{ github.sha }}
           cache-from: |
-            type=registry,ref=certpl/mwdb-tests:master
+            type=registry,ref=certpl/mwdb-tests:buildcache
           outputs: type=docker,dest=./mwdb-tests-image
       - name: Upload test image
         uses: actions/upload-artifact@v2 
@@ -135,7 +135,7 @@ jobs:
           tags: |
             certpl/mwdb-web-tests:${{ github.sha }}
           cache-from: |
-            type=registry,ref=certpl/mwdb-web-tests:master
+            type=registry,ref=certpl/mwdb-web-tests:buildcache
           outputs: type=docker,dest=./mwdb-web-tests-image
       - name: Upload test image
         uses: actions/upload-artifact@v2
@@ -232,9 +232,9 @@ jobs:
           tags: |
             certpl/mwdb:master
           cache-from: |
-            type=registry,ref=certpl/mwdb:master
+            type=registry,ref=certpl/mwdb:buildcache
           cache-to: |
-            type=registry,ref=certpl/mwdb:master,mode=max
+            type=registry,ref=certpl/mwdb:buildcache,mode=max
           push: true
       - name: Build and push mwdb-core web image
         uses: docker/build-push-action@v2
@@ -243,9 +243,9 @@ jobs:
           tags: |
             certpl/mwdb-web:master
           cache-from: |
-            type=registry,ref=certpl/mwdb-web:master
+            type=registry,ref=certpl/mwdb-web:buildcache
           cache-to: |
-            type=registry,ref=certpl/mwdb-web:master,mode=max
+            type=registry,ref=certpl/mwdb-web:buildcache,mode=max
           push: true
   push_test_images:
     needs: [test_backend_e2e, test_frontend_e2e]
@@ -274,9 +274,9 @@ jobs:
           tags: |
             certpl/mwdb-tests:master
           cache-from: |
-            type=registry,ref=certpl/mwdb-tests:master
+            type=registry,ref=certpl/mwdb-tests:buildcache
           cache-to: |
-            type=registry,ref=certpl/mwdb-tests:master,mode=max
+            type=registry,ref=certpl/mwdb-tests:buildcache,mode=max
           push: true
       - name: Build and push mwdb-web-tests image
         uses: docker/build-push-action@v2
@@ -286,7 +286,7 @@ jobs:
           tags: |
             certpl/mwdb-web-tests:master
           cache-from: |
-            type=registry,ref=certpl/mwdb-web-tests:master
+            type=registry,ref=certpl/mwdb-web-tests:buildcache
           cache-to: |
-            type=registry,ref=certpl/mwdb-web-tests:master,mode=max
+            type=registry,ref=certpl/mwdb-web-tests:buildcache,mode=max
           push: true

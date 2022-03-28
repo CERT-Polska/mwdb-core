@@ -14,12 +14,12 @@ services:
     environment:
       MWDB_ENABLE_KARTON: 1
       MWDB_REDIS_URI: redis://redis/
-      MWDB_POSTGRES_URI: postgresql://mwdb:e2e-postgres-password-karton-tests@postgres/mwdb
+      MWDB_POSTGRES_URI: postgresql://mwdb:e2e-postgres-password@postgres/mwdb
       # Hardcoded secret key for consistent JWT testing
       MWDB_SECRET_KEY: e2e-testing-key
       MWDB_ADMIN_LOGIN: admin
       MWDB_ADMIN_EMAIL: admin@localhost
-      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password-karton-tests
+      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
       MWDB_BASE_URL: http://127.0.0.1
       MWDB_ENABLE_RATE_LIMIT: 0
       MWDB_ENABLE_REGISTRATION: 1
@@ -44,14 +44,14 @@ services:
     environment:
       POSTGRES_USER: mwdb
       POSTGRES_DB: mwdb
-      POSTGRES_PASSWORD: e2e-postgres-password-karton-tests
+      POSTGRES_PASSWORD: e2e-postgres-password
   mwdb-tests:
     build: tests/backend
     depends_on:
       - mwdb
     image: certpl/mwdb-tests
     environment:
-      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password-karton-tests
+      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
       MWDB_ADMIN_LOGIN: admin
   web-tests:
     build: tests/frontend
@@ -62,11 +62,11 @@ services:
     environment:
       MWDB_ENABLE_KARTON: 1
       MWDB_REDIS_URI: redis://redis/
-      MWDB_POSTGRES_URI: postgresql://mwdb:e2e-postgres-password-karton-tests@postgres/mwdb
+      MWDB_POSTGRES_URI: postgresql://mwdb:e2e-postgres-password@postgres/mwdb
       MWDB_SECRET_KEY: e2e-testing-key
       MWDB_ADMIN_LOGIN: admin
       MWDB_ADMIN_EMAIL: admin@localhost
-      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password-karton-tests
+      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
       MWDB_BASE_URL: http://127.0.0.1
       MWDB_ENABLE_RATE_LIMIT: 0
       MWDB_ENABLE_REGISTRATION: 1
@@ -99,7 +99,7 @@ services:
     environment:
       KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
       KARTON_MWDB_USERNAME: admin
-      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password-karton-tests
+      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password
   karton-classifier:
     image: certpl/karton-classifier:320c99de8e05ff3d029609e73ac31bcf2d0ba56c
     depends_on:
@@ -110,7 +110,7 @@ services:
     environment:
       KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
       KARTON_MWDB_USERNAME: admin
-      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password-karton-tests
+      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password
   karton-dashboard:
     image: certpl/karton-dashboard:2c35fb3cae399dba8913f8ad1be9dd6b820b1fd6
     depends_on:
@@ -123,7 +123,7 @@ services:
     environment:
       KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
       KARTON_MWDB_USERNAME: admin
-      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password-karton-tests
+      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password
   karton-mwdb-reporter:
     image: certpl/karton-mwdb-reporter:a4a5a2ece14073e3a25a38bd5f1b0fa14ba725d3
     depends_on:
@@ -134,4 +134,4 @@ services:
     environment:
       KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
       KARTON_MWDB_USERNAME: admin
-      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password-karton-tests
+      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password

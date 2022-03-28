@@ -388,9 +388,9 @@ def test_search_date_time_relative(admin_session):
     assert len(found_objs) == 1
     found_objs = admin_session.search(f'upload_time:[2s TO *] AND tag:{tag}')
     assert len(found_objs) == 1
-    found_objs = admin_session.search(f'upload_time:>=3s AND tag:{tag}')
+    found_objs = admin_session.search(f'upload_time:>=4s AND tag:{tag}')
     assert len(found_objs) == 2
-    found_objs = admin_session.search(f'upload_time:[3s TO *] AND tag:{tag}')
+    found_objs = admin_session.search(f'upload_time:[4s TO *] AND tag:{tag}')
     assert len(found_objs) == 2
     found_objs = admin_session.search(f'upload_time:>=1M AND tag:{tag}')
     assert len(found_objs) == 2

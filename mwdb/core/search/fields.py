@@ -122,7 +122,7 @@ class SizeField(BaseField):
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
 
-        units = {"B": 1, "KB": 1024, "MB": 1024 ** 2, "GB": 1024 ** 3}
+        units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
         def parse_size(size):
             if size.isdigit():

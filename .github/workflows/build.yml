@@ -16,6 +16,7 @@ jobs:
         with:
           source: mwdb/
           use-mypy: false
+          install-requirements: false
   lint_web:
     name: Lint mwdb-core web sources
     runs-on: ubuntu-latest

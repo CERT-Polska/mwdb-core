@@ -10,18 +10,12 @@ on:
     - v[23456789].*.*
 jobs:
   lint_core:
-    name: Lint mwdb-core core sources
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: CERT-Polska/lint-python-action@v1
         with:
-          python-version: 3.6
-      - run: pip install -r dev-requirements.txt
-      - run: isort --check mwdb/
-      - run: black --check mwdb/
-      - run: flake8 mwdb/
+          source: mwdb/
+          use-mypy: false
   lint_web:
     name: Lint mwdb-core web sources
     runs-on: ubuntu-latest

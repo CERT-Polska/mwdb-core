@@ -526,6 +526,10 @@ function resubmitKartonAnalysis(id) {
     return axios.post(`/object/${id}/karton`);
 }
 
+function removeKartonAnalysisFromObject(id, analysis_id) {
+    return axios.delete(`/object/${id}/karton/${analysis_id}`);
+}
+
 const api = {
     axios,
     getApiForEnvironment,
@@ -625,5 +629,6 @@ const api = {
     getKartonAnalysesList,
     getKartonAnalysisStatus,
     resubmitKartonAnalysis,
+    removeKartonAnalysisFromObject,
 };
 export default api;

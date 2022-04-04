@@ -102,7 +102,7 @@ class KartonObjectResource(Resource):
             description: Karton analysis arguments (optional)
             content:
               application/json:
-                schema: TagRequestSchema
+                schema: KartonSubmitAnalysisRequestSchema
         responses:
             200:
                 description: Information about analysis status

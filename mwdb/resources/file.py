@@ -464,4 +464,4 @@ class FileDownloadResource(Resource):
 
         download_token = file.generate_download_token()
         schema = FileDownloadTokenResponseSchema()
-        return schema.dump({"token": download_token.decode()})
+        return schema.dump({"token": download_token})

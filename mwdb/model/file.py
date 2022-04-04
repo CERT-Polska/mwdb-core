@@ -4,12 +4,12 @@ import os
 import shutil
 import tempfile
 
-from itsdangerous import BadSignature, SignatureExpired, TimedJSONWebSignatureSerializer
 from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from werkzeug.utils import secure_filename
 
+from mwdb.core.auth import AuthScope, generate_token, verify_token
 from mwdb.core.config import StorageProviderType, app_config
 from mwdb.core.karton import send_file_to_karton
 from mwdb.core.util import (
@@ -280,21 +280,18 @@ class File(Object):
             self.upload_stream = None
 
     def generate_download_token(self):
-        serializer = TimedJSONWebSignatureSerializer(
-            app_config.mwdb.secret_key, expires_in=60
+        return generate_token(
+            {"identifier": self.sha256},
+            scope=AuthScope.download_file,
+            expiration=60,
         )
-        return serializer.dumps({"identifier": self.sha256})
 
     @staticmethod
     def get_by_download_token(download_token):
-        serializer = TimedJSONWebSignatureSerializer(app_config.mwdb.secret_key)
-        try:
-            download_req = serializer.loads(download_token)
-            return File.get(download_req["identifier"]).first()
-        except SignatureExpired:
+        download_req = verify_token(download_token, scope=AuthScope.download_file)
+        if not download_req:
             return None
-        except BadSignature:
-            return None
+        return File.get(download_req["identifier"]).first()
 
     def _send_to_karton(self):
         return send_file_to_karton(self)

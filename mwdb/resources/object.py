@@ -485,6 +485,7 @@ class ObjectFavoriteResource(Resource):
             )
 
     @requires_authorization
+    @requires_capabilities(Capabilities.personalize)
     def delete(self, identifier):
         """
         ---

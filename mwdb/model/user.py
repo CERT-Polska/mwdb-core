@@ -3,12 +3,11 @@ import os
 
 import bcrypt
 from flask import g
-from itsdangerous import BadSignature, SignatureExpired, TimedJSONWebSignatureSerializer
 from sqlalchemy import and_
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm.exc import NoResultFound
 
-from mwdb.core.config import app_config
+from mwdb.core.auth import AuthScope, generate_token, verify_legacy_token, verify_token
 
 from . import db
 from .group import Group, Member
@@ -150,29 +149,25 @@ class User(db.Model):
             db.session.commit()
         return user
 
-    def _generate_token(self, fields, expiration):
-        s = TimedJSONWebSignatureSerializer(
-            app_config.mwdb.secret_key, expires_in=expiration
-        )
-        return s.dumps(
+    def _generate_token(self, fields, scope, expiration):
+        token = generate_token(
             dict(
                 [("login", self.login)]
                 + [(field, getattr(self, field)) for field in fields]
-            )
+            ),
+            scope,
+            expiration,
         )
+        return token
 
     @staticmethod
-    def _verify_token(token, fields):
-        s = TimedJSONWebSignatureSerializer(app_config.mwdb.secret_key)
-        try:
-            data = s.loads(token)
-        except SignatureExpired:
-            return None
-        except BadSignature:
+    def _verify_token(token, fields, scope):
+        data = verify_token(token, scope)
+        if data is None:
             return None
 
         try:
-            user_obj = User.query.filter(User.login == data["login"]).one()
+            user_obj = User.query.filter(User.login == data["sub"]).one()
         except NoResultFound:
             return None
 
@@ -186,23 +181,47 @@ class User(db.Model):
 
     def generate_session_token(self):
         return self._generate_token(
-            ["password_ver", "identity_ver"], expiration=24 * 3600
+            ["password_ver", "identity_ver"],
+            scope=AuthScope.session,
+            expiration=24 * 3600,
         )
 
     def generate_set_password_token(self):
-        return self._generate_token(["password_ver"], expiration=14 * 24 * 3600)
+        return self._generate_token(
+            ["password_ver"],
+            scope=AuthScope.set_password,
+            expiration=14 * 24 * 3600,
+        )
 
     @staticmethod
     def verify_session_token(token):
-        return User._verify_token(token, ["password_ver", "identity_ver"])
+        return User._verify_token(
+            token, ["password_ver", "identity_ver"], scope=AuthScope.session
+        )
 
     @staticmethod
     def verify_set_password_token(token):
-        return User._verify_token(token, ["password_ver"])
+        return User._verify_token(
+            token,
+            ["password_ver"],
+            scope=AuthScope.set_password,
+        )
 
     @staticmethod
     def verify_legacy_token(token):
-        return User._verify_token(token, ["version_uid"])
+        data = verify_legacy_token(token, required_fields={"login", "version_uid"})
+        if data is None:
+            return None
+
+        try:
+            user_obj = User.query.filter(User.login == data["login"]).one()
+        except NoResultFound:
+            return None
+
+        if user_obj.version_uid != data["version_uid"]:
+            return None
+
+        return user_obj
 
     def is_member(self, group_id):
         groups = db.session.query(Member.group_id).filter(Member.user_id == self.id)

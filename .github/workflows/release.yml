@@ -46,6 +46,7 @@ jobs:
           file: ./deploy/docker/Dockerfile
           tags: |
             certpl/mwdb:${{ github.event.release.tag_name }}
+            certpl/mwdb:latest
           push: true
           context: .
       - name: Build and push mwdb-core web image
@@ -54,5 +55,6 @@ jobs:
           file: ./deploy/docker/Dockerfile-web
           tags: |
             certpl/mwdb-web:${{ github.event.release.tag_name }}
+            certpl/mwdb:latest
           push: true
           context: .

@@ -113,17 +113,15 @@ class ObjectItemResponseSchema(Schema):
         AttributeItemResponseSchema, many=True, required=True, allow_none=False
     )
 
-    @post_dump
-    def get_accessible_attributes(self, data, **kwargs):
+    @post_dump(pass_original=True)
+    def get_accessible_attributes(self, data, object, **kwargs):
         """
-        Replace all object attributes for attributes accessible for current user
+        Replace all object attributes with attributes accessible for current user
         """
-        object_hash = data["id"]
-        object_attributes = Object.get(object_hash).first().get_attributes()
+        object_attributes = object.get_attributes(show_karton=False)
         schema = AttributeItemResponseSchema()
         attributes_serialized = schema.dump(object_attributes, many=True)
-        data["attributes"] = attributes_serialized
-        return data
+        return {**data, "attributes": attributes_serialized}
 
 
 class ObjectCountResponseSchema(Schema):

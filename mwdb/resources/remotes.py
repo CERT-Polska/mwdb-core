@@ -95,7 +95,7 @@ class RemoteAPIResource(Resource):
             method, remote_path, params=request.args, data=request.data, stream=True
         )
         return Response(
-            response.iter_content(chunk_size=2 ** 16),
+            response.iter_content(chunk_size=2**16),
             mimetype=response.headers["content-type"],
         )
 
@@ -201,7 +201,7 @@ class RemoteFilePullResource(RemotePullResource):
         )
         share_with = get_shares_for_upload(options["upload_as"])
         with SpooledTemporaryFile() as file_stream:
-            for chunk in response.iter_content(chunk_size=2 ** 16):
+            for chunk in response.iter_content(chunk_size=2**16):
                 file_stream.write(chunk)
             file_stream.seek(0)
             try:

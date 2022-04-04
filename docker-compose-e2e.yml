@@ -11,6 +11,8 @@ services:
       - redis
     image: certpl/mwdb
     restart: on-failure
+    env_file:
+      - mwdb-vars.env
     environment:
       MWDB_ENABLE_KARTON: 1
       MWDB_REDIS_URI: redis://redis/
@@ -46,6 +48,11 @@ services:
     build: tests/backend
     depends_on:
       - mwdb
+      - mailhog
+      - karton-system
+      - karton-classifier
+      - karton-dashboard
+      - karton-mwdb-reporter
     image: certpl/mwdb-tests
     environment:
       MWDB_ADMIN_LOGIN: admin

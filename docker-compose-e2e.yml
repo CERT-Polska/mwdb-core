@@ -11,8 +11,6 @@ services:
       - redis
     image: certpl/mwdb
     restart: on-failure
-    env_file:
-      - mwdb-vars.env
     environment:
       MWDB_ENABLE_KARTON: 1
       MWDB_REDIS_URI: redis://redis/
@@ -41,9 +39,10 @@ services:
   postgres:
     image: postgres
     restart: always
-    env_file:
-      # NOTE: use gen_vars.sh in order to generate this file
-      - postgres-vars.env
+    environment:
+      POSTGRES_USER: mwdb
+      POSTGRES_DB: mwdb
+      POSTGRES_PASSWORD: e2e-postgres-password
   mwdb-tests:
     build: tests/backend
     depends_on:

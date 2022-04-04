@@ -9,8 +9,6 @@ from marshmallow import (
     validates_schema,
 )
 
-from mwdb.model import Object
-
 from .attribute import AttributeItemRequestSchema, AttributeItemResponseSchema
 from .metakey import MetakeyItemRequestSchema
 from .tag import TagItemResponseSchema, TagRequestSchema

@@ -63,6 +63,11 @@ services:
     depends_on:
       - mwdb
       - mwdb-web
+      - mailhog
+      - karton-system
+      - karton-classifier
+      - karton-dashboard
+      - karton-mwdb-reporter
     image: certpl/mwdb-web-tests
     environment:
       MWDB_ADMIN_LOGIN: admin

@@ -49,6 +49,7 @@ services:
     build: tests/backend
     depends_on:
       - mwdb
+      - mwdb-web
       - mailhog
       - karton-system
       - karton-classifier
@@ -58,6 +59,7 @@ services:
     environment:
       MWDB_ADMIN_LOGIN: admin
       MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
+      MWDB_URL: http://mwdb-web./api
   web-tests:
     build: tests/frontend
     depends_on:

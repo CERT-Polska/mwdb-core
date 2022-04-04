@@ -26,6 +26,8 @@ services:
       UWSGI_PROCESSES: 4
       MWDB_MAIL_SMTP: "mailhog:1025"
       MWDB_MAIL_FROM: "noreply@mwdb.dev"
+    volumes:
+    - "./dev/karton.ini:/etc/karton/karton.ini"
   mwdb-web:
     depends_on:
       - mwdb

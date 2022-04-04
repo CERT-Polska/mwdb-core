@@ -135,6 +135,16 @@ class FileResource(ObjectResource, FileUploader):
                       properties:
                         parent:
                           type: string
+                        karton_id:
+                          type: string
+                        karton_arguments:
+                          type: object
+                          additionalProperties:
+                            type:string
+                        attributes:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/AttributeItemRequest'
                         metakeys:
                           type: array
                           items:

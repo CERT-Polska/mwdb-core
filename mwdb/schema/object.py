@@ -9,7 +9,7 @@ from marshmallow import (
     validates_schema,
 )
 
-from .attribute import AttributeItemRequestSchema
+from .attribute import AttributeItemRequestSchema, AttributeItemResponseSchema
 from .metakey import MetakeyItemRequestSchema
 from .tag import TagItemResponseSchema, TagRequestSchema
 from .utils import UTCDateTime
@@ -107,6 +107,19 @@ class ObjectItemResponseSchema(Schema):
     children = fields.Nested(
         ObjectListItemResponseSchema, many=True, required=True, allow_none=False
     )
+    attributes = fields.Nested(
+        AttributeItemResponseSchema, many=True, required=True, allow_none=False
+    )
+
+    @post_dump(pass_original=True)
+    def get_accessible_attributes(self, data, object, **kwargs):
+        """
+        Replace all object attributes with attributes accessible for current user
+        """
+        object_attributes = object.get_attributes(show_karton=False)
+        schema = AttributeItemResponseSchema()
+        attributes_serialized = schema.dump(object_attributes, many=True)
+        return {**data, "attributes": attributes_serialized}
 
 
 class ObjectCountResponseSchema(Schema):

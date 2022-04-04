@@ -25,9 +25,9 @@ https://gist.github.com/Chaser324/ce0505fbed06b947d962).
 
 5. Remember to autoformat your code. 
    
-   For Python code, use formatters and linters listed below.
+   For Python code, install exact versions of formatters from https://github.com/CERT-Polska/lint-python-action.
+   Then use formatters and linters listed below.
    ```
-   pip install -r dev-requirements.txt
    isort mwdb/
    black mwdb/
    flake8 mwdb/

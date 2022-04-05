@@ -371,26 +371,22 @@ def test_search_date_time_relative(admin_session):
     filename_1 = base62uuid()
     file_content_1 = b"abc" * 500 + rand_string(30).encode("utf-8")
     sample_1 = admin_session.add_sample(filename_1, file_content_1)
-    time.sleep(3)
+    time.sleep(1)
     filename_2 = base62uuid()
     file_content_2 = b"abc" * 500 + rand_string(30).encode("utf-8")
     sample_2 = admin_session.add_sample(filename_2, file_content_2)
     tag = rand_string(20)
     admin_session.add_tag(sample_1["id"], tag)
     admin_session.add_tag(sample_2["id"], tag)
-    time.sleep(3)
+    time.sleep(1)
     
     found_objs = admin_session.search(f'upload_time:>=1s AND tag:{tag}')
     assert len(found_objs) == 0
     found_objs = admin_session.search(f'upload_time:[1s TO *] AND tag:{tag}')
     assert len(found_objs) == 0
     found_objs = admin_session.search(f'upload_time:>=4s AND tag:{tag}')
-    assert len(found_objs) == 1
-    found_objs = admin_session.search(f'upload_time:[4s TO *] AND tag:{tag}')
-    assert len(found_objs) == 1
-    found_objs = admin_session.search(f'upload_time:>=6s AND tag:{tag}')
     assert len(found_objs) == 2
-    found_objs = admin_session.search(f'upload_time:[6s TO *] AND tag:{tag}')
+    found_objs = admin_session.search(f'upload_time:[4s TO *] AND tag:{tag}')
     assert len(found_objs) == 2
     found_objs = admin_session.search(f'upload_time:>=1M AND tag:{tag}')
     assert len(found_objs) == 2
@@ -416,8 +412,6 @@ def test_search_date_time_relative(admin_session):
     assert len(found_objs) == 2
     found_objs = admin_session.search(f'upload_time:[5y TO *] AND tag:{tag}')
     assert len(found_objs) == 2
-    found_objs = admin_session.search(f'upload_time:[4s TO 1s] AND tag:{tag}')
-    assert len(found_objs) == 1
 
     with ShouldRaise(status_code=400):
         found_objs = admin_session.search(f'upload_time:>=s1 AND tag:{tag}')

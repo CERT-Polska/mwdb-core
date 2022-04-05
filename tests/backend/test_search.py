@@ -384,13 +384,13 @@ def test_search_date_time_relative(admin_session):
     assert len(found_objs) == 0
     found_objs = admin_session.search(f'upload_time:[1s TO *] AND tag:{tag}')
     assert len(found_objs) == 0
-    found_objs = admin_session.search(f'upload_time:>=2s AND tag:{tag}')
+    found_objs = admin_session.search(f'upload_time:>=4s AND tag:{tag}')
     assert len(found_objs) == 1
-    found_objs = admin_session.search(f'upload_time:[2s TO *] AND tag:{tag}')
+    found_objs = admin_session.search(f'upload_time:[4s TO *] AND tag:{tag}')
     assert len(found_objs) == 1
-    found_objs = admin_session.search(f'upload_time:>=5s AND tag:{tag}')
+    found_objs = admin_session.search(f'upload_time:>=6s AND tag:{tag}')
     assert len(found_objs) == 2
-    found_objs = admin_session.search(f'upload_time:[5s TO *] AND tag:{tag}')
+    found_objs = admin_session.search(f'upload_time:[6s TO *] AND tag:{tag}')
     assert len(found_objs) == 2
     found_objs = admin_session.search(f'upload_time:>=1M AND tag:{tag}')
     assert len(found_objs) == 2
@@ -416,7 +416,7 @@ def test_search_date_time_relative(admin_session):
     assert len(found_objs) == 2
     found_objs = admin_session.search(f'upload_time:[5y TO *] AND tag:{tag}')
     assert len(found_objs) == 2
-    found_objs = admin_session.search(f'upload_time:[2s TO 1s] AND tag:{tag}')
+    found_objs = admin_session.search(f'upload_time:[4s TO 1s] AND tag:{tag}')
     assert len(found_objs) == 1
 
     with ShouldRaise(status_code=400):

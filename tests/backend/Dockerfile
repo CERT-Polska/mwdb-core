@@ -3,4 +3,4 @@ COPY requirements.txt /app/requirements.txt
 RUN pip3 install -r /app/requirements.txt
 COPY *.py /app/
 WORKDIR /app
-CMD ["pytest", "-v"]
+CMD ["pytest", "-v", "--reruns", "3", "--only-rerun", "ConnectionError"]

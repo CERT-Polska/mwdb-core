@@ -5,3 +5,66 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 line_length = 88
+
+[tool.poetry]
+name = "mwdb-core"
+version = "2.7.0"
+description = "MWDB Core malware database"
+authors = ["CERT Polska <info@cert.pl>"]
+license = "AGPLv3"
+readme = "README.md"
+repository = "https://github.com/CERT-Polska/mwdb-core"
+documentation = "https://mwdb.readthedocs.io/en/latest/"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3"
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+Werkzeug = "2.0.3"
+uwsgi = "2.0.20"
+alembic = "1.4.2"
+Flask = "2.0.2"
+Flask-SQLAlchemy = "2.5.1"
+Flask-Migrate = "3.1.0"
+Flask-RESTful = "0.3.9"
+SQLAlchemy = "1.3.18"
+marshmallow = "3.7.1"
+ssdeep = "3.4"
+psycopg2-binary = "2.8.5"
+requests = "2.26.0"
+apispec = {version = "3.3.1", extras = ["yaml", "validation"]}
+bcrypt = "3.1.4"
+python-magic = "0.4.18"
+luqum = "0.7.4"
+python-json-logger = "2.0.2"
+click = "7.1.2"
+click-default-group = "1.2.2"
+PyYAML = "5.4"
+redis = "3.2.1"
+minio = "7.1.0"
+typed-config = "0.2.1"
+karton-core = "^4.3.0"
+Authlib = "0.15.4"
+regex = "2021.7.6"
+pyJWT = "2.3.0"
+Flask-Limiter = "2.1.3"
+python-dateutil = "2.8.2"
+
+[tool.poetry.dev-dependencies]
+isort = "5.10.1"
+black = "22.3.0"
+flake8 = "3.8.4"
+mypy = "0.940"
+pytest = "*"
+pytest-rerunfailures = "*"
+python-baseconv = "*"
+
+[tool.poetry.scripts]
+mwdb-core = "mwdb.cli:cli"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

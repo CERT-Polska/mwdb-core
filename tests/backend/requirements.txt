@@ -1,6 +1,0 @@
-python-dateutil==2.7.0
-pyJWT==2.3.0
-pytest
-pytest-rerunfailures
-requests
-python-baseconv

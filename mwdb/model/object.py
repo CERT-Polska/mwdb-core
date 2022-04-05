@@ -924,10 +924,21 @@ class Object(db.Model):
         Assigns KartonAnalysis to the object
         """
         analysis, is_new = KartonAnalysis.get_or_create(analysis_id, self)
+
         if not is_new and analysis.id not in [
             existing.id for existing in self.analyses
         ]:
-            self.analyses.append(analysis)
+            db.session.begin_nested()
+            try:
+                self.analyses.append(analysis)
+                db.session.commit()
+                is_new = True
+            except IntegrityError:
+                # The same relationship was added concurrently
+                db.session.rollback()
+                db.session.refresh(self)
+                if analysis.id not in [existing.id for existing in self.analyses]:
+                    raise
 
         if commit:
             db.session.commit()

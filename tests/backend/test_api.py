@@ -129,7 +129,7 @@ def test_add_tags(admin_session):
         admin_session.add_tag(sample['id'], tag)
 
     tags_response = admin_session.get_tags(sample['id'])
-    tags_returned = [t['tag'] for t in tags_response]
+    tags_returned = [t['tag'] for t in tags_response if not t["tag"].startswith("misc:")]
 
     assert len(tags_returned) == len(tags_expected)
     assert all([t in tags_returned for t in tags_expected])
@@ -145,9 +145,10 @@ def test_delete_tags(admin_session):
     admin_session.add_tag(identifier, tag2)
     admin_session.delete_tag(identifier, tag1)
 
-    tags = admin_session.get_tags(identifier)
+    tags = [t['tag'] for t in admin_session.get_tags(identifier) if not t["tag"].startswith("misc:")]
     assert len(tags) == 1
-    assert tags[0]['tag'] == tag2
+    assert tag1 not in tags
+    assert tag2 in tags
 
 
 @pytest.mark.parametrize('num_comments', [

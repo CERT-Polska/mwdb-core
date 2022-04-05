@@ -445,3 +445,29 @@ class MwdbTest(object):
             time.sleep(5.0)
 
         raise RuntimeError("Failed to see MWDB operational")
+
+    def get_analyses(self, identifier):
+        res = self.session.get(self.mwdb_url + "/object/" + identifier + "/karton")
+        res.raise_for_status()
+        return res.json()
+    
+    def reanalyze_object(self, identifier, arguments={}):
+        res = self.session.post(self.mwdb_url + "/object/" + identifier + "/karton",
+                                json={"arguments": arguments})
+        res.raise_for_status()
+        return res.json()
+    
+    def get_analysis_info(self, identifier, analysis_id):
+        res = self.session.get(self.mwdb_url + "/object/" + identifier + "/karton/" + analysis_id)
+        res.raise_for_status()
+        return res.json()
+    
+    def assign_analysis_to_object(self, identifier, analysis_id):
+        res = self.session.put(self.mwdb_url + "/object/" + identifier + "/karton/" + analysis_id)
+        res.raise_for_status()
+        return res.json()
+    
+    def unassign_analysis_from_object(self, identifier, analysis_id):
+        res = self.session.delete(self.mwdb_url + "/object/" + identifier + "/karton/" + analysis_id)
+        res.raise_for_status()
+        return res.json()

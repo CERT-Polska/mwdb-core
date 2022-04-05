@@ -80,8 +80,8 @@ def test_file_alternative_name_search(admin_session):
     assert len(found_objs_1) == 1
     assert len(found_objs_2) == 1
     assert len(found_objs_3) == 1
-    assert found_objs_1 == found_objs_2
-    assert found_objs_1 == found_objs_3
+    assert found_objs_1[0]["id"] == found_objs_2[0]["id"]
+    assert found_objs_1[0]["id"] == found_objs_3[0]["id"]
 
     # wildcard search
     found_objs_1_with_wildcard = test.search(f'file.name:{filename_main[:len(filename_main)// 2]}*')
@@ -90,8 +90,8 @@ def test_file_alternative_name_search(admin_session):
     assert len(found_objs_1_with_wildcard) == 1
     assert len(found_objs_2_with_wildcard) == 1
     assert len(found_objs_3_with_wildcard) == 1
-    assert found_objs_1_with_wildcard == found_objs_2_with_wildcard
-    assert found_objs_1_with_wildcard == found_objs_3_with_wildcard
+    assert found_objs_1_with_wildcard[0]["id"] == found_objs_2_with_wildcard[0]["id"]
+    assert found_objs_1_with_wildcard[0]["id"] == found_objs_3_with_wildcard[0]["id"]
 
 
 def test_search_tag(admin_session):
@@ -384,10 +384,6 @@ def test_search_date_time_relative(admin_session):
     assert len(found_objs) == 0
     found_objs = admin_session.search(f'upload_time:[1s TO *] AND tag:{tag}')
     assert len(found_objs) == 0
-    found_objs = admin_session.search(f'upload_time:>=2s AND tag:{tag}')
-    assert len(found_objs) == 1
-    found_objs = admin_session.search(f'upload_time:[2s TO *] AND tag:{tag}')
-    assert len(found_objs) == 1
     found_objs = admin_session.search(f'upload_time:>=4s AND tag:{tag}')
     assert len(found_objs) == 2
     found_objs = admin_session.search(f'upload_time:[4s TO *] AND tag:{tag}')
@@ -416,8 +412,6 @@ def test_search_date_time_relative(admin_session):
     assert len(found_objs) == 2
     found_objs = admin_session.search(f'upload_time:[5y TO *] AND tag:{tag}')
     assert len(found_objs) == 2
-    found_objs = admin_session.search(f'upload_time:[2s TO 1s] AND tag:{tag}')
-    assert len(found_objs) == 1
 
     with ShouldRaise(status_code=400):
         found_objs = admin_session.search(f'upload_time:>=s1 AND tag:{tag}')
@@ -557,6 +551,7 @@ def test_uploader_query(admin_session):
         Bob.session.search(f"uploader:{Alice.identity}")
     ]
     assert sorted(results) == sorted([FileC.dhash])
+
 
 def test_search_multi(admin_session):
     test = admin_session

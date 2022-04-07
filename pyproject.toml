@@ -20,6 +20,9 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3"
 ]
+packages = [
+    { include = "mwdb" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -40,7 +43,7 @@ bcrypt = "3.1.4"
 python-magic = "0.4.18"
 luqum = "0.7.4"
 python-json-logger = "2.0.2"
-click = "7.1.2"
+click = "8.1.2"
 click-default-group = "1.2.2"
 PyYAML = "5.4"
 redis = "3.2.1"

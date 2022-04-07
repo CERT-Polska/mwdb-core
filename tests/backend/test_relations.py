@@ -481,7 +481,7 @@ def test_remove_cycle_relation(admin_session):
 
     a_shares = Alice.session.get_shares(SampleA.dhash)["shares"]
 
-    Alice.session.remove_parent(SampleA.dhash, SampleA.dhash)
+    Alice.session.remove_parent(SampleA.dhash, SampleA)
 
     a_shares_remove = Alice.session.get_shares(SampleA.dhash)["shares"]
 

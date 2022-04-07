@@ -466,3 +466,21 @@ def test_removing_relations(admin_session):
         should_access=[Alice],
         should_not_access=[Bob],
     ).test()
+
+
+def test_remove_cycle_relation(admin_session):
+    testCase = RelationTestCase(admin_session)
+
+    Alice = testCase.new_user("Alice")
+
+    SampleA = testCase.new_sample("SampleA")
+
+    SampleA.create(Alice, parent=SampleA)
+
+    a_shares = Alice.session.get_shares(SampleA.dhash)["shares"]
+
+    Alice.session.remove_parent(SampleA.dhash, SampleA.dhash)
+
+    a_shares_remove = Alice.session.get_shares(SampleA.dhash)["shares"]
+
+    assert a_shares == a_shares_remove

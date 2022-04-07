@@ -475,7 +475,9 @@ def test_remove_cycle_relation(admin_session):
 
     SampleA = testCase.new_sample("SampleA")
 
-    SampleA.create(Alice, parent=SampleA)
+    SampleA.create(Alice)
+
+    SampleA.create(SampleA)
 
     a_shares = Alice.session.get_shares(SampleA.dhash)["shares"]
 

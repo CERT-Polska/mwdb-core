@@ -359,8 +359,9 @@ class Object(db.Model):
 
         try:
             # Remove inherited permissions from parent
-            for share in parent.shares:
-                self.uninherit_share(share)
+            if parent.id != self.id:
+                for share in parent.shares:
+                    self.uninherit_share(share)
             # Remove parent
             self.parents.remove(parent)
             db.session.flush()

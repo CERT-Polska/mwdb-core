@@ -471,7 +471,7 @@ def test_removing_relations(admin_session):
 def test_remove_cycle_relation(admin_session):
     testCase = RelationTestCase(admin_session)
 
-    Alice = testCase.new_user("Alice")
+    Alice = testCase.new_user("Alice", capabilities=["removing_parents"])
 
     SampleA = testCase.new_sample("SampleA")
 

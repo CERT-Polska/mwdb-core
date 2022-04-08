@@ -171,7 +171,8 @@ Webhooks can be used to automatically analyze the uploaded file in sandbox. The 
 Check out `mwdb-plugin-drakvuf <https://github.com/CERT-Polska/mwdb-plugin-drakvuf>`_ on Github!
 
 Available hooks
---------------
+---------------
+
 A lot of hooks have been implemented in MWDB. Each of these hooks is triggered when particular event occurs in system.
 
 

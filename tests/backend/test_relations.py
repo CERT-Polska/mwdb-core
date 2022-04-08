@@ -468,7 +468,7 @@ def test_removing_relations(admin_session):
     ).test()
 
 
-def test_remove_cycle_relation(admin_session):
+def test_remove_self_cycle_relation(admin_session):
     testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice", capabilities=["removing_parents"])
@@ -483,6 +483,6 @@ def test_remove_cycle_relation(admin_session):
 
     Alice.session.remove_parent(SampleA.dhash, SampleA.dhash)
 
-    a_shares_remove = Alice.session.get_shares(SampleA.dhash)["shares"]
+    a_shares_after_remove = Alice.session.get_shares(SampleA.dhash)["shares"]
 
-    assert a_shares == a_shares_remove
+    assert a_shares == a_shares_after_remove

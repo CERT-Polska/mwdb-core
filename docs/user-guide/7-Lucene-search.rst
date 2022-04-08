@@ -158,7 +158,7 @@ Remember that exclusive range is not allowed for date-time field so this is not 
    upload_time:>2020-09-01
 
 Query syntax: relative timestamps
-------------------------
+---------------------------------
 
 .. versionadded:: 2.7.0
 

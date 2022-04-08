@@ -7,6 +7,54 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrade mwdb-core to latest version`.
 
+v2.7.0
+------
+
+Release includes few improvements of security, integration and search capabilities.
+
+Complete changelog can be found here: `v2.7.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.7.0>`_.
+
+[Important change] Changed API key generation and handling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MWDB Core uses JWT tokens for various resources that require special authorization. One of them is managed
+directly by the end user: API keys. In this release, we slightly changed the implementation to improve security and
+make them more compliant with `RFC7519 <https://datatracker.ietf.org/doc/html/rfc7519>`_.
+
+That's why it's recommended to regenerate your API keys at some point after upgrade. All previously generated API keys
+will be honored by further 2.x.x releases of MWDB Core, but should be considered deprecated.
+
+The next important change is that API key token is shown **only just after creation** and token can't be regenerated for
+existing API key.
+
+[New feature] Configurable rate limits
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From now, you doesn't have to rely on arbitrary hardcoded rate limits like before 2.7.0. Now, you're open to configure it
+depending on your needs. You can use different limits for specific endpoints and HTTP methods.
+
+For more information, read :ref:`Rate limit configuration` section.
+
+[New feature] Relative date-time ranges in search
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+v2.7.0 comes with the next improvements in search. The new thing is support for relative date-time ranges.
+
+.. code-block::
+
+   upload_time:>=2h or upload_time:[2h TO *]
+
+For more information, read :ref:`Query syntax: relative timestamps`.
+
+[Improvement] New object hooks accessible for plugins
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In previous versions, MWDB Core was able to notify your plugins only of limited set of simple actions like creation of
+the new object, added tag or comment. From v2.7.0 you are able to integrate with much broader set of actions including
+object removals, changes in attributes and even administrative actions like creation of new user account.
+
+Complete list of hooks can be found in :ref:`Available hooks` section.
+
 v2.6.0
 ------
 
@@ -44,19 +92,19 @@ That's why we decided to migrate from plain strings to `JSONB type <https://www.
 in internal attribute value representation. We also designed a new Attribute API to operate on JSON objects rather than
 simple values.
 
-.. image:: ../_static/json-attribute-add.png
-   :target: ../_static/json-attribute-add.png
+.. image:: _static/json-attribute-add.png
+   :target: _static/json-attribute-add.png
    :alt: Adding JSON attribute
 
-.. image:: ../_static/json-attribute.png
-   :target: ../_static/json-attribute.png
+.. image:: _static/json-attribute.png
+   :target: _static/json-attribute.png
    :alt: JSON attribute
 
 Attribute API is the new set of endpoints and request fields. You can easily recognize them as we name them `attributes`
 instead of `meta(keys)`.
 
-.. image:: ../_static/attribute-swagger.png
-   :target: ../_static/attribute-swagger.png
+.. image:: _static/attribute-swagger.png
+   :target: _static/attribute-swagger.png
    :alt: Attribute API in Docs
 
 For compatibility reasons: deprecated Metakey API just coerces object values to strings. Keep in mind that strings
@@ -69,8 +117,8 @@ when we try to add the same value twice, the second one won't be added.
 Attribute API exposes attribute value identifier that can be used for removing the specific attribute value. Metakeys were identified directly by `key, value` tuple
 but it wasn't convenient for objects because these values can be pretty huge.
 
-.. image:: ../_static/json-attribute-response.png
-   :target: ../_static/json-attribute-response.png
+.. image:: _static/json-attribute-response.png
+   :target: _static/json-attribute-response.png
    :alt: Attribute API response with exposed id
 
 More information can be found in `#413 feature draft on Github <https://github.com/CERT-Polska/mwdb-core/issues/413>`_. At the time of
@@ -103,8 +151,8 @@ Default Web timeout is now a bit longer and set to 20 seconds instead of 8 secon
 
 MWDB stores all unique names for sample that it was uploaded with. They are exposed via "Variant file names" field in Web UI object view.
 
-.. image:: ../_static/alt_names.png
-   :target: ../_static/alt_names.png
+.. image:: _static/alt_names.png
+   :target: _static/alt_names.png
    :alt: Variant file names in sample view
 
 [New feature] Transactional tag adding along with object upload

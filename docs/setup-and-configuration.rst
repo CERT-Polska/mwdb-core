@@ -303,7 +303,9 @@ Registration feature settings:
 
 
 Rate limit configuration
-----------------------
+------------------------
+
+.. versionadded:: 2.7.0
 
 mwdb-core service has implemented rate limiting feature. Each limit for HTTP method can contain a few conditions (space separated).
 

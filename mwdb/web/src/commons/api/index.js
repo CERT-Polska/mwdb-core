@@ -415,10 +415,23 @@ function downloadFile(id) {
     });
 }
 
+function zipFile(id) {
+    return axios.get(`/file/${id}/zip`, {
+        responseType: "arraybuffer",
+        responseEncoding: "binary",
+    });
+}
+
 async function requestFileDownloadLink(id) {
     const response = await axios.post(`/file/${id}/download`);
     const baseURL = getApiForEnvironment();
     return `${baseURL}/file/${id}/download?token=${response.data.token}`;
+}
+
+async function requestZipFileDownloadLink(id) {
+    const response = await axios.post(`/file/${id}/zip`);
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/file/${id}/zip?token=${response.data.token}`;
 }
 
 function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
@@ -606,7 +619,9 @@ const api = {
     setAttributePermission,
     removeAttributePermission,
     downloadFile,
+    zipFile,
     requestFileDownloadLink,
+    requestZipFileDownloadLink,
     uploadFile,
     getRemoteNames,
     pushObjectRemote,

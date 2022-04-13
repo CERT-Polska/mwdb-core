@@ -55,6 +55,7 @@ import {
     faSave,
     faLock,
     faLockOpen,
+    faArchive,
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 

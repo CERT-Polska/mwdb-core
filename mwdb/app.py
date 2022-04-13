@@ -41,9 +41,9 @@ from mwdb.resources.config import (
 from mwdb.resources.download import DownloadResource, RequestSampleDownloadResource
 from mwdb.resources.file import (
     FileDownloadResource,
+    FileDownloadZipResource,
     FileItemResource,
     FileResource,
-    FileDownloadZipResource,
 )
 from mwdb.resources.group import GroupListResource, GroupMemberResource, GroupResource
 from mwdb.resources.karton import KartonAnalysisResource, KartonObjectResource

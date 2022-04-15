@@ -415,13 +415,6 @@ function downloadFile(id) {
     });
 }
 
-function zipFile(id) {
-    return axios.get(`/file/${id}/zip`, {
-        responseType: "arraybuffer",
-        responseEncoding: "binary",
-    });
-}
-
 async function requestFileDownloadLink(id) {
     const response = await axios.post(`/file/${id}/download`);
     const baseURL = getApiForEnvironment();
@@ -520,6 +513,12 @@ function downloadRemoteFile(remote, id) {
 }
 
 async function requestRemoteFileDownloadLink(remote, id) {
+    const response = await axios.post(`/remote/${remote}/api/file/${id}/zip`);
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/remote/${remote}/api/file/${id}/zip?token=${response.data.token}`;
+}
+
+async function requestRemoteZipFileDownloadLink(remote, id) {
     const response = await axios.post(
         `/remote/${remote}/api/file/${id}/download`
     );
@@ -619,7 +618,6 @@ const api = {
     setAttributePermission,
     removeAttributePermission,
     downloadFile,
-    zipFile,
     requestFileDownloadLink,
     requestZipFileDownloadLink,
     uploadFile,
@@ -641,6 +639,7 @@ const api = {
     getRemoteObjectAttributes,
     downloadRemoteFile,
     requestRemoteFileDownloadLink,
+    requestRemoteZipFileDownloadLink,
     getKartonAnalysesList,
     getKartonAnalysisStatus,
     resubmitKartonAnalysis,

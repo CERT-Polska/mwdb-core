@@ -24,7 +24,7 @@ export default function RemoteAPI({ children }) {
             downloadFile: (id) => api.downloadRemoteFile(remote, id),
             requestFileDownloadLink: (id) =>
                 api.requestRemoteFileDownloadLink(remote, id),
-            requestZipFileDownloadLink: (id) =>
+            requestRemoteZipFileDownloadLink: (id) =>
                 api.requestZipFileDownloadLink(remote, id),
         }),
         [remote]

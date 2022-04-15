@@ -422,9 +422,9 @@ async function requestFileDownloadLink(id) {
 }
 
 async function requestZipFileDownloadLink(id) {
-    const response = await axios.post(`/file/${id}/zip`);
+    const response = await axios.post(`/file/${id}/download/zip`);
     const baseURL = getApiForEnvironment();
-    return `${baseURL}/file/${id}/zip?token=${response.data.token}`;
+    return `${baseURL}/file/${id}/download/zip?token=${response.data.token}`;
 }
 
 function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
@@ -513,17 +513,19 @@ function downloadRemoteFile(remote, id) {
 }
 
 async function requestRemoteFileDownloadLink(remote, id) {
-    const response = await axios.post(`/remote/${remote}/api/file/${id}/zip`);
-    const baseURL = getApiForEnvironment();
-    return `${baseURL}/remote/${remote}/api/file/${id}/zip?token=${response.data.token}`;
-}
-
-async function requestRemoteZipFileDownloadLink(remote, id) {
     const response = await axios.post(
         `/remote/${remote}/api/file/${id}/download`
     );
     const baseURL = getApiForEnvironment();
     return `${baseURL}/remote/${remote}/api/file/${id}/download?token=${response.data.token}`;
+}
+
+async function requestRemoteZipFileDownloadLink(remote, id) {
+    const response = await axios.post(
+        `/remote/${remote}/api/file/${id}/download/zip`
+    );
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/remote/${remote}/api/file/${id}/download/zip?token=${response.data.token}`;
 }
 
 function getKartonAnalysesList(id) {

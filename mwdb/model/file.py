@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 
+import pyzipper
 from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
@@ -269,6 +270,23 @@ class File(Object):
         fh.close()
         if hasattr(fh, "release_conn"):
             fh.release_conn()
+
+    def zip_file(self):
+        secret_password = b"infected"
+
+        with tempfile.NamedTemporaryFile() as writer:
+            with open(writer.name, "rb") as reader:
+                with pyzipper.AESZipFile(
+                    writer,
+                    "w",
+                    compression=pyzipper.ZIP_LZMA,
+                    encryption=pyzipper.WZ_AES,
+                ) as zipwriter:
+                    zipwriter.setpassword(secret_password)
+                    zipwriter.writestr(self.file_name, self.read())
+                    yield reader.read()
+                writer.flush()
+                yield reader.read()
 
     def release_after_upload(self):
         """

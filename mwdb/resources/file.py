@@ -474,10 +474,10 @@ class FileDownloadZipResource(Resource):
         ---
         summary: Download zipped file
         description: |
-            Returns file contents.
+            Returns zipped file contents.
 
             Optionally accepts file download token to get
-            the file via direct link (without Authorization header)
+            the zipped file via direct link (without Authorization header)
         security:
             - bearerAuth: []
         tags:
@@ -493,11 +493,11 @@ class FileDownloadZipResource(Resource):
               schema:
                 type: string
               description: |
-                File download token for direct link purpose
+                Zipped file download token for direct link purpose
               required: false
         responses:
             200:
-                description: File contents
+                description: Zipped file contents
                 content:
                   application/octet-stream:
                     schema:

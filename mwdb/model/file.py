@@ -281,9 +281,9 @@ class File(Object):
                     "w",
                     compression=pyzipper.ZIP_LZMA,
                     encryption=pyzipper.WZ_AES,
-                ) as zipwriter:
-                    zipwriter.setpassword(secret_password)
-                    zipwriter.writestr(self.file_name, self.read())
+                ) as zf:
+                    zf.setpassword(secret_password)
+                    zf.writestr(self.file_name, self.read())
                     yield reader.read()
                 writer.flush()
                 yield reader.read()

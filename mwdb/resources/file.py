@@ -465,3 +465,120 @@ class FileDownloadResource(Resource):
         download_token = file.generate_download_token()
         schema = FileDownloadTokenResponseSchema()
         return schema.dump({"token": download_token})
+
+
+@rate_limited_resource
+class FileDownloadZipResource(Resource):
+    def get(self, identifier):
+        """
+        ---
+        summary: Download zipped file
+        description: |
+            Returns zipped file contents, encrypted using password "infected".
+
+            Optionally accepts file download token to get
+            the zipped file via direct link (without Authorization header)
+        security:
+            - bearerAuth: []
+        tags:
+            - file
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: File identifier (SHA256/SHA512/SHA1/MD5)
+            - in: query
+              name: token
+              schema:
+                type: string
+              description: |
+                Zipped file download token for direct link purpose
+              required: false
+        responses:
+            200:
+                description: Zipped file contents
+                content:
+                  application/octet-stream:
+                    schema:
+                      type: string
+                      format: binary
+            403:
+                description: |
+                    When file download token is no longer valid
+                    or was generated for different object
+            404:
+                description: |
+                    When file doesn't exist, object is not a file
+                    or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        access_token = request.args.get("token")
+
+        if access_token:
+            file_obj = File.get_by_download_token(access_token)
+            if not file_obj:
+                raise Forbidden("Download token expired, please re-request download.")
+            if not (
+                file_obj.sha1 == identifier
+                or file_obj.sha256 == identifier
+                or file_obj.sha512 == identifier
+                or file_obj.md5 == identifier
+            ):
+                raise Forbidden(
+                    "Download token doesn't apply to the chosen object. "
+                    "Please re-request download."
+                )
+        else:
+            if not g.auth_user:
+                raise Unauthorized("Not authenticated.")
+            file_obj = File.access(identifier)
+            if file_obj is None:
+                raise NotFound("Object not found")
+
+        return Response(
+            file_obj.zip_file(),
+            content_type="application/octet-stream",
+            headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"},
+        )
+
+    @requires_authorization
+    def post(self, identifier):
+        """
+        ---
+        summary: Generate zip file download token
+        description: |
+            Returns download token for given zipped file.
+        security:
+            - bearerAuth: []
+        tags:
+            - file
+        parameters:
+            - in: path
+              name: identifier
+              description: Requested file identifier (SHA256/MD5/SHA1/SHA512)
+              schema:
+                type: string
+        responses:
+            200:
+                description: File download token, valid for 60 seconds
+                content:
+                  application/json:
+                    schema: FileDownloadTokenResponseSchema
+            404:
+                description: |
+                    When file doesn't exist, object is not a file
+                    or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        file = File.access(identifier)
+        if file is None:
+            raise NotFound("Object not found")
+
+        download_token = file.generate_download_token()
+        schema = FileDownloadTokenResponseSchema()
+        return schema.dump({"token": download_token})

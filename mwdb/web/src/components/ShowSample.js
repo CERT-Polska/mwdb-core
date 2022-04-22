@@ -9,6 +9,7 @@ import {
     LatestConfigTab,
     RelationsTab,
     DownloadAction,
+    ZipAction,
     FavoriteAction,
     PushAction,
     PullAction,
@@ -297,6 +298,10 @@ export default function ShowSample(props) {
         window.location.href = await api.requestFileDownloadLink(object.id);
     }
 
+    async function zipSample(object) {
+        window.location.href = await api.requestZipFileDownloadLink(object.id);
+    }
+
     return (
         <ShowObject
             ident="showSample"
@@ -316,6 +321,7 @@ export default function ShowSample(props) {
                     <PullAction />,
                     <UploadChildAction />,
                     <FavoriteAction />,
+                    <ZipAction zip={zipSample} />,
                     <DownloadAction download={downloadSample} />,
                 ]}
             />

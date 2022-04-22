@@ -474,7 +474,7 @@ class FileDownloadZipResource(Resource):
         ---
         summary: Download zipped file
         description: |
-            Returns zipped file contents.
+            Returns zipped file contents, encrypted using password "infected".
 
             Optionally accepts file download token to get
             the zipped file via direct link (without Authorization header)

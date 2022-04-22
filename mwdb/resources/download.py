@@ -93,7 +93,5 @@ class RequestSampleDownloadResource(Resource):
 
         download_token = file.generate_download_token()
         schema = DownloadURLResponseSchema()
-        url = api.relative_url_for(
-            DownloadResource, access_token=download_token.decode()
-        )
+        url = api.relative_url_for(DownloadResource, access_token=download_token)
         return schema.dump({"url": url})

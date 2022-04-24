@@ -12,9 +12,16 @@ postgres_uri = {{ postgres_uri }}
 secret_key = {{ secret_key }}
 uploads_folder = {{ uploads_folder }}
 base_url = {{ base_url }}
-file_upload_timeout = {{ file_upload_timeout }}
-statement_timeout = {{ statement_timeout }}
-request_timeout = {{ request_timeout }}
+
+# Set longer timeout values if your queries last too long.
+# request_timeout = 20000
+# file_upload_timeout = 60000
+
+# Timeouts are recommended values for client-side and SQL queries are not interrupted
+# by finished connection. These timeouts doesn't have to be respected by the client.
+# If you want to control timeout on the backend (database) side, set statement_timeout
+# to desired number of milliseconds.
+# statement_timeout = 0
 
 ### Web application settings
 

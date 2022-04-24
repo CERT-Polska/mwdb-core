@@ -697,13 +697,15 @@ class Object(db.Model):
         db_tag.tag = tag_name
         db_tag, _ = Tag.get_or_create(db_tag)
 
+        if db_tag in self.tags:
+            return False
+
         is_new = False
         db.session.begin_nested()
         try:
-            if db_tag not in self.tags:
-                self.tags.append(db_tag)
-                db.session.commit()
-                is_new = True
+            self.tags.append(db_tag)
+            db.session.commit()
+            is_new = True
         except IntegrityError:
             db.session.rollback()
             db.session.refresh(self)
@@ -726,13 +728,15 @@ class Object(db.Model):
         else:
             db_tag = db_tag.one()
 
+        if db_tag not in self.tags:
+            return False
+
         is_removed = False
         db.session.begin_nested()
         try:
-            if db_tag in self.tags:
-                self.tags.remove(db_tag)
-                db.session.commit()
-                is_removed = True
+            self.tags.remove(db_tag)
+            db.session.commit()
+            is_removed = True
         except IntegrityError:
             db.session.rollback()
             db.session.refresh(self)
@@ -969,13 +973,15 @@ class Object(db.Model):
         if db_analysis is None:
             return False
 
+        if db_analysis not in self.analyses:
+            return False
+
         is_removed = False
         db.session.begin_nested()
         try:
-            if db_analysis in self.analyses:
-                self.analyses.remove(db_analysis)
-                db.session.commit()
-                is_removed = True
+            self.analyses.remove(db_analysis)
+            db.session.commit()
+            is_removed = True
         except IntegrityError:
             db.session.rollback()
             db.session.refresh(self)

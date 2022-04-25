@@ -243,7 +243,7 @@ export default function Navigation() {
             <Link className="navbar-brand" to="/">
                 <Extendable ident="navbarLogo">
                     <img src={logo} alt="logo" className="logo" />
-                    mwdb
+                    {config.config["instance_name"]}
                 </Extendable>
             </Link>
             <button

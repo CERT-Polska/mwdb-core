@@ -23,6 +23,7 @@ export const Capability = {
     personalize: "personalize",
     kartonAssign: "karton_assign",
     kartonReanalyze: "karton_reanalyze",
+    removingKarton: "karton_unassign",
 };
 
 export let capabilitiesList = {
@@ -54,6 +55,7 @@ export let capabilitiesList = {
     [Capability.kartonAssign]:
         "Can assign existing analysis to the object (required by karton-mwdb-reporter)",
     [Capability.kartonReanalyze]: "Can resubmit any object for analysis",
+    [Capability.removingKarton]: "Can remove analysis from object",
 };
 
 for (let extraCapabilities of fromPlugin("capabilities")) {

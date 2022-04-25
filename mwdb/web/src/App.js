@@ -55,6 +55,8 @@ import {
     faStar,
     faEdit,
     faSave,
+    faLock,
+    faLockOpen,
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
@@ -91,6 +93,8 @@ library.add(faStar);
 library.add(farStar);
 library.add(faEdit);
 library.add(faSave);
+library.add(faLock);
+library.add(faLockOpen);
 
 function DefaultRoute() {
     const location = useLocation();

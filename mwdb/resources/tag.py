@@ -5,6 +5,7 @@ from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import ObjectPermission, Tag, db, object_tag_table
 from mwdb.schema.tag import (
     TagItemResponseSchema,
@@ -22,6 +23,7 @@ from . import (
 )
 
 
+@rate_limited_resource
 class TagListResource(Resource):
     @requires_authorization
     def get(self):
@@ -81,6 +83,7 @@ class TagListResource(Resource):
         return schema.dump(tags)
 
 
+@rate_limited_resource
 class TagResource(Resource):
     @requires_authorization
     def get(self, type, identifier):
@@ -193,10 +196,13 @@ class TagResource(Resource):
 
         logger.info("Tag added", extra={"tag": tag_name, "dhash": db_object.dhash})
         db.session.refresh(db_object)
-        if is_new:
-            hooks.on_created_tag(db_object, tag_name)
-        else:
-            hooks.on_reuploaded_tag(db_object, tag_name)
+
+        tag = next((t for t in db_object.tags if t.tag == tag_name), None)
+        if is_new and tag:
+            hooks.on_created_tag(db_object, tag)
+            hooks.on_changed_object(db_object)
+        elif tag:
+            hooks.on_reuploaded_tag(db_object, tag)
 
         schema = TagItemResponseSchema(many=True)
         return schema.dump(db_object.tags)
@@ -262,10 +268,14 @@ class TagResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
+        tag_to_delete = next((t for t in db_object.tags if t.tag == obj["tag"]), None)
         tag_name = obj["tag"]
-        db_object.remove_tag(tag_name)
+        is_removed = db_object.remove_tag(tag_name)
 
         logger.info("Tag removed", extra={"tag": tag_name, "dhash": db_object.dhash})
         db.session.refresh(db_object)
+        if is_removed and tag_to_delete:
+            hooks.on_removed_tag(db_object, tag_to_delete)
+            hooks.on_changed_object(db_object)
         schema = TagItemResponseSchema(many=True)
         return schema.dump(db_object.tags)

@@ -7,6 +7,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Config, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobCreateSpecSchema
@@ -23,6 +24,7 @@ from . import load_schema, loads_schema, requires_authorization, requires_capabi
 from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
+@rate_limited_resource
 class ConfigStatsResource(Resource):
     @requires_authorization
     def get(self):
@@ -154,7 +156,9 @@ class ConfigUploader(ObjectUploader):
             raise Conflict("Object already exists and is not a config")
 
 
+@rate_limited_resource
 class ConfigResource(ObjectResource, ConfigUploader):
+
     ObjectType = Config
     ListResponseSchema = ConfigListResponseSchema
     ItemResponseSchema = ConfigItemResponseSchema
@@ -250,8 +254,14 @@ class ConfigResource(ObjectResource, ConfigUploader):
                       metakeys:
                        - key: string
                          value: string
+                      attributes:
+                       - key: string
+                         value: string
                       tags:
                        - tag: string
+                      karton_id: string
+                      karton_arguments:
+                       string: string
         responses:
             200:
                 description: Information about uploaded config
@@ -281,10 +291,15 @@ class ConfigResource(ObjectResource, ConfigUploader):
         return self.create_object(obj)
 
 
+@rate_limited_resource
 class ConfigItemResource(ObjectItemResource, ConfigUploader):
+
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
     CreateRequestSchema = ConfigLegacyCreateRequestSchema
+
+    def call_specialised_remove_hook(self, config):
+        hooks.on_removed_config(config)
 
     @requires_authorization
     def get(self, identifier):

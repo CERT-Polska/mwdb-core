@@ -40,13 +40,14 @@ def main(new_version):
 
         pattern = VERSION_FILES[path].replace("$VERSION", VERSION_REGEX)
         version = next(re.finditer(pattern, content)).group(1)
-        output_files[path] = re.sub(pattern, subst_version, content, count=1)
+        output_files[path] = re.sub(pattern, subst_version, content)
 
         if old_version is not None and version != old_version:
             print(
                 f"[!] {str(path)} contains different version than other files "
                 f"({version} != {old_version})"
             )
+            return
         old_version = version
 
     for path in VERSION_FILES.keys():

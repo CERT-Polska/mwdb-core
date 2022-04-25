@@ -9,8 +9,10 @@ from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFoun
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import AttributeDefinition, Object, db
+from mwdb.model.tag import Tag
 from mwdb.schema.object import (
     ObjectCountRequestSchema,
     ObjectCountResponseSchema,
@@ -44,6 +46,11 @@ class ObjectUploader:
         if app_config.mwdb.enable_karton and not object.is_analyzed():
             object.spawn_analysis(arguments=params.get("karton_arguments", {}))
         hooks.on_created_object(object)
+        tags = params.get("tags")
+        for tag in tags:
+            db_tag = Tag(tag=tag["tag"])
+            db_tag, _ = Tag.get_or_create(db_tag)
+            hooks.on_created_tag(object, db_tag)
 
     def on_reuploaded(self, object, params):
         hooks.on_reuploaded_object(object)
@@ -137,6 +144,7 @@ class ObjectUploader:
         return schema.dump(item)
 
 
+@rate_limited_resource
 class ObjectResource(Resource):
     ObjectType = Object
     ListResponseSchema = ObjectListResponseSchema
@@ -230,11 +238,14 @@ class ObjectResource(Resource):
         return schema.dump(objects, many=True)
 
 
+@rate_limited_resource
 class ObjectItemResource(Resource, ObjectUploader):
     ObjectType = Object
     ItemResponseSchema = ObjectItemResponseSchema
-
     CreateRequestSchema = None
+
+    def call_specialised_remove_hook(self, obj):
+        pass
 
     @requires_authorization
     def get(self, identifier):
@@ -349,7 +360,11 @@ class ObjectItemResource(Resource, ObjectUploader):
         db.session.delete(obj)
         db.session.commit()
 
+        self.call_specialised_remove_hook(obj)
+        hooks.on_removed_object(obj)
 
+
+@rate_limited_resource
 class ObjectCountResource(Resource):
     @requires_authorization
     def get(self, type):
@@ -413,6 +428,7 @@ class ObjectCountResource(Resource):
         return schema.dump({"count": result})
 
 
+@rate_limited_resource
 class ObjectFavoriteResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.personalize)
@@ -469,6 +485,7 @@ class ObjectFavoriteResource(Resource):
             )
 
     @requires_authorization
+    @requires_capabilities(Capabilities.personalize)
     def delete(self, identifier):
         """
         ---

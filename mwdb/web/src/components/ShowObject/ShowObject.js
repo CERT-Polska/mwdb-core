@@ -16,9 +16,11 @@ import TagBox from "./Views/TagBox";
 import AttributesBox from "./Views/AttributesBox";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
+import { ConfigContext } from "@mwdb-web/commons/config";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/extensions";
 import { View } from "@mwdb-web/commons/ui";
+import KartonAnalysisBox from "./Views/KartonAnalysisBox";
 
 const initialObjectState = {
     object: null,
@@ -50,6 +52,7 @@ export default function ShowObject({
     searchEndpoint,
 }) {
     const api = useContext(APIContext);
+    const config = useContext(ConfigContext);
     const [objectState, setObjectState] = useReducer(
         objectStateReducer,
         initialObjectState
@@ -108,6 +111,11 @@ export default function ShowObject({
                         <Extendable ident="showObjectRightColumn">
                             <TagBox />
                             <MultiRelationsBox />
+                            {config.config["is_karton_enabled"] ? (
+                                <KartonAnalysisBox />
+                            ) : (
+                                []
+                            )}
                             <ShareBox />
                             <CommentBox />
                         </Extendable>

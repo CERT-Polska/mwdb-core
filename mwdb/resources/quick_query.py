@@ -3,12 +3,14 @@ from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import QuickQuery, db
 from mwdb.schema.quick_query import QuickQueryResponseSchema, QuickQuerySchemaBase
 
 from . import loads_schema, logger, requires_authorization, requires_capabilities
 
 
+@rate_limited_resource
 class QuickQueryResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.personalize)
@@ -97,6 +99,7 @@ class QuickQueryResource(Resource):
         return schema.dump(quick_queries)
 
 
+@rate_limited_resource
 class QuickQueryItemResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.personalize)

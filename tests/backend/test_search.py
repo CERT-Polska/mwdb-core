@@ -80,8 +80,8 @@ def test_file_alternative_name_search(admin_session):
     assert len(found_objs_1) == 1
     assert len(found_objs_2) == 1
     assert len(found_objs_3) == 1
-    assert found_objs_1 == found_objs_2
-    assert found_objs_1 == found_objs_3
+    assert found_objs_1[0]["id"] == found_objs_2[0]["id"]
+    assert found_objs_1[0]["id"] == found_objs_3[0]["id"]
 
     # wildcard search
     found_objs_1_with_wildcard = test.search(f'file.name:{filename_main[:len(filename_main)// 2]}*')
@@ -90,8 +90,8 @@ def test_file_alternative_name_search(admin_session):
     assert len(found_objs_1_with_wildcard) == 1
     assert len(found_objs_2_with_wildcard) == 1
     assert len(found_objs_3_with_wildcard) == 1
-    assert found_objs_1_with_wildcard == found_objs_2_with_wildcard
-    assert found_objs_1_with_wildcard == found_objs_3_with_wildcard
+    assert found_objs_1_with_wildcard[0]["id"] == found_objs_2_with_wildcard[0]["id"]
+    assert found_objs_1_with_wildcard[0]["id"] == found_objs_3_with_wildcard[0]["id"]
 
 
 def test_search_tag(admin_session):
@@ -366,6 +366,58 @@ def test_search_date_time_unbounded(admin_session):
     with ShouldRaise(status_code=400):
         found_objs = test.search(f'upload_time:"<{now}" AND tag:{tag}')
 
+        
+def test_search_date_time_relative(admin_session):
+    filename_1 = base62uuid()
+    file_content_1 = b"abc" * 500 + rand_string(30).encode("utf-8")
+    sample_1 = admin_session.add_sample(filename_1, file_content_1)
+    time.sleep(1)
+    filename_2 = base62uuid()
+    file_content_2 = b"abc" * 500 + rand_string(30).encode("utf-8")
+    sample_2 = admin_session.add_sample(filename_2, file_content_2)
+    tag = rand_string(20)
+    admin_session.add_tag(sample_1["id"], tag)
+    admin_session.add_tag(sample_2["id"], tag)
+    time.sleep(1)
+    
+    found_objs = admin_session.search(f'upload_time:>=1s AND tag:{tag}')
+    assert len(found_objs) == 0
+    found_objs = admin_session.search(f'upload_time:[1s TO *] AND tag:{tag}')
+    assert len(found_objs) == 0
+    found_objs = admin_session.search(f'upload_time:>=4s AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:[4s TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:>=1M AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:[1M TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:>=1h AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:[1h TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:>=1d AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:[1d TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:>=1w AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:[1w TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:>=2m AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:[2m TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:>=5y AND tag:{tag}')
+    assert len(found_objs) == 2
+    found_objs = admin_session.search(f'upload_time:[5y TO *] AND tag:{tag}')
+    assert len(found_objs) == 2
+
+    with ShouldRaise(status_code=400):
+        found_objs = admin_session.search(f'upload_time:>=s1 AND tag:{tag}')
+    with ShouldRaise(status_code=400):
+        found_objs = admin_session.search(f'upload_time:>=1x AND tag:{tag}')
+
 
 def test_search_no_access_to_parent(admin_session):
     filename = base62uuid()
@@ -499,6 +551,7 @@ def test_uploader_query(admin_session):
         Bob.session.search(f"uploader:{Alice.identity}")
     ]
     assert sorted(results) == sorted([FileC.dhash])
+
 
 def test_search_multi(admin_session):
     test = admin_session

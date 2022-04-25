@@ -2,13 +2,7 @@ import React, { useState, useRef } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useLocation } from "react-router-dom";
 
-import {
-    faCopy,
-    faChevronUp,
-    faChevronDown,
-    faPlus,
-    faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "@mwdb-web/commons/api";
@@ -72,18 +66,6 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
 
     function closeKeyNameModal() {
         setApiKeyNameModalOpened(false);
-    }
-
-    async function getApiToken(apiKeyId) {
-        try {
-            setCurrentApiToken({
-                id: apiKeyId,
-            });
-            const response = await api.apiKeyGetToken(apiKeyId);
-            setCurrentApiToken(response.data);
-        } catch (error) {
-            viewAlert.setAlert({ error });
-        }
     }
 
     async function createApiKey(name) {
@@ -162,25 +144,6 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
                                 : []}
                         </p>
                         <a
-                            href="#show-token"
-                            className="card-link"
-                            onClick={(ev) => {
-                                ev.preventDefault();
-                                if (currentApiToken.id !== apiKey.id)
-                                    getApiToken(apiKey.id);
-                                else setCurrentApiToken({});
-                            }}
-                        >
-                            <FontAwesomeIcon
-                                icon={
-                                    currentApiToken.id === apiKey.id
-                                        ? faChevronUp
-                                        : faChevronDown
-                                }
-                            />{" "}
-                            Show token
-                        </a>
-                        <a
                             href="#remove-key"
                             className="card-link text-danger"
                             onClick={(ev) => {
@@ -198,6 +161,16 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
                             }
                         >
                             <div className="card card-body border-primary">
+                                <div
+                                    className="text-monospace"
+                                    style={{ margin: "8pt 0" }}
+                                >
+                                    <b>
+                                        Api key token will be shown only once,
+                                        copy its value because it will not be
+                                        visible again.
+                                    </b>
+                                </div>
                                 <div
                                     className="text-monospace"
                                     style={{ margin: "8pt 0" }}

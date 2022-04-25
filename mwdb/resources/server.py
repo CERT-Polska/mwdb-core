@@ -5,6 +5,7 @@ from mwdb.core.app import api
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import get_plugin_info
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.schema.server import (
     ServerAdminInfoResponseSchema,
     ServerInfoResponseSchema,
@@ -15,6 +16,7 @@ from mwdb.version import app_build_version
 from . import requires_authorization, requires_capabilities
 
 
+@rate_limited_resource
 class PingResource(Resource):
     def get(self):
         """
@@ -36,6 +38,7 @@ class PingResource(Resource):
         return schema.dump({"status": "ok"})
 
 
+@rate_limited_resource
 class ServerInfoResource(Resource):
     def get(self):
         """
@@ -56,17 +59,20 @@ class ServerInfoResource(Resource):
             {
                 "server_version": app_build_version,
                 "is_authenticated": bool(g.auth_user),
+                "instance_name": app_config.mwdb.instance_name,
                 "is_maintenance_set": app_config.mwdb.enable_maintenance,
                 "is_registration_enabled": app_config.mwdb.enable_registration,
                 "is_karton_enabled": app_config.mwdb.enable_karton,
                 "is_oidc_enabled": app_config.mwdb.enable_oidc,
                 "recaptcha_site_key": app_config.mwdb.recaptcha_site_key,
+                "request_timeout": app_config.mwdb.request_timeout,
                 "file_upload_timeout": app_config.mwdb.file_upload_timeout,
                 "statement_timeout": app_config.mwdb.statement_timeout,
             }
         )
 
 
+@rate_limited_resource
 class ServerAdminInfoResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -102,6 +108,7 @@ class ServerAdminInfoResource(Resource):
         )
 
 
+@rate_limited_resource
 class ServerDocsResource(Resource):
     @requires_authorization
     def get(self):

@@ -11,9 +11,23 @@ services:
       - redis
     image: certpl/mwdb
     restart: on-failure
-    env_file:
-      # NOTE: use gen_vars.sh in order to generate this file
-      - mwdb-vars.env
+    environment:
+      MWDB_ENABLE_KARTON: 1
+      MWDB_REDIS_URI: redis://redis/
+      MWDB_POSTGRES_URI: postgresql://mwdb:e2e-postgres-password@postgres/mwdb
+      # Hardcoded secret key for consistent JWT testing
+      MWDB_SECRET_KEY: e2e-testing-key
+      MWDB_ADMIN_LOGIN: admin
+      MWDB_ADMIN_EMAIL: admin@localhost
+      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
+      MWDB_BASE_URL: http://127.0.0.1
+      MWDB_ENABLE_RATE_LIMIT: 0
+      MWDB_ENABLE_REGISTRATION: 1
+      UWSGI_PROCESSES: 4
+      MWDB_MAIL_SMTP: "mailhog:1025"
+      MWDB_MAIL_FROM: "noreply@mwdb.dev"
+    volumes:
+    - "./dev/karton.ini:/etc/karton/karton.ini"
   mwdb-web:
     depends_on:
       - mwdb
@@ -27,23 +41,100 @@ services:
   postgres:
     image: postgres
     restart: always
-    env_file:
-      # NOTE: use gen_vars.sh in order to generate this file
-      - postgres-vars.env
+    environment:
+      POSTGRES_USER: mwdb
+      POSTGRES_DB: mwdb
+      POSTGRES_PASSWORD: e2e-postgres-password
   mwdb-tests:
     build: tests/backend
     depends_on:
       - mwdb
+      - mwdb-web
+      - mailhog
+      - karton-system
+      - karton-classifier
+      - karton-dashboard
+      - karton-mwdb-reporter
     image: certpl/mwdb-tests
-    env_file:
-      - mwdb-vars.env
+    environment:
+      MWDB_ADMIN_LOGIN: admin
+      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
+      MWDB_URL: http://mwdb-web./api
   web-tests:
     build: tests/frontend
     depends_on:
       - mwdb
       - mwdb-web
+      - mailhog
+      - karton-system
+      - karton-classifier
+      - karton-dashboard
+      - karton-mwdb-reporter
     image: certpl/mwdb-web-tests
-    env_file:
-      - mwdb-vars.env
+    environment:
+      MWDB_ADMIN_LOGIN: admin
+      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
   redis:
     image: redis:alpine
+  minio:
+    image: minio/minio
+    command: server /data
+    volumes:
+      - /tmp/minio:/data
+    ports:
+      - "127.0.0.1:9000:9000"
+    environment:
+      - MINIO_ACCESS_KEY=mwdb-test-access
+      - MINIO_SECRET_KEY=mwdb-test-key
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "127.0.0.1:8025:8025"
+  karton-system:
+    image: certpl/karton-system:79ffabd3607406f1cc494b024b44f4dd1a753095
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - "./dev/karton.ini:/etc/karton/karton.ini"
+    entrypoint: karton-system
+    command: --setup-bucket
+    environment:
+      KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
+      KARTON_MWDB_USERNAME: admin
+      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password
+  karton-classifier:
+    image: certpl/karton-classifier:8f02c6e5188414f28d37515d903ce2b6955bc768
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - "./dev/karton.ini:/etc/karton/karton.ini"
+    environment:
+      KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
+      KARTON_MWDB_USERNAME: admin
+      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password
+  karton-dashboard:
+    image: certpl/karton-dashboard:7b8ec871c4902cc7236eaa4782d9f7acdbc8809c
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - "./dev/karton.ini:/etc/karton/karton.ini"
+    ports:
+      - "127.0.0.1:8030:5000"
+    environment:
+      KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
+      KARTON_MWDB_USERNAME: admin
+      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password
+  karton-mwdb-reporter:
+    image: certpl/karton-mwdb-reporter:6f935f6dfbf459e278a496586b581b4ba0d4cbad
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - "./dev/karton.ini:/etc/karton/karton.ini"
+    environment:
+      KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
+      KARTON_MWDB_USERNAME: admin
+      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password

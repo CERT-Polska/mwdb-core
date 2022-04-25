@@ -3,7 +3,9 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.model import AttributeDefinition, AttributePermission, Group, db
+from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
+from mwdb.model import Attribute, AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.attribute import (
     AttributeDefinitionCreateRequestSchema,
     AttributeDefinitionItemResponseSchema,
@@ -29,6 +31,7 @@ from . import (
 )
 
 
+@rate_limited_resource
 class AttributeListResource(Resource):
     @requires_authorization
     def get(self, type, identifier):
@@ -165,10 +168,15 @@ class AttributeListResource(Resource):
         db.session.commit()
         db.session.refresh(db_object)
         attributes = db_object.get_attributes(show_karton=False)
+        attribute = next((attr for attr in attributes if attr.key == key), None)
+        if is_new:
+            hooks.on_created_attribute(db_object, attribute)
+            hooks.on_changed_object(db_object)
         schema = AttributeListResponseSchema()
         return schema.dump({"attributes": attributes})
 
 
+@rate_limited_resource
 class AttributeResource(Resource):
     @requires_authorization
     @requires_capabilities("removing_attributes")
@@ -220,6 +228,7 @@ class AttributeResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
+        attribute_to_delete = Attribute.get_by_id(db_object.id, attribute_id).first()
         is_deleted = db_object.remove_attribute_by_id(attribute_id)
         if is_deleted is False:
             raise NotFound(
@@ -227,8 +236,11 @@ class AttributeResource(Resource):
                 "insufficient permissions to delete it"
             )
         db.session.commit()
+        hooks.on_removed_attribute(db_object, attribute_to_delete)
+        hooks.on_changed_object(db_object)
 
 
+@rate_limited_resource
 class AttributeDefinitionListResource(Resource):
     @requires_authorization
     def get(self):
@@ -344,10 +356,12 @@ class AttributeDefinitionListResource(Resource):
         db.session.add(attribute_definition)
         db.session.commit()
 
+        hooks.on_created_attribute_key(attribute_definition)
         schema = AttributeDefinitionItemResponseSchema()
         return schema.dump(attribute_definition)
 
 
+@rate_limited_resource
 class AttributeDefinitionResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -464,6 +478,7 @@ class AttributeDefinitionResource(Resource):
 
         db.session.commit()
         logger.info("Attribute updated", extra=obj)
+        hooks.on_updated_attribute_key(attribute_definition)
 
         schema = AttributeDefinitionItemResponseSchema()
         return schema.dump(attribute_definition)
@@ -508,8 +523,10 @@ class AttributeDefinitionResource(Resource):
             raise NotFound("No such attribute key")
         db.session.delete(attribute_definition)
         db.session.commit()
+        hooks.on_removed_attribute_key(attribute_definition)
 
 
+@rate_limited_resource
 class AttributePermissionResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)

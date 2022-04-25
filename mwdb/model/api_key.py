@@ -1,11 +1,10 @@
 import datetime
 import uuid
 
-from itsdangerous import BadSignature, JSONWebSignatureSerializer, SignatureExpired
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm.exc import NoResultFound
 
-from mwdb.core.config import app_config
+from mwdb.core.auth import AuthScope, generate_token, verify_legacy_token, verify_token
 
 from . import db
 
@@ -29,16 +28,13 @@ class APIKey(db.Model):
 
     @staticmethod
     def verify_token(token):
-        s = JSONWebSignatureSerializer(app_config.mwdb.secret_key)
-        try:
-            data = s.loads(token)
-        except SignatureExpired:
-            return None
-        except BadSignature:
-            return None
+        data = verify_token(token, scope=AuthScope.api_key)
 
-        if "api_key_id" not in data:
-            return None
+        if data is None:
+            # check for legacy API Token
+            data = verify_legacy_token(token, required_fields={"login", "api_key_id"})
+            if data is None:
+                return None
 
         try:
             api_key_obj = APIKey.query.filter(
@@ -50,5 +46,7 @@ class APIKey(db.Model):
         return api_key_obj.user
 
     def generate_token(self):
-        s = JSONWebSignatureSerializer(app_config.mwdb.secret_key)
-        return s.dumps({"login": self.user.login, "api_key_id": str(self.id)})
+        return generate_token(
+            {"login": self.user.login, "api_key_id": str(self.id)},
+            scope=AuthScope.api_key,
+        )

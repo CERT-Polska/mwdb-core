@@ -359,8 +359,9 @@ class Object(db.Model):
 
         try:
             # Remove inherited permissions from parent
-            for share in parent.shares:
-                self.uninherit_share(share)
+            if parent.id != self.id:
+                for share in parent.shares:
+                    self.uninherit_share(share)
             # Remove parent
             self.parents.remove(parent)
             db.session.flush()
@@ -622,6 +623,7 @@ class Object(db.Model):
         # In that case we want only those parents to which requestor has access.
         stmtp = (
             db.session.query(Object)
+            .join(relation, relation.c.parent_id == Object.id)
             .filter(
                 Object.id.in_(
                     db.session.query(relation.c.parent_id).filter(
@@ -629,6 +631,7 @@ class Object(db.Model):
                     )
                 )
             )
+            .order_by(relation.c.creation_time.desc())
             .filter(requestor.has_access_to_object(Object.id))
         )
         stmtp = stmtp.subquery()
@@ -694,13 +697,15 @@ class Object(db.Model):
         db_tag.tag = tag_name
         db_tag, _ = Tag.get_or_create(db_tag)
 
+        if db_tag in self.tags:
+            return False
+
         is_new = False
         db.session.begin_nested()
         try:
-            if db_tag not in self.tags:
-                self.tags.append(db_tag)
-                db.session.commit()
-                is_new = True
+            self.tags.append(db_tag)
+            db.session.commit()
+            is_new = True
         except IntegrityError:
             db.session.rollback()
             db.session.refresh(self)
@@ -723,13 +728,15 @@ class Object(db.Model):
         else:
             db_tag = db_tag.one()
 
+        if db_tag not in self.tags:
+            return False
+
         is_removed = False
         db.session.begin_nested()
         try:
-            if db_tag in self.tags:
-                self.tags.remove(db_tag)
-                db.session.commit()
-                is_removed = True
+            self.tags.remove(db_tag)
+            db.session.commit()
+            is_removed = True
         except IntegrityError:
             db.session.rollback()
             db.session.refresh(self)
@@ -922,10 +929,21 @@ class Object(db.Model):
         Assigns KartonAnalysis to the object
         """
         analysis, is_new = KartonAnalysis.get_or_create(analysis_id, self)
+
         if not is_new and analysis.id not in [
             existing.id for existing in self.analyses
         ]:
-            self.analyses.append(analysis)
+            db.session.begin_nested()
+            try:
+                self.analyses.append(analysis)
+                db.session.commit()
+                is_new = True
+            except IntegrityError:
+                # The same relationship was added concurrently
+                db.session.rollback()
+                db.session.refresh(self)
+                if analysis.id not in [existing.id for existing in self.analyses]:
+                    raise
 
         if commit:
             db.session.commit()
@@ -941,3 +959,38 @@ class Object(db.Model):
             if analysis.status == "running":
                 return "running"
         return "finished"
+
+    def remove_analysis(self, analysis_id, commit=True):
+        """
+        Removes analysis from object
+        :param analysis_id: uuid
+        :return: True if analysis was removed
+        """
+        db_analysis = db.session.query(KartonAnalysis).filter(
+            KartonAnalysis.id == analysis_id
+        )
+        db_analysis = db_analysis.first()
+        if db_analysis is None:
+            return False
+
+        if db_analysis not in self.analyses:
+            return False
+
+        is_removed = False
+        db.session.begin_nested()
+        try:
+            self.analyses.remove(db_analysis)
+            db.session.commit()
+            is_removed = True
+        except IntegrityError:
+            db.session.rollback()
+            db.session.refresh(self)
+            if db_analysis in self.analyses:
+                raise
+        # delete analysis if no objects associated
+        if db_analysis.objects == []:
+            db.session.delete(db_analysis)
+
+        if commit:
+            db.session.commit()
+        return is_removed

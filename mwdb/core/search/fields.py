@@ -1,9 +1,10 @@
 import re
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, List, Type, Union
 
 import regex
+from dateutil.relativedelta import relativedelta
 from flask import g
 from luqum.tree import Range, Term
 from sqlalchemy import String, Text, and_, cast, column, exists, func, or_, select
@@ -121,7 +122,7 @@ class SizeField(BaseField):
                 f"Field doesn't have subfields: {'.'.join(remainder)}"
             )
 
-        units = {"B": 1, "KB": 1024, "MB": 1024 ** 2, "GB": 1024 ** 3}
+        units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
         def parse_size(size):
             if size.isdigit():
@@ -398,6 +399,40 @@ class JSONField(BaseField):
 class DatetimeField(BaseField):
     accepts_range = True
 
+    def _is_relative_time(self, expression_value):
+        pattern = r"^(\d+[yYmWwDdHhMSs])+$"
+        return re.search(pattern, expression_value)
+
+    def _get_field_for_unit(self, unit):
+        if unit in ["y", "Y"]:
+            unit = "years"
+        elif unit in ["m"]:
+            unit = "months"
+        elif unit in ["W", "w"]:
+            unit = "weeks"
+        elif unit in ["D", "d"]:
+            unit = "days"
+        elif unit in ["H", "h"]:
+            unit = "hours"
+        elif unit in ["M"]:
+            unit = "minutes"
+        elif unit in ["S", "s"]:
+            unit = "seconds"
+        else:
+            raise UnsupportedGrammarException("Invalid date-time format")
+        return unit
+
+    def _get_border_time(self, expression_value):
+        pattern = r"(\d+)([yYmWwDdHhMSs])"
+        conditions = re.findall(pattern, expression_value)
+        delta_dict = {}
+        for value, unit in conditions:
+            field = self._get_field_for_unit(unit)
+            if field not in delta_dict.keys():
+                delta_dict.update({field: int(value)})
+        border_time = datetime.now(tz=timezone.utc) - relativedelta(**delta_dict)
+        return border_time
+
     def _get_date_range(self, date_node):
 
         formats = [
@@ -436,14 +471,25 @@ class DatetimeField(BaseField):
             if expression.low.value == "*" and expression.high.value == "*":
                 return True
             if expression.low.value == "*":
-                high = self._get_date_range(expression.high)[1]
+                if self._is_relative_time(expression.high.value):
+                    high = self._get_border_time(expression.high.value)
+                else:
+                    high = self._get_date_range(expression.high)[1]
                 return self.column < high
             if expression.high.value == "*":
-                low = self._get_date_range(expression.low)[0]
+                if self._is_relative_time(expression.low.value):
+                    low = self._get_border_time(expression.low.value)
+                else:
+                    low = self._get_date_range(expression.low)[0]
                 return self.column >= low
-
-            low = self._get_date_range(expression.low)[0]
-            high = self._get_date_range(expression.high)[1]
+            if self._is_relative_time(expression.low.value):
+                low = self._get_border_time(expression.low.value)
+            else:
+                low = self._get_date_range(expression.low)[0]
+            if self._is_relative_time(expression.high.value):
+                high = self._get_border_time(expression.high.value)
+            else:
+                high = self._get_date_range(expression.high)[1]
         else:
             if expression.has_wildcard():
                 raise UnsupportedGrammarException(

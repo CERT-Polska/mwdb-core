@@ -7,7 +7,7 @@ Under the hood of mwdb.cert.pl service hosted by CERT.pl.
 """
 
 setup(name="mwdb-core",
-      version="2.6.0",
+      version="2.7.0",
       description="MWDB Core malware database",
       long_description=LONG_DESCRIPTION,
       author="CERT Polska",
@@ -16,7 +16,7 @@ setup(name="mwdb-core",
       include_package_data=True,
       url="https://github.com/CERT-Polska/mwdb-core",
       install_requires=open("requirements.txt").read().splitlines(),
-      python_requires='>=3.6',
+      python_requires='>=3.7',
       entry_points={
         'console_scripts': [
             'mwdb-core=mwdb.cli:cli'

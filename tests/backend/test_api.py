@@ -129,7 +129,7 @@ def test_add_tags(admin_session):
         admin_session.add_tag(sample['id'], tag)
 
     tags_response = admin_session.get_tags(sample['id'])
-    tags_returned = [t['tag'] for t in tags_response]
+    tags_returned = [t['tag'] for t in tags_response if not t["tag"].startswith("misc:")]
 
     assert len(tags_returned) == len(tags_expected)
     assert all([t in tags_returned for t in tags_expected])
@@ -145,9 +145,10 @@ def test_delete_tags(admin_session):
     admin_session.add_tag(identifier, tag2)
     admin_session.delete_tag(identifier, tag1)
 
-    tags = admin_session.get_tags(identifier)
+    tags = [t['tag'] for t in admin_session.get_tags(identifier) if not t["tag"].startswith("misc:")]
     assert len(tags) == 1
-    assert tags[0]['tag'] == tag2
+    assert tag1 not in tags
+    assert tag2 in tags
 
 
 @pytest.mark.parametrize('num_comments', [
@@ -166,6 +167,31 @@ def test_comment(num_comments, admin_session):
     comments = admin_session.get_comments(identifier)
     assert len(comments) == num_comments
     assert all([c['comment'] in expected_comments for c in comments])
+
+
+def test_delete_comment(admin_session):
+    comment_1 = rand_string()
+    comment_2 = rand_string()
+    
+    file_name_1 = rand_string()
+    file_name_2 = rand_string()
+    content_1 = rand_string()
+    content_2 = rand_string()
+    sample_1 = admin_session.add_sample(file_name_1, content_1)
+    sample_2 = admin_session.add_sample(file_name_2, content_2)
+    
+    identifier_1 = sample_1['id']
+    identifier_2 = sample_2['id']
+    
+    comment_added_1 = admin_session.add_comment(identifier_1, comment_1)
+    comment_added_2 = admin_session.add_comment(identifier_2, comment_2)
+    
+    # delete comment associated with object
+    admin_session.delete_comment(identifier_1, comment_added_1['id'])
+    
+    # delete comment not associated with object    
+    with ShouldRaise(status_code=404):
+        admin_session.delete_comment(identifier_1, comment_added_2['id'])
 
 
 def test_download_sample(admin_session):

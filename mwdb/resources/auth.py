@@ -12,6 +12,8 @@ from werkzeug.exceptions import Conflict, Forbidden, InternalServerError
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
+from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.auth import (
     AuthLoginRequestSchema,
@@ -45,6 +47,7 @@ def verify_recaptcha(recaptcha_token):
             raise Forbidden("Wrong ReCAPTCHA, please try again.")
 
 
+@rate_limited_resource
 class LoginResource(Resource):
     def post(self):
         """
@@ -121,6 +124,7 @@ class LoginResource(Resource):
         )
 
 
+@rate_limited_resource
 class RegisterResource(Resource):
     def post(self):
         """
@@ -183,11 +187,18 @@ class RegisterResource(Resource):
         except MailError:
             logger.exception("Can't send e-mail notification")
 
+        user_private_group = next(
+            (g for g in user.groups if g.name == user.login), None
+        )
+        hooks.on_created_user(user)
+        if user_private_group:
+            hooks.on_created_group(user_private_group)
         logger.info("User registered", extra={"user": user.login})
         schema = UserSuccessResponseSchema()
         return schema.dump({"login": user.login})
 
 
+@rate_limited_resource
 class ChangePasswordResource(Resource):
     def post(self):
         """
@@ -236,6 +247,7 @@ class ChangePasswordResource(Resource):
         return schema.dump({"login": user.login})
 
 
+@rate_limited_resource
 class RequestPasswordChangeResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_profile)
@@ -280,9 +292,7 @@ class RequestPasswordChangeResource(Resource):
                 email,
                 base_url=app_config.mwdb.base_url,
                 login=login,
-                set_password_token=g.auth_user.generate_set_password_token().decode(
-                    "utf-8"
-                ),
+                set_password_token=g.auth_user.generate_set_password_token(),
             )
         except MailError:
             logger.exception("Can't send e-mail notification")
@@ -296,6 +306,7 @@ class RequestPasswordChangeResource(Resource):
         return schema.dump({"login": login})
 
 
+@rate_limited_resource
 class RecoverPasswordResource(Resource):
     def post(self):
         """
@@ -363,7 +374,7 @@ class RecoverPasswordResource(Resource):
                 user.email,
                 base_url=app_config.mwdb.base_url,
                 login=user.login,
-                set_password_token=user.generate_set_password_token().decode("utf-8"),
+                set_password_token=user.generate_set_password_token(),
             )
         except MailError:
             logger.exception("Can't send e-mail notification")
@@ -377,6 +388,7 @@ class RecoverPasswordResource(Resource):
         return schema.dump({"login": user.login})
 
 
+@rate_limited_resource
 class RefreshTokenResource(Resource):
     @requires_authorization
     def post(self):
@@ -417,6 +429,7 @@ class RefreshTokenResource(Resource):
         )
 
 
+@rate_limited_resource
 class ValidateTokenResource(Resource):
     @requires_authorization
     def get(self):
@@ -448,6 +461,7 @@ class ValidateTokenResource(Resource):
         )
 
 
+@rate_limited_resource
 class AuthGroupListResource(Resource):
     @requires_authorization
     def get(self):

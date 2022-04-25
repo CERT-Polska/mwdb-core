@@ -124,10 +124,6 @@ function oauthGetIdentities() {
     return axios.get("/oauth/identities");
 }
 
-function apiKeyGetToken(key_id) {
-    return axios.get(`/api_key/${key_id}`);
-}
-
 function apiKeyAdd(login, name) {
     return axios.post(`/user/${login}/api_key`, { name });
 }
@@ -425,6 +421,12 @@ async function requestFileDownloadLink(id) {
     return `${baseURL}/file/${id}/download?token=${response.data.token}`;
 }
 
+async function requestZipFileDownloadLink(id) {
+    const response = await axios.post(`/file/${id}/download/zip`);
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/file/${id}/download/zip?token=${response.data.token}`;
+}
+
 function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
     let formData = new FormData();
     formData.append("file", file);
@@ -518,6 +520,14 @@ async function requestRemoteFileDownloadLink(remote, id) {
     return `${baseURL}/remote/${remote}/api/file/${id}/download?token=${response.data.token}`;
 }
 
+async function requestRemoteZipFileDownloadLink(remote, id) {
+    const response = await axios.post(
+        `/remote/${remote}/api/file/${id}/download/zip`
+    );
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/remote/${remote}/api/file/${id}/download/zip?token=${response.data.token}`;
+}
+
 function getKartonAnalysesList(id) {
     return axios.get(`/object/${id}/karton`);
 }
@@ -528,6 +538,10 @@ function getKartonAnalysisStatus(id, analysis_id) {
 
 function resubmitKartonAnalysis(id) {
     return axios.post(`/object/${id}/karton`);
+}
+
+function removeKartonAnalysisFromObject(id, analysis_id) {
+    return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
 const api = {
@@ -550,7 +564,6 @@ const api = {
     authSetPassword,
     authRequestPasswordChange,
     authRecoverPassword,
-    apiKeyGetToken,
     apiKeyAdd,
     apiKeyRemove,
     getObject,
@@ -608,6 +621,7 @@ const api = {
     removeAttributePermission,
     downloadFile,
     requestFileDownloadLink,
+    requestZipFileDownloadLink,
     uploadFile,
     getRemoteNames,
     pushObjectRemote,
@@ -627,8 +641,10 @@ const api = {
     getRemoteObjectAttributes,
     downloadRemoteFile,
     requestRemoteFileDownloadLink,
+    requestRemoteZipFileDownloadLink,
     getKartonAnalysesList,
     getKartonAnalysisStatus,
     resubmitKartonAnalysis,
+    removeKartonAnalysisFromObject,
 };
 export default api;

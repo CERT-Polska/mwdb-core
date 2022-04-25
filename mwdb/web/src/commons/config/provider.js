@@ -89,6 +89,12 @@ export function ConfigProvider(props) {
     }, [auth.isAuthenticated]);
 
     useEffect(() => {
+        if (Number.isInteger(serverConfig.config["request_timeout"])) {
+            api.axios.defaults.timeout = serverConfig.config["request_timeout"];
+        }
+    }, [serverConfig]);
+
+    useEffect(() => {
         if (
             auth.isAuthenticated &&
             auth.isAdmin &&

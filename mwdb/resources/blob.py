@@ -3,6 +3,7 @@ from werkzeug.exceptions import Conflict
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import TextBlob
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import (
@@ -41,6 +42,7 @@ class TextBlobUploader(ObjectUploader):
             raise Conflict("Object already exists and is not a blob")
 
 
+@rate_limited_resource
 class TextBlobResource(ObjectResource, TextBlobUploader):
     ObjectType = TextBlob
     ListResponseSchema = BlobListResponseSchema
@@ -136,8 +138,14 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                       metakeys:
                         - key: string
                           value: string
+                      attributes:
+                        - key: string
+                          value: string
                       tags:
                         - tag: string
+                      karton_id: string
+                      karton_arguments:
+                        string: string
         responses:
             200:
                 description: Text blob uploaded succesfully
@@ -162,10 +170,14 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
         return self.create_object(obj)
 
 
+@rate_limited_resource
 class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
     ObjectType = TextBlob
     ItemResponseSchema = BlobItemResponseSchema
     CreateRequestSchema = BlobLegacyCreateRequestSchema
+
+    def call_specialised_remove_hook(self, text_blob):
+        hooks.on_removed_text_blob(text_blob)
 
     @requires_authorization
     def get(self, identifier):

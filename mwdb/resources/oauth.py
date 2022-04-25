@@ -9,6 +9,8 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
+from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.oauth import (
@@ -25,6 +27,7 @@ from mwdb.schema.user import UserLoginSchemaBase
 from . import loads_schema, logger, requires_authorization, requires_capabilities
 
 
+@rate_limited_resource
 class OpenIDProviderResource(Resource):
     def get(self):
         """
@@ -110,6 +113,7 @@ class OpenIDProviderResource(Resource):
         db.session.commit()
 
 
+@rate_limited_resource
 class OpenIDSingleProviderResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -278,6 +282,7 @@ class OpenIDSingleProviderResource(Resource):
         return schema.dump({"name": provider_name})
 
 
+@rate_limited_resource
 class OpenIDAuthenticateResource(Resource):
     def post(self, provider_name):
         """
@@ -320,6 +325,7 @@ class OpenIDAuthenticateResource(Resource):
         return schema.dump({"authorization_url": url, "state": state, "nonce": nonce})
 
 
+@rate_limited_resource
 class OpenIDAuthorizeResource(Resource):
     def post(self, provider_name):
         provider = (
@@ -379,6 +385,7 @@ class OpenIDAuthorizeResource(Resource):
         )
 
 
+@rate_limited_resource
 class OpenIDRegisterUserResource(Resource):
     def post(self, provider_name):
         provider = (
@@ -449,6 +456,12 @@ class OpenIDRegisterUserResource(Resource):
 
         auth_token = user.generate_session_token()
 
+        user_private_group = next(
+            (g for g in user.groups if g.name == user.login), None
+        )
+        hooks.on_created_user(user)
+        if user_private_group:
+            hooks.on_created_group(user_private_group)
         logger.info(
             "User logged in via OpenID Provider",
             extra={"login": user.login, "provider": provider_name},
@@ -464,6 +477,7 @@ class OpenIDRegisterUserResource(Resource):
         )
 
 
+@rate_limited_resource
 class OpenIDBindAccountResource(Resource):
     @requires_authorization
     def post(self, provider_name):
@@ -537,6 +551,7 @@ class OpenIDBindAccountResource(Resource):
         )
 
 
+@rate_limited_resource
 class OpenIDAccountIdentitiesResource(Resource):
     @requires_authorization
     def get(self):

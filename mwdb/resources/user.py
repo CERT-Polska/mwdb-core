@@ -10,6 +10,8 @@ from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFou
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
+from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.user import (
     UserCreateRequestSchema,
@@ -33,6 +35,7 @@ from . import (
 )
 
 
+@rate_limited_resource
 class UserListResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -76,6 +79,7 @@ class UserListResource(Resource):
         return schema.dump({"users": objs})
 
 
+@rate_limited_resource
 class UserPendingResource(Resource):
     @requires_capabilities(Capabilities.manage_users)
     def post(self, login):
@@ -133,7 +137,7 @@ class UserPendingResource(Resource):
                 user.email,
                 base_url=app_config.mwdb.base_url,
                 login=user.login,
-                set_password_token=user.generate_set_password_token().decode("utf-8"),
+                set_password_token=user.generate_set_password_token(),
             )
         except MailError:
             logger.exception("Can't send e-mail notification")
@@ -214,9 +218,7 @@ class UserPendingResource(Resource):
                     user.email,
                     base_url=app_config.mwdb.base_url,
                     login=user.login,
-                    set_password_token=user.generate_set_password_token().decode(
-                        "utf-8"
-                    ),
+                    set_password_token=user.generate_set_password_token(),
                 )
             except MailError:
                 logger.exception("Can't send e-mail notification")
@@ -239,6 +241,7 @@ class UserPendingResource(Resource):
         return schema.dump({"login": user_login_obj["login"]})
 
 
+@rate_limited_resource
 class UserRequestPasswordChangeResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -300,7 +303,7 @@ class UserRequestPasswordChangeResource(Resource):
                 recipient_email=user.email,
                 base_url=app_config.mwdb.base_url,
                 login=user.login,
-                set_password_token=user.generate_set_password_token().decode("utf-8"),
+                set_password_token=user.generate_set_password_token(),
             )
         except MailError:
             logger.exception("Can't send e-mail notification")
@@ -314,6 +317,7 @@ class UserRequestPasswordChangeResource(Resource):
         return schema.dump({"login": login})
 
 
+@rate_limited_resource
 class UserGetPasswordChangeTokenResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -361,6 +365,7 @@ class UserGetPasswordChangeTokenResource(Resource):
         return schema.dump({"login": login, "token": token})
 
 
+@rate_limited_resource
 class UserResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -479,9 +484,7 @@ class UserResource(Resource):
                     user.email,
                     base_url=app_config.mwdb.base_url,
                     login=user.login,
-                    set_password_token=user.generate_set_password_token().decode(
-                        "utf-8"
-                    ),
+                    set_password_token=user.generate_set_password_token(),
                 )
             except MailError:
                 logger.exception("Can't send e-mail notification")
@@ -491,6 +494,13 @@ class UserResource(Resource):
                 )
 
         db.session.commit()
+
+        user_private_group = next(
+            (g for g in user.groups if g.name == user.login), None
+        )
+        hooks.on_created_user(user)
+        if user_private_group:
+            hooks.on_created_group(user_private_group)
 
         logger.info("User created", extra={"user": user.login})
         schema = UserSuccessResponseSchema()
@@ -574,6 +584,7 @@ class UserResource(Resource):
             user.reset_sessions()
 
         db.session.commit()
+        hooks.on_updated_user(user)
         logger.info("User updated", extra=obj)
 
         schema = UserSuccessResponseSchema()
@@ -626,12 +637,15 @@ class UserResource(Resource):
         db.session.delete(group)
         db.session.commit()
 
+        hooks.on_removed_user(user)
+        hooks.on_removed_group(group)
         logger.info("User was deleted", extra={"user": login})
 
         schema = UserSuccessResponseSchema()
         return schema.dump({"login": login})
 
 
+@rate_limited_resource
 class UserProfileResource(Resource):
     @requires_authorization
     def get(self, login):

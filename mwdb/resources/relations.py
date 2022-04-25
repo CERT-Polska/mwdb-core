@@ -2,12 +2,15 @@ from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Object, db
 from mwdb.schema.relations import RelationsResponseSchema
 
 from . import access_object, logger, requires_authorization, requires_capabilities
 
 
+@rate_limited_resource
 class RelationsResource(Resource):
     @requires_authorization
     def get(self, type, identifier):
@@ -56,6 +59,7 @@ class RelationsResource(Resource):
         return relations.dump(db_object)
 
 
+@rate_limited_resource
 class ObjectChildResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.adding_parents)
@@ -111,13 +115,20 @@ class ObjectChildResource(Resource):
         if child_object is None:
             raise NotFound("Child object not found")
 
-        child_object.add_parent(parent_object, commit=False)
+        is_added = child_object.add_parent(parent_object, commit=False)
 
         db.session.commit()
-        logger.info(
-            "Child added",
-            extra={"parent": parent_object.dhash, "child": child_object.dhash},
-        )
+        if is_added:
+            hooks.on_created_relation(parent_object, child_object)
+            if parent_object.id != child_object.id:
+                hooks.on_changed_object(parent_object)
+                hooks.on_changed_object(child_object)
+            else:
+                hooks.on_changed_object(parent_object)
+            logger.info(
+                "Child added",
+                extra={"parent": parent_object.dhash, "child": child_object.dhash},
+            )
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_parents)
@@ -154,9 +165,9 @@ class ObjectChildResource(Resource):
                 type: string
         responses:
             200:
-                description: When relation was successfully added
+                description: When relation was successfully removed.
             403:
-                description: When user doesn't have `adding_parents` capability.
+                description: When user doesn't have `removing_parents` capability.
             404:
                 description: |
                     When one of objects doesn't exist or user
@@ -173,7 +184,18 @@ class ObjectChildResource(Resource):
         if child_object is None:
             raise NotFound("Child object not found")
 
-        child_object.remove_parent(parent_object)
+        result = child_object.remove_parent(parent_object)
+        if not result:
+            # Relation already removed
+            return
+
+        hooks.on_removed_relation(parent_object, child_object)
+        if parent_object.id != child_object.id:
+            hooks.on_changed_object(parent_object)
+            hooks.on_changed_object(child_object)
+        else:
+            hooks.on_changed_object(parent_object)
+
         logger.info(
             "Child removed",
             extra={"parent": parent_object.dhash, "child": child_object.dhash},

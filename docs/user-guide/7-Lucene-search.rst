@@ -113,13 +113,13 @@ Query syntax: timestamps
 
 With timestamps you can search for objects within certain time range.
 
-If you want to find samples that were uploaded from the beginning of September till the 28th:
+If you want to find objects that were uploaded from the beginning of September till the 28th:
 
 .. code-block::
 
    upload_time:[2020-09-01 TO 2020-09-28]
 
-If you want to find samples that were uploaded from the beginning of September:
+If you want to find objects that were uploaded from the beginning of September:
 
 .. code-block::
 
@@ -131,19 +131,19 @@ Alternatively:
 
    upload_time:>=2020-09-01
 
-If you want to search for samples within time certain range:
+If you want to search for objects within time certain range:
 
 .. code-block::
 
    upload_time:["2020-09-28 08:00" TO "2020-09-28 09:00"]
 
-If you want to search for samples uploaded after certain hour:
+If you want to search for objects uploaded after certain hour:
 
 .. code-block::
 
    upload_time:">=2020-09-28 08:00"
 
-If you want to search for samples uploaded at certain minute:
+If you want to search for objects uploaded at certain minute:
 
 .. code-block::
 
@@ -156,6 +156,52 @@ Remember that exclusive range is not allowed for date-time field so this is not 
    upload_time:{2020-09-01 TO *]
 
    upload_time:>2020-09-01
+
+Query syntax: relative timestamps
+---------------------------------
+
+.. versionadded:: 2.7.0
+
+It is also possible to use upload_time in relation to current time.
+For example, if you want to search for objects uploaded during last 2 hours:
+
+.. code-block::
+
+   upload_time:>=2h or upload_time:[2h TO *]
+
+
+This way of time definition contains value and relative time format.
+
+Below are listed acceptable relative time symbols:
+
+
+* **y** or **Y** : years
+* **m** : months
+* **w** or **W** : weeks
+* **d** or **D** : days
+* **h** or **H** : hours
+* **M** : minutes
+* **s** or **S** : seconds
+
+.. warning::
+
+   Bring awareness to symbols **m** and **M**. They means quite different period time. Other symbols can be used as uppercase or lowercase letters.
+
+
+During defining relative time you can combine different time symbols.
+For example, if you want to search for objects uploaded earlier then 1 mounths and 5 days ago:
+
+.. code-block::
+
+   upload_time:<=1m5d or upload_time:[* TO 1m5d]
+
+
+It is possible to use relative timestamps and timestamps. 
+
+.. code-block::
+
+   upload_time:[2022-02-01 TO 1m10d]
+
 
 Basic search fields
 -------------------

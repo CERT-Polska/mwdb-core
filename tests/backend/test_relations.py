@@ -1,4 +1,5 @@
 from .relations import *
+from .utils import ShouldRaise, base62uuid
 
 
 def test_inheritance(admin_session):
@@ -465,3 +466,23 @@ def test_removing_relations(admin_session):
         should_access=[Alice],
         should_not_access=[Bob],
     ).test()
+
+
+def test_remove_self_cycle_relation(admin_session):
+    testCase = RelationTestCase(admin_session)
+
+    Alice = testCase.new_user("Alice", capabilities=["removing_parents"])
+
+    SampleA = testCase.new_sample("SampleA")
+
+    SampleA.create(Alice)
+
+    SampleA.create(parent=SampleA)
+
+    a_shares = Alice.session.get_shares(SampleA.dhash)["shares"]
+
+    Alice.session.remove_parent(SampleA.dhash, SampleA.dhash)
+
+    a_shares_after_remove = Alice.session.get_shares(SampleA.dhash)["shares"]
+
+    assert a_shares == a_shares_after_remove

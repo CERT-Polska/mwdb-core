@@ -58,9 +58,12 @@ class MWDBConfig(Config):
     web_folder = key(cast=path, required=False, default=None)
     # Base application URL, accessible for users
     base_url = key(cast=str, required=False, default="http://127.0.0.1")
+    # MWDB local instance name
+    instance_name = key(cast=str, required=False, default="mwdb")
     # Flask additional settings file (optional)
     flask_config_file = key(cast=path, required=False)
-
+    # Axios request timeout
+    request_timeout = key(cast=int, required=False, default=20000)
     # Which storage provider to use (options: disk or s3)
     storage_provider = key(
         cast=storage_provider_from_str, required=False, default="disk"
@@ -129,9 +132,16 @@ class KartonConfig(Config):
     config_path = key(cast=str, required=False, default=None)
 
 
+@section("mwdb_limiter")
+class MWDBLimiterConfig(Config):
+    # Section keys are read dynamically (<resourcename>_<method>)
+    pass
+
+
 class AppConfig(Config):
     mwdb = group_key(MWDBConfig)
     karton = group_key(KartonConfig)
+    mwdb_limiter = group_key(MWDBLimiterConfig)
 
 
 def _config_sources():

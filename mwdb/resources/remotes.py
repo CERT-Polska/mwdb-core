@@ -9,6 +9,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
+from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Config, File, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobItemResponseSchema
@@ -20,6 +21,7 @@ from mwdb.version import app_build_version
 from . import get_shares_for_upload, loads_schema, logger, requires_authorization
 
 
+@rate_limited_resource
 class RemoteListResource(Resource):
     @requires_authorization
     def get(self):
@@ -85,6 +87,7 @@ class RemoteAPI:
         return response
 
 
+@rate_limited_resource
 class RemoteAPIResource(Resource):
     def do_request(self, method, remote_name, remote_path):
         remote = RemoteAPI(remote_name)
@@ -92,7 +95,7 @@ class RemoteAPIResource(Resource):
             method, remote_path, params=request.args, data=request.data, stream=True
         )
         return Response(
-            response.iter_content(chunk_size=2 ** 16),
+            response.iter_content(chunk_size=2**16),
             mimetype=response.headers["content-type"],
         )
 
@@ -137,6 +140,7 @@ class RemotePullResource(Resource):
         return schema.dump(item)
 
 
+@rate_limited_resource
 class RemoteFilePullResource(RemotePullResource):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema
@@ -197,7 +201,7 @@ class RemoteFilePullResource(RemotePullResource):
         )
         share_with = get_shares_for_upload(options["upload_as"])
         with SpooledTemporaryFile() as file_stream:
-            for chunk in response.iter_content(chunk_size=2 ** 16):
+            for chunk in response.iter_content(chunk_size=2**16):
                 file_stream.write(chunk)
             file_stream.seek(0)
             try:
@@ -212,6 +216,7 @@ class RemoteFilePullResource(RemotePullResource):
         return self.create_pulled_object(item, is_new)
 
 
+@rate_limited_resource
 class RemoteConfigPullResource(RemotePullResource):
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
@@ -314,6 +319,7 @@ class RemoteConfigPullResource(RemotePullResource):
         return self.create_pulled_object(item, is_new)
 
 
+@rate_limited_resource
 class RemoteTextBlobPullResource(RemotePullResource):
     ObjectType = TextBlob
     ItemResponseSchema = BlobItemResponseSchema
@@ -383,6 +389,7 @@ class RemoteTextBlobPullResource(RemotePullResource):
         return self.create_pulled_object(item, is_new)
 
 
+@rate_limited_resource
 class RemoteFilePushResource(RemotePullResource):
     @requires_authorization
     def post(self, remote_name, identifier):
@@ -446,6 +453,7 @@ class RemoteFilePushResource(RemotePullResource):
         return response
 
 
+@rate_limited_resource
 class RemoteConfigPushResource(RemotePullResource):
     @requires_authorization
     def post(self, remote_name, identifier):
@@ -526,6 +534,7 @@ class RemoteConfigPushResource(RemotePullResource):
         return response
 
 
+@rate_limited_resource
 class RemoteTextBlobPushResource(RemotePullResource):
     @requires_authorization
     def post(self, remote_name, identifier):

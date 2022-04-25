@@ -1,5 +1,8 @@
 # MWDB Core
 
+## [Installation ⚙️](https://mwdb.readthedocs.io/en/latest/setup-and-configuration.html) | [Docs 📚](https://mwdb.readthedocs.io/en/latest/) | [Guide 📕](https://mwdb.readthedocs.io/en/latest/user-guide/index.html)
+---
+
 Malware repository component for automated malware collection/analysis systems. 
 
 Formerly known as Malwarecage.

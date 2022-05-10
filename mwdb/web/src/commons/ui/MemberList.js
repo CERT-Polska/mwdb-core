@@ -108,7 +108,14 @@ export default class MemberList extends Component {
                 <PagedList
                     listItem={MemberItem}
                     columnNames={columns}
-                    items={this.items}
+                    items={this.items
+                        .sort(function (a, b) {
+                            return a - b;
+                        })
+                        .slice(
+                            (this.state.activePage - 1) * 10,
+                            this.state.activePage * 10
+                        )}
                     itemCount={this.items.length}
                     activePage={this.state.activePage}
                     onPageChange={this.handlePageChange}

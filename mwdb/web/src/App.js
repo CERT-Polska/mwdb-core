@@ -23,7 +23,7 @@ import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
 import SettingsView from "./components/Settings/SettingsView";
 
-import AttributePreview from "./components/AttributePreview";
+import MarkedAttribute from "./components/MarkedAttribute";
 
 import { OAuthLogin, OAuthAuthorize } from "./components/OAuth";
 
@@ -209,8 +209,8 @@ export default function App() {
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
                 <ProfileView />
             </ProtectedRoute>
-            <ProtectedRoute path="/test/attribute">
-                <AttributePreview />
+            <ProtectedRoute path="/dev/marked">
+                <MarkedAttribute />
             </ProtectedRoute>
             {fromPlugin("routes")}
             <DefaultRoute />

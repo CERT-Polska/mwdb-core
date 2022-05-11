@@ -43,6 +43,19 @@ function AdminNav() {
     );
 }
 
+function DevDropdown() {
+    return (
+        <NavDropdown
+            title="Dev"
+            elements={[
+                <Link key="remote" className="dropdown-item" to={`/dev/marked`}>
+                    Rich-text attributes
+                </Link>,
+            ]}
+        />
+    );
+}
+
 function RemoteDropdown() {
     const config = useContext(ConfigContext);
     if (!config.isReady) return [];
@@ -191,6 +204,7 @@ export default function Navigation() {
                 title="Extras"
                 elements={[...fromPlugin("navdropdownExtras")]}
             />
+            <DevDropdown />
         </Extendable>
     ) : (
         []

@@ -1,6 +1,6 @@
 import Mustache from "mustache";
-import {lexer, Tokenizer as MarkedTokenizer} from "marked";
-import {DataTable} from "@mwdb-web/commons/ui";
+import { lexer, defaults, Tokenizer } from "marked";
+import { DataTable } from "@mwdb-web/commons/ui";
 import React from "react";
 
 /**
@@ -15,9 +15,10 @@ import React from "react";
  * - Removed HTML escaping on Marked level
  */
 
+// Extended context to provide special Mustache values in future
 class MarkedMustacheContext extends Mustache.Context {
     push(view) {
-        return new MarkedMustacheContext(view, this)
+        return new MarkedMustacheContext(view, this);
     }
 
     lookup(name) {
@@ -26,69 +27,12 @@ class MarkedMustacheContext extends Mustache.Context {
     }
 }
 
-class MarkedMustacheTokenizer extends MarkedTokenizer {
-    escape(src) {
-        const cap = this.rules.inline.escape.exec(src);
-        if(cap) {
-            return {
-                type: 'escape',
-                raw: cap[0],
-                text: cap[1]
-            };
-        }
-    }
-
-    codespan(src) {
-        const cap = this.rules.inline.code.exec(src);
-        if (cap) {
-            let text = cap[2].replace(/\n/g, ' ');
-            const hasNonSpaceChars = /[^ ]/.test(text);
-            const hasSpaceCharsOnBothEnds = /^ /.test(text) && / $/.test(text);
-            if (hasNonSpaceChars && hasSpaceCharsOnBothEnds) {
-                text = text.substring(1, text.length - 1);
-            }
-            return {
-                type: 'codespan',
-                raw: cap[0],
-                text
-            };
-        }
-    }
-
-    widget(src) {
-        const cap = src.match(/^<mustache-widget:([0-9a-f]{16})>/);
-        if(cap) {
-            return {
-                type: 'widget',
-                raw: cap[0],
-                widgetId: cap[1]
-            };
-        }
-    }
-
-    inlineText(src, smartypants) {
-        const cap = this.rules.inline.text.exec(src);
-        if (cap) {
-            let text;
-            if (this.lexer.state.inRawBlock) {
-                text = cap[0];
-            } else {
-                text = this.options.smartypants ? smartypants(cap[0]) : cap[0];
-            }
-            return {
-                type: 'text',
-                raw: cap[0],
-                text
-            };
-        }
-    }
-}
-
+// Extended Writer to escape Markdown characters instead of HTML
 class MarkedMustache extends Mustache.Writer {
     static escapeMarkdown(string) {
         // Escape Markdown characters
         // https://www.markdownguide.org/basic-syntax/#escaping-characters
-        return String(string).replace(/([\\`*_{}[\]<>()#+-,!|])/g, '\\$1');
+        return String(string).replace(/([\\`*_{}[\]<>()#+-,!|])/g, "\\$1");
     }
 
     getConfigEscape() {
@@ -99,83 +43,159 @@ class MarkedMustache extends Mustache.Writer {
     render(template, view) {
         return super.render(
             template,
-            new MarkedMustacheContext({
-                ...JSON.parse(view)
-            }, null)
-        )
+            new MarkedMustacheContext(
+                {
+                    ...JSON.parse(view),
+                },
+                null
+            )
+        );
+    }
+}
+
+// Overrides to not use HTML escape
+// Based on: https://github.com/markedjs/marked/blob/e3f8cd7c7ce75ce4f7e22bd082c45deb1678846d/src/Tokenizer.js#L67
+class MarkedMustacheTokenizer extends Tokenizer {
+    escape(src) {
+        const cap = this.rules.inline.escape.exec(src);
+        if (cap) {
+            return {
+                type: "escape",
+                raw: cap[0],
+                text: cap[1],
+            };
+        }
+        return false;
+    }
+
+    codespan(src) {
+        const cap = this.rules.inline.code.exec(src);
+        if (cap) {
+            let text = cap[2].replace(/\n/g, " ");
+            const hasNonSpaceChars = /[^ ]/.test(text);
+            const hasSpaceCharsOnBothEnds = /^ /.test(text) && / $/.test(text);
+            if (hasNonSpaceChars && hasSpaceCharsOnBothEnds) {
+                text = text.substring(1, text.length - 1);
+            }
+            return {
+                type: "codespan",
+                raw: cap[0],
+                text,
+            };
+        }
+    }
+
+    inlineText(src, smartypants) {
+        const cap = this.rules.inline.text.exec(src);
+        if (cap) {
+            let text = this.options.smartypants ? smartypants(cap[0]) : cap[0];
+            return {
+                type: "text",
+                raw: cap[0],
+                text,
+            };
+        }
     }
 }
 
 const markedMustache = new MarkedMustache();
+const markedTokenizer = new MarkedMustacheTokenizer();
 
+// Custom renderer into React components
 function renderTokens(tokens) {
     const renderers = {
         text(token) {
-            console.log(token);
-            return token.text;
+            return token.tokens ? renderTokens(token.tokens) : token.text;
         },
         escape(token) {
-            console.log(token);
             return token.text;
         },
         strong(token) {
-            return <strong>{renderTokens(token.tokens)}</strong>
+            return <strong>{renderTokens(token.tokens)}</strong>;
         },
         em(token) {
-            return <em>{renderTokens(token.tokens)}</em>
+            return <em>{renderTokens(token.tokens)}</em>;
         },
         del(token) {
-            return <del>{renderTokens(token.tokens)}</del>
+            return <del>{renderTokens(token.tokens)}</del>;
+        },
+        hr(token) {
+            return <hr />;
         },
         blockquote(token) {
-            return <blockquote className="blockquote">{renderTokens(token.tokens)}</blockquote>
+            return (
+                <blockquote className="blockquote">
+                    {renderTokens(token.tokens)}
+                </blockquote>
+            );
         },
         paragraph(token) {
-            return <p>{renderTokens(token.tokens)}</p>
+            return <p>{renderTokens(token.tokens)}</p>;
         },
         link(token) {
-            return <a href={token.href}>{renderTokens(token.tokens)}</a>
+            return <a href={token.href}>{renderTokens(token.tokens)}</a>;
+        },
+        list(token) {
+            return <ul>{token.items.map((item) => renderTokens([item]))}</ul>;
+        },
+        list_item(token) {
+            return <li>{renderTokens(token.tokens)}</li>;
+        },
+        html(token) {
+            return token.text;
         },
         table(token) {
             return (
                 <DataTable>
                     <thead>
                         <tr>
-                        {
-                            token.header.map((head) => <th>{renderTokens(head.tokens)}</th>)
-                        }
+                            {token.header.map((head) => (
+                                <th>{renderTokens(head.tokens)}</th>
+                            ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {
-                            token.rows.map((row) => <tr>{
-                                row.map((cell) => <td>{renderTokens(cell.tokens)}</td>)
-                            }</tr>)
-                        }
+                        {token.rows.map((row) => (
+                            <tr>
+                                {row.map((cell) => (
+                                    <td>{renderTokens(cell.tokens)}</td>
+                                ))}
+                            </tr>
+                        ))}
                     </tbody>
                 </DataTable>
-            )
+            );
         },
         codespan(token) {
-            return <code>{token.text}</code>
-        }
-    }
+            return <code>{token.text}</code>;
+        },
+        code(token) {
+            return <pre>{token.text}</pre>;
+        },
+        space() {
+            return [];
+        },
+    };
     return tokens.map((token) => {
         const renderer = renderers[token.type];
-        if(!renderer) {
-            console.warn(`Marked: Unknown renderer for ${token.type}`)
-            return [];
+        if (!renderer) {
+            return [<i>{`(No renderer for ${token.type})`}</i>];
         }
         return renderer(token);
-    })
+    });
 }
 
-function renderValue(template, value) {
+export function renderValue(template, value) {
+    let tokens = [];
     try {
         const markdown = markedMustache.render(template, value);
-        const tokens = lexer(markdown);
-        return renderTokens(tokens);
-    } catch(e) {
-        return [e.toString()];
+        tokens = lexer(markdown, {
+            ...defaults,
+            tokenizer: markedTokenizer,
+        });
+        return [tokens, renderTokens(tokens)];
+    } catch (e) {
+        console.error(e);
+        return [tokens, [e.toString()]];
     }
 }

@@ -1,20 +1,155 @@
 import React, { useEffect, useState, useCallback } from "react";
 import api from "@mwdb-web/commons/api";
-import { UserBadge, MemberList, useViewAlert } from "@mwdb-web/commons/ui";
+import Pagination from "react-js-pagination";
+import { useViewAlert } from "@mwdb-web/commons/ui";
+import {
+    faUser,
+    faTrash,
+    faCrown,
+    faPlus,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link } from "react-router-dom";
+import { Autocomplete, ConfirmationModal } from "@mwdb-web/commons/ui";
 
-export let GroupMemberList = (props) => (
-    <MemberList
-        nameKey="login"
-        itemLinkClass={(user) => (
-            <UserBadge user={user} clickable basePath="/settings" />
-        )}
-        {...props}
-    />
-);
+function AddMemberForm({ newMemberItems, addMember }) {
+    const [newMember, setNewMember] = useState("");
+
+    return (
+        <div className="card">
+            <div className="card-body">
+                <Autocomplete
+                    value={newMember}
+                    getItemValue={(user) => user.login}
+                    items={newMemberItems.filter(
+                        (user) =>
+                            user.login
+                                .toLowerCase()
+                                .indexOf(newMember.toLowerCase()) !== -1
+                    )}
+                    onChange={(value) => setNewMember(value)}
+                    className="form-control"
+                    placeholder="User login"
+                />
+                <button
+                    className="btn btn-outline-success mt-2 mr-1"
+                    disabled={newMember.length === 0}
+                    onClick={() => {
+                        addMember(newMember);
+                        setNewMember("");
+                    }}
+                >
+                    <FontAwesomeIcon icon={faPlus} /> Add member
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function MemberList({ members, admins, setAdminMembership, removeMember }) {
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [modalSpec, setModalSpec] = useState({});
+
+    function setAdmin(member, membership) {
+        let message = `Are you sure to change admin group permissions for ${member}?`;
+
+        setModalSpec({
+            message,
+            action: () => {
+                setModalOpen(false);
+                setAdminMembership(member, membership);
+            },
+            buttonStyle: "bg-success",
+            confirmText: "Yes",
+        });
+        setModalOpen(true);
+    }
+
+    function removeMembership(member) {
+        let message = `Remove ${member} from this group`;
+
+        setModalSpec({
+            message,
+            action: () => {
+                setModalOpen(false);
+                removeMember(member);
+            },
+            confirmText: "Remove",
+        });
+        setModalOpen(true);
+    }
+
+    return (
+        <React.Fragment>
+            {members.map((member) => (
+                <tr>
+                    <th className="col">
+                        <span className="badge badge-info">{member.login}</span>
+                        {admins.includes(member.login) ? (
+                            <span
+                                data-toggle="tooltip"
+                                title="Group admin user"
+                            >
+                                <FontAwesomeIcon
+                                    className="navbar-icon"
+                                    icon={faCrown}
+                                />
+                            </span>
+                        ) : (
+                            []
+                        )}
+                    </th>
+                    <td className="col-auto">
+                        <Link
+                            data-toggle="tooltip"
+                            title="Remove user from group"
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                removeMembership(
+                                    member.login,
+                                    !admins.includes(member.login)
+                                );
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faTrash} />
+                        </Link>
+                    </td>
+                    <td className="col-auto">
+                        <Link
+                            data-toggle="tooltip"
+                            title="Give or revoke group admin permissions"
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                setAdmin(
+                                    member.login,
+                                    !admins.includes(member.login)
+                                );
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faUser} />
+                        </Link>
+                    </td>
+                </tr>
+            ))}
+            <ConfirmationModal
+                isOpen={isModalOpen}
+                onRequestClose={() => {
+                    setModalOpen(false);
+                    setModalSpec({});
+                }}
+                onConfirm={modalSpec.action}
+                message={modalSpec.message}
+                buttonStyle={modalSpec.buttonStyle}
+                confirmText={modalSpec.confirmText}
+            />
+        </React.Fragment>
+    );
+}
 
 export default function GroupMembers({ group, getGroup }) {
     const { setAlert } = useViewAlert();
     const [allUsers, setAllUsers] = useState([]);
+    const [activePage, setActivePage] = useState(1);
 
     async function addMember(login) {
         try {
@@ -78,15 +213,30 @@ export default function GroupMembers({ group, getGroup }) {
 
     return (
         <div className="container">
-            <h2>Group members:</h2>
-            <GroupMemberList
-                items={usersItems}
-                admins={group.admins}
-                setAdminMembership={setAdminMembership}
-                addMember={addMember}
-                removeMember={removeMember}
+            <AddMemberForm
                 newMemberItems={allUsersItems}
-                groupName={group.name}
+                addMember={addMember}
+            />
+            <table className="table table-bordered wrap-table">
+                <tbody>
+                    <MemberList
+                        members={usersItems
+                            .sort()
+                            .slice((activePage - 1) * 10, activePage * 10)}
+                        admins={group.admins}
+                        setAdminMembership={setAdminMembership}
+                        removeMember={removeMember}
+                    />
+                </tbody>
+            </table>
+            <Pagination
+                activePage={activePage}
+                itemsCountPerPage={10}
+                totalItemsCount={usersItems.length}
+                pageRangeDisplayed={5}
+                onChange={setActivePage}
+                itemClass="page-item"
+                linkClass="page-link"
             />
         </div>
     );

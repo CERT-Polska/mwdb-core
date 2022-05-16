@@ -51,7 +51,7 @@ function MemberList({ members, admins, setAdminMembership, removeMember }) {
     const [modalSpec, setModalSpec] = useState({});
 
     function setAdmin(member, membership) {
-        let message = `Are you sure to change admin group permissions for ${member}?`;
+        const message = `Are you sure to change admin group permissions for ${member}?`;
 
         setModalSpec({
             message,
@@ -66,7 +66,7 @@ function MemberList({ members, admins, setAdminMembership, removeMember }) {
     }
 
     function removeMembership(member) {
-        let message = `Remove ${member} from this group`;
+        const message = `Remove ${member} from this group`;
 
         setModalSpec({
             message,
@@ -84,7 +84,7 @@ function MemberList({ members, admins, setAdminMembership, removeMember }) {
             {members.map((member) => (
                 <tr>
                     <th className="col">
-                        <span className="badge badge-info">{member.login}</span>
+                        <UserBadge user={member} clickable basePath="/settings"/>
                         {admins.includes(member.login) ? (
                             <span
                                 data-toggle="tooltip"
@@ -126,7 +126,7 @@ function MemberList({ members, admins, setAdminMembership, removeMember }) {
                                 );
                             }}
                         >
-                            <FontAwesomeIcon icon={faUser} />
+                            <FontAwesomeIcon icon={faCrown} />
                         </Link>
                     </td>
                 </tr>

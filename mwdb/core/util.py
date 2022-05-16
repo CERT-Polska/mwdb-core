@@ -79,7 +79,7 @@ def get_fd_path(stream):
         return None
 
 
-def calc_magic(stream):
+def calc_magic(stream) -> str:
     # Missing python-magic features:
     # - magic_descriptor (https://github.com/ahupp/python-magic/pull/227)
     # - direct support for symlink flag
@@ -93,9 +93,11 @@ def calc_magic(stream):
             # Handle BytesIO in-memory streams
             stream.seek(0, os.SEEK_SET)
             return magic.maybe_decode(magic.magic_buffer(magic_cookie, stream.read()))
+    except magic.MagicException:
+        # If libmagic fails, we fallback to 'data'
+        return "data"
     finally:
         magic.magic_close(magic_cookie)
-    return None
 
 
 def calc_ssdeep(stream):

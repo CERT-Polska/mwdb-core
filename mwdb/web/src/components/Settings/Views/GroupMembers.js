@@ -5,7 +5,11 @@ import { useViewAlert } from "@mwdb-web/commons/ui";
 import { faTrash, faCrown, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import { Autocomplete, ConfirmationModal } from "@mwdb-web/commons/ui";
+import {
+    Autocomplete,
+    ConfirmationModal,
+    UserBadge,
+} from "@mwdb-web/commons/ui";
 
 function AddMemberForm({ newMemberItems, addMember }) {
     const [newMember, setNewMember] = useState("");

@@ -2,12 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import api from "@mwdb-web/commons/api";
 import Pagination from "react-js-pagination";
 import { useViewAlert } from "@mwdb-web/commons/ui";
-import {
-    faUser,
-    faTrash,
-    faCrown,
-    faPlus,
-} from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faCrown, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { Autocomplete, ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -84,7 +79,11 @@ function MemberList({ members, admins, setAdminMembership, removeMember }) {
             {members.map((member) => (
                 <tr>
                     <th className="col">
-                        <UserBadge user={member} clickable basePath="/settings"/>
+                        <UserBadge
+                            user={member}
+                            clickable
+                            basePath="/settings"
+                        />
                         {admins.includes(member.login) ? (
                             <span
                                 data-toggle="tooltip"

@@ -48,8 +48,8 @@ class AttributeDefinitionListRequestSchema(Schema):
 class AttributeDefinitionCreateRequestSchema(AttributeKeySchema):
     label = fields.Str(required=True, allow_none=False)
     description = fields.Str(required=True, allow_none=False)
-    url_template = fields.Str(required=True, allow_none=False)
-    rich_template = fields.Str(required=True, allow_none=False)
+    url_template = fields.Str(missing="", allow_none=False)
+    rich_template = fields.Str(missing="", allow_none=False)
     hidden = fields.Boolean(required=True, allow_none=False)
 
 

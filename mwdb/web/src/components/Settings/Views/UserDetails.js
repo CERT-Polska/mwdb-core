@@ -5,6 +5,7 @@ import {
     DateString,
     ConfirmationModal,
     EditableItem,
+    PseudoEditableItem,
     GroupBadge,
     useViewAlert,
 } from "@mwdb-web/commons/ui";
@@ -123,6 +124,7 @@ export default function UserDetails({ user, getUser }) {
                         label="Groups"
                         value={user.groups && user.groups.length}
                     >
+                        <PseudoEditableItem editLocation={`/settings/user/${user.login}/groups`}>
                         {user.groups &&
                             user.groups
                                 .filter((group) => !group.private)
@@ -136,6 +138,7 @@ export default function UserDetails({ user, getUser }) {
                                         basePath="/settings"
                                     />
                                 ))}
+                        </PseudoEditableItem>
                     </UserItem>
                 </tbody>
             </table>

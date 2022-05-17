@@ -20,6 +20,48 @@ for (let extraRenderers of fromPlugin("attributeRenderers")) {
     attributeRenderers = { ...attributeRenderers, ...extraRenderers };
 }
 
+function Attribute({attributeDefinition, values, onUpdateAttributes}) {
+    const {key, label, description, rich_template: richTemplate, url_template: urlTemplate} = attributeDefinition;
+    const [collapsed, setCollapsed] = useState(true);
+    const isCollapsible = values.length > 3;
+    return (
+        <tr>
+            <th
+                onClick={(ev) => {
+                    ev.preventDefault();
+                    setCollapsed(!collapsed);
+                }}
+            >
+                {isCollapsible ? (
+                    <FontAwesomeIcon
+                        icon={collapsed ? "plus" : "minus"}
+                        size="sm"
+                    />
+                ) : (
+                    []
+                )}{" "}
+                <span
+                    data-toggle="tooltip"
+                    title={key}
+                    style={{ cursor: "pointer" }}
+                >
+                    {label}
+                </span>
+            </th>
+            <td className="flickerable">
+                {attributeValues}
+                {isCollapsible && collapsed ? (
+                    <span style={{ color: "gray", fontWeight: "bold" }}>
+                        ...
+                    </span>
+                ) : (
+                    []
+                )}
+            </td>
+        </tr>
+    );
+}
+
 function AttributeRenderer({
     attributeKey,
     attributeDefinition,

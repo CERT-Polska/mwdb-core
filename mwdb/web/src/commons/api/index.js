@@ -361,12 +361,11 @@ function getAttributeDefinition(key) {
     return axios.get(`/attribute/${key}`);
 }
 
-function addAttributeDefinition(key, label, description, url_template, hidden) {
+function addAttributeDefinition(key, label, description, hidden) {
     return axios.post("/attribute", {
         key,
         label,
         description,
-        url_template,
         hidden,
     });
 }
@@ -376,12 +375,14 @@ function updateAttributeDefinition(
     label,
     description,
     url_template,
+    rich_template,
     hidden
 ) {
     return axios.put(`/attribute/${key}`, {
         label,
         description,
         url_template,
+        rich_template,
         hidden,
     });
 }

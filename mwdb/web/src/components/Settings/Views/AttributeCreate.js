@@ -9,7 +9,6 @@ export default function AttributeCreate() {
         attributeKey: "",
         label: "",
         description: "",
-        url_template: "",
         hidden: false,
     });
 
@@ -31,7 +30,6 @@ export default function AttributeCreate() {
                 values.attributeKey,
                 values.label,
                 values.description,
-                values["url_template"],
                 values.hidden
             );
             viewAlert.redirectToAlert({
@@ -92,20 +90,6 @@ export default function AttributeCreate() {
                     />
                     <div className="form-hint">
                         Description of the attribute meaning (optional)
-                    </div>
-                </div>
-                <div className="form-group">
-                    <label>URL template</label>
-                    <input
-                        type="text"
-                        name="url_template"
-                        value={values["url_template"]}
-                        onChange={handleInputChange}
-                        className="form-control"
-                    />
-                    <div className="form-hint">
-                        Provide URL template for specified attribute with $value
-                        as a placeholder (e.g. http://system.cert.pl/job/$value)
                     </div>
                 </div>
                 <div className="form-group">

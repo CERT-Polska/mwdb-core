@@ -23,7 +23,7 @@ import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
 import SettingsView from "./components/Settings/SettingsView";
 
-import MarkedAttribute from "./components/MarkedAttribute";
+import RichAttributePreview from "./components/RichAttribute/RichAttributePreview";
 
 import { OAuthLogin, OAuthAuthorize } from "./components/OAuth";
 
@@ -210,7 +210,7 @@ export default function App() {
                 <ProfileView />
             </ProtectedRoute>
             <ProtectedRoute path="/dev/marked">
-                <MarkedAttribute />
+                <RichAttributePreview />
             </ProtectedRoute>
             {fromPlugin("routes")}
             <DefaultRoute />

@@ -4,6 +4,7 @@ import api from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
     EditableItem,
+    PseudoEditableItem,
     FeatureSwitch,
     UserBadge,
     useViewAlert,
@@ -70,6 +71,7 @@ export default function GroupDetails({ group, updateGroup }) {
                         />
                     </GroupItem>
                     <GroupItem label="Members">
+                        <PseudoEditableItem editLocation={`/settings/group/${group.name}/members`}>
                         {group &&
                             group.users
                                 .sort((userA, userB) =>
@@ -82,6 +84,7 @@ export default function GroupDetails({ group, updateGroup }) {
                                         basePath={"/settings"}
                                     />
                                 ))}
+                        </PseudoEditableItem>
                     </GroupItem>
                 </tbody>
             </table>

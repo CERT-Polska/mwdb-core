@@ -143,6 +143,8 @@ class AttributeDefinition(db.Model):
     description = db.Column(db.Text, nullable=False)
     url_template = db.Column(db.Text, nullable=False)  # deprecated
     rich_template = db.Column(db.Text, nullable=False)
+    # Example value used with rich_template
+    example_value = db.Column(db.Text, nullable=False)
     hidden = db.Column(db.Boolean, nullable=False, default=False)
     permissions = db.relationship(
         "AttributePermission",

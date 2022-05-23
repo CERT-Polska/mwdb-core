@@ -13,7 +13,7 @@ import exampleTemplates from "./exampleTemplates";
 function templateReducer(state, action) {
     console.log(state, action);
     if(action.type === "edit") {
-        if(state.chosenExample === "-1") {
+        if(state.chosenExample === "custom") {
             // Editing custom template
             return {
                 ...state,
@@ -23,7 +23,7 @@ function templateReducer(state, action) {
         } else {
             // Editing chosen example, apply secondary field from the chosen template
             return {
-                chosenExample: "-1", // go to custom mode
+                chosenExample: "custom", // go to custom mode
                 templateInput: action.templateInput !== undefined ? action.templateInput : exampleTemplates[state.chosenExample].template,
                 valueInput: action.valueInput !== undefined ? action.valueInput : exampleTemplates[state.chosenExample].value
             }
@@ -55,14 +55,15 @@ export default function RichAttributePreview() {
         dispatch({type: "edit", [field]: newValue})
     }
 
-    const template = templateState.chosenExample !== "-1" ? exampleTemplates[templateState.chosenExample].template : templateState.templateInput;
-    const value = templateState.chosenExample !== "-1" ? exampleTemplates[templateState.chosenExample].value : templateState.valueInput;
-    const [tokens, renderedValue] = renderValue(template, value);
+    const template = templateState.chosenExample !== "custom" ? exampleTemplates[templateState.chosenExample].template : templateState.templateInput;
+    const value = templateState.chosenExample !== "custom" ? exampleTemplates[templateState.chosenExample].value : templateState.valueInput;
+    // eslint-disable-next-line no-unused-vars
+    const [_, renderedValue] = renderValue(template, value);
 
     return (
         <View ident="attributePreview">
             <select className="custom-select" value={templateState.chosenExample} onChange={chooseTemplate}>
-                <option value="-1">
+                <option value="custom">
                     (custom template)
                 </option>
                 {

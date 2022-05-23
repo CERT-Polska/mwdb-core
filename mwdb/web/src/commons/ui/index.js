@@ -17,7 +17,6 @@ export { default as GroupBadge, UserBadge } from "./GroupBadge";
 export { default as Hash } from "./Hash";
 export { default as HexView } from "./HexView";
 export { default as Identicon } from "./Identicon";
-export { default as MemberList } from "./MemberList";
 export { default as NavDropdown } from "./NavDropdown";
 export { default as ObjectLink } from "./ObjectLink";
 export { default as PagedList } from "./PagedList";

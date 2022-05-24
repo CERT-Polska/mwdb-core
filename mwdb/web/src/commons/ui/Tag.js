@@ -4,7 +4,34 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { getStyleForTag } from "@mwdb-web/commons/ui";
+
+export function getStyleForTag(tag) {
+    let styleList = {
+        primary: ["spam", "src:", "uploader:", "feed:"],
+        warning: ["ripped:", "contains:", "matches:", "maybe:"],
+        success: ["static:", "dynamic:"],
+        secondary: [
+            "runnable:",
+            "archive:",
+            "dump:",
+            "script:",
+            "document:",
+            "archive",
+            "dump",
+        ],
+    };
+
+    for (let style of Object.keys(styleList)) {
+        if (
+            styleList[style].filter((t) =>
+                t.endsWith(":") ? tag.startsWith(t) : tag === t
+            ).length > 0
+        )
+            return style;
+    }
+    if (tag.indexOf(":") !== -1) return "info";
+    return "danger";
+}
 
 export class Tag extends Component {
     static defaultProps = {

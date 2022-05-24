@@ -41,15 +41,7 @@ class MarkedMustache extends Mustache.Writer {
     }
 
     render(template, view) {
-        return super.render(
-            template,
-            new MarkedMustacheContext(
-                {
-                    ...JSON.parse(view),
-                },
-                null
-            )
-        );
+        return super.render(template, new MarkedMustacheContext(view, null));
     }
 }
 
@@ -186,16 +178,10 @@ function renderTokens(tokens) {
 }
 
 export function renderValue(template, value) {
-    let tokens = [];
-    try {
-        const markdown = markedMustache.render(template, value);
-        tokens = lexer(markdown, {
-            ...defaults,
-            tokenizer: markedTokenizer,
-        });
-        return [tokens, renderTokens(tokens)];
-    } catch (e) {
-        console.error(e);
-        return [tokens, [e.toString()]];
-    }
+    const markdown = markedMustache.render(template, value);
+    const tokens = lexer(markdown, {
+        ...defaults,
+        tokenizer: markedTokenizer,
+    });
+    return <div>{renderTokens(tokens)}</div>;
 }

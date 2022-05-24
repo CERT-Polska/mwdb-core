@@ -23,8 +23,6 @@ import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
 import SettingsView from "./components/Settings/SettingsView";
 
-import RichAttributePreview from "./components/RichAttribute/RichAttributePreview";
-
 import { OAuthLogin, OAuthAuthorize } from "./components/OAuth";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -208,9 +206,6 @@ export default function App() {
             <SettingsRoute path="/settings" />
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
                 <ProfileView />
-            </ProtectedRoute>
-            <ProtectedRoute path="/dev/marked">
-                <RichAttributePreview />
             </ProtectedRoute>
             {fromPlugin("routes")}
             <DefaultRoute />

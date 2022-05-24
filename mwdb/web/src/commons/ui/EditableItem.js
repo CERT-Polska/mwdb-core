@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 
-function EditButton({onClick}) {
+function EditButton({ onClick }) {
     return (
         <button
             className="float-right align-middle btn shadow-none"
@@ -13,7 +13,7 @@ function EditButton({onClick}) {
             <small className="text-muted">Edit </small>
             <FontAwesomeIcon icon="edit" />
         </button>
-    )
+    );
 }
 
 export function EditableItem({
@@ -96,7 +96,8 @@ export function EditableItem({
                             <span>{defaultValue}</span>
                         )}
                     </span>
-                    <EditButton onClick={(ev) => {
+                    <EditButton
+                        onClick={(ev) => {
                             ev.preventDefault();
                             setValue(defaultValue);
                             setEdit(true);
@@ -108,19 +109,14 @@ export function EditableItem({
     );
 }
 
-export function PseudoEditableItem({
-    children,
-    editLocation,
-}) {
+export function PseudoEditableItem({ children, editLocation }) {
     /*
      Looks the same as regular editable item, but Edit button redirects to the
      separate editing view
      */
     return (
         <div>
-            <span className="align-middle">
-                {children}
-            </span>
+            <span className="align-middle">{children}</span>
             <Link to={editLocation}>
                 <EditButton />
             </Link>

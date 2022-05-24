@@ -79,7 +79,10 @@ export default function AttributeView() {
                     exact
                     path="/settings/attribute/:attributeKey/edit-template"
                 >
-                    <AttributeEditTemplate/>
+                    <AttributeEditTemplate
+                        attribute={attribute}
+                        getAttribute={updateAttribute}
+                    />
                 </AdministrativeRoute>
             </Switch>
         </div>

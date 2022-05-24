@@ -71,19 +71,21 @@ export default function GroupDetails({ group, updateGroup }) {
                         />
                     </GroupItem>
                     <GroupItem label="Members">
-                        <PseudoEditableItem editLocation={`/settings/group/${group.name}/members`}>
-                        {group &&
-                            group.users
-                                .sort((userA, userB) =>
-                                    userA.localeCompare(userB)
-                                )
-                                .map((user) => (
-                                    <UserBadge
-                                        user={{ login: user }}
-                                        clickable
-                                        basePath={"/settings"}
-                                    />
-                                ))}
+                        <PseudoEditableItem
+                            editLocation={`/settings/group/${group.name}/members`}
+                        >
+                            {group &&
+                                group.users
+                                    .sort((userA, userB) =>
+                                        userA.localeCompare(userB)
+                                    )
+                                    .map((user) => (
+                                        <UserBadge
+                                            user={{ login: user }}
+                                            clickable
+                                            basePath={"/settings"}
+                                        />
+                                    ))}
                         </PseudoEditableItem>
                     </GroupItem>
                 </tbody>

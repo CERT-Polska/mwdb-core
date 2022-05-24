@@ -124,20 +124,22 @@ export default function UserDetails({ user, getUser }) {
                         label="Groups"
                         value={user.groups && user.groups.length}
                     >
-                        <PseudoEditableItem editLocation={`/settings/user/${user.login}/groups`}>
-                        {user.groups &&
-                            user.groups
-                                .filter((group) => !group.private)
-                                .sort((groupA, groupB) =>
-                                    groupA.name.localeCompare(groupB.name)
-                                )
-                                .map((group) => (
-                                    <GroupBadge
-                                        group={group}
-                                        clickable
-                                        basePath="/settings"
-                                    />
-                                ))}
+                        <PseudoEditableItem
+                            editLocation={`/settings/user/${user.login}/groups`}
+                        >
+                            {user.groups &&
+                                user.groups
+                                    .filter((group) => !group.private)
+                                    .sort((groupA, groupB) =>
+                                        groupA.name.localeCompare(groupB.name)
+                                    )
+                                    .map((group) => (
+                                        <GroupBadge
+                                            group={group}
+                                            clickable
+                                            basePath="/settings"
+                                        />
+                                    ))}
                         </PseudoEditableItem>
                     </UserItem>
                 </tbody>

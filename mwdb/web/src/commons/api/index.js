@@ -370,19 +370,21 @@ function addAttributeDefinition(key, label, description, hidden) {
     });
 }
 
-function updateAttributeDefinition(
+function updateAttributeDefinition({
     key,
     label,
     description,
     url_template,
     rich_template,
-    hidden
-) {
+    example_value,
+    hidden,
+}) {
     return axios.put(`/attribute/${key}`, {
         label,
         description,
         url_template,
         rich_template,
+        example_value,
         hidden,
     });
 }

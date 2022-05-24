@@ -34,13 +34,13 @@ export function AttributeDetails({ attribute, getAttribute }) {
             newValue.hidden = false;
         }
         try {
-            await api.updateAttributeDefinition(
-                attribute.key,
-                newValue.label,
-                newValue.description,
-                newValue["url_template"],
-                newValue.hidden
-            );
+            await api.updateAttributeDefinition({
+                key: attribute.key,
+                label: newValue.label,
+                description: newValue.description,
+                urlTemplate: newValue["url_template"],
+                hidden: newValue.hidden,
+            });
         } catch (error) {
             viewAlert.setAlert({ error });
         } finally {
@@ -79,12 +79,17 @@ export function AttributeDetails({ attribute, getAttribute }) {
                             onSubmit={handleSubmit}
                         />
                     </AttributeItem>
-                    <AttributeItem label={
-                        <React.Fragment>
-                            URL template<br/>
-                            <span className="text-muted font-weight-normal">(deprecated)</span>
-                        </React.Fragment>
-                    }>
+                    <AttributeItem
+                        label={
+                            <React.Fragment>
+                                URL template
+                                <br />
+                                <span className="text-muted font-weight-normal">
+                                    (deprecated)
+                                </span>
+                            </React.Fragment>
+                        }
+                    >
                         <EditableItem
                             name="url_template"
                             defaultValue={attribute["url_template"]}
@@ -92,8 +97,18 @@ export function AttributeDetails({ attribute, getAttribute }) {
                         />
                     </AttributeItem>
                     <AttributeItem label="Rich template">
-                        <PseudoEditableItem editLocation={`/settings/attribute/${attribute.key}/edit-template`}>
-                            {attribute["rich_template"]}
+                        <PseudoEditableItem
+                            editLocation={`/settings/attribute/${attribute.key}/edit-template`}
+                        >
+                            <pre
+                                style={{
+                                    float: "left",
+                                    whiteSpace: "pre-wrap",
+                                    wordBreak: "break-all",
+                                }}
+                            >
+                                {attribute["rich_template"]}
+                            </pre>
                         </PseudoEditableItem>
                     </AttributeItem>
                 </tbody>

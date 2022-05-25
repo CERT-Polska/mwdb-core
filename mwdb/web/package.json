@@ -45,7 +45,7 @@
     "customize-cra": "^1.0.0",
     "dpdm": "^3.9.0",
     "exports-loader": "^1.1.0",
-    "http-proxy-middleware": "^0.20.0",
+    "http-proxy-middleware": "^2.0.6",
     "imports-loader": "^1.1.0",
     "prettier": "^2.4.1",
     "react-app-rewired": "2.1.3",

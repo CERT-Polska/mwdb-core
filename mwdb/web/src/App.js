@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Switch, Route, Redirect, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet, useLocation, useParams } from "react-router-dom-v5-compat"
 
 import About from "./components/About";
 import Navigation from "./components/Navigation";
@@ -61,8 +61,9 @@ import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
-import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
+import { ErrorBoundary } from "@mwdb-web/commons/ui";
 import { Extendable } from "./commons/extensions";
+import Upload from "./components/Upload";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -94,132 +95,101 @@ library.add(faSave);
 library.add(faLock);
 library.add(faLockOpen);
 
-function DefaultRoute() {
+function NavigateFor404() {
     const location = useLocation();
     return (
-        <Route>
-            <Redirect
-                to={{
-                    pathname: "/",
-                    state: {
-                        error: `Location '${location.pathname}' doesn't exist`,
-                    },
-                }}
-            />
-        </Route>
-    );
+        <Navigate
+            to="/" // todo: change to login
+            state={{
+                error: `Location '${location.pathname}' doesn't exist`,
+            }}
+        />
+    )
 }
 
-function SettingsRoute(args) {
+function SampleRouteFallback() {
+    // Fallback route for sample/:hash legacy link
+    const { hash } = useParams();
+    return <Navigate to={`/file/${hash}`} />
+}
+
+function RequiresAuth({children}) {
     const auth = useContext(AuthContext);
+    const location = useLocation();
+    if(!auth.isAuthenticated)
+        return (
+            <Navigate
+                to="/login"
+                state={{
+                    prevLocation: location,
+                    error: "You need to authenticate before accessing this page",
+                }}
+            />
+        )
+    return children ? children : <Outlet/>;
+}
+
+function RequiresCapability({capability, children}) {
+    const auth = useContext(AuthContext);
+    const location = useLocation();
+    if(!auth.hasCapability(capability))
+        return (
+            <Navigate
+                to="/"
+                state={{
+                    error: `You don't have permission to access '${location.pathname}'`
+                }}
+            />
+        )
+    return children ? children : <Outlet/>;
+}
+
+function AppRoutes() {
+    const auth = useContext(AuthContext);
+    const {config: {is_registration_enabled: isRegistrationEnabled}} = useContext(ConfigContext);
     return (
-        <ProtectedRoute
-            condition={auth.hasCapability(Capability.manageUsers)}
-            {...args}
-        >
-            <SettingsView />
-        </ProtectedRoute>
-    );
+        <Routes>
+            <Route path="login" element={<UserLogin />}/>
+            {
+                isRegistrationEnabled ? (
+                    <Route path="register" element={<UserRegister/>}/>
+                ) : []
+            }
+            <Route path="recover_password" element={<UserPasswordRecover/>}/>
+            <Route path="setpasswd/:token" element={<UserSetPassword/>}/>
+            <Route path="oauth/login" element={<OAuthLogin />} />
+            <Route path="oauth/callback" element={<OAuthAuthorize />} />
+            <Route element={<RequiresAuth/>}>
+                <Route path="/" element={<RecentSamples/>} />
+                <Route path="configs" element={<RecentConfigs />} />
+                <Route path="blobs" element={<RecentBlobs />} />
+                <Route path="search" element={<Search />}/>
+                <Route path="upload" element={
+                   <RequiresCapability capability={Capability.addingFiles}>
+                       <UploadWithTimeout />
+                   </RequiresCapability>
+                }/>
+                <Route path="configs/stats" element={<ConfigStats />} />
+                <Route path="about" element={<About />} />
+                <Route path="docs" element={<Docs />} />
+                <Route path="sample/:hash" element={ <SampleRouteFallback /> }/>
+                <Route path="file/:hash" element={<ShowSample />} />
+                <Route path="config/:hash" element={<ShowConfig />} />
+                <Route path="blob/:hash" element={<ShowTextBlob />} />
+            </Route>
+            <Route path="*" element={<NavigateFor404 />}/>
+        </Routes>
+    )
 }
 
 export default function App() {
-    const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-
-    const routeSwitch = config.isReady ? (
-        <Switch>
-            <Route exact path="/login">
-                <UserLogin />
-            </Route>
-            {config.config["is_registration_enabled"] ? (
-                <Route exact path="/register">
-                    <UserRegister />
-                </Route>
-            ) : (
-                []
-            )}
-            <Route exact path="/recover_password">
-                <UserPasswordRecover />
-            </Route>
-            <Route exact path="/setpasswd/:token">
-                <UserSetPassword />
-            </Route>
-            <Route exact path="/oauth/login">
-                <OAuthLogin />
-            </Route>
-            <Route exact path="/oauth/callback">
-                <OAuthAuthorize />
-            </Route>
-            <ProtectedRoute exact path="/">
-                {
-                    /*
-                        BUG: react-router doesn't re-render on search path change
-                        when we have direct component here
-                    */
-                    () => <RecentSamples />
-                }
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/configs">
-                {() => <RecentConfigs />}
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/blobs">
-                {() => <RecentBlobs />}
-            </ProtectedRoute>
-            <ProtectedRoute
-                exact
-                path="/upload"
-                condition={auth.hasCapability(Capability.addingFiles)}
-            >
-                <UploadWithTimeout />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/search">
-                {() => <Search />}
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/configs/stats">
-                <ConfigStats />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/about">
-                <About />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/docs">
-                <Docs />
-            </ProtectedRoute>
-            <Redirect from="/sample/:hash" to="/file/:hash" />
-            <ProtectedRoute path="/file/:hash">
-                <ShowSample />
-            </ProtectedRoute>
-            <ProtectedRoute path="/config/:hash">
-                <ShowConfig />
-            </ProtectedRoute>
-            <ProtectedRoute path="/blob/:hash">
-                <ShowTextBlob />
-            </ProtectedRoute>
-            <ProtectedRoute path="/diff/:current/:previous">
-                <DiffTextBlob />
-            </ProtectedRoute>
-            <ProtectedRoute path="/relations">
-                <RelationsPlot />
-            </ProtectedRoute>
-            <ProtectedRoute path="/remote/:remote">
-                <RemoteViews />
-            </ProtectedRoute>
-            <SettingsRoute path="/settings" />
-            <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
-                <ProfileView />
-            </ProtectedRoute>
-            {fromPlugin("routes")}
-            <DefaultRoute />
-        </Switch>
-    ) : (
-        []
-    );
-
     return (
         <div className="App">
             <Navigation />
             <div className="content">
                 <ErrorBoundary error={config.error}>
-                    <Extendable ident="main">{routeSwitch}</Extendable>
+                    <Extendable ident="main">{config.isReady ? <AppRoutes/> : []}</Extendable>
                 </ErrorBoundary>
             </div>
         </div>

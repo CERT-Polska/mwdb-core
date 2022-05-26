@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
-import { Routes, Route, Navigate, Outlet, useLocation, useParams } from "react-router-dom-v5-compat"
+import { Switch } from "react-router-dom";
+import { Routes, Route, CompatRoute, Navigate, Outlet, useLocation, useParams } from "react-router-dom-v5-compat"
 
 import About from "./components/About";
 import Navigation from "./components/Navigation";
@@ -61,9 +62,8 @@ import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
-import { ErrorBoundary } from "@mwdb-web/commons/ui";
+import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
 import { Extendable } from "./commons/extensions";
-import Upload from "./components/Upload";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -148,37 +148,59 @@ function AppRoutes() {
     const auth = useContext(AuthContext);
     const {config: {is_registration_enabled: isRegistrationEnabled}} = useContext(ConfigContext);
     return (
-        <Routes>
-            <Route path="login" element={<UserLogin />}/>
-            {
-                isRegistrationEnabled ? (
-                    <Route path="register" element={<UserRegister/>}/>
-                ) : []
-            }
-            <Route path="recover_password" element={<UserPasswordRecover/>}/>
-            <Route path="setpasswd/:token" element={<UserSetPassword/>}/>
-            <Route path="oauth/login" element={<OAuthLogin />} />
-            <Route path="oauth/callback" element={<OAuthAuthorize />} />
-            <Route element={<RequiresAuth/>}>
-                <Route path="/" element={<RecentSamples/>} />
-                <Route path="configs" element={<RecentConfigs />} />
-                <Route path="blobs" element={<RecentBlobs />} />
-                <Route path="search" element={<Search />}/>
-                <Route path="upload" element={
-                   <RequiresCapability capability={Capability.addingFiles}>
-                       <UploadWithTimeout />
-                   </RequiresCapability>
-                }/>
-                <Route path="configs/stats" element={<ConfigStats />} />
-                <Route path="about" element={<About />} />
-                <Route path="docs" element={<Docs />} />
-                <Route path="sample/:hash" element={ <SampleRouteFallback /> }/>
-                <Route path="file/:hash" element={<ShowSample />} />
-                <Route path="config/:hash" element={<ShowConfig />} />
-                <Route path="blob/:hash" element={<ShowTextBlob />} />
-            </Route>
-            <Route path="*" element={<NavigateFor404 />}/>
-        </Routes>
+        <Switch>
+            <ProtectedRoute path="/diff/:current/:previous">
+                <DiffTextBlob />
+            </ProtectedRoute>
+            <ProtectedRoute path="/relations">
+                <RelationsPlot />
+            </ProtectedRoute>
+            <ProtectedRoute path="/remote/:remote">
+                <RemoteViews />
+            </ProtectedRoute>
+            <ProtectedRoute
+                condition={auth.hasCapability(Capability.manageUsers)}
+                path="/settings">
+                <SettingsView />
+            </ProtectedRoute>
+            <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
+                <ProfileView />
+            </ProtectedRoute>
+            {fromPlugin("routes")}
+            <CompatRoute path="">
+                <Routes>
+                    <Route path="login" element={<UserLogin />}/>
+                    {
+                        isRegistrationEnabled ? (
+                            <Route path="register" element={<UserRegister/>}/>
+                        ) : []
+                    }
+                    <Route path="recover_password" element={<UserPasswordRecover/>}/>
+                    <Route path="setpasswd/:token" element={<UserSetPassword/>}/>
+                    <Route path="oauth/login" element={<OAuthLogin />} />
+                    <Route path="oauth/callback" element={<OAuthAuthorize />} />
+                    <Route element={<RequiresAuth/>}>
+                        <Route path="/" element={<RecentSamples/>} />
+                        <Route path="configs" element={<RecentConfigs />} />
+                        <Route path="blobs" element={<RecentBlobs />} />
+                        <Route path="search" element={<Search />}/>
+                        <Route path="upload" element={
+                           <RequiresCapability capability={Capability.addingFiles}>
+                               <UploadWithTimeout />
+                           </RequiresCapability>
+                        }/>
+                        <Route path="configs/stats" element={<ConfigStats />} />
+                        <Route path="about" element={<About />} />
+                        <Route path="docs" element={<Docs />} />
+                        <Route path="sample/:hash" element={ <SampleRouteFallback /> }/>
+                        <Route path="file/:hash" element={<ShowSample />} />
+                        <Route path="config/:hash" element={<ShowConfig />} />
+                        <Route path="blob/:hash" element={<ShowTextBlob />} />
+                    </Route>
+                    <Route path="*" element={<NavigateFor404 />}/>
+                </Routes>
+            </CompatRoute>
+        </Switch>
     )
 }
 

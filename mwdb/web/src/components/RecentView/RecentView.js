@@ -18,7 +18,6 @@ export function RecentRow(props) {
 export default function RecentView(props) {
     const api = useContext(APIContext);
     const [searchParams, setSearchParams] = useSearchParams();
-    console.log(searchParams);
     // Current query set in URI path
     const currentQuery = searchParams.get("q") || "";
     // Submitted query for which we know it's valid and

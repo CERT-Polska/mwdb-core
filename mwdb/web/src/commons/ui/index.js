@@ -26,41 +26,13 @@ export { default as SortedList } from "./SortedList";
 export { default as View, useViewAlert } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
 
-export { Tag, TagList } from "./Tag";
+export { Tag, TagList, getStyleForTag } from "./Tag";
 export {
     TabContext,
     useTabContext,
     ObjectTab,
     ObjectAction,
 } from "./ObjectTab";
-
-export function getStyleForTag(tag) {
-    let styleList = {
-        primary: ["spam", "src:", "uploader:", "feed:"],
-        warning: ["ripped:", "contains:", "matches:", "maybe:"],
-        success: ["static:", "dynamic:"],
-        secondary: [
-            "runnable:",
-            "archive:",
-            "dump:",
-            "script:",
-            "document:",
-            "archive",
-            "dump",
-        ],
-    };
-
-    for (let style of Object.keys(styleList)) {
-        if (
-            styleList[style].filter((t) =>
-                t.endsWith(":") ? tag.startsWith(t) : tag === t
-            ).length > 0
-        )
-            return style;
-    }
-    if (tag.indexOf(":") !== -1) return "info";
-    return "danger";
-}
 
 export function ShowIf({ condition, children }) {
     return condition ? children : [];

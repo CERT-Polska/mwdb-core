@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 
@@ -12,7 +12,8 @@ import "bootstrap/dist/css/bootstrap.css";
 import "./styles/index.css";
 import "swagger-ui-react/swagger-ui.css";
 
-ReactDOM.render(
+const root = createRoot(document.getElementById("root"));
+root.render(
     <BrowserRouter>
         <AuthProvider>
             <ConfigProvider>
@@ -21,6 +22,5 @@ ReactDOM.render(
                 </APIProvider>
             </ConfigProvider>
         </AuthProvider>
-    </BrowserRouter>,
-    document.getElementById("root")
+    </BrowserRouter>
 );

@@ -42,12 +42,11 @@ function TextBlobDetails() {
                     <th>Blob name</th>
                     <td id="blob_name">
                         <Link
-                            to={makeSearchLink(
-                                "name",
-                                context.object.blob_name,
-                                false,
-                                `${remotePath}/blobs`
-                            )}
+                            to={makeSearchLink({
+                                field: "name",
+                                value: context.object.blob_name,
+                                pathname: `${remotePath}/blobs`,
+                            })}
                         >
                             {context.object.blob_name}
                         </Link>
@@ -57,12 +56,11 @@ function TextBlobDetails() {
                     <th>Blob size</th>
                     <td id="blob_size">
                         <Link
-                            to={makeSearchLink(
-                                "size",
-                                context.object.blob_size,
-                                false,
-                                `${remotePath}/blobs`
-                            )}
+                            to={makeSearchLink({
+                                field: "size",
+                                value: context.object.blob_size,
+                                pathname: `${remotePath}/blobs`,
+                            })}
                         >
                             {humanFileSize(context.object.blob_size)}
                         </Link>
@@ -72,12 +70,11 @@ function TextBlobDetails() {
                     <th>Blob type</th>
                     <td id="blob_type">
                         <Link
-                            to={makeSearchLink(
-                                "type",
-                                context.object.blob_type,
-                                false,
-                                `${remotePath}/blobs`
-                            )}
+                            to={makeSearchLink({
+                                field: "type",
+                                value: context.object.blob_type,
+                                pathname: `${remotePath}/blobs`,
+                            })}
                         >
                             {context.object.blob_type}
                         </Link>
@@ -89,11 +86,11 @@ function TextBlobDetails() {
                         {" "}
                         {context.object.upload_time ? (
                             <Link
-                                to={makeSearchDateLink(
-                                    "upload_time",
-                                    context.object.upload_time,
-                                    `${remotePath}/blobs`
-                                )}
+                                to={makeSearchDateLink({
+                                    field: "upload_time",
+                                    value: context.object.upload_time,
+                                    pathname: `${remotePath}/blobs`,
+                                })}
                             >
                                 <DateString date={context.object.upload_time} />
                             </Link>
@@ -108,11 +105,11 @@ function TextBlobDetails() {
                         {" "}
                         {context.object.last_seen ? (
                             <Link
-                                to={makeSearchDateLink(
-                                    "last_seen",
-                                    context.object.last_seen,
-                                    `${remotePath}/blobs`
-                                )}
+                                to={makeSearchDateLink({
+                                    field: "last_seen",
+                                    value: context.object.last_seen,
+                                    pathname: `${remotePath}/blobs`,
+                                })}
                             >
                                 <DateString date={context.object.last_seen} />
                             </Link>

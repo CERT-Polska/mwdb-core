@@ -73,12 +73,11 @@ function ShareGroupItem({ reason, shares }) {
                         <tr className="d-flex">
                             <td className="col-6">
                                 <Link
-                                    to={makeSearchLink(
-                                        "uploader",
-                                        share.group_name,
-                                        false,
-                                        `${remotePath}/search`
-                                    )}
+                                    to={makeSearchLink({
+                                        field: "uploader",
+                                        value: share.group_name,
+                                        pathname: `${remotePath}/search`,
+                                    })}
                                 >
                                     {share.group_name}
                                 </Link>

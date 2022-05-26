@@ -54,11 +54,11 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
                         onClick={(ev) => {
                             ev.preventDefault();
                             history.push(
-                                makeSearchLink(
-                                    `attribute.${key}`,
-                                    valueRaw,
-                                    false
-                                )
+                                makeSearchLink({
+                                    field: `attribute.${key}`,
+                                    value: valueRaw,
+                                    pathname: "/search",
+                                })
                             );
                         }}
                     >

@@ -48,12 +48,11 @@ export class Tag extends Component {
                 >
                     {this.props.searchable ? (
                         <Link
-                            to={makeSearchLink(
-                                "tag",
-                                this.props.tag,
-                                false,
-                                this.props.searchEndpoint
-                            )}
+                            to={makeSearchLink({
+                                field: "tag",
+                                value: this.props.tag,
+                                pathname: this.props.searchEndpoint,
+                            })}
                             className="tag-link"
                             onClick={(ev) =>
                                 this.props.tagClick &&

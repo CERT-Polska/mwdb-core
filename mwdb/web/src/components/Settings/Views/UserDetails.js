@@ -144,7 +144,11 @@ export default function UserDetails({ user, getUser }) {
                 <li className="nav-item">
                     <Link
                         className="nav-link"
-                        to={makeSearchLink("uploader", user.login, false, "/")}
+                        to={makeSearchLink({
+                            field: "uploader",
+                            value: user.login,
+                            pathname: "/",
+                        })}
                     >
                         Search for uploads
                     </Link>

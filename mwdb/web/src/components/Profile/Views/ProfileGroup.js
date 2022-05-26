@@ -116,13 +116,21 @@ export default function ProfileGroup({ profile }) {
                 <li className="nav-item">
                     <Link
                         className="nav-link"
-                        to={makeSearchLink("uploader", group.name, false, "/")}
+                        to={makeSearchLink({
+                            field: "uploader",
+                            value: group.name,
+                            pathname: "/",
+                        })}
                     >
                         Search for uploads
                     </Link>
                     <Link
                         className="nav-link"
-                        to={makeSearchLink("shared", group.name, false, "/")}
+                        to={makeSearchLink({
+                            field: "shared",
+                            value: group.name,
+                            pathname: "/",
+                        })}
                     >
                         Search for shared files
                     </Link>

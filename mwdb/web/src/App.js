@@ -173,15 +173,6 @@ function AppRoutes() {
             {/**
              * React Router v5 legacy routes
              */}
-            <ProtectedRoute path="/file/:hash">
-                <ShowSample />
-            </ProtectedRoute>
-            <ProtectedRoute path="/config/:hash">
-                <ShowConfig />
-            </ProtectedRoute>
-            <ProtectedRoute path="/blob/:hash">
-                <ShowTextBlob />
-            </ProtectedRoute>
             <ProtectedRoute path="/diff/:current/:previous">
                 <DiffTextBlob />
             </ProtectedRoute>
@@ -243,11 +234,15 @@ function AppRoutes() {
                         <Route path="about" element={<About />} />
                         <Route path="docs" element={<Docs />} />
                         <Route
-                            path="sample/:hash"
+                            path="sample/:hash/*"
                             element={<SampleRouteFallback />}
                         />
+                        <Route path="file/:hash/*" element={<ShowSample />} />
+                        <Route path="config/:hash/*" element={<ShowConfig />} />
+                        <Route path="blob/:hash/*" element={<ShowTextBlob />} />
                     </Route>
                     <Route path="*" element={<NavigateFor404 />} />
+                    {fromPlugin("protectedRoutes")}
                 </Routes>
             </CompatRoute>
         </Switch>

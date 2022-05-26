@@ -64,12 +64,11 @@ export default function ProfileDetails({ profile }) {
                     </ShowIf>
                     <Link
                         className="nav-link"
-                        to={makeSearchLink(
-                            "uploader",
-                            profile.login,
-                            false,
-                            "/"
-                        )}
+                        to={makeSearchLink({
+                            field: "uploader",
+                            value: profile.login,
+                            pathname: "/",
+                        })}
                     >
                         Search for uploads
                     </Link>

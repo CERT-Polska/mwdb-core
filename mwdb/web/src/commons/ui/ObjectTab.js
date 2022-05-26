@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { Link } from "react-router-dom-v5-compat";
+import { Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -10,8 +10,6 @@ export const useTabContext = () => useContext(TabContext);
 
 export function ObjectTab(props) {
     const context = useTabContext();
-
-    console.log(props, context);
 
     useEffect(() => {
         if (context.tab !== props.tab) return;

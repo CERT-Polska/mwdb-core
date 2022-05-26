@@ -1,7 +1,6 @@
 import React from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom-v5-compat";
 
-import queryString from "query-string";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
@@ -10,9 +9,9 @@ import { DateString, ObjectLink, Hash } from "@mwdb-web/commons/ui";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 export function RecentBlobRow(props) {
-    let location = useLocation();
     const remotePath = useRemotePath();
-    const diffWith = queryString.parse(location.search)["diff"];
+    const searchParams = useSearchParams()[0];
+    const diffWith = searchParams.get("diff");
     const blobType = (
         <a
             href="#query"
@@ -149,8 +148,8 @@ export function RecentBlobHeader() {
 }
 
 export default function RecentBlobs(props) {
-    let location = useLocation();
-    const diffWith = queryString.parse(location.search)["diff"];
+    const searchParams = useSearchParams()[0];
+    const diffWith = searchParams.get("diff");
     return (
         <React.Fragment>
             {diffWith ? (

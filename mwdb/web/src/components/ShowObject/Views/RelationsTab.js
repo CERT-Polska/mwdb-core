@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
-import { useHistory } from "react-router";
-import queryString from "query-string";
+
+import { useSearchParams } from "react-router-dom-v5-compat";
 
 import { faProjectDiagram, faSearch } from "@fortawesome/free-solid-svg-icons";
 
@@ -11,12 +11,10 @@ import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
 
 export default function RelationsTab() {
     const context = useContext(ObjectContext);
-    const history = useHistory();
-    const nodes =
-        queryString.parse(history.location.search, { arrayFormat: "bracket" })
-            .node || [];
+    const searchParams = useSearchParams()[0];
+    const nodes = searchParams.getAll("node") || [];
     const zoomLink =
-        "/relations?node[]=" + [context.object.id, ...nodes].join("&node[]=");
+        "/relations?node=" + [context.object.id, ...nodes].join("&node=");
 
     return (
         <ObjectTab

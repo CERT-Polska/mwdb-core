@@ -1,6 +1,14 @@
 import React, { useContext } from "react";
 import { Switch } from "react-router-dom";
-import { Routes, Route, CompatRoute, Navigate, Outlet, useLocation, useParams } from "react-router-dom-v5-compat"
+import {
+    Routes,
+    Route,
+    CompatRoute,
+    Navigate,
+    Outlet,
+    useLocation,
+    useParams,
+} from "react-router-dom-v5-compat";
 
 import About from "./components/About";
 import Navigation from "./components/Navigation";
@@ -96,27 +104,35 @@ library.add(faLock);
 library.add(faLockOpen);
 
 function NavigateFor404() {
+    /**
+     * Fallback route for unknown routes
+     */
     const location = useLocation();
     return (
         <Navigate
-            to="/" // todo: change to login
+            to="/"
             state={{
                 error: `Location '${location.pathname}' doesn't exist`,
             }}
         />
-    )
+    );
 }
 
 function SampleRouteFallback() {
-    // Fallback route for sample/:hash legacy link
+    /**
+     * Fallback route for legacy /sample/:hash route
+     */
     const { hash } = useParams();
-    return <Navigate to={`/file/${hash}`} />
+    return <Navigate to={`/file/${hash}`} />;
 }
 
-function RequiresAuth({children}) {
+function RequiresAuth({ children }) {
+    /**
+     * Wrapper for views that require authentication
+     */
     const auth = useContext(AuthContext);
     const location = useLocation();
-    if(!auth.isAuthenticated)
+    if (!auth.isAuthenticated)
         return (
             <Navigate
                 to="/login"
@@ -125,30 +141,47 @@ function RequiresAuth({children}) {
                     error: "You need to authenticate before accessing this page",
                 }}
             />
-        )
-    return children ? children : <Outlet/>;
+        );
+    return children ? children : <Outlet />;
 }
 
-function RequiresCapability({capability, children}) {
+function RequiresCapability({ capability, children }) {
+    /**
+     * Wrapper for views that require additional capability
+     */
     const auth = useContext(AuthContext);
     const location = useLocation();
-    if(!auth.hasCapability(capability))
+    if (!auth.hasCapability(capability))
         return (
             <Navigate
                 to="/"
                 state={{
-                    error: `You don't have permission to access '${location.pathname}'`
+                    error: `You don't have permission to access '${location.pathname}'`,
                 }}
             />
-        )
-    return children ? children : <Outlet/>;
+        );
+    return children ? children : <Outlet />;
 }
 
 function AppRoutes() {
     const auth = useContext(AuthContext);
-    const {config: {is_registration_enabled: isRegistrationEnabled}} = useContext(ConfigContext);
+    const {
+        config: { is_registration_enabled: isRegistrationEnabled },
+    } = useContext(ConfigContext);
     return (
         <Switch>
+            {/**
+             * React Router v5 legacy routes
+             */}
+            <ProtectedRoute path="/file/:hash">
+                <ShowSample />
+            </ProtectedRoute>
+            <ProtectedRoute path="/config/:hash">
+                <ShowConfig />
+            </ProtectedRoute>
+            <ProtectedRoute path="/blob/:hash">
+                <ShowTextBlob />
+            </ProtectedRoute>
             <ProtectedRoute path="/diff/:current/:previous">
                 <DiffTextBlob />
             </ProtectedRoute>
@@ -160,48 +193,65 @@ function AppRoutes() {
             </ProtectedRoute>
             <ProtectedRoute
                 condition={auth.hasCapability(Capability.manageUsers)}
-                path="/settings">
+                path="/settings"
+            >
                 <SettingsView />
             </ProtectedRoute>
             <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
                 <ProfileView />
             </ProtectedRoute>
             {fromPlugin("routes")}
+            {/**
+             * React Router v6-compatible routes
+             * CompatRoute is v6 wrapper that is compatible with v5 and catches
+             * everything that wasn't catched by rules above.
+             */}
             <CompatRoute path="">
                 <Routes>
-                    <Route path="login" element={<UserLogin />}/>
-                    {
-                        isRegistrationEnabled ? (
-                            <Route path="register" element={<UserRegister/>}/>
-                        ) : []
-                    }
-                    <Route path="recover_password" element={<UserPasswordRecover/>}/>
-                    <Route path="setpasswd/:token" element={<UserSetPassword/>}/>
+                    <Route path="login" element={<UserLogin />} />
+                    {isRegistrationEnabled ? (
+                        <Route path="register" element={<UserRegister />} />
+                    ) : (
+                        []
+                    )}
+                    <Route
+                        path="recover_password"
+                        element={<UserPasswordRecover />}
+                    />
+                    <Route
+                        path="setpasswd/:token"
+                        element={<UserSetPassword />}
+                    />
                     <Route path="oauth/login" element={<OAuthLogin />} />
                     <Route path="oauth/callback" element={<OAuthAuthorize />} />
-                    <Route element={<RequiresAuth/>}>
-                        <Route path="/" element={<RecentSamples/>} />
+                    <Route element={<RequiresAuth />}>
+                        <Route path="/" element={<RecentSamples />} />
                         <Route path="configs" element={<RecentConfigs />} />
                         <Route path="blobs" element={<RecentBlobs />} />
-                        <Route path="search" element={<Search />}/>
-                        <Route path="upload" element={
-                           <RequiresCapability capability={Capability.addingFiles}>
-                               <UploadWithTimeout />
-                           </RequiresCapability>
-                        }/>
+                        <Route path="search" element={<Search />} />
+                        <Route
+                            path="upload"
+                            element={
+                                <RequiresCapability
+                                    capability={Capability.addingFiles}
+                                >
+                                    <UploadWithTimeout />
+                                </RequiresCapability>
+                            }
+                        />
                         <Route path="configs/stats" element={<ConfigStats />} />
                         <Route path="about" element={<About />} />
                         <Route path="docs" element={<Docs />} />
-                        <Route path="sample/:hash" element={ <SampleRouteFallback /> }/>
-                        <Route path="file/:hash" element={<ShowSample />} />
-                        <Route path="config/:hash" element={<ShowConfig />} />
-                        <Route path="blob/:hash" element={<ShowTextBlob />} />
+                        <Route
+                            path="sample/:hash"
+                            element={<SampleRouteFallback />}
+                        />
                     </Route>
-                    <Route path="*" element={<NavigateFor404 />}/>
+                    <Route path="*" element={<NavigateFor404 />} />
                 </Routes>
             </CompatRoute>
         </Switch>
-    )
+    );
 }
 
 export default function App() {
@@ -211,7 +261,9 @@ export default function App() {
             <Navigation />
             <div className="content">
                 <ErrorBoundary error={config.error}>
-                    <Extendable ident="main">{config.isReady ? <AppRoutes/> : []}</Extendable>
+                    <Extendable ident="main">
+                        {config.isReady ? <AppRoutes /> : []}
+                    </Extendable>
                 </ErrorBoundary>
             </div>
         </div>

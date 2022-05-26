@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useHistory } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom-v5-compat";
 
 import api from "../api";
 
@@ -69,7 +69,8 @@ function useAxiosEffect(func) {
 }
 
 export function AuthProvider(props) {
-    const history = useHistory();
+    const location = useLocation();
+    const navigate = useNavigate();
     const [session, _setSession] = useState(getStoredAuthSession());
     const refreshTimer = useRef(null);
     const isAuthenticated = !!session;
@@ -119,9 +120,11 @@ export function AuthProvider(props) {
             ? { error }
             : { success: "User logged out successfully." };
         updateSession(null);
-        history.push("/login", {
-            prevLocation: history.location,
-            ...logoutReason,
+        navigate("/login", {
+            state: {
+                prevLocation: location,
+                ...logoutReason,
+            },
         });
     }
 

@@ -1,3 +1,6 @@
+/**
+ * v5 compatible unit. Remove after complete migration
+ */
 import React, { useContext } from "react";
 import { useLocation } from "react-router";
 import { Redirect, Route } from "react-router-dom";

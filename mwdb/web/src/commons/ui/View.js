@@ -1,51 +1,57 @@
 import React, { useCallback, useMemo } from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom-v5-compat";
 import { Alert, getErrorMessage } from "./ErrorBoundary";
 import { Extendable } from "../extensions";
 
-function ViewAlert(props) {
+function ViewAlert({ success, error, warning }) {
     const locationState = useLocation().state || {};
     return (
         <Alert
-            success={props.success || locationState.success}
-            error={props.error || locationState.error}
-            warning={props.warning || locationState.warning}
+            success={success || locationState.success}
+            error={error || locationState.error}
+            warning={warning || locationState.warning}
         />
     );
 }
 
 export function useViewAlert() {
-    const history = useHistory();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const setAlert = useCallback(
         ({ success, error: rawError, warning, state }) => {
-            const { pathname, search } = history.location;
+            const { pathname, search } = location;
             const error = rawError && getErrorMessage(rawError);
-            history.replace(
+            navigate(
                 { pathname, search },
                 {
-                    ...history.location.state,
-                    ...(state || {}),
-                    success,
-                    error,
-                    warning,
+                    state: {
+                        ...location.state,
+                        ...(state || {}),
+                        success,
+                        error,
+                        warning,
+                    },
+                    replace: true,
                 }
             );
         },
-        [history]
+        [location]
     );
 
     const redirectToAlert = useCallback(
         ({ success, error: rawError, warning, target, state }) => {
             const error = rawError && getErrorMessage(rawError);
-            history.push(target, {
-                ...(state || {}),
-                success,
-                error,
-                warning,
+            navigate(target, {
+                state: {
+                    ...(state || {}),
+                    success,
+                    error,
+                    warning,
+                },
             });
         },
-        [history]
+        [location]
     );
 
     return useMemo(
@@ -54,7 +60,16 @@ export function useViewAlert() {
     );
 }
 
-export default function View(props) {
+export default function View({
+    ident,
+    children,
+    fluid,
+    style,
+    error,
+    success,
+    warning,
+    showIf = true,
+}) {
     /**
      * View component for all main views. Views shouldn't be nested.
      * Properties spec:
@@ -66,24 +81,16 @@ export default function View(props) {
      * fluid - uses wide fluid view instead of default container
      * style - custom container styling
      */
-    const children = props.ident ? (
-        <Extendable ident={props.ident}>{props.children}</Extendable>
+    const viewLayout = ident ? (
+        <Extendable ident={ident}>{children}</Extendable>
     ) : (
-        props.children
+        children
     );
     // If condition is undefined => assume default true
-    const showIf = props.showIf === undefined || props.showIf;
     return (
-        <div
-            className={props.fluid ? "container-fluid" : "container"}
-            style={props.style}
-        >
-            <ViewAlert
-                error={props.error}
-                success={props.success}
-                warning={props.warning}
-            />
-            {showIf ? children : []}
+        <div className={fluid ? "container-fluid" : "container"} style={style}>
+            <ViewAlert error={error} success={success} warning={warning} />
+            {showIf ? viewLayout : []}
         </div>
     );
 }

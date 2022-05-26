@@ -1,8 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router";
-import { Link } from "react-router-dom";
-
-import queryString from "query-string";
+import { Link, useSearchParams, useNavigate } from "react-router-dom-v5-compat";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
@@ -143,14 +140,19 @@ export function OAuthLogin() {
 export function OAuthAuthorize() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
-    const history = useHistory();
+    const navigate = useNavigate();
     // Current query set in URI path
-    const { code, state } = queryString.parse(history.location.search);
+    const searchParams = useSearchParams()[0];
+    const { code, state } = Object.fromEntries(searchParams);
 
     async function authorize() {
         const stateData = sessionStorage.getItem(`openid_${state}`);
         if (!stateData) {
-            history.push("/", { error: "Invalid state data" });
+            navigate("/", {
+                state: {
+                    error: "Invalid state data",
+                },
+            });
         }
         const { provider, nonce, action, expiration } = JSON.parse(stateData);
         sessionStorage.removeItem(`openid_${state}`);
@@ -166,19 +168,34 @@ export function OAuthAuthorize() {
                 state
             );
             if (action === "bind_account") {
-                history.replace("/profile/oauth", {
-                    success: "New external identity successfully added",
+                navigate("/profile/oauth", {
+                    state: {
+                        success: "New external identity successfully added",
+                    },
+                    replace: true,
                 });
             } else {
                 auth.updateSession(response.data);
-                history.replace("/");
+                navigate("/", {
+                    replace: true,
+                });
             }
         } catch (e) {
             if (action === "bind_account")
-                history.replace("/profile/oauth", {
-                    error: getErrorMessage(e),
+                navigate("/profile/oauth", {
+                    state: {
+                        error: getErrorMessage(e),
+                    },
+                    replace: true,
                 });
-            else history.replace("/oauth/login", { error: getErrorMessage(e) });
+            else {
+                navigate("/oauth/login", {
+                    state: {
+                        error: getErrorMessage(e),
+                    },
+                    replace: true,
+                });
+            }
         }
     }
 

@@ -36,7 +36,7 @@ export function useViewAlert() {
                 }
             );
         },
-        [location]
+        [location, navigate]
     );
 
     const redirectToAlert = useCallback(
@@ -51,7 +51,7 @@ export function useViewAlert() {
                 },
             });
         },
-        [location]
+        [navigate]
     );
 
     return useMemo(

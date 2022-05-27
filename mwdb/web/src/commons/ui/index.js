@@ -23,6 +23,7 @@ export { default as ShareReasonString } from "./ShareReasonString";
 export { default as SortedList } from "./SortedList";
 export { default as View, useViewAlert } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
+export { RequiresAuth, RequiresCapability } from "./RequiresAuth";
 
 export { Tag, TagList, getStyleForTag } from "./Tag";
 export {

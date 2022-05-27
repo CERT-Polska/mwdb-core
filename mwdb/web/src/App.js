@@ -3,7 +3,6 @@ import {
     Routes,
     Route,
     Navigate,
-    Outlet,
     useLocation,
     useParams,
 } from "react-router-dom";
@@ -90,10 +89,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
-import { ErrorBoundary } from "@mwdb-web/commons/ui";
+import {
+    ErrorBoundary,
+    RequiresAuth,
+    RequiresCapability,
+} from "@mwdb-web/commons/ui";
 import { AttributeDetails } from "./components/Settings/Views/AttributeDetails";
 import { AttributesPermissions } from "./components/Settings/Views/AttributePermissions";
 import GroupDetails from "./components/Settings/Views/GroupDetails";
@@ -156,43 +159,6 @@ function SampleRouteFallback() {
      */
     const { hash } = useParams();
     return <Navigate to={`/file/${hash}`} />;
-}
-
-function RequiresAuth({ children }) {
-    /**
-     * Wrapper for views that require authentication
-     */
-    const auth = useContext(AuthContext);
-    const location = useLocation();
-    if (!auth.isAuthenticated)
-        return (
-            <Navigate
-                to="/login"
-                state={{
-                    prevLocation: location,
-                    error: "You need to authenticate before accessing this page",
-                }}
-            />
-        );
-    return children ? children : <Outlet />;
-}
-
-function RequiresCapability({ capability, children }) {
-    /**
-     * Wrapper for views that require additional capability
-     */
-    const auth = useContext(AuthContext);
-    const location = useLocation();
-    if (!auth.hasCapability(capability))
-        return (
-            <Navigate
-                to="/"
-                state={{
-                    error: `You don't have permission to access '${location.pathname}'`,
-                }}
-            />
-        );
-    return children ? children : <Outlet />;
 }
 
 function AppRoutes() {

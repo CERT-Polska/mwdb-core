@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom-v5-compat";
 
 import api from "@mwdb-web/commons/api";
 import { GroupBadge, useViewAlert } from "@mwdb-web/commons/ui";
 
-export default function ProfileGroups({ profile }) {
+export default function ProfileGroups() {
     const { redirectToAlert } = useViewAlert();
+    const { profile } = useOutletContext();
     const [workspaces, setWorkspaces] = useState();
 
     async function updateWorkspaces() {

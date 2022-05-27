@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom-v5-compat";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,8 +18,9 @@ function ProfileItem(props) {
     );
 }
 
-export default function ProfileDetails({ profile }) {
+export default function ProfileDetails() {
     const auth = useContext(AuthContext);
+    const { profile } = useOutletContext();
     const isCurrentUser = profile.login === auth.user.login;
 
     return (

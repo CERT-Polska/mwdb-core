@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom-v5-compat";
 
 import api from "@mwdb-web/commons/api";
 import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
 
-export default function ProfileResetPassword({ profile }) {
-    const [pending, setPending] = useState(false);
+export default function ProfileResetPassword() {
+    const { profile } = useOutletContext();
     const viewAlert = useViewAlert();
+    const [pending, setPending] = useState(false);
 
     async function resetPassword() {
         setPending(true);

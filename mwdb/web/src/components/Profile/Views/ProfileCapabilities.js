@@ -1,4 +1,5 @@
 import React from "react";
+import { useOutletContext } from "react-router-dom-v5-compat";
 
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { GroupBadge } from "@mwdb-web/commons/ui";
@@ -44,7 +45,8 @@ function CapabilitiesTable({ profile }) {
     );
 }
 
-export default function ProfileCapabilities({ profile }) {
+export default function ProfileCapabilities() {
+    const { profile } = useOutletContext();
     return (
         <div className="container">
             <h2>Capabilities</h2>

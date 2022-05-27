@@ -72,6 +72,14 @@ import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
 import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
 import { Extendable } from "./commons/extensions";
+import ProfileDetails from "./components/Profile/Views/ProfileDetails";
+import ProfileGroup from "./components/Profile/Views/ProfileGroup";
+import ProfileGroupMembers from "./components/Profile/Views/ProfileGroupMembers";
+import ProfileGroups from "./components/Profile/Views/ProfileGroups";
+import ProfileCapabilities from "./components/Profile/Views/ProfileCapabilities";
+import ProfileAPIKeys from "./components/Profile/Views/ProfileAPIKeys";
+import ProfileResetPassword from "./components/Profile/Views/ProfileResetPassword";
+import ProfileOAuth from "./components/Profile/Views/ProfileOAuth";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -240,6 +248,36 @@ function AppRoutes() {
                         <Route path="file/:hash/*" element={<ShowSample />} />
                         <Route path="config/:hash/*" element={<ShowConfig />} />
                         <Route path="blob/:hash/*" element={<ShowTextBlob />} />
+                        <Route path="profile" element={<ProfileView />}>
+                            <Route index element={<ProfileDetails />} />
+                            <Route
+                                path="user/:user"
+                                element={<ProfileDetails />}
+                            />
+                            <Route
+                                end
+                                path="group/:group"
+                                element={<ProfileGroup />}
+                            />
+                            <Route
+                                path="group/:group/members"
+                                element={<ProfileGroupMembers />}
+                            />
+                            <Route path="groups" element={<ProfileGroups />} />
+                            <Route
+                                path="capabilities"
+                                element={<ProfileCapabilities />}
+                            />
+                            <Route
+                                path="api-keys"
+                                element={<ProfileAPIKeys />}
+                            />
+                            <Route
+                                path="reset-password"
+                                element={<ProfileResetPassword />}
+                            />
+                            <Route path="oauth" element={<ProfileOAuth />} />
+                        </Route>
                     </Route>
                     <Route path="*" element={<NavigateFor404 />} />
                     {fromPlugin("protectedRoutes")}

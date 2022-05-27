@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { useLocation } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom-v5-compat";
 
 import { faCopy, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -56,9 +56,10 @@ function KeyNameModal({ isOpen, onConfirm, onClose }) {
     );
 }
 
-export default function ProfileAPIKeys({ profile, updateProfile }) {
+export default function ProfileAPIKeys() {
     const location = useLocation();
     const viewAlert = useViewAlert();
+    const { profile, getProfile } = useOutletContext();
     const [currentApiToken, setCurrentApiToken] = useState({});
     const [apiKeyToRemove, setApiKeyToRemove] = useState({});
     const [removeModalOpened, setRemoveModalOpened] = useState(false);
@@ -72,7 +73,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
         try {
             const response = await api.apiKeyAdd(profile.login, name);
             setCurrentApiToken(response.data);
-            updateProfile();
+            getProfile();
             viewAlert.setAlert({
                 success: "New API key successfully added",
                 state: {
@@ -89,7 +90,7 @@ export default function ProfileAPIKeys({ profile, updateProfile }) {
             await api.apiKeyRemove(apiKeyId);
             setCurrentApiToken({});
             setApiKeyToRemove({});
-            updateProfile();
+            getProfile();
             setRemoveModalOpened(false);
             viewAlert.setAlert({
                 success: "API key successfully removed",

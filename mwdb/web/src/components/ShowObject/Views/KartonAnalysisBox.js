@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom-v5-compat";
 import readableTime from "readable-timestamp";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

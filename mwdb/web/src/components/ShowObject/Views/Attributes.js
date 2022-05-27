@@ -5,7 +5,7 @@ import { ObjectContext } from "@mwdb-web/commons/context";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { DataTable, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom-v5-compat";
 
 let attributeRenderers = {};
 
@@ -15,7 +15,7 @@ for (let extraRenderers of fromPlugin("attributeRenderers")) {
 
 function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
     const { url_template: urlTemplate, key } = attributeDefinition;
-    const history = useHistory();
+    const navigate = useNavigate();
 
     let valueRender, valueRaw;
 
@@ -53,7 +53,7 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
                         title="Search for that attribute values"
                         onClick={(ev) => {
                             ev.preventDefault();
-                            history.push(
+                            navigate(
                                 makeSearchLink({
                                     field: `attribute.${key}`,
                                     value: valueRaw,

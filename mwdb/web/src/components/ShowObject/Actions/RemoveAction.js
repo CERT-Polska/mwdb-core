@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom-v5-compat";
 
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
@@ -12,7 +12,7 @@ export default function RemoveAction() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
@@ -21,7 +21,7 @@ export default function RemoveAction() {
         setDisabledModalButton(true);
         try {
             await api.removeObject(context.object.id);
-            history.push(context.searchEndpoint);
+            navigate(context.searchEndpoint);
         } catch (error) {
             setDisabledModalButton(false);
             setDeleteModalOpen(false);

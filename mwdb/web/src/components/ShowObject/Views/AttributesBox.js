@@ -1,5 +1,5 @@
 import React, { useContext, useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom-v5-compat";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { APIContext } from "@mwdb-web/commons/api/context";

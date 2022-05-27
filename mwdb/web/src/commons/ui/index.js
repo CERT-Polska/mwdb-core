@@ -19,7 +19,6 @@ export { default as Identicon } from "./Identicon";
 export { default as NavDropdown } from "./NavDropdown";
 export { default as ObjectLink } from "./ObjectLink";
 export { default as PagedList } from "./PagedList";
-export { ProtectedRoute, AdministrativeRoute } from "./ProtectedRoute";
 export { default as ShareReasonString } from "./ShareReasonString";
 export { default as SortedList } from "./SortedList";
 export { default as View, useViewAlert } from "./View";

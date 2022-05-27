@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom-v5-compat";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
@@ -13,7 +13,7 @@ export default function PullAction() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
-    const history = useHistory();
+    const navigate = useNavigate();
     const [shareMode, setShareMode] = useState("*");
     const [group, setGroup] = useState("");
     const [isPullModalOpen, setPullModalOpen] = useState(false);
@@ -32,7 +32,7 @@ export default function PullAction() {
                 context.object.id,
                 upload_as
             );
-            history.push(`/${type}/${context.object.id}`);
+            navigate(`/${type}/${context.object.id}`);
         } catch (error) {
             context.setObjectError(error);
             setPullModalOpen(false);

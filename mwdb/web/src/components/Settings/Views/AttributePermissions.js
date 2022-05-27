@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link, useParams, useOutletContext } from "react-router-dom-v5-compat";
+import { Link, useParams, useOutletContext } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
     Autocomplete,

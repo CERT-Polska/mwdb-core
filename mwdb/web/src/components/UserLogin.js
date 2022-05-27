@@ -1,10 +1,5 @@
 import React, { useContext, useState } from "react";
-import {
-    Link,
-    Navigate,
-    useNavigate,
-    useLocation,
-} from "react-router-dom-v5-compat";
+import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
 import api from "@mwdb-web/commons/api";

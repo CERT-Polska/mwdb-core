@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom-v5-compat";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Alert, getErrorMessage } from "./ErrorBoundary";
 import { Extendable } from "../extensions";
 

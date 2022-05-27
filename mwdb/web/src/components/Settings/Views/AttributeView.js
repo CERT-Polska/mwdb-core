@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-    Link,
-    Outlet,
-    Routes,
-    Route,
-    useParams,
-} from "react-router-dom-v5-compat";
+import { Link, Outlet, Routes, Route, useParams } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/ui";
 

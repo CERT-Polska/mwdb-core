@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Link, useParams } from "react-router-dom-v5-compat";
+import { Link, useParams } from "react-router-dom";
 
 import {
     ShowObject,

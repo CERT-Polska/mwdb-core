@@ -1,10 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import {
-    Link,
-    Navigate,
-    useParams,
-    useOutletContext,
-} from "react-router-dom-v5-compat";
+import { Link, Navigate, useParams, useOutletContext } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

@@ -1,5 +1,5 @@
 import React from "react";
-import { useSearchParams, Link } from "react-router-dom-v5-compat";
+import { useSearchParams, Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 

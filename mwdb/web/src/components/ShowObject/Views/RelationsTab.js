@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-import { useSearchParams } from "react-router-dom-v5-compat";
+import { useSearchParams } from "react-router-dom";
 
 import { faProjectDiagram, faSearch } from "@fortawesome/free-solid-svg-icons";
 

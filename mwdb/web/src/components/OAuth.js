@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom-v5-compat";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";

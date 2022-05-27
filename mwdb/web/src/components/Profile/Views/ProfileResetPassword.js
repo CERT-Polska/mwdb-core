@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useOutletContext } from "react-router-dom-v5-compat";
+import { Link, useOutletContext } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
 import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";

@@ -1,5 +1,5 @@
 import React from "react";
-import { useOutletContext } from "react-router-dom-v5-compat";
+import { useOutletContext } from "react-router-dom";
 
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { GroupBadge } from "@mwdb-web/commons/ui";

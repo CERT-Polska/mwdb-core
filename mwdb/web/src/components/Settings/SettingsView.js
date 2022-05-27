@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { NavLink, Outlet } from "react-router-dom-v5-compat";
+import { NavLink, Outlet } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { Link, useOutletContext } from "react-router-dom-v5-compat";
+import { Link, useOutletContext } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 

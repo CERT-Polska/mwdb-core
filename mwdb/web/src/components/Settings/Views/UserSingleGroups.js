@@ -8,7 +8,7 @@ import {
 } from "@mwdb-web/commons/ui";
 import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link, useOutletContext } from "react-router-dom-v5-compat";
+import { Link, useOutletContext } from "react-router-dom";
 
 function AddGroupForm({ newGroupsItems, addGroup }) {
     const [newGroup, setNewGroup] = useState("");

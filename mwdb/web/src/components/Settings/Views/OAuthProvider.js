@@ -6,7 +6,7 @@ import {
     useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useParams } from "react-router-dom-v5-compat";
+import { useParams } from "react-router-dom";
 
 function ProviderItem(props) {
     let value = props.value ? props.value : "never";

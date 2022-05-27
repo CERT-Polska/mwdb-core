@@ -1,5 +1,5 @@
 import React, { Component, useCallback, useContext } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom-v5-compat";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

@@ -1,5 +1,5 @@
 import React from "react";
-import { useOutletContext } from "react-router-dom-v5-compat";
+import { useOutletContext } from "react-router-dom";
 import ProfileCapabilities from "../../Profile/Views/ProfileCapabilities";
 
 export default function UserCapabilities() {

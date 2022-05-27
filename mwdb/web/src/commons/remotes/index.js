@@ -1,4 +1,4 @@
-import { useMatch } from "react-router-dom-v5-compat";
+import { useMatch } from "react-router-dom";
 
 export function useRemote() {
     // Returns current remote name or undefined if current view is local

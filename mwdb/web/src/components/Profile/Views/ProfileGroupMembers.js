@@ -1,9 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import {
-    Navigate,
-    useParams,
-    useOutletContext,
-} from "react-router-dom-v5-compat";
+import { Navigate, useParams, useOutletContext } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link, useParams } from "react-router-dom-v5-compat";
+import { Link, useParams } from "react-router-dom";
 import { View } from "@mwdb-web/commons/ui";
 
 import $ from "jquery";

@@ -1,14 +1,12 @@
 import React, { useContext } from "react";
-import { Switch } from "react-router-dom";
 import {
     Routes,
     Route,
-    CompatRoute,
     Navigate,
     Outlet,
     useLocation,
     useParams,
-} from "react-router-dom-v5-compat";
+} from "react-router-dom";
 
 import About from "./components/About";
 import Navigation from "./components/Navigation";
@@ -202,202 +200,135 @@ function AppRoutes() {
         config: { is_registration_enabled: isRegistrationEnabled },
     } = useContext(ConfigContext);
     return (
-        <Switch>
-            {/**
-             * React Router v6-compatible routes
-             * CompatRoute is v6 wrapper that is compatible with v5 and catches
-             * everything that wasn't catched by rules above.
-             */}
-            <CompatRoute path="">
-                <Routes>
-                    <Route path="login" element={<UserLogin />} />
-                    {isRegistrationEnabled ? (
-                        <Route path="register" element={<UserRegister />} />
-                    ) : (
-                        []
-                    )}
+        <Routes>
+            <Route path="login" element={<UserLogin />} />
+            {isRegistrationEnabled ? (
+                <Route path="register" element={<UserRegister />} />
+            ) : (
+                []
+            )}
+            <Route path="recover_password" element={<UserPasswordRecover />} />
+            <Route path="setpasswd/:token" element={<UserSetPassword />} />
+            <Route path="oauth/login" element={<OAuthLogin />} />
+            <Route path="oauth/callback" element={<OAuthAuthorize />} />
+            <Route element={<RequiresAuth />}>
+                <Route path="/" element={<RecentSamples />} />
+                <Route path="configs" element={<RecentConfigs />} />
+                <Route path="blobs" element={<RecentBlobs />} />
+                <Route path="search" element={<Search />} />
+                <Route
+                    path="upload"
+                    element={
+                        <RequiresCapability capability={Capability.addingFiles}>
+                            <UploadWithTimeout />
+                        </RequiresCapability>
+                    }
+                />
+                <Route path="configs/stats" element={<ConfigStats />} />
+                <Route path="about" element={<About />} />
+                <Route path="docs" element={<Docs />} />
+                <Route
+                    path="sample/:hash/*"
+                    element={<SampleRouteFallback />}
+                />
+                <Route path="file/:hash/*" element={<ShowSample />} />
+                <Route path="config/:hash/*" element={<ShowConfig />} />
+                <Route path="blob/:hash/*" element={<ShowTextBlob />} />
+                <Route path="profile" element={<ProfileView />}>
+                    <Route index element={<ProfileDetails />} />
+                    <Route path="user/:user" element={<ProfileDetails />} />
+                    <Route path="group/:group" element={<ProfileGroup />} />
                     <Route
-                        path="recover_password"
-                        element={<UserPasswordRecover />}
+                        path="group/:group/members"
+                        element={<ProfileGroupMembers />}
                     />
+                    <Route path="groups" element={<ProfileGroups />} />
                     <Route
-                        path="setpasswd/:token"
-                        element={<UserSetPassword />}
+                        path="capabilities"
+                        element={<ProfileCapabilities />}
                     />
-                    <Route path="oauth/login" element={<OAuthLogin />} />
-                    <Route path="oauth/callback" element={<OAuthAuthorize />} />
-                    <Route element={<RequiresAuth />}>
-                        <Route path="/" element={<RecentSamples />} />
-                        <Route path="configs" element={<RecentConfigs />} />
-                        <Route path="blobs" element={<RecentBlobs />} />
-                        <Route path="search" element={<Search />} />
+                    <Route path="api-keys" element={<ProfileAPIKeys />} />
+                    <Route
+                        path="reset-password"
+                        element={<ProfileResetPassword />}
+                    />
+                    <Route path="oauth" element={<ProfileOAuth />} />
+                </Route>
+                <Route
+                    path="diff/:current/:previous"
+                    element={<DiffTextBlob />}
+                />
+                <Route path="relations" element={<RelationsPlot />} />
+                <Route path="remote/:remote" element={<RemoteViews />}>
+                    <Route index element={<RecentSamples />} />
+                    <Route path="configs" element={<RecentConfigs />} />
+                    <Route path="blobs" element={<RecentBlobs />} />
+                    <Route path="search" element={<Search />} />
+                    <Route path="file/:hash/*" element={<ShowSample />} />
+                    <Route path="config/:hash/*" element={<ShowConfig />} />
+                    <Route path="blob/:hash/*" element={<ShowTextBlob />} />
+                    <Route
+                        path="diff/:current/:previous"
+                        element={<DiffTextBlob />}
+                    />
+                </Route>
+                <Route
+                    path="settings"
+                    element={
+                        <RequiresCapability capability={Capability.manageUsers}>
+                            <SettingsView />
+                        </RequiresCapability>
+                    }
+                >
+                    <Route index element={<SettingsOverview />} />
+                    <Route path="pending" element={<UsersPendingList />} />
+                    <Route path="users" element={<UsersList />} />
+                    <Route path="user/new" element={<UserCreate />} />
+                    <Route path="user/:login" element={<UserView />}>
+                        <Route index element={<UserDetails />} />
                         <Route
-                            path="upload"
-                            element={
-                                <RequiresCapability
-                                    capability={Capability.addingFiles}
-                                >
-                                    <UploadWithTimeout />
-                                </RequiresCapability>
-                            }
+                            path="capabilities"
+                            element={<UserCapabilities />}
                         />
-                        <Route path="configs/stats" element={<ConfigStats />} />
-                        <Route path="about" element={<About />} />
-                        <Route path="docs" element={<Docs />} />
+                        <Route path="api-keys" element={<UserAPIKeys />} />
                         <Route
-                            path="sample/:hash/*"
-                            element={<SampleRouteFallback />}
+                            path="password"
+                            element={<UserResetPassword />}
                         />
-                        <Route path="file/:hash/*" element={<ShowSample />} />
-                        <Route path="config/:hash/*" element={<ShowConfig />} />
-                        <Route path="blob/:hash/*" element={<ShowTextBlob />} />
-                        <Route path="profile" element={<ProfileView />}>
-                            <Route index element={<ProfileDetails />} />
-                            <Route
-                                path="user/:user"
-                                element={<ProfileDetails />}
-                            />
-                            <Route
-                                path="group/:group"
-                                element={<ProfileGroup />}
-                            />
-                            <Route
-                                path="group/:group/members"
-                                element={<ProfileGroupMembers />}
-                            />
-                            <Route path="groups" element={<ProfileGroups />} />
-                            <Route
-                                path="capabilities"
-                                element={<ProfileCapabilities />}
-                            />
-                            <Route
-                                path="api-keys"
-                                element={<ProfileAPIKeys />}
-                            />
-                            <Route
-                                path="reset-password"
-                                element={<ProfileResetPassword />}
-                            />
-                            <Route path="oauth" element={<ProfileOAuth />} />
-                        </Route>
-                        <Route
-                            path="diff/:current/:previous"
-                            element={<DiffTextBlob />}
-                        />
-                        <Route path="relations" element={<RelationsPlot />} />
-                        <Route path="remote/:remote" element={<RemoteViews />}>
-                            <Route index element={<RecentSamples />} />
-                            <Route path="configs" element={<RecentConfigs />} />
-                            <Route path="blobs" element={<RecentBlobs />} />
-                            <Route path="search" element={<Search />} />
-                            <Route
-                                path="file/:hash/*"
-                                element={<ShowSample />}
-                            />
-                            <Route
-                                path="config/:hash/*"
-                                element={<ShowConfig />}
-                            />
-                            <Route
-                                path="blob/:hash/*"
-                                element={<ShowTextBlob />}
-                            />
-                            <Route
-                                path="diff/:current/:previous"
-                                element={<DiffTextBlob />}
-                            />
-                        </Route>
-                        <Route
-                            path="settings"
-                            element={
-                                <RequiresCapability
-                                    capability={Capability.manageUsers}
-                                >
-                                    <SettingsView />
-                                </RequiresCapability>
-                            }
-                        >
-                            <Route index element={<SettingsOverview />} />
-                            <Route
-                                path="pending"
-                                element={<UsersPendingList />}
-                            />
-                            <Route path="users" element={<UsersList />} />
-                            <Route path="user/new" element={<UserCreate />} />
-                            <Route path="user/:login" element={<UserView />}>
-                                <Route index element={<UserDetails />} />
-                                <Route
-                                    path="capabilities"
-                                    element={<UserCapabilities />}
-                                />
-                                <Route
-                                    path="api-keys"
-                                    element={<UserAPIKeys />}
-                                />
-                                <Route
-                                    path="password"
-                                    element={<UserResetPassword />}
-                                />
-                                <Route
-                                    path="groups"
-                                    element={<UserSingleGroups />}
-                                />
-                            </Route>
-                            <Route path="groups" element={<GroupsList />} />
-                            <Route path="group/new" element={<GroupCreate />} />
-                            <Route path="group/:name" element={<GroupView />}>
-                                <Route index element={<GroupDetails />} />
-                                <Route
-                                    path="capabilities"
-                                    element={<GroupCapabilities />}
-                                />
-                                <Route
-                                    path="members"
-                                    element={<GroupMembers />}
-                                />
-                            </Route>
-                            <Route
-                                path="capabilities"
-                                element={<AccessControl />}
-                            />
-                            <Route
-                                path="oauth"
-                                element={<OAuthListProviders />}
-                            />
-                            <Route
-                                path="oauth/register"
-                                element={<OAuthRegister />}
-                            />
-                            <Route
-                                path="oauth/:name"
-                                element={<OAuthProvider />}
-                            />
-                            <Route
-                                path="attributes"
-                                element={<AttributesList />}
-                            />
-                            <Route
-                                path="attribute/new"
-                                element={<AttributeCreate />}
-                            />
-                            <Route
-                                path="attribute/:attributeKey"
-                                element={<AttributeView />}
-                            >
-                                <Route index element={<AttributeDetails />} />
-                                <Route
-                                    path="permissions"
-                                    element={<AttributesPermissions />}
-                                />
-                            </Route>
-                        </Route>
-                        {fromPlugin("protectedRoutes")}
+                        <Route path="groups" element={<UserSingleGroups />} />
                     </Route>
-                    {fromPlugin("routes")}
-                    <Route path="*" element={<NavigateFor404 />} />
-                </Routes>
-            </CompatRoute>
-        </Switch>
+                    <Route path="groups" element={<GroupsList />} />
+                    <Route path="group/new" element={<GroupCreate />} />
+                    <Route path="group/:name" element={<GroupView />}>
+                        <Route index element={<GroupDetails />} />
+                        <Route
+                            path="capabilities"
+                            element={<GroupCapabilities />}
+                        />
+                        <Route path="members" element={<GroupMembers />} />
+                    </Route>
+                    <Route path="capabilities" element={<AccessControl />} />
+                    <Route path="oauth" element={<OAuthListProviders />} />
+                    <Route path="oauth/register" element={<OAuthRegister />} />
+                    <Route path="oauth/:name" element={<OAuthProvider />} />
+                    <Route path="attributes" element={<AttributesList />} />
+                    <Route path="attribute/new" element={<AttributeCreate />} />
+                    <Route
+                        path="attribute/:attributeKey"
+                        element={<AttributeView />}
+                    >
+                        <Route index element={<AttributeDetails />} />
+                        <Route
+                            path="permissions"
+                            element={<AttributesPermissions />}
+                        />
+                    </Route>
+                </Route>
+                {fromPlugin("protectedRoutes")}
+            </Route>
+            {fromPlugin("routes")}
+            <Route path="*" element={<NavigateFor404 />} />
+        </Routes>
     );
 }
 

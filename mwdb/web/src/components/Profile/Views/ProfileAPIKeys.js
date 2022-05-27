@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { useLocation, useOutletContext } from "react-router-dom-v5-compat";
+import { useLocation, useOutletContext } from "react-router-dom";
 
 import { faCopy, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

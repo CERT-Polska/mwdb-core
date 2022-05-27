@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Link, useOutletContext } from "react-router-dom-v5-compat";
+import { Link, useOutletContext } from "react-router-dom";
 import Pagination from "react-js-pagination";
 
 import { faTrash, faCrown, faPlus } from "@fortawesome/free-solid-svg-icons";

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom-v5-compat";
+import { useOutletContext } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
 import { GroupBadge, useViewAlert } from "@mwdb-web/commons/ui";

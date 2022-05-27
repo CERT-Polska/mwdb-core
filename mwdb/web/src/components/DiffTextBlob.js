@@ -1,5 +1,5 @@
 import React, { Component, useContext } from "react";
-import { Link, useParams } from "react-router-dom-v5-compat";
+import { Link, useParams } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { split as SplitEditor } from "react-ace";

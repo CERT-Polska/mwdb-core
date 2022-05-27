@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet } from "react-router-dom-v5-compat";
+import { Outlet } from "react-router-dom";
 import { useRemote } from "@mwdb-web/commons/remotes";
 import { Alert } from "@mwdb-web/commons/ui";
 

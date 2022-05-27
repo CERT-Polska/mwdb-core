@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useSearchParams } from "react-router-dom-v5-compat";
+import { useSearchParams } from "react-router-dom";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { multiFromHashes, addFieldToQuery } from "@mwdb-web/commons/helpers";

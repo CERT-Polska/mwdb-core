@@ -181,25 +181,12 @@ function AppRoutes() {
             {/**
              * React Router v5 legacy routes
              */}
-            <ProtectedRoute path="/diff/:current/:previous">
-                <DiffTextBlob />
-            </ProtectedRoute>
-            <ProtectedRoute path="/relations">
-                <RelationsPlot />
-            </ProtectedRoute>
-            <ProtectedRoute path="/remote/:remote">
-                <RemoteViews />
-            </ProtectedRoute>
             <ProtectedRoute
                 condition={auth.hasCapability(Capability.manageUsers)}
                 path="/settings"
             >
                 <SettingsView />
             </ProtectedRoute>
-            <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
-                <ProfileView />
-            </ProtectedRoute>
-            {fromPlugin("routes")}
             {/**
              * React Router v6-compatible routes
              * CompatRoute is v6 wrapper that is compatible with v5 and catches
@@ -278,9 +265,37 @@ function AppRoutes() {
                             />
                             <Route path="oauth" element={<ProfileOAuth />} />
                         </Route>
+                        <Route
+                            path="diff/:current/:previous"
+                            element={<DiffTextBlob />}
+                        />
+                        <Route path="relations" element={<RelationsPlot />} />
+                        <Route path="remote/:remote" element={<RemoteViews />}>
+                            <Route index element={<RecentSamples />} />
+                            <Route path="configs" element={<RecentConfigs />} />
+                            <Route path="blobs" element={<RecentBlobs />} />
+                            <Route path="search" element={<Search />} />
+                            <Route
+                                path="file/:hash/*"
+                                element={<ShowSample />}
+                            />
+                            <Route
+                                path="config/:hash/*"
+                                element={<ShowConfig />}
+                            />
+                            <Route
+                                path="blob/:hash/*"
+                                element={<ShowTextBlob />}
+                            />
+                            <Route
+                                path="diff/:current/:previous"
+                                element={<DiffTextBlob />}
+                            />
+                        </Route>
+                        {fromPlugin("protectedRoutes")}
                     </Route>
+                    {fromPlugin("routes")}
                     <Route path="*" element={<NavigateFor404 />} />
-                    {fromPlugin("protectedRoutes")}
                 </Routes>
             </CompatRoute>
         </Switch>

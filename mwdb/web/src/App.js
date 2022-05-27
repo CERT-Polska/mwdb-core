@@ -32,7 +32,32 @@ import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
 import SettingsView from "./components/Settings/SettingsView";
 
+import ProfileDetails from "./components/Profile/Views/ProfileDetails";
+import ProfileGroup from "./components/Profile/Views/ProfileGroup";
+import ProfileGroupMembers from "./components/Profile/Views/ProfileGroupMembers";
+import ProfileGroups from "./components/Profile/Views/ProfileGroups";
+import ProfileCapabilities from "./components/Profile/Views/ProfileCapabilities";
+import ProfileAPIKeys from "./components/Profile/Views/ProfileAPIKeys";
+import ProfileResetPassword from "./components/Profile/Views/ProfileResetPassword";
+import ProfileOAuth from "./components/Profile/Views/ProfileOAuth";
+
 import { OAuthLogin, OAuthAuthorize } from "./components/OAuth";
+
+import SettingsOverview from "./components/Settings/Views/SettingsOverview";
+import UsersPendingList from "./components/Settings/Views/UsersPendingList";
+import UsersList from "./components/Settings/Views/UsersList";
+import UserCreate from "./components/Settings/Views/UserCreate";
+import UserView from "./components/Settings/Views/UserView";
+import GroupCreate from "./components/Settings/Views/GroupCreate";
+import GroupView from "./components/Settings/Views/GroupView";
+import GroupsList from "./components/Settings/Views/GroupsList";
+import AccessControl from "./components/Settings/Views/AccessControl";
+import OAuthListProviders from "./components/Settings/Views/OAuthListProviders";
+import OAuthRegister from "./components/Settings/Views/OAuthRegister";
+import OAuthProvider from "./components/Settings/Views/OAuthProvider";
+import AttributesList from "./components/Settings/Views/AttributesList";
+import AttributeCreate from "./components/Settings/Views/AttributeCreate";
+import AttributeView from "./components/Settings/Views/AttributeView";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -69,17 +94,18 @@ import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { fromPlugin } from "@mwdb-web/commons/extensions";
-import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
-import { Extendable } from "./commons/extensions";
-import ProfileDetails from "./components/Profile/Views/ProfileDetails";
-import ProfileGroup from "./components/Profile/Views/ProfileGroup";
-import ProfileGroupMembers from "./components/Profile/Views/ProfileGroupMembers";
-import ProfileGroups from "./components/Profile/Views/ProfileGroups";
-import ProfileCapabilities from "./components/Profile/Views/ProfileCapabilities";
-import ProfileAPIKeys from "./components/Profile/Views/ProfileAPIKeys";
-import ProfileResetPassword from "./components/Profile/Views/ProfileResetPassword";
-import ProfileOAuth from "./components/Profile/Views/ProfileOAuth";
+import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
+import { ErrorBoundary } from "@mwdb-web/commons/ui";
+import { AttributeDetails } from "./components/Settings/Views/AttributeDetails";
+import { AttributesPermissions } from "./components/Settings/Views/AttributePermissions";
+import GroupDetails from "./components/Settings/Views/GroupDetails";
+import GroupCapabilities from "./components/Settings/Views/GroupCapabilities";
+import GroupMembers from "./components/Settings/Views/GroupMembers";
+import UserDetails from "./components/Settings/Views/UserDetails";
+import UserResetPassword from "./components/Settings/Views/UserResetPassword";
+import UserSingleGroups from "./components/Settings/Views/UserSingleGroups";
+import UserCapabilities from "./components/Settings/Views/UserCapabilities";
+import UserAPIKeys from "./components/Settings/Views/UserAPIKeys";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -172,21 +198,11 @@ function RequiresCapability({ capability, children }) {
 }
 
 function AppRoutes() {
-    const auth = useContext(AuthContext);
     const {
         config: { is_registration_enabled: isRegistrationEnabled },
     } = useContext(ConfigContext);
     return (
         <Switch>
-            {/**
-             * React Router v5 legacy routes
-             */}
-            <ProtectedRoute
-                condition={auth.hasCapability(Capability.manageUsers)}
-                path="/settings"
-            >
-                <SettingsView />
-            </ProtectedRoute>
             {/**
              * React Router v6-compatible routes
              * CompatRoute is v6 wrapper that is compatible with v5 and catches
@@ -242,7 +258,6 @@ function AppRoutes() {
                                 element={<ProfileDetails />}
                             />
                             <Route
-                                end
                                 path="group/:group"
                                 element={<ProfileGroup />}
                             />
@@ -291,6 +306,90 @@ function AppRoutes() {
                                 path="diff/:current/:previous"
                                 element={<DiffTextBlob />}
                             />
+                        </Route>
+                        <Route
+                            path="settings"
+                            element={
+                                <RequiresCapability
+                                    capability={Capability.manageUsers}
+                                >
+                                    <SettingsView />
+                                </RequiresCapability>
+                            }
+                        >
+                            <Route index element={<SettingsOverview />} />
+                            <Route
+                                path="pending"
+                                element={<UsersPendingList />}
+                            />
+                            <Route path="users" element={<UsersList />} />
+                            <Route path="user/new" element={<UserCreate />} />
+                            <Route path="user/:login" element={<UserView />}>
+                                <Route index element={<UserDetails />} />
+                                <Route
+                                    path="capabilities"
+                                    element={<UserCapabilities />}
+                                />
+                                <Route
+                                    path="api-keys"
+                                    element={<UserAPIKeys />}
+                                />
+                                <Route
+                                    path="password"
+                                    element={<UserResetPassword />}
+                                />
+                                <Route
+                                    path="groups"
+                                    element={<UserSingleGroups />}
+                                />
+                            </Route>
+                            <Route path="groups" element={<GroupsList />} />
+                            <Route path="group/new" element={<GroupCreate />} />
+                            <Route path="group/:name" element={<GroupView />}>
+                                <Route index element={<GroupDetails />} />
+                                <Route
+                                    path="capabilities"
+                                    element={<GroupCapabilities />}
+                                />
+                                <Route
+                                    path="members"
+                                    element={<GroupMembers />}
+                                />
+                            </Route>
+                            <Route
+                                path="capabilities"
+                                element={<AccessControl />}
+                            />
+                            <Route
+                                path="oauth"
+                                element={<OAuthListProviders />}
+                            />
+                            <Route
+                                path="oauth/register"
+                                element={<OAuthRegister />}
+                            />
+                            <Route
+                                path="oauth/:name"
+                                element={<OAuthProvider />}
+                            />
+                            <Route
+                                path="attributes"
+                                element={<AttributesList />}
+                            />
+                            <Route
+                                path="attribute/new"
+                                element={<AttributeCreate />}
+                            />
+                            <Route
+                                path="attribute/:attributeKey"
+                                element={<AttributeView />}
+                            >
+                                <Route index element={<AttributeDetails />} />
+                                <Route
+                                    path="permissions"
+                                    element={<AttributesPermissions />}
+                                />
+                            </Route>
                         </Route>
                         {fromPlugin("protectedRoutes")}
                     </Route>

@@ -45,8 +45,12 @@ function CapabilitiesTable({ profile }) {
     );
 }
 
-export default function ProfileCapabilities() {
-    const { profile } = useOutletContext();
+export default function ProfileCapabilities({ profile }) {
+    // Component is reused by Settings
+    const outletContext = useOutletContext();
+    if (profile === undefined) {
+        profile = outletContext.profile;
+    }
     return (
         <div className="container">
             <h2>Capabilities</h2>

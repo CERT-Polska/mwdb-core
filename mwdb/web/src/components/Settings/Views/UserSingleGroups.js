@@ -8,7 +8,7 @@ import {
 } from "@mwdb-web/commons/ui";
 import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom-v5-compat";
 
 function AddGroupForm({ newGroupsItems, addGroup }) {
     const [newGroup, setNewGroup] = useState("");
@@ -75,6 +75,7 @@ function GroupsList({ groups, removeMember }) {
                     </th>
                     <td className="col-auto">
                         <Link
+                            to="#"
                             data-toggle="tooltip"
                             title="Remove user from group"
                             onClick={(ev) => {
@@ -105,8 +106,9 @@ function GroupsList({ groups, removeMember }) {
     );
 }
 
-export default function UserSingleGroups({ user, getUser }) {
+export default function UserSingleGroups() {
     const { setAlert } = useViewAlert();
+    const { user, getUser } = useOutletContext();
     const [allGroups, setAllGroups] = useState([]);
 
     async function addMember(group) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-
+import { useOutletContext } from "react-router-dom-v5-compat";
 import api from "@mwdb-web/commons/api";
 import {
     Autocomplete,
@@ -189,8 +189,9 @@ function AttributePermissionsBox({
     );
 }
 
-export function AttributesPermissions({ attribute, getAttribute }) {
+export function AttributesPermissions() {
     const { attributeKey } = useParams();
+    const { attribute } = useOutletContext();
     const { setAlert } = useViewAlert();
     const [allGroups, setAllGroups] = useState([]);
     const [permissions, setPermissions] = useState({});

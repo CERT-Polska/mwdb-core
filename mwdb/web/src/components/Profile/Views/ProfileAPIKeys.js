@@ -56,14 +56,20 @@ function KeyNameModal({ isOpen, onConfirm, onClose }) {
     );
 }
 
-export default function ProfileAPIKeys() {
+export default function ProfileAPIKeys({ profile, getProfile }) {
     const location = useLocation();
     const viewAlert = useViewAlert();
-    const { profile, getProfile } = useOutletContext();
+    const outletContext = useOutletContext();
     const [currentApiToken, setCurrentApiToken] = useState({});
     const [apiKeyToRemove, setApiKeyToRemove] = useState({});
     const [removeModalOpened, setRemoveModalOpened] = useState(false);
     const [apiKeyNameModalOpened, setApiKeyNameModalOpened] = useState(false);
+
+    // Component is reused by Settings
+    if (profile === undefined) {
+        profile = outletContext.profile;
+        getProfile = outletContext.getProfile;
+    }
 
     function closeKeyNameModal() {
         setApiKeyNameModalOpened(false);

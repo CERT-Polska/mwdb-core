@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
-import api from "@mwdb-web/commons/api";
+import { Link, useOutletContext } from "react-router-dom-v5-compat";
 import Pagination from "react-js-pagination";
-import { useViewAlert } from "@mwdb-web/commons/ui";
+
 import { faTrash, faCrown, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom";
+
+import api from "@mwdb-web/commons/api";
 import {
+    useViewAlert,
     Autocomplete,
     ConfirmationModal,
     UserBadge,
@@ -149,8 +151,9 @@ function MemberList({ members, admins, setAdminMembership, removeMember }) {
     );
 }
 
-export default function GroupMembers({ group, getGroup }) {
+export default function GroupMembers() {
     const { setAlert } = useViewAlert();
+    const { group, getGroup } = useOutletContext();
     const [allUsers, setAllUsers] = useState([]);
     const [activePage, setActivePage] = useState(1);
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom-v5-compat";
 import api from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
@@ -21,8 +21,9 @@ function AttributeItem(props) {
     );
 }
 
-export function AttributeDetails({ attribute, getAttribute }) {
+export function AttributeDetails() {
     const viewAlert = useViewAlert();
+    const { attribute, getAttribute } = useOutletContext();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 

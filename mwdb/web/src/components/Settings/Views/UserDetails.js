@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom-v5-compat";
 import api from "@mwdb-web/commons/api";
 import {
     DateString,
@@ -21,8 +21,9 @@ function UserItem(props) {
     );
 }
 
-export default function UserDetails({ user, getUser }) {
+export default function UserDetails() {
     const viewAlert = useViewAlert();
+    const { user, getUser } = useOutletContext();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
     const [isBlockModalOpen, setBlockModalOpen] = useState(false);

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom-v5-compat";
 
 import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -61,6 +61,7 @@ function CapabilitiesList({ capabilities, onDelete }) {
         <tr>
             <td className="col-auto">
                 <Link
+                    to={"#"}
                     onClick={(ev) => {
                         ev.preventDefault();
                         onDelete(cap);

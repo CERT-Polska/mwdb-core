@@ -106,6 +106,7 @@ function MemberList({ members, admins, setAdminMembership, removeMember }) {
                     </th>
                     <td className="col-auto">
                         <Link
+                            to="#"
                             data-toggle="tooltip"
                             title="Remove user from group"
                             onClick={(ev) => {
@@ -121,6 +122,7 @@ function MemberList({ members, admins, setAdminMembership, removeMember }) {
                     </td>
                     <td className="col-auto">
                         <Link
+                            to="#"
                             data-toggle="tooltip"
                             title="Give or revoke group admin permissions"
                             onClick={(ev) => {

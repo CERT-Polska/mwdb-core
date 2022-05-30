@@ -192,6 +192,7 @@ export default function SettingsView() {
                                 path={[
                                     "/settings/attribute/:attributeKey",
                                     "/settings/attribute/:attributeKey/permissions",
+                                    "/settings/attribute/:attributeKey/edit-template",
                                 ]}
                             >
                                 <AttributeView />

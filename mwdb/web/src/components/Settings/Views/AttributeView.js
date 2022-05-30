@@ -4,6 +4,7 @@ import api from "@mwdb-web/commons/api";
 import { AttributeDetails } from "./AttributeDetails";
 import { AdministrativeRoute, useViewAlert } from "@mwdb-web/commons/ui";
 import { AttributesPermissions } from "./AttributePermissions";
+import { AttributeEditTemplate } from "./AttributeEditTemplate";
 
 export default function AttributeView() {
     const location = useLocation();
@@ -47,6 +48,9 @@ export default function AttributeView() {
                                 <AdministrativeRoute path="/settings/attribute/:attributeKey/permissions">
                                     Permissions
                                 </AdministrativeRoute>
+                                <AdministrativeRoute path="/settings/attribute/:attributeKey/edit-template">
+                                    Edit template
+                                </AdministrativeRoute>
                             </Switch>
                         </li>
                     )}
@@ -67,6 +71,15 @@ export default function AttributeView() {
                     path="/settings/attribute/:attributeKey/permissions"
                 >
                     <AttributesPermissions
+                        attribute={attribute}
+                        getAttribute={updateAttribute}
+                    />
+                </AdministrativeRoute>
+                <AdministrativeRoute
+                    exact
+                    path="/settings/attribute/:attributeKey/edit-template"
+                >
+                    <AttributeEditTemplate
                         attribute={attribute}
                         getAttribute={updateAttribute}
                     />

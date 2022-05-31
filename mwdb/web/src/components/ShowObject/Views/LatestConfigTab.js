@@ -19,7 +19,7 @@ export default function LatestConfigTab(props) {
                 <div>
                     {props.label}{" "}
                     {context.object.latest_config.family ? (
-                        <span class="badge badge-danger">
+                        <span className="badge badge-danger">
                             {context.object.latest_config.family}
                         </span>
                     ) : (

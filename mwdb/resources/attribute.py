@@ -349,6 +349,8 @@ class AttributeDefinitionListResource(Resource):
         attribute_definition = AttributeDefinition(
             key=obj["key"],
             url_template=obj["url_template"],
+            rich_template=obj["rich_template"],
+            example_value=obj["example_value"],
             label=obj["label"],
             description=obj["description"],
             hidden=obj["hidden"],
@@ -471,6 +473,14 @@ class AttributeDefinitionResource(Resource):
         url_template = obj["url_template"]
         if url_template is not None:
             attribute_definition.url_template = url_template
+
+        rich_template = obj["rich_template"]
+        if rich_template is not None:
+            attribute_definition.rich_template = rich_template
+
+        example_value = obj["example_value"]
+        if example_value is not None:
+            attribute_definition.example_value = example_value
 
         hidden = obj["hidden"]
         if hidden is not None:

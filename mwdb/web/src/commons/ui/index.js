@@ -5,7 +5,7 @@ export { default as BootstrapSelect } from "./BootstrapSelect";
 export { default as ConfirmationModal } from "./ConfirmationModal";
 export { default as DataTable } from "./DataTable";
 export { default as DateString } from "./DateString";
-export { default as EditableItem } from "./EditableItem";
+export { EditableItem, PseudoEditableItem } from "./EditableItem";
 export {
     default as ErrorBoundary,
     Alert,

@@ -60,6 +60,12 @@ export default function AttributeView() {
                                 <BreadcrumbItems elements={["Permissions"]} />
                             }
                         />
+                        <Route
+                            path="edit-template"
+                            element={
+                                <BreadcrumbItems elements={["Edit template"]} />
+                            }
+                        />
                     </Routes>
                 </ol>
             </nav>

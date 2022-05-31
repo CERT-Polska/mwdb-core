@@ -107,6 +107,7 @@ import UserResetPassword from "./components/Settings/Views/UserResetPassword";
 import UserSingleGroups from "./components/Settings/Views/UserSingleGroups";
 import UserCapabilities from "./components/Settings/Views/UserCapabilities";
 import UserAPIKeys from "./components/Settings/Views/UserAPIKeys";
+import { AttributeEditTemplate } from "./components/Settings/Views/AttributeEditTemplate";
 
 library.add(faTimes);
 library.add(faUpload);
@@ -287,6 +288,10 @@ function AppRoutes() {
                         <Route
                             path="permissions"
                             element={<AttributesPermissions />}
+                        />
+                        <Route
+                            path="edit-template"
+                            element={<AttributeEditTemplate />}
                         />
                     </Route>
                 </Route>

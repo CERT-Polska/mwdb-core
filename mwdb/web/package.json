@@ -17,6 +17,8 @@
     "identicon.js": "^2.3.2",
     "jquery": "^3.3.1",
     "lodash": "^4.17.10",
+    "marked": "^4.0.10",
+    "mustache": "^4.2.0",
     "popper.js": "^1.16.1",
     "react": "^18.1.0",
     "react-ace": "^10.1.0",

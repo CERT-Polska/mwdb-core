@@ -48,7 +48,9 @@ class AttributeDefinitionListRequestSchema(Schema):
 class AttributeDefinitionCreateRequestSchema(AttributeKeySchema):
     label = fields.Str(required=True, allow_none=False)
     description = fields.Str(required=True, allow_none=False)
-    url_template = fields.Str(required=True, allow_none=False)
+    url_template = fields.Str(missing="", allow_none=False)
+    rich_template = fields.Str(missing="", allow_none=False)
+    example_value = fields.Str(missing="", allow_none=False)
     hidden = fields.Boolean(required=True, allow_none=False)
 
 
@@ -56,6 +58,8 @@ class AttributeDefinitionUpdateRequestSchema(Schema):
     label = fields.Str(missing=None)
     description = fields.Str(missing=None)
     url_template = fields.Str(missing=None)
+    rich_template = fields.Str(missing=None)
+    example_value = fields.Str(missing=None)
     hidden = fields.Boolean(missing=None)
 
 
@@ -79,6 +83,8 @@ class AttributeListResponseSchema(Schema):
 
 class AttributeDefinitionItemResponseSchema(AttributeKeySchema):
     url_template = fields.Str(required=True, allow_none=False)
+    rich_template = fields.Str(required=True, allow_none=False)
+    example_value = fields.Str(required=True, allow_none=False)
     label = fields.Str(required=True, allow_none=False)
     description = fields.Str(required=True, allow_none=False)
     hidden = fields.Boolean(required=True, allow_none=False)

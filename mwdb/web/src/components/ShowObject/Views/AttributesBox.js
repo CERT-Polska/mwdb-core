@@ -1,6 +1,7 @@
 import React, { useContext, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -21,10 +22,10 @@ export default function AttributesBox() {
     const [attributeIdToRemove, setAttributeIdToRemove] = useState(null);
 
     const [attributeDefinitions, setAttributeDefinitions] = useState(null);
-    const [attributes, setAttributes] = useState(null);
     const objectId = context.object.id;
-    const setObjectError = context.setObjectError;
-    const dataLoaded = attributeDefinitions !== null && attributes !== null;
+    const { setObjectError, updateObjectData } = context;
+    const attributes = context.object.attributes;
+    const dataLoaded = attributeDefinitions && attributes;
 
     async function updateAttributeDefinitions() {
         try {
@@ -45,7 +46,6 @@ export default function AttributesBox() {
     }
 
     async function updateAttributes() {
-        if (typeof objectId === "undefined") return;
         try {
             const response = await api.getObjectAttributes(objectId);
             const attributes = response.data.attributes.reduce(
@@ -60,7 +60,7 @@ export default function AttributesBox() {
                 }),
                 {}
             );
-            setAttributes(attributes);
+            updateObjectData({ attributes });
         } catch (error) {
             setObjectError(error);
         }
@@ -99,6 +99,7 @@ export default function AttributesBox() {
         objectId,
         api,
         setObjectError,
+        updateObjectData,
     ]);
 
     useEffect(() => {
@@ -120,7 +121,7 @@ export default function AttributesBox() {
                             }}
                         >
                             <FontAwesomeIcon
-                                icon="plus"
+                                icon={faPlus}
                                 pull="left"
                                 size="1x"
                             />

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBan, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 
@@ -64,7 +65,7 @@ export function Tag({
                         onClick={(ev) => tagRemove(ev, tag)}
                     >
                         <FontAwesomeIcon
-                            icon={filterable ? "ban" : "times"}
+                            icon={filterable ? faBan : faTimes}
                             pull="right"
                             size="1x"
                         />

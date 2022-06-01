@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLockOpen, faLock } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
@@ -133,23 +134,69 @@ function ShareForm(props) {
     );
 }
 
+function SharingStatusIcon({ shares }) {
+    if (!shares) return [];
+
+    // Icon showing the sharing status of the object
+    const lockIcon = shares.some((share) => share.group_name === "public")
+        ? faLockOpen
+        : faLock;
+
+    const lockTooltip = shares.some((share) => share.group_name === "public")
+        ? "Object is shared with public"
+        : "Object is not shared with public";
+
+    return (
+        <span data-toggle="tooltip" title={lockTooltip}>
+            <FontAwesomeIcon
+                icon={lockIcon}
+                pull="left"
+                size="1x"
+                style={{ color: "grey", cursor: "pointer" }}
+            />
+        </span>
+    );
+}
+
+function SharesList({ shares, groups, handleShare }) {
+    if (!shares || !groups) {
+        return <div className="card-body text-muted">Loading data...</div>;
+    }
+
+    const groupedItems = groupShares(shares);
+    return (
+        <div>
+            {groupedItems.map((sharesGroup) => (
+                <ShareGroupItem {...sharesGroup} />
+            ))}
+            {handleShare ? (
+                <ShareForm onSubmit={handleShare} groups={groups} />
+            ) : (
+                []
+            )}
+        </div>
+    );
+}
+
 function SharesBox() {
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
 
     const [groups, setGroups] = useState([]);
-    const [items, setItems] = useState([]);
     const [shareReceiver, setShareReceiver] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const objectId = context.object.id;
-    const setObjectError = context.setObjectError;
+    const shares = context.object.shares;
+    const { setObjectError, updateObjectData } = context;
 
     async function updateShares() {
         try {
             let response = await api.getObjectShares(objectId);
             setGroups(response.data.groups);
-            setItems(response.data.shares);
+            updateObjectData({
+                shares: response.data.shares,
+            });
         } catch (error) {
             setObjectError(error);
         }
@@ -174,22 +221,12 @@ function SharesBox() {
         api,
         objectId,
         setObjectError,
+        updateObjectData,
     ]);
 
     useEffect(() => {
         getShares();
     }, [getShares]);
-
-    const groupedItems = groupShares(items);
-
-    // Icon showing the sharing status of the object
-    const lockIcon = items.some((share) => share.group_name === "public")
-        ? "lock-open"
-        : "lock";
-
-    const lockTooltip = items.some((share) => share.group_name === "public")
-        ? "Object is shared with public"
-        : "Object is not shared with public";
 
     return (
         <div className="card card-default">
@@ -205,24 +242,14 @@ function SharesBox() {
             <div className="card-header">
                 <div className="media">
                     <div className="align-self-center media-body">Shares</div>
-                    <span data-toggle="tooltip" title={lockTooltip}>
-                        <FontAwesomeIcon
-                            icon={lockIcon}
-                            pull="left"
-                            size="1x"
-                            style={{ color: "grey", cursor: "pointer" }}
-                        />
-                    </span>
+                    <SharingStatusIcon shares={shares} />
                 </div>
             </div>
-            {groupedItems.map((sharesGroup) => (
-                <ShareGroupItem {...sharesGroup} />
-            ))}
-            {!api.remote ? (
-                <ShareForm onSubmit={handleShare} groups={groups} />
-            ) : (
-                []
-            )}
+            <SharesList
+                shares={shares}
+                groups={groups}
+                handleShare={!api.remote ? handleShare : null}
+            />
         </div>
     );
 }

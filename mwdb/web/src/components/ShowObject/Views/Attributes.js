@@ -1,5 +1,11 @@
 import React, { useContext, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faPlus,
+    faMinus,
+    faSearch,
+    faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
@@ -83,7 +89,7 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
                     >
                         <i>
                             <FontAwesomeIcon
-                                icon="search"
+                                icon={faSearch}
                                 size="sm"
                                 style={{ cursor: "pointer" }}
                             />
@@ -99,7 +105,7 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
                     >
                         <i>
                             <FontAwesomeIcon
-                                icon={"trash"}
+                                icon={faTrash}
                                 size="sm"
                                 style={{ cursor: "pointer" }}
                             />
@@ -129,7 +135,7 @@ function AttributeRow({
             >
                 {collapsible ? (
                     <FontAwesomeIcon
-                        icon={collapsed ? "plus" : "minus"}
+                        icon={collapsed ? faPlus : faMinus}
                         size="sm"
                     />
                 ) : (

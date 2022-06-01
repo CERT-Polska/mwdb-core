@@ -9,6 +9,7 @@ import {
     faSearch,
     faBan,
     faPlus,
+    faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
@@ -133,7 +134,7 @@ function KartonAnalysisRow({ analysis, removeAnalysis }) {
                     >
                         <i>
                             <FontAwesomeIcon
-                                icon={"trash"}
+                                icon={faTrash}
                                 size="sm"
                                 style={{ cursor: "pointer" }}
                             />
@@ -166,16 +167,47 @@ function KartonAnalysisRow({ analysis, removeAnalysis }) {
     );
 }
 
+function KartonAnalysisList({ analyses, handleRemoveAnalysis }) {
+    if (!analyses) {
+        return <div className="card-body text-muted">Loading data...</div>;
+    }
+    if (analyses.length === 0) {
+        return (
+            <div className="card-body text-muted">
+                Object was never analyzed by Karton
+            </div>
+        );
+    }
+    return (
+        <table className="table table-striped table-bordered wrap-table">
+            {analyses
+                .slice()
+                .reverse()
+                .map((analysis) => (
+                    <tr key={analysis.id}>
+                        <td>
+                            <KartonAnalysisRow
+                                analysis={analysis}
+                                removeAnalysis={handleRemoveAnalysis}
+                            />
+                        </td>
+                    </tr>
+                ))}
+        </table>
+    );
+}
+
 export default function KartonAnalysisBox() {
-    const [analyses, setAnalyses] = useState([]);
     const [isResubmitPending, setResubmitPending] = useState(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [analysisToRemove, setAnalysisToRemove] = useState(null);
 
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
-    const { object, setObjectError } = useContext(ObjectContext);
+    const { object, setObjectError, updateObjectData } =
+        useContext(ObjectContext);
     const objectId = object.id;
+    const analyses = object.analyses;
     const isReanalysisAvailable = auth.hasCapability(
         Capability.kartonReanalyze
     );
@@ -183,15 +215,19 @@ export default function KartonAnalysisBox() {
     async function updateAnalyses() {
         try {
             let response = await api.getKartonAnalysesList(objectId);
-            setAnalyses(response.data.analyses);
+            updateObjectData({
+                analyses: response.data.analyses,
+            });
         } catch (error) {
             setObjectError(error);
         }
     }
+
     const getAnalyses = useCallback(updateAnalyses, [
         api,
         objectId,
         setObjectError,
+        updateObjectData,
     ]);
 
     useEffect(() => {
@@ -209,7 +245,7 @@ export default function KartonAnalysisBox() {
         setResubmitPending(true);
         try {
             await api.resubmitKartonAnalysis(objectId);
-            updateAnalyses();
+            await updateAnalyses();
         } catch (error) {
             setObjectError(error);
         }
@@ -218,7 +254,7 @@ export default function KartonAnalysisBox() {
     async function removeAnalysis(analysisId) {
         try {
             await api.removeKartonAnalysisFromObject(objectId, analysisId);
-            updateAnalyses();
+            await updateAnalyses();
         } catch (error) {
             setObjectError(error);
         } finally {
@@ -261,29 +297,10 @@ export default function KartonAnalysisBox() {
                         Reanalyze
                     </Link>
                 </div>
-                {analyses.length ? (
-                    <table className="table table-striped table-bordered wrap-table">
-                        {analyses
-                            .slice()
-                            .reverse()
-                            .map((analysis) => (
-                                <tr key={analysis.id}>
-                                    <td>
-                                        <KartonAnalysisRow
-                                            analysis={analysis}
-                                            removeAnalysis={
-                                                handleRemoveAnalysis
-                                            }
-                                        />
-                                    </td>
-                                </tr>
-                            ))}
-                    </table>
-                ) : (
-                    <div className="card-body text-muted">
-                        Object was never analyzed by Karton
-                    </div>
-                )}
+                <KartonAnalysisList
+                    analyses={analyses}
+                    handleRemoveAnalysis={handleRemoveAnalysis}
+                />
             </div>
         </Extendable>
     );

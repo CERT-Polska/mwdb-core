@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import Pagination from "react-js-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { Capability } from "@mwdb-web/commons/auth";
@@ -130,7 +131,7 @@ function RelationsBox(props) {
                     >
                         <i>
                             <FontAwesomeIcon
-                                icon={"trash"}
+                                icon={faTrash}
                                 size="sm"
                                 style={{ cursor: "pointer" }}
                             />
@@ -182,7 +183,7 @@ function RelationsBox(props) {
                     >
                         <i>
                             <FontAwesomeIcon
-                                icon={"trash"}
+                                icon={faTrash}
                                 size="sm"
                                 style={{ cursor: "pointer" }}
                             />
@@ -209,7 +210,7 @@ function RelationsBox(props) {
                             setModalError("");
                         }}
                     >
-                        <FontAwesomeIcon icon="plus" pull="left" size="1x" />
+                        <FontAwesomeIcon icon={faPlus} pull="left" size="1x" />
                         Add
                     </Link>
                 ) : (

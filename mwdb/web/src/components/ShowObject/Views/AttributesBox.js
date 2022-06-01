@@ -1,6 +1,7 @@
 import React, { useContext, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -120,7 +121,7 @@ export default function AttributesBox() {
                             }}
                         >
                             <FontAwesomeIcon
-                                icon="plus"
+                                icon={faPlus}
                                 pull="left"
                                 size="1x"
                             />

@@ -11,6 +11,7 @@ import {
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBan, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 function UserItem(props) {
     let value = props.value ? props.value : "never";
@@ -186,7 +187,7 @@ export default function UserDetails({ user, getUser }) {
                                 setBlockModalOpen(true);
                             }}
                         >
-                            <FontAwesomeIcon icon="ban" />
+                            <FontAwesomeIcon icon={faBan} />
                             Unblock user
                         </a>
                     ) : (
@@ -198,7 +199,7 @@ export default function UserDetails({ user, getUser }) {
                                 setBlockModalOpen(true);
                             }}
                         >
-                            <FontAwesomeIcon icon="ban" />
+                            <FontAwesomeIcon icon={faBan} />
                             Block user
                         </a>
                     )}
@@ -210,7 +211,7 @@ export default function UserDetails({ user, getUser }) {
                             setDeleteModalOpen(true);
                         }}
                     >
-                        <FontAwesomeIcon icon="trash" />
+                        <FontAwesomeIcon icon={faTrash} />
                         Remove user
                     </a>
                 </li>

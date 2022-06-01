@@ -6,6 +6,7 @@ import {
     useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useParams } from "react-router-dom";
 
 function ProviderItem(props) {
@@ -143,7 +144,7 @@ export default function OAuthProvider() {
                             setDeleteModalOpen(true);
                         }}
                     >
-                        <FontAwesomeIcon icon="trash" />
+                        <FontAwesomeIcon icon={faTrash} />
                         Remove provider
                     </a>
                 </li>

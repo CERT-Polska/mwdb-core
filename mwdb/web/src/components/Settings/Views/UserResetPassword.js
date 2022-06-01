@@ -3,6 +3,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
 import api from "@mwdb-web/commons/api";
 import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
@@ -101,7 +102,7 @@ export default function UserResetPassword({ user }) {
                                     className="card-link"
                                     onClick={(ev) => ev.preventDefault()}
                                 >
-                                    <FontAwesomeIcon icon="copy" /> Copy to
+                                    <FontAwesomeIcon icon={faCopy} /> Copy to
                                     clipboard
                                 </a>
                             </CopyToClipboard>

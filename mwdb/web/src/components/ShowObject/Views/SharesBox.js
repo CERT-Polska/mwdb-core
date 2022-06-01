@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLockOpen, faLock } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { ObjectContext } from "@mwdb-web/commons/context";
@@ -138,8 +139,8 @@ function SharingStatusIcon({ shares }) {
 
     // Icon showing the sharing status of the object
     const lockIcon = shares.some((share) => share.group_name === "public")
-        ? "lock-open"
-        : "lock";
+        ? faLockOpen
+        : faLock;
 
     const lockTooltip = shares.some((share) => share.group_name === "public")
         ? "Object is shared with public"

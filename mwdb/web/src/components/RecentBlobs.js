@@ -3,6 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 
 import queryString from "query-string";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRandom } from "@fortawesome/free-solid-svg-icons";
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
 import { TagList } from "@mwdb-web/commons/ui";
@@ -37,7 +38,7 @@ export function RecentBlobRow(props) {
     );
     const blobIcon = diffWith && (
         <FontAwesomeIcon
-            icon="random"
+            icon={faRandom}
             size="x"
             style={{ marginRight: "0.3em" }}
         />

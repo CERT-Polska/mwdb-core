@@ -25,74 +25,11 @@ import SettingsView from "./components/Settings/SettingsView";
 
 import { OAuthLogin, OAuthAuthorize } from "./components/OAuth";
 
-import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-    faTimes,
-    faUpload,
-    faDownload,
-    faPlus,
-    faMinus,
-    faRandom,
-    faExchangeAlt,
-    faBan,
-    faSearch,
-    faToggleOn,
-    faToggleOff,
-    faSort,
-    faSortUp,
-    faSortDown,
-    faProjectDiagram,
-    faFile,
-    faFileImage,
-    faFilePdf,
-    faFingerprint,
-    faBoxes,
-    faTrash,
-    faCopy,
-    faThumbtack,
-    faStar,
-    faEdit,
-    faSave,
-    faLock,
-    faLockOpen,
-} from "@fortawesome/free-solid-svg-icons";
-import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
-
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin } from "@mwdb-web/commons/extensions";
 import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
 import { Extendable } from "./commons/extensions";
-
-library.add(faTimes);
-library.add(faUpload);
-library.add(faDownload);
-library.add(faPlus);
-library.add(faMinus);
-library.add(faRandom);
-library.add(faExchangeAlt);
-library.add(faBan);
-library.add(faSearch);
-library.add(faToggleOn);
-library.add(faToggleOff);
-library.add(faSort);
-library.add(faSortUp);
-library.add(faSortDown);
-library.add(faProjectDiagram);
-library.add(faFile);
-library.add(faFileImage);
-library.add(faFilePdf);
-library.add(faFingerprint);
-library.add(faBoxes);
-library.add(faTrash);
-library.add(faCopy);
-library.add(faThumbtack);
-library.add(faStar);
-library.add(farStar);
-library.add(faEdit);
-library.add(faSave);
-library.add(faLock);
-library.add(faLockOpen);
 
 function DefaultRoute() {
     const location = useLocation();

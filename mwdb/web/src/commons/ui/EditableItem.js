@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes, faEdit, faSave } from "@fortawesome/free-solid-svg-icons";
 
 function EditButton({ onClick }) {
     return (
@@ -11,7 +12,7 @@ function EditButton({ onClick }) {
             onClick={onClick}
         >
             <small className="text-muted">Edit </small>
-            <FontAwesomeIcon icon="edit" />
+            <FontAwesomeIcon icon={faEdit} />
         </button>
     );
 }
@@ -66,7 +67,7 @@ export function EditableItem({
                             type="submit"
                         >
                             <small>Save </small>
-                            <FontAwesomeIcon icon="save" />
+                            <FontAwesomeIcon icon={faSave} />
                         </button>
                         <button
                             className="btn btn-outline-danger"
@@ -77,7 +78,7 @@ export function EditableItem({
                             }}
                         >
                             <small>Cancel </small>
-                            <FontAwesomeIcon icon="times" />
+                            <FontAwesomeIcon icon={faTimes} />
                         </button>
                     </div>
                 </div>

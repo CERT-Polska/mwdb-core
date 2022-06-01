@@ -2,6 +2,7 @@ import React, { Component, useContext } from "react";
 import { Link, useRouteMatch } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
 import { split as SplitEditor } from "react-ace";
 import DiffMatchPatch from "diff-match-patch";
 
@@ -208,7 +209,7 @@ class DiffView extends Component {
                                                         className="btn btn-primary"
                                                     >
                                                         <FontAwesomeIcon
-                                                            icon="exchange-alt"
+                                                            icon={faExchangeAlt}
                                                             pull="left"
                                                             size="x"
                                                         />

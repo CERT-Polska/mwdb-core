@@ -4,6 +4,7 @@ import api from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
     EditableItem,
+    PseudoEditableItem,
     FeatureSwitch,
     UserBadge,
     useViewAlert,
@@ -71,18 +72,22 @@ export default function GroupDetails({ group, updateGroup }) {
                         />
                     </GroupItem>
                     <GroupItem label="Members">
-                        {group &&
-                            group.users
-                                .sort((userA, userB) =>
-                                    userA.localeCompare(userB)
-                                )
-                                .map((user) => (
-                                    <UserBadge
-                                        user={{ login: user }}
-                                        clickable
-                                        basePath={"/settings"}
-                                    />
-                                ))}
+                        <PseudoEditableItem
+                            editLocation={`/settings/group/${group.name}/members`}
+                        >
+                            {group &&
+                                group.users
+                                    .sort((userA, userB) =>
+                                        userA.localeCompare(userB)
+                                    )
+                                    .map((user) => (
+                                        <UserBadge
+                                            user={{ login: user }}
+                                            clickable
+                                            basePath={"/settings"}
+                                        />
+                                    ))}
+                        </PseudoEditableItem>
                     </GroupItem>
                 </tbody>
             </table>

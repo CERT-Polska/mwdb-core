@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useCallback } from "react";
+import React, { useState, useContext } from "react";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -70,18 +70,19 @@ export default function TagBox() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
-    const [tags, setTags] = useState([]);
     const [modalIsOpen, setModalIsOpen] = useState(null);
     const [tagToRemove, setTagToRemove] = useState(false);
 
     const objectId = context.object.id;
-    const setObjectError = context.setObjectError;
+    const tags = context.object.tags;
+    const { setObjectError, updateObjectData } = context;
 
     async function updateTags() {
         try {
             let response = await api.getObjectTags(objectId);
-            let tags = response.data;
-            setTags(tags);
+            updateObjectData({
+                tags: response.data,
+            });
         } catch (error) {
             setObjectError(error);
         }
@@ -90,7 +91,7 @@ export default function TagBox() {
     async function handleTagSubmit(tag) {
         try {
             await api.addObjectTag(objectId, tag);
-            updateTags();
+            await updateTags();
         } catch (error) {
             setObjectError(error);
         }
@@ -99,7 +100,7 @@ export default function TagBox() {
     async function tagRemove(tag) {
         try {
             await api.removeObjectTag(objectId, tag);
-            updateTags();
+            await updateTags();
         } catch (error) {
             setObjectError(error);
         } finally {
@@ -111,12 +112,6 @@ export default function TagBox() {
         setModalIsOpen(true);
         setTagToRemove(tag);
     }
-
-    const getTags = useCallback(updateTags, [api, objectId, setObjectError]);
-
-    useEffect(() => {
-        getTags();
-    }, [getTags]);
 
     return (
         <div className="card card-default">

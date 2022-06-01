@@ -1,8 +1,23 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faEdit, faSave } from "@fortawesome/free-solid-svg-icons";
 
-export default function EditableItem({
+function EditButton({ onClick }) {
+    return (
+        <button
+            className="float-right align-middle btn shadow-none"
+            style={{ cursor: "pointer" }}
+            type="button"
+            onClick={onClick}
+        >
+            <small className="text-muted">Edit </small>
+            <FontAwesomeIcon icon={faEdit} />
+        </button>
+    );
+}
+
+export function EditableItem({
     name,
     type,
     selective,
@@ -82,21 +97,30 @@ export default function EditableItem({
                             <span>{defaultValue}</span>
                         )}
                     </span>
-                    <button
-                        className="float-right align-middle btn shadow-none"
-                        style={{ cursor: "pointer" }}
-                        type="button"
+                    <EditButton
                         onClick={(ev) => {
                             ev.preventDefault();
                             setValue(defaultValue);
                             setEdit(true);
                         }}
-                    >
-                        <small className="text-muted">Edit </small>
-                        <FontAwesomeIcon icon={faEdit} />
-                    </button>
+                    />
                 </div>
             )}
         </form>
+    );
+}
+
+export function PseudoEditableItem({ children, editLocation }) {
+    /*
+     Looks the same as regular editable item, but Edit button redirects to the
+     separate editing view
+     */
+    return (
+        <div>
+            <span className="align-middle">{children}</span>
+            <Link to={editLocation}>
+                <EditButton />
+            </Link>
+        </div>
     );
 }

@@ -12,6 +12,7 @@ import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { DataTable, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { useHistory } from "react-router-dom";
+import { renderValue } from "../../RichAttribute/MarkedMustache";
 
 let attributeRenderers = {};
 
@@ -20,12 +21,30 @@ for (let extraRenderers of fromPlugin("attributeRenderers")) {
 }
 
 function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
-    const { url_template: urlTemplate, key } = attributeDefinition;
+    const {
+        url_template: urlTemplate,
+        rich_template: richTemplate,
+        key,
+    } = attributeDefinition;
     const history = useHistory();
 
     let valueRender, valueRaw;
 
-    if (typeof value === "string") {
+    if (richTemplate !== "") {
+        try {
+            valueRender = renderValue(richTemplate, {
+                value: value,
+            });
+        } catch (e) {
+            console.error(e);
+            valueRender = (
+                <pre className="attribute-object" style={{ color: "red" }}>
+                    {"(template error)"} {JSON.stringify(value, null, 4)}
+                </pre>
+            );
+        }
+        valueRaw = JSON.stringify(value);
+    } else if (typeof value === "string") {
         // URL templates are supported only for string values
         const url = urlTemplate ? urlTemplate.replace("$value", value) : null;
         if (url) {

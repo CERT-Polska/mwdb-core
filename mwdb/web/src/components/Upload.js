@@ -15,17 +15,14 @@ import { Extendable } from "@mwdb-web/commons/extensions";
 
 function UploadDropzone(props) {
     const onDrop = props.onDrop;
-    const {
-        getRootProps,
-        getInputProps,
-        isDragActive,
-        isDragReject,
-    } = useDropzone({
-        multiple: false,
-        onDrop: useCallback((acceptedFiles) => onDrop(acceptedFiles[0]), [
-            onDrop,
-        ]),
-    });
+    const { getRootProps, getInputProps, isDragActive, isDragReject } =
+        useDropzone({
+            multiple: false,
+            onDrop: useCallback(
+                (acceptedFiles) => onDrop(acceptedFiles[0]),
+                [onDrop]
+            ),
+        });
 
     const dropzoneClassName = isDragActive
         ? "dropzone-active"

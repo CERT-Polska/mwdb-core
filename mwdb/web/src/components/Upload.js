@@ -4,6 +4,7 @@ import { useDropzone } from "react-dropzone";
 import queryString from "query-string";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import AttributesAddModal from "./AttributesAddModal";
 
 import api from "@mwdb-web/commons/api";
@@ -14,14 +15,17 @@ import { Extendable } from "@mwdb-web/commons/extensions";
 
 function UploadDropzone(props) {
     const onDrop = props.onDrop;
-    const { getRootProps, getInputProps, isDragActive, isDragReject } =
-        useDropzone({
-            multiple: false,
-            onDrop: useCallback(
-                (acceptedFiles) => onDrop(acceptedFiles[0]),
-                [onDrop]
-            ),
-        });
+    const {
+        getRootProps,
+        getInputProps,
+        isDragActive,
+        isDragReject,
+    } = useDropzone({
+        multiple: false,
+        onDrop: useCallback((acceptedFiles) => onDrop(acceptedFiles[0]), [
+            onDrop,
+        ]),
+    });
 
     const dropzoneClassName = isDragActive
         ? "dropzone-active"
@@ -39,7 +43,7 @@ function UploadDropzone(props) {
             <div className="card">
                 <div className="card-body">
                     <h5 className="card-title">
-                        <FontAwesomeIcon icon="upload" size="x" />
+                        <FontAwesomeIcon icon={faUpload} size="x" />
                         &nbsp;
                         {props.file ? (
                             <span>

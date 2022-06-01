@@ -9,6 +9,7 @@ import {
     faSearch,
     faBan,
     faPlus,
+    faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
@@ -133,7 +134,7 @@ function KartonAnalysisRow({ analysis, removeAnalysis }) {
                     >
                         <i>
                             <FontAwesomeIcon
-                                icon={"trash"}
+                                icon={faTrash}
                                 size="sm"
                                 style={{ cursor: "pointer" }}
                             />

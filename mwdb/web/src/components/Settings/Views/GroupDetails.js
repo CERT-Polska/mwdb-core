@@ -10,6 +10,7 @@ import {
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 function GroupItem(props) {
     let value = props.value ? props.value : "never";
@@ -151,7 +152,7 @@ export default function GroupDetails({ group, updateGroup }) {
                             setDeleteModalOpen(true);
                         }}
                     >
-                        <FontAwesomeIcon icon="trash" />
+                        <FontAwesomeIcon icon={faTrash} />
                         Remove group
                     </a>
                 </li>

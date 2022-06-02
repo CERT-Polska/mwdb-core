@@ -59,7 +59,7 @@ export function OAuthLogin() {
                 Alternatively, you can register a new account through an
                 external identity provider by{" "}
                 <Link
-                    href="#new-oauth-user"
+                    to="#"
                     onClick={(ev) => {
                         ev.preventDefault();
                         setRegisterModalOpen(true);
@@ -74,7 +74,7 @@ export function OAuthLogin() {
                     <div className="d-flex justify-content-center">
                         <div className="col-6 text-center">
                             <Link
-                                href="#"
+                                to="#"
                                 className="card btn-outline-secondary text-decoration-none"
                                 onClick={(ev) => {
                                     ev.preventDefault();

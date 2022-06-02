@@ -21,7 +21,7 @@ PyYAML==5.4
 redis==3.2.1
 minio==7.1.0
 typed-config==0.2.1
-karton-core==4.3.0
+karton-core==4.4.1
 Authlib==0.15.4
 prance==0.21.8.0  # apispec unpinned dependency
 regex==2021.7.6

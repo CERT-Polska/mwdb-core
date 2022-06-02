@@ -82,7 +82,9 @@ export default function RichAttributePreview({
     let renderedValue,
         invalid = false;
     try {
-        renderedValue = renderValue(template, makeContext(JSON.parse(value)));
+        renderedValue = renderValue(template, makeContext(JSON.parse(value)), {
+            searchEndpoint: "/",
+        });
     } catch (e) {
         renderedValue = e.toString();
         invalid = true;

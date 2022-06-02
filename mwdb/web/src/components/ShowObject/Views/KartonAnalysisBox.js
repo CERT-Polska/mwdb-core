@@ -96,7 +96,13 @@ function KartonAnalysisRow({ analysis, removeAnalysis }) {
 
     let actionButtons = (
         <Extendable ident="kartonAnalysisActionButtons" analysis={analysis}>
-            <Link to={makeSearchLink("karton", analysis.id)}>
+            <Link
+                to={makeSearchLink({
+                    field: "karton",
+                    value: analysis.id,
+                    pathname: "/search",
+                })}
+            >
                 <span className="badge badge-primary">
                     <FontAwesomeIcon icon={faSearch} pull="left" />
                     Search artifacts

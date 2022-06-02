@@ -49,7 +49,11 @@ export function Tag({
             <span className={`d-flex badge badge-${badgeStyle}`}>
                 {searchable ? (
                     <Link
-                        to={makeSearchLink("tag", tag, false, searchEndpoint)}
+                        to={makeSearchLink({
+                            field: "tag",
+                            value: tag,
+                            pathname: searchEndpoint,
+                        })}
                         className="tag-link"
                         onClick={(ev) => tagClick && tagClick(ev, tag)}
                     >

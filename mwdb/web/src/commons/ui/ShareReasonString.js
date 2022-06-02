@@ -20,12 +20,11 @@ export default function ShareReasonString({
     );
     const userLink = relatedUserLogin ? (
         <Link
-            to={makeSearchLink(
-                "uploader",
-                relatedUserLogin,
-                false,
-                `${remotePath}/search`
-            )}
+            to={makeSearchLink({
+                field: "uploader",
+                value: relatedUserLogin,
+                pathname: `${remotePath}/search`,
+            })}
         >
             {relatedUserLogin}
         </Link>

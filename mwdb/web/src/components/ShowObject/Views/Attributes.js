@@ -11,7 +11,7 @@ import { ObjectContext } from "@mwdb-web/commons/context";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
 import { DataTable, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { renderValue } from "../../RichAttribute/MarkedMustache";
 
 let attributeRenderers = {};
@@ -26,7 +26,7 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
         rich_template: richTemplate,
         key,
     } = attributeDefinition;
-    const history = useHistory();
+    const navigate = useNavigate();
 
     let valueRender, valueRaw;
 
@@ -78,12 +78,12 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
                         title="Search for that attribute values"
                         onClick={(ev) => {
                             ev.preventDefault();
-                            history.push(
-                                makeSearchLink(
-                                    `attribute.${key}`,
-                                    valueRaw,
-                                    false
-                                )
+                            navigate(
+                                makeSearchLink({
+                                    field: `attribute.${key}`,
+                                    value: valueRaw,
+                                    pathname: "/search",
+                                })
                             );
                         }}
                     >

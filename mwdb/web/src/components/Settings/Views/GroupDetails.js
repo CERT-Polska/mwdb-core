@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
@@ -23,8 +23,9 @@ function GroupItem(props) {
     );
 }
 
-export default function GroupDetails({ group, updateGroup }) {
+export default function GroupDetails() {
     const viewAlert = useViewAlert();
+    const { group, getGroup } = useOutletContext();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
@@ -35,7 +36,7 @@ export default function GroupDetails({ group, updateGroup }) {
                 target: `/settings/group/${newValue["name"] || group.name}`,
                 success: `Group has been successfully updated.`,
             });
-            if (!newValue["name"]) updateGroup();
+            if (!newValue["name"]) getGroup();
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -127,13 +128,21 @@ export default function GroupDetails({ group, updateGroup }) {
                 <li className="nav-item">
                     <Link
                         className="nav-link"
-                        to={makeSearchLink("uploader", group.name, false, "/")}
+                        to={makeSearchLink({
+                            field: "uploader",
+                            value: group.name,
+                            pathname: "/",
+                        })}
                     >
                         Search for uploads
                     </Link>
                     <Link
                         className="nav-link"
-                        to={makeSearchLink("shared", group.name, false, "/")}
+                        to={makeSearchLink({
+                            field: "shared",
+                            value: group.name,
+                            pathname: "/",
+                        })}
                     >
                         Search for shared files
                     </Link>

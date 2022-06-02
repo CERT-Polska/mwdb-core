@@ -1,5 +1,11 @@
 import React, { useContext } from "react";
-import { Switch, Route, Redirect, useLocation } from "react-router-dom";
+import {
+    Routes,
+    Route,
+    Navigate,
+    useLocation,
+    useParams,
+} from "react-router-dom";
 
 import About from "./components/About";
 import Navigation from "./components/Navigation";
@@ -23,140 +29,227 @@ import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
 import SettingsView from "./components/Settings/SettingsView";
 
+import ProfileDetails from "./components/Profile/Views/ProfileDetails";
+import ProfileGroup from "./components/Profile/Views/ProfileGroup";
+import ProfileGroupMembers from "./components/Profile/Views/ProfileGroupMembers";
+import ProfileGroups from "./components/Profile/Views/ProfileGroups";
+import ProfileCapabilities from "./components/Profile/Views/ProfileCapabilities";
+import ProfileAPIKeys from "./components/Profile/Views/ProfileAPIKeys";
+import ProfileResetPassword from "./components/Profile/Views/ProfileResetPassword";
+import ProfileOAuth from "./components/Profile/Views/ProfileOAuth";
+
 import { OAuthLogin, OAuthAuthorize } from "./components/OAuth";
 
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { ConfigContext } from "@mwdb-web/commons/config";
-import { fromPlugin } from "@mwdb-web/commons/extensions";
-import { ErrorBoundary, ProtectedRoute } from "@mwdb-web/commons/ui";
-import { Extendable } from "./commons/extensions";
+import SettingsOverview from "./components/Settings/Views/SettingsOverview";
+import UsersPendingList from "./components/Settings/Views/UsersPendingList";
+import UsersList from "./components/Settings/Views/UsersList";
+import UserCreate from "./components/Settings/Views/UserCreate";
+import UserView from "./components/Settings/Views/UserView";
+import GroupCreate from "./components/Settings/Views/GroupCreate";
+import GroupView from "./components/Settings/Views/GroupView";
+import GroupsList from "./components/Settings/Views/GroupsList";
+import AccessControl from "./components/Settings/Views/AccessControl";
+import OAuthListProviders from "./components/Settings/Views/OAuthListProviders";
+import OAuthRegister from "./components/Settings/Views/OAuthRegister";
+import OAuthProvider from "./components/Settings/Views/OAuthProvider";
+import AttributesList from "./components/Settings/Views/AttributesList";
+import AttributeCreate from "./components/Settings/Views/AttributeCreate";
+import AttributeView from "./components/Settings/Views/AttributeView";
+import { AttributeDetails } from "./components/Settings/Views/AttributeDetails";
+import { AttributesPermissions } from "./components/Settings/Views/AttributePermissions";
+import GroupDetails from "./components/Settings/Views/GroupDetails";
+import GroupCapabilities from "./components/Settings/Views/GroupCapabilities";
+import GroupMembers from "./components/Settings/Views/GroupMembers";
+import UserDetails from "./components/Settings/Views/UserDetails";
+import UserResetPassword from "./components/Settings/Views/UserResetPassword";
+import UserSingleGroups from "./components/Settings/Views/UserSingleGroups";
+import UserCapabilities from "./components/Settings/Views/UserCapabilities";
+import UserAPIKeys from "./components/Settings/Views/UserAPIKeys";
+import { AttributeEditTemplate } from "./components/Settings/Views/AttributeEditTemplate";
 
-function DefaultRoute() {
+import { Capability } from "@mwdb-web/commons/auth";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
+import {
+    ErrorBoundary,
+    RequiresAuth,
+    RequiresCapability,
+} from "@mwdb-web/commons/ui";
+
+function NavigateFor404() {
+    /**
+     * Fallback route for unknown routes
+     */
     const location = useLocation();
     return (
-        <Route>
-            <Redirect
-                to={{
-                    pathname: "/",
-                    state: {
-                        error: `Location '${location.pathname}' doesn't exist`,
-                    },
-                }}
-            />
-        </Route>
+        <Navigate
+            to="/"
+            state={{
+                error: `Location '${location.pathname}' doesn't exist`,
+            }}
+        />
     );
 }
 
-function SettingsRoute(args) {
-    const auth = useContext(AuthContext);
+function SampleRouteFallback() {
+    /**
+     * Fallback route for legacy /sample/:hash route
+     */
+    const { hash } = useParams();
+    return <Navigate to={`/file/${hash}`} />;
+}
+
+function AppRoutes() {
+    const {
+        config: { is_registration_enabled: isRegistrationEnabled },
+    } = useContext(ConfigContext);
     return (
-        <ProtectedRoute
-            condition={auth.hasCapability(Capability.manageUsers)}
-            {...args}
-        >
-            <SettingsView />
-        </ProtectedRoute>
+        <Routes>
+            <Route path="login" element={<UserLogin />} />
+            {isRegistrationEnabled ? (
+                <Route path="register" element={<UserRegister />} />
+            ) : (
+                []
+            )}
+            <Route path="recover_password" element={<UserPasswordRecover />} />
+            <Route path="setpasswd/:token" element={<UserSetPassword />} />
+            <Route path="oauth/login" element={<OAuthLogin />} />
+            <Route path="oauth/callback" element={<OAuthAuthorize />} />
+            <Route element={<RequiresAuth />}>
+                <Route path="/" element={<RecentSamples />} />
+                <Route path="configs" element={<RecentConfigs />} />
+                <Route path="blobs" element={<RecentBlobs />} />
+                <Route path="search" element={<Search />} />
+                <Route
+                    path="upload"
+                    element={
+                        <RequiresCapability capability={Capability.addingFiles}>
+                            <UploadWithTimeout />
+                        </RequiresCapability>
+                    }
+                />
+                <Route path="configs/stats" element={<ConfigStats />} />
+                <Route path="about" element={<About />} />
+                <Route path="docs" element={<Docs />} />
+                <Route
+                    path="sample/:hash/*"
+                    element={<SampleRouteFallback />}
+                />
+                <Route path="file/:hash/*" element={<ShowSample />} />
+                <Route path="config/:hash/*" element={<ShowConfig />} />
+                <Route path="blob/:hash/*" element={<ShowTextBlob />} />
+                <Route path="profile" element={<ProfileView />}>
+                    <Route index element={<ProfileDetails />} />
+                    <Route path="user/:user" element={<ProfileDetails />} />
+                    <Route path="group/:group" element={<ProfileGroup />} />
+                    <Route
+                        path="group/:group/members"
+                        element={<ProfileGroupMembers />}
+                    />
+                    <Route path="groups" element={<ProfileGroups />} />
+                    <Route
+                        path="capabilities"
+                        element={<ProfileCapabilities />}
+                    />
+                    <Route path="api-keys" element={<ProfileAPIKeys />} />
+                    <Route
+                        path="reset-password"
+                        element={<ProfileResetPassword />}
+                    />
+                    <Route path="oauth" element={<ProfileOAuth />} />
+                </Route>
+                <Route
+                    path="diff/:current/:previous"
+                    element={<DiffTextBlob />}
+                />
+                <Route path="relations" element={<RelationsPlot />} />
+                <Route path="remote/:remote" element={<RemoteViews />}>
+                    <Route index element={<RecentSamples />} />
+                    <Route path="configs" element={<RecentConfigs />} />
+                    <Route path="blobs" element={<RecentBlobs />} />
+                    <Route path="search" element={<Search />} />
+                    <Route path="file/:hash/*" element={<ShowSample />} />
+                    <Route path="config/:hash/*" element={<ShowConfig />} />
+                    <Route path="blob/:hash/*" element={<ShowTextBlob />} />
+                    <Route
+                        path="diff/:current/:previous"
+                        element={<DiffTextBlob />}
+                    />
+                </Route>
+                <Route
+                    path="settings"
+                    element={
+                        <RequiresCapability capability={Capability.manageUsers}>
+                            <SettingsView />
+                        </RequiresCapability>
+                    }
+                >
+                    <Route index element={<SettingsOverview />} />
+                    <Route path="pending" element={<UsersPendingList />} />
+                    <Route path="users" element={<UsersList />} />
+                    <Route path="user/new" element={<UserCreate />} />
+                    <Route path="user/:login" element={<UserView />}>
+                        <Route index element={<UserDetails />} />
+                        <Route
+                            path="capabilities"
+                            element={<UserCapabilities />}
+                        />
+                        <Route path="api-keys" element={<UserAPIKeys />} />
+                        <Route
+                            path="password"
+                            element={<UserResetPassword />}
+                        />
+                        <Route path="groups" element={<UserSingleGroups />} />
+                    </Route>
+                    <Route path="groups" element={<GroupsList />} />
+                    <Route path="group/new" element={<GroupCreate />} />
+                    <Route path="group/:name" element={<GroupView />}>
+                        <Route index element={<GroupDetails />} />
+                        <Route
+                            path="capabilities"
+                            element={<GroupCapabilities />}
+                        />
+                        <Route path="members" element={<GroupMembers />} />
+                    </Route>
+                    <Route path="capabilities" element={<AccessControl />} />
+                    <Route path="oauth" element={<OAuthListProviders />} />
+                    <Route path="oauth/register" element={<OAuthRegister />} />
+                    <Route path="oauth/:name" element={<OAuthProvider />} />
+                    <Route path="attributes" element={<AttributesList />} />
+                    <Route path="attribute/new" element={<AttributeCreate />} />
+                    <Route
+                        path="attribute/:attributeKey"
+                        element={<AttributeView />}
+                    >
+                        <Route index element={<AttributeDetails />} />
+                        <Route
+                            path="permissions"
+                            element={<AttributesPermissions />}
+                        />
+                        <Route
+                            path="edit-template"
+                            element={<AttributeEditTemplate />}
+                        />
+                    </Route>
+                </Route>
+                {fromPlugin("protectedRoutes")}
+            </Route>
+            {fromPlugin("routes")}
+            <Route path="*" element={<NavigateFor404 />} />
+        </Routes>
     );
 }
 
 export default function App() {
-    const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-
-    const routeSwitch = config.isReady ? (
-        <Switch>
-            <Route exact path="/login">
-                <UserLogin />
-            </Route>
-            {config.config["is_registration_enabled"] ? (
-                <Route exact path="/register">
-                    <UserRegister />
-                </Route>
-            ) : (
-                []
-            )}
-            <Route exact path="/recover_password">
-                <UserPasswordRecover />
-            </Route>
-            <Route exact path="/setpasswd/:token">
-                <UserSetPassword />
-            </Route>
-            <Route exact path="/oauth/login">
-                <OAuthLogin />
-            </Route>
-            <Route exact path="/oauth/callback">
-                <OAuthAuthorize />
-            </Route>
-            <ProtectedRoute exact path="/">
-                {
-                    /*
-                        BUG: react-router doesn't re-render on search path change
-                        when we have direct component here
-                    */
-                    () => <RecentSamples />
-                }
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/configs">
-                {() => <RecentConfigs />}
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/blobs">
-                {() => <RecentBlobs />}
-            </ProtectedRoute>
-            <ProtectedRoute
-                exact
-                path="/upload"
-                condition={auth.hasCapability(Capability.addingFiles)}
-            >
-                <UploadWithTimeout />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/search">
-                {() => <Search />}
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/configs/stats">
-                <ConfigStats />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/about">
-                <About />
-            </ProtectedRoute>
-            <ProtectedRoute exact path="/docs">
-                <Docs />
-            </ProtectedRoute>
-            <Redirect from="/sample/:hash" to="/file/:hash" />
-            <ProtectedRoute path="/file/:hash">
-                <ShowSample />
-            </ProtectedRoute>
-            <ProtectedRoute path="/config/:hash">
-                <ShowConfig />
-            </ProtectedRoute>
-            <ProtectedRoute path="/blob/:hash">
-                <ShowTextBlob />
-            </ProtectedRoute>
-            <ProtectedRoute path="/diff/:current/:previous">
-                <DiffTextBlob />
-            </ProtectedRoute>
-            <ProtectedRoute path="/relations">
-                <RelationsPlot />
-            </ProtectedRoute>
-            <ProtectedRoute path="/remote/:remote">
-                <RemoteViews />
-            </ProtectedRoute>
-            <SettingsRoute path="/settings" />
-            <ProtectedRoute path={["/profile/user/:user", "/profile"]}>
-                <ProfileView />
-            </ProtectedRoute>
-            {fromPlugin("routes")}
-            <DefaultRoute />
-        </Switch>
-    ) : (
-        []
-    );
-
     return (
         <div className="App">
             <Navigation />
             <div className="content">
                 <ErrorBoundary error={config.error}>
-                    <Extendable ident="main">{routeSwitch}</Extendable>
+                    <Extendable ident="main">
+                        {config.isReady ? <AppRoutes /> : []}
+                    </Extendable>
                 </ErrorBoundary>
             </div>
         </div>

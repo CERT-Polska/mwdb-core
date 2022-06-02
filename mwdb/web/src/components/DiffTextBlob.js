@@ -1,5 +1,5 @@
 import React, { Component, useContext } from "react";
-import { Link, useRouteMatch } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
@@ -143,11 +143,11 @@ class DiffView extends Component {
         try {
             let currentBlob = await this.props.api.getObject(
                 "blob",
-                this.props.match.params.current
+                this.props.params.current
             );
             let previousBlob = await this.props.api.getObject(
                 "blob",
-                this.props.match.params.previous
+                this.props.params.previous
             );
             this.setState({
                 current: currentBlob.data,
@@ -248,8 +248,8 @@ class DiffView extends Component {
 function ConnectedDiffView(props) {
     const remote = useRemote();
     const api = useContext(APIContext);
-    const match = useRouteMatch();
-    return <DiffView {...props} remote={remote} api={api} match={match} />;
+    const params = useParams();
+    return <DiffView {...props} remote={remote} api={api} params={params} />;
 }
 
 export default ConnectedDiffView;

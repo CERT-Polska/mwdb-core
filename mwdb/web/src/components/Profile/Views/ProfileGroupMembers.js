@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Redirect, useParams } from "react-router-dom";
+import { Navigate, useParams, useOutletContext } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -72,9 +72,10 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
     );
 }
 
-export default function ProfileGroupMembers({ profile }) {
+export default function ProfileGroupMembers() {
     const auth = useContext(AuthContext);
     const { redirectToAlert } = useViewAlert();
+    const { profile } = useOutletContext();
     const { group: groupName } = useParams();
     const [workspaces, setWorkspaces] = useState();
 
@@ -100,16 +101,14 @@ export default function ProfileGroupMembers({ profile }) {
     const group = profile.groups.find((group) => group.name === groupName);
     if (!group)
         return (
-            <Redirect
-                to={{
-                    pathname: "/profile",
-                    state: {
-                        error: `Group ${groupName} doesn't exist`,
-                    },
+            <Navigate
+                to="/profile"
+                state={{
+                    error: `Group ${groupName} doesn't exist`,
                 }}
             />
         );
-    if (group.private) return <Redirect to={`/profile/user/${group.name}`} />;
+    if (group.private) return <Navigate to={`/profile/user/${group.name}`} />;
 
     // Merge it with workspace info
     const workspace = workspaces.find((group) => group.name === groupName);
@@ -121,12 +120,10 @@ export default function ProfileGroupMembers({ profile }) {
         )
     )
         return (
-            <Redirect
-                to={{
-                    pathname: `/profile/group/${groupName}`,
-                    state: {
-                        error: `Only group admins have access to group members management.`,
-                    },
+            <Navigate
+                to={`/profile/group/${groupName}`}
+                state={{
+                    error: `Only group admins have access to group members management.`,
                 }}
             />
         );

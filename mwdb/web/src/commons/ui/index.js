@@ -1,6 +1,5 @@
 import React from "react";
 
-export { default as APIKeyList } from "./APIKeyList";
 export { default as Autocomplete } from "./Autocomplete";
 export { default as BootstrapSelect } from "./BootstrapSelect";
 export { default as ConfirmationModal } from "./ConfirmationModal";
@@ -20,11 +19,11 @@ export { default as Identicon } from "./Identicon";
 export { default as NavDropdown } from "./NavDropdown";
 export { default as ObjectLink } from "./ObjectLink";
 export { default as PagedList } from "./PagedList";
-export { ProtectedRoute, AdministrativeRoute } from "./ProtectedRoute";
 export { default as ShareReasonString } from "./ShareReasonString";
 export { default as SortedList } from "./SortedList";
 export { default as View, useViewAlert } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
+export { RequiresAuth, RequiresCapability } from "./RequiresAuth";
 
 export { Tag, TagList, getStyleForTag } from "./Tag";
 export {

@@ -1,13 +1,16 @@
 import React from "react";
-import RichAttributePreview from "../../RichAttribute/RichAttributePreview";
-import { useHistory } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
+
 import api from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/ui";
 
-export function AttributeEditTemplate({ attribute, getAttribute }) {
+import RichAttributePreview from "../../RichAttribute/RichAttributePreview";
+
+export function AttributeEditTemplate() {
+    const { attribute, getAttribute } = useOutletContext();
     const { rich_template: richTemplate, example_value: exampleValue } =
         attribute;
-    const history = useHistory();
+    const navigate = useNavigate();
     const viewAlert = useViewAlert();
 
     async function storeTemplate(template, value) {
@@ -29,7 +32,7 @@ export function AttributeEditTemplate({ attribute, getAttribute }) {
     }
 
     function handleCancel() {
-        history.push(`/settings/attribute/${attribute.key}`);
+        navigate(`/settings/attribute/${attribute.key}`);
     }
 
     return (

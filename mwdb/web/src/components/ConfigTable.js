@@ -55,7 +55,11 @@ export function ConfigRow(props) {
         rawValue = String(value);
         prettyValue = (
             <Link
-                to={makeSearchConfigLink(path, value, `${remotePath}/configs`)}
+                to={makeSearchConfigLink({
+                    field: path,
+                    value: value,
+                    pathname: `${remotePath}/configs`,
+                })}
             >
                 {String(value)}
             </Link>
@@ -161,12 +165,11 @@ export default function ConfigTable(props) {
                     <th>Family</th>
                     <td id="config_family">
                         <Link
-                            to={makeSearchLink(
-                                "family",
-                                object.family,
-                                false,
-                                `${remotePath}/configs`
-                            )}
+                            to={makeSearchLink({
+                                field: "family",
+                                value: object.family,
+                                pathname: `${remotePath}/configs`,
+                            })}
                         >
                             {object.family}
                         </Link>
@@ -176,12 +179,11 @@ export default function ConfigTable(props) {
                     <th>Config type</th>
                     <td id="config_family">
                         <Link
-                            to={makeSearchLink(
-                                "type",
-                                object.config_type,
-                                false,
-                                `${remotePath}/configs`
-                            )}
+                            to={makeSearchLink({
+                                field: "type",
+                                value: object.config_type,
+                                pathname: `${remotePath}/configs`,
+                            })}
                         >
                             {object.config_type}
                         </Link>
@@ -193,11 +195,11 @@ export default function ConfigTable(props) {
                     <td id="upload_time">
                         {object.upload_time ? (
                             <Link
-                                to={makeSearchDateLink(
-                                    "upload_time",
-                                    object.upload_time,
-                                    `${remotePath}/configs`
-                                )}
+                                to={makeSearchDateLink({
+                                    field: `upload_time`,
+                                    value: object.upload_time,
+                                    pathname: `${remotePath}/configs`,
+                                })}
                             >
                                 <DateString date={object.upload_time} />
                             </Link>

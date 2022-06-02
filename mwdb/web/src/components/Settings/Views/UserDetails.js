@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
     DateString,
@@ -23,8 +23,9 @@ function UserItem(props) {
     );
 }
 
-export default function UserDetails({ user, getUser }) {
+export default function UserDetails() {
     const viewAlert = useViewAlert();
+    const { user, getUser } = useOutletContext();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
     const [isBlockModalOpen, setBlockModalOpen] = useState(false);
@@ -150,7 +151,11 @@ export default function UserDetails({ user, getUser }) {
                 <li className="nav-item">
                     <Link
                         className="nav-link"
-                        to={makeSearchLink("uploader", user.login, false, "/")}
+                        to={makeSearchLink({
+                            field: "uploader",
+                            value: user.login,
+                            pathname: "/",
+                        })}
                     >
                         Search for uploads
                     </Link>

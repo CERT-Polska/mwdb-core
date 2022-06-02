@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-
+import { Link, useParams, useOutletContext } from "react-router-dom";
 import api from "@mwdb-web/commons/api";
 import {
     Autocomplete,
     ConfirmationModal,
     useViewAlert,
 } from "@mwdb-web/commons/ui";
-import { Link, useParams } from "react-router-dom";
 
 function AttributePermissionsItem({
     group,
@@ -189,8 +188,9 @@ function AttributePermissionsBox({
     );
 }
 
-export function AttributesPermissions({ attribute, getAttribute }) {
+export function AttributesPermissions() {
     const { attributeKey } = useParams();
+    const { attribute } = useOutletContext();
     const { setAlert } = useViewAlert();
     const [allGroups, setAllGroups] = useState([]);
     const [permissions, setPermissions] = useState({});

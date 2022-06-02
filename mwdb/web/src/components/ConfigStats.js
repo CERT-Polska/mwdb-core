@@ -12,12 +12,11 @@ function ConfigStatsItem(props) {
         <tr>
             <td>
                 <Link
-                    to={makeSearchLink(
-                        "family",
-                        props.family,
-                        false,
-                        `${remotePath}/configs`
-                    )}
+                    to={makeSearchLink({
+                        field: "family",
+                        value: props.family,
+                        pathname: `${remotePath}/configs`,
+                    })}
                 >
                     {props.family}
                 </Link>

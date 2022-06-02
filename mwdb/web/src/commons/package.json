@@ -11,7 +11,6 @@
         "react-ace": "*",
         "react-copy-to-clipboard": "*",
         "react-js-pagination": "*",
-        "react-router": "*",
         "react-router-dom": "*"
     }
 }

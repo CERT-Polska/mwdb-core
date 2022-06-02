@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useHistory } from "react-router-dom";
-
-import queryString from "query-string";
+import { useSearchParams } from "react-router-dom";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
-import {
-    encodeSearchQuery,
-    decodeSearchQuery,
-    multiFromHashes,
-    addFieldToQuery,
-} from "@mwdb-web/commons/helpers";
+import { multiFromHashes, addFieldToQuery } from "@mwdb-web/commons/helpers";
 import { View } from "@mwdb-web/commons/ui";
 
 import RecentViewList from "./RecentViewList";
@@ -24,22 +17,12 @@ export function RecentRow(props) {
 
 export default function RecentView(props) {
     const api = useContext(APIContext);
-    const history = useHistory();
+    const [searchParams, setSearchParams] = useSearchParams();
     // Current query set in URI path
-    const currentQuery = decodeSearchQuery(
-        (queryString.parse(history.location.search)["q"] || "").trim()
-    );
+    const currentQuery = searchParams.get("q") || "";
     // Submitted query for which we know it's valid and
     // we can load next parts of results into UI
     const [submittedQuery, setSubmittedQuery] = useState(null);
-
-    function getQueryURL(query) {
-        const queryPart = queryString.stringify({
-            ...queryString.parse(history.location.search),
-            q: encodeSearchQuery(query),
-        });
-        return `${history.location.pathname}?${queryPart}`;
-    }
 
     // Query input state
     const [queryInput, setQueryInput] = useState(currentQuery);
@@ -62,7 +45,7 @@ export default function RecentView(props) {
         // Optionally convert query if only hash or hashes were provided
         query = multiFromHashes(query);
         // Set query in URL (currentQuery)
-        history.push(getQueryURL(query));
+        setSearchParams({ q: query });
     }
 
     const addToQuery = (field, value) => {

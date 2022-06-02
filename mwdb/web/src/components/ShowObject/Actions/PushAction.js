@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
@@ -13,7 +13,7 @@ export default function PushAction() {
     const api = useContext(APIContext);
     const config = useContext(ConfigContext);
     const context = useContext(ObjectContext);
-    const history = useHistory();
+    const navigate = useNavigate();
     const [isPushModalDisabled, setPushModalDisabled] = useState(false);
     const [isPushModalOpen, setPushModalOpen] = useState(false);
     const [remoteName, setRemoteName] = useState("");
@@ -33,7 +33,7 @@ export default function PushAction() {
                 context.object.id,
                 shareMode
             );
-            history.push(`/remote/${remoteName}/${type}/${context.object.id}`);
+            navigate(`/remote/${remoteName}/${type}/${context.object.id}`);
         } catch (error) {
             context.setObjectError(error);
             setPushModalOpen(false);

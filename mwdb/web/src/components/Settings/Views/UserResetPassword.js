@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
@@ -8,8 +8,9 @@ import { faCopy } from "@fortawesome/free-solid-svg-icons";
 import api from "@mwdb-web/commons/api";
 import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
 
-export default function UserResetPassword({ user }) {
+export default function UserResetPassword() {
     const viewAlert = useViewAlert();
+    const { user } = useOutletContext();
     const [pending, setPending] = useState(false);
     const [passwordURL, setPasswordURL] = useState("");
     async function resetPassword() {

@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Link, Redirect, useParams } from "react-router-dom";
+import { Link, Navigate, useParams, useOutletContext } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,8 +19,9 @@ function ProfileItem(props) {
     );
 }
 
-export default function ProfileGroup({ profile }) {
+export default function ProfileGroup() {
     const auth = useContext(AuthContext);
+    const { profile } = useOutletContext();
     const { redirectToAlert } = useViewAlert();
     const { group: groupName } = useParams();
     const [workspaces, setWorkspaces] = useState();
@@ -48,19 +49,17 @@ export default function ProfileGroup({ profile }) {
     const group = profile.groups.find((group) => group.name === groupName);
     if (!group)
         return (
-            <Redirect
-                to={{
-                    pathname: "/profile",
-                    state: {
-                        error: `Group ${groupName} doesn't exist`,
-                    },
+            <Navigate
+                to="/profile"
+                state={{
+                    error: `Group ${groupName} doesn't exist`,
                 }}
             />
         );
     // Merge it with workspace info
     const workspace = workspaces.find((group) => group.name === groupName);
 
-    if (group.private) return <Redirect to={`/profile/user/${group.name}`} />;
+    if (group.private) return <Navigate to={`/profile/user/${group.name}`} />;
 
     return (
         <div className="container">
@@ -116,13 +115,21 @@ export default function ProfileGroup({ profile }) {
                 <li className="nav-item">
                     <Link
                         className="nav-link"
-                        to={makeSearchLink("uploader", group.name, false, "/")}
+                        to={makeSearchLink({
+                            field: "uploader",
+                            value: group.name,
+                            pathname: "/",
+                        })}
                     >
                         Search for uploads
                     </Link>
                     <Link
                         className="nav-link"
-                        to={makeSearchLink("shared", group.name, false, "/")}
+                        to={makeSearchLink({
+                            field: "shared",
+                            value: group.name,
+                            pathname: "/",
+                        })}
                     >
                         Search for shared files
                     </Link>

@@ -61,6 +61,7 @@ function CapabilitiesList({ capabilities, onDelete }) {
         <tr>
             <td className="col-auto">
                 <Link
+                    to={"#"}
                     onClick={(ev) => {
                         ev.preventDefault();
                         onDelete(cap);

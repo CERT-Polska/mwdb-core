@@ -50,12 +50,11 @@ function SampleDetails() {
                     <th>File name</th>
                     <td id="file_name">
                         <Link
-                            to={makeSearchLink(
-                                "name",
-                                context.object.file_name,
-                                false,
-                                `${remotePath}/`
-                            )}
+                            to={makeSearchLink({
+                                field: "name",
+                                value: context.object.file_name,
+                                pathname: `${remotePath}/`,
+                            })}
                         >
                             {context.object.file_name}
                         </Link>
@@ -73,12 +72,11 @@ function SampleDetails() {
                         {context.object.alt_names.map((alt_name) => (
                             <div>
                                 <Link
-                                    to={makeSearchLink(
-                                        "name",
-                                        alt_name,
-                                        false,
-                                        `${remotePath}/`
-                                    )}
+                                    to={makeSearchLink({
+                                        field: "name",
+                                        value: alt_name,
+                                        pathname: `${remotePath}/`,
+                                    })}
                                 >
                                     {alt_name}
                                 </Link>
@@ -96,12 +94,11 @@ function SampleDetails() {
                     <th>File size</th>
                     <td id="file_size">
                         <Link
-                            to={makeSearchLink(
-                                "size",
-                                context.object.file_size,
-                                false,
-                                `${remotePath}/`
-                            )}
+                            to={makeSearchLink({
+                                field: "size",
+                                value: context.object.file_size,
+                                pathname: `${remotePath}/`,
+                            })}
                         >
                             {humanFileSize(context.object.file_size)}
                         </Link>
@@ -117,12 +114,11 @@ function SampleDetails() {
                     <th>File type</th>
                     <td id="file_type">
                         <Link
-                            to={makeSearchLink(
-                                "type",
-                                context.object.file_type,
-                                false,
-                                `${remotePath}/`
-                            )}
+                            to={makeSearchLink({
+                                field: "type",
+                                value: context.object.file_type,
+                                pathname: `${remotePath}/`,
+                            })}
                         >
                             {context.object.file_type}
                         </Link>
@@ -198,12 +194,11 @@ function SampleDetails() {
                     <th>ssdeep</th>
                     <td id="ssdeep" className="text-monospace">
                         <Link
-                            to={makeSearchLink(
-                                "ssdeep",
-                                context.object.ssdeep,
-                                false,
-                                `${remotePath}/`
-                            )}
+                            to={makeSearchLink({
+                                field: "ssdeep",
+                                value: context.object.ssdeep,
+                                pathname: `${remotePath}/`,
+                            })}
                         >
                             {context.object.ssdeep}
                         </Link>
@@ -221,11 +216,11 @@ function SampleDetails() {
                         {" "}
                         {context.object.upload_time ? (
                             <Link
-                                to={makeSearchDateLink(
-                                    "upload_time",
-                                    context.object.upload_time,
-                                    `${remotePath}/`
-                                )}
+                                to={makeSearchDateLink({
+                                    field: "upload_time",
+                                    value: context.object.upload_time,
+                                    pathname: `${remotePath}/`,
+                                })}
                             >
                                 <DateString date={context.object.upload_time} />
                             </Link>

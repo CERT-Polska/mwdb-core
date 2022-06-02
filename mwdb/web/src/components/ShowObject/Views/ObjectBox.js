@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router";
-import { useRouteMatch } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { TabContext } from "@mwdb-web/commons/ui";
 
@@ -16,28 +15,26 @@ function useComponentState(initialState) {
     ];
 }
 
-export default function ObjectBox(props) {
-    const history = useHistory();
+export default function ObjectBox({ defaultTab, children }) {
+    const location = useLocation();
     const [Component, setComponent] = useComponentState(() => []);
     const [actions, setActions] = useState([]);
     // /sample/:hash/details
     // routePath => /sample/:hash
     // tabPath => /details
-    const routePath = useRouteMatch().url;
-    const tabPath = history.location.pathname.slice(routePath.length);
-    const tab = tabPath.split("/")[1] || props.defaultTab;
-    const subTab = tabPath.split("/")[2];
-
+    const [objectType, hash, tab, subTab] = location.pathname
+        .split("/")
+        .slice(1);
     function getTabLink(tab, subtab) {
-        return routePath + "/" + [tab].concat(subtab ? [subtab] : []).join("/");
+        return ["", objectType, hash, tab]
+            .concat(subtab ? [subtab] : [])
+            .join("/");
     }
-
-    const tabButtons = props.children;
 
     return (
         <TabContext.Provider
             value={{
-                tab,
+                tab: tab || defaultTab,
                 subTab,
                 getTabLink,
                 setComponent,
@@ -45,7 +42,7 @@ export default function ObjectBox(props) {
             }}
         >
             <nav className="navbar navbar-expand-sm bg-white">
-                <ul className="nav nav-tabs mr-auto">{tabButtons}</ul>
+                <ul className="nav nav-tabs mr-auto">{children}</ul>
                 <ul className="nav nav-pills ml-auto">{actions}</ul>
             </nav>
             <Component />

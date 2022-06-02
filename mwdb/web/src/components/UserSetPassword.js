@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { withRouter } from "react-router";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { View } from "@mwdb-web/commons/ui";
 
 import $ from "jquery";
@@ -61,7 +60,7 @@ class UserSetPassword extends Component {
         event.preventDefault();
         try {
             let response = await api.authSetPassword(
-                this.props.match.params.token,
+                this.props.params.token,
                 this.state.password
             );
             this.setState({ success: response.data.login, error: null });
@@ -127,4 +126,7 @@ class UserSetPassword extends Component {
     }
 }
 
-export default withRouter(UserSetPassword);
+export default function ConnectedUserSetPassword(props) {
+    const params = useParams();
+    return <UserSetPassword params={params} {...props} />;
+}

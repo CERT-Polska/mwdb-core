@@ -1,7 +1,6 @@
 import React, { Component, useCallback, useContext } from "react";
-import { withRouter } from "react-router";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
-import queryString from "query-string";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
@@ -72,7 +71,7 @@ class Upload extends Component {
     static contextType = AuthContext;
 
     get parentFromQuery() {
-        return queryString.parse(this.props.location.search)["parent"];
+        return this.props.searchParams.get("parent");
     }
 
     handleParentChange = (ev) => {
@@ -82,7 +81,7 @@ class Upload extends Component {
     };
 
     handleParentClear = () => {
-        if (this.parentFromQuery) this.props.history.push("upload");
+        if (this.parentFromQuery) this.props.navigate("/upload");
         this.setState({ parent: "" });
     };
 
@@ -137,8 +136,9 @@ class Upload extends Component {
                 this.props.fileUploadTimeout
             );
             this.sha256 = response.data.sha256;
-            this.props.history.replace("/file/" + this.sha256, {
-                success: "File uploaded successfully.",
+            this.props.navigate("/file/" + this.sha256, {
+                state: { success: "File uploaded successfully." },
+                replace: true,
             });
         } catch (error) {
             this.setState({ error });
@@ -356,12 +356,16 @@ class Upload extends Component {
 
 function UploadWithTimeout(props) {
     const config = useContext(ConfigContext);
+    const navigate = useNavigate();
+    const searchParams = useSearchParams()[0];
     return (
         <Upload
             fileUploadTimeout={config.config["file_upload_timeout"]}
+            navigate={navigate}
+            searchParams={searchParams}
             {...props}
         />
     );
 }
 
-export default withRouter(UploadWithTimeout);
+export default UploadWithTimeout;

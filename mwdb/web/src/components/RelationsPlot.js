@@ -1,7 +1,5 @@
 import React, { Suspense, useState, useLayoutEffect, useContext } from "react";
-import { useHistory } from "react-router";
-
-import queryString from "query-string";
+import { useSearchParams } from "react-router-dom";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { capitalize } from "@mwdb-web/commons/helpers";
@@ -70,7 +68,7 @@ function RelationsNode(props) {
 
 function RelationsPlot(props) {
     const api = useContext(APIContext);
-    const history = useHistory();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { hash, height } = props;
     const defaultProps = {
         height: "900",
@@ -169,22 +167,19 @@ function RelationsPlot(props) {
     };
 
     const onNodeClick = (node) => {
-        let params = queryString.parse(history.location.search, {
-            arrayFormat: "bracket",
-        });
+        let nodes = searchParams.getAll("node");
         if (isNodeExpanded(node)) return;
-        params.node = [...(params.node || []), node];
+        nodes = [...(nodes || []), node];
         expandNode(node);
-        history.replace({
-            search: queryString.stringify(params, { arrayFormat: "bracket" }),
-        });
+        setSearchParams(
+            new URLSearchParams(nodes.map((node) => ["node", node])),
+            { replace: true }
+        );
     };
 
     useLayoutEffect(() => {
-        let params = queryString.parse(history.location.search, {
-            arrayFormat: "bracket",
-        });
-        let expandedNodes = params.node || [];
+        let nodes = searchParams.getAll("node");
+        let expandedNodes = nodes || [];
         if (hash && !expandedNodes.includes(hash)) {
             expandedNodes.push(hash);
         }

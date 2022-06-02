@@ -1,17 +1,3 @@
-export function encodeSearchQuery(query) {
-    // We need to escape this twice because of this bug: https://github.com/ReactTraining/history/issues/505
-    return encodeURIComponent(encodeURIComponent(query));
-}
-
-export function decodeSearchQuery(query) {
-    let pathname = decodeURIComponent(query);
-    try {
-        return decodeURIComponent(pathname);
-    } catch (_error) {
-        return pathname;
-    }
-}
-
 export function escapeSearchValue(input) {
     if (typeof input === "string") {
         input = JSON.stringify(input);
@@ -25,38 +11,37 @@ export function escapeSearchField(field) {
     return field.replace(/[.\\ *:]/g, "\\$&");
 }
 
-export function makeSearchLink(field, input, noEscape, endpoint) {
-    if (input === undefined) return "";
-
-    const prefix = field + ":";
-
-    if (!noEscape) input = escapeSearchValue(input);
+export function makeSearchParams({ field, value, noEscape = false }) {
     return (
-        `${endpoint === undefined ? "/search" : endpoint}?q=` +
-        encodeSearchQuery(prefix + input)
+        "?" +
+        new URLSearchParams({
+            q: `${field}:${noEscape ? value : escapeSearchValue(value)}`,
+        }).toString()
     );
 }
 
-export function makeSearchRangeLink(field, from, to, endpoint) {
-    return makeSearchLink(
+export function makeSearchLink({ field, value, noEscape = false, pathname }) {
+    return {
+        pathname,
+        search: makeSearchParams({ field, value, noEscape }),
+    };
+}
+
+export function makeSearchConfigLink({ field, value, pathname }) {
+    return makeSearchLink({
+        pathname,
+        field: `cfg.${field.join(".")}`,
+        value,
+    });
+}
+
+export function makeSearchDateLink({ field, value, pathname }) {
+    return makeSearchLink({
+        pathname,
         field,
-        `[${escapeSearchValue(from)} TO ${escapeSearchValue(to)}]`,
-        true,
-        endpoint
-    );
-}
-
-export function makeSearchConfigLink(path, value, endpoint) {
-    return makeSearchLink(`cfg.${path.join(".")}`, value, false, endpoint);
-}
-
-export function makeSearchDateLink(field, date, endpoint) {
-    return makeSearchLink(
-        field,
-        new Date(date).toISOString().split("T")[0],
-        true,
-        endpoint
-    );
+        value: new Date(value).toISOString().split("T")[0],
+        noEscape: true,
+    });
 }
 
 export function isHash(element) {

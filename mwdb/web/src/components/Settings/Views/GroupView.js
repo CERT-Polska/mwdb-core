@@ -1,15 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useParams, Switch, Link, useLocation } from "react-router-dom";
+import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
-import { AdministrativeRoute, useViewAlert } from "@mwdb-web/commons/ui";
-
-import GroupDetails from "./GroupDetails";
-import ProfileCapabilities from "../../Profile/Views/ProfileCapabilities";
-import GroupMembers from "./GroupMembers";
+import { useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function GroupView() {
-    const location = useLocation();
     const { setAlert } = useViewAlert();
     const { name } = useParams();
     const [group, setGroup] = useState({});
@@ -31,48 +26,50 @@ export default function GroupView() {
 
     if (!group) return [];
 
+    function BreadcrumbItems({ elements = [] }) {
+        return [
+            <li className="breadcrumb-item">
+                <strong>Group details: </strong>
+                {elements.length > 0 ? (
+                    <Link to={`/settings/group/${group.name}`}>
+                        {group.name}
+                    </Link>
+                ) : (
+                    <span>{group.name}</span>
+                )}
+            </li>,
+            ...elements.map((element, index) => (
+                <li
+                    className={`breadcrumb-item ${
+                        index === elements.length - 1 ? "active" : ""
+                    }`}
+                >
+                    {element}
+                </li>
+            )),
+        ];
+    }
+
     return (
         <div className="container">
             <nav aria-label="breadcrumb">
                 <ol className="breadcrumb">
-                    <li className="breadcrumb-item">
-                        <strong>Group details: </strong>
-                        {location.pathname.split("/").length > 4 ? (
-                            <Link to={`/settings/group/${group.name}`}>
-                                {group.name}
-                            </Link>
-                        ) : (
-                            <span>{group.name}</span>
-                        )}
-                    </li>
-                    {location.pathname.split("/").length > 4 && (
-                        <li className="breadcrumb-item active">
-                            <Switch>
-                                <AdministrativeRoute path="/settings/group/:name/capabilities">
-                                    Capabilities
-                                </AdministrativeRoute>
-                                <AdministrativeRoute path="/settings/group/:name/members">
-                                    Members
-                                </AdministrativeRoute>
-                            </Switch>
-                        </li>
-                    )}
+                    <Routes>
+                        <Route index element={<BreadcrumbItems />} />
+                        <Route
+                            path="capabilities"
+                            element={
+                                <BreadcrumbItems elements={["Capabilities"]} />
+                            }
+                        />
+                        <Route
+                            path="members"
+                            element={<BreadcrumbItems elements={["Members"]} />}
+                        />
+                    </Routes>
                 </ol>
             </nav>
-            <Switch>
-                <AdministrativeRoute exact path="/settings/group/:name">
-                    <GroupDetails group={group} updateGroup={getGroup} />
-                </AdministrativeRoute>
-                <AdministrativeRoute
-                    exact
-                    path="/settings/group/:name/capabilities"
-                >
-                    <ProfileCapabilities profile={group} />
-                </AdministrativeRoute>
-                <AdministrativeRoute exact path="/settings/group/:name/members">
-                    <GroupMembers group={group} getGroup={updateGroup} />
-                </AdministrativeRoute>
-            </Switch>
+            <Outlet context={{ group, getGroup }} />
         </div>
     );
 }

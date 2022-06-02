@@ -8,7 +8,6 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
-import { updateActivePage } from "@mwdb-web/commons/helpers";
 
 function Comment(props) {
     return (
@@ -42,28 +41,6 @@ function Comment(props) {
                 <small>{readableTime(new Date(props.timestamp))}</small>
             </p>
         </li>
-    );
-}
-
-function CommentList(props) {
-    const commentNodes = props.data.map((comment, index) => (
-        <Comment
-            id={comment.id}
-            comment={comment.comment}
-            author={comment.author}
-            timestamp={comment.timestamp}
-            removeComment={props.removeComment}
-            key={index}
-        />
-    ));
-    return (
-        <div className="commentList">
-            {commentNodes.length > 0 ? (
-                <ul className="list-group list-group-flush">{commentNodes}</ul>
-            ) : (
-                <div className="text-muted">No comments to display</div>
-            )}
-        </div>
     );
 }
 
@@ -106,29 +83,89 @@ function CommentForm(props) {
     );
 }
 
+function CommentList({ comments, removeComment }) {
+    const itemsCountPerPage = 5;
+    const [activePage, setActivePage] = useState(1);
+
+    useEffect(() => {
+        if (
+            comments &&
+            comments.length <= itemsCountPerPage * (activePage - 1)
+        ) {
+            // Come back to first page if activePage is too big
+            setActivePage(1);
+        }
+    }, [activePage, comments]);
+
+    if (!comments) {
+        return <div className="card-body text-muted">Loading data...</div>;
+    }
+
+    if (comments.length === 0) {
+        return (
+            <div className="card-body text-muted">No comments to display</div>
+        );
+    }
+    const commentNodes = comments
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(
+            (activePage - 1) * itemsCountPerPage,
+            itemsCountPerPage * activePage
+        )
+        .map((comment, index) => (
+            <Comment
+                id={comment.id}
+                comment={comment.comment}
+                author={comment.author}
+                timestamp={comment.timestamp}
+                removeComment={removeComment}
+                key={index}
+            />
+        ));
+
+    return (
+        <div className="card-body">
+            <div className="commentList">
+                <ul className="list-group list-group-flush">{commentNodes}</ul>
+            </div>
+            {comments.length > itemsCountPerPage && (
+                <Pagination
+                    activePage={activePage}
+                    itemsCountPerPage={itemsCountPerPage}
+                    totalItemsCount={comments.length}
+                    pageRangeDisplayed={5}
+                    onChange={setActivePage}
+                    itemClass="page-item"
+                    linkClass="page-link"
+                />
+            )}
+        </div>
+    );
+}
+
 function CommentBox() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
-    const itemsCountPerPage = 5;
 
     const canRemoveComments =
         auth.hasCapability(Capability.removingComments) && !api.remote;
     const canAddComments =
         auth.hasCapability(Capability.addingComments) && !api.remote;
 
-    const [comments, setComments] = useState([]);
-    const [activePage, setActivePage] = useState(1);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [commentToRemove, setCommentToRemove] = useState("");
 
     const objectId = context.object.id;
-    const setObjectError = context.setObjectError;
+    const comments = context.object.comments;
+    const { setObjectError, updateObjectData } = context;
 
     async function updateComments() {
         try {
             let response = await api.getObjectComments(objectId);
-            setComments(response.data);
+            updateObjectData({
+                comments: response.data,
+            });
         } catch (error) {
             setObjectError(error);
         }
@@ -138,7 +175,7 @@ function CommentBox() {
         if (comment) {
             try {
                 await api.addObjectComment(objectId, comment);
-                updateComments();
+                await updateComments();
             } catch (error) {
                 setObjectError(error);
             }
@@ -148,7 +185,7 @@ function CommentBox() {
     async function removeComment(comment_id) {
         try {
             await api.removeObjectComment(objectId, comment_id);
-            updateComments();
+            await updateComments();
         } catch (error) {
             setObjectError(error);
         } finally {
@@ -165,6 +202,7 @@ function CommentBox() {
         api,
         objectId,
         setObjectError,
+        updateObjectData,
     ]);
 
     useEffect(() => {
@@ -178,45 +216,15 @@ function CommentBox() {
                 onRequestClose={() => setDeleteModalOpen(false)}
                 onConfirm={() => {
                     removeComment(commentToRemove);
-                    updateActivePage(
-                        activePage,
-                        comments.length,
-                        itemsCountPerPage,
-                        setActivePage
-                    );
                 }}
                 message="Remove the comment?"
                 confirmText="Remove"
             />
             <div className="card-header">Comments</div>
-            <div className="card-body">
-                <CommentList
-                    removeComment={
-                        canRemoveComments ? handleRemoveComment : null
-                    }
-                    data={comments
-                        .sort(function (a, b) {
-                            return (
-                                new Date(b.timestamp) - new Date(a.timestamp)
-                            );
-                        })
-                        .slice(
-                            (activePage - 1) * itemsCountPerPage,
-                            itemsCountPerPage * activePage
-                        )}
-                />
-            </div>
-            {comments.length > itemsCountPerPage && (
-                <Pagination
-                    activePage={activePage}
-                    itemsCountPerPage={itemsCountPerPage}
-                    totalItemsCount={comments.length}
-                    pageRangeDisplayed={5}
-                    onChange={setActivePage}
-                    itemClass="page-item"
-                    linkClass="page-link"
-                />
-            )}
+            <CommentList
+                comments={comments}
+                removeComment={canRemoveComments ? handleRemoveComment : null}
+            />
             {canAddComments && <CommentForm submitComment={submitComment} />}
         </div>
     );

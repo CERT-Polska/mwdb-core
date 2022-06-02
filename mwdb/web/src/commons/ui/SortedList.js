@@ -1,12 +1,17 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faSort,
+    faSortUp,
+    faSortDown,
+} from "@fortawesome/free-solid-svg-icons";
 
 class SortedList extends Component {
     sortIcon(idx) {
         let sortOrder = this.props.sortOrder || [-1, 0];
-        if (idx !== sortOrder[0]) return "sort";
-        if (sortOrder[1] === 1) return "sort-down";
-        if (sortOrder[1] === -1) return "sort-up";
+        if (idx !== sortOrder[0]) return faSort;
+        if (sortOrder[1] === 1) return faSortDown;
+        if (sortOrder[1] === -1) return faSortUp;
     }
 
     handleSort(idx) {

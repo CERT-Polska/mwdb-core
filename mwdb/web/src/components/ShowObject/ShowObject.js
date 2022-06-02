@@ -27,13 +27,21 @@ const initialObjectState = {
     objectError: null,
 };
 
+const objectLoad = Symbol("objectLoad");
 const objectUpdate = Symbol("objectUpdate");
 const objectError = Symbol("objectError");
 
 function objectStateReducer(state, action) {
     switch (action.type) {
-        case objectUpdate:
+        case objectLoad:
+            // Reload object and wipe lazy-loaded updates
             return { object: action.object, objectError: null };
+        case objectUpdate:
+            // Update object data with new information
+            return {
+                object: { ...state.object, ...action.object },
+                objectError: null,
+            };
         case objectError:
             return { object: state.object, objectError: action.error };
         default:
@@ -67,20 +75,30 @@ export default function ShowObject({
         []
     );
 
-    const updateObject = useCallback(async () => {
-        try {
-            let response = await api.getObject(objectType, objectId);
-            setObjectState({
-                type: objectUpdate,
-                object: response.data,
-            });
-        } catch (error) {
-            setObjectError(error);
-        }
-    }, [api, objectType, objectId, setObjectError]);
+    const updateObject = useCallback(
+        async (doLoad) => {
+            try {
+                let response = await api.getObject(objectType, objectId);
+                setObjectState({
+                    type: doLoad ? objectLoad : objectUpdate,
+                    object: response.data,
+                });
+            } catch (error) {
+                setObjectError(error);
+            }
+        },
+        [api, objectType, objectId, setObjectError]
+    );
+
+    const updateObjectData = useCallback((objectData) => {
+        setObjectState({
+            type: objectUpdate,
+            object: objectData,
+        });
+    }, []);
 
     useEffect(() => {
-        updateObject();
+        updateObject(true);
     }, [updateObject]);
 
     const objectLayout = objectState.object ? (
@@ -134,9 +152,17 @@ export default function ShowObject({
             objectType: objectType,
             searchEndpoint: searchEndpoint,
             updateObject,
+            updateObjectData,
             setObjectError,
         }),
-        [objectState, objectType, searchEndpoint, updateObject, setObjectError]
+        [
+            objectState,
+            objectType,
+            searchEndpoint,
+            updateObject,
+            updateObjectData,
+            setObjectError,
+        ]
     );
 
     return (

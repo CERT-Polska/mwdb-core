@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import AttributesAddModal from "./AttributesAddModal";
 
 import api from "@mwdb-web/commons/api";
@@ -38,7 +39,7 @@ function UploadDropzone(props) {
             <div className="card">
                 <div className="card-body">
                     <h5 className="card-title">
-                        <FontAwesomeIcon icon="upload" size="x" />
+                        <FontAwesomeIcon icon={faUpload} size="x" />
                         &nbsp;
                         {props.file ? (
                             <span>

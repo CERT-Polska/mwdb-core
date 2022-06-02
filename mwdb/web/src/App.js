@@ -55,48 +55,6 @@ import OAuthProvider from "./components/Settings/Views/OAuthProvider";
 import AttributesList from "./components/Settings/Views/AttributesList";
 import AttributeCreate from "./components/Settings/Views/AttributeCreate";
 import AttributeView from "./components/Settings/Views/AttributeView";
-
-import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-    faTimes,
-    faUpload,
-    faDownload,
-    faPlus,
-    faMinus,
-    faRandom,
-    faExchangeAlt,
-    faBan,
-    faSearch,
-    faToggleOn,
-    faToggleOff,
-    faSort,
-    faSortUp,
-    faSortDown,
-    faProjectDiagram,
-    faFile,
-    faFileImage,
-    faFilePdf,
-    faFingerprint,
-    faBoxes,
-    faTrash,
-    faCopy,
-    faThumbtack,
-    faStar,
-    faEdit,
-    faSave,
-    faLock,
-    faLockOpen,
-} from "@fortawesome/free-solid-svg-icons";
-import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
-
-import { Capability } from "@mwdb-web/commons/auth";
-import { ConfigContext } from "@mwdb-web/commons/config";
-import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
-import {
-    ErrorBoundary,
-    RequiresAuth,
-    RequiresCapability,
-} from "@mwdb-web/commons/ui";
 import { AttributeDetails } from "./components/Settings/Views/AttributeDetails";
 import { AttributesPermissions } from "./components/Settings/Views/AttributePermissions";
 import GroupDetails from "./components/Settings/Views/GroupDetails";
@@ -109,35 +67,14 @@ import UserCapabilities from "./components/Settings/Views/UserCapabilities";
 import UserAPIKeys from "./components/Settings/Views/UserAPIKeys";
 import { AttributeEditTemplate } from "./components/Settings/Views/AttributeEditTemplate";
 
-library.add(faTimes);
-library.add(faUpload);
-library.add(faDownload);
-library.add(faPlus);
-library.add(faMinus);
-library.add(faRandom);
-library.add(faExchangeAlt);
-library.add(faBan);
-library.add(faSearch);
-library.add(faToggleOn);
-library.add(faToggleOff);
-library.add(faSort);
-library.add(faSortUp);
-library.add(faSortDown);
-library.add(faProjectDiagram);
-library.add(faFile);
-library.add(faFileImage);
-library.add(faFilePdf);
-library.add(faFingerprint);
-library.add(faBoxes);
-library.add(faTrash);
-library.add(faCopy);
-library.add(faThumbtack);
-library.add(faStar);
-library.add(farStar);
-library.add(faEdit);
-library.add(faSave);
-library.add(faLock);
-library.add(faLockOpen);
+import { Capability } from "@mwdb-web/commons/auth";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
+import {
+    ErrorBoundary,
+    RequiresAuth,
+    RequiresCapability,
+} from "@mwdb-web/commons/ui";
 
 function NavigateFor404() {
     /**

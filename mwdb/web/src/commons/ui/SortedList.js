@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faSort,
@@ -6,70 +6,66 @@ import {
     faSortDown,
 } from "@fortawesome/free-solid-svg-icons";
 
-class SortedList extends Component {
-    sortIcon(idx) {
-        let sortOrder = this.props.sortOrder || [-1, 0];
+export default function SortedList(props) {
+    const ListItem = props.listItem;
+    const columnNames = props.columnNames || ListItem.columnNames;
+    const unsortable = props.unsortable || [];
+
+    function sortIcon(idx) {
+        let sortOrder = props.sortOrder || [-1, 0];
         if (idx !== sortOrder[0]) return faSort;
         if (sortOrder[1] === 1) return faSortDown;
         if (sortOrder[1] === -1) return faSortUp;
     }
 
-    handleSort(idx) {
+    function handleSort(idx) {
         let newSortOrder = [idx, 1];
-        let sortOrder = this.props.sortOrder || [-1, 0];
+        let sortOrder = props.sortOrder || [-1, 0];
         if (idx === sortOrder[0]) newSortOrder = [idx, -sortOrder[1]];
-        this.props.onSort(newSortOrder);
+        props.onSort(newSortOrder);
     }
 
-    render() {
-        let ListItem = this.props.listItem;
-        let columnNames = this.props.columnNames || ListItem.columnNames;
-        let unsortable = this.props.unsortable || [];
-
-        return (
-            <table className="table table-striped table-bordered">
-                <thead>
-                    {columnNames.map((h, idx) => (
-                        <th
-                            key={idx}
-                            onClick={(ev) => {
-                                ev.preventDefault();
-                                this.handleSort(idx);
-                            }}
-                            style={{ cursor: "pointer" }}
+    return (
+        <table className="table table-striped table-bordered">
+            <thead>
+                {columnNames.map((h, idx) => (
+                    <th
+                        key={idx}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            handleSort(idx);
+                        }}
+                        style={{ cursor: "pointer" }}
+                    >
+                        {h}
+                        {!unsortable.includes(h) ? (
+                            <FontAwesomeIcon
+                                icon={sortIcon(idx)}
+                                pull="right"
+                                size="x"
+                            />
+                        ) : (
+                            []
+                        )}
+                    </th>
+                ))}
+            </thead>
+            <tbody>
+                {props.items.length ? (
+                    props.items.map((item, idx) => (
+                        <ListItem key={idx} {...item} />
+                    ))
+                ) : (
+                    <tr>
+                        <td
+                            colSpan={columnNames.length}
+                            className="text-center"
                         >
-                            {h}
-                            {!unsortable.includes(h) ? (
-                                <FontAwesomeIcon
-                                    icon={this.sortIcon(idx)}
-                                    pull="right"
-                                    size="x"
-                                />
-                            ) : (
-                                []
-                            )}
-                        </th>
-                    ))}
-                </thead>
-                <tbody>
-                    {this.props.items.length ? (
-                        this.props.items.map((item, idx) => (
-                            <ListItem key={idx} {...item} />
-                        ))
-                    ) : (
-                        <tr>
-                            <td
-                                colSpan={columnNames.length}
-                                className="text-center"
-                            >
-                                Nothing to display.
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        );
-    }
+                            Nothing to display.
+                        </td>
+                    </tr>
+                )}
+            </tbody>
+        </table>
+    );
 }
-
-export default SortedList;

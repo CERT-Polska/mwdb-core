@@ -25,10 +25,13 @@ class SearchResource(Resource):
 
             Hard-limited to 10000 records.
             Use `query` argument in object get methods instead.
+
+            Deprecated: use /object?query= instead
+        deprecated: true
         security:
             - bearerAuth: []
         tags:
-            - deprecated
+            - object
         requestBody:
             description: Search query
             content:

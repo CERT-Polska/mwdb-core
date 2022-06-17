@@ -239,10 +239,13 @@ class FileItemResource(ObjectItemResource, FileUploader):
             Uploads a new file.
 
             Requires `adding_files` capability.
+
+            Deprecated: use POST /file instead.
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - file
         parameters:
             - in: path
               name: identifier

@@ -344,10 +344,13 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
             Uploads a new config.
 
             Requires `adding_configs` capability.
+
+            Deprecated: use POST /config method instead.
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - config
         parameters:
             - in: path
               name: identifier

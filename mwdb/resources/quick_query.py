@@ -23,7 +23,7 @@ class QuickQueryResource(Resource):
 
             Requires `personalize` capability.
         tags:
-            - query
+            - quick-query
         requestBody:
             description: Basic information for saving query
             content:
@@ -69,7 +69,7 @@ class QuickQueryResource(Resource):
         summary: Get stored quick queries
         description: Returns all saved queries related with specified object type.
         tags:
-            - query
+            - quick-query
         parameters:
             - in: path
               name: type
@@ -112,7 +112,7 @@ class QuickQueryItemResource(Resource):
 
             Requires `personalize` capability.
         tags:
-            - query
+            - quick-query
         parameters:
             - in: path
               name: id

@@ -222,10 +222,13 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
             Uploads a new text blob.
 
             Requires `adding_blobs` capability.
+
+            Deprecated: use POST /blob method instead.
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - blob
         parameters:
             - in: path
               name: identifier

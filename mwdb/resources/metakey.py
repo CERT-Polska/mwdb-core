@@ -42,10 +42,13 @@ class MetakeyResource(Resource):
         summary: Get object attributes
         description: |
             Returns all attributes of specified object that user is allowed to read.
+
+            Deprecated: use Attributes API instead
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: type
@@ -111,10 +114,13 @@ class MetakeyResource(Resource):
 
             User must have `set` access to the attribute key
             or `adding_all_attributes` capability.
+
+            Deprecated: use Attributes API instead
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: type
@@ -190,10 +196,13 @@ class MetakeyResource(Resource):
 
             If value is not specified, all values under the specified
             key are removed.
+
+            Deprecated: use Attributes API instead
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: type
@@ -260,10 +269,13 @@ class MetakeyListDefinitionResource(Resource):
         description: |
             Returns list of attribute keys which currently authenticated user
             can read or set.
+
+            Deprecated: use Attributes API instead
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: access
@@ -307,10 +319,13 @@ class MetakeyListDefinitionManageResource(Resource):
             Returns list of attribute key definitions.
 
             Requires `manage_users` capability.
+
+            Deprecated: use Attributes API instead
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         responses:
             200:
                 description: List of attribute keys and definitions
@@ -344,10 +359,13 @@ class MetakeyDefinitionManageResource(Resource):
             Returns attribute key definition details.
 
             Requires `manage_users` capability.
+
+            Deprecated: use Attributes API instead
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: key
@@ -388,10 +406,13 @@ class MetakeyDefinitionManageResource(Resource):
             Creates attribute key definition.
 
             Requires `manage_users` capability.
+
+            Deprecated: use Attributes API instead
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: key
@@ -447,10 +468,13 @@ class MetakeyDefinitionManageResource(Resource):
             Update attribute key definition.
 
             Requires `manage_users` capability.
+
+            Deprecated: use Attribute API instead.
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: key
@@ -523,10 +547,13 @@ class MetakeyDefinitionManageResource(Resource):
             Deletes attribute key including all related object attributes.
 
             Requires `manage_users` capability.
+
+            Deprecated: use Attribute API instead.
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: key
@@ -568,10 +595,13 @@ class MetakeyPermissionResource(Resource):
             for specified key and group name.
 
             Requires `manage_users` capability.
+
+            Deprecated: use Attribute API instead.
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: key
@@ -648,10 +678,13 @@ class MetakeyPermissionResource(Resource):
             Removes attribute key permission for specified key and group name.
 
             Requires `manage_users` capability.
+
+            Deprecated: use Attribute API instead.
         security:
             - bearerAuth: []
+        deprecated: true
         tags:
-            - deprecated
+            - metakey
         parameters:
             - in: path
               name: key

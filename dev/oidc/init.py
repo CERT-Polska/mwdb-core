@@ -1,6 +1,5 @@
 import json
 import pathlib
-
 import requests
 
 print("[+] Authenticating")

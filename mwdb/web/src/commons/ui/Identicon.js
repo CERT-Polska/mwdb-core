@@ -1,53 +1,43 @@
 import identicon from "identicon.js";
-import React, { Component } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import sha1 from "sha1";
 
-class Identicon extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            identicon: "",
-        };
-    }
+export default function Identicon(props) {
+    const [identiconState, setIdenticonState] = useState("");
+    const mounted = useRef();
 
-    updateState = () => {
+    const updateState = () => {
         if (
-            typeof this.props.data === "undefined" &&
-            typeof this.props.hash === "undefined"
+            typeof props.data === "undefined" &&
+            typeof props.hash === "undefined"
         )
             return;
-        let data = this.props.hash || sha1(this.props.data);
+        let data = props.hash || sha1(props.data);
         let options = {
-            margin: parseInt(this.props.margin, 10) || 0.08,
-            size: parseInt(this.props.size, 10),
+            margin: parseInt(props.margin, 10) || 0.08,
+            size: parseInt(props.size, 10),
             format: "svg",
         };
         let ident = new identicon(data, options).toString();
 
-        this.setState({
-            identicon: "data:image/svg+xml;base64," + ident,
-        });
+        setIdenticonState("data:image/svg+xml;base64," + ident);
     };
 
-    componentDidUpdate = (prevProps, prevState) => {
-        if (this.props !== prevProps) this.updateState();
-    };
+    useEffect(() => {
+        if (!mounted.current) {
+            updateState();
+        } else {
+            updateState();
+        }
+    });
 
-    componentDidMount = () => {
-        this.updateState();
-    };
-
-    render() {
-        return (
-            <img
-                className="identicon"
-                src={this.state.identicon}
-                alt="identicon"
-                style={this.props.style}
-            />
-        );
-    }
+    return (
+        <img
+            className="identicon"
+            src={identiconState}
+            alt="identicon"
+            style={props.style}
+        />
+    );
 }
-
-export default Identicon;

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import api from "@mwdb-web/commons/api";
@@ -34,7 +34,6 @@ export default function ConfigStats() {
     const [sortOrder, setSortOrder] = useState([0, 1]);
     const [filterValue, setFilterValue] = useState("*");
     const [error, setError] = useState("");
-    const didMount = useRef(false);
 
     async function updateStats() {
         try {
@@ -45,17 +44,14 @@ export default function ConfigStats() {
         }
     }
 
-    const items = () => {
-        let columns = ["family", "last_upload", "count"];
-        let sortCriterion = columns[sortOrder[0]];
-        let sortOrderVariable = sortOrder[1];
-
-        return families.sort((a, b) => {
-            if (a[sortCriterion] < b[sortCriterion]) return -sortOrderVariable;
-            if (a[sortCriterion] > b[sortCriterion]) return sortOrderVariable;
-            return 0;
-        });
-    };
+    const columns = ["family", "last_upload", "count"];
+    const sortCriterion = columns[sortOrder[0]];
+    const sortOrderVariable = sortOrder[1];
+    const items = families.sort((a, b) => {
+        if (a[sortCriterion] < b[sortCriterion]) return -sortOrderVariable;
+        if (a[sortCriterion] > b[sortCriterion]) return sortOrderVariable;
+        return 0;
+    });
 
     const onSort = (sortOrder) => {
         setSortOrder(sortOrder);
@@ -68,12 +64,8 @@ export default function ConfigStats() {
     const getStats = useCallback(updateStats, [filterValue]);
 
     useEffect(() => {
-        if (!didMount.current) {
-            getStats();
-            return;
-        }
         getStats();
-    }, [getStats, filterValue]);
+    }, [getStats]);
 
     return (
         <View ident="configStats" error={error}>

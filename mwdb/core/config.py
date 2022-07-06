@@ -8,15 +8,15 @@ from typedconfig.source import EnvironmentConfigSource, IniFileConfigSource
 from mwdb.paths import mail_templates_dir
 
 
-def intbool(v) -> bool:
+def intbool(v: str) -> bool:
     return bool(int(v))
 
 
-def list_of_str(v) -> List[str]:
+def list_of_str(v: str) -> List[str]:
     return [el.strip() for el in v.split(",") if el.strip()]
 
 
-def path(v) -> Optional[str]:
+def path(v: str) -> str:
     if not v:
         raise ValueError(f"Path can't be empty")
     v = os.path.abspath(v)

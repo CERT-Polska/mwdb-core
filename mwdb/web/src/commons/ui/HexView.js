@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-text";
@@ -7,24 +7,6 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 
 class HexViewNumberRenderer {
-    getText(session, row) {
-        return (row << 4).toString(16).padStart(8, "0");
-    }
-
-    getWidth(session, lastLineNumber, config) {
-        return (
-            Math.max(
-                this.getText(session, lastLineNumber).length,
-                this.getText(session, config.lastRow + 1).length,
-                2
-            ) * config.characterWidth
-        );
-    }
-
-    update(e, editor) {
-        editor.renderer.$loop.schedule(editor.renderer.CHANGE_GUTTER);
-    }
-
     attach(editor) {
         editor.renderer.$gutterLayer.$renderer = this;
         editor.on("changeSelection", this.update);
@@ -39,46 +21,39 @@ class HexViewNumberRenderer {
     }
 }
 
-export default class HexView extends Component {
-    constructor(props) {
-        super(props);
-        this.numberRenderer = new HexViewNumberRenderer();
-        this.editor = React.createRef();
-        this.originalContent = null;
-        this.hexlifiedContent = null;
-    }
+export default function HexView(props) {
+    const [originalContent, setOriginalContent] = useState(null);
+    const [hexlifiedContent, setHexlifiedContent] = useState(null);
+    const editor = React.createRef();
+    const mounted = useRef(false);
+    let numberRenderer = new HexViewNumberRenderer();
 
-    componentDidUpdate(prevProps) {
-        let editor = this.editor.current.editor;
-        if (this.props.mode !== prevProps.mode) {
-            if (this.props.mode === "raw") this.numberRenderer.detach(editor);
-            else this.numberRenderer.attach(editor);
+    useEffect(() => {
+        let currentEditor = editor.current.editor;
+        if (!mounted.current) {
+            currentEditor.gotoLine(1);
+            if (props.mode === "hex") numberRenderer.attach(editor);
+            mounted.current = true;
+        } else {
+            if (props.mode === "hex") numberRenderer.detach(editor);
+            else numberRenderer.attach(editor);
         }
-    }
+    });
 
-    componentDidMount() {
-        let editor = this.editor.current.editor;
-        editor.gotoLine(1);
-        if (this.props.mode === "hex") this.numberRenderer.attach(editor);
-    }
-
-    get content() {
+    const content = () => {
         let rows = [];
-        if (!this.props.content) return "";
-        if (this.props.mode === "raw") {
-            if (this.props.content instanceof ArrayBuffer)
-                return new TextDecoder().decode(this.props.content);
-            else return this.props.content;
+        if (!props.content) return "";
+        if (props.mode === "raw") {
+            if (props.content instanceof ArrayBuffer)
+                return new TextDecoder().decode(props.content);
+            else return props.content;
         }
-        if (
-            !this.hexlifiedContent ||
-            this.originalContent !== this.props.content
-        ) {
+        if (!hexlifiedContent || originalContent !== props.content) {
             let content;
-            if (this.props.content instanceof ArrayBuffer) {
-                content = new Uint8Array(this.props.content);
+            if (props.content instanceof ArrayBuffer) {
+                content = new Uint8Array(props.content);
             } else {
-                content = new TextEncoder().encode(this.props.content);
+                content = new TextEncoder().encode(props.content);
             }
             let byteRow = [];
             let asciiRow = [];
@@ -101,30 +76,27 @@ export default class HexView extends Component {
                 rows.push(
                     byteRow.join(" ").padEnd(50, " ") + asciiRow.join("")
                 );
-            this.originalContent = this.props.content;
-            this.hexlifiedContent = rows.join("\n");
+            setOriginalContent(props.content);
+            setHexlifiedContent(rows.join("\n"));
         }
-        return this.hexlifiedContent;
-    }
+        return hexlifiedContent;
+    };
 
-    render() {
-        return (
-            <AceEditor
-                ref={this.editor}
-                mode={this.props.json ? "json" : "text"}
-                theme="github"
-                name="blob-content"
-                value={this.content}
-                readOnly
-                wrapEnabled
-                width="100%"
-                fontSize="16px"
-                setOptions={{
-                    showInvisibles:
-                        this.props.showInvisibles && this.props.mode !== "hex",
-                    useWorker: false,
-                }}
-            />
-        );
-    }
+    return (
+        <AceEditor
+            ref={editor}
+            mode={props.json ? "json" : "text"}
+            theme="github"
+            name="blob-content"
+            value={content}
+            readOnly
+            wrapEnabled
+            width="100%"
+            fontSize="16px"
+            setOptions={{
+                showInvisibles: props.showInvisibles && props.mode !== "hex",
+                useWorker: false,
+            }}
+        />
+    );
 }

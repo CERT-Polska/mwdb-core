@@ -1,6 +1,6 @@
 import os
 from enum import Enum
-from typing import List, Optional
+from typing import List
 
 from typedconfig import Config, group_key, key, section
 from typedconfig.source import EnvironmentConfigSource, IniFileConfigSource
@@ -18,7 +18,7 @@ def list_of_str(v: str) -> List[str]:
 
 def path(v: str) -> str:
     if not v:
-        raise ValueError(f"Path can't be empty")
+        raise ValueError("Path can't be empty")
     v = os.path.abspath(v)
     if not os.path.exists(v):
         raise ValueError(f"Path {v} doesn't exist")

@@ -70,7 +70,7 @@ export default function Upload() {
     const [shareWith, setShareWith] = useState("default");
     const [group, setGroup] = useState("");
     const [groups, setGroups] = useState([]);
-    const [parent, setParent] = useState("null");
+    const [parent, setParent] = useState("");
     const [attributes, setAttributes] = useState([]);
     const [attributeModalOpen, setAttributeModalOpen] = useState(false);
 
@@ -97,7 +97,7 @@ export default function Upload() {
         }
     }
 
-    const getGroups = useCallback(updateGroups, [groups]);
+    const getGroups = useCallback(updateGroups, [auth.user.login]);
 
     useEffect(() => {
         getGroups();
@@ -185,7 +185,7 @@ export default function Upload() {
                                     placeholder="(Optional) Type parent identifier..."
                                     value={searchParams.get("parent") || parent}
                                     onChange={handleParentChange}
-                                    disabled={!searchParams.get("parent")}
+                                    disabled={searchParams.get("parent")}
                                 />
                                 <div className="input-group-append">
                                     <input

@@ -167,9 +167,9 @@ export default function UserRegister() {
                         invitation info, blog URL etc.
                     </div>
                 </div>
-                {config["recaptcha_site_key"] ? (
+                {config.config["recaptcha_site_key"] ? (
                     <ReCAPTCHA
-                        sitekey={config["recaptcha_site_key"]}
+                        sitekey={config.config["recaptcha_site_key"]}
                         onChange={(value) => setRecaptcha(value)}
                     />
                 ) : (

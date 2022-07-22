@@ -22,7 +22,7 @@ function ProviderItem(props) {
 export default function OAuthProvider() {
     const viewAlert = useViewAlert();
     const { name } = useParams();
-    const [provider, setProvider] = useState({});
+    const [provider, setProvider] = useState(null);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
@@ -94,7 +94,7 @@ export default function OAuthProvider() {
                         <EditableItem
                             name="client_secret"
                             type="client_secret"
-                            defaultValue={provider.client_secret}
+                            defaultValue={provider.client_secret || ""}
                             onSubmit={handleSubmit}
                             masked
                         />

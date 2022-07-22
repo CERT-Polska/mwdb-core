@@ -5,7 +5,7 @@ import requests
 print("[+] Authenticating")
 
 response = requests.post(
-    "http://127.0.0.1:8080/auth/realms/master/protocol/openid-connect/token",
+    "http://127.0.0.1:8080/realms/master/protocol/openid-connect/token",
     data={
         "client_id": "admin-cli",
         "username": "user",
@@ -25,7 +25,7 @@ print("[+] Registering realm")
 
 realm_path = pathlib.Path(__file__).parent / "realm-export.json"
 realm = realm_path.read_bytes()
-response = session.post("http://127.0.0.1:8080/auth/admin/realms/", data=realm)
+response = session.post("http://127.0.0.1:8080/admin/realms/", data=realm)
 if response.status_code != 409:
     response.raise_for_status()
 
@@ -53,13 +53,13 @@ user = {
     "credentials": [{"type": "password", "temporary": False, "value": "foobar"}],
 }
 response = session.post(
-    "http://127.0.0.1:8080/auth/admin/realms/mwdb-oidc-dev/users", data=json.dumps(user)
+    "http://127.0.0.1:8080/admin/realms/mwdb-oidc-dev/users", data=json.dumps(user)
 )
 if response.status_code != 409:
     response.raise_for_status()
 
 response = session.get(
-    "http://127.0.0.1:8080/auth/admin/realms/mwdb-oidc-dev/users?username=foo"
+    "http://127.0.0.1:8080/admin/realms/mwdb-oidc-dev/users?username=foo"
 )
 user_id = response.json()[0]["id"]
 print(f"'foo' => {user_id}")
@@ -95,10 +95,10 @@ response = mwdb_session.post(
         "name": "keycloak",
         "client_id": "mwdb",
         "client_secret": "",
-        "authorization_endpoint": "http://127.0.0.1:8080/auth/realms/mwdb-oidc-dev/protocol/openid-connect/auth",
-        "userinfo_endpoint": "http://keycloak.:8080/auth/realms/mwdb-oidc-dev/protocol/openid-connect/userinfo",
-        "token_endpoint": "http://keycloak.:8080/auth/realms/mwdb-oidc-dev/protocol/openid-connect/token",
-        "jwks_endpoint": "http://keycloak.:8080/auth/realms/mwdb-oidc-dev/protocol/openid-connect/certs",
+        "authorization_endpoint": "http://127.0.0.1:8080/realms/mwdb-oidc-dev/protocol/openid-connect/auth",
+        "userinfo_endpoint": "http://keycloak.:8080/realms/mwdb-oidc-dev/protocol/openid-connect/userinfo",
+        "token_endpoint": "http://keycloak.:8080/realms/mwdb-oidc-dev/protocol/openid-connect/token",
+        "jwks_endpoint": "http://keycloak.:8080/realms/mwdb-oidc-dev/protocol/openid-connect/certs",
     },
 )
 response.raise_for_status()

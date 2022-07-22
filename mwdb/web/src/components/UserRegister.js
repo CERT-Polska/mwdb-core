@@ -89,7 +89,7 @@ export default function UserRegister() {
                         pattern="[A-Za-z0-9_-]{1,32}"
                         disabled={disable}
                     />
-                    <div class="form-hint">
+                    <div className="form-hint">
                         Login must contain only letters, digits, '_' and '-'
                         characters, max 32 characters allowed.
                     </div>
@@ -118,7 +118,7 @@ export default function UserRegister() {
                         required
                         disabled={disable}
                     />
-                    <div class="form-hint">
+                    <div className="form-hint">
                         Provide name of company or university
                     </div>
                 </div>
@@ -133,7 +133,7 @@ export default function UserRegister() {
                         required
                         disabled={disable}
                     />
-                    <div class="form-hint">Provide your job title</div>
+                    <div className="form-hint">Provide your job title</div>
                 </div>
                 <div className="form-group">
                     <label>Job Responsibilities</label>
@@ -146,7 +146,7 @@ export default function UserRegister() {
                         required
                         disabled={disable}
                     />
-                    <div class="form-hint">
+                    <div className="form-hint">
                         Provide your job responsibilities and experience in the
                         field of malware analysis
                     </div>
@@ -154,7 +154,6 @@ export default function UserRegister() {
                 <div className="form-group">
                     <label>Other information</label>
                     <textarea
-                        type="text"
                         name="other_info"
                         value={state.other_info}
                         onChange={handleInputChange}
@@ -162,7 +161,7 @@ export default function UserRegister() {
                         required
                         disabled={disable}
                     />
-                    <div class="form-hint">
+                    <div className="form-hint">
                         Provide additional information e.g. Twitter handle,
                         invitation info, blog URL etc.
                     </div>

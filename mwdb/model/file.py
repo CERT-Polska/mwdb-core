@@ -19,7 +19,7 @@ from mwdb.core.util import (
     calc_magic,
     calc_ssdeep,
     get_fd_path,
-    get_minio_client,
+    get_s3_client,
 )
 
 from . import db
@@ -131,7 +131,7 @@ class File(Object):
         if is_new:
             file_stream.seek(0, os.SEEK_SET)
             if app_config.mwdb.storage_provider == StorageProviderType.S3:
-                get_minio_client(
+                get_s3_client(
                     app_config.mwdb.s3_storage_endpoint,
                     app_config.mwdb.s3_storage_access_key,
                     app_config.mwdb.s3_storage_secret_key,
@@ -210,7 +210,7 @@ class File(Object):
         """
         if self.upload_stream is not None:
             # If file contents are uploaded in this request,
-            # try to reuse the existing file instead of downloading it from Minio.
+            # try to reuse the existing file instead of downloading it from S3.
             if isinstance(self.upload_stream, io.BytesIO):
                 return io.BytesIO(self.upload_stream.getbuffer())
             else:
@@ -219,7 +219,7 @@ class File(Object):
                 stream.seek(0, os.SEEK_SET)
                 return stream
         if app_config.mwdb.storage_provider == StorageProviderType.S3:
-            return get_minio_client(
+            return get_s3_client(
                 app_config.mwdb.s3_storage_endpoint,
                 app_config.mwdb.s3_storage_access_key,
                 app_config.mwdb.s3_storage_secret_key,
@@ -268,8 +268,6 @@ class File(Object):
         Closes file stream opened by File.open
         """
         fh.close()
-        if hasattr(fh, "release_conn"):
-            fh.release_conn()
 
     def zip_file(self):
         secret_password = b"infected"

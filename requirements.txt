@@ -19,9 +19,9 @@ click==7.1.2
 click-default-group==1.2.2
 PyYAML==5.4
 redis==3.2.1
-minio==7.1.0
+boto3==1.24.38
 typed-config==1.1.0
-karton-core==4.4.1
+karton-core==5.0.0
 Authlib==0.15.4
 prance==0.21.8.0  # apispec unpinned dependency
 regex==2021.7.6

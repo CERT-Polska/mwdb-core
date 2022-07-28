@@ -10,8 +10,8 @@ services:
     ports:
       - "127.0.0.1:9000:9000"
     environment:
-      - MINIO_ACCESS_KEY=mwdb-test-access
-      - MINIO_SECRET_KEY=mwdb-test-key
+      - MINIO_ROOT_USER=mwdb-test-access
+      - MINIO_ROOT_PASSWORD=mwdb-test-key
   mwdb:
     build:
       context: .

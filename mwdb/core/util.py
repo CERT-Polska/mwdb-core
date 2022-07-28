@@ -13,12 +13,12 @@ except ImportError:
 import hashlib
 from zlib import crc32
 
+import boto3
+import botocore.client
 import magic
 import ssdeep
 from flask_restful import abort
 from flask_sqlalchemy import Pagination
-from minio import Minio
-from minio.credentials import IamAwsProvider
 
 
 def config_dhash(obj):
@@ -156,26 +156,38 @@ def is_subdir(parent, child):
     )
 
 
-def get_minio_client(
+def get_s3_client(
     endpoint: str,
     access_key: str,
     secret_key: str,
     region: str,
     secure: bool,
     iam_auth: bool,
-) -> Minio:
+) -> botocore.client.BaseClient:
     if endpoint is None:
-        raise RuntimeError("Attempting to get Minio client without an endpoint set")
+        raise RuntimeError("Attempting to get S3 client without an endpoint set")
+
+    if endpoint.startswith("http://") or endpoint.startswith("https://"):
+        endpoint_url = endpoint
+    else:
+        # TODO: Remove secure flag and use explicit scheme only
+        if secure is True:
+            endpoint_url = "https://" + endpoint
+        else:
+            endpoint_url = "http://" + endpoint
+
     if iam_auth:
-        return Minio(endpoint=endpoint, region=region, credentials=IamAwsProvider())
+        return boto3.client("iam", endpoint_url=endpoint_url, region_name=region)
+
     if access_key is None or secret_key is None:
         raise RuntimeError(
-            "Attempting to get Minio client without an access_key/secret_key set"
+            "Attempting to get S3 client without an access_key/secret_key set"
         )
-    return Minio(
-        endpoint=endpoint,
-        access_key=access_key,
-        secret_key=secret_key,
-        secure=secure,
-        region=region,
+
+    return boto3.client(
+        "s3",
+        endpoint_url=endpoint_url,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name=region,
     )

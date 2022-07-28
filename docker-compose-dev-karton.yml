@@ -10,8 +10,8 @@ services:
     ports:
       - "127.0.0.1:9000:9000"
     environment:
-      - MINIO_ACCESS_KEY=mwdb-test-access
-      - MINIO_SECRET_KEY=mwdb-test-key
+      - MINIO_ROOT_USER=mwdb-test-access
+      - MINIO_ROOT_PASSWORD=mwdb-test-key
   mwdb:
     build:
       context: .
@@ -72,7 +72,7 @@ services:
     ports:
       - "127.0.0.1:8025:8025"
   karton-system:
-    image: certpl/karton-system:158d07960d8cd39dee8771af719f560df93b3212
+    image: certpl/karton-system:v5.0.0
     depends_on:
       - redis
       - minio
@@ -81,14 +81,14 @@ services:
     entrypoint: karton-system
     command: --setup-bucket
   karton-classifier:
-    image: certpl/karton-classifier:320c99de8e05ff3d029609e73ac31bcf2d0ba56c
+    image: certpl/karton-classifier:v1.4.0
     depends_on:
       - redis
       - minio
     volumes:
       - "./dev/karton.ini:/etc/karton/karton.ini"
   karton-dashboard:
-    image: certpl/karton-dashboard:2c35fb3cae399dba8913f8ad1be9dd6b820b1fd6
+    image: certpl/karton-dashboard:v1.4.0
     depends_on:
       - redis
       - minio
@@ -97,7 +97,7 @@ services:
     ports:
       - "127.0.0.1:8030:5000"
   karton-mwdb-reporter:
-    image: certpl/karton-mwdb-reporter:a4a5a2ece14073e3a25a38bd5f1b0fa14ba725d3
+    image: certpl/karton-mwdb-reporter:v1.2.0
     depends_on:
       - redis
       - minio

@@ -17,7 +17,7 @@ export default function UserSetPassword() {
             .required("Password is required")
             .min(8, "Password must be at least 8 characters"),
         confirmPassword: Yup.string()
-            .required("Confirm Password is required")
+            .required("Password confirmation is required")
             .oneOf(
                 [Yup.ref("password")],
                 "Password and confirm password does not match"
@@ -62,7 +62,7 @@ export default function UserSetPassword() {
                     {errors.password && <p>{errors.password.message}</p>}
                 </div>
                 <div className="form-group">
-                    <label>New password</label>
+                    <label>Confirm password</label>
                     <input
                         type="password"
                         name="confirmPassword"

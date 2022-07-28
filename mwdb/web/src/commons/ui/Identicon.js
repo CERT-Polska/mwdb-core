@@ -3,25 +3,24 @@ import React from "react";
 
 import sha1 from "sha1";
 
-export default function Identicon(props) {
-    if (typeof props.data === "undefined" && typeof props.hash === "undefined")
-        return;
-    let data = props.hash || sha1(props.data);
-    let options = {
-        margin: parseInt(props.margin, 10) || 0.08,
-        size: parseInt(props.size, 10),
+export default function Identicon({ data, hash, margin, size, style }) {
+    if (typeof data === "undefined" && typeof hash === "undefined") return;
+    const identiconData = hash || sha1(data);
+    const options = {
+        margin: parseInt(margin, 10) || 0.08,
+        size: parseInt(size, 10),
         format: "svg",
     };
-    let ident = new identicon(data, options).toString();
+    const ident = new identicon(identiconData, options).toString();
 
-    const identiconState = "data:image/svg+xml;base64," + ident;
+    const identiconSrc = "data:image/svg+xml;base64," + ident;
 
     return (
         <img
             className="identicon"
-            src={identiconState}
+            src={identiconSrc}
             alt="identicon"
-            style={props.style}
+            style={style}
         />
     );
 }

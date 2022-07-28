@@ -139,14 +139,18 @@ class File(Object):
                     app_config.mwdb.s3_storage_secure,
                     app_config.mwdb.s3_storage_iam_auth,
                 ).put_object(
-                    app_config.mwdb.s3_storage_bucket_name,
-                    file_obj._calculate_path(),
-                    file_stream,
-                    file_size,
+                    Bucket=app_config.mwdb.s3_storage_bucket_name,
+                    Key=file_obj._calculate_path(),
+                    Body=file_stream,
                 )
-            else:
+            elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
                 with open(file_obj._calculate_path(), "wb") as f:
                     shutil.copyfileobj(file_stream, f)
+            else:
+                raise RuntimeError(
+                    f"StorageProvider {app_config.mwdb.storage_provider} "
+                    f"is not supported"
+                )
 
         file_obj.upload_stream = file_stream
         return file_obj, is_new
@@ -154,8 +158,12 @@ class File(Object):
     def _calculate_path(self):
         if app_config.mwdb.storage_provider == StorageProviderType.DISK:
             upload_path = app_config.mwdb.uploads_folder
-        else:
+        elif app_config.mwdb.storage_provider == StorageProviderType.S3:
             upload_path = ""
+        else:
+            raise RuntimeError(
+                f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
+            )
 
         sample_sha256 = self.sha256.lower()
 
@@ -226,7 +234,12 @@ class File(Object):
                 app_config.mwdb.s3_storage_region_name,
                 app_config.mwdb.s3_storage_secure,
                 app_config.mwdb.s3_storage_iam_auth,
-            ).get_object(app_config.mwdb.s3_storage_bucket_name, self._calculate_path())
+            ).get_object(
+                Bucket=app_config.mwdb.s3_storage_bucket_name,
+                Key=self._calculate_path(),
+            )[
+                "Body"
+            ]
         elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
             return open(self._calculate_path(), "rb")
         else:

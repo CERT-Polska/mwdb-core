@@ -1,14 +1,14 @@
-import React, { useState, useContext } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
+import React, { useState, useContext } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 
-import api from '@mwdb-web/commons/api';
-import { ConfigContext } from '@mwdb-web/commons/config';
-import { View } from '@mwdb-web/commons/ui';
+import api from "@mwdb-web/commons/api";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { View } from "@mwdb-web/commons/ui";
 
 export default function UserPasswordRecover() {
     const initialState = {
-        login: '',
-        email: ''
+        login: "",
+        email: "",
     };
 
     const config = useContext(ConfigContext);
@@ -23,13 +23,17 @@ export default function UserPasswordRecover() {
 
         setFieldState({
             ...fieldState,
-            [name]: value
+            [name]: value,
         });
     };
 
     async function recoverPassword() {
         try {
-            await api.authRecoverPassword(fieldState.login, fieldState.email, recaptcha);
+            await api.authRecoverPassword(
+                fieldState.login,
+                fieldState.email,
+                recaptcha
+            );
             setSuccess(true);
         } catch (error) {
             setError(error);
@@ -46,7 +50,9 @@ export default function UserPasswordRecover() {
         recoverPassword();
     };
 
-    let successMessage = success && <div>Password reset link has been sent to the e-mail address</div>;
+    let successMessage = success && (
+        <div>Password reset link has been sent to the e-mail address</div>
+    );
 
     return (
         <View success={successMessage} error={success ? null : error}>
@@ -77,14 +83,25 @@ export default function UserPasswordRecover() {
                     />
                 </div>
                 <div>
-                    <label>Please enter the information above to recover your password.</label>
+                    <label>
+                        Please enter the information above to recover your
+                        password.
+                    </label>
                 </div>
-                {config.config['recaptcha_site_key'] ? (
-                    <ReCAPTCHA sitekey={config.config['recaptcha_site_key']} onChange={onCaptchaChange} />
+                {config.config["recaptcha_site_key"] ? (
+                    <ReCAPTCHA
+                        sitekey={config.config["recaptcha_site_key"]}
+                        onChange={onCaptchaChange}
+                    />
                 ) : (
                     []
                 )}
-                <input type="submit" value="Submit" className="btn btn-primary" disabled={success} />
+                <input
+                    type="submit"
+                    value="Submit"
+                    className="btn btn-primary"
+                    disabled={success}
+                />
             </form>
         </View>
     );

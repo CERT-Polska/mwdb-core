@@ -9,22 +9,21 @@ export default function UserPasswordRecover() {
     const initialState = {
         login: "",
         email: "",
-        success: false,
-        error: null,
-        recaptcha: null,
     };
 
     const config = useContext(ConfigContext);
-    const [state, setState] = useState(initialState);
+    const [fieldState, setFieldState] = useState(initialState);
+    const [success, setSuccess] = useState(false)
+    const [error, setError] = useState(null)
+    const [recaptcha, setRecaptcha] = useState(null)
+
 
     const handleInputChange = (event) => {
-        const target = event.target;
-        const value =
-            target.type === "checkbox" ? target.checked : target.value;
-        const name = target.name;
+        const value = event.target.value;
+        const name = event.target.name;
 
-        setState({
-            ...state,
+        setFieldState({
+            ...fieldState,
             [name]: value,
         });
     };
@@ -32,20 +31,19 @@ export default function UserPasswordRecover() {
     async function recoverPassword() {
         try {
             await api.authRecoverPassword(
-                state.login,
-                state.email,
-                state.recaptcha
+                fieldState.login,
+                fieldState.email,
+                recaptcha
             );
-            setState({
-                success: true,
-            });
+            setSuccess(true)
         } catch (error) {
-            setState({ ...initialState, error });
+            setError(error)
+            setFieldState(initialState)
         }
     }
 
     const onCaptchaChange = (value) => {
-        setState({ ...state, recaptcha: value });
+        setRecaptcha(value)
     };
 
     const handleSubmit = (event) => {
@@ -53,12 +51,12 @@ export default function UserPasswordRecover() {
         recoverPassword();
     };
 
-    let success = state.success && (
+    let successMessage = success && (
         <div>Password reset link has been sent to the e-mail address</div>
     );
 
     return (
-        <View success={success} error={success ? null : state.error}>
+        <View success={successMessage} error={success ? null : error}>
             <h2>Recover password</h2>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
@@ -66,10 +64,10 @@ export default function UserPasswordRecover() {
                     <input
                         type="text"
                         name="login"
-                        value={state.login}
+                        value={fieldState.login}
                         onChange={handleInputChange}
                         className="form-control"
-                        disabled={state.success}
+                        disabled={success}
                         required
                     />
                 </div>
@@ -78,10 +76,10 @@ export default function UserPasswordRecover() {
                     <input
                         type="email"
                         name="email"
-                        value={state.email}
+                        value={fieldState.email}
                         onChange={handleInputChange}
                         className="form-control"
-                        disabled={state.success}
+                        disabled={success}
                         required
                     />
                 </div>
@@ -103,7 +101,7 @@ export default function UserPasswordRecover() {
                     type="submit"
                     value="Submit"
                     className="btn btn-primary"
-                    disabled={state.success}
+                    disabled={success}
                 />
             </form>
         </View>

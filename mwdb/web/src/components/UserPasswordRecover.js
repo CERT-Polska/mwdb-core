@@ -21,10 +21,10 @@ export default function UserPasswordRecover() {
         const value = event.target.value;
         const name = event.target.name;
 
-        setFieldState({
+        setFieldState((fieldState) => ({
             ...fieldState,
             [name]: value,
-        });
+        }));
     };
 
     async function recoverPassword() {

@@ -1,132 +1,89 @@
-import React, { Component } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
 import { View } from "@mwdb-web/commons/ui";
 
-import $ from "jquery";
 import api from "@mwdb-web/commons/api";
 
-class UserSetPassword extends Component {
-    constructor(props) {
-        super(props);
-        this.state = this.initialState;
-    }
+export default function UserSetPassword() {
+    const params = useParams();
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState(false);
 
-    get initialState() {
-        return {
-            password: "",
-            repeatPassword: "",
-            success: false,
-            dirty: false,
-            error: null,
-        };
-    }
+    const validationSchema = Yup.object().shape({
+        password: Yup.string()
+            .required("Password is required")
+            .min(8, "Password must be at least 8 characters"),
+        confirmPassword: Yup.string()
+            .required("Password confirmation is required")
+            .oneOf(
+                [Yup.ref("password")],
+                "Password and confirm password does not match"
+            ),
+    });
+    const formOptions = { resolver: yupResolver(validationSchema) };
 
-    componentDidMount() {
-        if (this.dirty) this.setState(this.initialState);
-    }
+    const { register, handleSubmit, formState } = useForm(formOptions);
+    const { errors } = formState;
 
-    handleInputChange = (event) => {
-        const target = event.target;
-        const value =
-            target.type === "checkbox" ? target.checked : target.value;
-        const name = target.name;
-
-        this.setState(
-            {
-                [name]: value,
-                dirty: true,
-            },
-            () => {
-                const encoder = new TextEncoder();
-                let repeatPasswordElement = $("#repeatPassword")[0];
-                if (this.state.password !== this.state.repeatPassword) {
-                    repeatPasswordElement.setCustomValidity(
-                        "Passwords doesn't match"
-                    );
-                } else if (
-                    encoder.encode(this.state.repeatPassword).length > 72
-                ) {
-                    repeatPasswordElement.setCustomValidity(
-                        "The password should contain no more than 72 bytes of UTF-8 characters, your password is too long."
-                    );
-                } else {
-                    repeatPasswordElement.setCustomValidity("");
-                }
-            }
-        );
-    };
-
-    handleSubmit = async (event) => {
-        event.preventDefault();
+    async function onSubmit(form) {
         try {
             let response = await api.authSetPassword(
-                this.props.params.token,
-                this.state.password
+                params.token,
+                form.password
             );
-            this.setState({ success: response.data.login, error: null });
+            setSuccess(
+                `Password successfully changed for ${response.data.login}`
+            );
+            setError(false);
         } catch (error) {
-            this.setState({ ...this.initialState, error });
+            setError(error);
         }
-    };
-
-    isConfirmedPassword = (value) => {
-        return value === this.state.password;
-    };
-
-    render() {
-        let success = this.state.success && (
-            <div>
-                Password for {this.state.success} set successfully.{" "}
-                <Link to="/login">Log in.</Link>
-            </div>
-        );
-        return (
-            <View
-                ident="userSetPassword"
-                error={this.state.error}
-                success={success}
-            >
-                <h2>Set password</h2>
-                <form onSubmit={this.handleSubmit}>
-                    <div className="form-group">
-                        <label>New password</label>
-                        <input
-                            type="password"
-                            minLength="8"
-                            name="password"
-                            value={this.state.password}
-                            onChange={this.handleInputChange}
-                            className="form-control"
-                            required
-                            disabled={this.state.success}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Repeat new password</label>
-                        <input
-                            type="password"
-                            minLength="8"
-                            name="repeatPassword"
-                            value={this.state.repeatPassword}
-                            id="repeatPassword"
-                            onChange={this.handleInputChange}
-                            className="form-control"
-                            required
-                            disabled={this.state.success}
-                        />
-                    </div>
-                    <input
-                        type="submit"
-                        value="Submit"
-                        className="btn btn-primary"
-                    />
-                </form>
-            </View>
-        );
     }
-}
 
-export default function ConnectedUserSetPassword(props) {
-    const params = useParams();
-    return <UserSetPassword params={params} {...props} />;
+    return (
+        <View ident="userSetPassword" success={success} error={error}>
+            <form onSubmit={(e) => e.preventDefault()}>
+                <h2>Set password</h2>
+                <div className="form-group">
+                    <label>New password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        className={`form-control ${
+                            errors.password ? "is-invalid" : ""
+                        }`}
+                        required
+                        {...register("password")}
+                        disabled={success}
+                    />
+                    {errors.password && <p>{errors.password.message}</p>}
+                </div>
+                <div className="form-group">
+                    <label>Confirm password</label>
+                    <input
+                        type="password"
+                        name="confirmPassword"
+                        className={`form-control ${
+                            errors.confirmPassword ? "is-invalid" : ""
+                        }`}
+                        required
+                        {...register("confirmPassword")}
+                        disabled={success}
+                    />
+                    {errors.confirmPassword && (
+                        <p>{errors.confirmPassword.message}</p>
+                    )}
+                </div>
+                <input
+                    type="submit"
+                    value="Submit"
+                    onClick={handleSubmit(onSubmit)}
+                    className="btn btn-primary"
+                />
+            </form>
+        </View>
+    );
 }

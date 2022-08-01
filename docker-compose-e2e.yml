@@ -84,14 +84,14 @@ services:
     ports:
       - "127.0.0.1:9000:9000"
     environment:
-      - MINIO_ACCESS_KEY=mwdb-test-access
-      - MINIO_SECRET_KEY=mwdb-test-key
+      - MINIO_ROOT_USER=mwdb-test-access
+      - MINIO_ROOT_PASSWORD=mwdb-test-key
   mailhog:
     image: mailhog/mailhog:latest
     ports:
       - "127.0.0.1:8025:8025"
   karton-system:
-    image: certpl/karton-system:79ffabd3607406f1cc494b024b44f4dd1a753095
+    image: certpl/karton-system:v5.0.0
     depends_on:
       - redis
       - minio
@@ -99,23 +99,15 @@ services:
       - "./dev/karton.ini:/etc/karton/karton.ini"
     entrypoint: karton-system
     command: --setup-bucket
-    environment:
-      KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
-      KARTON_MWDB_USERNAME: admin
-      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password
   karton-classifier:
-    image: certpl/karton-classifier:8f02c6e5188414f28d37515d903ce2b6955bc768
+    image: certpl/karton-classifier:v1.4.0
     depends_on:
       - redis
       - minio
     volumes:
       - "./dev/karton.ini:/etc/karton/karton.ini"
-    environment:
-      KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
-      KARTON_MWDB_USERNAME: admin
-      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password
   karton-dashboard:
-    image: certpl/karton-dashboard:7b8ec871c4902cc7236eaa4782d9f7acdbc8809c
+    image: certpl/karton-dashboard:v1.4.0
     depends_on:
       - redis
       - minio
@@ -123,12 +115,8 @@ services:
       - "./dev/karton.ini:/etc/karton/karton.ini"
     ports:
       - "127.0.0.1:8030:5000"
-    environment:
-      KARTON_MWDB_API_URL: http://mwdb-web.:80/api/
-      KARTON_MWDB_USERNAME: admin
-      KARTON_MWDB_PASSWORD: e2e-mwdb-admin-password
   karton-mwdb-reporter:
-    image: certpl/karton-mwdb-reporter:6f935f6dfbf459e278a496586b581b4ba0d4cbad
+    image: certpl/karton-mwdb-reporter:v1.2.0
     depends_on:
       - redis
       - minio

@@ -19,7 +19,7 @@ from mwdb.core.util import (
     calc_magic,
     calc_ssdeep,
     get_fd_path,
-    get_minio_client,
+    get_s3_client,
 )
 
 from . import db
@@ -131,7 +131,7 @@ class File(Object):
         if is_new:
             file_stream.seek(0, os.SEEK_SET)
             if app_config.mwdb.storage_provider == StorageProviderType.S3:
-                get_minio_client(
+                get_s3_client(
                     app_config.mwdb.s3_storage_endpoint,
                     app_config.mwdb.s3_storage_access_key,
                     app_config.mwdb.s3_storage_secret_key,
@@ -139,14 +139,18 @@ class File(Object):
                     app_config.mwdb.s3_storage_secure,
                     app_config.mwdb.s3_storage_iam_auth,
                 ).put_object(
-                    app_config.mwdb.s3_storage_bucket_name,
-                    file_obj._calculate_path(),
-                    file_stream,
-                    file_size,
+                    Bucket=app_config.mwdb.s3_storage_bucket_name,
+                    Key=file_obj._calculate_path(),
+                    Body=file_stream,
                 )
-            else:
+            elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
                 with open(file_obj._calculate_path(), "wb") as f:
                     shutil.copyfileobj(file_stream, f)
+            else:
+                raise RuntimeError(
+                    f"StorageProvider {app_config.mwdb.storage_provider} "
+                    f"is not supported"
+                )
 
         file_obj.upload_stream = file_stream
         return file_obj, is_new
@@ -154,8 +158,12 @@ class File(Object):
     def _calculate_path(self):
         if app_config.mwdb.storage_provider == StorageProviderType.DISK:
             upload_path = app_config.mwdb.uploads_folder
-        else:
+        elif app_config.mwdb.storage_provider == StorageProviderType.S3:
             upload_path = ""
+        else:
+            raise RuntimeError(
+                f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
+            )
 
         sample_sha256 = self.sha256.lower()
 
@@ -210,7 +218,7 @@ class File(Object):
         """
         if self.upload_stream is not None:
             # If file contents are uploaded in this request,
-            # try to reuse the existing file instead of downloading it from Minio.
+            # try to reuse the existing file instead of downloading it from S3.
             if isinstance(self.upload_stream, io.BytesIO):
                 return io.BytesIO(self.upload_stream.getbuffer())
             else:
@@ -219,14 +227,19 @@ class File(Object):
                 stream.seek(0, os.SEEK_SET)
                 return stream
         if app_config.mwdb.storage_provider == StorageProviderType.S3:
-            return get_minio_client(
+            return get_s3_client(
                 app_config.mwdb.s3_storage_endpoint,
                 app_config.mwdb.s3_storage_access_key,
                 app_config.mwdb.s3_storage_secret_key,
                 app_config.mwdb.s3_storage_region_name,
                 app_config.mwdb.s3_storage_secure,
                 app_config.mwdb.s3_storage_iam_auth,
-            ).get_object(app_config.mwdb.s3_storage_bucket_name, self._calculate_path())
+            ).get_object(
+                Bucket=app_config.mwdb.s3_storage_bucket_name,
+                Key=self._calculate_path(),
+            )[
+                "Body"
+            ]
         elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
             return open(self._calculate_path(), "rb")
         else:
@@ -268,8 +281,6 @@ class File(Object):
         Closes file stream opened by File.open
         """
         fh.close()
-        if hasattr(fh, "release_conn"):
-            fh.release_conn()
 
     def zip_file(self):
         secret_password = b"infected"

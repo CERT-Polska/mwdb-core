@@ -1,53 +1,26 @@
 import identicon from "identicon.js";
-import React, { Component } from "react";
+import React from "react";
 
 import sha1 from "sha1";
 
-class Identicon extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            identicon: "",
-        };
-    }
-
-    updateState = () => {
-        if (
-            typeof this.props.data === "undefined" &&
-            typeof this.props.hash === "undefined"
-        )
-            return;
-        let data = this.props.hash || sha1(this.props.data);
-        let options = {
-            margin: parseInt(this.props.margin, 10) || 0.08,
-            size: parseInt(this.props.size, 10),
-            format: "svg",
-        };
-        let ident = new identicon(data, options).toString();
-
-        this.setState({
-            identicon: "data:image/svg+xml;base64," + ident,
-        });
+export default function Identicon({ data, hash, margin, size, style }) {
+    if (typeof data === "undefined" && typeof hash === "undefined") return;
+    const identiconData = hash || sha1(data);
+    const options = {
+        margin: parseInt(margin, 10) || 0.08,
+        size: parseInt(size, 10),
+        format: "svg",
     };
+    const ident = new identicon(identiconData, options).toString();
 
-    componentDidUpdate = (prevProps, prevState) => {
-        if (this.props !== prevProps) this.updateState();
-    };
+    const identiconSrc = "data:image/svg+xml;base64," + ident;
 
-    componentDidMount = () => {
-        this.updateState();
-    };
-
-    render() {
-        return (
-            <img
-                className="identicon"
-                src={this.state.identicon}
-                alt="identicon"
-                style={this.props.style}
-            />
-        );
-    }
+    return (
+        <img
+            className="identicon"
+            src={identiconSrc}
+            alt="identicon"
+            style={style}
+        />
+    );
 }
-
-export default Identicon;

@@ -1,6 +1,6 @@
 import os
 from enum import Enum
-from typing import List, Optional
+from typing import List
 
 from typedconfig import Config, group_key, key, section
 from typedconfig.source import EnvironmentConfigSource, IniFileConfigSource
@@ -8,17 +8,17 @@ from typedconfig.source import EnvironmentConfigSource, IniFileConfigSource
 from mwdb.paths import mail_templates_dir
 
 
-def intbool(v) -> bool:
+def intbool(v: str) -> bool:
     return bool(int(v))
 
 
-def list_of_str(v) -> List[str]:
+def list_of_str(v: str) -> List[str]:
     return [el.strip() for el in v.split(",") if el.strip()]
 
 
-def path(v) -> Optional[str]:
+def path(v: str) -> str:
     if not v:
-        return None
+        raise ValueError("Path can't be empty")
     v = os.path.abspath(v)
     if not os.path.exists(v):
         raise ValueError(f"Path {v} doesn't exist")
@@ -30,9 +30,9 @@ class StorageProviderType(Enum):
     S3 = "S3"
 
 
-def storage_provider_from_str(v: str) -> Optional[StorageProviderType]:
+def storage_provider_from_str(v: str) -> StorageProviderType:
     if not v:
-        return None
+        return StorageProviderType.DISK
 
     v = v.upper()
     try:
@@ -66,7 +66,7 @@ class MWDBConfig(Config):
     request_timeout = key(cast=int, required=False, default=20000)
     # Which storage provider to use (options: disk or s3)
     storage_provider = key(
-        cast=storage_provider_from_str, required=False, default="disk"
+        cast=storage_provider_from_str, required=False, default=StorageProviderType.DISK
     )
     # File upload timeout
     file_upload_timeout = key(cast=int, required=False, default=60000)
@@ -97,21 +97,20 @@ class MWDBConfig(Config):
 
     enable_plugins = key(cast=intbool, required=False, default=True)
     # List of plugin names to be loaded, separated by commas
-    plugins = key(cast=list_of_str, required=False, default="")
+    plugins = key(cast=list_of_str, required=False, default=[])
     # Directory that will be added to sys.path for plugin imports
     # Allows to load local plugins without installing them in site-packages
     local_plugins_folder = key(cast=path, required=False, default=None)
     # Auto-discover plugins contained in local_plugins_folder
     local_plugins_autodiscover = key(cast=intbool, required=False, default=False)
 
-    remotes = key(cast=list_of_str, required=False, default="")
+    remotes = key(cast=list_of_str, required=False, default=[])
 
     enable_rate_limit = key(cast=intbool, required=False, default=False)
     enable_registration = key(cast=intbool, required=False, default=False)
     enable_maintenance = key(cast=intbool, required=False, default=False)
     enable_hooks = key(cast=intbool, required=False, default=True)
     enable_karton = key(cast=intbool, required=False, default=False)
-    # Feature flag: OIDC is under development
     enable_oidc = key(cast=intbool, required=False, default=False)
 
     mail_smtp = key(cast=str, required=False)

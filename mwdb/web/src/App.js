@@ -17,7 +17,7 @@ import ShowSample from "./components/ShowSample";
 import ShowConfig from "./components/ShowConfig";
 import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
-import UploadWithTimeout from "./components/Upload";
+import Upload from "./components/Upload";
 import UserLogin from "./components/UserLogin";
 import UserRegister from "./components/UserRegister";
 import UserSetPassword from "./components/UserSetPassword";
@@ -124,7 +124,7 @@ function AppRoutes() {
                     path="upload"
                     element={
                         <RequiresCapability capability={Capability.addingFiles}>
-                            <UploadWithTimeout />
+                            <Upload />
                         </RequiresCapability>
                     }
                 />

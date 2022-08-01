@@ -1,4 +1,4 @@
-import React, { Component, useCallback, useContext } from "react";
+import React, { useCallback, useContext, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
 
@@ -55,317 +55,263 @@ function UploadDropzone(props) {
     );
 }
 
-class Upload extends Component {
-    state = {
-        files: null,
-        error: null,
-        success: null,
-        shareWith: "default",
-        group: "",
-        groups: null,
-        parent: "",
-        attributes: [],
-        isAttributeModalOpen: false,
-    };
+export default function Upload() {
+    const auth = useContext(AuthContext);
+    const config = useContext(ConfigContext);
+    const fileUploadTimeout = config.config["file_upload_timeout"];
+    const navigate = useNavigate();
+    const searchParams = useSearchParams()[0];
 
-    static contextType = AuthContext;
+    const [file, setFile] = useState(null);
+    const [error, setError] = useState(null);
+    const [shareWith, setShareWith] = useState("default");
+    const [group, setGroup] = useState("");
+    const [groups, setGroups] = useState([]);
+    const [parent, setParent] = useState("");
+    const [attributes, setAttributes] = useState([]);
+    const [attributeModalOpen, setAttributeModalOpen] = useState(false);
 
-    get parentFromQuery() {
-        return this.props.searchParams.get("parent");
-    }
-
-    handleParentChange = (ev) => {
-        let value = ev.target.value;
+    const handleParentChange = (ev) => {
         ev.preventDefault();
-        this.setState({ parent: value });
+        setParent(ev.target.value);
     };
 
-    handleParentClear = () => {
-        if (this.parentFromQuery) this.props.navigate("/upload");
-        this.setState({ parent: "" });
+    const handleParentClear = () => {
+        if (searchParams.get("parent")) navigate("/upload");
+        setParent("");
     };
 
-    async updateGroups() {
+    async function updateGroups() {
         try {
             let response = await api.getShareInfo();
             let groups = response.data.groups;
             groups.splice(groups.indexOf("public"), 1);
-            groups.splice(groups.indexOf(this.context.user.login), 1);
-            this.setState({
-                groups: groups,
-                shareWith: groups.length > 0 ? "default" : "private",
-            });
+            groups.splice(groups.indexOf(auth.user.login), 1);
+            setGroups(groups);
+            setShareWith(groups.length > 0 ? "default" : "private");
         } catch (error) {
-            this.setState({ error });
+            setError(error);
         }
     }
 
-    componentDidMount() {
-        this.updateGroups();
-    }
+    const getGroups = useCallback(updateGroups, [auth.user.login]);
 
-    updateSharingMode = (event) => {
-        this.setState({ shareWith: event.target.value, group: "" });
+    useEffect(() => {
+        getGroups();
+    }, [getGroups]);
+
+    const updateSharingMode = (ev) => {
+        setShareWith(ev.target.value);
+        setGroup("");
     };
 
-    sharingModeToUploadParam = () => {
-        if (this.state.shareWith === "default") return "*";
-        if (this.state.shareWith === "public") return "public";
-        if (this.state.shareWith === "private") return "private";
-        if (this.state.shareWith === "single") return this.state.group;
+    const sharingModeToUploadParam = () => {
+        if (shareWith === "default") return "*";
+        else if (shareWith === "public") return "public";
+        else if (shareWith === "private") return "private";
+        else if (shareWith === "single") return group;
     };
 
-    getSharingModeHint = () => {
-        if (this.state.shareWith === "default")
+    const getSharingModeHint = () => {
+        if (shareWith === "default")
             return `The sample and all related artifacts will be shared with all your workgroups`;
-        if (this.state.shareWith === "public")
+        else if (shareWith === "public")
             return `The sample will be added to the public feed, so everyone will see it.`;
-        else if (this.state.shareWith === "private")
+        else if (shareWith === "private")
             return `The sample will be accessible only from your account.`;
-        else if (this.state.shareWith === "single")
+        else if (shareWith === "single")
             return `The sample will be accessible only for you and chosen group.`;
     };
 
-    handleSubmit = async () => {
+    const handleSubmit = async () => {
         try {
             let response = await api.uploadFile(
-                this.state.file,
-                this.parentFromQuery || this.state.parent,
-                this.sharingModeToUploadParam(),
-                this.state.attributes,
-                this.props.fileUploadTimeout
+                file,
+                searchParams.get("parent") || parent,
+                sharingModeToUploadParam(),
+                attributes,
+                fileUploadTimeout
             );
-            this.sha256 = response.data.sha256;
-            this.props.navigate("/file/" + this.sha256, {
+            navigate("/file/" + response.data.sha256, {
                 state: { success: "File uploaded successfully." },
                 replace: true,
             });
         } catch (error) {
-            this.setState({ error });
+            setError(error);
         }
     };
 
-    handleAttributeModalOpen = () => {
-        this.setState({ isAttributeModalOpen: true });
-    };
-
-    onRequestAttributeModalClose = () => {
-        this.setState({ isAttributeModalOpen: false });
-    };
-
-    onAttributeAdd = (key, value) => {
+    const onAttributeAdd = (key, value) => {
         for (let attr of this.state.attributes)
             if (attr.key === key && attr.value === value) {
                 // that key, value was added yet
-                this.onRequestAttributeModalClose();
+                setAttributeModalOpen(false);
                 return;
             }
-        this.setState({
-            attributes: [...this.state.attributes, { key, value }],
-        });
-        this.onRequestAttributeModalClose();
+        setAttributes([...attributes, { key: value }]);
+        setAttributeModalOpen(false);
     };
 
-    onAttributeRemove = (idx) => {
-        this.setState({
-            attributes: [
-                ...this.state.attributes.slice(0, idx),
-                ...this.state.attributes.slice(idx + 1),
-            ],
-        });
+    const onAttributeRemove = (idx) => {
+        setAttributes([
+            ...attributes.slice(0, idx),
+            ...attributes.slice(idx + 1),
+        ]);
     };
 
-    render() {
-        return (
-            <View
-                ident="upload"
-                error={this.state.error}
-                success={this.state.success}
-                showIf={this.state.groups !== null}
-            >
-                <Extendable ident="uploadForm">
-                    <form>
-                        <UploadDropzone
-                            file={this.state.file}
-                            onDrop={(file) => this.setState({ file })}
-                        />
-                        <div className="form-group">
-                            {this.context.hasCapability(
-                                Capability.addingParents
-                            ) ? (
-                                <div className="input-group mb-3">
-                                    <div className="input-group-prepend">
-                                        <label className="input-group-text">
-                                            Parent
-                                        </label>
-                                    </div>
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        style={{ fontSize: "medium" }}
-                                        placeholder="(Optional) Type parent identifier..."
-                                        value={
-                                            this.parentFromQuery ||
-                                            this.state.parent
-                                        }
-                                        onChange={this.handleParentChange}
-                                        disabled={!!this.parentFromQuery}
-                                    />
-                                    <div className="input-group-append">
-                                        <input
-                                            className="btn btn-outline-danger"
-                                            type="button"
-                                            value="Clear"
-                                            onClick={this.handleParentClear}
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                []
-                            )}
+    return (
+        <View ident="upload" error={error} showIf={groups !== null}>
+            <Extendable ident="uploadForm">
+                <form>
+                    <UploadDropzone
+                        file={file}
+                        onDrop={(data) => setFile(data)}
+                    />
+                    <div className="form-group">
+                        {auth.hasCapability(Capability.addingParents) ? (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label className="input-group-text">
-                                        Share with
+                                        Parent
                                     </label>
                                 </div>
-                                <select
-                                    className="custom-select"
-                                    value={this.state.shareWith}
-                                    onChange={this.updateSharingMode}
-                                >
-                                    {this.state.groups &&
-                                    this.state.groups.length
-                                        ? [
-                                              <option value="default">
-                                                  All my groups
-                                              </option>,
-                                              <option value="single">
-                                                  Single group...
-                                              </option>,
-                                          ]
-                                        : []}
-                                    <option value="public">Everybody</option>
-                                    <option value="private">Only me</option>
-                                </select>
-                                <div className="form-hint">
-                                    {this.getSharingModeHint()}
+                                <input
+                                    className="form-control"
+                                    type="text"
+                                    style={{ fontSize: "medium" }}
+                                    placeholder="(Optional) Type parent identifier..."
+                                    value={searchParams.get("parent") || parent}
+                                    onChange={handleParentChange}
+                                    disabled={searchParams.get("parent")}
+                                />
+                                <div className="input-group-append">
+                                    <input
+                                        className="btn btn-outline-danger"
+                                        type="button"
+                                        value="Clear"
+                                        onClick={handleParentClear}
+                                    />
                                 </div>
                             </div>
-                            {this.state.shareWith === "single" ? (
-                                <div className="mb-3">
-                                    <Autocomplete
-                                        value={this.state.group}
-                                        items={this.state.groups.filter(
-                                            (item) =>
-                                                item
-                                                    .toLowerCase()
-                                                    .indexOf(
-                                                        this.state.group.toLowerCase()
-                                                    ) !== -1
-                                        )}
-                                        onChange={(value) =>
-                                            this.setState({ group: value })
-                                        }
-                                        className="form-control"
-                                        style={{ fontSize: "medium" }}
-                                        placeholder="Type group name..."
-                                        prependChildren
-                                    >
-                                        <div className="input-group-prepend">
-                                            <label className="input-group-text">
-                                                Group name
-                                            </label>
-                                        </div>
-                                    </Autocomplete>
-                                </div>
-                            ) : (
-                                []
-                            )}
-                            {this.state.attributes.length > 0 ? (
-                                <div>
-                                    <h5>Attributes</h5>
-                                    <DataTable>
-                                        {this.state.attributes.map(
-                                            (attr, idx) => (
-                                                <tr
-                                                    key={idx}
-                                                    className="centered"
-                                                >
-                                                    <th>{attr.key}</th>
-                                                    <td>
-                                                        {typeof attr.value ===
-                                                        "string" ? (
-                                                            attr.value
-                                                        ) : (
-                                                            <pre className="attribute-object">
-                                                                {"(object)"}{" "}
-                                                                {JSON.stringify(
-                                                                    attr.value,
-                                                                    null,
-                                                                    4
-                                                                )}
-                                                            </pre>
-                                                        )}
-                                                    </td>
-                                                    <td>
-                                                        <input
-                                                            value="Dismiss"
-                                                            className="btn btn-danger"
-                                                            type="button"
-                                                            onClick={() =>
-                                                                this.onAttributeRemove(
-                                                                    idx
-                                                                )
-                                                            }
-                                                        />
-                                                    </td>
-                                                </tr>
-                                            )
-                                        )}
-                                    </DataTable>
-                                </div>
-                            ) : (
-                                []
-                            )}
-                            <input
-                                value="Upload File"
-                                className="btn btn-success"
-                                type="button"
-                                onClick={this.handleSubmit}
-                                disabled={!this.state.file}
-                            />
-                            <input
-                                value="Add attribute"
-                                className="btn btn-success"
-                                type="button"
-                                onClick={this.handleAttributeModalOpen}
-                            />
+                        ) : (
+                            []
+                        )}
+                        <div className="input-group mb-3">
+                            <div className="input-group-prepend">
+                                <label className="input-group-text">
+                                    Share with
+                                </label>
+                            </div>
+                            <select
+                                className="custom-select"
+                                value={shareWith}
+                                onChange={updateSharingMode}
+                            >
+                                {groups.length
+                                    ? [
+                                          <option value="default">
+                                              All my groups
+                                          </option>,
+                                          <option value="single">
+                                              Single group...
+                                          </option>,
+                                      ]
+                                    : []}
+                                <option value="public">Everybody</option>
+                                <option value="private">Only me</option>
+                            </select>
+                            <div className="form-hint">
+                                {getSharingModeHint()}
+                            </div>
                         </div>
-                    </form>
-                </Extendable>
-                <AttributesAddModal
-                    isOpen={this.state.isAttributeModalOpen}
-                    onRequestClose={this.onRequestAttributeModalClose}
-                    onAdd={this.onAttributeAdd}
-                />
-            </View>
-        );
-    }
-}
-
-function UploadWithTimeout(props) {
-    const config = useContext(ConfigContext);
-    const navigate = useNavigate();
-    const searchParams = useSearchParams()[0];
-    return (
-        <Upload
-            fileUploadTimeout={config.config["file_upload_timeout"]}
-            navigate={navigate}
-            searchParams={searchParams}
-            {...props}
-        />
+                        {shareWith === "single" ? (
+                            <div className="mb-3">
+                                <Autocomplete
+                                    value={group}
+                                    items={groups.filter(
+                                        (item) =>
+                                            item
+                                                .toLowerCase()
+                                                .indexOf(
+                                                    group.toLowerCase()
+                                                ) !== -1
+                                    )}
+                                    onChange={(value) => setGroup(value)}
+                                    className="form-control"
+                                    style={{ fontSize: "medium" }}
+                                    placeholder="Type group name..."
+                                    prependChildren
+                                >
+                                    <div className="input-group-prepend">
+                                        <label className="input-group-text">
+                                            Group name
+                                        </label>
+                                    </div>
+                                </Autocomplete>
+                            </div>
+                        ) : (
+                            []
+                        )}
+                        {attributes.length > 0 ? (
+                            <div>
+                                <h5>Attributes</h5>
+                                <DataTable>
+                                    {attributes.map((attr, idx) => (
+                                        <tr key={idx} className="centered">
+                                            <th>{attr.key}</th>
+                                            <td>
+                                                {typeof attr.value ===
+                                                "string" ? (
+                                                    attr.value
+                                                ) : (
+                                                    <pre className="attribute-object">
+                                                        {"(object)"}{" "}
+                                                        {JSON.stringify(
+                                                            attr.value,
+                                                            null,
+                                                            4
+                                                        )}
+                                                    </pre>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <input
+                                                    value="Dismiss"
+                                                    className="btn btn-danger"
+                                                    type="button"
+                                                    onClick={() =>
+                                                        onAttributeRemove(idx)
+                                                    }
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </DataTable>
+                            </div>
+                        ) : (
+                            []
+                        )}
+                        <input
+                            value="Upload File"
+                            className="btn btn-success"
+                            type="button"
+                            onClick={handleSubmit}
+                            disabled={!file}
+                        />
+                        <input
+                            value="Add attribute"
+                            className="btn btn-success"
+                            type="button"
+                            onClick={() => setAttributeModalOpen(true)}
+                        />
+                    </div>
+                </form>
+            </Extendable>
+            <AttributesAddModal
+                isOpen={attributeModalOpen}
+                onRequestClose={() => setAttributeModalOpen(false)}
+                onAdd={onAttributeAdd}
+            />
+        </View>
     );
 }
-
-export default UploadWithTimeout;

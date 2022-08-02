@@ -12,10 +12,8 @@ jobs:
   lint_core:
     runs-on: ubuntu-latest
     steps:
-      - uses: CERT-Polska/lint-python-action@v1
+      - uses: CERT-Polska/lint-python-action@v2
         with:
-          source: mwdb/
-          use-mypy: false
           install-requirements: false
   lint_web:
     name: Lint mwdb-core web sources

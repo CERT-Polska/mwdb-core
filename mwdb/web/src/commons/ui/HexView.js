@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-text";
@@ -7,6 +7,24 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 
 class HexViewNumberRenderer {
+    getText(session, row) {
+        return (row << 4).toString(16).padStart(8, "0");
+    }
+
+    getWidth(session, lastLineNumber, config) {
+        return (
+            Math.max(
+                this.getText(session, lastLineNumber).length,
+                this.getText(session, config.lastRow + 1).length,
+                2
+            ) * config.characterWidth
+        );
+    }
+
+    update(e, editor) {
+        editor.renderer.$loop.schedule(editor.renderer.CHANGE_GUTTER);
+    }
+
     attach(editor) {
         editor.renderer.$gutterLayer.$renderer = this;
         editor.on("changeSelection", this.update);
@@ -24,17 +42,20 @@ class HexViewNumberRenderer {
 export default function HexView(props) {
     const [originalContent, setOriginalContent] = useState(null);
     const [hexlifiedContent, setHexlifiedContent] = useState(null);
-    const editor = React.createRef();
-    const mounted = useRef(false);
+    let editorRef = React.createRef()
     let numberRenderer = new HexViewNumberRenderer();
 
     useEffect(() => {
-        let currentEditor = editor.current.editor;
-        if (!mounted.current) {
-            currentEditor.gotoLine(1);
+        if (editorRef.current !== null) {
+            let editor = editorRef.current.editor;
+            editor.gotoLine(1);
             if (props.mode === "hex") numberRenderer.attach(editor);
-            mounted.current = true;
-        } else {
+        }
+    }, []);
+
+    useEffect(() => {
+        if (editorRef.current !== null) {
+            let editor = editorRef.current.editor;
             if (props.mode === "hex") numberRenderer.detach(editor);
             else numberRenderer.attach(editor);
         }
@@ -84,7 +105,7 @@ export default function HexView(props) {
 
     return (
         <AceEditor
-            ref={editor}
+            ref={editorRef}
             mode={props.json ? "json" : "text"}
             theme="github"
             name="blob-content"

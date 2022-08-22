@@ -45,23 +45,23 @@ export default function HexView(props) {
     const [editor, setEditor] = useState(null);
 
     const setEditorRef = useCallback((node) => {
-        if(node) {
+        if (node) {
             setEditor(node.editor);
             node.editor.gotoLine(1);
         } else {
             setEditor(null);
         }
-    }, [])
+    }, []);
 
     useEffect(() => {
-        if(editor && props.mode === "hex") {
+        if (editor && props.mode === "hex") {
             const numberRenderer = new HexViewNumberRenderer();
             numberRenderer.attach(editor);
             return () => {
                 numberRenderer.detach(editor);
-            }
+            };
         }
-    }, [editor, props.mode])
+    }, [editor, props.mode]);
 
     const getContent = () => {
         let rows = [];

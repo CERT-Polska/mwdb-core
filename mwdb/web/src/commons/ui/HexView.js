@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-text";
@@ -42,26 +42,28 @@ class HexViewNumberRenderer {
 export default function HexView(props) {
     const [originalContent, setOriginalContent] = useState(null);
     const [hexlifiedContent, setHexlifiedContent] = useState(null);
-    let editorRef = React.createRef()
-    let numberRenderer = new HexViewNumberRenderer();
+    const [editor, setEditor] = useState(null);
+
+    const setEditorRef = useCallback((node) => {
+        if(node) {
+            setEditor(node.editor);
+            node.editor.gotoLine(1);
+        } else {
+            setEditor(null);
+        }
+    }, [])
 
     useEffect(() => {
-        if (editorRef.current !== null) {
-            let editor = editorRef.current.editor;
-            editor.gotoLine(1);
-            if (props.mode === "hex") numberRenderer.attach(editor);
+        if(editor && props.mode === "hex") {
+            const numberRenderer = new HexViewNumberRenderer();
+            numberRenderer.attach(editor);
+            return () => {
+                numberRenderer.detach(editor);
+            }
         }
-    }, []);
+    }, [editor, props.mode])
 
-    useEffect(() => {
-        if (editorRef.current !== null) {
-            let editor = editorRef.current.editor;
-            if (props.mode === "hex") numberRenderer.detach(editor);
-            else numberRenderer.attach(editor);
-        }
-    });
-
-    const content = () => {
+    const getContent = () => {
         let rows = [];
         if (!props.content) return "";
         if (props.mode === "raw") {
@@ -105,11 +107,11 @@ export default function HexView(props) {
 
     return (
         <AceEditor
-            ref={editorRef}
+            ref={setEditorRef}
             mode={props.json ? "json" : "text"}
             theme="github"
             name="blob-content"
-            value={content}
+            value={getContent()}
             readOnly
             wrapEnabled
             width="100%"

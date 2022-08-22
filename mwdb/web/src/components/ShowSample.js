@@ -272,14 +272,14 @@ function PreviewSwitchAction(props) {
         return (
             <ObjectAction
                 label="Hex view"
-                link={() => tabContext.getTabLink(tabContext.tab, "hex")}
+                link={tabContext.getTabLink(tabContext.tab, "hex")}
             />
         );
     else
         return (
             <ObjectAction
                 label="Raw view"
-                link={() => tabContext.getTabLink(tabContext.tab, "raw")}
+                link={tabContext.getTabLink(tabContext.tab, "raw")}
             />
         );
 }

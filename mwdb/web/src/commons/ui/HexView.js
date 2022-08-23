@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-text";
@@ -39,46 +39,44 @@ class HexViewNumberRenderer {
     }
 }
 
-export default class HexView extends Component {
-    constructor(props) {
-        super(props);
-        this.numberRenderer = new HexViewNumberRenderer();
-        this.editor = React.createRef();
-        this.originalContent = null;
-        this.hexlifiedContent = null;
-    }
+export default function HexView(props) {
+    const [originalContent, setOriginalContent] = useState(null);
+    const [hexlifiedContent, setHexlifiedContent] = useState(null);
+    const [editor, setEditor] = useState(null);
 
-    componentDidUpdate(prevProps) {
-        let editor = this.editor.current.editor;
-        if (this.props.mode !== prevProps.mode) {
-            if (this.props.mode === "raw") this.numberRenderer.detach(editor);
-            else this.numberRenderer.attach(editor);
+    const setEditorRef = useCallback((node) => {
+        if (node) {
+            setEditor(node.editor);
+            node.editor.gotoLine(1);
+        } else {
+            setEditor(null);
         }
-    }
+    }, []);
 
-    componentDidMount() {
-        let editor = this.editor.current.editor;
-        editor.gotoLine(1);
-        if (this.props.mode === "hex") this.numberRenderer.attach(editor);
-    }
+    useEffect(() => {
+        if (editor && props.mode === "hex") {
+            const numberRenderer = new HexViewNumberRenderer();
+            numberRenderer.attach(editor);
+            return () => {
+                numberRenderer.detach(editor);
+            };
+        }
+    }, [editor, props.mode]);
 
-    get content() {
+    const getContent = () => {
         let rows = [];
-        if (!this.props.content) return "";
-        if (this.props.mode === "raw") {
-            if (this.props.content instanceof ArrayBuffer)
-                return new TextDecoder().decode(this.props.content);
-            else return this.props.content;
+        if (!props.content) return "";
+        if (props.mode === "raw") {
+            if (props.content instanceof ArrayBuffer)
+                return new TextDecoder().decode(props.content);
+            else return props.content;
         }
-        if (
-            !this.hexlifiedContent ||
-            this.originalContent !== this.props.content
-        ) {
+        if (!hexlifiedContent || originalContent !== props.content) {
             let content;
-            if (this.props.content instanceof ArrayBuffer) {
-                content = new Uint8Array(this.props.content);
+            if (props.content instanceof ArrayBuffer) {
+                content = new Uint8Array(props.content);
             } else {
-                content = new TextEncoder().encode(this.props.content);
+                content = new TextEncoder().encode(props.content);
             }
             let byteRow = [];
             let asciiRow = [];
@@ -101,30 +99,27 @@ export default class HexView extends Component {
                 rows.push(
                     byteRow.join(" ").padEnd(50, " ") + asciiRow.join("")
                 );
-            this.originalContent = this.props.content;
-            this.hexlifiedContent = rows.join("\n");
+            setOriginalContent(props.content);
+            setHexlifiedContent(rows.join("\n"));
         }
-        return this.hexlifiedContent;
-    }
+        return hexlifiedContent;
+    };
 
-    render() {
-        return (
-            <AceEditor
-                ref={this.editor}
-                mode={this.props.json ? "json" : "text"}
-                theme="github"
-                name="blob-content"
-                value={this.content}
-                readOnly
-                wrapEnabled
-                width="100%"
-                fontSize="16px"
-                setOptions={{
-                    showInvisibles:
-                        this.props.showInvisibles && this.props.mode !== "hex",
-                    useWorker: false,
-                }}
-            />
-        );
-    }
+    return (
+        <AceEditor
+            ref={setEditorRef}
+            mode={props.json ? "json" : "text"}
+            theme="github"
+            name="blob-content"
+            value={getContent()}
+            readOnly
+            wrapEnabled
+            width="100%"
+            fontSize="16px"
+            setOptions={{
+                showInvisibles: props.showInvisibles && props.mode !== "hex",
+                useWorker: false,
+            }}
+        />
+    );
 }

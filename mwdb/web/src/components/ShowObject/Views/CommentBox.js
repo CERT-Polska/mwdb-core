@@ -24,7 +24,9 @@ function Comment(props) {
                         {_.flatMap(
                             props.comment.split("\n"),
                             (value, index, array) =>
-                                array.length - 1 !== index ? [value, <br />] : value
+                                array.length - 1 !== index
+                                    ? [value, <br />]
+                                    : value
                         )}
                     </span>
                     <p>
@@ -42,7 +44,7 @@ function Comment(props) {
                     <small>{readableTime(new Date(props.timestamp))}</small>
                 </p>
             </li>
-            <hr style={{ "border-top": "1px solid #bbb", "width": "100%" }} />
+            <hr style={{ "border-top": "1px solid #bbb", width: "100%" }} />
         </React.Fragment>
     );
 }

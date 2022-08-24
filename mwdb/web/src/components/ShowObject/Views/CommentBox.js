@@ -11,36 +11,39 @@ import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 function Comment(props) {
     return (
-        <li className="media" style={{ overflowWrap: "anywhere" }}>
-            <div className="align-self-center mr-3">
-                <Identicon data={props.author} size="45" />
-            </div>
-            <div className="media-body">
-                <h4 className="media-heading user_name">
-                    {props.author ? props.author : "(deleted)"}
-                </h4>
-                <span>
-                    {_.flatMap(
-                        props.comment.split("\n"),
-                        (value, index, array) =>
-                            array.length - 1 !== index ? [value, <br />] : value
-                    )}
-                </span>
-                <p>
-                    {props.removeComment && (
-                        <button
-                            className="btn btn-link p-0 remove-comment-link"
-                            onClick={() => props.removeComment(props.id)}
-                        >
-                            Remove
-                        </button>
-                    )}
+        <React.Fragment>
+            <li className="media" style={{ overflowWrap: "anywhere" }}>
+                <div className="mr-3">
+                    <Identicon data={props.author} size="45" />
+                </div>
+                <div className="media-body">
+                    <h4 className="media-heading user_name">
+                        {props.author ? props.author : "(deleted)"}
+                    </h4>
+                    <span>
+                        {_.flatMap(
+                            props.comment.split("\n"),
+                            (value, index, array) =>
+                                array.length - 1 !== index ? [value, <br />] : value
+                        )}
+                    </span>
+                    <p>
+                        {props.removeComment && (
+                            <button
+                                className="btn btn-link p-0 remove-comment-link"
+                                onClick={() => props.removeComment(props.id)}
+                            >
+                                Remove
+                            </button>
+                        )}
+                    </p>
+                </div>
+                <p className="float-right">
+                    <small>{readableTime(new Date(props.timestamp))}</small>
                 </p>
-            </div>
-            <p className="float-right">
-                <small>{readableTime(new Date(props.timestamp))}</small>
-            </p>
-        </li>
+            </li>
+            <hr style={{ "border-top": "1px solid #bbb", "width": "100%" }} />
+        </React.Fragment>
     );
 }
 

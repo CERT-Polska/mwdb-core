@@ -11,41 +11,36 @@ import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 function Comment(props) {
     return (
-        <React.Fragment>
-            <li className="media" style={{ overflowWrap: "anywhere" }}>
-                <div className="mr-3">
-                    <Identicon data={props.author} size="45" />
-                </div>
-                <div className="media-body">
-                    <h4 className="media-heading user_name">
-                        {props.author ? props.author : "(deleted)"}
-                    </h4>
-                    <span>
-                        {_.flatMap(
-                            props.comment.split("\n"),
-                            (value, index, array) =>
-                                array.length - 1 !== index
-                                    ? [value, <br />]
-                                    : value
-                        )}
-                    </span>
-                    <p>
-                        {props.removeComment && (
-                            <button
-                                className="btn btn-link p-0 remove-comment-link"
-                                onClick={() => props.removeComment(props.id)}
-                            >
-                                Remove
-                            </button>
-                        )}
-                    </p>
-                </div>
-                <p className="float-right">
-                    <small>{readableTime(new Date(props.timestamp))}</small>
+        <li className="media" style={{ overflowWrap: "anywhere" }}>
+            <div className="mr-3">
+                <Identicon data={props.author} size="45" />
+            </div>
+            <div className="media-body">
+                <h4 className="media-heading user_name">
+                    {props.author ? props.author : "(deleted)"}
+                </h4>
+                <span>
+                    {_.flatMap(
+                        props.comment.split("\n"),
+                        (value, index, array) =>
+                            array.length - 1 !== index ? [value, <br />] : value
+                    )}
+                </span>
+                <p>
+                    {props.removeComment && (
+                        <button
+                            className="btn btn-link p-0 remove-comment-link"
+                            onClick={() => props.removeComment(props.id)}
+                        >
+                            Remove
+                        </button>
+                    )}
                 </p>
-            </li>
-            <hr style={{ "border-top": "1px solid #bbb", width: "100%" }} />
-        </React.Fragment>
+            </div>
+            <p className="float-right">
+                <small>{readableTime(new Date(props.timestamp))}</small>
+            </p>
+        </li>
     );
 }
 
@@ -118,14 +113,23 @@ function CommentList({ comments, removeComment }) {
             itemsCountPerPage * activePage
         )
         .map((comment, index) => (
-            <Comment
-                id={comment.id}
-                comment={comment.comment}
-                author={comment.author}
-                timestamp={comment.timestamp}
-                removeComment={removeComment}
-                key={index}
-            />
+            <React.Fragment>
+                <Comment
+                    id={comment.id}
+                    comment={comment.comment}
+                    author={comment.author}
+                    timestamp={comment.timestamp}
+                    removeComment={removeComment}
+                    key={index}
+                />
+                {index < array.length - 1 ? (
+                    <hr
+                        style={{ borderTop: "1px solid #bbb", width: "100%" }}
+                    />
+                ) : (
+                    []
+                )}
+            </React.Fragment>
         ));
 
     return (

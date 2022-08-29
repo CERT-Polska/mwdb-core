@@ -14,8 +14,8 @@ import { View } from "@mwdb-web/commons/ui";
 import { useRemote } from "@mwdb-web/commons/remotes";
 
 function DiffTextBlobContentPresenter(props){
-
     const [rowMappings, setRowMappings] = useState([[], []])
+    const [markers, setMarkers] = useState([[], []])
     const editorRef = useRef()
 
     const performDiff = (current, previous) => {
@@ -88,10 +88,11 @@ function DiffTextBlobContentPresenter(props){
             cursors = newCursors.slice();
         }
         setRowMappings(rowMappings);
-        return markers;
+        setMarkers(markers)
     }
 
     useEffect(() => {
+        getDiff(props.current, props.previous)
         let split = editorRef.current.split;
         split
             .getEditor(0)
@@ -125,7 +126,7 @@ function DiffTextBlobContentPresenter(props){
             }}
             width="100%"
             fontSize="16px"
-            markers={getDiff(props.current, props.previous)}
+            markers={markers}
             editorProps={{ $blockScrolling: true }}
         />
     );

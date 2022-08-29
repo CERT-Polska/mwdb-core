@@ -122,7 +122,7 @@ function CommentList({ comments, removeComment }) {
                     removeComment={removeComment}
                     key={index}
                 />
-                {index < array.length - 1 ? (
+                {index < comments.length - 1 ? (
                     <hr
                         style={{ borderTop: "1px solid #bbb", width: "100%" }}
                     />

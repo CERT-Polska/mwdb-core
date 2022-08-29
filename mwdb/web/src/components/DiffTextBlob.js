@@ -13,10 +13,10 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { View } from "@mwdb-web/commons/ui";
 import { useRemote } from "@mwdb-web/commons/remotes";
 
-function DiffTextBlobContentPresenter(props){
-    const [rowMappings, setRowMappings] = useState([[], []])
-    const [markers, setMarkers] = useState([[], []])
-    const editorRef = useRef()
+function DiffTextBlobContentPresenter(props) {
+    const [rowMappings, setRowMappings] = useState([[], []]);
+    const [markers, setMarkers] = useState([[], []]);
+    const editorRef = useRef();
 
     const performDiff = (current, previous) => {
         let engine = new DiffMatchPatch();
@@ -28,7 +28,7 @@ function DiffTextBlobContentPresenter(props){
         engine.diff_charsToLines_(diffs, lineArray);
         engine.diff_cleanupSemantic(diffs);
         return diffs;
-    }
+    };
 
     function moveCursor(cursor, payload) {
         let lines = payload.split(/\r?\n/);
@@ -88,11 +88,11 @@ function DiffTextBlobContentPresenter(props){
             cursors = newCursors.slice();
         }
         setRowMappings(rowMappings);
-        setMarkers(markers)
-    }
+        setMarkers(markers);
+    };
 
     useEffect(() => {
-        getDiff(props.current, props.previous)
+        getDiff(props.current, props.previous);
         let split = editorRef.current.split;
         split
             .getEditor(0)
@@ -130,7 +130,6 @@ function DiffTextBlobContentPresenter(props){
             editorProps={{ $blockScrolling: true }}
         />
     );
-
 }
 
 export default function DiffTextBlob() {
@@ -138,24 +137,18 @@ export default function DiffTextBlob() {
     const remotePath = remote ? `/remote/${remote}` : "";
     const api = useContext(APIContext);
     const params = useParams();
-    const [error, setError] = useState(null)
-    const [current, setCurrent] = useState(null)
-    const [previous, setPrevious] = useState(null)
+    const [error, setError] = useState(null);
+    const [current, setCurrent] = useState(null);
+    const [previous, setPrevious] = useState(null);
 
     async function updateTextBlob() {
         try {
-            let currentBlob = await api.getObject(
-                "blob",
-                params.current
-            );
-            let previousBlob = await api.getObject(
-                "blob",
-                params.previous
-            );
-            setCurrent(currentBlob.data)
-            setPrevious(previousBlob.data)
+            let currentBlob = await api.getObject("blob", params.current);
+            let previousBlob = await api.getObject("blob", params.previous);
+            setCurrent(currentBlob.data);
+            setPrevious(previousBlob.data);
         } catch (error) {
-            setError(error)
+            setError(error);
         }
     }
 

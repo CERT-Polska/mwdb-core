@@ -12,7 +12,7 @@ import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
 function Comment(props) {
     return (
         <li className="media" style={{ overflowWrap: "anywhere" }}>
-            <div className="align-self-center mr-3">
+            <div className="mr-3">
                 <Identicon data={props.author} size="45" />
             </div>
             <div className="media-body">
@@ -113,14 +113,23 @@ function CommentList({ comments, removeComment }) {
             itemsCountPerPage * activePage
         )
         .map((comment, index) => (
-            <Comment
-                id={comment.id}
-                comment={comment.comment}
-                author={comment.author}
-                timestamp={comment.timestamp}
-                removeComment={removeComment}
-                key={index}
-            />
+            <React.Fragment>
+                <Comment
+                    id={comment.id}
+                    comment={comment.comment}
+                    author={comment.author}
+                    timestamp={comment.timestamp}
+                    removeComment={removeComment}
+                    key={index}
+                />
+                {index < comments.length - 1 ? (
+                    <hr
+                        style={{ borderTop: "1px solid #bbb", width: "100%" }}
+                    />
+                ) : (
+                    []
+                )}
+            </React.Fragment>
         ));
 
     return (

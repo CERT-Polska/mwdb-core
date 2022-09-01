@@ -15,7 +15,7 @@ from mwdb.core.capabilities import Capabilities
 from . import db
 from .attribute import Attribute, AttributeDefinition, AttributePermission
 from .karton import KartonAnalysis, karton_object
-from .tag import Tag, object_tag_table
+from .tag import Tag
 
 relation = db.Table(
     "relation",
@@ -255,7 +255,10 @@ class Object(db.Model):
         cascade="save-update, merge, delete",
     )
     tags = db.relationship(
-        "Tag", secondary=object_tag_table, back_populates="objects", lazy="joined"
+        "Tag",
+        back_populates="object",
+        lazy="joined",
+        cascade="save-update, merge, delete",
     )
 
     followers = db.relationship(
@@ -683,7 +686,7 @@ class Object(db.Model):
         """
         return [
             tag.tag
-            for tag in db.session.query(Tag).filter(Tag.objects.any(id=self.id)).all()
+            for tag in db.session.query(Tag).filter(Tag.object_id == self.id).all()
         ]
 
     def add_tag(self, tag_name, commit=True):
@@ -693,17 +696,19 @@ class Object(db.Model):
         :param commit: Commit transaction after operation
         :return: True if tag wasn't added yet
         """
-        db_tag = Tag()
-        db_tag.tag = tag_name
-        db_tag, _ = Tag.get_or_create(db_tag)
-
-        if db_tag in self.tags:
+        db_tag = (
+            db.session.query(Tag)
+            .filter(Tag.tag == tag_name, Tag.object_id == self.id)
+            .first()
+        )
+        if db_tag:
             return False
 
         is_new = False
         db.session.begin_nested()
         try:
-            self.tags.append(db_tag)
+            db_tag = Tag(tag=tag_name, object_id=self.id)
+            db.session.add(db_tag)
             db.session.commit()
             is_new = True
         except IntegrityError:
@@ -722,19 +727,18 @@ class Object(db.Model):
         :param tag_name: tag string
         :return: True if tag wasn't removed yet
         """
-        db_tag = db.session.query(Tag).filter(tag_name == Tag.tag)
-        if db_tag.scalar() is None:
-            return False
-        else:
-            db_tag = db_tag.one()
-
-        if db_tag not in self.tags:
+        db_tag = (
+            db.session.query(Tag)
+            .filter(Tag.tag == tag_name, Tag.object_id == self.id)
+            .first()
+        )
+        if not db_tag:
             return False
 
         is_removed = False
         db.session.begin_nested()
         try:
-            self.tags.remove(db_tag)
+            db.session.delete(db_tag)
             db.session.commit()
             is_removed = True
         except IntegrityError:

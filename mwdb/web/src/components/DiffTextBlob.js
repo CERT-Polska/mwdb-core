@@ -20,9 +20,12 @@ import { View } from "@mwdb-web/commons/ui";
 import { useRemote } from "@mwdb-web/commons/remotes";
 
 function DiffTextBlobContentPresenter({ current, previous }) {
-    const [rowMappings, setRowMappings] = useState([[], []]);
     const [markers, setMarkers] = useState([[], []]);
-    const editorRef = useRef();
+    const editor = useRef();
+    // This must be ref instead of state
+    // It's used by event handler and it will be overcomplicated
+    // to set new handler every time we receive new rowMappings
+    const rowMappings = useRef();
 
     const performDiff = (current, previous) => {
         let engine = new DiffMatchPatch();
@@ -56,7 +59,7 @@ function DiffTextBlobContentPresenter({ current, previous }) {
         ];
         let markers = [[], []];
         let newCursors = [[], []];
-        let rowMappings = [[], []];
+        let mappings = [[], []];
         for (let mark of diff) {
             let oper = mark[0];
             let text = mark[1];
@@ -91,7 +94,7 @@ function DiffTextBlobContentPresenter({ current, previous }) {
                 });
             }
             for (let row = cursors[0][1]; row <= newCursors[0][1]; row++) {
-                rowMappings[0][row] =
+                mappings[0][row] =
                     cursors[1][1] +
                     (cursors[1][1] === newCursors[1][1]
                         ? 0
@@ -99,24 +102,36 @@ function DiffTextBlobContentPresenter({ current, previous }) {
             }
             cursors = newCursors.slice();
         }
-        setRowMappings(rowMappings);
+        rowMappings.current = mappings;
         setMarkers(markers);
     }, []);
 
-    const onCursorChange = useCallback(
-        ([selectionLeft, selectionRight]) => {
+    const editorRef = useCallback((newEditor) => {
+        function onCursorChange() {
+            // Synchronize right-side cursor with left-side
+            const split = editor.current.split;
+            const mappings = rowMappings.current;
+
+            const selectionLeft = split.getEditor(0).getSelection();
+            const selectionRight = split.getEditor(1).getSelection();
+
             if (
-                rowMappings[0][selectionLeft.lead.row] !== undefined &&
-                rowMappings[0][selectionLeft.lead.row] !==
-                    selectionRight.lead.row
+                mappings[0][selectionLeft.lead.row] !== undefined &&
+                mappings[0][selectionLeft.lead.row] !== selectionRight.lead.row
             ) {
-                editorRef.current
+                split
                     .getEditor(1)
-                    .gotoLine(rowMappings[0][selectionLeft.lead.row] + 1);
+                    .gotoLine(mappings[0][selectionLeft.lead.row] + 1);
             }
-        },
-        [rowMappings]
-    );
+        }
+        editor.current = newEditor;
+        if (newEditor) {
+            newEditor.split
+                .getEditor(0)
+                .getSelection()
+                .on("changeCursor", onCursorChange);
+        }
+    }, []);
 
     useEffect(() => {
         getDiff(current, previous);
@@ -138,7 +153,6 @@ function DiffTextBlobContentPresenter({ current, previous }) {
             width="100%"
             fontSize="16px"
             markers={markers}
-            onCursorChange={onCursorChange}
             editorProps={{ $blockScrolling: true }}
         />
     );

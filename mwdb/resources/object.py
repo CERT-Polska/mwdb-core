@@ -48,8 +48,7 @@ class ObjectUploader:
         hooks.on_created_object(object)
         tags = params.get("tags")
         for tag in tags:
-            db_tag = Tag(tag=tag["tag"])
-            db_tag, _ = Tag.get_or_create(db_tag)
+            db_tag = Tag(tag=tag["tag"], object_id=object.id)
             hooks.on_created_tag(object, db_tag)
 
     def on_reuploaded(self, object, params):

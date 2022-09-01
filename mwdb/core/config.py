@@ -124,6 +124,8 @@ class MWDBConfig(Config):
     recaptcha_secret = key(cast=str, required=False)
 
     enable_json_logger = key(cast=intbool, required=False, default=False)
+    enable_sql_profiler = key(cast=intbool, required=False, default=False)
+    log_only_slow_sql = key(cast=intbool, required=False, default=False)
 
 
 @section("karton")

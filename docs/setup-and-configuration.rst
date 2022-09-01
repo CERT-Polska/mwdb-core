@@ -26,7 +26,7 @@ It's highly recommended to create a fresh `virtualenv <https://docs.python.org/3
    ~/mwdb$ python3 -m venv venv
 
    # Activate virtual environment
-   ~/mwdb$ ./venv/bin/activate
+   ~/mwdb$ source ./venv/bin/activate
 
    (venv) ~/mwdb$
 

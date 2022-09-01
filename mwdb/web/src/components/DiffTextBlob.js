@@ -1,4 +1,10 @@
-import React, { Component, useContext } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useState,
+    useEffect,
+    useRef,
+} from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,14 +19,15 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { View } from "@mwdb-web/commons/ui";
 import { useRemote } from "@mwdb-web/commons/remotes";
 
-class DiffTextBlobContentPresenter extends Component {
-    constructor(props) {
-        super(props);
-        this.editorRef = React.createRef();
-        this.rowMappings = [[], []];
-    }
+function DiffTextBlobContentPresenter({ current, previous }) {
+    const [markers, setMarkers] = useState([[], []]);
+    const editor = useRef();
+    // This must be ref instead of state
+    // It's used by event handler and it will be overcomplicated
+    // to set new handler every time we receive new rowMappings
+    const rowMappings = useRef();
 
-    performDiff(current, previous) {
+    const performDiff = (current, previous) => {
         let engine = new DiffMatchPatch();
         let chars = engine.diff_linesToChars_(current, previous);
         var lineText1 = chars.chars1;
@@ -30,28 +37,29 @@ class DiffTextBlobContentPresenter extends Component {
         engine.diff_charsToLines_(diffs, lineArray);
         engine.diff_cleanupSemantic(diffs);
         return diffs;
+    };
+
+    function moveCursor(cursor, payload) {
+        let lines = payload.split(/\r?\n/);
+        let newCursor =
+            lines.length === 1
+                ? [cursor[0] + lines[0].length, cursor[1]]
+                : [
+                      lines[lines.length - 1].length,
+                      cursor[1] + (lines.length - 1),
+                  ];
+        return newCursor;
     }
 
-    getDiff(current, previous) {
-        function moveCursor(cursor, payload) {
-            let lines = payload.split(/\r?\n/);
-            let newCursor =
-                lines.length === 1
-                    ? [cursor[0] + lines[0].length, cursor[1]]
-                    : [
-                          lines[lines.length - 1].length,
-                          cursor[1] + (lines.length - 1),
-                      ];
-            return newCursor;
-        }
-        let diff = this.performDiff(previous, current);
+    const getDiff = useCallback((current, previous) => {
+        let diff = performDiff(previous, current);
         let cursors = [
             [0, 0],
             [0, 0],
         ];
         let markers = [[], []];
         let newCursors = [[], []];
-        let rowMappings = [[], []];
+        let mappings = [[], []];
         for (let mark of diff) {
             let oper = mark[0];
             let text = mark[1];
@@ -59,8 +67,11 @@ class DiffTextBlobContentPresenter extends Component {
                 newCursors[0] = moveCursor(cursors[0], text);
                 newCursors[1] = moveCursor(cursors[1], text);
             } else if (oper === -1) {
-                let start = cursors[1],
-                    end = (newCursors[1] = moveCursor(cursors[1], text));
+                let start, end;
+                newCursors[0] = cursors[0];
+                newCursors[1] = moveCursor(cursors[1], text);
+                start = cursors[1];
+                end = newCursors[1];
                 markers[1].push({
                     startCol: start[0],
                     startRow: start[1],
@@ -69,8 +80,11 @@ class DiffTextBlobContentPresenter extends Component {
                     className: "marker-deleted",
                 });
             } else if (oper === 1) {
-                let start = cursors[0],
-                    end = (newCursors[0] = moveCursor(cursors[0], text));
+                let start, end;
+                newCursors[0] = moveCursor(cursors[0], text);
+                newCursors[1] = cursors[1];
+                start = cursors[0];
+                end = newCursors[0];
                 markers[0].push({
                     startCol: start[0],
                     startRow: start[1],
@@ -80,7 +94,7 @@ class DiffTextBlobContentPresenter extends Component {
                 });
             }
             for (let row = cursors[0][1]; row <= newCursors[0][1]; row++) {
-                rowMappings[0][row] =
+                mappings[0][row] =
                     cursors[1][1] +
                     (cursors[1][1] === newCursors[1][1]
                         ? 0
@@ -88,168 +102,158 @@ class DiffTextBlobContentPresenter extends Component {
             }
             cursors = newCursors.slice();
         }
-        this.rowMappings = rowMappings;
-        return markers;
-    }
+        rowMappings.current = mappings;
+        setMarkers(markers);
+    }, []);
 
-    componentDidMount() {
-        let split = this.editorRef.current.split;
-        split
-            .getEditor(0)
-            .getSelection()
-            .on("changeCursor", () => {
-                let sel0 = split.getEditor(0).getSelection();
-                let sel1 = split.getEditor(1).getSelection();
-                if (
-                    this.rowMappings[0][sel0.lead.row] !== undefined &&
-                    this.rowMappings[0][sel0.lead.row] !== sel1.lead.row
-                )
-                    split
-                        .getEditor(1)
-                        .gotoLine(this.rowMappings[0][sel0.lead.row] + 1);
-            });
-    }
+    const editorRef = useCallback((newEditor) => {
+        function onCursorChange() {
+            // Synchronize right-side cursor with left-side
+            const split = editor.current.split;
+            const mappings = rowMappings.current;
 
-    render() {
-        return (
-            <SplitEditor
-                ref={this.editorRef}
-                mode="text"
-                theme="github"
-                name="blob-diff"
-                splits={2}
-                value={[this.props.current, this.props.previous]}
-                readOnly
-                wrapEnabled
-                setOptions={{
-                    showInvisibles: true,
-                }}
-                width="100%"
-                fontSize="16px"
-                markers={this.getDiff(this.props.current, this.props.previous)}
-                editorProps={{ $blockScrolling: true }}
-                onScroll={this.doScroll}
-            />
-        );
-    }
+            const selectionLeft = split.getEditor(0).getSelection();
+            const selectionRight = split.getEditor(1).getSelection();
+
+            if (
+                mappings[0][selectionLeft.lead.row] !== undefined &&
+                mappings[0][selectionLeft.lead.row] !== selectionRight.lead.row
+            ) {
+                split
+                    .getEditor(1)
+                    .gotoLine(mappings[0][selectionLeft.lead.row] + 1);
+            }
+        }
+        editor.current = newEditor;
+        if (newEditor) {
+            newEditor.split
+                .getEditor(0)
+                .getSelection()
+                .on("changeCursor", onCursorChange);
+        }
+    }, []);
+
+    useEffect(() => {
+        getDiff(current, previous);
+    }, [getDiff, current, previous]);
+
+    return (
+        <SplitEditor
+            ref={editorRef}
+            mode="text"
+            theme="github"
+            name="blob-diff"
+            splits={2}
+            value={[current, previous]}
+            readOnly
+            wrapEnabled
+            setOptions={{
+                showInvisibles: true,
+            }}
+            width="100%"
+            fontSize="16px"
+            markers={markers}
+            editorProps={{ $blockScrolling: true }}
+        />
+    );
 }
 
-class DiffView extends Component {
-    state = {
-        error: null,
-    };
+export default function DiffTextBlob() {
+    const remote = useRemote();
+    const remotePath = remote ? `/remote/${remote}` : "";
+    const api = useContext(APIContext);
+    const { current: currentHash, previous: previousHash } = useParams();
+    const [error, setError] = useState(null);
+    const [currentBlob, setCurrentBlob] = useState(null);
+    const [previousBlob, setPreviousBlob] = useState(null);
 
-    async updateTextBlob() {
+    async function updateTextBlob() {
         try {
-            let currentBlob = await this.props.api.getObject(
-                "blob",
-                this.props.params.current
-            );
-            let previousBlob = await this.props.api.getObject(
-                "blob",
-                this.props.params.previous
-            );
-            this.setState({
-                current: currentBlob.data,
-                previous: previousBlob.data,
-            });
+            let currentBlob = await api.getObject("blob", currentHash);
+            let previousBlob = await api.getObject("blob", previousHash);
+            setCurrentBlob(currentBlob.data);
+            setPreviousBlob(previousBlob.data);
         } catch (error) {
-            this.setState({ error });
+            setError(error);
         }
     }
 
-    componentDidMount() {
-        this.updateTextBlob();
-    }
+    const getTextBlob = useCallback(updateTextBlob, [
+        api,
+        currentHash,
+        previousHash,
+    ]);
 
-    componentDidUpdate(prevProps) {
-        if (prevProps !== this.props) this.updateTextBlob();
-    }
+    useEffect(() => {
+        getTextBlob();
+    }, [getTextBlob]);
 
-    render() {
-        const remotePath = this.props.remote
-            ? `/remote/${this.props.remote}`
-            : "";
-        return (
-            <View fluid error={this.state.error}>
-                {this.state.current && this.state.previous ? (
-                    <div className="card-body">
-                        <div className="card-header">
-                            <div className="media">
-                                <div className="align-self-center media-body">
-                                    Blob diff
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-md-12">
-                                <table
-                                    className="table table-striped table-bordered table-hover"
-                                    id="label-table"
-                                >
-                                    <tbody>
-                                        <tr>
-                                            <th style={{ width: "49%" }}>
-                                                <Link
-                                                    to={`${remotePath}/blob/${this.state.current.id}`}
-                                                >
-                                                    {this.state.current.id}
-                                                </Link>
-                                            </th>
-                                            <td>
-                                                <Link
-                                                    to={`${remotePath}/diff/${this.state.previous.id}/${this.state.current.id}`}
-                                                >
-                                                    <button
-                                                        onClick={
-                                                            this
-                                                                .handleMalwareDownload
-                                                        }
-                                                        target="_self"
-                                                        className="btn btn-primary"
-                                                    >
-                                                        <FontAwesomeIcon
-                                                            icon={faExchangeAlt}
-                                                            pull="left"
-                                                            size="x"
-                                                        />
-                                                    </button>
-                                                </Link>
-                                            </td>
-                                            <td>
-                                                <Link
-                                                    to={`${remotePath}/blob/${this.state.previous.id}`}
-                                                >
-                                                    {this.state.previous.id}
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-md-12">
-                                <DiffTextBlobContentPresenter
-                                    current={this.state.current.content}
-                                    previous={this.state.previous.content}
-                                />
+    return (
+        <View fluid error={error}>
+            {currentBlob && previousBlob ? (
+                <div className="card-body">
+                    <div className="card-header">
+                        <div className="media">
+                            <div className="align-self-center media-body">
+                                Blob diff
                             </div>
                         </div>
                     </div>
-                ) : (
-                    []
-                )}
-            </View>
-        );
-    }
+                    <div className="row">
+                        <div className="col-md-12">
+                            <table
+                                className="table table-striped table-bordered table-hover"
+                                id="label-table"
+                            >
+                                <tbody>
+                                    <tr>
+                                        <th style={{ width: "49%" }}>
+                                            <Link
+                                                to={`${remotePath}/blob/${currentBlob.id}`}
+                                            >
+                                                {currentBlob.id}
+                                            </Link>
+                                        </th>
+                                        <td>
+                                            <Link
+                                                to={`${remotePath}/diff/${previousBlob.id}/${currentBlob.id}`}
+                                            >
+                                                <button
+                                                    target="_self"
+                                                    className="btn btn-primary"
+                                                >
+                                                    <FontAwesomeIcon
+                                                        icon={faExchangeAlt}
+                                                        pull="left"
+                                                        size="x"
+                                                    />
+                                                </button>
+                                            </Link>
+                                        </td>
+                                        <td>
+                                            <Link
+                                                to={`${remotePath}/blob/${previousBlob.id}`}
+                                            >
+                                                {previousBlob.id}
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-md-12">
+                            <DiffTextBlobContentPresenter
+                                current={currentBlob.content}
+                                previous={previousBlob.content}
+                            />
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                []
+            )}
+        </View>
+    );
 }
-
-function ConnectedDiffView(props) {
-    const remote = useRemote();
-    const api = useContext(APIContext);
-    const params = useParams();
-    return <DiffView {...props} remote={remote} api={api} params={params} />;
-}
-
-export default ConnectedDiffView;

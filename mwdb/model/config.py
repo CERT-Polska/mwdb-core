@@ -9,17 +9,12 @@ from .object import Object
 
 
 class Config(Object):
-    __tablename__ = "static_config"
-
-    id = db.Column(db.Integer, db.ForeignKey("object.id"), primary_key=True)
-    family = db.Column(db.String(32), nullable=False, index=True)
-    config_type = db.Column(
-        db.String(32), index=True, nullable=False, server_default="static"
-    )
-    _cfg = db.Column("cfg", JSONB, nullable=False)
+    family = db.Column(db.String(32), index=True)
+    config_type = db.Column(db.String(32), index=True)
+    _cfg = db.Column("cfg", JSONB)
 
     __mapper_args__ = {
-        "polymorphic_identity": __tablename__,
+        "polymorphic_identity": "static_config",
     }
 
     @property
@@ -35,7 +30,7 @@ class Config(Object):
         cls,
         cfg,
         family,
-        config_type,
+        config_type=None,
         parent=None,
         attributes=None,
         share_with=None,
@@ -45,7 +40,10 @@ class Config(Object):
         dhash = config_dhash(cfg)
 
         cfg_obj = Config(
-            dhash=dhash, _cfg=config_encode(cfg), family=family, config_type=config_type
+            dhash=dhash,
+            _cfg=config_encode(cfg),
+            family=family,
+            config_type=config_type or "static",
         )
         return cls._get_or_create(
             cfg_obj,

@@ -10,17 +10,14 @@ from .object import Object
 
 
 class TextBlob(Object):
-    __tablename__ = "text_blob"
-
-    id = db.Column(db.Integer, db.ForeignKey("object.id"), primary_key=True)
-    blob_name = db.Column(db.String, nullable=False, index=True)
-    blob_size = db.Column(db.Integer, nullable=False, index=True)
-    blob_type = db.Column(db.String(32), nullable=False, index=True)
-    _content = db.Column("content", db.String(), nullable=False)
-    last_seen = db.Column(db.DateTime, nullable=False, index=True)
+    blob_name = db.Column(db.String, index=True)
+    blob_size = db.Column(db.Integer, index=True)
+    blob_type = db.Column(db.String(32), index=True)
+    _content = db.Column("content", db.String())
+    last_seen = db.Column(db.DateTime, index=True)
 
     __mapper_args__ = {
-        "polymorphic_identity": __tablename__,
+        "polymorphic_identity": "text_blob",
     }
 
     @hybrid_property

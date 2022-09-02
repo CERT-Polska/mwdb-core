@@ -210,7 +210,7 @@ class Object(db.Model):
     __tablename__ = "object"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    type = db.Column(db.String(50), nullable=False)
+    type = db.Column(db.String(50), index=True, nullable=False)
     dhash = db.Column(db.String(64), unique=True, index=True, nullable=False)
     upload_time = db.Column(
         db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow
@@ -226,7 +226,7 @@ class Object(db.Model):
         deferred=True,
     )
 
-    __mapper_args__ = {"polymorphic_identity": __tablename__, "polymorphic_on": type}
+    __mapper_args__ = {"polymorphic_identity": "object", "polymorphic_on": type}
 
     parents = db.relationship(
         "Object",

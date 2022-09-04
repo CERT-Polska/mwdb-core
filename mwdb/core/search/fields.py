@@ -3,7 +3,6 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, List, Type, Union
 
-import regex
 from dateutil.relativedelta import relativedelta
 from flask import g
 from luqum.tree import Range, Term
@@ -68,7 +67,7 @@ def make_jsonpath(field_path: List[str]) -> str:
     def jsonpath_escape(field):
         """Escapes field to be correctly represented in jsonpath"""
         # Escape all unescaped double quotes
-        field = regex.sub(r'(?<!\\)(?:\\\\)*\K["]', '\\"', field)
+        field = re.sub(r'\\([\s\S])|(")', r"\\\1\2", field)
         # Find trailing non-escaped asterisks
         asterisk_r = re.search(r"(?<!\\)(?:\\\\)*([*]+)$", field)
         if not asterisk_r:
@@ -78,7 +77,7 @@ def make_jsonpath(field_path: List[str]) -> str:
             field = field[:-asterisk_levels]
             asterisks = asterisk_levels * "[*]"
         # Unescape all escaped asterisks
-        field = regex.sub(r"(?<!\\)(?:\\\\)*\K(\\[*])", "*", field)
+        field = re.sub(r"\\([\s\S)|(\*)])", r"\1\2", field)
         return f'"{field}"{asterisks}'
 
     return ".".join(["$"] + [jsonpath_escape(field) for field in field_path])

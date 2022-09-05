@@ -13,6 +13,7 @@ from . import db
 from .group import Group, Member
 from .oauth import OpenIDUserIdentity
 from .object import ObjectPermission, favorites
+from .quick_query import QuickQuery
 
 
 class User(db.Model):
@@ -70,6 +71,11 @@ class User(db.Model):
         "Comment",
         back_populates="author",
     )
+
+    quick_queries = db.relationship(
+        "QuickQuery", back_populates="owner", cascade="all, delete"
+    )
+
     api_keys = db.relationship(
         "APIKey", foreign_keys="APIKey.user_id", backref="user", cascade="all, delete"
     )

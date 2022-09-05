@@ -13,7 +13,6 @@ from . import db
 from .group import Group, Member
 from .oauth import OpenIDUserIdentity
 from .object import ObjectPermission, favorites
-from .quick_query import QuickQuery
 
 
 class User(db.Model):

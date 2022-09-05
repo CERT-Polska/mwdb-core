@@ -12,7 +12,9 @@ class QuickQuery(db.Model):
     name = db.Column(db.String(64), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
 
     owner = db.relationship("User", lazy="joined")
 

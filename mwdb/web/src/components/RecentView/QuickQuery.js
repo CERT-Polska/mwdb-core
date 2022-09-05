@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -27,7 +28,7 @@ function QuickQueryItem(props) {
                     title="Delete Quick query."
                     onClick={props.onDelete}
                 >
-                    <FontAwesomeIcon icon="times" pull="right" size="1x" />
+                    <FontAwesomeIcon icon={faTimes} pull="right" size="1x" />
                 </span>
             ) : (
                 []
@@ -136,7 +137,6 @@ export default function QuickQuery(props) {
             }}
         />,
     ];
-
     const queryBadges = queries
         .sort((a, b) => a.id - b.id)
         .map((v) => (

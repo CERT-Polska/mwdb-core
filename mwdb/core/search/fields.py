@@ -1,9 +1,8 @@
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, List, Type, Union
+from typing import Any, List, Tuple, Type, Union
 
-import regex
 from dateutil.relativedelta import relativedelta
 from flask import g
 from luqum.tree import Range, Term
@@ -59,34 +58,58 @@ def get_term_value(node: Term) -> str:
         return node.unescaped_value
 
 
-def make_jsonpath(field_path: List[str]) -> str:
+def make_jsonpath(field_path: List[Tuple[str, int]]) -> str:
     """
     Makes jsonpath from field path
     key.array*.child => $."key"."array"[*]."child"
     """
 
-    def jsonpath_escape(field):
-        """Escapes field to be correctly represented in jsonpath"""
-        # Escape all unescaped double quotes
-        field = regex.sub(r'(?<!\\)(?:\\\\)*\K["]', '\\"', field)
-        # Find trailing non-escaped asterisks
-        asterisk_r = re.search(r"(?<!\\)(?:\\\\)*([*]+)$", field)
-        if not asterisk_r:
-            asterisks = ""
-        else:
-            asterisk_levels = len(asterisk_r.group(1))
-            field = field[:-asterisk_levels]
-            asterisks = asterisk_levels * "[*]"
-        # Unescape all escaped asterisks
-        field = regex.sub(r"(?<!\\)(?:\\\\)*\K(\\[*])", "*", field)
-        return f'"{field}"{asterisks}'
+    def jsonpath_quote(field):
+        """Quotes field to be correctly represented in jsonpath"""
+        # Escape all double quotes and backslashes
+        field = re.sub(r'(["\\])', r"\\\1", field)
+        return f'"{field}"'
 
-    return ".".join(["$"] + [jsonpath_escape(field) for field in field_path])
+    _, root_asterisks = field_path[0]
+    root = "$" + ("[*]" * root_asterisks)
+    return ".".join(
+        [root]
+        + [
+            jsonpath_quote(field) + ("[*]" * asterisks)
+            for field, asterisks in field_path[1:]
+        ]
+    )
+
+
+def make_jsonpath_range_query(jsonpath: str, expression: Range) -> str:
+    conditions = []
+
+    def ensure_number(value):
+        if value.isdigit():
+            return value
+        else:
+            match = re.match(r"\d+(?:[.]\d+)?", value)
+            if not match:
+                raise UnsupportedGrammarException("Invalid range value")
+            return value
+
+    if expression.low.value != "*":
+        operator = ">=" if expression.include_low else ">"
+        conditions.append(f"@ {operator} {ensure_number(expression.low.value)}")
+    if expression.high.value != "*":
+        operator = "<=" if expression.include_high else "<"
+        conditions.append(f"@ {operator} {ensure_number(expression.high.value)}")
+    if not conditions:
+        # Handle [* TO *]
+        return jsonpath
+    return f'{jsonpath} ? ({" && ".join(conditions)})'
 
 
 class BaseField:
     accepts_range = False
     accepts_subquery = False
+    accepts_subfields = False
+    accepts_wildcards = False
 
     def __init__(self, column):
         self.column = column
@@ -95,17 +118,36 @@ class BaseField:
     def field_type(self) -> Type[Object]:
         return self.column.class_
 
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        raise NotImplementedError()
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
+        raise NotImplementedError
+
+    def get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
+        if not self.accepts_subfields and len(subfields) > 1:
+            raise FieldNotQueryableException(
+                f"Field doesn't have subfields: "
+                f"{'.'.join([field for field, _ in subfields[1:]])}"
+            )
+        if (
+            not self.accepts_wildcards
+            and isinstance(expression, Term)
+            and expression.has_wildcard()
+        ):
+            raise UnsupportedGrammarException(
+                "Wildcards are not allowed for this field"
+            )
+        return self._get_condition(expression, subfields)
 
 
 class StringField(BaseField):
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
+    accepts_wildcards = True
 
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         value = get_term_value(expression)
         if expression.has_wildcard():
             return self.column.like(value)
@@ -115,13 +157,11 @@ class StringField(BaseField):
 
 class SizeField(BaseField):
     accepts_range = True
+    accepts_wildcards = True
 
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
         def parse_size(size):
@@ -168,16 +208,15 @@ class SizeField(BaseField):
 
 
 class ListField(BaseField):
+    accepts_wildcards = True
+
     def __init__(self, column, value_column):
         super().__init__(column)
         self.value_column = value_column
 
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         value = get_term_value(expression)
 
         if expression.has_wildcard():
@@ -187,16 +226,15 @@ class ListField(BaseField):
 
 
 class UUIDField(BaseField):
+    accepts_wildcards = True
+
     def __init__(self, column, value_column):
         super().__init__(column)
         self.value_column = value_column
 
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         value = get_term_value(expression)
 
         if expression.has_wildcard():
@@ -211,16 +249,9 @@ class UUIDField(BaseField):
 
 
 class FavoritesField(BaseField):
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-        if expression.has_wildcard():
-            raise UnsupportedGrammarException(
-                "Wildcards are not allowed for shared field"
-            )
-
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         value = get_term_value(expression)
 
         if (
@@ -243,14 +274,19 @@ class FavoritesField(BaseField):
 
 
 class AttributeField(BaseField):
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            attribute_key = remainder[0]
-        else:
+    accepts_range = True
+    accepts_subfields = True
+    accepts_wildcards = True
+
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
+        if len(subfields) <= 1:
             raise UnsupportedGrammarException(
                 "Missing attribute key (attribute.<key>:)"
             )
 
+        attribute_key, _ = subfields[1]
         attribute_definition = AttributeDefinition.query_for_read(
             key=attribute_key, include_hidden=True
         ).first()
@@ -260,44 +296,45 @@ class AttributeField(BaseField):
 
         if (
             attribute_definition.hidden
-            and expression.has_wildcard()
+            and (type(expression) is Range or expression.has_wildcard())
             and not g.auth_user.has_rights(Capabilities.reading_all_attributes)
         ):
             raise FieldNotQueryableException(
-                "Wildcards are not allowed for hidden attributes"
+                "Wildcards and ranges are not allowed for hidden attributes"
             )
 
-        value = get_term_value(expression)
-        json_path = make_jsonpath(remainder[1:])
-        # Make aliased function call
-        json_elements = func.jsonb_path_query(Attribute.value, json_path).alias(
-            "json_element"
-        )
-        # Use #>>'{}' to extract value as text
-        json_element = column("json_element").operate(
-            JSONPATH_ASTEXT, "{}", result_type=Text
-        )
-        if expression.has_wildcard():
-            condition = json_element.like(value)
+        json_path = make_jsonpath(subfields[1:])
+        if type(expression) is Range:
+            json_query_path = make_jsonpath_range_query(json_path, expression)
+            value_condition = exists(
+                select([1]).select_from(
+                    func.jsonb_path_query(Attribute.value, json_query_path)
+                )
+            )
         else:
-            condition = json_element == value
-        value_condition = exists(
-            select([1]).select_from(json_elements).where(condition)
-        )
+            value = get_term_value(expression)
+            # Make aliased function call
+            json_elements = func.jsonb_path_query(Attribute.value, json_path).alias(
+                "json_element"
+            )
+            # Use #>>'{}' to extract value as text
+            json_element = column("json_element").operate(
+                JSONPATH_ASTEXT, "{}", result_type=Text
+            )
+            if expression.has_wildcard():
+                condition = json_element.like(value)
+            else:
+                condition = json_element == value
+            value_condition = exists(
+                select([1]).select_from(json_elements).where(condition)
+            )
         return self.column.any(and_(Attribute.key == attribute_key, value_condition))
 
 
 class ShareField(BaseField):
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-        if expression.has_wildcard():
-            raise UnsupportedGrammarException(
-                "Wildcards are not allowed for shared field"
-            )
-
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         value = expression.unescaped_value
 
         group = db.session.query(Group).filter(Group.name == value).first()
@@ -314,16 +351,9 @@ class ShareField(BaseField):
 
 
 class UploaderField(BaseField):
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-        if expression.has_wildcard():
-            raise UnsupportedGrammarException(
-                "Wildcards are not allowed for uploader field"
-            )
-
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         value = expression.unescaped_value
         if value == "public":
             raise ObjectNotFoundException(
@@ -368,8 +398,13 @@ class UploaderField(BaseField):
 
 
 class JSONField(BaseField):
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        value = get_term_value(expression)
+    accepts_range = True
+    accepts_subfields = True
+    accepts_wildcards = True
+
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         """
         Target query:
             select cfg from static_config
@@ -380,20 +415,29 @@ class JSONField(BaseField):
                 where json_element  #>> '{}' like '2'
             );
         """
-        json_path = make_jsonpath(remainder)
-        # Make aliased function call
-        json_elements = func.jsonb_path_query(self.column, json_path).alias(
-            "json_element"
-        )
-        # Use #>>'{}' to extract value as text
-        json_element = column("json_element").operate(
-            JSONPATH_ASTEXT, "{}", result_type=Text
-        )
-        if expression.has_wildcard():
-            condition = json_element.like(value)
+        json_path = make_jsonpath(subfields)
+        if type(expression) is Range:
+            json_query_path = make_jsonpath_range_query(json_path, expression)
+            return exists(
+                select([1]).select_from(
+                    func.jsonb_path_query(self.column, json_query_path)
+                )
+            )
         else:
-            condition = json_element == value
-        return exists(select([1]).select_from(json_elements).where(condition))
+            value = get_term_value(expression)
+            # Make aliased function call
+            json_elements = func.jsonb_path_query(self.column, json_path).alias(
+                "json_element"
+            )
+            # Use #>>'{}' to extract value as text
+            json_element = column("json_element").operate(
+                JSONPATH_ASTEXT, "{}", result_type=Text
+            )
+            if expression.has_wildcard():
+                condition = json_element.like(value)
+            else:
+                condition = json_element == value
+            return exists(select([1]).select_from(json_elements).where(condition))
 
 
 class DatetimeField(BaseField):
@@ -434,7 +478,6 @@ class DatetimeField(BaseField):
         return border_time
 
     def _get_date_range(self, date_node):
-
         formats = [
             ("%Y-%m-%d %H:%M", timedelta(minutes=1)),
             ("%Y-%m-%d %H:%M:%S", timedelta(seconds=1)),
@@ -453,12 +496,9 @@ class DatetimeField(BaseField):
                 f"Unsupported date-time format ({date_string})"
             )
 
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         if isinstance(expression, Range):
             if expression.high.value != "*" and not expression.include_high:
                 raise UnsupportedGrammarException(
@@ -491,10 +531,6 @@ class DatetimeField(BaseField):
             else:
                 high = self._get_date_range(expression.high)[1]
         else:
-            if expression.has_wildcard():
-                raise UnsupportedGrammarException(
-                    "Wildcards are not allowed for date-time field"
-                )
             low, high = self._get_date_range(expression)
 
         return and_(self.column >= low, self.column < high)
@@ -503,11 +539,9 @@ class DatetimeField(BaseField):
 class RelationField(BaseField):
     accepts_subquery = True
 
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         if not isinstance(expression, Subquery):
             raise UnsupportedGrammarException(
                 "Only subquery is allowed for relation field"
@@ -520,16 +554,9 @@ class CommentAuthorField(BaseField):
         super().__init__(column)
         self.value_column = value_column
 
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-        if expression.has_wildcard():
-            raise UnsupportedGrammarException(
-                "Wildcards are not allowed for comment_author field"
-            )
-
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         value = get_term_value(expression)
 
         user = db.session.query(User).filter(User.login == value).first()
@@ -542,12 +569,9 @@ class CommentAuthorField(BaseField):
 class UploadCountField(BaseField):
     accepts_range = True
 
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
-
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         def parse_upload_value(value):
             try:
                 value = int(value)
@@ -624,14 +648,11 @@ class MultiField(BaseField):
                 f"{queried_type.__name__} is not valid data type"
             )
 
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         string_column = ["TextBlob._content"]
         json_column = ["Config._cfg"]
-
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
 
         value = get_term_value(expression).strip()
         values_list = re.split("\\s+", value)
@@ -650,21 +671,15 @@ class MultiField(BaseField):
                 # hashes values
                 condition = or_(condition, (column == value))
 
-        if expression.has_wildcard():
-            raise UnsupportedGrammarException(
-                "Wildcards are not allowed for multi field"
-            )
-        else:
-            return condition
+        return condition
 
 
 class FileNameField(BaseField):
-    def get_condition(self, expression: Expression, remainder: List[str]) -> Any:
-        if remainder:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: {'.'.join(remainder)}"
-            )
+    accepts_wildcards = True
 
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
         value = get_term_value(expression)
 
         if expression.has_wildcard():

@@ -322,6 +322,14 @@ If you search by more than one value contained in an array, just type:
 
    cfg.field.array*:"*1, 2*"
 
+Starting from v2.8.0, you can also use range queries for numbers, for example:
+
+.. code-block::
+
+   cfg.field.array*:[1 TO 3]
+
+looks for any configuration that contains `field.array` with at least one number element within range 1 to 3 inclusively.
+
 Favorites field (\ ``favorites:``\ )
 ------------------------------------------------------------
 
@@ -483,6 +491,30 @@ If you want to search for Configs that have configuration content which contain 
 
     Wildcards are not allowed for field ``multi:``. They are automatically used for Config configuration and Blob content.
 
+Escaping special characters
+---------------------------
+
+Field labels may contain characters that need to be escaped in query. Let's consider a config field with space character:
+
+.. code-block:: json
+
+   {
+       "decoy domains": [ "evil.com" ]
+   }
+
+Special characters (like space) need to be escaped using backslash, so correct query looks like below:
+
+.. code-block::
+
+   config.cfg.decoy\ domains*:"evil.com"
+
+Other special characters that also need to be escaped are:
+
+- dots (``\.``)
+- colons (``\:``)
+- asterisks (``\*``)
+- backslashes (``\\``)
+
 Quick queries
 -------------
 
@@ -516,4 +548,3 @@ Afterwards, you can see your newly added query as another black-coloured badge. 
 .. image:: ../_static/7dXJkSH.png
    :target: ../_static/7dXJkSH.png
    :alt: 
-

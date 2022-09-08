@@ -325,9 +325,6 @@ def test_search_json_special_chars(admin_session):
     found_objs = test.search(f'config.cfg.array\\*with\\*stars\\\\\\**:{value}')
     assert len(found_objs) == 1
 
-    found_objs = test.search(f'config.cfg."array*with*stars\\\\*"*:{value}')
-    assert len(found_objs) == 1
-
     found_objs = test.search(f'config.cfg.key\\\\with\\\\slashes:{value}')
     assert len(found_objs) == 1
 
@@ -337,7 +334,7 @@ def test_search_json_special_chars(admin_session):
     found_objs = test.search(f'config.cfg.key\\"with\\:quote:{value}')
     assert len(found_objs) == 1
 
-    found_objs = test.search(f'config.cfg.key\\"with\\\\\\"quotes:{value}')
+    found_objs = test.search(f'config.cfg.key"with\\\\"quotes:{value}')
     assert len(found_objs) == 1
 
 

@@ -12,11 +12,7 @@ from mwdb.model import (
     User,
 )
 
-from .exceptions import (
-    FieldNotQueryableException,
-    MultipleObjectsQueryException,
-    UnsupportedGrammarException,
-)
+from .exceptions import FieldNotQueryableException, MultipleObjectsQueryException
 from .fields import (
     AttributeField,
     BaseField,
@@ -100,11 +96,10 @@ def parse_field_path(field_path):
     - . - field separator
     - " - quote for control character escaping
     """
-    quoted = False
     fields = [""]
     last_pos = 0
 
-    for match in re.finditer(r'\\.|[."]|[*]+(?:[.]|$)', field_path):
+    for match in re.finditer(r"\\.|[.]|[*]+(?:[.]|$)", field_path):
         control_char = match.group(0)
         control_char_pos, next_pos = match.span(0)
         # Append remaining characters to the last field
@@ -114,27 +109,15 @@ def parse_field_path(field_path):
         if control_char[0] == "\\":
             # Escaped character
             fields[-1] = fields[-1] + control_char[1]
-        elif control_char == '"':
-            # Switch quoted state
-            quoted = not quoted
         elif control_char == ".":
-            if quoted:
-                fields[-1] = fields[-1] + control_char
-            else:
-                # End of field
-                fields.append("")
+            # End of field
+            fields.append("")
         elif control_char[0] == "*":
-            if quoted:
-                fields[-1] = fields[-1] + control_char
-            else:
-                # Terminate field as a tuple with count of trailing asterisks
-                fields[-1] = (fields[-1], control_char.count("*"))
-                # End of field with trailing asterisks
-                if control_char[-1] == ".":
-                    fields.append("")
-
-    if quoted:
-        raise UnsupportedGrammarException("Unterminated quoted string in field path")
+            # Terminate field as a tuple with count of trailing asterisks
+            fields[-1] = (fields[-1], control_char.count("*"))
+            # End of field with trailing asterisks
+            if control_char[-1] == ".":
+                fields.append("")
 
     if len(field_path) > last_pos:
         # Last field should not be a tuple at this point. If it is: something went wrong

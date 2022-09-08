@@ -1,6 +1,5 @@
+import re
 from typing import Dict, List, Tuple, Type
-
-import regex
 
 from mwdb.model import (
     Comment,
@@ -88,14 +87,53 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
 }
 
 
+def parse_field_path(field_path):
+    """
+    Extract subfields from fields path with proper control character handling:
+
+    - \\x - escaped character
+    - * - array element reference e.g. (array*:2)
+    - . - field separator
+    - " - quote for control character escaping
+    """
+    fields = [""]
+    last_pos = 0
+
+    for match in re.finditer(r"\\.|[.]|[*]+(?:[.]|$)", field_path):
+        control_char = match.group(0)
+        control_char_pos, next_pos = match.span(0)
+        # Append remaining characters to the last field
+        fields[-1] = fields[-1] + field_path[last_pos:control_char_pos]
+        last_pos = next_pos
+        # Check control character
+        if control_char[0] == "\\":
+            # Escaped character
+            fields[-1] = fields[-1] + control_char[1]
+        elif control_char == ".":
+            # End of field
+            fields.append("")
+        elif control_char[0] == "*":
+            # Terminate field as a tuple with count of trailing asterisks
+            fields[-1] = (fields[-1], control_char.count("*"))
+            # End of field with trailing asterisks
+            if control_char[-1] == ".":
+                fields.append("")
+
+    if len(field_path) > last_pos:
+        # Last field should not be a tuple at this point. If it is: something went wrong
+        assert type(fields[-1]) is str
+        fields[-1] = fields[-1] + field_path[last_pos:]
+    return [field if type(field) is tuple else (field, 0) for field in fields]
+
+
 def get_field_mapper(
     queried_type: Type[Object], field_selector: str
 ) -> Tuple[BaseField, List[str]]:
-    field_path = regex.split(r"(?<!\\)(?:\\\\)*\K[.]", field_selector)
-
+    field_path = parse_field_path(field_selector)
+    field_name, asterisks = field_path[0]
     # Map object type selector
-    if field_path[0] in object_mapping:
-        selected_type = object_mapping[field_path[0]]
+    if field_name in object_mapping:
+        selected_type = object_mapping[field_name]
         # Because object type selector determines queried type, we can't use specialized
         # fields from different types in the same query
         if not issubclass(selected_type, queried_type):
@@ -108,10 +146,12 @@ def get_field_mapper(
         selected_type = queried_type
 
     # Map object field selector
-    if field_path[0] in field_mapping[selected_type.__name__]:
-        field = field_mapping[selected_type.__name__][field_path[0]]
-    elif field_path[0] in field_mapping[Object.__name__]:
-        field = field_mapping[Object.__name__][field_path[0]]
+    field_name, asterisks = field_path[0]
+    if field_name in field_mapping[selected_type.__name__]:
+        field = field_mapping[selected_type.__name__][field_name]
+    elif field_name in field_mapping[Object.__name__]:
+        field = field_mapping[Object.__name__][field_name]
     else:
-        raise FieldNotQueryableException(f"No such field: {field_selector}")
-    return field, field_path[1:]
+        raise FieldNotQueryableException(f"No such field: {field_name}")
+
+    return field, field_path

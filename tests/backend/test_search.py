@@ -283,6 +283,32 @@ def test_search_json(admin_session):
     assert len(found_objs) == 1
 
 
+def test_search_json_ranges(admin_session):
+    test = admin_session
+
+    value = base62uuid().lower()
+
+    test.add_config(
+        None,
+        "malwarex",
+        {"array": [1, 10, 30], "value": 100, "key": value},  # for deduplication
+    )
+    found_objs = test.search(f"config.cfg.array*:[10 TO 100]")
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f"config.cfg.value:<100")
+    assert len(found_objs) == 0
+
+    found_objs = test.search(f"config.cfg.value:<=100")
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f"config.cfg.value:>100")
+    assert len(found_objs) == 0
+
+    found_objs = test.search(f"config.cfg.value:>=100")
+    assert len(found_objs) == 1
+
+
 def test_search_json_special_chars(admin_session):
     test = admin_session
 

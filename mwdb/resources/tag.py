@@ -6,7 +6,7 @@ from werkzeug.exceptions import NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.model import ObjectPermission, Tag, db, object_tag_table
+from mwdb.model import ObjectPermission, Tag, db
 from mwdb.schema.tag import (
     TagItemResponseSchema,
     TagListRequestSchema,
@@ -64,11 +64,10 @@ class TagListResource(Resource):
         tags = (
             db.session.query(Tag.tag)
             .distinct(Tag.tag)
-            .join(object_tag_table, object_tag_table.c.tag_id == Tag.id)
             .join(
                 ObjectPermission,
                 and_(
-                    ObjectPermission.object_id == object_tag_table.c.object_id,
+                    ObjectPermission.object_id == Tag.object_id,
                     g.auth_user.is_member(ObjectPermission.group_id),
                 ),
             )
@@ -78,7 +77,6 @@ class TagListResource(Resource):
         if tag_prefix:
             tags = tags.filter(Tag.tag.startswith(tag_prefix, autoescape=True))
         tags = tags.all()
-
         schema = TagItemResponseSchema(many=True)
         return schema.dump(tags)
 

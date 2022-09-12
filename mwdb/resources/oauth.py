@@ -13,6 +13,7 @@ from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
+from mwdb.schema.group import GroupNameSchemaBase
 from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,
     OpenIDLoginResponseSchema,
@@ -23,7 +24,6 @@ from mwdb.schema.oauth import (
     OpenIDProviderUpdateRequestSchema,
 )
 from mwdb.schema.user import UserLoginSchemaBase
-from mwdb.schema.group import GroupNameSchemaBase
 
 from . import (
     load_schema,

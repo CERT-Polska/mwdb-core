@@ -117,14 +117,16 @@ class OpenIDProviderResource(Resource):
             jwks_endpoint=jwks_endpoint,
         )
 
-        group_name_obj = load_schema({"name": obj["name"]}, GroupNameSchemaBase())
+        group_name = obj["name"] + "_Open_ID_Provider"
+
+        group_name_obj = load_schema({"name": group_name}, GroupNameSchemaBase())
 
         if db.session.query(
             exists().where(Group.name == group_name_obj["name"])
         ).scalar():
             raise Conflict("Group exists yet")
 
-        group = Group(name=group_name_obj["name"])
+        group = Group(name=group_name_obj["name"], immutable=True)
 
         db.session.add(group)
         db.session.add(provider)

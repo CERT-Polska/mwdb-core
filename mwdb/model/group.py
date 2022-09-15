@@ -24,6 +24,7 @@ class Group(db.Model):
     # - group members can list all the other group memebers
     # - they are candidates for sharing when upload_as:*
     workspace = db.Column(db.Boolean, nullable=False, default=True)
+    immutable = db.Column(db.Boolean, nullable=False, default=False)
 
     members = db.relationship(
         "Member", back_populates="group", cascade="all, delete-orphan"
@@ -57,14 +58,6 @@ class Group(db.Model):
             self.private
             and db.session.query(User).filter(User.login == self.name).first().pending
         )
-
-    @property
-    def immutable(self):
-        """
-        Immutable groups can't be renamed, joined and left.
-        The only thing that can be changed are capabilities.
-        """
-        return self.private or self.name == self.PUBLIC_GROUP_NAME
 
     @property
     def user_logins(self):

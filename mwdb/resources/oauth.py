@@ -418,7 +418,8 @@ class OpenIDRegisterUserResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        group = db.session.query(Group).filter(Group.name == provider_name).first()
+        group_name = provider_name + "_Open_ID_Provider"
+        group = db.session.query(Group).filter(Group.name == group_name).first()
         if group is None:
             raise NotFound("No such group")
 
@@ -551,8 +552,8 @@ class OpenIDBindAccountResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        group = db.session.query(Group).filter(Group.name == provider_name).first()
-
+        group_name = provider_name + "_Open_ID_Provider"
+        group = db.session.query(Group).filter(Group.name == group_name).first()
         if group is None:
             raise NotFound("No such group")
 

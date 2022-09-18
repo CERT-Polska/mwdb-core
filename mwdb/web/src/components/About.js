@@ -29,7 +29,7 @@ export default function About() {
                                 Try out our{" "}
                                 <a
                                     href="https://pypi.org/project/mwdblib/"
-                                    style={{ color: "lime" }}
+                                    style={{ color: "hsla(0,0%,100%,.5)" }}
                                 >
                                     mwdblib library
                                 </a>

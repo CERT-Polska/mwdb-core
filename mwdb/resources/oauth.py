@@ -117,7 +117,7 @@ class OpenIDProviderResource(Resource):
             jwks_endpoint=jwks_endpoint,
         )
 
-        group_name = obj["name"] + "_Open_ID_Provider"
+        group_name = "OpenID_" + obj["name"]
 
         group_name_obj = load_schema({"name": group_name}, GroupNameSchemaBase())
 

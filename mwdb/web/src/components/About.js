@@ -26,7 +26,10 @@ export default function About() {
                                 <br />
                                 Version:{" "}
                                 <a
-                                    href={"https://github.com/CERT-Polska/mwdb-core/releases/tag/v" + config.config["server_version"]}
+                                    href={
+                                        "https://github.com/CERT-Polska/mwdb-core/releases/tag/v" +
+                                        config.config["server_version"]
+                                    }
                                 >
                                     {config.config["server_version"]}
                                 </a>

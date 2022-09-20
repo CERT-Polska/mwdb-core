@@ -117,14 +117,14 @@ class OpenIDProviderResource(Resource):
             jwks_endpoint=jwks_endpoint,
         )
 
-        group_name = "OpenID_" + obj["name"]
+        group_name = ("OpenID_" + obj["name"])[:32]
 
         group_name_obj = load_schema({"name": group_name}, GroupNameSchemaBase())
 
         if db.session.query(
             exists().where(Group.name == group_name_obj["name"])
         ).scalar():
-            raise Conflict("Group exists yet")
+            raise Conflict("Group exists yet, choose another provider name")
 
         group = Group(name=group_name_obj["name"], immutable=True)
 
@@ -296,9 +296,13 @@ class OpenIDSingleProviderResource(Resource):
         )
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
+        group = provider.get_group()
+
         db.session.delete(provider)
+        db.session.delete(group)
         db.session.commit()
 
+        hooks.on_removed_group(("OpenID_" + provider_name)[:32])
         logger.info("Provider was deleted", extra={"provider": provider_name})
         schema = OpenIDProviderSuccessResponseSchema()
         return schema.dump({"name": provider_name})
@@ -418,10 +422,7 @@ class OpenIDRegisterUserResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        group_name = provider_name + "_Open_ID_Provider"
-        group = db.session.query(Group).filter(Group.name == group_name).first()
-        if group is None:
-            raise NotFound("No such group")
+        group = provider.get_group()
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -552,10 +553,7 @@ class OpenIDBindAccountResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        group_name = provider_name + "_Open_ID_Provider"
-        group = db.session.query(Group).filter(Group.name == group_name).first()
-        if group is None:
-            raise NotFound("No such group")
+        group = provider.get_group()
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)

@@ -7,6 +7,50 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrade mwdb-core to latest version`.
 
+v2.8.0
+------
+
+Release includes few improvements of performance, integration and search capabilities.
+
+Complete changelog can be found here: `v2.8.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.8.0>`_.
+
+[Important change] Changes in database model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This release contains few model optimizations to improve query time, especially for tag queries.
+
+- Relationship between Object and Tag was converted from many-to-many to one-to-many. Tag is represented by (object_id, tag_string) association instead of (object_id, tag_id) with tag in separate Table.
+- Inheritance model is single-table based instead of join-based. All information is contained in single table Object instead of using separate tables for specialized fields, joined with common primary key.
+
+Database migration may take a while during upgrade and requires extra space (~70% more) because major data must be copied from one table to another.
+
+It's also recommended to make a database backup before upgrade.
+
+[New feature] Rich attributes rendering
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+...
+
+[Important change] Upgrade to Karton v5.0.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Changed name of ``karton.ini`` section that contains S3 client configuration from ``[minio]`` to ``[s3]``.
+
+In addition to this, you need to add a URI scheme to the address field and remove the secure field. If secure was 0, correct scheme is http://. If secure was 1, use https://.
+
+.. code-block:: diff
+
+    - [minio]
+    + [s3]
+      access_key = karton-test-access
+      secret_key = karton-test-key
+    - address = localhost:9000
+    + address = http://localhost:9000
+      bucket = karton
+    - secure = 0
+
+v5.0.0 maps ``[minio]`` configuration to correct ``[s3]`` configuration internally, but ``[minio]`` scheme is considered deprecated and can be removed in further major release.
+
 v2.7.0
 ------
 

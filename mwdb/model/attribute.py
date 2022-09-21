@@ -141,7 +141,7 @@ class AttributeDefinition(db.Model):
     key = db.Column(db.String(64), primary_key=True)
     label = db.Column(db.String(64), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    url_template = db.Column(db.Text, nullable=False)  # deprecated
+    url_template = db.Column(db.Text, nullable=False)
     rich_template = db.Column(db.Text, nullable=False)
     # Example value used with rich_template
     example_value = db.Column(db.Text, nullable=False)

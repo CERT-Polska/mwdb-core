@@ -1,7 +1,7 @@
+from werkzeug.exceptions import NotFound
+
 from mwdb.core.oauth import OpenIDSession
 from mwdb.model import Group
-
-from werkzeug.exceptions import NotFound
 
 from . import db
 

@@ -81,15 +81,7 @@ export function AttributeDetails() {
                         />
                     </AttributeItem>
                     <AttributeItem
-                        label={
-                            <React.Fragment>
-                                URL template
-                                <br />
-                                <span className="text-muted font-weight-normal">
-                                    (deprecated)
-                                </span>
-                            </React.Fragment>
-                        }
+                        label={<React.Fragment>URL template</React.Fragment>}
                     >
                         <EditableItem
                             name="url_template"

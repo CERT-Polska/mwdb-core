@@ -27,6 +27,7 @@ Features
    remotes-guide
    karton-guide
    oauth-guide
+   rich-attributes-guide
 
 Indices and tables
 ==================

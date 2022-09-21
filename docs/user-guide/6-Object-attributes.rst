@@ -181,3 +181,8 @@ Attributes marked as "hidden" can be only queried using exact search (without wi
 Hidden attributes can be used if you want to share the job identifier and allow to search associated objects without giving access to other job references for these objects.
 
 A good example is the mquery plugin. In case of mquery, we want to ensure that user will have access only to the results of jobs runned by themselves or shared by other users. Unfortunately, attribute key permissions are "all or nothing" and we can't define ACLs on the value level.
+
+Rich templates
+--------------
+
+Starting from v2.8.0, MWDB Core supports rich attribute value rendering. For more information, see :ref:`Rich attributes guide`.

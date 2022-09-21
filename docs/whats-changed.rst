@@ -24,12 +24,12 @@ This release contains few model optimizations to improve query time, especially 
 
 Database migration may take a while during upgrade and requires extra space (~70% more) because major data must be copied from one table to another.
 
-It's also recommended to make a database backup before upgrade.
+It's also recommended to **make a database backup before upgrade**.
 
 [New feature] Rich attributes rendering
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-...
+Starting from v2.8.0, MWDB Core supports rich attribute value rendering. For more information, see :ref:`Rich attributes guide`.
 
 [Important change] Upgrade to Karton v5.0.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

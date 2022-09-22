@@ -24,7 +24,7 @@ group_helper = sa.Table(
     sa.MetaData(),
     sa.Column("id", sa.Integer()),
     sa.Column("name", sa.String(32)),
-    sa.Column("Immutable", sa.Boolean()),
+    sa.Column("immutable", sa.Boolean()),
 )
 
 member_helper = sa.Table(

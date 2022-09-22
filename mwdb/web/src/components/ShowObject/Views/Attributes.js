@@ -20,6 +20,27 @@ for (let extraRenderers of fromPlugin("attributeRenderers")) {
     attributeRenderers = { ...attributeRenderers, ...extraRenderers };
 }
 
+function RichAttributeValue({ attributeDefinition, value }) {
+    const { rich_template: richTemplate, key } = attributeDefinition;
+    const object = useContext(ObjectContext);
+    try {
+        const context = {
+            key,
+            value,
+            object: object.object,
+        };
+        return renderValue(richTemplate, context, {
+            searchEndpoint: object.searchEndpoint,
+        });
+    } catch (e) {
+        return (
+            <pre className="attribute-object" style={{ color: "red" }}>
+                {"(template error)"} {JSON.stringify(value, null, 4)}
+            </pre>
+        );
+    }
+}
+
 function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
     const {
         url_template: urlTemplate,
@@ -31,19 +52,12 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
     let valueRender, valueRaw;
 
     if (richTemplate !== "") {
-        try {
-            valueRender = renderValue(richTemplate, {
-                value: value,
-            });
-        } catch (e) {
-            console.error(e);
-            valueRender = (
-                <pre className="attribute-object" style={{ color: "red" }}>
-                    {"(template error)"} {JSON.stringify(value, null, 4)}
-                </pre>
-            );
-        }
-        valueRaw = JSON.stringify(value);
+        valueRender = (
+            <RichAttributeValue
+                attributeDefinition={attributeDefinition}
+                value={value}
+            />
+        )
     } else if (typeof value === "string") {
         // URL templates are supported only for string values
         const url = urlTemplate ? urlTemplate.replace("$value", value) : null;
@@ -52,15 +66,20 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
         } else {
             valueRender = <span>{value}</span>;
         }
-        valueRaw = value;
     } else {
         valueRender = (
             <pre className="attribute-object">
                 {"(object)"} {JSON.stringify(value, null, 4)}
             </pre>
         );
+    }
+
+    if(typeof value === "string") {
+        valueRaw = value;
+    } else {
         valueRaw = JSON.stringify(value);
     }
+
     return (
         <div className="d-flex">
             {valueRender}

@@ -1,7 +1,7 @@
+import React from "react";
 import Mustache from "mustache";
 import { lexer, defaults, Tokenizer } from "marked";
 import { DataTable } from "@mwdb-web/commons/ui";
-import React from "react";
 
 /**
  * Markdown with Mustache templates for React
@@ -122,13 +122,13 @@ function renderTokens(tokens) {
             );
         },
         paragraph(token) {
-            return <p>{renderTokens(token.tokens)}</p>;
+            return <p style={{margin: "0"}}>{renderTokens(token.tokens)}</p>;
         },
         link(token) {
             return <a href={token.href}>{renderTokens(token.tokens)}</a>;
         },
         list(token) {
-            return <ul>{token.items.map((item) => renderTokens([item]))}</ul>;
+            return <ul style={{margin: "0"}}>{token.items.map((item) => renderTokens([item]))}</ul>;
         },
         list_item(token) {
             return <li>{renderTokens(token.tokens)}</li>;

@@ -36,7 +36,7 @@ member_helper = sa.Table(
 )
 
 oauth_helper = sa.Table(
-    "oauth",
+    "openid_provider",
     sa.MetaData(),
     sa.Column("id", sa.Integer()),
     sa.Column("name", sa.String()),

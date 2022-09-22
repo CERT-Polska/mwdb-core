@@ -24,6 +24,9 @@ group_helper = sa.Table(
     sa.MetaData(),
     sa.Column("id", sa.Integer()),
     sa.Column("name", sa.String(32)),
+    sa.Column("private", sa.Boolean()),
+    sa.Column("default", sa.Boolean()),
+    sa.Column("workspace", sa.Boolean()),
     sa.Column("immutable", sa.Boolean()),
 )
 
@@ -72,6 +75,9 @@ def upgrade():
             connection.execute(
                 group_helper.insert().returning(group_helper.c.id),
                 name=provider_group_name,
+                private=False,
+                default=False,
+                workspace=True,
                 immutable=True,
             )
         ).id

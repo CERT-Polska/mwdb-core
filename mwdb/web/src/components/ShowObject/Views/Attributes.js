@@ -57,7 +57,7 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
                 attributeDefinition={attributeDefinition}
                 value={value}
             />
-        )
+        );
     } else if (typeof value === "string") {
         // URL templates are supported only for string values
         const url = urlTemplate ? urlTemplate.replace("$value", value) : null;
@@ -74,7 +74,7 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
         );
     }
 
-    if(typeof value === "string") {
+    if (typeof value === "string") {
         valueRaw = value;
     } else {
         valueRaw = JSON.stringify(value);

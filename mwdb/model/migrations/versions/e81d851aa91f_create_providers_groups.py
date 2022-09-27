@@ -9,7 +9,6 @@ import logging
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects.postgresql.array import ARRAY
 
 # revision identifiers, used by Alembic.
 revision = "e81d851aa91f"
@@ -67,7 +66,7 @@ def upgrade():
             group_helper.select().where(group_helper.c.name == provider_group_name)
         ).fetchone():
             logger.warning(
-                f"Group for {provider.name} already exist, skipping creating new group"
+                f"Group for {provider.name} already exists, skipping creating new group"
             )
             continue
 

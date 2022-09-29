@@ -45,6 +45,7 @@ class FileListItemResponseSchema(ObjectListItemResponseSchema):
     file_type = fields.Str(required=True, allow_none=False)
 
     md5 = fields.Str(required=True, allow_none=False)
+    sha1 = fields.Str(required=True, allow_none=False)
     sha256 = fields.Str(required=True, allow_none=False)
 
 

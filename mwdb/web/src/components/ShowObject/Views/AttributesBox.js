@@ -48,18 +48,7 @@ export default function AttributesBox() {
     async function updateAttributes() {
         try {
             const response = await api.getObjectAttributes(objectId);
-            const attributes = response.data.attributes.reduce(
-                (agg, attribute) => ({
-                    ...agg,
-                    [attribute.key]: [
-                        {
-                            id: attribute.id,
-                            value: attribute.value,
-                        },
-                    ].concat(agg[attribute.key] || []),
-                }),
-                {}
-            );
+            const attributes = response.data.attributes;
             updateObjectData({ attributes });
         } catch (error) {
             setObjectError(error);
@@ -102,9 +91,18 @@ export default function AttributesBox() {
         updateObjectData,
     ]);
 
-    useEffect(() => {
-        getAttributes();
-    }, [getAttributes]);
+    const aggregatedAttributes = attributes.reduce(
+        (agg, attribute) => ({
+            ...agg,
+            [attribute.key]: [
+                {
+                    id: attribute.id,
+                    value: attribute.value,
+                },
+            ].concat(agg[attribute.key] || []),
+        }),
+        {}
+    );
 
     return (
         <Extendable ident="attributesBox">
@@ -135,7 +133,7 @@ export default function AttributesBox() {
                     <div className="card-body text-muted">Loading data...</div>
                 ) : (
                     <Attributes
-                        attributes={attributes}
+                        attributes={aggregatedAttributes}
                         attributeDefinitions={attributeDefinitions}
                         onUpdateAttributes={getAttributes}
                         onRemoveAttribute={

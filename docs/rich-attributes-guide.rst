@@ -7,9 +7,9 @@ Rich attributes guide
     This feature is still **in development** and it may significantly change in the future versions.
 
 Attributes can be used to store complex information in JSON format. In addition, values can be queried just like
-configurations using ``attribute.<key>:<value>`` syntax.
+configurations with the use of ``attribute.<key>:<value>`` syntax.
 
-Rich attribute templates combine forces of Mustache and Markdown languages to give you next level of flexibility in rendering
+Rich attribute templates combine forces of Mustache and Markdown languages that gives you next level of flexibility in rendering
 attribute values in UI without the need of writing additional plugins. Templates allow you to render value objects as custom
 links, lists, tables or combinations of them. You can also combine your representation with other context values like
 sample name or hash.
@@ -33,16 +33,16 @@ The view consists of two edit fields. The first one is **Template** that can be 
 template used for rendering attribute value. The second one is **Example value** that contains example attribute value
 appropriate for attribute key in JSON format.
 
-**Preview** field below shows the rendered representation based on template and example value.
+**Preview** field shows the rendered representation based on template and example value.
 
 .. image:: ./_static/rich-template-edit.png
    :target: ./_static/rich-template-edit.png
    :alt: Rich template edit view
 
-After filling fields with appropriate template, use ``Store`` to save the template or ``Cancel`` to leave it unedited.
+After filling fields with the appropriate template, use ``Store`` to save the template or ``Cancel`` to leave it unchanged.
 If you want to clear template and show only raw representation of attribute value, click on ``Delete``.
 
-Interactive editor contains few sample templates that can be used for making your own definitions.
+Interactive editor contains few sample templates that can be used for making its own definitions.
 
 Mustache basics
 ---------------
@@ -51,7 +51,7 @@ Mustache is basic logic-less template language. Mustache substitution is the fir
 
 The most basic Mustache tag is ``{{value}}`` that will be substituted by Markdown-escaped attribute value.
 
-If value is represented by JSON object, we can reference the appropriate subkey using dot as a key separator.
+If value is represented by JSON object, we can reference the appropriate subkey with the use of dot as a key separator.
 For example: ``{{value.id}}`` will be substituted by value under ``id`` key in JSON object
 
 Another type of tags are **sections**. Sections render blocks of text one or more times and are mostly used for iterating

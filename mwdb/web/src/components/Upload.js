@@ -142,13 +142,13 @@ export default function Upload() {
     };
 
     const onAttributeAdd = (key, value) => {
-        for (let attr of this.state.attributes)
+        for (let attr of attributes)
             if (attr.key === key && attr.value === value) {
                 // that key, value was added yet
                 setAttributeModalOpen(false);
                 return;
             }
-        setAttributes([...attributes, { key: value }]);
+        setAttributes([...attributes, { key, value }]);
         setAttributeModalOpen(false);
     };
 

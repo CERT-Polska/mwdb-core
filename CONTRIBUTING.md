@@ -4,7 +4,7 @@
 
 Great, so you want to join the development!
 
-First, [set up a development environment](INSTALL.md).
+First, [set up a development environment](https://mwdb.readthedocs.io/en/latest/developer-guide.html).
 Since you're going to write a new code, we recommend using the `docker-compose-dev.yml` method.
 
 If everything went right, the system should be accessible at `http://localhost:80`.

@@ -162,7 +162,7 @@ class SizeField(BaseField):
     def _get_condition(
         self, expression: Expression, subfields: List[Tuple[str, int]]
     ) -> Any:
-        units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
+        units = {"B": 1, "KB": 1024, "MB": 1024 ** 2, "GB": 1024 ** 3}
 
         def parse_size(size):
             if size.isdigit():

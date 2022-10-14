@@ -16,7 +16,7 @@ from zlib import crc32
 import boto3
 import botocore.client
 import magic
-import ssdeep
+import ppdeep
 from flask_restful import abort
 from flask_sqlalchemy import Pagination
 
@@ -101,7 +101,12 @@ def calc_magic(stream) -> str:
 
 
 def calc_ssdeep(stream):
-    return calc_hash(stream, ssdeep.Hash(), lambda h: h.digest())
+    stream.seek(0, os.SEEK_END)
+    file_size = stream.tell()
+
+    stream.seek(0, os.SEEK_SET)
+
+    return ppdeep._spamsum(stream, file_size)
 
 
 def calc_crc32(stream):

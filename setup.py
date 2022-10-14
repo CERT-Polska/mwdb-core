@@ -7,7 +7,7 @@ Under the hood of mwdb.cert.pl service hosted by CERT.pl.
 """
 
 setup(name="mwdb-core",
-      version="2.8.1",
+      version="2.8.2",
       description="MWDB Core malware database",
       long_description=LONG_DESCRIPTION,
       author="CERT Polska",

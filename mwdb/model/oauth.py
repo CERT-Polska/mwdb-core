@@ -1,4 +1,7 @@
+from werkzeug.exceptions import NotFound
+
 from mwdb.core.oauth import OpenIDSession
+from mwdb.model import Group
 
 from . import db
 
@@ -48,6 +51,13 @@ class OpenIDProvider(db.Model):
         client = self._get_client()
         token = client.fetch_token(code=code, state=state, redirect_uri=redirect_uri)
         return client.parse_id_token(token, nonce)
+
+    def get_group(self):
+        group_name = ("OpenID_" + self.name)[:32]
+        group = db.session.query(Group).filter(Group.name == group_name).first()
+        if group is None:
+            raise NotFound("No such group")
+        return group
 
 
 class OpenIDUserIdentity(db.Model):

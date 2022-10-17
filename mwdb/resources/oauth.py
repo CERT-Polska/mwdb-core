@@ -13,6 +13,7 @@ from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
+from mwdb.schema.group import GroupNameSchemaBase
 from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,
     OpenIDLoginResponseSchema,
@@ -24,7 +25,13 @@ from mwdb.schema.oauth import (
 )
 from mwdb.schema.user import UserLoginSchemaBase
 
-from . import loads_schema, logger, requires_authorization, requires_capabilities
+from . import (
+    load_schema,
+    loads_schema,
+    logger,
+    requires_authorization,
+    requires_capabilities,
+)
 
 
 @rate_limited_resource
@@ -109,8 +116,23 @@ class OpenIDProviderResource(Resource):
             userinfo_endpoint=obj["userinfo_endpoint"],
             jwks_endpoint=jwks_endpoint,
         )
+
+        group_name = ("OpenID_" + obj["name"])[:32]
+
+        group_name_obj = load_schema({"name": group_name}, GroupNameSchemaBase())
+
+        if db.session.query(
+            exists().where(Group.name == group_name_obj["name"])
+        ).scalar():
+            raise Conflict("Group exists yet, choose another provider name")
+
+        group = Group(name=group_name_obj["name"], immutable=True)
+
+        db.session.add(group)
         db.session.add(provider)
+
         db.session.commit()
+        hooks.on_created_group(group)
 
 
 @rate_limited_resource
@@ -274,9 +296,13 @@ class OpenIDSingleProviderResource(Resource):
         )
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
+        group = provider.get_group()
+
         db.session.delete(provider)
+        db.session.delete(group)
         db.session.commit()
 
+        hooks.on_removed_group(("OpenID_" + provider_name)[:32])
         logger.info("Provider was deleted", extra={"provider": provider_name})
         schema = OpenIDProviderSuccessResponseSchema()
         return schema.dump({"name": provider_name})
@@ -396,6 +422,8 @@ class OpenIDRegisterUserResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
+        group = provider.get_group()
+
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
@@ -449,6 +477,10 @@ class OpenIDRegisterUserResource(Resource):
         identity = OpenIDUserIdentity(
             sub_id=userinfo["sub"], provider_id=provider.id, user_id=user.id
         )
+
+        if not group.add_member(user):
+            raise Conflict("Member is already added")
+
         db.session.add(identity)
 
         user.logged_on = datetime.datetime.now()
@@ -462,6 +494,7 @@ class OpenIDRegisterUserResource(Resource):
         hooks.on_created_user(user)
         if user_private_group:
             hooks.on_created_group(user_private_group)
+        hooks.on_created_membership(group, user)
         logger.info(
             "User logged in via OpenID Provider",
             extra={"login": user.login, "provider": provider_name},
@@ -520,6 +553,8 @@ class OpenIDBindAccountResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
+        group = provider.get_group()
+
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
@@ -542,8 +577,15 @@ class OpenIDBindAccountResource(Resource):
         identity = OpenIDUserIdentity(
             sub_id=userinfo["sub"], provider_id=provider.id, user_id=g.auth_user.id
         )
+
+        if not group.add_member(g.auth_user):
+            raise Conflict("Member is already added")
+
         db.session.add(identity)
+
         db.session.commit()
+
+        hooks.on_created_membership(group, g.auth_user)
 
         logger.info(
             "Account was successfully bound with OpenID Identity",

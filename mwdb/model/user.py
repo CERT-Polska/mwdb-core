@@ -125,7 +125,7 @@ class User(db.Model):
         from mwdb.model.group import Group
 
         # Create user's private group
-        user_group = Group(name=login, private=True)
+        user_group = Group(name=login, private=True, immutable=True)
         db.session.add(user_group)
 
         # Create user object

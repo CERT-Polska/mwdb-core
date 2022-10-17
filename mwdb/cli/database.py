@@ -16,7 +16,11 @@ def _initialize(admin_password):
     Creates initial objects in database
     """
     public_group = Group(
-        name=Group.PUBLIC_GROUP_NAME, capabilities=[], workspace=False, default=True
+        name=Group.PUBLIC_GROUP_NAME,
+        capabilities=[],
+        workspace=False,
+        default=True,
+        immutable=True,
     )
     db.session.add(public_group)
 

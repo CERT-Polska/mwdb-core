@@ -170,7 +170,7 @@ export default function RichAttributePreview({
                     className="btn btn-light mr-1"
                     onClick={() => onDelete()}
                 >
-                    Delete
+                    Clear
                 </button>
             </div>
         </View>

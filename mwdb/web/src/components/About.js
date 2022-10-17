@@ -22,14 +22,22 @@ export default function About() {
                         <div className="col-lg-6 col-sm-4">
                             <h1>mwdb-core</h1>
                             <p>
-                                Powered by CERT.pl
+                                Powered by <a href="https://cert.pl">CERT.pl</a>
                                 <br />
-                                Version: {config.config["server_version"]}
+                                Version:{" "}
+                                <a
+                                    href={
+                                        "https://github.com/CERT-Polska/mwdb-core/releases/tag/v" +
+                                        config.config["server_version"]
+                                    }
+                                >
+                                    {config.config["server_version"]}
+                                </a>
                                 <br />
                                 Try out our{" "}
                                 <a
                                     href="https://pypi.org/project/mwdblib/"
-                                    style={{ color: "lime" }}
+                                    style={{ color: "hsla(0,0%,100%,.5)" }}
                                 >
                                     mwdblib library
                                 </a>

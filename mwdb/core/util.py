@@ -41,6 +41,24 @@ def traverse(obj, fn):
         return fn(obj)
 
 
+def config_encode(obj):
+    return traverse(
+        obj,
+        lambda o: o.encode("unicode_escape").decode("utf-8")
+        if isinstance(o, str)
+        else o,
+    )
+
+
+def config_decode(obj):
+    return traverse(
+        obj,
+        lambda o: bytes(o, "utf-8").decode("unicode_escape")
+        if isinstance(o, str)
+        else o,
+    )
+
+
 def calc_hash(stream, hash_obj, digest_cb):
     stream.seek(0, os.SEEK_SET)
 

@@ -32,7 +32,7 @@ export let capabilitiesList = {
     [Capability.shareQueriedObjects]: "Query for all objects in system",
     [Capability.accessAllObjects]:
         "Has access to all new uploaded objects into system",
-    [Capability.sharingObjects]: "Can share objects with all groups in system",
+    [Capability.sharingWithAll]: "Can share objects with all groups in system",
     [Capability.addingTags]: "Can add tags",
     [Capability.removingTags]: "Can remove tags",
     [Capability.addingComments]: "Can add comments",

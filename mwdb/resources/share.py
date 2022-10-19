@@ -26,7 +26,7 @@ class ShareGroupListResource(Resource):
         description: |
             Returns list of available groups that user can share objects with.
 
-            If user doesn't have `sharing_objects` capability,
+            If user doesn't have `sharing_with_all` capability,
             list includes only groups of which the user is a member.
         security:
             - bearerAuth: []
@@ -42,7 +42,7 @@ class ShareGroupListResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        if g.auth_user.has_rights(Capabilities.sharing_objects):
+        if g.auth_user.has_rights(Capabilities.sharing_with_all):
             groups = db.session.query(Group.name)
         else:
             groups = db.session.query(Group.name).filter(
@@ -71,7 +71,7 @@ class ShareResource(Resource):
         description: |
             Returns list of available groups and sharing info for specified object.
 
-            If user doesn't have `sharing_objects` capability,
+            If user doesn't have `sharing_with_all` capability,
             only own groups are included.
         security:
             - bearerAuth: []
@@ -103,7 +103,7 @@ class ShareResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        if g.auth_user.has_rights(Capabilities.sharing_objects):
+        if g.auth_user.has_rights(Capabilities.sharing_with_all):
             groups = db.session.query(Group.name)
         else:
             groups = db.session.query(Group.name).filter(
@@ -135,7 +135,7 @@ class ShareResource(Resource):
         description: |
             Shares object with another group.
 
-            If user doesn't have `sharing_objects` capability,
+            If user doesn't have `sharing_with_all` capability,
             it can share object only within its own groups.
         security:
             - bearerAuth: []
@@ -183,7 +183,7 @@ class ShareResource(Resource):
 
         group_name = obj["group"]
         group = db.session.query(Group).filter(Group.name == group_name)
-        if not g.auth_user.has_rights(Capabilities.sharing_objects):
+        if not g.auth_user.has_rights(Capabilities.sharing_with_all):
             group = group.filter(g.auth_user.is_member(Group.id))
         group = group.first()
 

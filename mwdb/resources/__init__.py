@@ -120,7 +120,7 @@ def get_shares_for_upload(upload_as):
             raise NotFound(f"Group {upload_as} doesn't exist")
         # Has user access to group?
         if share_group not in g.auth_user.groups and not g.auth_user.has_rights(
-            Capabilities.sharing_objects
+            Capabilities.sharing_with_all
         ):
             raise NotFound(f"Group {upload_as} doesn't exist")
         # Is group pending?

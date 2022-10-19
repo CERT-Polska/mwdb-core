@@ -4,7 +4,7 @@ export const Capability = {
     manageUsers: "manage_users",
     shareQueriedObjects: "share_queried_objects",
     accessAllObjects: "access_all_objects",
-    sharingObjects: "sharing_objects",
+    sharingWithAll: "sharing_with_all",
     addingTags: "adding_tags",
     removingTags: "removing_tags",
     addingComments: "adding_comments",

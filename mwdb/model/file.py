@@ -240,8 +240,10 @@ class File(Object):
                     Fileobj=stream,
                 )
                 stream.seek(0, io.SEEK_SET)
-            finally:
+                return stream
+            except Exception:
                 stream.close()
+                raise
         elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
             return open(self._calculate_path(), "rb")
         else:

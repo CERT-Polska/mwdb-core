@@ -226,3 +226,16 @@ def test_removing_objects(admin_session):
 
     assert {"tag": "tag123"} in admin_session.get_tags(SampleB.dhash)
 
+
+def test_removing_object_with_comments(admin_session):
+    testCase = RelationTestCase(admin_session)
+    sample = testCase.new_sample("Sample")
+    sample.create()
+
+    admin_session.add_comment(sample.dhash, "comment1")
+    admin_session.add_comment(sample.dhash, "comment2")
+    admin_session.add_comment(sample.dhash, "comment3")
+    admin_session.remove_object(sample.dhash)
+
+    with ShouldRaise(status_code=404):
+        admin_session.get_sample(sample.dhash)

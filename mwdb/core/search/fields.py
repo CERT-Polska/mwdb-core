@@ -419,6 +419,7 @@ class JSONField(BaseField):
         # cfg values in DataBase are espaced, so we need to escape search phrase too
         if isinstance(expression, (Phrase, Word)):
             expression.value = expression.value.encode("unicode_escape").decode("utf-8")
+            print("\n\n EXPRESSION: \n", expression.value, "\n\n")
 
         json_path = make_jsonpath(subfields)
         if type(expression) is Range:
@@ -440,9 +441,15 @@ class JSONField(BaseField):
             )
             if expression.has_wildcard():
                 value = value.replace("\\", "\\\\")
+                value = value.replace("\\\\%", "\\%")
+                value = value.replace("\\\\_", "\\_")
+                value = value.replace('\\"', '"')
                 condition = json_element.like(value)
             else:
+                value = value.replace('\\"', '"')
                 condition = json_element == value
+
+            print("\n\n", value, "\n\n")
 
             return exists(select([1]).select_from(json_elements).where(condition))
 

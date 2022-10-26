@@ -1,4 +1,3 @@
-from glob import escape
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -6,7 +5,7 @@ from typing import Any, List, Tuple, Type, Union
 
 from dateutil.relativedelta import relativedelta
 from flask import g
-from luqum.tree import Range, Term, Phrase, Word
+from luqum.tree import Phrase, Range, Term, Word
 from sqlalchemy import String, Text, and_, cast, column, exists, func, or_, select
 from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 

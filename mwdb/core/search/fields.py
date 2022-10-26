@@ -1,3 +1,4 @@
+from glob import escape
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -5,7 +6,7 @@ from typing import Any, List, Tuple, Type, Union
 
 from dateutil.relativedelta import relativedelta
 from flask import g
-from luqum.tree import Range, Term
+from luqum.tree import Range, Term, Phrase, Word
 from sqlalchemy import String, Text, and_, cast, column, exists, func, or_, select
 from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 
@@ -415,6 +416,11 @@ class JSONField(BaseField):
                 where json_element  #>> '{}' like '2'
             );
         """
+
+        # cfg values in DataBase are espaced, so we need to escape search phrase too
+        if isinstance(expression, (Phrase, Word)):
+            expression.value = expression.value.encode("unicode_escape").decode("utf-8")
+
         json_path = make_jsonpath(subfields)
         if type(expression) is Range:
             json_query_path = make_jsonpath_range_query(json_path, expression)
@@ -434,9 +440,11 @@ class JSONField(BaseField):
                 JSONPATH_ASTEXT, "{}", result_type=Text
             )
             if expression.has_wildcard():
+                value = value.replace("\\", "\\\\")
                 condition = json_element.like(value)
             else:
                 condition = json_element == value
+
             return exists(select([1]).select_from(json_elements).where(condition))
 
 

@@ -23,8 +23,7 @@ class Config(Object):
 
     @hybrid_property
     def cfg(self):
-        return self._cfg
-        #return config_decode(self._cfg)
+        return config_decode(self._cfg)
 
     @classmethod
     def get_or_create(

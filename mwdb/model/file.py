@@ -223,19 +223,27 @@ class File(Object):
                 stream.seek(0, os.SEEK_SET)
                 return stream
         if app_config.mwdb.storage_provider == StorageProviderType.S3:
-            return get_s3_client(
-                app_config.mwdb.s3_storage_endpoint,
-                app_config.mwdb.s3_storage_access_key,
-                app_config.mwdb.s3_storage_secret_key,
-                app_config.mwdb.s3_storage_region_name,
-                app_config.mwdb.s3_storage_secure,
-                app_config.mwdb.s3_storage_iam_auth,
-            ).get_object(
-                Bucket=app_config.mwdb.s3_storage_bucket_name,
-                Key=self._calculate_path(),
-            )[
-                "Body"
-            ]
+            # Stream coming from Boto3 get_object is not buffered and not seekable.
+            # We need to download it to the temporary file first.
+            stream = tempfile.TemporaryFile(mode="w+b")
+            try:
+                get_s3_client(
+                    app_config.mwdb.s3_storage_endpoint,
+                    app_config.mwdb.s3_storage_access_key,
+                    app_config.mwdb.s3_storage_secret_key,
+                    app_config.mwdb.s3_storage_region_name,
+                    app_config.mwdb.s3_storage_secure,
+                    app_config.mwdb.s3_storage_iam_auth,
+                ).download_fileobj(
+                    Bucket=app_config.mwdb.s3_storage_bucket_name,
+                    Key=self._calculate_path(),
+                    Fileobj=stream,
+                )
+                stream.seek(0, io.SEEK_SET)
+                return stream
+            except Exception:
+                stream.close()
+                raise
         elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
             return open(self._calculate_path(), "rb")
         else:

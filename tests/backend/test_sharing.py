@@ -10,7 +10,7 @@ def test_share_with_foreign(admin_session):
     Joe = testCase.new_user("Joe")
 
     Workgroup = testCase.new_group("Workgroup")
-    Homegroup = testCase.new_group("Homegroup", ["sharing_objects"])
+    Homegroup = testCase.new_group("Homegroup", ["sharing_with_all"])
 
     Workgroup.add_member(Alice)
     Workgroup.add_member(Bob)
@@ -44,7 +44,7 @@ def test_share_with_public(admin_session):
     Joe = testCase.new_user("Joe")
 
     Workgroup = testCase.new_group("Workgroup")
-    Homegroup = testCase.new_group("Homegroup", ["sharing_objects"])
+    Homegroup = testCase.new_group("Homegroup", ["sharing_with_all"])
 
     Workgroup.add_member(Alice)
     Workgroup.add_member(Bob)
@@ -71,7 +71,7 @@ def test_share_and_leave(admin_session):
     Joe = testCase.new_user("Joe")
 
     Workgroup = testCase.new_group("Workgroup")
-    Homegroup = testCase.new_group("Homegroup", ["sharing_objects"])
+    Homegroup = testCase.new_group("Homegroup", ["sharing_with_all"])
 
     Workgroup.add_member(Alice)
     Workgroup.add_member(Bob)
@@ -100,7 +100,7 @@ def test_list_groups_for_share(admin_session):
     Joe = testCase.new_user("Joe")
 
     Workgroup = testCase.new_group("Workgroup")
-    Homegroup = testCase.new_group("Homegroup", ["sharing_objects"])
+    Homegroup = testCase.new_group("Homegroup", ["sharing_with_all"])
 
     Workgroup.add_member(Alice)
     Workgroup.add_member(Bob)

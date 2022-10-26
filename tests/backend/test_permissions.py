@@ -63,11 +63,11 @@ def test_access_all_objects(admin_session):
     ], should_access=[Bob]).test()
 
 
-def test_sharing_objects(admin_session):
+def test_sharing_with_all(admin_session):
     testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
-    Bob = testCase.new_user("Bob", capabilities=["sharing_objects"])
+    Bob = testCase.new_user("Bob", capabilities=["sharing_with_all"])
 
     Sample = testCase.new_sample("Sample")
     Sample.create(Bob)

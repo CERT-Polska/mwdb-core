@@ -899,7 +899,7 @@ class Object(db.Model):
         """
         permission_filter = ObjectPermission.object_id == self.id
 
-        if not g.auth_user.has_rights(Capabilities.sharing_objects):
+        if not g.auth_user.has_rights(Capabilities.sharing_with_all):
             permission_filter = and_(
                 permission_filter, g.auth_user.is_member(ObjectPermission.group_id)
             )

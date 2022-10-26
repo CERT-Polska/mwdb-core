@@ -276,7 +276,7 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
                       description: |
                         Group that object will be shared with.
 
-                        If user doesn't have `sharing_objects` capability,
+                        If user doesn't have `sharing_with_all` capability,
                         user must be a member of specified group
                         (unless `Group doesn't exist` error will occur).
 

@@ -63,11 +63,11 @@ def test_access_all_objects(admin_session):
     ], should_access=[Bob]).test()
 
 
-def test_sharing_objects(admin_session):
+def test_sharing_with_all(admin_session):
     testCase = RelationTestCase(admin_session)
 
     Alice = testCase.new_user("Alice")
-    Bob = testCase.new_user("Bob", capabilities=["sharing_objects"])
+    Bob = testCase.new_user("Bob", capabilities=["sharing_with_all"])
 
     Sample = testCase.new_sample("Sample")
     Sample.create(Bob)
@@ -226,3 +226,16 @@ def test_removing_objects(admin_session):
 
     assert {"tag": "tag123"} in admin_session.get_tags(SampleB.dhash)
 
+
+def test_removing_object_with_comments(admin_session):
+    testCase = RelationTestCase(admin_session)
+    sample = testCase.new_sample("Sample")
+    sample.create()
+
+    admin_session.add_comment(sample.dhash, "comment1")
+    admin_session.add_comment(sample.dhash, "comment2")
+    admin_session.add_comment(sample.dhash, "comment3")
+    admin_session.remove_object(sample.dhash)
+
+    with ShouldRaise(status_code=404):
+        admin_session.get_sample(sample.dhash)

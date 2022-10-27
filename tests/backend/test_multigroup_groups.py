@@ -133,7 +133,7 @@ def test_multigroup_sharing(admin_session):
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob")
-    Joe = testCase.new_user("Joe", capabilities=["sharing_objects"])
+    Joe = testCase.new_user("Joe", capabilities=["sharing_with_all"])
 
     File = testCase.new_sample("File")
 

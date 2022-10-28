@@ -105,6 +105,18 @@ def make_jsonpath_range_query(jsonpath: str, expression: Range) -> str:
     return f'{jsonpath} ? ({" && ".join(conditions)})'
 
 
+def add_escaping_for_like_statement(statement : str) -> str:
+    """
+    Formats query value to work properly with LIKE statements
+    LIKE statements use escaping (default symbol is '\')
+    Every escape should be doubled except '%' and '_'
+    """
+    statement = statement.replace("\\", "\\\\")
+    statement = statement.replace("\\\\%", "\\%")
+    statement = statement.replace("\\\\_", "\\_")
+    return statement
+
+
 class BaseField:
     accepts_range = False
     accepts_subquery = False
@@ -150,6 +162,7 @@ class StringField(BaseField):
     ) -> Any:
         value = get_term_value(expression)
         if expression.has_wildcard():
+            value = add_escaping_for_like_statement(value)
             return self.column.like(value)
         else:
             return self.column == value
@@ -220,6 +233,7 @@ class ListField(BaseField):
         value = get_term_value(expression)
 
         if expression.has_wildcard():
+            value = add_escaping_for_like_statement(value)
             return self.column.any(self.value_column.like(value))
         else:
             return self.column.any(self.value_column == value)
@@ -238,6 +252,7 @@ class UUIDField(BaseField):
         value = get_term_value(expression)
 
         if expression.has_wildcard():
+            value = add_escaping_for_like_statement(value)
             return self.column.any(cast(self.value_column, String).like(value))
 
         try:
@@ -322,6 +337,7 @@ class AttributeField(BaseField):
                 JSONPATH_ASTEXT, "{}", result_type=Text
             )
             if expression.has_wildcard():
+                value = add_escaping_for_like_statement(value)
                 condition = json_element.like(value)
             else:
                 condition = json_element == value
@@ -416,10 +432,12 @@ class JSONField(BaseField):
             );
         """
 
-        # cfg values in DataBase are espaced, so we need to escape search phrase too
+        # Cfg values in DataBase are espaced, so we need to escape search phrase too
         if isinstance(expression, (Phrase, Word)):
             expression.value = expression.value.encode("unicode_escape").decode("utf-8")
             print("\n\n EXPRESSION: \n", expression.value, "\n\n")
+
+        print("\n\n", expression.has_wildcard(), "\n\n")
 
         json_path = make_jsonpath(subfields)
         if type(expression) is Range:
@@ -440,16 +458,17 @@ class JSONField(BaseField):
                 JSONPATH_ASTEXT, "{}", result_type=Text
             )
             if expression.has_wildcard():
-                value = value.replace("\\", "\\\\")
-                value = value.replace("\\\\%", "\\%")
-                value = value.replace("\\\\_", "\\_")
+                value = add_escaping_for_like_statement(value)
+                # chars " are not double escaped by mwdb.core.util.config_encode()
+                # remove unnecessary escaping in query
                 value = value.replace('\\"', '"')
                 condition = json_element.like(value)
             else:
+                # remove unnecessary escaping in query
                 value = value.replace('\\"', '"')
                 condition = json_element == value
 
-            print("\n\n", value, "\n\n")
+            print("\n\n", json_elements, "\n\n")
 
             return exists(select([1]).select_from(json_elements).where(condition))
 
@@ -677,9 +696,11 @@ class MultiField(BaseField):
 
             if str(column) in string_column:
                 value = f"%{value}%"
+                value = add_escaping_for_like_statement(value)
                 condition = or_(condition, (column.like(value)))
             elif str(column) in json_column:
                 value = f"%{value}%"
+                value = add_escaping_for_like_statement(value)
                 condition = or_(condition, (cast(column, String).like(value)))
             else:
                 # hashes values
@@ -700,6 +721,7 @@ class FileNameField(BaseField):
             sub_query = db.session.query(
                 File.id.label("f_id"), func.unnest(File.alt_names).label("alt_name")
             ).subquery()
+            value = add_escaping_for_like_statement(value)
             file_id_matching = (
                 db.session.query(File.id)
                 .join(sub_query, sub_query.c.f_id == File.id)

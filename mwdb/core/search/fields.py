@@ -105,7 +105,7 @@ def make_jsonpath_range_query(jsonpath: str, expression: Range) -> str:
     return f'{jsonpath} ? ({" && ".join(conditions)})'
 
 
-def add_escaping_for_like_statement(statement : str) -> str:
+def add_escaping_for_like_statement(statement: str) -> str:
     """
     Formats query value to work properly with LIKE statements
     LIKE statements use escaping (default symbol is '\')

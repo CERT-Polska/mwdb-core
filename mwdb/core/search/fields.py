@@ -460,6 +460,12 @@ class JSONField(BaseField):
                 # remove unnecessary escaping in query
                 value = value.replace('\\"', '"')
                 condition = json_element.like(value)
+
+                # if json_path does not contain exact path, the value extracted with #>> contains additional escaping and {} brackets
+                # add char escaping one more time and {} brackets to match the extracted value
+                value = add_escaping_for_like_statement(value)
+                value = '{' + value + '}'
+                condition = or_(condition, json_element.like(value))
             else:
                 # remove unnecessary escaping in query
                 value = value.replace('\\"', '"')

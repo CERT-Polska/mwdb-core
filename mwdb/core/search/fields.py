@@ -367,7 +367,7 @@ class UploaderField(BaseField):
             ObjectPermission.related_object_id == ObjectPermission.object_id,
         )
 
-        if g.auth_user.has_rights(Capabilities.manage_users):
+        if g.auth_user.has_rights(Capabilities.access_uploader_info):
             uploaders = (
                 db.session.query(User)
                 .join(User.memberships)

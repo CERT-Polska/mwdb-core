@@ -175,6 +175,11 @@ Each capability has its own name and scope:
 
   Implies the access to the list of all group names, but without access to the membership information and management features. Allows to share object with arbitrary group in MWDB.
 
+*
+  **access_uploader_info - Can view who uploaded object and filter by uploader**
+
+  Can view who uploaded object and filter by uploader. Without this capability users can filter by / see only users in their workspaces.
+
 * 
   **adding_tags - Can add tags**
 

@@ -124,6 +124,26 @@ class ShareResource(Resource):
             raise NotFound("Object not found")
 
         shares = db_object.get_shares()
+        # shares[0] contains the first share (upload)
+        # in front-end shares[0] is used to determine uploader
+
+        # if user do not have capability or is not the uploader of object
+        if not (
+            g.auth_user.has_rights(Capabilities.access_uploader_info)
+            or shares[0].related_user_login == g.auth_user.login
+        ):
+            groups = groups.filter(shares[0].related_user.is_member(Group.id)).filter(
+                Group.workspace.is_(True)
+            )
+            # if user and the uploader are not in the same workspace
+            if len(groups.all()) == 0:
+                # $$$$$ is an illegal username
+                # I use it instead of None value and handle it later in front-end
+                shares[0].related_user.login = "$$$$$"
+
+                # Alternatively:
+                # shares[0].related_user.login = None
+
         schema = ShareInfoResponseSchema()
         return schema.dump({"groups": group_names, "shares": shares})
 

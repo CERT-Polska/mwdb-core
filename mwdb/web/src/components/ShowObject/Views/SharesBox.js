@@ -62,7 +62,18 @@ function ShareGroupItem({ reason, shares }) {
             <thead>
                 <tr>
                     <th colSpan="2">
-                        <ShareReasonString {...reason} />
+                        {(() => {
+                            if (reason.relatedUserLogin !== "$$$$$") {
+                                return <ShareReasonString {...reason} />;
+                            } else {
+                                return (
+                                    <span class="text-muted">
+                                        You do not have permission to see the
+                                        uploader.
+                                    </span>
+                                );
+                            }
+                        })()}
                     </th>
                 </tr>
             </thead>

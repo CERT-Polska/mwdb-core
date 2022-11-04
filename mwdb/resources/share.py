@@ -139,10 +139,10 @@ class ShareResource(Resource):
             if len(groups.all()) == 0:
                 # $$$$$ is an illegal username
                 # I use it instead of None value and handle it later in front-end
-                shares[0].related_user.login = "$$$$$"
-
                 # Alternatively:
-                # shares[0].related_user.login = None
+                # shares.related_user.login = None
+                for share in shares:
+                    share.related_user.login = "$$$$$"
 
         schema = ShareInfoResponseSchema()
         return schema.dump({"groups": group_names, "shares": shares})

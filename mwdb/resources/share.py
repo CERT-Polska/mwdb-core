@@ -128,7 +128,8 @@ class ShareResource(Resource):
         # in front-end shares[0] is used to determine uploader
 
         # if user do not have capability or is not the uploader of object
-        if not (
+        # shares[0].related_user is None, when the user was deleted
+        if shares[0].related_user is not None and not (
             g.auth_user.has_rights(Capabilities.access_uploader_info)
             or shares[0].related_user_login == g.auth_user.login
         ):

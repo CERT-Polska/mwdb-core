@@ -20,7 +20,7 @@ def upgrade():
         """
             UPDATE public.group
             SET capabilities = array_append(capabilities, 'access_uploader_info')
-            WHERE name='public';
+            WHERE name='public' OR array_position(capabilities, 'manage_users') IS NOT NULL;
         """
     )
 

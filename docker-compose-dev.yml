@@ -50,7 +50,7 @@ services:
       context: .
       dockerfile: deploy/docker/Dockerfile-web-dev
     ports:
-      - "81:3000"
+      - "88:3000"
     environment:
       HOST: 0.0.0.0
       REACT_APP_API_URL: "/api/"
@@ -68,14 +68,13 @@ services:
     ports:
       - "127.0.0.1:54322:5432"
     volumes:
-      - mwdb-postgres:/var/lib/postgresql/data
+      - mwdb-postgres:/var/lib/posgresql/data
   redis:
     image: redis:alpine
   mailhog:
     image: mailhog/mailhog:latest
     ports:
       - "127.0.0.1:8025:8025"
-
 volumes:
   mwdb-postgres:
   mwdb-uploads:

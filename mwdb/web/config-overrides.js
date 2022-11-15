@@ -74,5 +74,10 @@ module.exports = {
             )
             : (_ => _)
         )
-    )
+    ),
+    optimization: {
+        minimize: process.env.NODE_ENV == 'development' //minimization only true if production, else false
+    }
 }
+
+console.log(process.env.NODE_ENV)

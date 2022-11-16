@@ -123,35 +123,45 @@ class ShareResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        with db.session.no_autoflush:
-            shares = db_object.get_shares()
+        shares = db_object.get_shares()
 
-            if g.auth_user.has_rights(Capabilities.access_uploader_info):
-                schema = ShareInfoResponseSchema()
-                return schema.dump({"groups": group_names, "shares": shares})
-            else:
-                groups = (
-                    db.session.query(Group.name)
-                    .filter(g.auth_user.is_member(Group.id))
-                    .filter(Group.workspace.is_(True))
-                )
+        if g.auth_user.has_rights(Capabilities.access_uploader_info):
+            schema = ShareInfoResponseSchema()
+            return schema.dump({"groups": group_names, "shares": shares})
+        else:
+            groups = (
+                db.session.query(Group.name)
+                .filter(g.auth_user.is_member(Group.id))
+                .filter(Group.workspace.is_(True))
+            )
 
-                unique_related_users = []
-                for share in shares:
-                    if share.related_user not in unique_related_users:
-                        unique_related_users.append(share.related_user)
+            unique_related_users = []
+            for share in shares:
+                if (
+                    share.related_user is not None
+                    and share.related_user not in unique_related_users
+                ):
+                    unique_related_users.append(share.related_user)
 
-                for unique_user in unique_related_users:
-                    if unique_user is None:
-                        continue
-                    if (
-                        groups.filter(unique_user.is_member(Group.id)).count() == 0
-                        and unique_user.login != g.auth_user.login
-                    ):
-                        unique_user.login = "$hidden"
+            visible_related_users_logins = []
+            for unique_user in unique_related_users:
+                if (
+                    groups.filter(unique_user.is_member(Group.id)).count() > 0
+                    or unique_user.login == g.auth_user.login
+                ):
+                    visible_related_users_logins.append(unique_user.login)
 
-                schema = ShareInfoResponseSchema()
-                return schema.dump({"groups": group_names, "shares": shares})
+            schema = ShareInfoResponseSchema()
+            response = schema.dump({"groups": group_names, "shares": shares})
+
+            for share in response["shares"]:
+                try:
+                    if share["related_user_login"] not in visible_related_users_logins:
+                        share["related_user_login"] = "$hidden"
+                except KeyError:
+                    # 'related_user_login' doesn't exist when user was deleted
+                    pass
+            return response
 
     @requires_authorization
     def put(self, type, identifier):

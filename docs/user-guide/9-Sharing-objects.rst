@@ -173,7 +173,7 @@ Each capability has its own name and scope:
 * 
   **sharing_with_all - Can share objects with all groups in system**
 
-  Implies the access to the list of all group names, but without access to the membership information and management features. Allows to share object with arbitrary group in MWDB.
+  Implies the access to the list of all group names, but without access to the membership information and management features. Allows to share object with arbitrary group in MWDB. It also allows the user to view full history of sharing an object (if the user has access to the object).
 
 *
   **access_uploader_info - Can view who uploaded object and filter by uploader**

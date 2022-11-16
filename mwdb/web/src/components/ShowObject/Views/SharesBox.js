@@ -63,7 +63,7 @@ function ShareGroupItem({ reason, shares }) {
                 <tr>
                     <th colSpan="2">
                         {(() => {
-                            if (reason.relatedUserLogin !== "$$$$$") {
+                            if (reason.relatedUserLogin !== "$hidden") {
                                 return <ShareReasonString {...reason} />;
                             } else {
                                 return (

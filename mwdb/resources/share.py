@@ -123,30 +123,35 @@ class ShareResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        shares = db_object.get_shares()
-        # shares[0] contains the first share (upload)
-        # in front-end shares[0] is used to determine uploader
+        with db.session.no_autoflush:
+            shares = db_object.get_shares()
 
-        # if user do not have capability or is not the uploader of object
-        # shares[0].related_user is None, when the user was deleted
-        if shares[0].related_user is not None and not (
-            g.auth_user.has_rights(Capabilities.access_uploader_info)
-            or shares[0].related_user_login == g.auth_user.login
-        ):
-            groups = groups.filter(shares[0].related_user.is_member(Group.id)).filter(
-                Group.workspace.is_(True)
-            )
-            # if user and the uploader are not in the same workspace
-            if len(groups.all()) == 0:
-                # $$$$$ is an illegal username
-                # I use it instead of None value and handle it later in front-end
-                # Alternatively:
-                # shares.related_user.login = None
+            if g.auth_user.has_rights(Capabilities.access_uploader_info):
+                schema = ShareInfoResponseSchema()
+                return schema.dump({"groups": group_names, "shares": shares})
+            else:
+                groups = (
+                    db.session.query(Group.name)
+                    .filter(g.auth_user.is_member(Group.id))
+                    .filter(Group.workspace.is_(True))
+                )
+
+                unique_related_users = []
                 for share in shares:
-                    share.related_user.login = "$$$$$"
+                    if share.related_user not in unique_related_users:
+                        unique_related_users.append(share.related_user)
 
-        schema = ShareInfoResponseSchema()
-        return schema.dump({"groups": group_names, "shares": shares})
+                for unique_user in unique_related_users:
+                    if unique_user is None:
+                        continue
+                    if (
+                        groups.filter(unique_user.is_member(Group.id)).count() == 0
+                        and unique_user.login != g.auth_user.login
+                    ):
+                        unique_user.login = "$hidden"
+
+                schema = ShareInfoResponseSchema()
+                return schema.dump({"groups": group_names, "shares": shares})
 
     @requires_authorization
     def put(self, type, identifier):

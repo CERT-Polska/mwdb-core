@@ -50,7 +50,7 @@ services:
       context: .
       dockerfile: deploy/docker/Dockerfile-web-dev
     ports:
-      - "88:3000"
+      - "80:3000"
     environment:
       HOST: 0.0.0.0
       REACT_APP_API_URL: "/api/"

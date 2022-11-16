@@ -17,7 +17,11 @@ import boto3
 import botocore.client
 import magic
 import ssdeep
-from botocore.credentials import InstanceMetadataFetcher, InstanceMetadataProvider
+from botocore.credentials import (
+    ContainerProvider,
+    InstanceMetadataFetcher,
+    InstanceMetadataProvider,
+)
 from flask_restful import abort
 from flask_sqlalchemy import Pagination
 
@@ -180,13 +184,20 @@ def get_s3_client(
     session_token = None
 
     if iam_auth:
-        provider = InstanceMetadataProvider(
-            iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2)
-        )
-        creds = provider.load().get_frozen_credentials()
-        access_key = creds.access_key
-        secret_key = creds.secret_key
-        session_token = creds.token
+        iam_providers = [
+            ContainerProvider(),
+            InstanceMetadataProvider(
+                iam_role_fetcher=InstanceMetadataFetcher(timeout=1000, num_attempts=2)
+            ),
+        ]
+
+        for provider in iam_providers:
+            creds = provider.load()
+            if creds:
+                access_key = creds.access_key
+                secret_key = creds.secret_key
+                session_token = creds.token
+                break
 
     if access_key is None or secret_key is None:
         raise RuntimeError(

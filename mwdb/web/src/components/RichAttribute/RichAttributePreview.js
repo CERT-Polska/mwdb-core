@@ -80,7 +80,8 @@ export default function RichAttributePreview({
         templateState.chosenExample !== "custom"
             ? exampleTemplates[templateState.chosenExample].value
             : templateState.valueInput;
-    let renderedValue, contextValue,
+    let renderedValue,
+        contextValue,
         invalid = false;
     try {
         contextValue = makeContext(JSON.parse(value));
@@ -128,22 +129,36 @@ export default function RichAttributePreview({
                         <strong>Example value</strong>
                     </div>
                     <div className="form-check form-check-inline">
-                        <input className="form-check-input" type="radio" id="showValue" checked={!showContext}
+                        <input
+                            className="form-check-input"
+                            type="radio"
+                            id="showValue"
+                            checked={!showContext}
                             onClick={() => setShowContext(false)}
-                               />
-                        <label className="form-check-label" for="showValue">Value</label>
+                        />
+                        <label className="form-check-label" for="showValue">
+                            Value
+                        </label>
                     </div>
                     <div className="form-check form-check-inline">
-                        <input className="form-check-input" type="radio" id="showContext" checked={showContext}
+                        <input
+                            className="form-check-input"
+                            type="radio"
+                            id="showContext"
+                            checked={showContext}
                             onClick={() => setShowContext(true)}
                         />
-                        <label className="form-check-label" for="showContext">Context</label>
+                        <label className="form-check-label" for="showContext">
+                            Context
+                        </label>
                     </div>
                     <AceEditor
                         mode="json"
                         theme="github"
                         value={
-                            showContext ? JSON.stringify(contextValue, null, 4) : value
+                            showContext
+                                ? JSON.stringify(contextValue, null, 4)
+                                : value
                         }
                         wrapEnabled
                         readOnly={showContext}

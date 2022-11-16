@@ -155,12 +155,10 @@ class ShareResource(Resource):
             response = schema.dump({"groups": group_names, "shares": shares})
 
             for share in response["shares"]:
-                try:
+                if "related_user_login" in share.keys():
                     if share["related_user_login"] not in visible_related_users_logins:
                         share["related_user_login"] = "$hidden"
-                except KeyError:
-                    # 'related_user_login' doesn't exist when user was deleted
-                    pass
+
             return response
 
     @requires_authorization

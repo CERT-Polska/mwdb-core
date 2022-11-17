@@ -430,7 +430,7 @@ class JSONField(BaseField):
             );
         """
 
-        # Cfg values in DataBase are espaced, so we need to escape search phrase too
+        # Cfg values in DataBase are escaped, so we need to escape search phrase too
         if isinstance(expression, (Phrase, Word)):
             expression.value = expression.value.encode("unicode_escape").decode("utf-8")
 

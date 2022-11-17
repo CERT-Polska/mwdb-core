@@ -111,9 +111,7 @@ def add_escaping_for_like_statement(statement: str) -> str:
     LIKE statements use escaping (default symbol is '\')
     Every escape should be doubled except '%' and '_'
     """
-    statement = statement.replace("\\", "\\\\")
-    statement = statement.replace("\\\\%", "\\%")
-    statement = statement.replace("\\\\_", "\\_")
+    statement = re.sub(r"\\(?![%_])", r"\\\\", statement)
     return statement
 
 

@@ -293,19 +293,19 @@ def test_search_json_ranges(admin_session):
         "malwarex",
         {"array": [1, 10, 30], "value": 100, "key": value},  # for deduplication
     )
-    found_objs = test.search(f"config.cfg.array*:[10 TO 100]")
+    found_objs = test.search(f"config.cfg.array*:[10 TO 100] AND config.cfg.key:{value}")
     assert len(found_objs) == 1
 
-    found_objs = test.search(f"config.cfg.value:<100")
+    found_objs = test.search(f"config.cfg.value:<100 AND config.cfg.key:{value}")
     assert len(found_objs) == 0
 
-    found_objs = test.search(f"config.cfg.value:<=100")
+    found_objs = test.search(f"config.cfg.value:<=100 AND config.cfg.key:{value}")
     assert len(found_objs) == 1
 
-    found_objs = test.search(f"config.cfg.value:>100")
+    found_objs = test.search(f"config.cfg.value:>100 AND config.cfg.key:{value}")
     assert len(found_objs) == 0
 
-    found_objs = test.search(f"config.cfg.value:>=100")
+    found_objs = test.search(f"config.cfg.value:>=100 AND config.cfg.key:{value}")
     assert len(found_objs) == 1
 
 
@@ -336,6 +336,71 @@ def test_search_json_special_chars(admin_session):
 
     found_objs = test.search(f'config.cfg.key"with\\\\"quotes:{value}')
     assert len(found_objs) == 1
+
+
+def test_search_json_escaping(admin_session):
+    test = admin_session
+
+    value = base62uuid().lower()
+
+    test.add_config(None, "malwarex", {
+        "key" : value,
+        "path" : f"C:\\Users\\{value}",
+        "pl" : f"ąćęłńóśźż-{value}",
+        "quotation" : f"{value}\"\\\"\'ABC",
+        "nul" : b"\x00 \x01 \x02",
+        "chinese" : f"施也会意字汉字-{value}"
+    })
+
+    found_objs = test.search(f'config.cfg.path:"C:\\\\Users\\\\{value}"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.pl:"ąćęłńóśźż-{value}"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.quotation:"{value}\\\"\\\\\\\"\'ABC"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.nul:"\\x00 \\x01 \\x02" AND config.cfg.key:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.chinese:"施也会意字汉字-{value}"')
+    assert len(found_objs) == 1
+
+    # LIKE statements
+
+    found_objs = test.search(f'config.cfg.path:"C:\\\\U*s\\\\{value}"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.pl:"ą*ż-{value}"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.quotation:"{value}\\\"\\\\\\\"\'A*"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.nul:"\\x00*" AND config.cfg.key:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg.chinese:"施*-{value}"')
+    assert len(found_objs) == 1
+
+    # JSON path is not precise
+
+    found_objs = test.search(f'config.cfg:"*C:\\\\U*s\\\\{value}*"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg:"*ą*ż-{value}*"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg:"*{value}\\\"\\\\\\\"\'A*"')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg:"*\\x00*" AND config.cfg.key:{value}')
+    assert len(found_objs) == 1
+
+    found_objs = test.search(f'config.cfg:"*施*-{value}*"')
+    assert len(found_objs) == 1
+
 
 
 def test_search_file_size_unbounded(admin_session):

@@ -348,7 +348,7 @@ def test_search_json_escaping(admin_session):
         "path" : f"C:\\Users\\{value}",
         "pl" : f"ąćęłńóśźż-{value}",
         "quotation" : f"{value}\"\\\"\'ABC",
-        "nul" : b"\x00 \x01 \x02",
+        "nul" : "\x00 \x01 \x02",
         "chinese" : f"施也会意字汉字-{value}"
     })
 

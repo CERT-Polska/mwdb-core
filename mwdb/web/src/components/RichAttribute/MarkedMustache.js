@@ -234,15 +234,11 @@ function renderTokens(tokens, options) {
             );
         },
         paragraph(token) {
-<<<<<<< HEAD
-            return <p style={{ margin: "0" }}>{renderTokens(token.tokens)}</p>;
-=======
             return (
                 <p style={{ margin: "0" }}>
                     {renderTokens(token.tokens, options)}
                 </p>
             );
->>>>>>> 37c14eb (Prettier)
         },
         link(token) {
             if (token.href.startsWith("search#")) {

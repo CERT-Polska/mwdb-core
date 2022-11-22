@@ -1,6 +1,6 @@
 from flask import g, request
 from flask_restful import Resource
-from werkzeug.exceptions import NotFound, Forbidden
+from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.rate_limit import rate_limited_resource

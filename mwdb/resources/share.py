@@ -1,6 +1,6 @@
 from flask import g, request
 from flask_restful import Resource
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, Forbidden
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.rate_limit import rate_limited_resource
@@ -118,6 +118,9 @@ class ShareResource(Resource):
         )
 
         group_names = [group[0] for group in groups.all()]
+        # User cannot share object with themself
+        if g.auth_user.login in group_names:
+            group_names.remove(g.auth_user.login)
 
         db_object = access_object(type, identifier)
         if db_object is None:
@@ -200,6 +203,9 @@ class ShareResource(Resource):
                     schema: ShareListResponseSchema
             400:
                 description: When request body is invalid.
+            403:
+                description: |
+                    When user tries to share object with themself.
             404:
                 description: |
                     When object or group doesn't exist
@@ -223,6 +229,9 @@ class ShareResource(Resource):
 
         if group is None or group.pending_group:
             raise NotFound(f"Group {group_name} doesn't exist")
+
+        if group.name == g.auth_user.login:
+            raise Forbidden("You cannot share object with yourself")
 
         db_object.give_access(group.id, AccessType.SHARED, db_object, g.auth_user)
 

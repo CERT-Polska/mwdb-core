@@ -397,7 +397,7 @@ class UploaderField(BaseField):
             ).all()
             # Regular users can see only uploads to its own groups
             condition = and_(
-                condition, g.auth_user.is_member(ObjectPermission.group_id)
+                condition, g.auth_user.has_access_to_object(ObjectPermission.object_id)
             )
         else:
             uploaders = (
@@ -411,7 +411,7 @@ class UploaderField(BaseField):
             ).all()
             # Regular users can see only uploads to its own groups
             condition = and_(
-                condition, g.auth_user.is_member(ObjectPermission.group_id)
+                condition, g.auth_user.has_access_to_object(ObjectPermission.object_id)
             )
         if not uploaders:
             raise ObjectNotFoundException(f"No such user or group: {value}")

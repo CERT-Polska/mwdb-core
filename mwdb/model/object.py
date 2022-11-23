@@ -920,6 +920,7 @@ class Object(db.Model):
         # Others can see uploader only if they uploaded the object
         # or when the uploader is in their workspace
         else:
+            # list of user_ids who are in a common workspace with auth_user
             members = (
                 db.session.query(Member.user_id)
                 .join(Group.members)

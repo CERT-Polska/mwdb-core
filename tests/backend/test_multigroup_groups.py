@@ -148,7 +148,6 @@ def test_multigroup_sharing(admin_session):
     assert set(shares["groups"]) == {
         "public",
         "registered",
-        Alice.identity,
         Workgroup.identity,
     }
     assert set(gr["group_name"] for gr in shares["shares"]) == {
@@ -157,7 +156,7 @@ def test_multigroup_sharing(admin_session):
     }
 
     shares = Bob.session.get_shares(File.dhash)
-    assert set(shares["groups"]) == {"public", "registered", Bob.identity}
+    assert set(shares["groups"]) == {"public", "registered"}
     assert set(gr["group_name"] for gr in shares["shares"]) == {Bob.identity}
 
     shares = Joe.session.get_shares(File.dhash)
@@ -166,7 +165,6 @@ def test_multigroup_sharing(admin_session):
         "registered",
         Alice.identity,
         Bob.identity,
-        Joe.identity,
         Workgroup.identity,
     }
     assert set(shares["groups"]).intersection(groups) == groups

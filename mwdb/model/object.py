@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from flask import g
-from sqlalchemy import and_, cast, distinct, exists, func, select
+from sqlalchemy import and_, cast, distinct, exists, func, or_, select
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, column_property, contains_eager
@@ -566,19 +566,28 @@ class Object(db.Model):
 
         # Share with all specified groups
         for share_group in share_with:
-            created_object.give_access(
-                share_group.id,
-                AccessType.ADDED,
-                created_object,
-                g.auth_user,
-                commit=False,
-            )
+            if share_group.name == g.auth_user.login:
+                created_object.give_access(
+                    share_group.id,
+                    AccessType.ADDED,
+                    created_object,
+                    g.auth_user,
+                    commit=False,
+                )
+            else:
+                created_object.give_access(
+                    share_group.id,
+                    AccessType.SHARED,
+                    created_object,
+                    g.auth_user,
+                    commit=False,
+                )
 
         # Share with all groups that access all objects
         for all_access_group in Group.all_access_groups():
             created_object.give_access(
                 all_access_group.id,
-                AccessType.ADDED,
+                AccessType.SHARED,
                 created_object,
                 g.auth_user,
                 commit=False,
@@ -892,6 +901,47 @@ class Object(db.Model):
                 raise
         return True
 
+    def get_uploaders(self):
+        """
+        Gets all object uploads visible for currently authenticated user
+        :rtype: List[ObjectPermission]
+        """
+
+        from .group import Group, Member
+
+        # Users with access_uploader_info can see every upload
+        if g.auth_user.has_rights(Capabilities.access_uploader_info):
+            uploaders = (
+                db.session.query(ObjectPermission)
+                .filter(ObjectPermission.object_id == self.id)
+                .filter(ObjectPermission.reason_type == "added")
+                .order_by(ObjectPermission.access_time.asc())
+            ).all()
+        # Others can see uploader only if they uploaded the object
+        # or when the uploader is in their workspace
+        else:
+            members = (
+                db.session.query(Member.user_id)
+                .join(Group.members)
+                .filter(g.auth_user.is_member(Group.id))
+                .filter(Group.workspace.is_(True))
+            )
+
+            uploaders = (
+                db.session.query(ObjectPermission)
+                .filter(ObjectPermission.object_id == self.id)
+                .filter(ObjectPermission.reason_type == "added")
+                .filter(
+                    or_(
+                        ObjectPermission.related_user_id == g.auth_user.id,
+                        ObjectPermission.related_user_id.in_(members),
+                    )
+                )
+                .order_by(ObjectPermission.access_time.asc())
+            ).all()
+
+        return uploaders
+
     def get_shares(self):
         """
         Gets all object shares visible for currently authenticated user
@@ -907,6 +957,7 @@ class Object(db.Model):
         shares = (
             db.session.query(ObjectPermission)
             .filter(permission_filter)
+            .filter(ObjectPermission.reason_type == "shared")
             .order_by(ObjectPermission.access_time.asc())
         ).all()
         return shares

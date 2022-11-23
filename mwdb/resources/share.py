@@ -126,9 +126,9 @@ class ShareResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        shares = db_object.get_shares()
+        shares = db_object.get_uploaders() + db_object.get_shares()
 
-        if g.auth_user.has_rights(Capabilities.access_uploader_info):
+        if True:  # g.auth_user.has_rights(Capabilities.access_uploader_info):
             schema = ShareInfoResponseSchema()
             return schema.dump({"groups": group_names, "shares": shares})
         else:

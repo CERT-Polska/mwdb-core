@@ -35,8 +35,9 @@ function groupShares(shares) {
             reason_type,
         } = share;
         const reasonKey = `${related_object_dhash} ${related_object_type} ${related_user_login} ${reason_type}`;
-        if (!shares_by_reason[reasonKey]) shares_by_reason[reasonKey] = [share];
-        else {
+        if (!shares_by_reason[reasonKey]){
+            shares_by_reason[reasonKey] = [share];
+        } else {
             shares_by_reason[reasonKey].push(share);
         }
     });
@@ -79,8 +80,8 @@ function ShareGroupItem({ reason, shares }) {
             </thead>
             <tbody>
                 {shares.map((share) => {
-                    const isUploader =
-                        share.related_user_login === share.group_name;
+                    const isUploader = 
+                        share.related_user_login === share.group_name && share.reason_type === "added";
                     return (
                         <tr className="d-flex">
                             <td className="col-6">

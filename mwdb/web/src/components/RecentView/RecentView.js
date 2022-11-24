@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, {useState, useEffect, useContext} from "react";
+import {useSearchParams} from "react-router-dom";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
-import { multiFromHashes, addFieldToQuery } from "@mwdb-web/commons/helpers";
-import { View } from "@mwdb-web/commons/ui";
+import {APIContext} from "@mwdb-web/commons/api/context";
+import {multiFromHashes, addFieldToQuery} from "@mwdb-web/commons/helpers";
+import {View} from "@mwdb-web/commons/ui";
 
 import RecentViewList from "./RecentViewList";
 import QuickQuery from "./QuickQuery";
@@ -31,6 +31,7 @@ export default function RecentView(props) {
     // Query error shown under the query bar
     const [queryError, setQueryError] = useState(null);
     const [objectCount, setObjectCount] = useState(null);
+    const [getObjectCount, setGetObjectCount] = useState(true);
 
     const isLocked = !queryError && submittedQuery !== currentQuery;
 
@@ -58,34 +59,49 @@ export default function RecentView(props) {
         resetErrors();
     }, [currentQuery]);
 
-    // Submit query if currentQuery was changed
     useEffect(() => {
+        !getObjectCount ? (
+            submitQuery(currentQuery)
+        ) : (
+            submitQueryGetObjectCount(currentQuery)
+        )
+    }, [currentQuery])
+
+    function submitQuery(currentQ) {
+        if (submittedQuery === currentQ) return;
+
+        if (!currentQ) {
+            setSubmittedQuery("")
+        } else {
+            setSubmittedQuery(currentQ)
+        }
+    }
+
+    async function submitQueryGetObjectCount(currentQ) {
         let cancelled = false;
         // If query is already submitted: do nothing
-        if (submittedQuery === currentQuery) return;
+        if (submittedQuery === currentQ) return;
         // If query is empty, submit immediately
-        if (!currentQuery) setSubmittedQuery("");
-        else {
+        if (!currentQ) setSubmittedQuery(""); else {
             // Make preflight query to get count of results
             // and check if query is correct
-            api.getObjectCount(props.type, currentQuery)
+            await api.getObjectCount(props.type, currentQ)
                 .then((response) => {
                     if (cancelled) return;
                     // If ok: commit query
-                    setSubmittedQuery(currentQuery);
+                    setSubmittedQuery(currentQ);
                     setObjectCount(response.data["count"]);
                 })
                 .catch((error) => {
                     if (cancelled) return;
                     setQueryError(error);
                 });
+
+            return () => {
+                cancelled = true;
+            }
         }
-        return () => {
-            // Cancel pending requests after unmount/remount
-            cancelled = true;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentQuery]);
+    }
 
     const canAddQuickQuery =
         queryInput && !isLocked && queryInput === submittedQuery;
@@ -140,11 +156,38 @@ export default function RecentView(props) {
                             onChange={(evt) => setQueryInput(evt.target.value)}
                         />
                         <div className="input-group-append">
-                            <input
-                                className="btn btn-outline-success"
-                                type="submit"
-                                value="Search"
-                            />
+                            <div className="btn-group">
+                                <input
+                                    className="btn btn-outline-success rounded-0"
+                                    type="submit"
+                                    value="Search"
+                                    onClick={(ev) => {
+                                        ev.preventDefault();
+                                        setGetObjectCount(true);
+                                        setCurrentQuery(queryInput);
+                                    }}
+                                />
+                                <button type="btn"
+                                        className="dropdown-toggle dropdown-toggle-split btn btn-outline-success rounded-0"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span className="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <div className="dropdown-menu">
+                                    <a
+                                        className="dropdown-item btn btn-outline-success"
+                                        type="submit"
+                                        onClick={(ev) => {
+                                            ev.preventDefault();
+                                            setGetObjectCount(false);
+                                            setObjectCount(null);
+                                            setCurrentQuery(queryInput);
+                                        }}
+                                    >
+                                        Search without count
+                                    </a>
+                                </div>
+                            </div>
+
                             <a
                                 href="https://mwdb.readthedocs.io/en/latest/user-guide/7-Lucene-search.html"
                                 className="btn btn-outline-primary"

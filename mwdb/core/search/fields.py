@@ -378,13 +378,14 @@ class SharerField(BaseField):
         if g.auth_user.has_rights(Capabilities.manage_users):
             return self.column.any(ObjectPermission.related_user_id == user_id)
         else:
-            # list of user_ids who are in a common workspace with auth_user
+            # list of users who are in a common workspace with auth_user
             members = (
                 db.session.query(Member)
                 .join(Group.members)
                 .filter(g.auth_user.is_member(Group.id))
                 .filter(Group.workspace.is_(True))
             ).all()
+            # list of users who shared object with auth_user
             related_users = (
                 db.session.query(ObjectPermission)
                 .filter(g.auth_user.is_member(ObjectPermission.group_id))

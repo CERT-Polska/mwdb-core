@@ -25,6 +25,7 @@ from .fields import (
     MultiField,
     RelationField,
     ShareField,
+    SharerField,
     SizeField,
     StringField,
     UploadCountField,
@@ -48,6 +49,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "meta": AttributeField(Object.attributes),  # legacy
         "attribute": AttributeField(Object.attributes),
         "shared": ShareField(Object.shares),
+        "sharer": SharerField(Object.shares),
         "uploader": UploaderField(Object.related_shares),
         "upload_time": DatetimeField(Object.upload_time),
         "parent": RelationField(Object.parents),

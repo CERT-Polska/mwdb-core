@@ -364,6 +364,46 @@ class ShareField(BaseField):
         return self.column.any(ObjectPermission.group_id == group_id)
 
 
+class SharerField(BaseField):
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
+        value = expression.unescaped_value
+
+        user = db.session.query(User).filter(User.login == value).first()
+        if user is None:
+            raise ObjectNotFoundException(f"No such user: {value}")
+
+        user_id = user.id
+        if g.auth_user.has_rights(Capabilities.manage_users):
+            return self.column.any(ObjectPermission.related_user_id == user_id)
+        else:
+            # list of user_ids who are in a common workspace with auth_user
+            members = (
+                db.session.query(Member)
+                .join(Group.members)
+                .filter(g.auth_user.is_member(Group.id))
+                .filter(Group.workspace.is_(True))
+            ).all()
+            related_users = (
+                db.session.query(ObjectPermission)
+                .filter(g.auth_user.is_member(ObjectPermission.group_id))
+                .filter(ObjectPermission.related_user_id == user_id)
+            ).all()
+            visible_ids = [m.user_id for m in members] + [
+                r.related_user_id for r in related_users
+            ]
+            if user_id not in visible_ids:
+                raise ObjectNotFoundException(f"No such user: {value}")
+
+            return self.column.any(
+                and_(
+                    g.auth_user.is_member(ObjectPermission.group_id),
+                    ObjectPermission.related_user_id == user_id,
+                )
+            )
+
+
 class UploaderField(BaseField):
     def _get_condition(
         self, expression: Expression, subfields: List[Tuple[str, int]]

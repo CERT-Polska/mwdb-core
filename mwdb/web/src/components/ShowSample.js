@@ -234,6 +234,21 @@ function SampleDetails() {
     );
 }
 
+function xorArrayBuffer(buffer) {
+    /*
+    xor buffer with key equal 255
+	https://stackoverflow.com/questions/49885795/access-uint8array-in-javascript-arraybuffer
+	https://stackoverflow.com/questions/47891321/fastest-way-to-perform-xor-using-javascript-arraybuffer
+	https://stackoverflow.com/questions/29776996/applying-a-function-to-each-object-in-a-javascript-array
+	https://stackoverflow.com/questions/37228285/uint8array-to-arraybuffer
+    */
+    const uint8View = new Uint8Array(buffer);
+    const xored = uint8View.map(function(item) {
+        return (item ^ 255);
+    });
+    return xored.buffer.slice(xored.byteOffset, xored.byteLength + xored.byteOffset)
+}
+
 function SamplePreview() {
     const [content, setContent] = useState("");
     const api = useContext(APIContext);
@@ -243,8 +258,9 @@ function SamplePreview() {
     async function updateSample() {
         try {
             const fileId = objectContext.object.id;
-            const fileContentResponse = await api.downloadFile(fileId);
-            setContent(fileContentResponse.data);
+            const fileContentResponse = await api.downloadFileXored(fileId);
+            const fileContentResponseData = xorArrayBuffer(fileContentResponse.data);
+            setContent(fileContentResponseData);
         } catch (e) {
             objectContext.setObjectError(e);
         }

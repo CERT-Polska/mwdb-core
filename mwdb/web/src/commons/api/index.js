@@ -418,6 +418,13 @@ function downloadFile(id) {
     });
 }
 
+function downloadFileXored(id) {
+    return axios.get(`/file/${id}/download/xor`, {
+        responseType: "arraybuffer",
+        responseEncoding: "binary",
+    });
+}
+
 async function requestFileDownloadLink(id) {
     const response = await axios.post(`/file/${id}/download`);
     const baseURL = getApiForEnvironment();
@@ -623,6 +630,7 @@ const api = {
     setAttributePermission,
     removeAttributePermission,
     downloadFile,
+    downloadFileXored,
     requestFileDownloadLink,
     requestZipFileDownloadLink,
     uploadFile,

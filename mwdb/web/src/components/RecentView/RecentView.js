@@ -1,9 +1,9 @@
-import React, {useState, useEffect, useContext} from "react";
-import {useSearchParams} from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { useSearchParams } from "react-router-dom";
 
-import {APIContext} from "@mwdb-web/commons/api/context";
-import {multiFromHashes, addFieldToQuery} from "@mwdb-web/commons/helpers";
-import {View} from "@mwdb-web/commons/ui";
+import { APIContext } from "@mwdb-web/commons/api/context";
+import { multiFromHashes, addFieldToQuery } from "@mwdb-web/commons/helpers";
+import { View } from "@mwdb-web/commons/ui";
 
 import RecentViewList from "./RecentViewList";
 import QuickQuery from "./QuickQuery";
@@ -60,20 +60,18 @@ export default function RecentView(props) {
     }, [currentQuery]);
 
     useEffect(() => {
-        !getObjectCount ? (
-            submitQuery(currentQuery)
-        ) : (
-            submitQueryGetObjectCount(currentQuery)
-        )
-    }, [currentQuery])
+        !getObjectCount
+            ? submitQuery(currentQuery)
+            : submitQueryGetObjectCount(currentQuery);
+    }, [currentQuery]);
 
     function submitQuery(currentQ) {
         if (submittedQuery === currentQ) return;
 
         if (!currentQ) {
-            setSubmittedQuery("")
+            setSubmittedQuery("");
         } else {
-            setSubmittedQuery(currentQ)
+            setSubmittedQuery(currentQ);
         }
     }
 
@@ -82,10 +80,12 @@ export default function RecentView(props) {
         // If query is already submitted: do nothing
         if (submittedQuery === currentQ) return;
         // If query is empty, submit immediately
-        if (!currentQ) setSubmittedQuery(""); else {
+        if (!currentQ) setSubmittedQuery("");
+        else {
             // Make preflight query to get count of results
             // and check if query is correct
-            await api.getObjectCount(props.type, currentQ)
+            await api
+                .getObjectCount(props.type, currentQ)
                 .then((response) => {
                     if (cancelled) return;
                     // If ok: commit query
@@ -99,7 +99,7 @@ export default function RecentView(props) {
 
             return () => {
                 cancelled = true;
-            }
+            };
         }
     }
 
@@ -167,10 +167,16 @@ export default function RecentView(props) {
                                         setCurrentQuery(queryInput);
                                     }}
                                 />
-                                <button type="btn"
-                                        className="dropdown-toggle dropdown-toggle-split btn btn-outline-success rounded-0"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span className="sr-only">Toggle Dropdown</span>
+                                <button
+                                    type="btn"
+                                    className="dropdown-toggle dropdown-toggle-split btn btn-outline-success rounded-0"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    <span className="sr-only">
+                                        Toggle Dropdown
+                                    </span>
                                 </button>
                                 <div className="dropdown-menu">
                                     <a

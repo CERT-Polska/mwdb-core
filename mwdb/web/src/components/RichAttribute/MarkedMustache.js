@@ -105,7 +105,6 @@ class MustacheContext extends Mustache.Context {
         if (!name) return undefined;
         const path = splitName(name);
         let currentObject = this.view;
-        console.log("currentObject", currentObject, path);
         for (let element of path) {
             if (!Object.prototype.hasOwnProperty.call(currentObject, element))
                 return undefined;

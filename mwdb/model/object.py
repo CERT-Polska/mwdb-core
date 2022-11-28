@@ -958,7 +958,7 @@ class Object(db.Model):
         shares = (
             db.session.query(ObjectPermission)
             .filter(permission_filter)
-            .filter(ObjectPermission.reason_type == "shared")
+            .filter(ObjectPermission.reason_type != "added")
             .order_by(ObjectPermission.access_time.asc())
         ).all()
         return shares

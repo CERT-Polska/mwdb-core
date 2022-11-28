@@ -13,6 +13,7 @@ export default function ShareReasonString({
     const remotePath = useRemotePath();
     const reasonText =
         reasonType.charAt(0).toUpperCase() + reasonType.slice(1).toLowerCase();
+    const isShared = reasonType === "shared";
     const objLink = relatedObjectDHash ? (
         <ObjectLink type={relatedObjectType} id={relatedObjectDHash} inline />
     ) : (
@@ -21,20 +22,24 @@ export default function ShareReasonString({
     const userLink = relatedUserLogin ? (
         <Link
             to={makeSearchLink({
-                field: "uploader",
+                field: (isShared ? "sharer" : "uploader"),
                 value: relatedUserLogin,
                 pathname: `${remotePath}/search`,
             })}
         >
-            {relatedUserLogin}
+            {isShared ? relatedUserLogin : ""}
         </Link>
     ) : (
         <span className="text-muted">(deleted)</span>
     );
 
-    return (
+    return isShared ? (
         <div>
             {reasonText} by {userLink}: {objLink}
+        </div>
+    ) : (
+        <div>
+            {reasonText} by: {objLink}
         </div>
     );
 }

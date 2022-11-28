@@ -370,13 +370,22 @@ class SharerField(BaseField):
     ) -> Any:
         value = expression.unescaped_value
 
+        # Look only for upload actions
+        # (reason_type=SHARED and uploaded_object=shared_object)
+        condition = and_(
+            ObjectPermission.reason_type == AccessType.SHARED,
+            ObjectPermission.related_object_id == ObjectPermission.object_id,
+        )
+
         user = db.session.query(User).filter(User.login == value).first()
         if user is None:
             raise ObjectNotFoundException(f"No such user: {value}")
 
         user_id = user.id
         if g.auth_user.has_rights(Capabilities.manage_users):
-            return self.column.any(ObjectPermission.related_user_id == user_id)
+            return self.column.any(
+                and_(condition, ObjectPermission.related_user_id == user_id)
+            )
         else:
             # list of users who are in a common workspace with auth_user
             members = (
@@ -399,6 +408,7 @@ class SharerField(BaseField):
 
             return self.column.any(
                 and_(
+                    condition,
                     g.auth_user.is_member(ObjectPermission.group_id),
                     ObjectPermission.related_user_id == user_id,
                 )

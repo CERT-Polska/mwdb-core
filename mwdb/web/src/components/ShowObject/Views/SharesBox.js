@@ -23,6 +23,17 @@ function groupShares(shares) {
         if (a_time < b_time) return -1;
         return 0;
     }
+    function reasonAndTimeCompare(a, b) {
+        // reasonTypes should be grouped (one after another)
+        if (a.reason.reasonType > b.reason.reasonType) return 1;
+        if (a.reason.reasonType < b.reason.reasonType) return -1;
+        // if two shares have identical reasonType sort by time
+        const a_time = Date.parse(a.access_time);
+        const b_time = Date.parse(b.access_time);
+        if (a_time > b_time) return 1;
+        if (a_time < b_time) return -1;
+        return 0;
+    }
     // Sort by time
     const shares_by_time = shares.sort(timeCompare);
     // Group by reason
@@ -34,14 +45,16 @@ function groupShares(shares) {
             related_user_login,
             reason_type,
         } = share;
-        const reasonKey = `${related_object_dhash} ${related_object_type} ${related_user_login} ${reason_type}`;
+        const reasonKey = (reason_type === "shared")
+            ? `${related_object_dhash} ${related_object_type} ${related_user_login} ${reason_type}`
+            : `${related_object_dhash} ${related_object_type} ${reason_type}`;
         if (!shares_by_reason[reasonKey]){
             shares_by_reason[reasonKey] = [share];
         } else {
             shares_by_reason[reasonKey].push(share);
         }
     });
-    // Sort by first reason time
+    // Sort by reason and first reason time
     return Object.values(shares_by_reason)
         .map((shares) => {
             const firstShare = shares[0];
@@ -53,7 +66,7 @@ function groupShares(shares) {
             };
             return { reason, shares, access_time: firstShare.access_time };
         })
-        .sort(timeCompare);
+        .sort(reasonAndTimeCompare);
 }
 
 function ShareGroupItem({ reason, shares }) {
@@ -80,23 +93,18 @@ function ShareGroupItem({ reason, shares }) {
             </thead>
             <tbody>
                 {shares.map((share) => {
-                    const isUploader = 
-                        share.related_user_login === share.group_name && share.reason_type === "added";
                     return (
                         <tr className="d-flex">
                             <td className="col-6">
                                 <Link
                                     to={makeSearchLink({
-                                        field: "uploader",
+                                        field: (share.reason_type === "added" ? "uploader" : "shared"),
                                         value: share.group_name,
                                         pathname: `${remotePath}/search`,
                                     })}
                                 >
                                     {share.group_name}
                                 </Link>
-                                {isUploader && (
-                                    <span className="ml-2">(uploader)</span>
-                                )}
                             </td>
                             <td className="col">
                                 <DateString date={share.access_time} />

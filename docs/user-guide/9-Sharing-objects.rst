@@ -171,7 +171,7 @@ Each capability has its own name and scope:
   Capability used by ``everything`` group, useful when you want to make additional "everything" that is separate from the original one. Keep in mind that it applies only to the **uploads made during the capability was enabled**\ , so if you want the new group to be truly "everything", you may need to share the old objects manually.
 
 * 
-  **sharing_objects - Can share objects with all groups in system**
+  **sharing_with_all - Can share objects with all groups in system**
 
   Implies the access to the list of all group names, but without access to the membership information and management features. Allows to share object with arbitrary group in MWDB.
 

@@ -249,10 +249,7 @@ class Object(db.Model):
         "Attribute", backref="object", lazy=True, cascade="save-update, merge, delete"
     )
     comments = db.relationship(
-        "Comment",
-        backref="object",
-        lazy="dynamic",
-        cascade="save-update, merge, delete",
+        "Comment", backref="object", lazy="dynamic", passive_deletes=True
     )
     tags = db.relationship(
         "Tag",
@@ -266,7 +263,10 @@ class Object(db.Model):
     )
 
     comment_authors = db.relationship(
-        "User", secondary="comment", back_populates="commented_objects"
+        "User",
+        secondary="comment",
+        back_populates="commented_objects",
+        passive_deletes=True,
     )
 
     shares = db.relationship(
@@ -899,7 +899,7 @@ class Object(db.Model):
         """
         permission_filter = ObjectPermission.object_id == self.id
 
-        if not g.auth_user.has_rights(Capabilities.sharing_objects):
+        if not g.auth_user.has_rights(Capabilities.sharing_with_all):
             permission_filter = and_(
                 permission_filter, g.auth_user.is_member(ObjectPermission.group_id)
             )

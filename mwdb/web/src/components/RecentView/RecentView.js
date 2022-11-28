@@ -181,7 +181,7 @@ export default function RecentView(props) {
                                 </button>
                                 <div className="dropdown-menu">
                                     <a
-                                        href='#'
+                                        href="#"
                                         className="dropdown-item btn btn-outline-success"
                                         type="submit"
                                         onClick={(ev) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
@@ -63,9 +63,9 @@ export default function RecentView(props) {
         !getObjectCount
             ? submitQuery(currentQuery)
             : submitQueryGetObjectCount(currentQuery);
-    }, [currentQuery, getObjectCount, submitQuery, submitQueryGetObjectCount]);
+    }, [currentQuery, getObjectCount]);
 
-    function submitQuery(currentQ) {
+    const submitQuery = useCallback((currentQ) => {
         if (submittedQuery === currentQ) return;
 
         if (!currentQ) {
@@ -73,9 +73,9 @@ export default function RecentView(props) {
         } else {
             setSubmittedQuery(currentQ);
         }
-    }
+    }, []);
 
-    async function submitQueryGetObjectCount(currentQ) {
+    const submitQueryGetObjectCount = useCallback(async (currentQ) => {
         let cancelled = false;
         // If query is already submitted: do nothing
         if (submittedQuery === currentQ) return;
@@ -101,7 +101,7 @@ export default function RecentView(props) {
                 cancelled = true;
             };
         }
-    }
+    }, []);
 
     const canAddQuickQuery =
         queryInput && !isLocked && queryInput === submittedQuery;
@@ -180,8 +180,7 @@ export default function RecentView(props) {
                                     </span>
                                 </button>
                                 <div className="dropdown-menu">
-                                    <a
-                                        href="#"
+                                    <button
                                         className="dropdown-item btn btn-outline-success"
                                         type="submit"
                                         onClick={(ev) => {
@@ -192,7 +191,7 @@ export default function RecentView(props) {
                                         }}
                                     >
                                         Search without count
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
 

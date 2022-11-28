@@ -63,7 +63,7 @@ export default function RecentView(props) {
         !getObjectCount
             ? submitQuery(currentQuery)
             : submitQueryGetObjectCount(currentQuery);
-    }, [currentQuery, getObjectCount]);
+    }, [currentQuery, getObjectCount, submitQuery, submitQueryGetObjectCount]);
 
     const submitQuery = useCallback((currentQ) => {
         if (submittedQuery === currentQ) return;
@@ -73,7 +73,7 @@ export default function RecentView(props) {
         } else {
             setSubmittedQuery(currentQ);
         }
-    }, []);
+    });
 
     const submitQueryGetObjectCount = useCallback(async (currentQ) => {
         let cancelled = false;
@@ -101,7 +101,7 @@ export default function RecentView(props) {
                 cancelled = true;
             };
         }
-    }, []);
+    });
 
     const canAddQuickQuery =
         queryInput && !isLocked && queryInput === submittedQuery;

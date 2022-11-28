@@ -63,7 +63,7 @@ export default function RecentView(props) {
         !getObjectCount
             ? submitQuery(currentQuery)
             : submitQueryGetObjectCount(currentQuery);
-    }, [currentQuery]);
+    }, [currentQuery, getObjectCount, submitQuery, submitQueryGetObjectCount]);
 
     function submitQuery(currentQ) {
         if (submittedQuery === currentQ) return;
@@ -125,6 +125,7 @@ export default function RecentView(props) {
         ) : (
             []
         );
+
     return (
         <View fluid ident="recentObjects" error={error}>
             <div className="table-responsive">
@@ -180,6 +181,7 @@ export default function RecentView(props) {
                                 </button>
                                 <div className="dropdown-menu">
                                     <a
+                                        href='#'
                                         className="dropdown-item btn btn-outline-success"
                                         type="submit"
                                         onClick={(ev) => {

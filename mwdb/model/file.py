@@ -283,8 +283,8 @@ class File(Object):
     def xor(self, chunk):
         """
         xor data with key equal 255 of length of chunk; using numpy
-		https://stackoverflow.com/questions/23312571/fast-xoring-bytes-in-python-3
-		"""
+        https://stackoverflow.com/questions/23312571/fast-xoring-bytes-in-python-3
+        """
         key = np.frombuffer(b'\xff'*len(chunk), dtype='uint8')
         chunk = np.frombuffer(chunk, dtype='uint8')
         return (key ^ chunk).tobytes()

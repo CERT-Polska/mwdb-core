@@ -60,34 +60,34 @@ export default function RecentView(props) {
     }, [currentQuery]);
 
     const submitQuery = useCallback(
-        (currentQ) => {
-            if (submittedQuery === currentQ) return;
+        (query) => {
+            if (submittedQuery === query) return;
 
-            if (!currentQ) {
+            if (!query) {
                 setSubmittedQuery("");
             } else {
-                setSubmittedQuery(currentQ);
+                setSubmittedQuery(query);
             }
         },
         [submittedQuery]
     );
 
     const submitQueryGetObjectCount = useCallback(
-        async (currentQ) => {
+        async (query) => {
             let cancelled = false;
             // If query is already submitted: do nothing
-            if (submittedQuery === currentQ) return;
+            if (submittedQuery === query) return;
             // If query is empty, submit immediately
-            if (!currentQ) setSubmittedQuery("");
+            if (!query) setSubmittedQuery("");
             else {
                 // Make preflight query to get count of results
                 // and check if query is correct
                 await api
-                    .getObjectCount(props.type, currentQ)
+                    .getObjectCount(props.type, query)
                     .then((response) => {
                         if (cancelled) return;
                         // If ok: commit query
-                        setSubmittedQuery(currentQ);
+                        setSubmittedQuery(query);
                         setObjectCount(response.data["count"]);
                     })
                     .catch((error) => {

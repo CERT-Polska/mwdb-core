@@ -69,7 +69,7 @@ function groupShares(shares) {
         .sort(reasonAndTimeCompare);
 }
 
-function ShareGroupItem({ reason, shares }) {
+function ShareGroupItem({ reason, shares, showDhash }) {
     const remotePath = useRemotePath();
     return (
         <table className="table table-striped table-bordered wrap-table share-table">
@@ -78,7 +78,7 @@ function ShareGroupItem({ reason, shares }) {
                     <th colSpan="2">
                         {(() => {
                             if (reason.relatedUserLogin !== "$hidden") {
-                                return <ShareReasonString {...reason} />;
+                                return <ShareReasonString {...reason} showDhash={showDhash} />;
                             } else {
                                 return (
                                     <span class="text-muted">
@@ -177,24 +177,51 @@ function SharingStatusIcon({ shares }) {
     );
 }
 
-function SharesList({ shares, groups, handleShare }) {
+function SharesList({ shares, groups, handleShare, currentFile, direct }) {
+    function filterShares(){
+        const ret = [];
+        if (direct) {
+            shares.forEach((share) => {
+                if (share.related_object_dhash === currentFile) {
+                    ret.push(share);
+                }
+            })
+        } else {
+            shares.forEach((share) => {
+                if (share.related_object_dhash !== currentFile) {
+                    ret.push(share);
+                }
+            })
+        }
+        return ret;
+    }
+
     if (!shares || !groups) {
         return <div className="card-body text-muted">Loading data...</div>;
     }
 
-    const groupedItems = groupShares(shares);
-    return (
-        <div>
-            {groupedItems.map((sharesGroup) => (
-                <ShareGroupItem {...sharesGroup} />
-            ))}
-            {handleShare ? (
-                <ShareForm onSubmit={handleShare} groups={groups} />
-            ) : (
-                []
-            )}
-        </div>
-    );
+    const filteredShares = filterShares(shares);
+    if (filteredShares.length) {
+        const groupedItems = groupShares(filteredShares);
+        return (
+            <div>
+                {groupedItems.map((sharesGroup) => (
+                    <ShareGroupItem {...sharesGroup} showDhash={!direct} />
+                ))}
+                {handleShare ? (
+                    <ShareForm onSubmit={handleShare} groups={groups} />
+                ) : (
+                    []
+                )}
+            </div>
+        );
+    } else {
+        return (
+            <div class="card-body text-muted">
+                No shares to display
+            </div>
+        );
+    }
 }
 
 function SharesBox() {
@@ -248,27 +275,45 @@ function SharesBox() {
     }, [getShares]);
 
     return (
-        <div className="card card-default">
-            <ConfirmationModal
-                isOpen={isModalOpen}
-                onRequestClose={() => setIsModalOpen(false)}
-                message={`Share the sample and all its descendants with ${shareReceiver}?`}
-                onConfirm={() => doShare(shareReceiver)}
-                confirmText="Share"
-                buttonStyle="bg-success"
-            />
+        <div>
+            <div className="card card-default">
+                <ConfirmationModal
+                    isOpen={isModalOpen}
+                    onRequestClose={() => setIsModalOpen(false)}
+                    message={`Share the sample and all its descendants with ${shareReceiver}?`}
+                    onConfirm={() => doShare(shareReceiver)}
+                    confirmText="Share"
+                    buttonStyle="bg-success"
+                />
 
-            <div className="card-header">
-                <div className="media">
-                    <div className="align-self-center media-body">Shares</div>
-                    <SharingStatusIcon shares={shares} />
+                <div className="card-header">
+                    <div className="media">
+                        <div className="align-self-center media-body">Shares</div>
+                        <SharingStatusIcon shares={shares} />
+                    </div>
                 </div>
+                <SharesList
+                    shares={shares}
+                    groups={groups}
+                    handleShare={!api.remote ? handleShare : null}
+                    currentFile = {context.object.sha256}
+                    direct={true}
+                />
             </div>
-            <SharesList
-                shares={shares}
-                groups={groups}
-                handleShare={!api.remote ? handleShare : null}
-            />
+            <div className="card card-default">
+                <div className="card-header">
+                    <div className="media">
+                        <div className="align-self-center media-body">Related shares</div>
+                    </div>
+                </div>
+                <SharesList
+                    shares={shares}
+                    groups={groups}
+                    handleShare={false}
+                    currentFile = {context.object.sha256}
+                    direct={false}
+                />
+            </div>
         </div>
     );
 }

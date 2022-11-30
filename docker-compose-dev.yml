@@ -42,6 +42,7 @@ services:
     volumes:
       - "./docker/mail_templates:/app/mail_templates"
       - "./mwdb:/app/mwdb"
+      - mwdb-uploads:/app/uploads
   mwdb-web:
     depends_on:
       - mwdb
@@ -53,6 +54,7 @@ services:
     environment:
       HOST: 0.0.0.0
       REACT_APP_API_URL: "/api/"
+      NODE_ENV: development
     volumes:
       - "./mwdb/web/public:/app/public"
       - "./mwdb/web/src:/app/src"
@@ -65,9 +67,14 @@ services:
       - postgres-vars.env
     ports:
       - "127.0.0.1:54322:5432"
+    volumes:
+      - mwdb-postgres:/var/lib/postgresql/data
   redis:
     image: redis:alpine
   mailhog:
     image: mailhog/mailhog:latest
     ports:
       - "127.0.0.1:8025:8025"
+volumes:
+  mwdb-postgres:
+  mwdb-uploads:

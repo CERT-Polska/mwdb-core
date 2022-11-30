@@ -16,7 +16,7 @@ export default function About() {
             >
                 <View ident="about">
                     <div className="row justify-content-center">
-                        <div className="col-lg-2 col-sm-4 offset-2 text-center">
+                        <div className="col-sm-4 offset-2 text-center">
                             <img src={logo} alt="logo" className="logo-about" />
                         </div>
                         <div className="col-lg-6 col-sm-4">

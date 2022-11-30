@@ -377,42 +377,46 @@ class SharerField(BaseField):
             ObjectPermission.related_object_id == ObjectPermission.object_id,
         )
 
-        user = db.session.query(User).filter(User.login == value).first()
-        if user is None:
-            raise ObjectNotFoundException(f"No such user: {value}")
-
-        user_id = user.id
         if g.auth_user.has_rights(Capabilities.manage_users):
-            return self.column.any(
-                and_(condition, ObjectPermission.related_user_id == user_id)
-            )
+            sharers = (
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
+                .filter(Group.name == value)
+            ).all()
+            found_ids = [s.id for s in sharers]
         else:
             # list of users who are in a common workspace with auth_user
             members = (
-                db.session.query(Member)
-                .join(Group.members)
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
                 .filter(g.auth_user.is_member(Group.id))
                 .filter(Group.workspace.is_(True))
+                .filter(Group.name == value)
             ).all()
             # list of users who shared object with auth_user
             related_users = (
                 db.session.query(ObjectPermission)
+                .join(ObjectPermission.related_user)
+                .join(User.memberships)
+                .join(Member.group)
                 .filter(g.auth_user.is_member(ObjectPermission.group_id))
-                .filter(ObjectPermission.related_user_id == user_id)
+                .filter(Group.name == value)
             ).all()
-            visible_ids = [m.user_id for m in members] + [
+            found_ids = [m.user_id for m in members] + [
                 r.related_user_id for r in related_users
             ]
-            if user_id not in visible_ids:
-                raise ObjectNotFoundException(f"No such user: {value}")
-
-            return self.column.any(
-                and_(
-                    condition,
-                    g.auth_user.is_member(ObjectPermission.group_id),
-                    ObjectPermission.related_user_id == user_id,
-                )
+            condition = and_(
+                condition,
+                g.auth_user.is_member(ObjectPermission.group_id),
             )
+        if not found_ids:
+            raise ObjectNotFoundException(f"No such user or group: {value}")
+
+        return self.column.any(
+            and_(condition, ObjectPermission.related_user_id.in_(found_ids))
+        )
 
 
 class UploaderField(BaseField):

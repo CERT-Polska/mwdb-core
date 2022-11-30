@@ -34,8 +34,8 @@ export default function OAuthRegister() {
                 values.client_id,
                 values.client_secret,
                 values.authorization_endpoint,
-                values.userinfo_endpoint,
                 values.token_endpoint,
+                values.userinfo_endpoint,
                 values.jwks_endpoint
             );
             viewAlert.redirectToAlert({

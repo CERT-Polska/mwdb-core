@@ -61,7 +61,7 @@ export function multiFromHashes(query) {
     return query;
 }
 
-export function addFieldToQuery(query, field, value) {
+export function addFieldToQuery(query, field, value, countingEnabled) {
     const OP_NOT = "NOT ";
     const OP_AND = " AND ";
     const OP_PRE_AND = "AND ";
@@ -110,5 +110,5 @@ export function addFieldToQuery(query, field, value) {
     query = query.trim();
     if (query.startsWith(OP_PRE_AND))
         query = query.substring(OP_PRE_AND.length);
-    return query;
+    return {query: query, count: countingEnabled};
 }

@@ -1,9 +1,9 @@
-import React, {useState, useEffect, useContext, useCallback} from "react";
-import {useSearchParams} from "react-router-dom";
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 
-import {APIContext} from "@mwdb-web/commons/api/context";
-import {multiFromHashes, addFieldToQuery} from "@mwdb-web/commons/helpers";
-import {View} from "@mwdb-web/commons/ui";
+import { APIContext } from "@mwdb-web/commons/api/context";
+import { multiFromHashes, addFieldToQuery } from "@mwdb-web/commons/helpers";
+import { View } from "@mwdb-web/commons/ui";
 
 import RecentViewList from "./RecentViewList";
 import QuickQuery from "./QuickQuery";
@@ -40,17 +40,21 @@ export default function RecentView(props) {
         setQueryError(null);
     }
 
-    function setCurrentQuery(query, countingEnabled) {
+    function setCurrentQuery({ query, countingEnabled }) {
         // If query is already submitted: do nothing
         if (query === submittedQuery) return;
         // Optionally convert query if only hash or hashes were provided
         query = multiFromHashes(query);
         // Set query in URL (currentQuery, countingEnabled)
-        setSearchParams({q: query, count: countingEnabled});
+        console.log("setCurrentQuery query:", query);
+        console.log("setCurrentQuery count: ", countingEnabled);
+        setSearchParams({ q: query, count: countingEnabled });
     }
 
-    const addToQuery = (field, value) => {
-        return setCurrentQuery(addFieldToQuery(submittedQuery, field, value));
+    const addToQuery = (field, value, countingEnabled) => {
+        return setCurrentQuery(
+            addFieldToQuery(submittedQuery, field, value, countingEnabled)
+        );
     };
 
     // Synchronize input if currentQuery was changed
@@ -58,7 +62,6 @@ export default function RecentView(props) {
         setQueryInput(currentQuery);
         resetErrors();
     }, [currentQuery]);
-
 
     const submitQueryWithoutCount = useCallback(
         (query) => {
@@ -106,14 +109,11 @@ export default function RecentView(props) {
 
     useEffect(() => {
         const countingEnabled = searchParams.get("count");
-        console.log(countingEnabled);
-        // console.log(+countingEnabled);
+        console.log("useEffect count: ", countingEnabled);
 
-        // {searchParams && console.log(searchParams.getAll('count'));}
-
-        Boolean(countingEnabled)
-            ? (submitQuery(currentQuery))
-            : (submitQueryWithoutCount(currentQuery))
+        !countingEnabled
+            ? submitQuery(currentQuery)
+            : submitQueryWithoutCount(currentQuery);
     }, [currentQuery, submitQuery, submitQueryWithoutCount]);
 
     const canAddQuickQuery =
@@ -157,7 +157,10 @@ export default function RecentView(props) {
                                 value="X"
                                 onClick={(ev) => {
                                     ev.preventDefault();
-                                    setCurrentQuery("");
+                                    setCurrentQuery({
+                                        query: "",
+                                        countingEnabled: 1,
+                                    });
                                 }}
                             />
                         </div>
@@ -177,7 +180,10 @@ export default function RecentView(props) {
                                     value="Search"
                                     onClick={(ev) => {
                                         ev.preventDefault();
-                                        setCurrentQuery(queryInput, 1);
+                                        setCurrentQuery({
+                                            query: queryInput,
+                                            countingEnabled: 1,
+                                        });
                                     }}
                                 />
                                 <button
@@ -198,7 +204,10 @@ export default function RecentView(props) {
                                         onClick={(ev) => {
                                             ev.preventDefault();
                                             setObjectCount(null);
-                                            setCurrentQuery(queryInput, 0);
+                                            setCurrentQuery({
+                                                query: queryInput,
+                                                countingEnabled: 0,
+                                            });
                                         }}
                                     >
                                         Search without count
@@ -220,7 +229,12 @@ export default function RecentView(props) {
                             type={props.type}
                             query={submittedQuery}
                             canAddQuickQuery={canAddQuickQuery}
-                            submitQuery={(q, countingEnabled) => setCurrentQuery(q, countingEnabled)}
+                            submitQuery={(query) =>
+                                setCurrentQuery({
+                                    query: query,
+                                    countingEnabled: 1,
+                                })
+                            }
                             addToQuery={addToQuery}
                             setQueryError={setQueryError}
                         />

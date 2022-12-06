@@ -94,7 +94,7 @@ export default function QuickQuery(props) {
                 key="uploaded-by-me"
                 onClick={(ev) => {
                     ev.preventDefault();
-                    props.addToQuery("uploader", auth.user.login);
+                    props.addToQuery("uploader", auth.user.login, 1);
                 }}
             />
         ),
@@ -104,7 +104,7 @@ export default function QuickQuery(props) {
             color="secondary"
             onClick={(ev) => {
                 ev.preventDefault();
-                props.addToQuery("NOT shared", "public");
+                props.addToQuery("NOT shared", "public", 1);
             }}
         />,
         !api.remote && auth.hasCapability(Capability.personalize) && (
@@ -114,7 +114,7 @@ export default function QuickQuery(props) {
                 color="info"
                 onClick={(ev) => {
                     ev.preventDefault();
-                    props.addToQuery("favorites", auth.user.login);
+                    props.addToQuery("favorites", auth.user.login, 1);
                 }}
             />
         ),
@@ -124,7 +124,7 @@ export default function QuickQuery(props) {
             color="primary"
             onClick={(ev) => {
                 ev.preventDefault();
-                props.addToQuery("NOT tag", "feed:*");
+                props.addToQuery("NOT tag", "feed:*", 1);
             }}
         />,
         <QuickQueryItem
@@ -133,7 +133,7 @@ export default function QuickQuery(props) {
             color="warning"
             onClick={(ev) => {
                 ev.preventDefault();
-                props.addToQuery("tag", "ripped:*");
+                props.addToQuery("tag", "ripped:*", 1);
             }}
         />,
     ];
@@ -146,7 +146,10 @@ export default function QuickQuery(props) {
                 color="dark"
                 onClick={(ev) => {
                     ev.preventDefault();
-                    props.submitQuery(v.query, 1);
+                    props.submitQuery({
+                        query: v.query,
+                        countingEnabled: 1,
+                    });
                 }}
                 onDelete={
                     auth.hasCapability(Capability.personalize) &&

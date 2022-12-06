@@ -94,7 +94,7 @@ export default function QuickQuery(props) {
                 key="uploaded-by-me"
                 onClick={(ev) => {
                     ev.preventDefault();
-                    props.addToQuery("uploader", auth.user.login, 1);
+                    props.addToQuery("uploader", auth.user.login);
                 }}
             />
         ),
@@ -104,7 +104,7 @@ export default function QuickQuery(props) {
             color="secondary"
             onClick={(ev) => {
                 ev.preventDefault();
-                props.addToQuery("NOT shared", "public", 1);
+                props.addToQuery("NOT shared", "public");
             }}
         />,
         !api.remote && auth.hasCapability(Capability.personalize) && (
@@ -114,7 +114,7 @@ export default function QuickQuery(props) {
                 color="info"
                 onClick={(ev) => {
                     ev.preventDefault();
-                    props.addToQuery("favorites", auth.user.login, 1);
+                    props.addToQuery("favorites", auth.user.login);
                 }}
             />
         ),
@@ -124,7 +124,7 @@ export default function QuickQuery(props) {
             color="primary"
             onClick={(ev) => {
                 ev.preventDefault();
-                props.addToQuery("NOT tag", "feed:*", 1);
+                props.addToQuery("NOT tag", "feed:*");
             }}
         />,
         <QuickQueryItem
@@ -133,7 +133,7 @@ export default function QuickQuery(props) {
             color="warning"
             onClick={(ev) => {
                 ev.preventDefault();
-                props.addToQuery("tag", "ripped:*", 1);
+                props.addToQuery("tag", "ripped:*");
             }}
         />,
     ];
@@ -146,10 +146,7 @@ export default function QuickQuery(props) {
                 color="dark"
                 onClick={(ev) => {
                     ev.preventDefault();
-                    props.submitQuery({
-                        query: v.query,
-                        countingEnabled: 1,
-                    });
+                    props.submitQuery(v.query);
                 }}
                 onDelete={
                     auth.hasCapability(Capability.personalize) &&

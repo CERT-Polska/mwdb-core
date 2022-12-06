@@ -146,7 +146,7 @@ export default function QuickQuery(props) {
                 color="dark"
                 onClick={(ev) => {
                     ev.preventDefault();
-                    props.submitQuery(v.query);
+                    props.submitQuery(v.query, 1);
                 }}
                 onDelete={
                     auth.hasCapability(Capability.personalize) &&

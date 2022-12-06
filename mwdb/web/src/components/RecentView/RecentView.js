@@ -40,24 +40,26 @@ export default function RecentView(props) {
         setQueryError(null);
     }
 
-    const setCurrentQuery = useCallback(({query, enableCounting = countingEnabled}) => {
-        // If query is already submitted: do nothing
-        // if (query === submittedQuery) return;
-        // Optionally convert query if only hash or hashes were provided
-        query = multiFromHashes(query);
-        // Set query in URL (currentQuery, countingEnabled)
-        console.log("setCurrentQuery query:", query);
-        console.log("setCurrentQuery count: ", enableCounting);
-        setSearchParams({ q: query, count: enableCounting });
-    }, [countingEnabled, setSearchParams]);
+    const setCurrentQuery = useCallback(
+        ({ query, enableCounting = countingEnabled }) => {
+            // If query is already submitted: do nothing
+            // if (query === submittedQuery) return;
+            // Optionally convert query if only hash or hashes were provided
+            query = multiFromHashes(query);
+            // Set query in URL (currentQuery, countingEnabled)
+            setSearchParams({ q: query, count: enableCounting });
+        },
+        [countingEnabled, setSearchParams]
+    );
 
-    const addToQuery = useCallback((field, value) => {
-        return setCurrentQuery(
-            {
-                query: addFieldToQuery(submittedQuery, field, value)
-            }
-        );
-    }, [submittedQuery, setCurrentQuery]);
+    const addToQuery = useCallback(
+        (field, value) => {
+            return setCurrentQuery({
+                query: addFieldToQuery(submittedQuery, field, value),
+            });
+        },
+        [submittedQuery, setCurrentQuery]
+    );
 
     // Synchronize input if currentQuery was changed
     useEffect(() => {
@@ -110,8 +112,6 @@ export default function RecentView(props) {
     );
 
     useEffect(() => {
-        console.log("useEffect count: ", countingEnabled);
-
         countingEnabled
             ? submitQuery(currentQuery)
             : submitQueryWithoutCount(currentQuery);
@@ -147,7 +147,7 @@ export default function RecentView(props) {
                     className="searchForm"
                     onSubmit={(ev) => {
                         ev.preventDefault();
-                        setCurrentQuery({query: queryInput});
+                        setCurrentQuery({ query: queryInput });
                     }}
                 >
                     <div className="input-group">
@@ -229,7 +229,7 @@ export default function RecentView(props) {
                             canAddQuickQuery={canAddQuickQuery}
                             submitQuery={(query) =>
                                 setCurrentQuery({
-                                    query: query
+                                    query: query,
                                 })
                             }
                             addToQuery={addToQuery}

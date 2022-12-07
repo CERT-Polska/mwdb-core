@@ -41,7 +41,6 @@ from mwdb.resources.config import (
 from mwdb.resources.download import DownloadResource, RequestSampleDownloadResource
 from mwdb.resources.file import (
     FileDownloadResource,
-    FileDownloadResourceXored,
     FileDownloadZipResource,
     FileItemResource,
     FileResource,
@@ -258,7 +257,6 @@ api.add_resource(
 api.add_resource(FileResource, "/file")
 api.add_resource(FileItemResource, "/file/<hash64:identifier>")
 api.add_resource(FileDownloadResource, "/file/<hash64:identifier>/download")
-api.add_resource(FileDownloadResourceXored, "/file/<hash64:identifier>/download/xor")
 api.add_resource(FileDownloadZipResource, "/file/<hash64:identifier>/download/zip")
 
 # Config endpoints

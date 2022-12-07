@@ -280,7 +280,7 @@ class File(Object):
         finally:
             File.close(fh)
 
-    def xor(self, chunk):
+    def negate_bits(self, chunk):
         """
         xor data with key equal 255 of length of chunk; using numpy
         https://stackoverflow.com/questions/23312571/fast-xoring-bytes-in-python-3
@@ -289,10 +289,10 @@ class File(Object):
         chunk = np.frombuffer(chunk, dtype='uint8')
         return (key ^ chunk).tobytes()
 
-    def iterate_xored(self, chunk_size=1024 * 256):
+    def iterate_obfuscated(self, chunk_size=1024 * 256):
         """
         Iterates over bytes in the file contents with xor applied
-        The idea behind xoring before send is to prevent Chrome browser
+        The idea behind xoring before send is to prevent browsers
         from caching original samples (malware). Unxoring is provided
         in mwdb\web\src\components\ShowSample.js in SamplePreview
         """
@@ -300,7 +300,7 @@ class File(Object):
         stream_type = hasattr(fh, "stream")
         try:
             if hasattr(fh, "stream"):
-                yield from map(self.xor, fh.stream(chunk_size))
+                yield from map(self.negate_bits, fh.stream(chunk_size))
             else:
                 while True:
                     chunk = fh.read(chunk_size)

@@ -623,7 +623,6 @@ const api = {
     setAttributePermission,
     removeAttributePermission,
     downloadFile,
-    downloadFileXored,
     requestFileDownloadLink,
     requestZipFileDownloadLink,
     uploadFile,

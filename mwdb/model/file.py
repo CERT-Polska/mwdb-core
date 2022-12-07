@@ -304,7 +304,7 @@ class File(Object):
             else:
                 while True:
                     chunk = fh.read(chunk_size)
-                    chunk = self.xor(chunk)
+                    chunk = self.negate_bits(chunk)
                     if chunk:
                         yield chunk
                     else:

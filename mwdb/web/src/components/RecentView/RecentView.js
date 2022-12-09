@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, {useCallback, useContext, useEffect, useState} from "react";
+import {useSearchParams} from "react-router-dom";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
-import { multiFromHashes, addFieldToQuery } from "@mwdb-web/commons/helpers";
-import { View } from "@mwdb-web/commons/ui";
+import {APIContext} from "@mwdb-web/commons/api/context";
+import {addFieldToQuery, multiFromHashes} from "@mwdb-web/commons/helpers";
+import {View} from "@mwdb-web/commons/ui";
 
 import RecentViewList from "./RecentViewList";
 import QuickQuery from "./QuickQuery";
@@ -41,13 +41,13 @@ export default function RecentView(props) {
     }
 
     const setCurrentQuery = useCallback(
-        ({ query, enableCounting = countingEnabled }) => {
+        ({query, enableCounting = countingEnabled}) => {
             // If query is already submitted: do nothing
             // if (query === submittedQuery) return;
             // Optionally convert query if only hash or hashes were provided
             query = multiFromHashes(query);
             // Set query in URL (currentQuery, countingEnabled)
-            setSearchParams({ q: query, count: enableCounting });
+            setSearchParams({q: query, count: enableCounting});
         },
         [countingEnabled, setSearchParams]
     );
@@ -147,7 +147,10 @@ export default function RecentView(props) {
                     className="searchForm"
                     onSubmit={(ev) => {
                         ev.preventDefault();
-                        setCurrentQuery({ query: queryInput });
+                        setCurrentQuery({
+                            query: queryInput,
+                            // enableCounting: countingEnabled
+                        });
                     }}
                 >
                     <div className="input-group">
@@ -158,7 +161,15 @@ export default function RecentView(props) {
                                 value="X"
                                 onClick={(ev) => {
                                     ev.preventDefault();
-                                    setSearchParams({});
+                                    // setSearchParams({
+                                    //     q: "",
+                                    //     count: countingEnabled
+                                    // });
+
+                                    setCurrentQuery({
+                                        query: "",
+                                        // enableCounting: countingEnabled,
+                                    });
                                 }}
                             />
                         </div>
@@ -180,37 +191,12 @@ export default function RecentView(props) {
                                         ev.preventDefault();
                                         setCurrentQuery({
                                             query: queryInput,
-                                            enableCounting: 1,
+                                            // enableCounting: countingEnabled,
                                         });
                                     }}
                                 />
-                                <button
-                                    type="btn"
-                                    className="dropdown-toggle dropdown-toggle-split btn btn-outline-success rounded-0"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                >
-                                    <span className="sr-only">
-                                        Toggle Dropdown
-                                    </span>
-                                </button>
-                                <div className="dropdown-menu">
-                                    <button
-                                        className="dropdown-item btn btn-outline-success"
-                                        type="submit"
-                                        onClick={(ev) => {
-                                            ev.preventDefault();
-                                            setObjectCount(null);
-                                            setCurrentQuery({
-                                                query: queryInput,
-                                                enableCounting: 0,
-                                            });
-                                        }}
-                                    >
-                                        Search without count
-                                    </button>
-                                </div>
+
+
                             </div>
 
                             <a
@@ -219,6 +205,41 @@ export default function RecentView(props) {
                             >
                                 ?
                             </a>
+                            <div className="form-check form-switch ml-3 flex-column">
+                                <input className="form-check-input" type="checkbox" role="switch" autoComplete="off"
+                                       id="btn-check-outlined"
+                                       checked={countingEnabled}
+                                       value={countingEnabled}
+                                       onChange={() => {
+                                           // setCurrentQuery({
+                                           //     query: q,
+                                           //     enableCounting: countingEnabled ? '0' : '1',
+                                           // });
+
+                                           setSearchParams({
+                                               q: queryInput,
+                                               count: countingEnabled ? '0' : '1'
+                                           });
+
+                                           // comparing to countingEnabled from prevState
+                                           if (countingEnabled) {
+                                               setObjectCount(null);
+                                           }
+                                           // but because of this approach, loading site by default, even with "counting 1" will not display
+                                           // number of results, because the condition is fulfilled, so objectCount=null
+                                       }}
+
+                                />
+                                <label className="form-check-label"
+                                       htmlFor="btn-check-outlined">Counting</label>
+                            </div>
+
+                            {/*<div className="form-check form-switch">*/}
+                            {/*    <input className="form-check-input" type="checkbox" role="switch"*/}
+                            {/*           id="flexSwitchCheckChecked" checked/>*/}
+                            {/*        <label className="form-check-label" htmlFor="flexSwitchCheckChecked">Checked switch*/}
+                            {/*            checkbox input</label>*/}
+                            {/*</div>*/}
                         </div>
                     </div>
                     <div className="input-group">
@@ -245,6 +266,7 @@ export default function RecentView(props) {
                     locked={isLocked}
                     disallowEmpty={props.disallowEmpty}
                     setError={setError}
+                    setQueryError={setQueryError}
                     addToQuery={addToQuery}
                 />
             </div>

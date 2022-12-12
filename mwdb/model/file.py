@@ -402,7 +402,7 @@ class RelatedFile(db.Model):
 
         # If file already exists
         if new_related_file is not None:
-            return
+            raise FileExistsError("Related file with this sha256 already exists")
 
         # If related file doesn't exist
         if related_object is None:

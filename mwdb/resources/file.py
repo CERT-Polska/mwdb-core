@@ -749,6 +749,8 @@ class RelatedFileItemResource(Resource):
             raise NotFound(
                 "There is no file with provided sha256 or you don't have access to it"
             )
+        except FileExistsError:
+            raise Conflict("Related file with this sha256 already exists")
 
         return Response("OK")
 

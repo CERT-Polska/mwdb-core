@@ -1,6 +1,5 @@
 import React, { useReducer, useState } from "react";
 import AceEditor from "react-ace";
-import { renderValue } from "./MarkedMustache";
 import RichAttributeRenderer from "./RichAttributeRenderer";
 
 import "ace-builds/src-noconflict/mode-markdown";

@@ -3,11 +3,7 @@ import { renderValue } from "./MarkedMustache";
 
 import { makeContext } from "./exampleTemplates";
 
-export default function RichAttributeRenderer({
-    template,
-    value,
-    setInvalid,
-}) {
+export default function RichAttributeRenderer({ template, value, setInvalid }) {
     let renderedValue, contextValue;
     try {
         contextValue = makeContext(JSON.parse(value));

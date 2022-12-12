@@ -5,7 +5,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unaut
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.model import File
+from mwdb.model import File, RelatedFile
 from mwdb.model.file import EmptyFileError
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import (
@@ -585,3 +585,146 @@ class FileDownloadZipResource(Resource):
         download_token = file.generate_download_token()
         schema = FileDownloadTokenResponseSchema()
         return schema.dump({"token": download_token})
+
+
+@rate_limited_resource
+class RelatedFileDownloadResource(Resource):
+    def get(self, identifier):
+        """
+        ---
+        summary: Download related file
+        description: |
+            Returns related file contents.
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: File identifier (SHA256)
+              required: true
+        responses:
+            200:
+                description: File contents
+                content:
+                  application/octet-stream:
+                    schema:
+                      type: string
+                      format: binary
+            404:
+                description: |
+                    When related file doesn't exist
+                    or user doesn't have access to it.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+
+        if not g.auth_user:
+            raise Unauthorized("Not authenticated.")
+
+        related_file_obj = RelatedFile.access(identifier)
+
+        if related_file_obj is None:
+            raise NotFound("Object not found")
+
+        return Response(
+            related_file_obj.iterate(),
+            content_type="application/octet-stream",
+            headers={"Content-disposition": f"attachment; filename={related_file_obj.sha256}"},
+        )
+
+
+@rate_limited_resource
+class RelatedFileItemResource(Resource):
+    @requires_authorization
+    @requires_capabilities(Capabilities.adding_files)
+    def post(self, identifier):
+        """
+        ---
+        summary: Upload file
+        description: |
+            Uploads a new file.
+
+            Requires `adding_files` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        requestBody:
+            required: true
+            content:
+              multipart/form-data:
+                schema:
+                  type: object
+                  properties:
+                    file:
+                      type: string
+                      format: binary
+                      description: RelatedFile contents to be uploaded
+                    identifier:
+                      type: string
+                      description: |
+                        sha256 of the relating file
+                  required:
+                    - file
+                    - identifier
+        responses:
+            200:
+                description: Information about uploaded file
+            400:
+                description: RelatedFile is empty
+            409:
+                description: RelatedFile already exists
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        try:
+            RelatedFile.create(
+                request.files["file"].filename,
+                request.files["file"].stream,
+                identifier
+            )
+        except EmptyFileError:
+            raise BadRequest("RelatedFile cannot be empty")
+        
+        return "OK" #self.create_object(obj["options"])
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.removing_objects)
+    def delete(self, identifier):
+        """
+        ---
+        summary: Delete file
+        description: |
+            Removes a file from the database along with its references.
+
+            Requires `removing_objects` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - file
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: File identifier (SHA256/SHA512/SHA1/MD5)
+        responses:
+            200:
+                description: When file was deleted
+            403:
+                description: When user doesn't have `removing_objects` capability
+            404:
+                description: |
+                    When file doesn't exist, object is not a file
+                    or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        return super().delete(identifier)

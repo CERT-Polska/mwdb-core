@@ -444,6 +444,10 @@ function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
 }
 
+//function uploadRelatedFile(file, id) {
+//    return axios.post(`/related_file/${id}`)
+//}
+
 function getRemoteNames() {
     return axios.get("/remote");
 }

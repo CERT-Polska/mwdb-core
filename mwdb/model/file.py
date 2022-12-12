@@ -9,6 +9,7 @@ from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from werkzeug.utils import secure_filename
+from flask import g
 
 from mwdb.core.auth import AuthScope, generate_token, verify_token
 from mwdb.core.config import StorageProviderType, app_config
@@ -328,3 +329,129 @@ class File(Object):
 
     def _send_to_karton(self):
         return send_file_to_karton(self)
+
+
+class RelatedFile(db.Model):
+    __tablename__ = "related_file"
+
+    id = db.Column(db.Integer, primary_key=True)
+    object_id = db.Column(
+        db.Integer,
+        db.ForeignKey("object.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    file_name = db.Column(db.String, nullable=False)
+    file_size = db.Column(db.Integer, nullable=False)
+    sha256 = db.Column(db.String, nullable=False)
+
+    related_object = db.relationship(
+        "Object",
+        back_populates="related_files",
+        lazy=True,
+    )
+
+    def _calculate_path(self):
+        if app_config.mwdb.storage_provider == StorageProviderType.DISK:
+            upload_path = (
+                "related_files"
+                if app_config.mwdb.related_files_folder == ""
+                else app_config.mwdb.related_files_folder + "/related_files"
+            )
+        elif app_config.mwdb.storage_provider == StorageProviderType.S3:
+            upload_path = "related_files/"
+        else:
+            raise RuntimeError(
+                f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
+            )
+
+        sample_sha256 = self.sha256.lower()
+
+        if app_config.mwdb.hash_pathing:
+            # example: related_files/9/f/8/6/9f86d0818...
+            upload_path = os.path.join(upload_path, *list(sample_sha256)[0:4])
+
+        if app_config.mwdb.storage_provider == StorageProviderType.DISK:
+            upload_path = os.path.abspath(upload_path)
+            os.makedirs(upload_path, mode=0o755, exist_ok=True)
+
+        return os.path.join(upload_path, sample_sha256)
+
+    @classmethod
+    def create(
+        cls,
+        file_name,
+        file_stream,
+        related_object,
+    ):
+        file_stream.seek(0, os.SEEK_END)
+        file_size = file_stream.tell()
+        if file_size == 0:
+            raise EmptyFileError
+
+        sha256 = calc_hash(file_stream, hashlib.sha256(), lambda h: h.hexdigest())
+
+        new_related_file = (
+            db.session.query(RelatedFile).filter(RelatedFile.sha256 == sha256).first()
+        )
+
+        # If file already exists
+        if new_related_file is not None:
+            return
+
+        new_related_file = RelatedFile(
+            object_id=related_object.id,
+            file_name=secure_filename(file_name),
+            file_size=file_size,
+            sha256=sha256,
+        )
+
+        file_stream.seek(0, os.SEEK_SET)
+        if app_config.mwdb.storage_provider == StorageProviderType.S3:
+            get_s3_client(
+                app_config.mwdb.s3_storage_endpoint,
+                app_config.mwdb.s3_storage_access_key,
+                app_config.mwdb.s3_storage_secret_key,
+                app_config.mwdb.s3_storage_region_name,
+                app_config.mwdb.s3_storage_secure,
+                app_config.mwdb.s3_storage_iam_auth,
+            ).put_object(
+                Bucket=app_config.mwdb.s3_storage_bucket_name,
+                Key=new_related_file._calculate_path(),
+                Body=file_stream,
+            )
+        elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
+            with open(new_related_file._calculate_path(), "wb") as f:
+                shutil.copyfileobj(file_stream, f)
+        else:
+            raise RuntimeError(
+                f"StorageProvider {app_config.mwdb.storage_provider} "
+                f"is not supported"
+            )
+
+    @classmethod
+    def access(cls, identifier):
+        related_file_obj = db.session.query(RelatedFile).filter(RelatedFile.sha256 == identifier).first()
+        if related_file_obj is None:
+            return None
+        if not g.auth_user.has_access_to_object(related_file_obj.object_id):
+            return None
+
+        return related_file_obj
+
+    def iterate(self, chunk_size=1024 * 256):
+        """
+        Iterates over bytes in the file contents
+        """
+        fh = self.open()
+        try:
+            if hasattr(fh, "stream"):
+                yield from fh.stream(chunk_size)
+            else:
+                while True:
+                    chunk = fh.read(chunk_size)
+                    if chunk:
+                        yield chunk
+                    else:
+                        return
+        finally:
+            fh.close()

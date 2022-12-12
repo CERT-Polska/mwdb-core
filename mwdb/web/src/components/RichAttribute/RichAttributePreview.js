@@ -9,7 +9,7 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 
 import { DataTable, View } from "@mwdb-web/commons/ui";
-import exampleTemplates from "./exampleTemplates";
+import exampleTemplates, { makeContext } from "./exampleTemplates";
 
 function templateReducer(state, action) {
     console.log(state, action);
@@ -82,7 +82,13 @@ export default function RichAttributePreview({
         templateState.chosenExample !== "custom"
             ? exampleTemplates[templateState.chosenExample].value
             : templateState.valueInput;
-
+    let contextValue;
+    try {
+        contextValue = makeContext(JSON.parse(value));
+    } catch (e) {
+        contextValue = null;
+        setInvalid(true);
+    }
     return (
         <View ident="attributePreview">
             <select

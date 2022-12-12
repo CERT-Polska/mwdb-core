@@ -5,7 +5,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unaut
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.model import File, RelatedFile
+from mwdb.model import File, Object, RelatedFile, db
 from mwdb.model.file import EmptyFileError
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import (
@@ -14,6 +14,7 @@ from mwdb.schema.file import (
     FileItemResponseSchema,
     FileLegacyCreateRequestSchema,
     FileListResponseSchema,
+    RelatedFileResponseSchema,
 )
 
 from . import load_schema, requires_authorization, requires_capabilities
@@ -604,11 +605,11 @@ class RelatedFileDownloadResource(Resource):
               name: identifier
               schema:
                 type: string
-              description: File identifier (SHA256)
+              description: RelatedFile identifier (SHA256)
               required: true
         responses:
             200:
-                description: File contents
+                description: RelatedFile contents
                 content:
                   application/octet-stream:
                     schema:
@@ -642,14 +643,62 @@ class RelatedFileDownloadResource(Resource):
 
 @rate_limited_resource
 class RelatedFileItemResource(Resource):
+    def get(self, identifier):
+        """
+        ---
+        summary: Get list of RelatedFiles
+        description: |
+            Returns list of RelatedFiles for a File specified by sha256
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Master File identifier (SHA256)
+              required: true
+        responses:
+            200:
+                description: List of RelatedFiles
+                content:
+                  application/json:
+                    schema: RelatedFileResponseSchema
+            404:
+                description: |
+                    There is no file with provided sha256 or you don't have access to it
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        master_object = (
+            db.session.query(Object)
+            .filter(Object.dhash == identifier)
+            .filter(g.auth_user.has_access_to_object(Object.id))
+        ).first()
+
+        if master_object is None:
+            raise NotFound(
+                "There is no file with provided sha256 or you don't have access to it"
+            )
+
+        related_files = db.session.query(RelatedFile).filter(
+            RelatedFile.object_id == master_object.id
+        )
+        schema = RelatedFileResponseSchema()
+
+        return schema.dump({"related_files": related_files})
+
     @requires_authorization
     @requires_capabilities(Capabilities.adding_files)
     def post(self, identifier):
         """
         ---
-        summary: Upload file
+        summary: Upload related file
         description: |
-            Uploads a new file.
+            Uploads a new related file.
 
             Requires `adding_files` capability.
         security:
@@ -661,7 +710,7 @@ class RelatedFileItemResource(Resource):
               name: identifier
               schema:
                 type: string
-              description: File identifier (SHA256)
+              description: Master File identifier (SHA256)
               required: true
         requestBody:
             required: true
@@ -678,11 +727,12 @@ class RelatedFileItemResource(Resource):
                     - file
         responses:
             200:
-                description: Information about uploaded file
+                description: OK
             400:
                 description: RelatedFile is empty
             404:
-                description: There is no file with provided sha256
+                description: |
+                    There is no file with provided sha256 or you don't have access to it
             409:
                 description: RelatedFile already exists
             503:
@@ -696,9 +746,11 @@ class RelatedFileItemResource(Resource):
         except EmptyFileError:
             raise BadRequest("RelatedFile cannot be empty")
         except ValueError:
-            raise NotFound("There is no file with provided sha256")
+            raise NotFound(
+                "There is no file with provided sha256 or you don't have access to it"
+            )
 
-        return "OK"  # self.create_object(obj["options"])
+        return Response("OK")
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_objects)
@@ -713,24 +765,31 @@ class RelatedFileItemResource(Resource):
         security:
             - bearerAuth: []
         tags:
-            - file
+            - related_file
         parameters:
             - in: path
               name: identifier
               schema:
                 type: string
-              description: File identifier (SHA256/SHA512/SHA1/MD5)
+              description: RelatedFile identifier (SHA256/SHA512/SHA1/MD5)
         responses:
             200:
-                description: When file was deleted
+                description: When related file was deleted
             403:
                 description: When user doesn't have `removing_objects` capability
             404:
                 description: |
-                    When file doesn't exist, object is not a file
+                    When related file doesn't exist
                     or user doesn't have access to this object.
             503:
                 description: |
                     Request canceled due to database statement timeout.
         """
-        return super().delete(identifier)
+        try:
+            RelatedFile.delete(identifier)
+        except ValueError:
+            raise NotFound(
+                "There is no file with provided sha256 or you don't have access to it"
+            )
+
+        return Response("OK")

@@ -406,7 +406,9 @@ class RelatedFile(db.Model):
 
         # If related file doesn't exist
         if related_object is None:
-            raise ValueError("There is no object with this sha256")
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
 
         new_related_file = RelatedFile(
             object_id=related_object.id,
@@ -449,10 +451,75 @@ class RelatedFile(db.Model):
         )
         if related_file_obj is None:
             return None
-        if not g.auth_user.has_access_to_object(related_file_obj.object_id):
+
+        main_obj = (
+            db.session.query(Object)
+            .filter(Object.id == related_file_obj.object_id)
+            .first()
+        )
+        if not main_obj.has_explicit_access(g.auth_user):
             return None
 
         return related_file_obj
+
+    @classmethod
+    def delete(cls, identifier):
+        related_file_obj = (
+            db.session.query(RelatedFile)
+            .filter(RelatedFile.sha256 == identifier)
+            .first()
+        )
+
+        if related_file_obj is None:
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+        main_obj = (
+            db.session.query(Object)
+            .filter(Object.id == related_file_obj.object_id)
+            .first()
+        )
+        if not main_obj.has_explicit_access(g.auth_user):
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+
+        db.session.delete(related_file_obj)
+        db.session.commit()
+        return
+
+    def open(self):
+        """
+        Opens the related file stream with contents.
+        """
+        if app_config.mwdb.storage_provider == StorageProviderType.S3:
+            # Stream coming from Boto3 get_object is not buffered and not seekable.
+            # We need to download it to the temporary file first.
+            stream = tempfile.TemporaryFile(mode="w+b")
+            try:
+                get_s3_client(
+                    app_config.mwdb.s3_storage_endpoint,
+                    app_config.mwdb.s3_storage_access_key,
+                    app_config.mwdb.s3_storage_secret_key,
+                    app_config.mwdb.s3_storage_region_name,
+                    app_config.mwdb.s3_storage_secure,
+                    app_config.mwdb.s3_storage_iam_auth,
+                ).download_fileobj(
+                    Bucket=app_config.mwdb.s3_storage_bucket_name,
+                    Key=self._calculate_path(),
+                    Fileobj=stream,
+                )
+                stream.seek(0, io.SEEK_SET)
+                return stream
+            except Exception:
+                stream.close()
+                raise
+        elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
+            return open(self._calculate_path(), "rb")
+        else:
+            raise RuntimeError(
+                f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
+            )
 
     def iterate(self, chunk_size=1024 * 256):
         """

@@ -73,3 +73,14 @@ class FileItemResponseSchema(ObjectItemResponseSchema):
 
 class FileDownloadTokenResponseSchema(Schema):
     token = fields.Str(required=True, allow_none=False)
+
+
+class RelatedFileItemResponseSchema(Schema):
+    file_name = fields.Str(required=True, allow_none=False)
+    file_size = fields.Int(required=True, allow_none=False)
+
+
+class RelatedFileResponseSchema(Schema):
+    related_files = fields.Nested(
+        RelatedFileItemResponseSchema, many=True, required=True, allow_none=False
+    )

@@ -1,7 +1,8 @@
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { faPlus, faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faExternalLinkSquare, faDownload } from "@fortawesome/free-solid-svg-icons";
 
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
@@ -10,18 +11,23 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 function RelatedFileItem({ file_name, file_size, sha256 }){
     console.log(file_name);
     return (
-        <tr>
+        <tr class="flickerable">
             <td>
                 {file_name}
             </td>
             <td>
-                {file_size}
+                {file_size} B
             </td>
             <td>
                 <Link
-                    to={`/related_file/${sha256}/download`}
+                    to={`/related_files/${sha256}/download`}
+                    className="nav-link"
+                    onClick={() => {
+
+                    }}
                 >
-                    Pobierz
+                    <FontAwesomeIcon icon={faDownload} size="1x"/>
+                    &nbsp;Download
                 </Link>
             </td>
         </tr>
@@ -46,7 +52,18 @@ function ShowRelatedFiles(){
     updateRelatedFiles();
 
     return (
-        <table className="table table-striped table-bordered wrap-table share-table">
+        <table className="table table-striped table-bordered table-hover data-table">
+            <thead>
+                <td>
+                    File name
+                </td>
+                <td>
+                    File size
+                </td>
+                <td>
+                    Download
+                </td>
+            </thead>
             {relatedFiles.map((related_file) => (
                 <RelatedFileItem {...related_file} />
             ))}
@@ -62,7 +79,7 @@ export default function RelatedFilesTab(){
             icon = {faExternalLinkSquare}
             component = {ShowRelatedFiles}
             actions={[
-                <ObjectAction label="Upload new" icon={faPlus} link="google.com" />,
+                <ObjectAction label="Upload new" icon={faPlus} link="PUT_MODAL_HERE" />,
             ]}
         />
     )

@@ -437,6 +437,8 @@ class RelatedFile(db.Model):
                 f"StorageProvider {app_config.mwdb.storage_provider} "
                 f"is not supported"
             )
+        db.session.add(new_related_file)
+        db.session.commit()
 
     @classmethod
     def access(cls, identifier):

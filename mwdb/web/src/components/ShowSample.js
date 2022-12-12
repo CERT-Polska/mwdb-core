@@ -8,6 +8,7 @@ import {
     useTabContext,
     LatestConfigTab,
     RelationsTab,
+    RelatedFilesTab,
     DownloadAction,
     ZipAction,
     FavoriteAction,
@@ -335,6 +336,7 @@ export default function ShowSample(props) {
                     <DownloadAction download={downloadSample} />,
                 ]}
             />
+            <RelatedFilesTab />
             <LatestConfigTab label="Static config" />
         </ShowObject>
     );

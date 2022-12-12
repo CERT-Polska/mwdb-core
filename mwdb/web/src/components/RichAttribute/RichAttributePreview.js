@@ -1,6 +1,7 @@
 import React, { useReducer, useState } from "react";
 import AceEditor from "react-ace";
 import { renderValue } from "./MarkedMustache";
+import RichAttributeRenderer from "./RichAttributeRenderer";
 
 import "ace-builds/src-noconflict/mode-markdown";
 import "ace-builds/src-noconflict/mode-json";
@@ -8,7 +9,7 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 
 import { DataTable, View } from "@mwdb-web/commons/ui";
-import exampleTemplates, { makeContext } from "./exampleTemplates";
+import exampleTemplates from "./exampleTemplates";
 
 function templateReducer(state, action) {
     console.log(state, action);
@@ -62,6 +63,7 @@ export default function RichAttributePreview({
         valueInput: storedExampleValue,
     });
     const [showContext, setShowContext] = useState(false);
+    const [invalid, setInvalid] = useState(false);
 
     function chooseTemplate(ev) {
         const index = ev.target.value;
@@ -80,19 +82,6 @@ export default function RichAttributePreview({
         templateState.chosenExample !== "custom"
             ? exampleTemplates[templateState.chosenExample].value
             : templateState.valueInput;
-    let renderedValue,
-        contextValue,
-        invalid = false;
-    try {
-        contextValue = makeContext(JSON.parse(value));
-        renderedValue = renderValue(template, contextValue, {
-            searchEndpoint: "/",
-        });
-    } catch (e) {
-        renderedValue = e.toString();
-        contextValue = null;
-        invalid = true;
-    }
 
     return (
         <View ident="attributePreview">
@@ -177,10 +166,11 @@ export default function RichAttributePreview({
                 <div className="col">
                     <strong>Preview</strong>
                     <DataTable>
-                        <tr>
-                            <th>My attribute</th>
-                            <td>{renderedValue}</td>
-                        </tr>
+                        <RichAttributeRenderer
+                            template={template}
+                            value={value}
+                            setInvalid={setInvalid}
+                        />
                     </DataTable>
                 </div>
             </div>

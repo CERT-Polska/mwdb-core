@@ -5,11 +5,11 @@ import shutil
 import tempfile
 
 import pyzipper
+from flask import g
 from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from werkzeug.utils import secure_filename
-from flask import g
 
 from mwdb.core.auth import AuthScope, generate_token, verify_token
 from mwdb.core.config import StorageProviderType, app_config
@@ -352,11 +352,12 @@ class RelatedFile(db.Model):
 
     def _calculate_path(self):
         if app_config.mwdb.storage_provider == StorageProviderType.DISK:
-            upload_path = (
-                "related_files"
-                if app_config.mwdb.related_files_folder == ""
-                else app_config.mwdb.related_files_folder + "/related_files"
-            )
+            # upload_path = (
+            #     "related_files"
+            #     if app_config.mwdb.related_files_folder == ""
+            #     else app_config.mwdb.related_files_folder + "/related_files"
+            # )
+            upload_path = "/app/uploads/related_files"
         elif app_config.mwdb.storage_provider == StorageProviderType.S3:
             upload_path = "related_files/"
         else:
@@ -381,7 +382,7 @@ class RelatedFile(db.Model):
         cls,
         file_name,
         file_stream,
-        related_object,
+        related_object_dhash,
     ):
         file_stream.seek(0, os.SEEK_END)
         file_size = file_stream.tell()
@@ -393,10 +394,19 @@ class RelatedFile(db.Model):
         new_related_file = (
             db.session.query(RelatedFile).filter(RelatedFile.sha256 == sha256).first()
         )
+        related_object = (
+            db.session.query(Object)
+            .filter(Object.dhash == related_object_dhash)
+            .first()
+        )
 
         # If file already exists
         if new_related_file is not None:
             return
+
+        # If related file doesn't exist
+        if related_object is None:
+            raise ValueError("There is no object with this sha256")
 
         new_related_file = RelatedFile(
             object_id=related_object.id,
@@ -430,7 +440,11 @@ class RelatedFile(db.Model):
 
     @classmethod
     def access(cls, identifier):
-        related_file_obj = db.session.query(RelatedFile).filter(RelatedFile.sha256 == identifier).first()
+        related_file_obj = (
+            db.session.query(RelatedFile)
+            .filter(RelatedFile.sha256 == identifier)
+            .first()
+        )
         if related_file_obj is None:
             return None
         if not g.auth_user.has_access_to_object(related_file_obj.object_id):

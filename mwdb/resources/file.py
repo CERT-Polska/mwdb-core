@@ -634,7 +634,9 @@ class RelatedFileDownloadResource(Resource):
         return Response(
             related_file_obj.iterate(),
             content_type="application/octet-stream",
-            headers={"Content-disposition": f"attachment; filename={related_file_obj.sha256}"},
+            headers={
+                "Content-disposition": f"attachment; filename={related_file_obj.sha256}"
+            },
         )
 
 
@@ -654,6 +656,13 @@ class RelatedFileItemResource(Resource):
             - bearerAuth: []
         tags:
             - related_file
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: File identifier (SHA256)
+              required: true
         requestBody:
             required: true
             content:
@@ -665,18 +674,15 @@ class RelatedFileItemResource(Resource):
                       type: string
                       format: binary
                       description: RelatedFile contents to be uploaded
-                    identifier:
-                      type: string
-                      description: |
-                        sha256 of the relating file
                   required:
                     - file
-                    - identifier
         responses:
             200:
                 description: Information about uploaded file
             400:
                 description: RelatedFile is empty
+            404:
+                description: There is no file with provided sha256
             409:
                 description: RelatedFile already exists
             503:
@@ -685,14 +691,14 @@ class RelatedFileItemResource(Resource):
         """
         try:
             RelatedFile.create(
-                request.files["file"].filename,
-                request.files["file"].stream,
-                identifier
+                request.files["file"].filename, request.files["file"].stream, identifier
             )
         except EmptyFileError:
             raise BadRequest("RelatedFile cannot be empty")
-        
-        return "OK" #self.create_object(obj["options"])
+        except ValueError:
+            raise NotFound("There is no file with provided sha256")
+
+        return "OK"  # self.create_object(obj["options"])
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_objects)

@@ -263,7 +263,9 @@ api.add_resource(FileDownloadZipResource, "/file/<hash64:identifier>/download/zi
 
 # RelatedFiles endpoints
 api.add_resource(RelatedFileItemResource, "/related_file/<hash64:identifier>")
-api.add_resource(RelatedFileDownloadResource, "/related_file/<hash64:identifier>/download")
+api.add_resource(
+    RelatedFileDownloadResource, "/related_file/<hash64:identifier>/download"
+)
 
 # Config endpoints
 api.add_resource(ConfigResource, "/config")

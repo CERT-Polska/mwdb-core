@@ -12,8 +12,8 @@ import {
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
 import { APIContext } from "@mwdb-web/commons/api/context";
+import { humanFileSize } from "@mwdb-web/commons/helpers";
 import ReactModal from "react-modal";
-import { useDropzone } from "react-dropzone";
 
 function ShowRelatedFiles() {
     const [relatedFiles, setRelatedFiles] = useState([]);
@@ -23,9 +23,9 @@ function ShowRelatedFiles() {
 
     function RelatedFileItem({ file_name, file_size, sha256 }) {
         return (
-            <tr class="flickerable">
+            <tr>
                 <td>{file_name}</td>
-                <td>{file_size} B</td>
+                <td>{humanFileSize(file_size)}</td>
                 <td>
                     <Link
                         to={`/file/${context.object.sha256}/related_files`}
@@ -90,10 +90,10 @@ function ShowRelatedFiles() {
     return (
         <table className="table table-striped table-bordered table-hover data-table">
             <thead>
-                <td>File name</td>
-                <td>File size</td>
-                <td>Download</td>
-                <td>Remove</td>
+                <th>File name</th>
+                <th>File size</th>
+                <th>Download</th>
+                <th>Remove</th>
             </thead>
             {relatedFiles.map((related_file) => (
                 <RelatedFileItem {...related_file} />

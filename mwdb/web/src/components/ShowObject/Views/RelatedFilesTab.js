@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -49,7 +49,14 @@ function ShowRelatedFiles(){
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
 
-    updateRelatedFiles();
+    const getRelatedFiles = useCallback(updateRelatedFiles, [
+        api,
+        context
+    ]);
+
+    useEffect(() => {
+        getRelatedFiles();
+    }, [getRelatedFiles]);
 
     return (
         <table className="table table-striped table-bordered table-hover data-table">

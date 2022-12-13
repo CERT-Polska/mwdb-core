@@ -130,15 +130,23 @@ export default function RelatedFilesTab() {
                 }}
             >
                 <form
+                    name="RelatedFileUploadForm"
                     onSubmit={() => {
                         handleSubmit();
                         setShowModal(false);
                     }}
                 >
                     <input
+                        name="RelatedFileUploadField"
                         type="file"
                         required="required"
-                        onChange={(data) => setFile(data)}
+                        onChange={() =>
+                            setFile(
+                                document.forms["RelatedFileUploadForm"][
+                                    "RelatedFileUploadField"
+                                ].files[0]
+                            )
+                        }
                     />{" "}
                     <br />
                     <input type="submit" />

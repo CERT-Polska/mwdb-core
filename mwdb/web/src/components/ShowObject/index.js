@@ -1,7 +1,7 @@
 export { default as ShowObject } from "./ShowObject";
 
 export { default as RelationsTab } from "./Views/RelationsTab";
-export { default as RelatedFilesTab } from "./Views/RelatedFilesTab"
+export { default as RelatedFilesTab } from "./Views/RelatedFilesTab";
 export { default as LatestConfigTab } from "./Views/LatestConfigTab";
 
 export { default as DownloadAction } from "./Actions/DownloadAction";

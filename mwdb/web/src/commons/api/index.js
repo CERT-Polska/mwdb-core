@@ -444,8 +444,22 @@ function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
 }
 
+function uploadRelatedFile(file, masterFileDhash) {
+    let formData = new FormData();
+    formData.append("file", file);
+    return axios.post(`/related_file/${masterFileDhash}`, formData);
+}
+
+function downloadRelatedFile(id) {
+    return axios.get(`/related_file/${id}/download`);
+}
+
+function deleteRelatedFile(id) {
+    return axios.delete(`/related_file/${id}`);
+}
+
 function getListOfRelatedFiles(id) {
-    return axios.get(`/related_file/${id}`)
+    return axios.get(`/related_file/${id}`);
 }
 
 function getRemoteNames() {
@@ -630,6 +644,9 @@ const api = {
     requestFileDownloadLink,
     requestZipFileDownloadLink,
     uploadFile,
+    uploadRelatedFile,
+    downloadRelatedFile,
+    deleteRelatedFile,
     getListOfRelatedFiles,
     getRemoteNames,
     pushObjectRemote,

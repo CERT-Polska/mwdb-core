@@ -451,7 +451,10 @@ function uploadRelatedFile(file, masterFileDhash) {
 }
 
 function downloadRelatedFile(id) {
-    return axios.get(`/related_file/${id}/download`);
+    return axios.get(`/related_file/${id}/download`, {
+        responseType: "arraybuffer",
+        responseEncoding: "binary",
+    });
 }
 
 function deleteRelatedFile(id) {

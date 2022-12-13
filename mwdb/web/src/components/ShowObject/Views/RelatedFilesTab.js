@@ -26,11 +26,18 @@ function ShowRelatedFiles() {
                 <td>{file_size} B</td>
                 <td>
                     <Link
-                        to=""
+                        to={`/file/${context.object.sha256}/related_files`}
                         className="nav-link"
                         onClick={async () => {
-                            console.log(sha256);
-                            await api.downloadRelatedFile(sha256);
+                            let content = await api.downloadRelatedFile(sha256);
+                            let blob = new Blob([content.data], {
+                                type: "application/octet-stream",
+                            });
+                            let tempLink = document.createElement("a");
+                            tempLink.style.display = "none";
+                            tempLink.href = window.URL.createObjectURL(blob);
+                            tempLink.download = file_name;
+                            tempLink.click();
                         }}
                     >
                         <FontAwesomeIcon icon={faDownload} size="1x" />

@@ -46,7 +46,7 @@ function ShowRelatedFiles() {
                 </td>
                 <td>
                     <Link
-                        to=""
+                        to={`/file/${context.object.sha256}/related_files`}
                         className="nav-link"
                         onClick={async () => {
                             await api.deleteRelatedFile(sha256);

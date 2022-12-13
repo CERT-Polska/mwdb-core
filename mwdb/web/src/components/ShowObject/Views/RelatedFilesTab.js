@@ -13,6 +13,7 @@ import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
 import { APIContext } from "@mwdb-web/commons/api/context";
 import ReactModal from "react-modal";
+import { useDropzone } from "react-dropzone";
 
 function ShowRelatedFiles() {
     const [relatedFiles, setRelatedFiles] = useState([]);
@@ -108,6 +109,17 @@ export default function RelatedFilesTab() {
     const api = useContext(APIContext);
     const { setObjectError } = context;
 
+    const modalStyle = {
+        content: {
+            top: "50%",
+            left: "50%",
+            right: "auto",
+            bottom: "auto",
+            marginRight: "-50%",
+            transform: "translate(-50%, -50%)",
+        },
+    };
+
     async function handleSubmit() {
         try {
             await api.uploadRelatedFile(file, context.object.sha256);
@@ -138,6 +150,7 @@ export default function RelatedFilesTab() {
                 onRequestClose={() => {
                     setShowModal(false);
                 }}
+                style={modalStyle}
             >
                 <form
                     name="RelatedFileUploadForm"
@@ -148,6 +161,7 @@ export default function RelatedFilesTab() {
                     }}
                 >
                     <input
+                        class="modal-header"
                         name="RelatedFileUploadField"
                         type="file"
                         required="required"
@@ -158,17 +172,23 @@ export default function RelatedFilesTab() {
                                 ].files[0]
                             )
                         }
-                    />{" "}
-                    <br />
-                    <input type="submit" />
+                    />
+                    <div class="modal-footer">
+                        <input
+                            class="btn btn-success"
+                            type="submit"
+                            value="Submit related file"
+                        />
+                        <button
+                            class="btn btn-secondary"
+                            onClick={() => {
+                                setShowModal(false);
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </form>
-                <button
-                    onClick={() => {
-                        setShowModal(false);
-                    }}
-                >
-                    Cancel
-                </button>
             </ReactModal>
         </div>
     );

@@ -18,6 +18,7 @@ function ShowRelatedFiles() {
     const [relatedFiles, setRelatedFiles] = useState([]);
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
+    const { setObjectError, updateObjectData } = context;
 
     function RelatedFileItem({ file_name, file_size, sha256 }) {
         return (
@@ -50,6 +51,7 @@ function ShowRelatedFiles() {
                         className="nav-link"
                         onClick={async () => {
                             await api.deleteRelatedFile(sha256);
+                            updateRelatedFiles();
                         }}
                     >
                         <FontAwesomeIcon icon={faTrash} size="1x" />
@@ -66,12 +68,19 @@ function ShowRelatedFiles() {
                 context.object.sha256
             );
             setRelatedFiles(response.data.related_files);
+            updateObjectData({
+                related_files: response.data.related_files,
+            });
         } catch (error) {
-            console.log(error);
+            setObjectError(error);
         }
     }
-
-    const getRelatedFiles = useCallback(updateRelatedFiles, [api, context]);
+    const getRelatedFiles = useCallback(updateRelatedFiles, [
+        api,
+        setObjectError,
+        updateObjectData,
+        context.object.sha256,
+    ]);
 
     useEffect(() => {
         getRelatedFiles();
@@ -97,12 +106,13 @@ export default function RelatedFilesTab() {
     const [file, setFile] = useState(null);
     const context = useContext(ObjectContext);
     const api = useContext(APIContext);
+    const { setObjectError } = context;
 
     async function handleSubmit() {
         try {
             await api.uploadRelatedFile(file, context.object.sha256);
         } catch (error) {
-            console.log(error);
+            setObjectError(error);
         }
     }
 
@@ -134,6 +144,7 @@ export default function RelatedFilesTab() {
                     onSubmit={() => {
                         handleSubmit();
                         setShowModal(false);
+                        ShowRelatedFiles().updateRelatedFiles();
                     }}
                 >
                     <input

@@ -62,7 +62,10 @@ function ShowRelatedFiles() {
                         to={`/file/${context.object.sha256}/related_files`}
                         className="nav-link"
                         onClick={async () => {
-                            await api.deleteRelatedFile(sha256);
+                            await api.deleteRelatedFile(
+                                sha256,
+                                context.object.sha256
+                            );
                             updateRelatedFiles(api, context);
                         }}
                     >

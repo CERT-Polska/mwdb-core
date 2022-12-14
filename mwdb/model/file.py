@@ -6,7 +6,7 @@ import tempfile
 
 import pyzipper
 from flask import g
-from sqlalchemy import or_
+from sqlalchemy import not_, or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from werkzeug.utils import secure_filename
@@ -391,22 +391,31 @@ class RelatedFile(db.Model):
 
         sha256 = calc_hash(file_stream, hashlib.sha256(), lambda h: h.hexdigest())
 
-        new_related_file = (
-            db.session.query(RelatedFile).filter(RelatedFile.sha256 == sha256).first()
-        )
         main_obj = (
             db.session.query(Object).filter(Object.dhash == main_obj_dhash).first()
         )
-
-        # If file already exists
-        if new_related_file is not None:
-            raise FileExistsError("Related file with this sha256 already exists")
-
-        # If related file doesn't exist
-        if main_obj is None:
+        # If main file doesn't exist or no access
+        if main_obj is None or not main_obj.has_explicit_access(g.auth_user):
             raise ValueError(
                 "There is no object with this sha256 or you don't have access"
             )
+
+        is_new = True
+        new_related_file = (
+            db.session.query(RelatedFile).filter(RelatedFile.sha256 == sha256).first()
+        )
+        # If RelatedFile already exists
+        if new_related_file is not None:
+            is_new = False
+            new_related_file = (
+                db.session.query(RelatedFile)
+                .filter(RelatedFile.sha256 == sha256)
+                .filter(RelatedFile.object_id == main_obj.id)
+                .first()
+            )
+            # If RelatedFile related to main_obj already exists
+            if new_related_file is not None:
+                raise FileExistsError("Related file with this sha256 already exists")
 
         new_related_file = RelatedFile(
             object_id=main_obj.id,
@@ -415,56 +424,69 @@ class RelatedFile(db.Model):
             sha256=sha256,
         )
 
-        file_stream.seek(0, os.SEEK_SET)
-        if app_config.mwdb.storage_provider == StorageProviderType.S3:
-            get_s3_client(
-                app_config.mwdb.s3_storage_endpoint,
-                app_config.mwdb.s3_storage_access_key,
-                app_config.mwdb.s3_storage_secret_key,
-                app_config.mwdb.s3_storage_region_name,
-                app_config.mwdb.s3_storage_secure,
-                app_config.mwdb.s3_storage_iam_auth,
-            ).put_object(
-                Bucket=app_config.mwdb.s3_storage_bucket_name,
-                Key=new_related_file._calculate_path(),
-                Body=file_stream,
-            )
-        elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
-            with open(new_related_file._calculate_path(), "wb") as f:
-                shutil.copyfileobj(file_stream, f)
-        else:
-            raise RuntimeError(
-                f"StorageProvider {app_config.mwdb.storage_provider} "
-                f"is not supported"
-            )
+        if is_new:
+            file_stream.seek(0, os.SEEK_SET)
+            if app_config.mwdb.storage_provider == StorageProviderType.S3:
+                get_s3_client(
+                    app_config.mwdb.s3_storage_endpoint,
+                    app_config.mwdb.s3_storage_access_key,
+                    app_config.mwdb.s3_storage_secret_key,
+                    app_config.mwdb.s3_storage_region_name,
+                    app_config.mwdb.s3_storage_secure,
+                    app_config.mwdb.s3_storage_iam_auth,
+                ).put_object(
+                    Bucket=app_config.mwdb.s3_storage_bucket_name,
+                    Key=new_related_file._calculate_path(),
+                    Body=file_stream,
+                )
+            elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
+                with open(new_related_file._calculate_path(), "wb") as f:
+                    shutil.copyfileobj(file_stream, f)
+            else:
+                raise RuntimeError(
+                    f"StorageProvider {app_config.mwdb.storage_provider} "
+                    f"is not supported"
+                )
         db.session.add(new_related_file)
         db.session.commit()
 
     @classmethod
     def access(cls, identifier):
-        related_file_obj = (
-            db.session.query(RelatedFile)
-            .filter(RelatedFile.sha256 == identifier)
-            .first()
+        related_files = (
+            db.session.query(RelatedFile).filter(RelatedFile.sha256 == identifier).all()
         )
-        if related_file_obj is None:
+        # Empty list - no such RelatedFile
+        if not related_files:
             return None
 
+        main_obj_ids = [rf.object_id for rf in related_files]
         main_obj = (
             db.session.query(Object)
-            .filter(Object.id == related_file_obj.object_id)
+            .filter(Object.id.in_(main_obj_ids))
+            .filter(g.auth_user.has_access_to_object(Object.id))
             .first()
         )
-        if not main_obj.has_explicit_access(g.auth_user):
+        if main_obj is None:
             return None
 
-        return related_file_obj
+        return related_files[0]
 
     @classmethod
-    def delete(cls, identifier):
+    def delete(cls, identifier, main_file_identifier):
+        main_obj = (
+            db.session.query(Object)
+            .filter(Object.dhash == main_file_identifier)
+            .first()
+        )
+        if not main_obj.has_explicit_access(g.auth_user):
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+
         related_file_obj = (
             db.session.query(RelatedFile)
             .filter(RelatedFile.sha256 == identifier)
+            .filter(RelatedFile.object_id == main_obj.id)
             .first()
         )
 
@@ -472,15 +494,37 @@ class RelatedFile(db.Model):
             raise ValueError(
                 "There is no object with this sha256 or you don't have access"
             )
-        main_obj = (
-            db.session.query(Object)
-            .filter(Object.id == related_file_obj.object_id)
+
+        is_last = False
+        other_related_file_obj = (
+            db.session.query(RelatedFile)
+            .filter(RelatedFile.sha256 == identifier)
+            .filter(not_(RelatedFile.object_id == main_obj.id))
             .first()
         )
-        if not main_obj.has_explicit_access(g.auth_user):
-            raise ValueError(
-                "There is no object with this sha256 or you don't have access"
-            )
+        if other_related_file_obj is None:
+            is_last = True
+
+        if is_last:
+            if app_config.mwdb.storage_provider == StorageProviderType.S3:
+                get_s3_client(
+                    app_config.mwdb.s3_storage_endpoint,
+                    app_config.mwdb.s3_storage_access_key,
+                    app_config.mwdb.s3_storage_secret_key,
+                    app_config.mwdb.s3_storage_region_name,
+                    app_config.mwdb.s3_storage_secure,
+                    app_config.mwdb.s3_storage_iam_auth,
+                ).delete_object(
+                    Bucket=app_config.mwdb.s3_storage_bucket_name,
+                    Key=related_file_obj._calculate_path(),
+                )
+            elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
+                os.remove(related_file_obj._calculate_path())
+            else:
+                raise RuntimeError(
+                    f"StorageProvider {app_config.mwdb.storage_provider} "
+                    f"is not supported"
+                )
 
         db.session.delete(related_file_obj)
         db.session.commit()

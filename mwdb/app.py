@@ -44,6 +44,7 @@ from mwdb.resources.file import (
     FileDownloadZipResource,
     FileItemResource,
     FileResource,
+    RelatedFileDeleteResource,
     RelatedFileDownloadResource,
     RelatedFileItemResource,
 )
@@ -265,6 +266,10 @@ api.add_resource(FileDownloadZipResource, "/file/<hash64:identifier>/download/zi
 api.add_resource(RelatedFileItemResource, "/related_file/<hash64:identifier>")
 api.add_resource(
     RelatedFileDownloadResource, "/related_file/<hash64:identifier>/download"
+)
+api.add_resource(
+    RelatedFileDeleteResource,
+    "/related_file/<hash64:identifier>/delete/<hash64:main_file_identifier>",
 )
 
 # Config endpoints

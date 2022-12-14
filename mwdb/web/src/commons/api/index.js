@@ -457,8 +457,8 @@ function downloadRelatedFile(id) {
     });
 }
 
-function deleteRelatedFile(id) {
-    return axios.delete(`/related_file/${id}`);
+function deleteRelatedFile(id, main_file_id) {
+    return axios.delete(`/related_file/${id}/delete/${main_file_id}`);
 }
 
 function getListOfRelatedFiles(id) {

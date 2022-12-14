@@ -767,9 +767,11 @@ class RelatedFileItemResource(Resource):
 
         return Response("OK")
 
+
+class RelatedFileDeleteResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.removing_related_files)
-    def delete(self, identifier):
+    def delete(self, identifier, main_file_identifier):
         """
         ---
         summary: Delete file
@@ -784,9 +786,16 @@ class RelatedFileItemResource(Resource):
         parameters:
             - in: path
               name: identifier
+              required: true
               schema:
                 type: string
-              description: RelatedFile identifier (SHA256/SHA512/SHA1/MD5)
+              description: RelatedFile identifier (SHA256)
+            - in: path
+              name: main_file_identifier
+              required: true
+              schema:
+                type: string
+              description: Main file identifier (SHA256)
         responses:
             200:
                 description: When related file was deleted
@@ -801,7 +810,7 @@ class RelatedFileItemResource(Resource):
                     Request canceled due to database statement timeout.
         """
         try:
-            RelatedFile.delete(identifier)
+            RelatedFile.delete(identifier, main_file_identifier)
         except ValueError:
             raise NotFound(
                 "There is no file with provided sha256 or you don't have access to it"

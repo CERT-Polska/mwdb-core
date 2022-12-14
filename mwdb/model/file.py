@@ -382,7 +382,7 @@ class RelatedFile(db.Model):
         cls,
         file_name,
         file_stream,
-        related_object_dhash,
+        main_obj_dhash,
     ):
         file_stream.seek(0, os.SEEK_END)
         file_size = file_stream.tell()
@@ -394,9 +394,9 @@ class RelatedFile(db.Model):
         new_related_file = (
             db.session.query(RelatedFile).filter(RelatedFile.sha256 == sha256).first()
         )
-        related_object = (
+        main_obj = (
             db.session.query(Object)
-            .filter(Object.dhash == related_object_dhash)
+            .filter(Object.dhash == main_obj_dhash)
             .first()
         )
 
@@ -405,13 +405,13 @@ class RelatedFile(db.Model):
             raise FileExistsError("Related file with this sha256 already exists")
 
         # If related file doesn't exist
-        if related_object is None:
+        if main_obj is None:
             raise ValueError(
                 "There is no object with this sha256 or you don't have access"
             )
 
         new_related_file = RelatedFile(
-            object_id=related_object.id,
+            object_id=main_obj.id,
             file_name=secure_filename(file_name),
             file_size=file_size,
             sha256=sha256,

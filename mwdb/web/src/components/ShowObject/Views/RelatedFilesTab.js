@@ -81,7 +81,7 @@ function ShowRelatedFiles() {
         context.object.sha256,
     ]);
 
-    // JS throws a warning "Line 92:8:  React Hook useEffect has missing dependencies: 'api' and 'context'"
+    // JS throws a warning "Line 90:8:  React Hook useEffect has missing dependencies: 'api' and 'context'"
     // Those dependencies are skipped on purpose
     // To disable this warning I used 'eslint-disable-next-line'
     useEffect(() => {
@@ -164,7 +164,6 @@ export default function RelatedFilesTab() {
                     onSubmit={() => {
                         handleSubmit();
                         setShowModal(false);
-                        ShowRelatedFiles().updateRelatedFiles();
                     }}
                 >
                     <input

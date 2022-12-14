@@ -395,9 +395,7 @@ class RelatedFile(db.Model):
             db.session.query(RelatedFile).filter(RelatedFile.sha256 == sha256).first()
         )
         main_obj = (
-            db.session.query(Object)
-            .filter(Object.dhash == main_obj_dhash)
-            .first()
+            db.session.query(Object).filter(Object.dhash == main_obj_dhash).first()
         )
 
         # If file already exists

@@ -24,6 +24,9 @@ export const Capability = {
     kartonAssign: "karton_assign",
     kartonReanalyze: "karton_reanalyze",
     removingKarton: "karton_unassign",
+    accessRelatedFiles: "access_related_files",
+    addingRelatedFiles: "adding_related_files",
+    removingRelatedFiles: "removing_related_files",
 };
 
 export let capabilitiesList = {
@@ -56,6 +59,9 @@ export let capabilitiesList = {
         "Can assign existing analysis to the object (required by karton-mwdb-reporter)",
     [Capability.kartonReanalyze]: "Can resubmit any object for analysis",
     [Capability.removingKarton]: "Can remove analysis from object",
+    [Capability.accessRelatedFiles]: "Can view and download RelatedFiles",
+    [Capability.addingRelatedFiles]: "Can upload new RelatedFiles",
+    [Capability.removingRelatedFiles]: "Can remove existing RelatedFiles",
 };
 
 for (let extraCapabilities of fromPlugin("capabilities")) {

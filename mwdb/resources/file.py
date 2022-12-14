@@ -590,12 +590,16 @@ class FileDownloadZipResource(Resource):
 
 @rate_limited_resource
 class RelatedFileDownloadResource(Resource):
+    @requires_authorization
+    @requires_capabilities(Capabilities.access_related_files)
     def get(self, identifier):
         """
         ---
         summary: Download related file
         description: |
             Returns related file contents.
+
+            Requires `access_related_files` capability.
         security:
             - bearerAuth: []
         tags:
@@ -615,6 +619,8 @@ class RelatedFileDownloadResource(Resource):
                     schema:
                       type: string
                       format: binary
+            403:
+                description: When user doesn't have `access_related_files` capability
             404:
                 description: |
                     When related file doesn't exist
@@ -684,15 +690,20 @@ class RelatedFileItemResource(Resource):
                 "There is no file with provided sha256 or you don't have access to it"
             )
 
-        related_files = db.session.query(RelatedFile).filter(
-            RelatedFile.object_id == master_object.id
-        )
-        schema = RelatedFileResponseSchema()
+        if g.auth_user.has_rights(Capabilities.access_related_files):
+            related_files = (
+                db.session.query(RelatedFile)
+                .filter(RelatedFile.object_id == master_object.id)
+                .all()
+            )
+        else:
+            related_files = []
 
+        schema = RelatedFileResponseSchema()
         return schema.dump({"related_files": related_files})
 
     @requires_authorization
-    @requires_capabilities(Capabilities.adding_files)
+    @requires_capabilities(Capabilities.adding_related_files)
     def post(self, identifier):
         """
         ---
@@ -700,7 +711,7 @@ class RelatedFileItemResource(Resource):
         description: |
             Uploads a new related file.
 
-            Requires `adding_files` capability.
+            Requires `adding_related_files` capability.
         security:
             - bearerAuth: []
         tags:
@@ -730,6 +741,8 @@ class RelatedFileItemResource(Resource):
                 description: OK
             400:
                 description: RelatedFile is empty
+            403:
+                description: When user doesn't have `adding_related_files` capability
             404:
                 description: |
                     There is no file with provided sha256 or you don't have access to it
@@ -755,7 +768,7 @@ class RelatedFileItemResource(Resource):
         return Response("OK")
 
     @requires_authorization
-    @requires_capabilities(Capabilities.removing_objects)
+    @requires_capabilities(Capabilities.removing_related_files)
     def delete(self, identifier):
         """
         ---
@@ -763,7 +776,7 @@ class RelatedFileItemResource(Resource):
         description: |
             Removes a file from the database along with its references.
 
-            Requires `removing_objects` capability.
+            Requires `removing_related_files` capability.
         security:
             - bearerAuth: []
         tags:
@@ -778,7 +791,7 @@ class RelatedFileItemResource(Resource):
             200:
                 description: When related file was deleted
             403:
-                description: When user doesn't have `removing_objects` capability
+                description: When user doesn't have `removing_related_files` capability
             404:
                 description: |
                     When related file doesn't exist

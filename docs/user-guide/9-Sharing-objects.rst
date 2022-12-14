@@ -155,47 +155,47 @@ By default, ``admin`` private group has enabled all capabilities. All other grou
 
 Each capability has its own name and scope:
 
-* 
+*
   **manage_users - Managing users and groups (system administration)**
 
   Allows to access all users and groups in MWDB. Rules described in *Who is who?* don't apply to users with that permission. Enables user to create new user accounts, new groups and change their capabilities and membership. Allows to manage attribute keys, define new ones, delete and set the group permissions for them.
 
-* 
+*
   **share_queried_objects - Query for all objects in system**
 
   That one is a bit tricky and will be possibly deprecated. MWDB will automatically share object and all descendants with group if member directly accessed it via identifier (knows the hash e.g. have direct link to the object). It can be used for bot accounts, so they have access only to these objects that are intended to be processed by them. Internally, we abandoned that idea, so that capability may not be stable.
 
-* 
+*
   **access_all_objects - Has access to all new uploaded objects into system**
 
   Capability used by ``everything`` group, useful when you want to make additional "everything" that is separate from the original one. Keep in mind that it applies only to the **uploads made during the capability was enabled**\ , so if you want the new group to be truly "everything", you may need to share the old objects manually.
 
-* 
+*
   **sharing_with_all - Can share objects with all groups in system**
 
   Implies the access to the list of all group names, but without access to the membership information and management features. Allows to share object with arbitrary group in MWDB.
 
-* 
+*
   **adding_tags - Can add tags**
 
   Allows to tag objects. This feature is disabled by default, as you may want to have only tags from automated analyses.
 
-* 
+*
   **removing_tags - Can remove tags**
 
   Allows to remove tags. Tag doesn't have "owner", so user will be able to remove all tags from the object.
 
-* 
+*
   **adding_comments - Can add comments**
 
   Allows to add comments to the objects. Keep in mind that comments are public.
 
-* 
+*
   **removing_comments - Can remove (all) comments**
 
   Allows to remove **all** comments, not only these authored by the user.
 
-* 
+*
   **adding_parents - Can add parents**
 
   Allows to add new relationships by specifying object parent during upload or adding new relationship between existing objects.
@@ -210,22 +210,22 @@ Each capability has its own name and scope:
 
   Enables upload of files. Enabled by default for ``registered`` group.
 
-* 
+*
   **adding_configs - Can upload configs**
 
   Enables upload of configurations. Configurations are intended to be uploaded by automated systems or trusted entities that follow the conventions.
 
-* 
+*
   **adding_blobs - Can upload text blobs**
 
   Enables upload of blobs. Blobs may have similar meaning as configurations in terms of user roles.
 
-* 
+*
   **reading_all_attributes - Has access to all attributes of object (including hidden)**
 
   With that capability, you can read all the attributes, even if you don't have ``read`` permission for that attribute key. It allows to list hidden attribute values.
 
-* 
+*
   **adding_all_attributes - Can add all attributes to object**
 
   Enables group to add all the attributes, even if it doesn't have ``set`` permission for that attribute key.
@@ -235,12 +235,12 @@ Each capability has its own name and scope:
 
   Allows to remove attribute from object. To remove attribute, you need to have ``set`` permission for key. Combined with ``adding_all_attributes``\ , allows to remove all attributes.
 
-* 
+*
   **unlimited_requests - API requests are not rate-limited for this group**
 
   Disables rate limiting for users from that group, if rate limiting feature is enabled.
 
-* 
+*
   **removing_objects - Can remove objects**
 
   Can remove all accessible objects from the MWDB. May be quite destructive, we suggest to keep that capability enabled only for ``admin`` account.
@@ -255,7 +255,7 @@ Each capability has its own name and scope:
 
   Allows to use personalization features like favorites or quick queries.
 
-*  
+*
   **karton_assign - Can assign existing analysis to the object**
 
   Allows to assign Karton analysis to the object by setting ``karton`` attribute or using dedicated API.
@@ -264,6 +264,21 @@ Each capability has its own name and scope:
   **karton_reanalyze - Can resubmit any object for analysis**
 
   Can manually resubmit object to Karton.
+*
+  **access_related_files - Can view and download RelatedFiles**
+
+  Allows to view list of RelatedFiles and download them.
+
+*
+  **adding_related_files - Can upload new RelatedFiles**
+
+  Allows to upload new RelatedFiles.
+
+*
+  **removing_related_files - removing_related_files**
+
+  Allows to remove existing RelatedFiles.
+
 
 User capabilities are the sum of all group capabilities. If you want to enable capability system-wide (e.g. enable all users to add tags), enable that capability for ``registered`` group or ``public`` group if you want to include guests.
 

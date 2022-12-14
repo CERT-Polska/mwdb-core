@@ -90,7 +90,10 @@ function ShowRelatedFiles() {
     }, [getRelatedFiles]);
 
     if (!context.object.related_files) {
-        return "Loading...";
+        return <div class="card-body text-muted">Loading...</div>;
+    }
+    if (context.object.related_files.length === 0) {
+        return <div class="card-body text-muted">Nothing to show here</div>;
     }
 
     return (

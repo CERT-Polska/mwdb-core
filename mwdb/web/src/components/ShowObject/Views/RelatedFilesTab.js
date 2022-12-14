@@ -15,8 +15,19 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { humanFileSize } from "@mwdb-web/commons/helpers";
 import ReactModal from "react-modal";
 
+async function updateRelatedFiles(api, context) {
+    const { setObjectError, updateObjectData } = context;
+    try {
+        let response = await api.getListOfRelatedFiles(context.object.sha256);
+        updateObjectData({
+            related_files: response.data.related_files,
+        });
+    } catch (error) {
+        setObjectError(error);
+    }
+}
+
 function ShowRelatedFiles() {
-    const [relatedFiles, setRelatedFiles] = useState([]);
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
     const { setObjectError, updateObjectData } = context;
@@ -52,7 +63,7 @@ function ShowRelatedFiles() {
                         className="nav-link"
                         onClick={async () => {
                             await api.deleteRelatedFile(sha256);
-                            updateRelatedFiles();
+                            updateRelatedFiles(api, context);
                         }}
                     >
                         <FontAwesomeIcon icon={faTrash} size="1x" />
@@ -63,19 +74,6 @@ function ShowRelatedFiles() {
         );
     }
 
-    async function updateRelatedFiles() {
-        try {
-            let response = await api.getListOfRelatedFiles(
-                context.object.sha256
-            );
-            setRelatedFiles(response.data.related_files);
-            updateObjectData({
-                related_files: response.data.related_files,
-            });
-        } catch (error) {
-            setObjectError(error);
-        }
-    }
     const getRelatedFiles = useCallback(updateRelatedFiles, [
         api,
         setObjectError,
@@ -83,9 +81,17 @@ function ShowRelatedFiles() {
         context.object.sha256,
     ]);
 
+    // JS throws a warning "Line 92:8:  React Hook useEffect has missing dependencies: 'api' and 'context'"
+    // Those dependencies are skipped on purpose
+    // To disable this warning I used 'eslint-disable-next-line'
     useEffect(() => {
-        getRelatedFiles();
+        getRelatedFiles(api, context);
+        // eslint-disable-next-line
     }, [getRelatedFiles]);
+
+    if (!context.object.related_files) {
+        return "Loading...";
+    }
 
     return (
         <table className="table table-striped table-bordered table-hover data-table">
@@ -95,7 +101,7 @@ function ShowRelatedFiles() {
                 <th>Download</th>
                 <th>Remove</th>
             </thead>
-            {relatedFiles.map((related_file) => (
+            {context.object.related_files.map((related_file) => (
                 <RelatedFileItem {...related_file} />
             ))}
         </table>
@@ -123,6 +129,7 @@ export default function RelatedFilesTab() {
     async function handleSubmit() {
         try {
             await api.uploadRelatedFile(file, context.object.sha256);
+            updateRelatedFiles(api, context);
         } catch (error) {
             setObjectError(error);
         }

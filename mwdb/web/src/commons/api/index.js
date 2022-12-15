@@ -444,25 +444,25 @@ function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
 }
 
-function uploadRelatedFile(file, masterFileDhash) {
+function uploadRelatedFile(file, mainFileDhash, type = "object") {
     let formData = new FormData();
     formData.append("file", file);
-    return axios.post(`/related_file/${masterFileDhash}`, formData);
+    return axios.post(`/${type}/${mainFileDhash}/related_file`, formData);
 }
 
-function downloadRelatedFile(id) {
-    return axios.get(`/related_file/${id}/download`, {
+function downloadRelatedFile(mainFileDhash, id, type = "object") {
+    return axios.get(`/${type}/${mainFileDhash}/related_file/${id}`, {
         responseType: "arraybuffer",
         responseEncoding: "binary",
     });
 }
 
-function deleteRelatedFile(id, main_file_id) {
-    return axios.delete(`/related_file/${id}/delete/${main_file_id}`);
+function deleteRelatedFile(mainFileDhash, id, type = "object") {
+    return axios.delete(`/${type}/${mainFileDhash}/related_file/${id}`);
 }
 
-function getListOfRelatedFiles(id) {
-    return axios.get(`/related_file/${id}`);
+function getListOfRelatedFiles(mainFileDhash, type = "object") {
+    return axios.get(`/${type}/${mainFileDhash}/related_file`);
 }
 
 function getRemoteNames() {

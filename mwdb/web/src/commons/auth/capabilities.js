@@ -59,9 +59,9 @@ export let capabilitiesList = {
         "Can assign existing analysis to the object (required by karton-mwdb-reporter)",
     [Capability.kartonReanalyze]: "Can resubmit any object for analysis",
     [Capability.removingKarton]: "Can remove analysis from object",
-    [Capability.accessRelatedFiles]: "Can view and download RelatedFiles",
-    [Capability.addingRelatedFiles]: "Can upload new RelatedFiles",
-    [Capability.removingRelatedFiles]: "Can remove existing RelatedFiles",
+    [Capability.accessRelatedFiles]: "Can view and download related files",
+    [Capability.addingRelatedFiles]: "Can upload new related files",
+    [Capability.removingRelatedFiles]: "Can remove existing related files",
 };
 
 for (let extraCapabilities of fromPlugin("capabilities")) {

@@ -10,9 +10,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ObjectContext } from "@mwdb-web/commons/context";
-import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
+import {
+    ObjectAction,
+    ObjectTab,
+    ConfirmationModal,
+} from "@mwdb-web/commons/ui";
 import { APIContext } from "@mwdb-web/commons/api/context";
-import { humanFileSize } from "@mwdb-web/commons/helpers";
+import { humanFileSize, downloadData } from "@mwdb-web/commons/helpers";
 import ReactModal from "react-modal";
 
 async function updateRelatedFiles(api, context) {
@@ -27,55 +31,70 @@ async function updateRelatedFiles(api, context) {
     }
 }
 
+function RelatedFileItem({ file_name, file_size, sha256 }) {
+    const api = useContext(APIContext);
+    const context = useContext(ObjectContext);
+    const [isConfirmationModalOpen, setConfirmationModalOpen] = useState(null);
+
+    return (
+        <tr>
+            <td>{file_name}</td>
+            <td>{humanFileSize(file_size)}</td>
+            <td>
+                <Link
+                    to={`/file/${context.object.sha256}/related_files`}
+                    className="nav-link"
+                    onClick={async () => {
+                        let content = await api.downloadRelatedFile(
+                            context.object.sha256,
+                            sha256
+                        );
+                        downloadData(
+                            content.data,
+                            file_name,
+                            "application/octet-stream"
+                        );
+                    }}
+                >
+                    <FontAwesomeIcon icon={faDownload} size="1x" />
+                    &nbsp;Download
+                </Link>
+            </td>
+            <td>
+                <Link
+                    to={`/file/${context.object.sha256}/related_files`}
+                    className="nav-link"
+                    onClick={() => setConfirmationModalOpen(true)}
+                >
+                    <FontAwesomeIcon icon={faTrash} size="1x" />
+                    &nbsp;Remove
+                </Link>
+                <ConfirmationModal
+                    isOpen={isConfirmationModalOpen}
+                    onRequestClose={() => {
+                        setConfirmationModalOpen(false);
+                    }}
+                    onConfirm={async () => {
+                        await api.deleteRelatedFile(
+                            context.object.sha256,
+                            sha256
+                        );
+                        updateRelatedFiles(api, context);
+                        setConfirmationModalOpen(false);
+                    }}
+                    message={`Are you sure you want to delete this related file?`}
+                    buttonStyle="btn-success"
+                    confirmText="Yes"
+                />
+            </td>
+        </tr>
+    );
+}
+
 function ShowRelatedFiles() {
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
     const { setObjectError, updateObjectData } = context;
-
-    function RelatedFileItem({ file_name, file_size, sha256 }) {
-        return (
-            <tr>
-                <td>{file_name}</td>
-                <td>{humanFileSize(file_size)}</td>
-                <td>
-                    <Link
-                        to={`/file/${context.object.sha256}/related_files`}
-                        className="nav-link"
-                        onClick={async () => {
-                            let content = await api.downloadRelatedFile(sha256);
-                            let blob = new Blob([content.data], {
-                                type: "application/octet-stream",
-                            });
-                            let tempLink = document.createElement("a");
-                            tempLink.style.display = "none";
-                            tempLink.href = window.URL.createObjectURL(blob);
-                            tempLink.download = file_name;
-                            tempLink.click();
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faDownload} size="1x" />
-                        &nbsp;Download
-                    </Link>
-                </td>
-                <td>
-                    <Link
-                        to={`/file/${context.object.sha256}/related_files`}
-                        className="nav-link"
-                        onClick={async () => {
-                            await api.deleteRelatedFile(
-                                sha256,
-                                context.object.sha256
-                            );
-                            updateRelatedFiles(api, context);
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faTrash} size="1x" />
-                        &nbsp;Remove
-                    </Link>
-                </td>
-            </tr>
-        );
-    }
 
     const getRelatedFiles = useCallback(updateRelatedFiles, [
         api,
@@ -84,7 +103,7 @@ function ShowRelatedFiles() {
         context.object.sha256,
     ]);
 
-    // JS throws a warning "Line 90:8:  React Hook useEffect has missing dependencies: 'api' and 'context'"
+    // JS throws a warning "Line ***:  React Hook useEffect has missing dependencies: 'api' and 'context'"
     // Those dependencies are skipped on purpose
     // To disable this warning I used 'eslint-disable-next-line'
     useEffect(() => {
@@ -177,13 +196,7 @@ export default function RelatedFilesTab() {
                         name="RelatedFileUploadField"
                         type="file"
                         required="required"
-                        onChange={() =>
-                            setFile(
-                                document.forms["RelatedFileUploadForm"][
-                                    "RelatedFileUploadField"
-                                ].files[0]
-                            )
-                        }
+                        onChange={(event) => setFile(event.target.files[0])}
                     />
                     <div class="modal-footer">
                         <input

@@ -589,67 +589,8 @@ class FileDownloadZipResource(Resource):
 
 
 @rate_limited_resource
-class RelatedFileDownloadResource(Resource):
-    @requires_authorization
-    @requires_capabilities(Capabilities.access_related_files)
-    def get(self, identifier):
-        """
-        ---
-        summary: Download related file
-        description: |
-            Returns related file contents.
-
-            Requires `access_related_files` capability.
-        security:
-            - bearerAuth: []
-        tags:
-            - related_file
-        parameters:
-            - in: path
-              name: identifier
-              schema:
-                type: string
-              description: RelatedFile identifier (SHA256)
-              required: true
-        responses:
-            200:
-                description: RelatedFile contents
-                content:
-                  application/octet-stream:
-                    schema:
-                      type: string
-                      format: binary
-            403:
-                description: When user doesn't have `access_related_files` capability
-            404:
-                description: |
-                    When related file doesn't exist
-                    or user doesn't have access to it.
-            503:
-                description: |
-                    Request canceled due to database statement timeout.
-        """
-
-        if not g.auth_user:
-            raise Unauthorized("Not authenticated.")
-
-        related_file_obj = RelatedFile.access(identifier)
-
-        if related_file_obj is None:
-            raise NotFound("Object not found")
-
-        return Response(
-            related_file_obj.iterate(),
-            content_type="application/octet-stream",
-            headers={
-                "Content-disposition": f"attachment; filename={related_file_obj.sha256}"
-            },
-        )
-
-
-@rate_limited_resource
-class RelatedFileItemResource(Resource):
-    def get(self, identifier):
+class RelatedFileResource(Resource):
+    def get(self, type, main_obj_identifier):
         """
         ---
         summary: Get list of RelatedFiles
@@ -661,10 +602,16 @@ class RelatedFileItemResource(Resource):
             - related_file
         parameters:
             - in: path
-              name: identifier
+              name: type
               schema:
                 type: string
-              description: Master File identifier (SHA256)
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
               required: true
         responses:
             200:
@@ -681,7 +628,7 @@ class RelatedFileItemResource(Resource):
         """
         master_object = (
             db.session.query(Object)
-            .filter(Object.dhash == identifier)
+            .filter(Object.dhash == main_obj_identifier)
             .filter(g.auth_user.has_access_to_object(Object.id))
         ).first()
 
@@ -704,7 +651,7 @@ class RelatedFileItemResource(Resource):
 
     @requires_authorization
     @requires_capabilities(Capabilities.adding_related_files)
-    def post(self, identifier):
+    def post(self, type, main_obj_identifier):
         """
         ---
         summary: Upload related file
@@ -718,10 +665,16 @@ class RelatedFileItemResource(Resource):
             - related_file
         parameters:
             - in: path
-              name: identifier
+              name: type
               schema:
                 type: string
-              description: Master File identifier (SHA256)
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
               required: true
         requestBody:
             required: true
@@ -754,7 +707,9 @@ class RelatedFileItemResource(Resource):
         """
         try:
             RelatedFile.create(
-                request.files["file"].filename, request.files["file"].stream, identifier
+                request.files["file"].filename,
+                request.files["file"].stream,
+                main_obj_identifier,
             )
         except EmptyFileError:
             raise BadRequest("RelatedFile cannot be empty")
@@ -768,10 +723,78 @@ class RelatedFileItemResource(Resource):
         return Response("OK")
 
 
-class RelatedFileDeleteResource(Resource):
+class RelatedFileItemResource(Resource):
+    @requires_authorization
+    @requires_capabilities(Capabilities.access_related_files)
+    def get(self, type, main_obj_identifier, identifier):
+        """
+        ---
+        summary: Download related file
+        description: |
+            Returns related file contents.
+
+            Requires `access_related_files` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              required: true
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
+            - in: path
+              name: identifier
+              required: true
+              schema:
+                type: string
+              description: RelatedFile identifier (SHA256)
+        responses:
+            200:
+                description: RelatedFile contents
+                content:
+                  application/octet-stream:
+                    schema:
+                      type: string
+                      format: binary
+            403:
+                description: When user doesn't have `access_related_files` capability
+            404:
+                description: |
+                    When related file doesn't exist
+                    or user doesn't have access to it.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+
+        if not g.auth_user:
+            raise Unauthorized("Not authenticated.")
+
+        try:
+            related_file_obj = RelatedFile.access(main_obj_identifier, identifier)
+        except ValueError:
+            raise NotFound("Object not found")
+
+        return Response(
+            related_file_obj.iterate(),
+            content_type="application/octet-stream",
+            headers={
+                "Content-disposition": f"attachment; filename={related_file_obj.sha256}"
+            },
+        )
+
     @requires_authorization
     @requires_capabilities(Capabilities.removing_related_files)
-    def delete(self, identifier, main_file_identifier):
+    def delete(self, type, main_obj_identifier, identifier):
         """
         ---
         summary: Delete file
@@ -785,17 +808,23 @@ class RelatedFileDeleteResource(Resource):
             - related_file
         parameters:
             - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              required: true
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
+            - in: path
               name: identifier
               required: true
               schema:
                 type: string
               description: RelatedFile identifier (SHA256)
-            - in: path
-              name: main_file_identifier
-              required: true
-              schema:
-                type: string
-              description: Main file identifier (SHA256)
         responses:
             200:
                 description: When related file was deleted
@@ -810,7 +839,7 @@ class RelatedFileDeleteResource(Resource):
                     Request canceled due to database statement timeout.
         """
         try:
-            RelatedFile.delete(identifier, main_file_identifier)
+            RelatedFile.delete(main_obj_identifier, identifier)
         except ValueError:
             raise NotFound(
                 "There is no file with provided sha256 or you don't have access to it"

@@ -46,6 +46,7 @@ from mwdb.resources.file import (
     FileResource,
     RelatedFileItemResource,
     RelatedFileResource,
+    RelatedFileZipDownloadResource,
 )
 from mwdb.resources.group import GroupListResource, GroupMemberResource, GroupResource
 from mwdb.resources.karton import KartonAnalysisResource, KartonObjectResource
@@ -270,6 +271,11 @@ api.add_resource(
     RelatedFileItemResource,
     "/<any(file, config, blob, object):type>/<hash64:main_obj_identifier>"
     "/related_file/<hash64:identifier>",
+)
+api.add_resource(
+    RelatedFileZipDownloadResource,
+    "/<any(file, config, blob, object):type>/<hash64:main_obj_identifier>"
+    "/related_file/zip",
 )
 
 # Config endpoints

@@ -386,6 +386,10 @@ class RelatedFile(db.Model):
         main_obj = (
             db.session.query(Object).filter(Object.dhash == main_obj_identifier).first()
         )
+        if main_obj is None:
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
         if not main_obj.has_explicit_access(g.auth_user):
             raise ValueError(
                 "There is no object with this sha256 or you don't have access"
@@ -406,12 +410,14 @@ class RelatedFile(db.Model):
         return related_file
 
     @classmethod
-    def delete(cls, main_file_identifier, identifier):
+    def delete(cls, main_obj_identifier, identifier):
         main_obj = (
-            db.session.query(Object)
-            .filter(Object.dhash == main_file_identifier)
-            .first()
+            db.session.query(Object).filter(Object.dhash == main_obj_identifier).first()
         )
+        if main_obj is None:
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
         if not main_obj.has_explicit_access(g.auth_user):
             raise ValueError(
                 "There is no object with this sha256 or you don't have access"
@@ -456,4 +462,24 @@ class RelatedFile(db.Model):
         """
         Iterates over bytes in the file contents
         """
-        return iterate_buffer(self)
+        return iterate_buffer(self, chunk_size)
+
+    @classmethod
+    def zip_all(cls, main_obj_identifier):
+        main_obj = (
+            db.session.query(Object).filter(Object.dhash == main_obj_identifier).first()
+        )
+        if main_obj is None:
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+        related_files = (
+            db.session.query(RelatedFile).filter(RelatedFile.object_id == main_obj.id)
+        ).all()
+
+        with tempfile.NamedTemporaryFile() as temp_file:
+            with open(temp_file.name, "rb") as reader:
+                with pyzipper.ZipFile(temp_file, "w") as zip_file:
+                    for rf in related_files:
+                        zip_file.write(rf._calculate_path(), arcname=rf.file_name)
+                return reader.read()

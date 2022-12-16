@@ -7,6 +7,7 @@ import {
     faExternalLinkSquare,
     faDownload,
     faTrash,
+    faArchive,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ObjectContext } from "@mwdb-web/commons/context";
@@ -183,6 +184,12 @@ export default function RelatedFilesTab() {
         }
     }
 
+    async function handleDownloadAll() {
+        window.location.href = await api.getZippedRelatedFilesLink(
+            context.object.sha256
+        );
+    }
+
     return (
         <div>
             <ObjectTab
@@ -197,6 +204,11 @@ export default function RelatedFilesTab() {
                         action={() => {
                             setShowModal(true);
                         }}
+                    />,
+                    <ObjectAction
+                        label="Download all"
+                        icon={faArchive}
+                        action={handleDownloadAll}
                     />,
                 ]}
             />

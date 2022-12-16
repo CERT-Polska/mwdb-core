@@ -465,6 +465,11 @@ function getListOfRelatedFiles(mainFileDhash, type = "object") {
     return axios.get(`/${type}/${mainFileDhash}/related_file`);
 }
 
+function getZippedRelatedFilesLink(mainFileDhash, type = "object") {
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/${type}/${mainFileDhash}/related_file/zip`;
+}
+
 function getRemoteNames() {
     return axios.get("/remote");
 }
@@ -651,6 +656,7 @@ const api = {
     downloadRelatedFile,
     deleteRelatedFile,
     getListOfRelatedFiles,
+    getZippedRelatedFilesLink,
     getRemoteNames,
     pushObjectRemote,
     pullObjectRemote,

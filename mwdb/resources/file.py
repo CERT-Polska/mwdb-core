@@ -846,3 +846,60 @@ class RelatedFileItemResource(Resource):
             )
 
         return Response("OK")
+
+
+class RelatedFileZipDownloadResource(Resource):
+    def get(self, type, main_obj_identifier):
+        """
+        ---
+        summary: Download every related file for a provided main object
+        description: |
+            Returns zipped related file contents.
+
+            Requires `access_related_files` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              required: true
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
+        responses:
+            200:
+                description: RelatedFile contents
+                content:
+                  application/octet-stream:
+                    schema:
+                      type: string
+                      format: binary
+            403:
+                description: When user doesn't have `access_related_files` capability
+            404:
+                description: |
+                    When related file doesn't exist
+                    or user doesn't have access to it.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        try:
+            zipped_related_files = RelatedFile.zip_all(main_obj_identifier)
+        except ValueError:
+            raise NotFound("Object not found")
+
+        zip_file_name = "related_files" + main_obj_identifier + ".zip"
+        return Response(
+            zipped_related_files,
+            content_type="application/octet-stream",
+            headers={"Content-disposition": f"attachment; filename={zip_file_name}"},
+        )

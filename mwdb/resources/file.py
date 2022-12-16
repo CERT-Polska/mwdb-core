@@ -593,9 +593,9 @@ class RelatedFileResource(Resource):
     def get(self, type, main_obj_identifier):
         """
         ---
-        summary: Get list of RelatedFiles
+        summary: Get list of related files
         description: |
-            Returns list of RelatedFiles for a File specified by sha256
+            Returns list of related files for an object specified by sha256
         security:
             - bearerAuth: []
         tags:
@@ -615,32 +615,33 @@ class RelatedFileResource(Resource):
               required: true
         responses:
             200:
-                description: List of RelatedFiles
+                description: List of related files
                 content:
                   application/json:
                     schema: RelatedFileResponseSchema
             404:
                 description: |
-                    There is no file with provided sha256 or you don't have access to it
+                    There is no object with provided sha256
+                    or user doesn't have access to it
             503:
                 description: |
                     Request canceled due to database statement timeout.
         """
-        master_object = (
+        main_object = (
             db.session.query(Object)
             .filter(Object.dhash == main_obj_identifier)
             .filter(g.auth_user.has_access_to_object(Object.id))
         ).first()
 
-        if master_object is None:
+        if main_object is None:
             raise NotFound(
-                "There is no file with provided sha256 or you don't have access to it"
+                "There is no object with provided sha256 or you don't have access to it"
             )
 
         if g.auth_user.has_rights(Capabilities.access_related_files):
             related_files = (
                 db.session.query(RelatedFile)
-                .filter(RelatedFile.object_id == master_object.id)
+                .filter(RelatedFile.object_id == main_object.id)
                 .all()
             )
         else:
@@ -686,21 +687,22 @@ class RelatedFileResource(Resource):
                     file:
                       type: string
                       format: binary
-                      description: RelatedFile contents to be uploaded
+                      description: Related file contents to be uploaded
                   required:
                     - file
         responses:
             200:
                 description: OK
             400:
-                description: RelatedFile is empty
+                description: Related file is empty
             403:
                 description: When user doesn't have `adding_related_files` capability
             404:
                 description: |
-                    There is no file with provided sha256 or you don't have access to it
+                    There is no object with provided sha256
+                    or user doesn't have access to it
             409:
-                description: RelatedFile already exists
+                description: Such related file already exists
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -712,13 +714,13 @@ class RelatedFileResource(Resource):
                 main_obj_identifier,
             )
         except EmptyFileError:
-            raise BadRequest("RelatedFile cannot be empty")
+            raise BadRequest("Related file cannot be empty")
         except ValueError:
             raise NotFound(
-                "There is no file with provided sha256 or you don't have access to it"
+                "There is no object with provided sha256 or you don't have access to it"
             )
         except FileExistsError:
-            raise Conflict("Related file with this sha256 already exists")
+            raise Conflict("Such related file already exists")
 
         return Response("OK")
 
@@ -756,10 +758,10 @@ class RelatedFileItemResource(Resource):
               required: true
               schema:
                 type: string
-              description: RelatedFile identifier (SHA256)
+              description: Related file identifier (SHA256)
         responses:
             200:
-                description: RelatedFile contents
+                description: Related file contents
                 content:
                   application/octet-stream:
                     schema:
@@ -782,7 +784,7 @@ class RelatedFileItemResource(Resource):
         try:
             related_file_obj = RelatedFile.access(main_obj_identifier, identifier)
         except ValueError:
-            raise NotFound("Object not found")
+            raise NotFound("Related file not found")
 
         return Response(
             related_file_obj.iterate(),
@@ -797,9 +799,9 @@ class RelatedFileItemResource(Resource):
     def delete(self, type, main_obj_identifier, identifier):
         """
         ---
-        summary: Delete file
+        summary: Delete related file
         description: |
-            Removes a file from the database along with its references.
+            Removes a related file from the database.
 
             Requires `removing_related_files` capability.
         security:
@@ -824,7 +826,7 @@ class RelatedFileItemResource(Resource):
               required: true
               schema:
                 type: string
-              description: RelatedFile identifier (SHA256)
+              description: Related file identifier (SHA256)
         responses:
             200:
                 description: When related file was deleted
@@ -833,7 +835,7 @@ class RelatedFileItemResource(Resource):
             404:
                 description: |
                     When related file doesn't exist
-                    or user doesn't have access to this object.
+                    or user doesn't have access to it.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -876,7 +878,7 @@ class RelatedFileZipDownloadResource(Resource):
               description: Main object identifier (SHA256)
         responses:
             200:
-                description: RelatedFile contents
+                description: Contents of related file
                 content:
                   application/octet-stream:
                     schema:
@@ -886,8 +888,8 @@ class RelatedFileZipDownloadResource(Resource):
                 description: When user doesn't have `access_related_files` capability
             404:
                 description: |
-                    When related file doesn't exist
-                    or user doesn't have access to it.
+                    There is no object with provided sha256
+                    or user doesn't have access to it
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -895,9 +897,11 @@ class RelatedFileZipDownloadResource(Resource):
         try:
             zipped_related_files = RelatedFile.zip_all(main_obj_identifier)
         except ValueError:
-            raise NotFound("Object not found")
+            raise NotFound(
+                "There is no object with provided sha256 or you don't have access to it"
+            )
 
-        zip_file_name = "related_files" + main_obj_identifier + ".zip"
+        zip_file_name = "related_files_" + main_obj_identifier + ".zip"
         return Response(
             zipped_related_files,
             content_type="application/octet-stream",

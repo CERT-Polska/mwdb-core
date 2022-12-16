@@ -35,13 +35,27 @@ function RelatedFileItem({ file_name, file_size, sha256 }) {
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
     const [isConfirmationModalOpen, setConfirmationModalOpen] = useState(null);
+    const linkStyle = {
+        display: "inline-block",
+        padding: "8px",
+    };
+    const tdStyle = {
+        padding: "10px 20px 10px 20px",
+        width: "80%",
+        borderRight: "none",
+        borderLeft: "none",
+    };
 
     return (
         <tr>
-            <td>{file_name}</td>
-            <td>{humanFileSize(file_size)}</td>
-            <td>
+            <td style={tdStyle}>
+                <span class="text-monospace">{file_name}</span>
+                <br />
+                <span class="text-muted">{humanFileSize(file_size)}</span>
+            </td>
+            <td align="right" style={tdStyle}>
                 <Link
+                    style={linkStyle}
                     to={`/file/${context.object.sha256}/related_files`}
                     className="nav-link"
                     onClick={async () => {
@@ -56,18 +70,15 @@ function RelatedFileItem({ file_name, file_size, sha256 }) {
                         );
                     }}
                 >
-                    <FontAwesomeIcon icon={faDownload} size="1x" />
-                    &nbsp;Download
+                    <FontAwesomeIcon icon={faDownload} size="lg" />
                 </Link>
-            </td>
-            <td>
                 <Link
+                    style={linkStyle}
                     to={`/file/${context.object.sha256}/related_files`}
                     className="nav-link"
                     onClick={() => setConfirmationModalOpen(true)}
                 >
-                    <FontAwesomeIcon icon={faTrash} size="1x" />
-                    &nbsp;Remove
+                    <FontAwesomeIcon icon={faTrash} size="lg" />
                 </Link>
                 <ConfirmationModal
                     isOpen={isConfirmationModalOpen}
@@ -119,12 +130,24 @@ function ShowRelatedFiles() {
     }
 
     return (
-        <table className="table table-striped table-bordered table-hover data-table">
-            <thead>
-                <th>File name</th>
-                <th>File size</th>
-                <th>Download</th>
-                <th>Remove</th>
+        <table className="table table-striped table-bordered table-hover">
+            <thead className="card-header">
+                <th
+                    style={{
+                        textAlign: "left",
+                        padding: "10px 20px 10px 20px",
+                    }}
+                >
+                    File
+                </th>
+                <th
+                    style={{
+                        textAlign: "right",
+                        padding: "10px 20px 10px 20px",
+                    }}
+                >
+                    Actions
+                </th>
             </thead>
             {context.object.related_files.map((related_file) => (
                 <RelatedFileItem {...related_file} />

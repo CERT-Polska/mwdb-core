@@ -239,3 +239,84 @@ def test_removing_object_with_comments(admin_session):
 
     with ShouldRaise(status_code=404):
         admin_session.get_sample(sample.dhash)
+
+
+def test_adding_related_files(admin_session):
+    testCase = RelationTestCase(admin_session)
+
+    Alice = testCase.new_user("Alice")
+    Bob = testCase.new_user("Bob", capabilities=["adding_related_files"])
+
+    SampleA = testCase.new_sample("SampleA")
+    SampleA.create(Alice, upload_as="public")
+    SampleB = testCase.new_sample("SampleB")
+
+    # Alice doesn't have capability
+    with ShouldRaise(status_code=403):
+        Alice.session.add_related_file(SampleA.dhash, "RelatedFileA")
+
+    # Everything works fine
+    Bob.session.add_related_file(SampleA.dhash, "RelatedFileA")
+    assert len( testCase.session.get_related_files(SampleA.dhash)['related_files'] ) == 1
+
+    # Bob can't add related files to objects not accessible for him
+    with ShouldRaise(status_code=404):
+        Bob.session.add_related_file(SampleB.dhash, "RelatedFileB")
+
+
+def test_removing_related_files(admin_session):
+    testCase = RelationTestCase(admin_session)
+
+    Alice = testCase.new_user("Alice")
+    Bob = testCase.new_user("Bob", capabilities=["removing_related_files"])
+
+    SampleA = testCase.new_sample("SampleA")
+    SampleA.create(Alice, upload_as="public")
+    SampleB = testCase.new_sample("SampleB")
+
+    related_file_content = rand_string()
+    related_file_dhash = calc_sha256(related_file_content)
+
+    # Related files added by admin session
+    testCase.session.add_related_file(SampleA.dhash, "RelatedFile", related_file_content)
+    testCase.session.add_related_file(SampleB.dhash, "RelatedFile", related_file_content)
+
+    assert len( testCase.session.get_related_files(SampleA.dhash)['related_files'] ) == 1
+    assert len( testCase.session.get_related_files(SampleB.dhash)['related_files'] ) == 1
+
+    # Alice doesn't have capability
+    with ShouldRaise(status_code=403):
+        Alice.session.remove_related_file(SampleA.dhash, related_file_dhash)
+
+    # Bob can't remove related files for objects not accessible for him
+    with ShouldRaise(status_code=404):
+        Bob.session.remove_related_file(SampleB.dhash, related_file_dhash)
+
+    # Everything works file
+    Bob.session.remove_related_file(SampleA.dhash, related_file_dhash)
+
+    assert len( testCase.session.get_related_files(SampleA.dhash)['related_files'] ) == 0
+    assert len( testCase.session.get_related_files(SampleB.dhash)['related_files'] ) == 1
+
+
+def test_accessing_related_files(admin_session):
+    testCase = RelationTestCase(admin_session)
+
+    Alice = testCase.new_user("Alice")
+    Bob = testCase.new_user("Bob", capabilities=["access_related_files"])
+
+    SampleA = testCase.new_sample("SampleA")
+    SampleA.create(Alice, upload_as="public")
+    SampleB = testCase.new_sample("SampleB")
+
+    testCase.session.add_related_file(SampleA.dhash, "RelatedFile")
+
+    # Alice doesn't have capability
+    assert len( Alice.session.get_related_files(SampleA.dhash)['related_files'] ) == 0
+
+    # Everything works fine
+    assert len( Bob.session.get_related_files(SampleA.dhash)['related_files'] ) == 1
+
+    # Bob can't access related files for objects not accessible for him
+    with ShouldRaise(status_code=404):
+        Bob.session.get_related_files(SampleB.dhash)

@@ -261,6 +261,7 @@ class Object(db.Model):
         "RelatedFile",
         back_populates="related_object",
         lazy=True,
+        cascade="save-update, merge, delete",
     )
 
     followers = db.relationship(

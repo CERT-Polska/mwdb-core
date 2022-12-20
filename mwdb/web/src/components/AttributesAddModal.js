@@ -44,8 +44,10 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             setRichTemplate(
                 attributeDefinitions[ev.target.value].rich_template
             );
-            if (attributeDefinitions[ev.target.value].example_value){
-                setRichExampleValue(attributeDefinitions[ev.target.value].example_value);
+            if (attributeDefinitions[ev.target.value].example_value) {
+                setRichExampleValue(
+                    attributeDefinitions[ev.target.value].example_value
+                );
             }
         }
 

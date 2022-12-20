@@ -82,7 +82,7 @@ export default function RichAttributePreview({
         templateState.chosenExample !== "custom"
             ? exampleTemplates[templateState.chosenExample].value
             : templateState.valueInput;
-    
+
     useEffect(() => {
         try {
             setContextValue(makeContext(JSON.parse(value)));

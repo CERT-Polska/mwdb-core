@@ -15,6 +15,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
     const [attributeDefinitions, setAttributeDefinitions] = useState({});
     const [attributeKey, setAttributeKey] = useState("");
     const [richTemplate, setRichTemplate] = useState("");
+    const [richExampleValue, setRichExampleValue] = useState("");
     const [attributeValue, setAttributeValue] = useState("");
     const [attributeType, setAttributeType] = useState("string");
     const [invalid, setInvalid] = useState(false);
@@ -43,6 +44,9 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             setRichTemplate(
                 attributeDefinitions[ev.target.value].rich_template
             );
+            if (attributeDefinitions[ev.target.value].example_value){
+                setRichExampleValue(attributeDefinitions[ev.target.value].example_value);
+            }
         }
 
         setError(null);
@@ -133,7 +137,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                         </select>
                         {attributeDefinitions[attributeKey] &&
                         attributeDefinitions[attributeKey].description ? (
-                            <div className="form-hint">
+                            <div className="form-group pt-2">
                                 {attributeDefinitions[attributeKey].description}
                             </div>
                         ) : (
@@ -188,6 +192,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                             />
                         ) : (
                             <AceEditor
+                                placeholder={richExampleValue}
                                 mode="json"
                                 theme="github"
                                 wrapEnabled

@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from "react";
+import React, { useReducer, useState, useEffect } from "react";
 import AceEditor from "react-ace";
 import RichAttributeRenderer from "./RichAttributeRenderer";
 
@@ -63,6 +63,7 @@ export default function RichAttributePreview({
     });
     const [showContext, setShowContext] = useState(false);
     const [invalid, setInvalid] = useState(false);
+    const [contextValue, setContextValue] = useState(null);
 
     function chooseTemplate(ev) {
         const index = ev.target.value;
@@ -81,13 +82,16 @@ export default function RichAttributePreview({
         templateState.chosenExample !== "custom"
             ? exampleTemplates[templateState.chosenExample].value
             : templateState.valueInput;
-    let contextValue;
-    try {
-        contextValue = makeContext(JSON.parse(value));
-    } catch (e) {
-        contextValue = null;
-        setInvalid(true);
-    }
+    
+    useEffect(() => {
+        try {
+            setContextValue(makeContext(JSON.parse(value)));
+        } catch (e) {
+            setContextValue(null);
+            setInvalid(true);
+        }
+    }, [value, setContextValue, setInvalid]);
+
     return (
         <View ident="attributePreview">
             <select

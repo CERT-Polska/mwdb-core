@@ -4,16 +4,14 @@ import { renderValue } from "./MarkedMustache";
 import { makeContext } from "./exampleTemplates";
 
 export default function RichAttributeRenderer({ template, value, setInvalid }) {
-    let renderedValue, contextValue;
+    let renderedValue;
     try {
-        contextValue = makeContext(JSON.parse(value));
-        renderedValue = renderValue(template, contextValue, {
+        renderedValue = renderValue(template, makeContext(JSON.parse(value)), {
             searchEndpoint: "/",
         });
         setInvalid(false);
     } catch (e) {
         renderedValue = e.toString();
-        contextValue = null;
         setInvalid(true);
     }
     return (

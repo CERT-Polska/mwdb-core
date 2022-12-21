@@ -548,3 +548,13 @@ Afterwards, you can see your newly added query as another black-coloured badge. 
 .. image:: ../_static/7dXJkSH.png
    :target: ../_static/7dXJkSH.png
    :alt: 
+
+Related file field (\ ``related.<field>:``\ )
+------------------------------------------------------------
+
+You can query objects by their related files. There are 4 ways to do it:
+
+* ``related.name:`` - query by related file's name
+* ``related.size:`` - query by related file's size
+* ``related.sha256:`` - query by related file's sha256
+* ``related.count:`` - query by number of files related to the object

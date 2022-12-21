@@ -19,6 +19,7 @@ from mwdb.model import (
     Member,
     Object,
     ObjectPermission,
+    RelatedFile,
     TextBlob,
     User,
     db,
@@ -732,3 +733,85 @@ class FileNameField(BaseField):
         else:
             condition = or_((self.column == value), File.alt_names.any(value))
         return condition
+
+
+class RelatedField(BaseField):
+    accepts_range = True
+    accepts_subfields = True
+    accepts_wildcards = True
+
+    def count_condition(self, expression):
+        def parse_count_value(value):
+            try:
+                value = int(value)
+                if value < 0:
+                    raise ValueError
+            except ValueError:
+                raise UnsupportedGrammarException(
+                    "Field related.count accepts statements with "
+                    "only correct integer values"
+                )
+            return value
+
+        if isinstance(expression, Range):
+            low_value = expression.low.value
+            high_value = expression.high.value
+
+            if low_value != "*":
+                low_value = parse_count_value(low_value)
+            if high_value != "*":
+                high_value = parse_count_value(high_value)
+
+            low_condition = (
+                func.count() >= low_value
+                if expression.include_low
+                else func.count() > low_value
+            )
+            high_condition = (
+                func.count() <= high_value
+                if expression.include_high
+                else func.count() < high_value
+            )
+
+            if high_value == "*" and low_value == "*":
+                condition = True
+            elif high_value == "*":
+                condition = low_condition
+            elif low_value == "*":
+                condition = high_condition
+            else:
+                condition = and_(low_condition, high_condition)
+        else:
+            upload_value = parse_count_value(expression.value)
+            condition = func.count() == upload_value
+
+        related = (
+            db.session.query(RelatedFile.object_id)
+            .group_by(RelatedFile.object_id)
+            .having(condition)
+        ).all()
+        found_ids = [r[0] for r in related]
+        return RelatedFile.object_id.in_(found_ids)
+
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
+        if len(subfields) <= 1:  # [('related', 0)]
+            raise FieldNotQueryableException("One subfield is required")
+        if len(subfields) > 2:
+            raise FieldNotQueryableException(f"Too many subfields: {len(subfields)}")
+
+        key = subfields[1][0]
+
+        if key == "name":
+            field = StringField(RelatedFile.file_name)
+        elif key == "size":
+            field = SizeField(RelatedFile.file_size)
+        elif key == "sha256":
+            field = StringField(RelatedFile.sha256)
+        elif key == "count":
+            return self.column.any(self.count_condition(expression))
+        else:
+            raise FieldNotQueryableException(f"No such subfield: {key}")
+
+        return self.column.any(field._get_condition(expression, subfields))

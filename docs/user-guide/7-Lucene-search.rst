@@ -555,6 +555,36 @@ Related file field (\ ``related.<field>:``\ )
 You can query objects by their related files. There are 4 ways to do it:
 
 * ``related.name:`` - query by related file's name
+
+.. code-block:: python
+
+   related.name:"name.txt"
+
+
+This field accepts wildcards.
+
 * ``related.size:`` - query by related file's size
+
+.. code-block:: python
+
+   related.size:"<5kb"
+
+
 * ``related.sha256:`` - query by related file's sha256
+
+.. code-block:: python
+   related.sha256:"2ed91d820157c0530ffbae54122d998e0de6d958f266b682f7c528942f770470"
+
+
 * ``related.count:`` - query by number of files related to the object
+
+.. code-block:: python
+
+   # get files, which have at least 0 related files and no more than 2
+   related.count:[0 TO 2]
+   # get files, which have at least 2 related files
+   related.count:">=2"
+   # get files, which have more than 2 related files
+   related.count:">2" 
+   # get files, which have exactly 1 related file
+   related.count:"1"

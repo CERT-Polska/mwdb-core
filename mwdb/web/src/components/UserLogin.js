@@ -2,12 +2,14 @@ import React, { useContext, useState } from "react";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
+import { ConfigContext } from "@mwdb-web/commons/config";
 import api from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/extensions";
 import { View } from "@mwdb-web/commons/ui";
 
 export default function UserLogin() {
     const auth = useContext(AuthContext);
+    const config = useContext(ConfigContext);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -63,6 +65,12 @@ export default function UserLogin() {
                 </div>
                 <nav className="form-group">
                     <Link to="/recover_password">Forgot password?</Link>
+                    <br />
+                    {!auth.isAuthenticated && config.config["is_oidc_enabled"] ? (
+                        <Link to="/oauth/login">Login using OAuth authentication</Link>
+                    ) : (
+                        []
+                    )}
                 </nav>
                 <input
                     type="submit"

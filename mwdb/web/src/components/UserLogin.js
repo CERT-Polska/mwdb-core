@@ -66,8 +66,11 @@ export default function UserLogin() {
                 <nav className="form-group">
                     <Link to="/recover_password">Forgot password?</Link>
                     <br />
-                    {!auth.isAuthenticated && config.config["is_oidc_enabled"] ? (
-                        <Link to="/oauth/login">Login using OAuth authentication</Link>
+                    {!auth.isAuthenticated &&
+                    config.config["is_oidc_enabled"] ? (
+                        <Link to="/oauth/login">
+                            Login using OAuth authentication
+                        </Link>
                     ) : (
                         []
                     )}

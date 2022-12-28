@@ -4,7 +4,53 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { View, getErrorMessage } from "@mwdb-web/commons/ui";
-import { ConfirmationModal, ShowIf } from "@mwdb-web/commons/ui";
+import { ConfirmationModal, Identicon, ShowIf } from "@mwdb-web/commons/ui";
+
+function ProviderBox({ provider, setChosenProvider, setRedirectModalOpen }) {
+    function calcSimpleHash(text) {
+        let ret = 0;
+        for (let i = 0; i < text.length; i++) {
+            ret *= 997;
+            ret += text.charCodeAt(i);
+            ret %= 1000000007;
+        }
+        ret = ret.toString();
+        while (ret.length < 15) {
+            ret += ret;
+        }
+        return ret;
+    }
+
+    return (
+        <div className="col text-center" colspan="2">
+            <div>
+                <Link
+                    to="#"
+                    className="card btn-outline-secondary text-decoration-none"
+                    onClick={(ev) => {
+                        ev.preventDefault();
+                        setChosenProvider(provider);
+                        setRedirectModalOpen(true);
+                    }}
+                >
+                    <Identicon
+                        hash={calcSimpleHash(provider)}
+                        size="45"
+                        style={{
+                            marginLeft: "auto",
+                            marginRight: "auto",
+                            height: "20%",
+                            width: "20%",
+                        }}
+                    />
+                    <div className="card-body">
+                        <h5>{provider}</h5>
+                    </div>
+                </Link>
+            </div>
+        </div>
+    );
+}
 
 export function OAuthLogin() {
     const api = useContext(APIContext);
@@ -71,23 +117,11 @@ export function OAuthLogin() {
             </p>
             <ShowIf condition={providers.length}>
                 {providers.map((provider) => (
-                    <div className="d-flex justify-content-center">
-                        <div className="col-6 text-center">
-                            <Link
-                                to="#"
-                                className="card btn-outline-secondary text-decoration-none"
-                                onClick={(ev) => {
-                                    ev.preventDefault();
-                                    setChosenProvider(provider);
-                                    setRedirectModalOpen(true);
-                                }}
-                            >
-                                <div className="card-body">
-                                    <h5>{provider}</h5>
-                                </div>
-                            </Link>
-                        </div>
-                    </div>
+                    <ProviderBox
+                        provider={provider}
+                        setChosenProvider={setChosenProvider}
+                        setRedirectModalOpen={setRedirectModalOpen}
+                    />
                 ))}
             </ShowIf>
             <ConfirmationModal

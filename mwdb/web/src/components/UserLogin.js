@@ -107,6 +107,13 @@ export default function UserLogin() {
                     )}
                     <hr />
                 </ShowIf>
+                {config.config["is_registration_enabled"] ? (
+                    <nav className="form-group" style={{ textAlign: "center" }}>
+                        <Link to="/register">Register user</Link>
+                    </nav>
+                ) : (
+                    []
+                )}
                 <nav className="form-group" style={{ textAlign: "center" }}>
                     <Link to="/recover_password">Forgot password?</Link>
                 </nav>

@@ -100,17 +100,10 @@ function SampleRouteFallback() {
 }
 
 function AppRoutes() {
-    const {
-        config: { is_registration_enabled: isRegistrationEnabled },
-    } = useContext(ConfigContext);
     return (
         <Routes>
             <Route path="login" element={<UserLogin />} />
-            {isRegistrationEnabled ? (
-                <Route path="register" element={<UserRegister />} />
-            ) : (
-                []
-            )}
+            <Route path="register" element={<UserRegister />} />
             <Route path="recover_password" element={<UserPasswordRecover />} />
             <Route path="setpasswd/:token" element={<UserSetPassword />} />
             <Route path="oauth/callback" element={<OAuthAuthorize />} />

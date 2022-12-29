@@ -1,73 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
-import { View, getErrorMessage } from "@mwdb-web/commons/ui";
-import { ConfirmationModal, Identicon, ShowIf } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/ui";
 
-function ProviderBox({ provider, setChosenProvider, setRedirectModalOpen }) {
-    function calcSimpleHash(text) {
-        let ret = 0;
-        for (let i = 0; i < text.length; i++) {
-            ret *= 997;
-            ret += text.charCodeAt(i);
-            ret %= 1000000007;
-        }
-        ret = ret.toString();
-        while (ret.length < 15) {
-            ret += ret;
-        }
-        return ret;
-    }
-
-    return (
-        <div className="col text-center" colspan="2">
-            <div>
-                <Link
-                    to="#"
-                    className="card btn-outline-secondary text-decoration-none"
-                    onClick={(ev) => {
-                        ev.preventDefault();
-                        setChosenProvider(provider);
-                        setRedirectModalOpen(true);
-                    }}
-                >
-                    <Identicon
-                        hash={calcSimpleHash(provider)}
-                        size="45"
-                        style={{
-                            marginLeft: "auto",
-                            marginRight: "auto",
-                            height: "20%",
-                            width: "20%",
-                        }}
-                    />
-                    <div className="card-body">
-                        <h5>{provider}</h5>
-                    </div>
-                </Link>
-            </div>
-        </div>
-    );
-}
-
-export function OAuthLogin() {
+export function ProviderButton({ provider }) {
     const api = useContext(APIContext);
     const [error, setError] = useState();
-    const [providers, setProviders] = useState([]);
-    const [chosenProvider, setChosenProvider] = useState();
-    const [isRedirectModalOpen, setRedirectModalOpen] = useState(false);
-    const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
-
-    async function getProviders() {
-        try {
-            const response = await api.oauthGetProviders();
-            setProviders(response.data["providers"]);
-        } catch (e) {
-            setError(e);
-        }
-    }
+    const chosenProvider = provider;
 
     async function authenticate(provider, action) {
         try {
@@ -88,86 +29,73 @@ export function OAuthLogin() {
         }
     }
 
-    useEffect(() => {
-        getProviders();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    return (
+        <button
+            onClick={(e) => {
+                e.preventDefault();
+                authenticate(chosenProvider, "authorize");
+            }}
+            error={error}
+            className="form-control btn btn-primary"
+            style={{ marginBottom: "10px" }}
+        >
+            {provider}
+        </button>
+    );
+}
+
+export function ProvidersSelectList({ providersList }) {
+    const api = useContext(APIContext);
+    const [error, setError] = useState();
+    const availableProviders = providersList;
+    const [chosenProvider, setChosenProvider] = useState();
+
+    async function authenticate(provider, action) {
+        try {
+            const response = await api.oauthAuthenticate(provider);
+            const expirationTime = Date.now() + 5 * 60 * 1000;
+            sessionStorage.setItem(
+                `openid_${response.data["state"]}`,
+                JSON.stringify({
+                    provider: provider,
+                    nonce: response.data["nonce"],
+                    action: action,
+                    expiration: expirationTime,
+                })
+            );
+            window.location = response.data["authorization_url"];
+        } catch (e) {
+            setError(e);
+        }
+    }
 
     return (
-        <View error={error}>
-            <h2>External authentication</h2>
-            <p>
-                Select below the identity provider associated with your mwdb
-                account. By clicking on the identity provider below you will be
-                redirected to its authentication page. <br />
-                If you don't have an account associated with any of these
-                providers you can do this in the profile details. <br />
-                Alternatively, you can register a new account through an
-                external identity provider by{" "}
-                <Link
-                    to="#"
-                    onClick={(ev) => {
-                        ev.preventDefault();
-                        setRegisterModalOpen(true);
-                    }}
-                >
-                    clicking here
-                </Link>
-                .
-            </p>
-            <ShowIf condition={providers.length}>
-                {providers.map((provider) => (
-                    <ProviderBox
-                        provider={provider}
-                        setChosenProvider={setChosenProvider}
-                        setRedirectModalOpen={setRedirectModalOpen}
-                    />
-                ))}
-            </ShowIf>
-            <ConfirmationModal
-                isOpen={isRedirectModalOpen}
-                onRequestClose={() => {
-                    setRedirectModalOpen(false);
-                    setChosenProvider("");
+        <form>
+            <select
+                className="custom-select"
+                onChange={(e) => {
+                    setChosenProvider(e.target.value);
                 }}
-                onConfirm={(e) => {
+            >
+                <option value="" hidden>
+                    Select provider...
+                </option>
+                {availableProviders.map((provider) => (
+                    <option value={provider}>{provider}</option>
+                ))}
+            </select>
+            <button
+                className="form-control btn btn-primary"
+                style={{ marginTop: "10px" }}
+                onClick={(e) => {
                     e.preventDefault();
                     authenticate(chosenProvider, "authorize");
                 }}
-                message={`Are you sure you want to redirect to ${chosenProvider} provider`}
-                buttonStyle="btn-danger"
-            />
-            <ConfirmationModal
-                isOpen={isRegisterModalOpen}
-                onRequestClose={() => setRegisterModalOpen(false)}
-                message="Choose OpenID Provider to register user"
-                onConfirm={(e) => {
-                    e.preventDefault();
-                    authenticate(chosenProvider, "register");
-                }}
-                buttonStyle="btn-info"
-                confirmText="Submit"
+                error={error}
             >
-                <form onSubmit={(e) => {}}>
-                    <div>
-                        <select
-                            className="custom-select"
-                            value={chosenProvider}
-                            onChange={(ev) =>
-                                setChosenProvider(ev.target.value)
-                            }
-                        >
-                            <option value="" hidden>
-                                Select provider...
-                            </option>
-                            {providers.map((provider) => (
-                                <option value={provider}>{provider}</option>
-                            ))}
-                        </select>
-                    </div>
-                </form>
-            </ConfirmationModal>
-        </View>
+                Log in with selected provider
+            </button>
+        </form>
     );
 }
 

@@ -1,11 +1,12 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import api from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/extensions";
-import { View } from "@mwdb-web/commons/ui";
+import { View, ShowIf } from "@mwdb-web/commons/ui";
+import { ProviderButton, ProvidersSelectList } from "./OAuth";
 
 export default function UserLogin() {
     const auth = useContext(AuthContext);
@@ -16,6 +17,15 @@ export default function UserLogin() {
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
     const [loginError, setLoginError] = useState(null);
+    const [providers, setProviders] = useState([]);
+
+    const loginStyle = {
+        backgroundColor: "#f2f2f2",
+        padding: "50px",
+        marginTop: "5%",
+        width: "450px",
+        borderRadius: "10px",
+    };
 
     const locationState = location.state || {};
     async function tryLogin() {
@@ -29,11 +39,29 @@ export default function UserLogin() {
         }
     }
 
+    async function getProviders() {
+        if (!config.config["is_oidc_enabled"]) {
+            setProviders([]);
+            return;
+        }
+        try {
+            const response = await api.oauthGetProviders();
+            setProviders(response.data["providers"]);
+        } catch (e) {
+            setLoginError(e);
+        }
+    }
+
+    useEffect(() => {
+        getProviders();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     if (auth.isAuthenticated) return <Navigate to="/" />;
 
     return (
-        <View ident="userLogin" error={loginError}>
-            <h2>Login</h2>
+        <View ident="userLogin" error={loginError} style={loginStyle}>
+            <h3 align="center">Welcome to MWDB</h3>
             <form
                 onSubmit={(ev) => {
                     ev.preventDefault();
@@ -63,23 +91,25 @@ export default function UserLogin() {
                         required
                     />
                 </div>
-                <nav className="form-group">
-                    <Link to="/recover_password">Forgot password?</Link>
-                    <br />
-                    {!auth.isAuthenticated &&
-                    config.config["is_oidc_enabled"] ? (
-                        <Link to="/oauth/login">
-                            Login using OAuth authentication
-                        </Link>
-                    ) : (
-                        []
-                    )}
-                </nav>
                 <input
                     type="submit"
-                    value="Submit"
-                    className="btn btn-primary"
+                    value="Log in"
+                    className="form-control btn btn-success"
                 />
+                <hr />
+                <ShowIf condition={providers.length}>
+                    {providers.length <= 5 ? (
+                        providers.map((provider) => (
+                            <ProviderButton provider={provider} />
+                        ))
+                    ) : (
+                        <ProvidersSelectList providersList={providers} />
+                    )}
+                    <hr />
+                </ShowIf>
+                <nav className="form-group" style={{ textAlign: "center" }}>
+                    <Link to="/recover_password">Forgot password?</Link>
+                </nav>
             </form>
         </View>
     );

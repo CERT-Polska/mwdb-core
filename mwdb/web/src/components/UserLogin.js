@@ -20,12 +20,22 @@ export default function UserLogin() {
     const [providers, setProviders] = useState([]);
 
     const loginStyle = {
-        backgroundColor: "#f2f2f2",
+        backgroundColor: "white",
         padding: "50px",
-        marginTop: "5%",
+        marginTop: "7%",
         width: "450px",
         borderRadius: "10px",
     };
+    const divStyle = {
+        backgroundColor: "#f2f2f2",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        zIndex: -1,
+        minHeight: "100%",
+        width: "100%",
+    };
+    const colorsList = ["#3c5799", "#01a0f6", "#ef3e2e", "#B4878B", "#444444"];
 
     const locationState = location.state || {};
     async function tryLogin() {
@@ -60,64 +70,72 @@ export default function UserLogin() {
     if (auth.isAuthenticated) return <Navigate to="/" />;
 
     return (
-        <View ident="userLogin" error={loginError} style={loginStyle}>
-            <h3 align="center">Welcome to MWDB</h3>
-            <form
-                onSubmit={(ev) => {
-                    ev.preventDefault();
-                    tryLogin();
-                }}
-            >
-                <Extension ident="userLoginNote" />
-                <div className="form-group">
-                    <label>Login</label>
+        <div style={divStyle}>
+            <View ident="userLogin" error={loginError} style={loginStyle}>
+                <h3 align="center">Welcome to MWDB</h3>
+                <form
+                    onSubmit={(ev) => {
+                        ev.preventDefault();
+                        tryLogin();
+                    }}
+                >
+                    <Extension ident="userLoginNote" />
+                    <div className="form-group">
+                        <label>Login</label>
+                        <input
+                            type="text"
+                            name="login"
+                            value={login}
+                            onChange={(ev) => setLogin(ev.target.value)}
+                            className="form-control"
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            value={password}
+                            onChange={(ev) => setPassword(ev.target.value)}
+                            className="form-control"
+                            required
+                        />
+                    </div>
                     <input
-                        type="text"
-                        name="login"
-                        value={login}
-                        onChange={(ev) => setLogin(ev.target.value)}
-                        className="form-control"
-                        required
+                        type="submit"
+                        value="Log in"
+                        className="form-control btn btn-success"
                     />
-                </div>
-                <div className="form-group">
-                    <label>Password</label>
-                    <input
-                        type="password"
-                        name="password"
-                        value={password}
-                        onChange={(ev) => setPassword(ev.target.value)}
-                        className="form-control"
-                        required
-                    />
-                </div>
-                <input
-                    type="submit"
-                    value="Log in"
-                    className="form-control btn btn-success"
-                />
-                <hr />
-                <ShowIf condition={providers.length}>
-                    {providers.length <= 5 ? (
-                        providers.map((provider) => (
-                            <ProviderButton provider={provider} />
-                        ))
-                    ) : (
-                        <ProvidersSelectList providersList={providers} />
-                    )}
                     <hr />
-                </ShowIf>
-                {config.config["is_registration_enabled"] ? (
+                    <ShowIf condition={providers.length}>
+                        {providers.length <= 5 ? (
+                            providers.map((provider, i) => (
+                                <ProviderButton
+                                    provider={provider}
+                                    color={colorsList[i % colorsList.length]}
+                                />
+                            ))
+                        ) : (
+                            <ProvidersSelectList providersList={providers} />
+                        )}
+                        <hr />
+                    </ShowIf>
+                    {config.config["is_registration_enabled"] ? (
+                        <nav
+                            className="form-group"
+                            style={{ textAlign: "center" }}
+                        >
+                            <Link to="/register">Register user</Link>
+                        </nav>
+                    ) : (
+                        []
+                    )}
                     <nav className="form-group" style={{ textAlign: "center" }}>
-                        <Link to="/register">Register user</Link>
+                        <Link to="/recover_password">Forgot password?</Link>
                     </nav>
-                ) : (
-                    []
-                )}
-                <nav className="form-group" style={{ textAlign: "center" }}>
-                    <Link to="/recover_password">Forgot password?</Link>
-                </nav>
-            </form>
-        </View>
+                </form>
+            </View>
+        </div>
     );
 }

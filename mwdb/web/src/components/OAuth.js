@@ -5,7 +5,7 @@ import { APIContext } from "@mwdb-web/commons/api/context";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { getErrorMessage } from "@mwdb-web/commons/ui";
 
-export function ProviderButton({ provider }) {
+export function ProviderButton({ provider, color }) {
     const api = useContext(APIContext);
     const [error, setError] = useState();
     const chosenProvider = provider;
@@ -37,9 +37,13 @@ export function ProviderButton({ provider }) {
             }}
             error={error}
             className="form-control btn btn-primary"
-            style={{ marginBottom: "10px" }}
+            style={{
+                marginBottom: "5px",
+                backgroundColor: color,
+                borderStyle: "none",
+            }}
         >
-            {provider}
+            Log in with {provider}
         </button>
     );
 }

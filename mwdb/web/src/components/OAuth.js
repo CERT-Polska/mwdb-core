@@ -155,7 +155,7 @@ export function OAuthAuthorize() {
                     replace: true,
                 });
             else {
-                navigate("/oauth/login", {
+                navigate("/login", {
                     state: {
                         error: getErrorMessage(e),
                     },

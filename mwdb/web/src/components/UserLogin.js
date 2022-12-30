@@ -35,7 +35,7 @@ export default function UserLogin() {
         minHeight: "100%",
         width: "100%",
     };
-    const colorsList = ["#3c5799", "#01a0f6", "#ef3e2e", "#B4878B", "#444444"];
+    const colorsList = ["#3c5799", "#01a0f6", "#d03f30", "#b4878b", "#444444"];
 
     const locationState = location.state || {};
     async function tryLogin() {
@@ -72,7 +72,8 @@ export default function UserLogin() {
     return (
         <div style={divStyle}>
             <View ident="userLogin" error={loginError} style={loginStyle}>
-                <h3 align="center">Welcome to MWDB</h3>
+                <h2 align="center">Welcome to MWDB</h2>
+                <h6 align="center">Log in using mwdb credentials</h6>
                 <form
                     onSubmit={(ev) => {
                         ev.preventDefault();
@@ -109,6 +110,7 @@ export default function UserLogin() {
                     />
                     <hr />
                     <ShowIf condition={providers.length}>
+                        <h6 align="center">Log in using OAuth</h6>
                         {providers.length <= 5 ? (
                             providers.map((provider, i) => (
                                 <ProviderButton

@@ -90,7 +90,7 @@ export function ProvidersSelectList({ providersList }) {
             </select>
             <button
                 className="form-control btn btn-primary"
-                style={{ marginTop: "10px" }}
+                style={{ marginTop: "10px", backgroundColor: "#3c5799" }}
                 onClick={(e) => {
                     e.preventDefault();
                     authenticate(chosenProvider, "authorize");

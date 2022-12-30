@@ -16,6 +16,6 @@ export const browserLogin = (username, password) => {
 
   cy.get("input[name=password]").type(password).should("have.value", password);
 
-  cy.contains("Log in").click();
+  cy.get('input').contains("Log in").click();
   cy.get("a.profile-button").should("have.attr", "href").and('contain', '/profile');
 };

@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useState } from "react";
 import AceEditor from "react-ace";
 import { renderValue } from "./MarkedMustache";
 
@@ -61,6 +61,7 @@ export default function RichAttributePreview({
         templateInput: storedRichTemplate,
         valueInput: storedExampleValue,
     });
+    const [showContext, setShowContext] = useState(false);
 
     function chooseTemplate(ev) {
         const index = ev.target.value;
@@ -80,11 +81,16 @@ export default function RichAttributePreview({
             ? exampleTemplates[templateState.chosenExample].value
             : templateState.valueInput;
     let renderedValue,
+        contextValue,
         invalid = false;
     try {
-        renderedValue = renderValue(template, makeContext(JSON.parse(value)));
+        contextValue = makeContext(JSON.parse(value));
+        renderedValue = renderValue(template, contextValue, {
+            searchEndpoint: "/",
+        });
     } catch (e) {
         renderedValue = e.toString();
+        contextValue = null;
         invalid = true;
     }
 
@@ -119,12 +125,43 @@ export default function RichAttributePreview({
                     />
                 </div>
                 <div className="col-6">
-                    <strong>Example value</strong>
+                    <div className="form-check form-check-inline">
+                        <strong>Example value</strong>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input
+                            className="form-check-input"
+                            type="radio"
+                            id="showValue"
+                            checked={!showContext}
+                            onClick={() => setShowContext(false)}
+                        />
+                        <label className="form-check-label" for="showValue">
+                            Value
+                        </label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input
+                            className="form-check-input"
+                            type="radio"
+                            id="showContext"
+                            checked={showContext}
+                            onClick={() => setShowContext(true)}
+                        />
+                        <label className="form-check-label" for="showContext">
+                            Context
+                        </label>
+                    </div>
                     <AceEditor
                         mode="json"
                         theme="github"
-                        value={value}
+                        value={
+                            showContext
+                                ? JSON.stringify(contextValue, null, 4)
+                                : value
+                        }
                         wrapEnabled
+                        readOnly={showContext}
                         width="100%"
                         fontSize="16px"
                         onChange={(newValue) => {

@@ -66,6 +66,7 @@ function AttributeValue({ value, attributeId, attributeDefinition, onRemove }) {
         } else {
             valueRender = <span>{value}</span>;
         }
+        valueRaw = value;
     } else {
         valueRender = (
             <pre className="attribute-object">

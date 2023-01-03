@@ -436,13 +436,17 @@ class FileDownloadResource(Resource):
             return Response(
                 file_obj.iterate_obfuscated(),
                 content_type="application/octet-stream",
-                headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"},
+                headers={
+                    "Content-disposition": f"attachment; filename={file_obj.sha256}"
+                },
             )
         else:
             return Response(
                 file_obj.iterate(),
                 content_type="application/octet-stream",
-                headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"},
+                headers={
+                    "Content-disposition": f"attachment; filename={file_obj.sha256}"
+                },
             )
 
     @requires_authorization

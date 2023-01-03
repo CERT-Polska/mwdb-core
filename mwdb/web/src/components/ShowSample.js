@@ -237,8 +237,11 @@ function SampleDetails() {
 // negate the buffer contents (xor with key equal 0xff)
 function negateBuffer(buffer) {
     const uint8View = new Uint8Array(buffer);
-    const xored = uint8View.map(item => item ^ 0xFF);
-    return xored.buffer.slice(xored.byteOffset, xored.byteLength + xored.byteOffset)
+    const xored = uint8View.map((item) => item ^ 0xff);
+    return xored.buffer.slice(
+        xored.byteOffset,
+        xored.byteLength + xored.byteOffset
+    );
 }
 
 function SamplePreview() {
@@ -251,8 +254,13 @@ function SamplePreview() {
         try {
             const fileId = objectContext.object.id;
             const obfuscate = 1;
-            const fileContentResponse = await api.downloadFile(fileId, obfuscate);
-            const fileContentResponseData = negateBuffer(fileContentResponse.data);
+            const fileContentResponse = await api.downloadFile(
+                fileId,
+                obfuscate
+            );
+            const fileContentResponseData = negateBuffer(
+                fileContentResponse.data
+            );
             setContent(fileContentResponseData);
         } catch (e) {
             objectContext.setObjectError(e);

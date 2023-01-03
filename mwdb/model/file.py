@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 
+import numpy as np
 import pyzipper
 from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
@@ -272,6 +273,37 @@ class File(Object):
             else:
                 while True:
                     chunk = fh.read(chunk_size)
+                    if chunk:
+                        yield chunk
+                    else:
+                        return
+        finally:
+            File.close(fh)
+
+    def negate_bits(self, chunk):
+        """
+        xor data with key equal 255 of length of chunk; using numpy
+        https://stackoverflow.com/questions/23312571/fast-xoring-bytes-in-python-3
+        """
+        key = np.frombuffer(b"\xff" * len(chunk), dtype="uint8")
+        chunk = np.frombuffer(chunk, dtype="uint8")
+        return (key ^ chunk).tobytes()
+
+    def iterate_obfuscated(self, chunk_size=1024 * 256):
+        r"""
+        Iterates over bytes in the file contents with xor applied
+        The idea behind xoring before send is to prevent browsers
+        from caching original samples (malware). Unxoring is provided
+        in mwdb\web\src\components\ShowSample.js in SamplePreview
+        """
+        fh = self.open()
+        try:
+            if hasattr(fh, "stream"):
+                yield from map(self.negate_bits, fh.stream(chunk_size))
+            else:
+                while True:
+                    chunk = fh.read(chunk_size)
+                    chunk = self.negate_bits(chunk)
                     if chunk:
                         yield chunk
                     else:

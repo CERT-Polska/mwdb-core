@@ -234,6 +234,13 @@ function SampleDetails() {
     );
 }
 
+// negate the buffer contents (xor with key equal 0xff)
+function negateBuffer(buffer) {
+    const uint8View = new Uint8Array(buffer);
+    const xored = uint8View.map((item) => item ^ 0xff);
+    return xored.buffer;
+}
+
 function SamplePreview() {
     const [content, setContent] = useState("");
     const api = useContext(APIContext);
@@ -243,8 +250,15 @@ function SamplePreview() {
     async function updateSample() {
         try {
             const fileId = objectContext.object.id;
-            const fileContentResponse = await api.downloadFile(fileId);
-            setContent(fileContentResponse.data);
+            const obfuscate = 1;
+            const fileContentResponse = await api.downloadFile(
+                fileId,
+                obfuscate
+            );
+            const fileContentResponseData = negateBuffer(
+                fileContentResponse.data
+            );
+            setContent(fileContentResponseData);
         } catch (e) {
             objectContext.setObjectError(e);
         }

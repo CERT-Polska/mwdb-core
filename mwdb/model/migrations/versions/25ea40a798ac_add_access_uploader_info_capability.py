@@ -1,4 +1,4 @@
-"""empty message
+"""Add access uploader info capability
 
 Revision ID: 25ea40a798ac
 Revises: c7c72fd7fac5

@@ -4,7 +4,7 @@ from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.model import Group, User, db
+from mwdb.model import Group, Member, User, db
 from mwdb.model.object import AccessType
 from mwdb.schema.share import (
     ShareGroupListResponseSchema,
@@ -132,34 +132,22 @@ class ShareResource(Resource):
             schema = ShareInfoResponseSchema()
             return schema.dump({"groups": group_names, "shares": shares})
         else:
-            groups = (
-                db.session.query(Group.name)
+            # list of user_ids who are in a common workspace with auth_user
+            users = (
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
                 .filter(g.auth_user.is_member(Group.id))
                 .filter(Group.workspace.is_(True))
-            )
-
-            unique_related_users = []
-            for share in shares:
-                if (
-                    share.related_user is not None
-                    and share.related_user not in unique_related_users
-                ):
-                    unique_related_users.append(share.related_user)
-
-            visible_related_users_logins = []
-            for unique_user in unique_related_users:
-                if (
-                    groups.filter(unique_user.is_member(Group.id)).count() > 0
-                    or unique_user.login == g.auth_user.login
-                ):
-                    visible_related_users_logins.append(unique_user.login)
+            ).all()
+            visible_users = [u.login for u in users]
 
             schema = ShareInfoResponseSchema()
             response = schema.dump({"groups": group_names, "shares": shares})
 
             for share in response["shares"]:
                 if "related_user_login" in share.keys():
-                    if share["related_user_login"] not in visible_related_users_logins:
+                    if share["related_user_login"] not in visible_users:
                         share["related_user_login"] = "$hidden"
 
             return response

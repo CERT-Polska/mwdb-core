@@ -238,10 +238,7 @@ function SampleDetails() {
 function negateBuffer(buffer) {
     const uint8View = new Uint8Array(buffer);
     const xored = uint8View.map((item) => item ^ 0xff);
-    return xored.buffer.slice(
-        xored.byteOffset,
-        xored.byteLength + xored.byteOffset
-    );
+    return xored.buffer;
 }
 
 function SamplePreview() {

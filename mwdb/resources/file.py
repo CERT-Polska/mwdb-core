@@ -386,7 +386,7 @@ class FileDownloadResource(Resource):
               schema:
                 type: string
               description: |
-                Obfuscated response flag
+                Obfuscated response flag to avoid AV detection on preview
               required: false
         responses:
             200:

@@ -381,6 +381,13 @@ class FileDownloadResource(Resource):
               description: |
                 File download token for direct link purpose
               required: false
+            - in: query
+              name: obfuscate
+              schema:
+                type: string
+              description: |
+                Obfuscated response flag to avoid AV detection on preview
+              required: false
         responses:
             200:
                 description: File contents
@@ -402,6 +409,7 @@ class FileDownloadResource(Resource):
                     Request canceled due to database statement timeout.
         """
         access_token = request.args.get("token")
+        obfuscate = request.args.get("obfuscate")
 
         if access_token:
             file_obj = File.get_by_download_token(access_token)
@@ -424,11 +432,22 @@ class FileDownloadResource(Resource):
             if file_obj is None:
                 raise NotFound("Object not found")
 
-        return Response(
-            file_obj.iterate(),
-            content_type="application/octet-stream",
-            headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"},
-        )
+        if obfuscate == "1":
+            return Response(
+                file_obj.iterate_obfuscated(),
+                content_type="application/octet-stream",
+                headers={
+                    "Content-disposition": f"attachment; filename={file_obj.sha256}"
+                },
+            )
+        else:
+            return Response(
+                file_obj.iterate(),
+                content_type="application/octet-stream",
+                headers={
+                    "Content-disposition": f"attachment; filename={file_obj.sha256}"
+                },
+            )
 
     @requires_authorization
     def post(self, identifier):

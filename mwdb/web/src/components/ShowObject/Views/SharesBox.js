@@ -45,10 +45,11 @@ function groupShares(shares) {
             related_user_login,
             reason_type,
         } = share;
-        const reasonKey = (reason_type === "shared")
-            ? `${related_object_dhash} ${related_object_type} ${related_user_login} ${reason_type}`
-            : `${related_object_dhash} ${related_object_type} ${reason_type}`;
-        if (!shares_by_reason[reasonKey]){
+        const reasonKey =
+            reason_type === "shared"
+                ? `${related_object_dhash} ${related_object_type} ${related_user_login} ${reason_type}`
+                : `${related_object_dhash} ${related_object_type} ${reason_type}`;
+        if (!shares_by_reason[reasonKey]) {
             shares_by_reason[reasonKey] = [share];
         } else {
             shares_by_reason[reasonKey].push(share);
@@ -78,7 +79,12 @@ function ShareGroupItem({ reason, shares, showDhash }) {
                     <th colSpan="2">
                         {(() => {
                             if (reason.relatedUserLogin !== "$hidden") {
-                                return <ShareReasonString {...reason} showDhash={showDhash} />;
+                                return (
+                                    <ShareReasonString
+                                        {...reason}
+                                        showDhash={showDhash}
+                                    />
+                                );
                             } else {
                                 return (
                                     <span class="text-muted">
@@ -98,7 +104,10 @@ function ShareGroupItem({ reason, shares, showDhash }) {
                             <td className="col-6">
                                 <Link
                                     to={makeSearchLink({
-                                        field: (share.reason_type === "added" ? "uploader" : "shared"),
+                                        field:
+                                            share.reason_type === "added"
+                                                ? "uploader"
+                                                : "shared",
                                         value: share.group_name,
                                         pathname: `${remotePath}/search`,
                                     })}
@@ -178,20 +187,20 @@ function SharingStatusIcon({ shares }) {
 }
 
 function SharesList({ shares, groups, handleShare, currentFile, direct }) {
-    function filterShares(){
+    function filterShares() {
         const ret = [];
         if (direct) {
             shares.forEach((share) => {
                 if (share.related_object_dhash === currentFile) {
                     ret.push(share);
                 }
-            })
+            });
         } else {
             shares.forEach((share) => {
                 if (share.related_object_dhash !== currentFile) {
                     ret.push(share);
                 }
-            })
+            });
         }
         return ret;
     }
@@ -216,11 +225,7 @@ function SharesList({ shares, groups, handleShare, currentFile, direct }) {
             </div>
         );
     } else {
-        return (
-            <div class="card-body text-muted">
-                No shares to display
-            </div>
-        );
+        return <div class="card-body text-muted">No shares to display</div>;
     }
 }
 
@@ -288,7 +293,9 @@ function SharesBox() {
 
                 <div className="card-header">
                     <div className="media">
-                        <div className="align-self-center media-body">Shares</div>
+                        <div className="align-self-center media-body">
+                            Shares
+                        </div>
                         <SharingStatusIcon shares={shares} />
                     </div>
                 </div>
@@ -296,21 +303,23 @@ function SharesBox() {
                     shares={shares}
                     groups={groups}
                     handleShare={!api.remote ? handleShare : null}
-                    currentFile = {context.object.sha256}
+                    currentFile={context.object.sha256}
                     direct={true}
                 />
             </div>
             <div className="card card-default">
                 <div className="card-header">
                     <div className="media">
-                        <div className="align-self-center media-body">Related shares</div>
+                        <div className="align-self-center media-body">
+                            Related shares
+                        </div>
                     </div>
                 </div>
                 <SharesList
                     shares={shares}
                     groups={groups}
                     handleShare={false}
-                    currentFile = {context.object.sha256}
+                    currentFile={context.object.sha256}
                     direct={false}
                 />
             </div>

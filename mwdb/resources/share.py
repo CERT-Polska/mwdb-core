@@ -4,7 +4,7 @@ from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.model import Group, Member, User, db
+from mwdb.model import Group, User, db
 from mwdb.model.object import AccessType
 from mwdb.schema.share import (
     ShareGroupListResponseSchema,

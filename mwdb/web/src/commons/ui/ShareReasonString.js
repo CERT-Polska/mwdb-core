@@ -9,7 +9,7 @@ export default function ShareReasonString({
     relatedObjectDHash,
     relatedObjectType,
     relatedUserLogin,
-    showDhash
+    showDhash,
 }) {
     const remotePath = useRemotePath();
     const reasonText =
@@ -17,17 +17,21 @@ export default function ShareReasonString({
     const isShared = reasonType === "shared";
     const objLink = showDhash ? (
         relatedObjectDHash ? (
-            <ObjectLink type={relatedObjectType} id={relatedObjectDHash} inline />
+            <ObjectLink
+                type={relatedObjectType}
+                id={relatedObjectDHash}
+                inline
+            />
         ) : (
             <span className="text-muted">(object deleted)</span>
         )
     ) : (
         ""
-    )
+    );
     const userLink = relatedUserLogin ? (
         <Link
             to={makeSearchLink({
-                field: (isShared ? "sharer" : "uploader"),
+                field: isShared ? "sharer" : "uploader",
                 value: relatedUserLogin,
                 pathname: `${remotePath}/search`,
             })}

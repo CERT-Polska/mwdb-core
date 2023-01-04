@@ -131,6 +131,14 @@ export default function OAuthProvider() {
                             onSubmit={handleSubmit}
                         />
                     </ProviderItem>
+                    <ProviderItem label="Logout endpoint">
+                        <EditableItem
+                            name="logout_endpoint"
+                            type="logout_endpoint"
+                            defaultValue={provider.logout_endpoint}
+                            onSubmit={handleSubmit}
+                        />
+                    </ProviderItem>
                 </tbody>
             </table>
             <b>Actions:</b>

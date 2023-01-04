@@ -1,10 +1,10 @@
 from flask import g, request
 from flask_restful import Resource
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.model import Group, User, db
+from mwdb.model import Group, Member, User, db
 from mwdb.model.object import AccessType
 from mwdb.schema.share import (
     ShareGroupListResponseSchema,
@@ -118,14 +118,39 @@ class ShareResource(Resource):
         )
 
         group_names = [group[0] for group in groups.all()]
+        # User cannot share object with themself
+        if g.auth_user.login in group_names:
+            group_names.remove(g.auth_user.login)
 
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
         shares = db_object.get_shares()
-        schema = ShareInfoResponseSchema()
-        return schema.dump({"groups": group_names, "shares": shares})
+
+        if g.auth_user.has_rights(Capabilities.access_uploader_info):
+            schema = ShareInfoResponseSchema()
+            return schema.dump({"groups": group_names, "shares": shares})
+        else:
+            # list of user_ids who are in a common workspace with auth_user
+            users = (
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
+                .filter(g.auth_user.is_member(Group.id))
+                .filter(Group.workspace.is_(True))
+            ).all()
+            visible_users = [u.login for u in users]
+
+            schema = ShareInfoResponseSchema()
+            response = schema.dump({"groups": group_names, "shares": shares})
+
+            for share in response["shares"]:
+                if "related_user_login" in share.keys():
+                    if share["related_user_login"] not in visible_users:
+                        share["related_user_login"] = "$hidden"
+
+            return response
 
     @requires_authorization
     def put(self, type, identifier):
@@ -166,6 +191,9 @@ class ShareResource(Resource):
                     schema: ShareListResponseSchema
             400:
                 description: When request body is invalid.
+            403:
+                description: |
+                    When user tries to share object with themself.
             404:
                 description: |
                     When object or group doesn't exist
@@ -189,6 +217,9 @@ class ShareResource(Resource):
 
         if group is None or group.pending_group:
             raise NotFound(f"Group {group_name} doesn't exist")
+
+        if group.name == g.auth_user.login:
+            raise Forbidden("You cannot share object with yourself")
 
         db_object.give_access(group.id, AccessType.SHARED, db_object, g.auth_user)
 

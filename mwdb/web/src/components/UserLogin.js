@@ -108,8 +108,29 @@ export default function UserLogin() {
                         value="Log in"
                         className="form-control btn btn-success"
                     />
-                    <hr />
+                    <nav
+                        className="form-group"
+                        style={{ textAlign: "center", marginTop: "5px" }}
+                    >
+                        <table width="100%">
+                            <td width="50%" align="left">
+                                <Link to="/recover_password">
+                                    Forgot password?
+                                </Link>
+                            </td>
+                            <td width="50%" align="right">
+                                <ShowIf
+                                    condition={
+                                        config.config["is_registration_enabled"]
+                                    }
+                                >
+                                    <Link to="/register">Register user</Link>
+                                </ShowIf>
+                            </td>
+                        </table>
+                    </nav>
                     <ShowIf condition={providers.length}>
+                        <hr />
                         <h6 align="center">Log in using OAuth</h6>
                         {providers.length <= 5 ? (
                             providers.map((provider, i) => (
@@ -121,21 +142,7 @@ export default function UserLogin() {
                         ) : (
                             <ProvidersSelectList providersList={providers} />
                         )}
-                        <hr />
                     </ShowIf>
-                    {config.config["is_registration_enabled"] ? (
-                        <nav
-                            className="form-group"
-                            style={{ textAlign: "center" }}
-                        >
-                            <Link to="/register">Register user</Link>
-                        </nav>
-                    ) : (
-                        []
-                    )}
-                    <nav className="form-group" style={{ textAlign: "center" }}>
-                        <Link to="/recover_password">Forgot password?</Link>
-                    </nav>
                 </form>
             </View>
         </div>

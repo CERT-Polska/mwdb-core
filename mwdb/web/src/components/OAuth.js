@@ -1,39 +1,38 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
+import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { getErrorMessage } from "@mwdb-web/commons/ui";
 
+async function authenticate(provider, action, errorFunction) {
+    try {
+        const response = await api.oauthAuthenticate(provider);
+        const expirationTime = Date.now() + 5 * 60 * 1000;
+        sessionStorage.setItem(
+            `openid_${response.data["state"]}`,
+            JSON.stringify({
+                provider: provider,
+                nonce: response.data["nonce"],
+                action: action,
+                expiration: expirationTime,
+            })
+        );
+        window.location = response.data["authorization_url"];
+    } catch (e) {
+        errorFunction(e);
+    }
+}
+
 export function ProviderButton({ provider, color }) {
-    const api = useContext(APIContext);
     const [error, setError] = useState();
     const chosenProvider = provider;
-
-    async function authenticate(provider, action) {
-        try {
-            const response = await api.oauthAuthenticate(provider);
-            const expirationTime = Date.now() + 5 * 60 * 1000;
-            sessionStorage.setItem(
-                `openid_${response.data["state"]}`,
-                JSON.stringify({
-                    provider: provider,
-                    nonce: response.data["nonce"],
-                    action: action,
-                    expiration: expirationTime,
-                })
-            );
-            window.location = response.data["authorization_url"];
-        } catch (e) {
-            setError(e);
-        }
-    }
 
     return (
         <button
             onClick={(e) => {
                 e.preventDefault();
-                authenticate(chosenProvider, "authorize");
+                authenticate(chosenProvider, "authorize", setError);
             }}
             error={error}
             className="form-control btn btn-primary"
@@ -49,29 +48,9 @@ export function ProviderButton({ provider, color }) {
 }
 
 export function ProvidersSelectList({ providersList }) {
-    const api = useContext(APIContext);
     const [error, setError] = useState();
     const availableProviders = providersList;
     const [chosenProvider, setChosenProvider] = useState();
-
-    async function authenticate(provider, action) {
-        try {
-            const response = await api.oauthAuthenticate(provider);
-            const expirationTime = Date.now() + 5 * 60 * 1000;
-            sessionStorage.setItem(
-                `openid_${response.data["state"]}`,
-                JSON.stringify({
-                    provider: provider,
-                    nonce: response.data["nonce"],
-                    action: action,
-                    expiration: expirationTime,
-                })
-            );
-            window.location = response.data["authorization_url"];
-        } catch (e) {
-            setError(e);
-        }
-    }
 
     return (
         <form>
@@ -93,7 +72,7 @@ export function ProvidersSelectList({ providersList }) {
                 style={{ marginTop: "10px", backgroundColor: "#3c5799" }}
                 onClick={(e) => {
                     e.preventDefault();
-                    authenticate(chosenProvider, "authorize");
+                    authenticate(chosenProvider, "authorize", setError);
                 }}
                 error={error}
             >
@@ -104,7 +83,6 @@ export function ProvidersSelectList({ providersList }) {
 }
 
 export function OAuthAuthorize() {
-    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const navigate = useNavigate();
     // Current query set in URI path

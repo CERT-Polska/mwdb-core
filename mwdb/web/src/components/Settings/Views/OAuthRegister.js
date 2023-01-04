@@ -131,6 +131,16 @@ export default function OAuthRegister() {
                         className="form-control"
                     />
                 </div>
+                <div className="form-group">
+                    <label>Logout endpoint</label>
+                    <input
+                        type="text"
+                        name="logout_endpoint"
+                        value={values.logout_endpoint}
+                        onChange={handleInputChange}
+                        className="form-control"
+                    />
+                </div>
                 <input
                     type="submit"
                     value="Submit"

@@ -74,6 +74,7 @@ export function AuthProvider(props) {
     const [session, _setSession] = useState(getStoredAuthSession());
     const refreshTimer = useRef(null);
     const isAuthenticated = !!session;
+    const [authProvider, setAuthProvider] = useState("");
 
     function setSession(newSession) {
         // Internal session setter which updates token used by Axios
@@ -100,6 +101,10 @@ export function AuthProvider(props) {
         setSession(newSession);
     }
 
+    function updateProvider(newProvider) {
+        setAuthProvider(newProvider);
+    }
+
     async function refreshSession() {
         try {
             // If not authenticated: just ignore that call
@@ -115,10 +120,14 @@ export function AuthProvider(props) {
     }
 
     function logout(error) {
+        if (authProvider !== ""){
+            console.log(authProvider);
+        }
         // Clears session state and redirects user to the UserLogin page
         let logoutReason = error
             ? { error }
             : { success: "User logged out successfully." };
+        setAuthProvider("");
         updateSession(null);
         navigate("/login", {
             state: {
@@ -217,6 +226,7 @@ export function AuthProvider(props) {
                 hasCapability,
                 refreshSession,
                 updateSession,
+                updateProvider,
                 logout,
             }}
         >

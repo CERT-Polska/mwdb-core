@@ -32,7 +32,6 @@ export default function OAuthRegister() {
 
     function autoFill() {
         if (!discoverData) return;
-        console.log(values);
         const keys = Object.keys(values);
         for (const i in keys) {
             values[keys[i]] = discoverData[keys[i]];

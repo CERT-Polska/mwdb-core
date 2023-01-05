@@ -61,6 +61,7 @@ export default function ProfileView() {
         }
     }
 
+    console.log(auth);
     const getProfile = useCallback(updateProfile, [user, redirectToAlert]);
 
     useEffect(() => {

@@ -304,23 +304,21 @@ function SharesBox() {
                     groups={groups}
                     handleShare={!api.remote ? handleShare : null}
                     currentFile={context.object.sha256}
-                    direct={true}
+                    direct
                 />
             </div>
             <div className="card card-default">
                 <div className="card-header">
                     <div className="media">
                         <div className="align-self-center media-body">
-                            Related shares
+                            Inherited shares
                         </div>
                     </div>
                 </div>
                 <SharesList
                     shares={shares}
                     groups={groups}
-                    handleShare={false}
                     currentFile={context.object.sha256}
-                    direct={false}
                 />
             </div>
         </div>

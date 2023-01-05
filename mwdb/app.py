@@ -62,6 +62,7 @@ from mwdb.resources.oauth import (
     OpenIDProviderResource,
     OpenIDRegisterUserResource,
     OpenIDSingleProviderResource,
+    OpenIDLogoutResource,
 )
 from mwdb.resources.object import (
     ObjectCountResource,
@@ -340,6 +341,7 @@ if app_config.mwdb.enable_oidc:
     api.add_resource(OpenIDAuthorizeResource, "/oauth/<provider_name>/authorize")
     api.add_resource(OpenIDBindAccountResource, "/oauth/<provider_name>/bind_account")
     api.add_resource(OpenIDRegisterUserResource, "/oauth/<provider_name>/register")
+    api.add_resource(OpenIDLogoutResource, "/oauth/<provider_name>/logout")
 
 # Remote endpoints
 api.add_resource(RemoteListResource, "/remote")

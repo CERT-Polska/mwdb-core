@@ -124,6 +124,12 @@ function oauthGetIdentities() {
     return axios.get("/oauth/identities");
 }
 
+async function oauthGetLogoutLink(provider, token) {
+    const response = await axios.get(`/oauth/${provider}/logout`);
+    const baseURL = getApiForEnvironment();
+    return `${response}?id_token=${token}&post_logout_redirect_uri=${baseURL}`
+}
+
 function apiKeyAdd(login, name) {
     return axios.post(`/user/${login}/api_key`, { name });
 }
@@ -563,6 +569,7 @@ const api = {
     oauthUpdateSingleProvider,
     oauthRemoveSingleProvider,
     oauthGetIdentities,
+    oauthGetLogoutLink,
     authRefresh,
     authSetPassword,
     authRequestPasswordChange,

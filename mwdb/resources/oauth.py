@@ -5,7 +5,7 @@ from flask import g, request
 from flask_restful import Resource
 from marshmallow import ValidationError
 from sqlalchemy import and_, exists, or_
-from werkzeug.exceptions import Conflict, Forbidden, NotFound
+from werkzeug.exceptions import Conflict, Forbidden, NotFound, PreconditionFailed
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -620,3 +620,48 @@ class OpenIDAccountIdentitiesResource(Resource):
             identity.provider.name for identity in g.auth_user.openid_identities
         ]
         return OpenIDProviderListResponseSchema().dump({"providers": identities})
+
+
+@rate_limited_resource
+class OpenIDLogoutResource(Resource):
+    @requires_authorization
+    def get(self, provider_name):
+        """
+        ---
+        summary: Get logout endpoint
+        description: |
+            Get logout endpoint
+        security:
+            - bearerAuth: []
+        tags:
+            - auth
+        parameters:
+            - in: path
+              name: provider_name
+              schema:
+                type: string
+              description: OpenID provider name.
+        responses:
+            200:
+                description: When logged out successfully 
+            404:
+                description: Requested provider doesn't exist
+            412:
+                description: |
+                    end_session_endpoint is not specified for this provider
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        provider = (
+            db.session.query(OpenIDProvider)
+            .filter(OpenIDProvider.name == provider_name)
+            .first()
+        )
+        if not provider:
+            raise NotFound(f"Requested provider name '{provider_name}' not found")
+
+        if provider.logout_endpoint is None:
+            raise PreconditionFailed(f"end_session_endpoint is not specified for {provider_name}")
+
+        return provider.logout_endpoint

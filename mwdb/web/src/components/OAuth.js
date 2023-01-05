@@ -25,7 +25,8 @@ async function authenticate(provider, action, errorFunction) {
 }
 
 export function ProviderButton({ provider, color }) {
-    const [error, setError] = useState();
+    // todo: correct error handling
+    const [, setError] = useState();
     const chosenProvider = provider;
 
     return (
@@ -34,7 +35,6 @@ export function ProviderButton({ provider, color }) {
                 e.preventDefault();
                 authenticate(chosenProvider, "authorize", setError);
             }}
-            error={error}
             className="form-control btn btn-primary mb-1"
             style={{
                 backgroundColor: color,
@@ -47,7 +47,8 @@ export function ProviderButton({ provider, color }) {
 }
 
 export function ProvidersSelectList({ providersList }) {
-    const [error, setError] = useState();
+    // todo: correct error handling
+    const [, setError] = useState();
     const availableProviders = providersList;
     const [chosenProvider, setChosenProvider] = useState();
 
@@ -73,7 +74,6 @@ export function ProvidersSelectList({ providersList }) {
                     e.preventDefault();
                     authenticate(chosenProvider, "authorize", setError);
                 }}
-                error={error}
             >
                 Log in with selected provider
             </button>

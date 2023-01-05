@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
@@ -20,6 +20,7 @@ export default function UserLogin() {
     const [providers, setProviders] = useState([]);
 
     const colorsList = ["#3c5799", "#01a0f6", "#d03f30", "#b4878b", "#444444"];
+    const isOIDCEnabled = config.config["is_oidc_enabled"];
 
     const locationState = location.state || {};
     async function tryLogin() {
@@ -33,23 +34,20 @@ export default function UserLogin() {
         }
     }
 
-    async function getProviders() {
-        if (!config.config["is_oidc_enabled"]) {
-            setProviders([]);
-            return;
-        }
+    const getProviders = useCallback(async () => {
         try {
             const response = await api.oauthGetProviders();
             setProviders(response.data["providers"]);
         } catch (e) {
             setLoginError(e);
         }
-    }
+    }, []);
 
     useEffect(() => {
-        getProviders();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        if (isOIDCEnabled) {
+            getProviders();
+        }
+    }, [getProviders, isOIDCEnabled]);
 
     if (auth.isAuthenticated) return <Navigate to="/" />;
 

@@ -35,9 +35,8 @@ export function ProviderButton({ provider, color }) {
                 authenticate(chosenProvider, "authorize", setError);
             }}
             error={error}
-            className="form-control btn btn-primary"
+            className="form-control btn btn-primary mb-1"
             style={{
-                marginBottom: "5px",
                 backgroundColor: color,
                 borderStyle: "none",
             }}
@@ -68,8 +67,8 @@ export function ProvidersSelectList({ providersList }) {
                 ))}
             </select>
             <button
-                className="form-control btn btn-primary"
-                style={{ marginTop: "10px", backgroundColor: "#3c5799" }}
+                className="form-control btn btn-primary mt-1"
+                style={{ backgroundColor: "#3c5799" }}
                 onClick={(e) => {
                     e.preventDefault();
                     authenticate(chosenProvider, "authorize", setError);

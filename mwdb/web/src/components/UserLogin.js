@@ -19,22 +19,6 @@ export default function UserLogin() {
     const [loginError, setLoginError] = useState(null);
     const [providers, setProviders] = useState([]);
 
-    const loginStyle = {
-        backgroundColor: "white",
-        padding: "50px",
-        marginTop: "7%",
-        width: "450px",
-        borderRadius: "10px",
-    };
-    const divStyle = {
-        backgroundColor: "#f2f2f2",
-        position: "absolute",
-        top: 0,
-        left: 0,
-        zIndex: -1,
-        minHeight: "100%",
-        width: "100%",
-    };
     const colorsList = ["#3c5799", "#01a0f6", "#d03f30", "#b4878b", "#444444"];
 
     const locationState = location.state || {};
@@ -70,8 +54,9 @@ export default function UserLogin() {
     if (auth.isAuthenticated) return <Navigate to="/" />;
 
     return (
-        <div style={divStyle}>
-            <View ident="userLogin" error={loginError} style={loginStyle}>
+        <div className="user-login">
+            <div className="background" />
+            <View fluid ident="userLogin" error={loginError}>
                 <h2 align="center">Welcome to MWDB</h2>
                 <h6 align="center">Log in using mwdb credentials</h6>
                 <form
@@ -112,13 +97,13 @@ export default function UserLogin() {
                         className="form-group"
                         style={{ textAlign: "center", marginTop: "5px" }}
                     >
-                        <table width="100%">
-                            <td width="50%" align="left">
+                        <div className="d-flex justify-content-between">
+                            <div>
                                 <Link to="/recover_password">
                                     Forgot password?
                                 </Link>
-                            </td>
-                            <td width="50%" align="right">
+                            </div>
+                            <div>
                                 <ShowIf
                                     condition={
                                         config.config["is_registration_enabled"]
@@ -126,8 +111,8 @@ export default function UserLogin() {
                                 >
                                     <Link to="/register">Register user</Link>
                                 </ShowIf>
-                            </td>
-                        </table>
+                            </div>
+                        </div>
                     </nav>
                     <ShowIf condition={providers.length}>
                         <hr />

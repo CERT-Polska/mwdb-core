@@ -87,11 +87,7 @@ export default function OAuthRegister() {
         discoverURL,
         viewAlert,
     ]);
-    const autoFillCallback = useCallback(autoFill, [
-        discoverData,
-        values,
-        viewAlert,
-    ]);
+    const autoFillCallback = useCallback(autoFill, [discoverData, values]);
 
     useEffect(() => {
         getDiscover();

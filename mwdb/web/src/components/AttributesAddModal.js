@@ -44,11 +44,9 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             setRichTemplate(
                 attributeDefinitions[ev.target.value].rich_template
             );
-            if (attributeDefinitions[ev.target.value].example_value) {
-                setRichExampleValue(
-                    attributeDefinitions[ev.target.value].example_value
-                );
-            }
+            setRichExampleValue(
+                attributeDefinitions[ev.target.value].example_value || ""
+            );
         }
 
         setError(null);
@@ -208,7 +206,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                             />
                         )}
                     </div>
-                    {richTemplate && attributeType === "object" ? (
+                    {richTemplate ? (
                         <div className="form-group">
                             <label>Rich attribute preview</label>
                             <table

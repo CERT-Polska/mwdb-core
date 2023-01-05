@@ -112,10 +112,11 @@ export default function RecentView(props) {
     );
 
     useEffect(() => {
+        console.log(countingEnabled);
         countingEnabled
             ? submitQuery(currentQuery)
             : submitQueryWithoutCount(currentQuery);
-    }, [currentQuery, submitQuery, submitQueryWithoutCount, countingEnabled]);
+    }, [currentQuery, countingEnabled, submitQuery, submitQueryWithoutCount]);
 
     const canAddQuickQuery =
         queryInput && !isLocked && queryInput === submittedQuery;
@@ -134,7 +135,7 @@ export default function RecentView(props) {
         submittedQuery && objectCount !== null ? (
             <div className="form-hint">
                 {objectCount}
-                {" results found"}
+                {" results found"}x
             </div>
         ) : (
             []
@@ -188,6 +189,25 @@ export default function RecentView(props) {
                                     }}
                                 />
                             </div>
+                            <div className="btn-group">
+                                <input
+                                    type="submit"
+                                    className={`btn btn-outline-info rounded-0 ${
+                                        searchParams.get("count") === "1"
+                                            ? "active"
+                                            : ""
+                                    }`}
+                                    value="Count"
+                                    onClick={() => {
+                                        setSearchParams({
+                                            q: queryInput,
+                                            count: countingEnabled ? "0" : "1",
+                                        });
+                                        if (countingEnabled)
+                                            setObjectCount(null);
+                                    }}
+                                />
+                            </div>
 
                             <a
                                 href="https://mwdb.readthedocs.io/en/latest/user-guide/7-Lucene-search.html"
@@ -195,33 +215,6 @@ export default function RecentView(props) {
                             >
                                 ?
                             </a>
-                            <div className="custom-control custom-switch ml-2 d-flex align-items-center">
-                                <input
-                                    className="custom-control-input"
-                                    type="checkbox"
-                                    autoComplete="off"
-                                    id="btn-check-outlined"
-                                    checked={countingEnabled}
-                                    value={countingEnabled}
-                                    onChange={() => {
-                                        setSearchParams({
-                                            q: queryInput,
-                                            count: countingEnabled ? "0" : "1",
-                                        });
-
-                                        // comparing to countingEnabled from prevState
-                                        if (countingEnabled) {
-                                            setObjectCount(null);
-                                        }
-                                    }}
-                                />
-                                <label
-                                    className="custom-control-label"
-                                    htmlFor="btn-check-outlined"
-                                >
-                                    Counting
-                                </label>
-                            </div>
                         </div>
                     </div>
                     <div className="input-group">

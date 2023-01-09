@@ -70,24 +70,20 @@ export default function RecentView(props) {
     const submitQueryWithoutCount = useCallback(
         async (query) => {
             let cancelled = false;
-            if (submittedQuery === query) return;
-            if (!query) {
-                setSubmittedQuery("");
-            } else {
-                api.getObjectList(props.type, "", query)
-                    .then(() => {
-                        if (cancelled) return;
-                        // If ok: commit query
-                        setSubmittedQuery(query);
-                    })
-                    .catch((error) => {
-                        if (cancelled) return;
-                        props.setQueryError(error);
-                    });
-                return () => {
-                    cancelled = true;
-                };
-            }
+            // Only check if query is correct
+            api.getObjectList(props.type, "", query)
+                .then(() => {
+                    if (cancelled) return;
+                    // If ok: commit query
+                    setSubmittedQuery(query);
+                })
+                .catch((error) => {
+                    if (cancelled) return;
+                    setQueryError(error);
+                });
+            return () => {
+                cancelled = true;
+            };
         },
         [api, props.type, submittedQuery]
     );
@@ -95,36 +91,33 @@ export default function RecentView(props) {
     const submitQueryWithCount = useCallback(
         async (query) => {
             let cancelled = false;
-            // If query is already submitted: do nothing
-            if (submittedQuery === query) return;
-            // If query is empty, submit immediately
-            if (!query) setSubmittedQuery("");
-            else {
-                // Make preflight query to get count of results
-                // and check if query is correct
-                await api
-                    .getObjectCount(props.type, query)
-                    .then((response) => {
-                        if (cancelled) return;
-                        // If ok: commit query
-                        setSubmittedQuery(query);
-                        setObjectCount(response.data["count"]);
-                    })
-                    .catch((error) => {
-                        if (cancelled) return;
-                        setQueryError(error);
-                    });
+            // Make preflight query to get count of results
+            // and check if query is correct
+            await api
+                .getObjectCount(props.type, query)
+                .then((response) => {
+                    if (cancelled) return;
+                    // If ok: commit query
+                    setSubmittedQuery(query);
+                    setObjectCount(response.data["count"]);
+                })
+                .catch((error) => {
+                    if (cancelled) return;
+                    setQueryError(error);
+                });
 
-                return () => {
-                    cancelled = true;
-                };
-            }
+            return () => {
+                cancelled = true;
+            };
         },
         [api, props.type, submittedQuery]
     );
 
     const submitQuery = useCallback(
         (query) => {
+            setCurrentQuery({
+                query,
+            });
             countingEnabled
                 ? submitQueryWithCount(query)
                 : submitQueryWithoutCount(query);
@@ -133,6 +126,10 @@ export default function RecentView(props) {
     );
 
     useEffect(() => {
+        // // If query is already submitted: do nothing
+        if (submittedQuery === currentQuery) return;
+        // If query is empty, submit immediately
+        if (!currentQuery) setSubmittedQuery("");
         submitQuery(currentQuery);
     }, [currentQuery, submitQuery]);
 
@@ -201,9 +198,6 @@ export default function RecentView(props) {
                                     value="Search"
                                     onClick={(ev) => {
                                         ev.preventDefault();
-                                        setCurrentQuery({
-                                            query: queryInput,
-                                        });
                                         submitQuery(queryInput);
                                     }}
                                 />

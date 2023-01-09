@@ -85,7 +85,7 @@ export default function RecentView(props) {
                 cancelled = true;
             };
         },
-        [api, props.type, submittedQuery]
+        [api, props.type]
     );
 
     const submitQueryWithCount = useCallback(
@@ -110,7 +110,7 @@ export default function RecentView(props) {
                 cancelled = true;
             };
         },
-        [api, props.type, submittedQuery]
+        [api, props.type]
     );
 
     const submitQuery = useCallback(
@@ -122,7 +122,12 @@ export default function RecentView(props) {
                 ? submitQueryWithCount(query)
                 : submitQueryWithoutCount(query);
         },
-        [countingEnabled, submitQueryWithCount, submitQueryWithoutCount]
+        [
+            countingEnabled,
+            setCurrentQuery,
+            submitQueryWithCount,
+            submitQueryWithoutCount,
+        ]
     );
 
     useEffect(() => {
@@ -131,7 +136,7 @@ export default function RecentView(props) {
         // If query is empty, submit immediately
         if (!currentQuery) setSubmittedQuery("");
         submitQuery(currentQuery);
-    }, [currentQuery, submitQuery]);
+    }, [currentQuery, submitQuery, submittedQuery]);
 
     const canAddQuickQuery =
         queryInput && !isLocked && queryInput === submittedQuery;

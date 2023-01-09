@@ -15,7 +15,6 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
     const [attributeDefinitions, setAttributeDefinitions] = useState({});
     const [attributeKey, setAttributeKey] = useState("");
     const [richTemplate, setRichTemplate] = useState("");
-    const [richExampleValue, setRichExampleValue] = useState("");
     const [attributeValue, setAttributeValue] = useState("");
     const [attributeType, setAttributeType] = useState("string");
     const [invalid, setInvalid] = useState(false);
@@ -44,7 +43,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             setRichTemplate(
                 attributeDefinitions[ev.target.value].rich_template
             );
-            setRichExampleValue(
+            setAttributeValue(
                 attributeDefinitions[ev.target.value].example_value || ""
             );
         }
@@ -192,7 +191,6 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                             />
                         ) : (
                             <AceEditor
-                                placeholder={richExampleValue}
                                 mode="json"
                                 theme="github"
                                 wrapEnabled

@@ -32,7 +32,7 @@ export default function RecentView(props) {
     const [queryError, setQueryError] = useState(null);
     const [objectCount, setObjectCount] = useState(null);
     // const [countingEnabled, setCountingEnabled] = useState(true);
-    const countingEnabled = searchParams.get("count") === "0" ? 0 : 1;
+    const countingEnabled = searchParams.get("count") === "1" ? 1 : 0;
     const isLocked = !queryError && submittedQuery !== currentQuery;
 
     function resetErrors() {
@@ -68,19 +68,31 @@ export default function RecentView(props) {
     }, [currentQuery]);
 
     const submitQueryWithoutCount = useCallback(
-        (query) => {
+        async (query) => {
+            let cancelled = false;
             if (submittedQuery === query) return;
-
             if (!query) {
                 setSubmittedQuery("");
             } else {
-                setSubmittedQuery(query);
+                api.getObjectList(props.type, "", query)
+                    .then(() => {
+                        if (cancelled) return;
+                        // If ok: commit query
+                        setSubmittedQuery(query);
+                    })
+                    .catch((error) => {
+                        if (cancelled) return;
+                        props.setQueryError(error);
+                    });
+                return () => {
+                    cancelled = true;
+                };
             }
         },
-        [submittedQuery]
+        [api, props.type, submittedQuery]
     );
 
-    const submitQuery = useCallback(
+    const submitQueryWithCount = useCallback(
         async (query) => {
             let cancelled = false;
             // If query is already submitted: do nothing
@@ -111,12 +123,18 @@ export default function RecentView(props) {
         [api, props.type, submittedQuery]
     );
 
+    const submitQuery = useCallback(
+        (query) => {
+            countingEnabled
+                ? submitQueryWithCount(query)
+                : submitQueryWithoutCount(query);
+        },
+        [countingEnabled, submitQueryWithCount, submitQueryWithoutCount]
+    );
+
     useEffect(() => {
-        console.log(countingEnabled);
-        countingEnabled
-            ? submitQuery(currentQuery)
-            : submitQueryWithoutCount(currentQuery);
-    }, [currentQuery, countingEnabled, submitQuery, submitQueryWithoutCount]);
+        submitQuery(currentQuery);
+    }, [currentQuery, submitQuery]);
 
     const canAddQuickQuery =
         queryInput && !isLocked && queryInput === submittedQuery;
@@ -135,7 +153,7 @@ export default function RecentView(props) {
         submittedQuery && objectCount !== null ? (
             <div className="form-hint">
                 {objectCount}
-                {" results found"}x
+                {" results found"}
             </div>
         ) : (
             []
@@ -186,6 +204,7 @@ export default function RecentView(props) {
                                         setCurrentQuery({
                                             query: queryInput,
                                         });
+                                        submitQuery(queryInput);
                                     }}
                                 />
                             </div>

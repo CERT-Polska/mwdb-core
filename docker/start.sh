@@ -6,5 +6,9 @@ until psql "$MWDB_POSTGRES_URI" -c "\q" ; do
     sleep 1
 done
 
+if [[ $HOT_RELOAD ]]; then
+    RELOAD="--reload"
+fi
+
 echo "Configuring mwdb-core instance"
-mwdb-core configure --quiet basic && exec uwsgi --ini /app/uwsgi.ini
+mwdb-core configure --quiet basic && exec gunicorn ${RELOAD} --bind 0.0.0.0:8080 --user nobody mwdb.app:app

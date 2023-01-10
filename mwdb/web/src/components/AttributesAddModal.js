@@ -47,6 +47,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                 attributeDefinitions[ev.target.value].example_value || ""
             );
         }
+        setAttributeType("object");
 
         setError(null);
     }
@@ -216,7 +217,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                                 <tbody>
                                     <RichAttributeRenderer
                                         template={richTemplate}
-                                        value={attributeValue}
+                                        value={attributeType === "string" ? JSON.stringify(attributeValue) : attributeValue}
                                         setInvalid={setInvalid}
                                     />
                                 </tbody>

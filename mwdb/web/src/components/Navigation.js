@@ -91,25 +91,6 @@ export default function Navigation() {
     const remotePath = useRemotePath();
     const navItems = config.isReady ? (
         <Extendable ident="navbar">
-            {!auth.isAuthenticated &&
-            config.config["is_registration_enabled"] ? (
-                <li className="nav-item">
-                    <Link className="nav-link" to={"/register"}>
-                        Register user
-                    </Link>
-                </li>
-            ) : (
-                []
-            )}
-            {!auth.isAuthenticated && config.config["is_oidc_enabled"] ? (
-                <li className="nav-item">
-                    <Link className="nav-link" to={"/oauth/login"}>
-                        OAuth authentication
-                    </Link>
-                </li>
-            ) : (
-                []
-            )}
             {auth.isAuthenticated ? (
                 <Extendable ident="navbarAuthenticated">
                     <li className="nav-item">

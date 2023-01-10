@@ -28,3 +28,4 @@ pyJWT==2.4.0
 Flask-Limiter==2.1.3
 python-dateutil==2.8.2
 pyzipper==0.3.5
+pycryptodomex==3.16.0

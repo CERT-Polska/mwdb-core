@@ -604,6 +604,9 @@ def test_uploader_query(admin_session):
 
     Alice = testCase.new_user("Alice")
     Bob = testCase.new_user("Bob")
+    Charlie = testCase.new_user("Charlie", capabilities=["access_uploader_info"])
+    # David does not have capability and not in workgroup
+    David = testCase.new_user("David")
 
     Workgroup = testCase.new_group("Workgroup")
 
@@ -642,6 +645,15 @@ def test_uploader_query(admin_session):
         Bob.session.search(f"uploader:{Alice.identity}")
     ]
     assert sorted(results) == sorted([FileC.dhash])
+    # Charlie looks for files uploaded by Alice
+    results = [
+        result["id"] for result in
+        Charlie.session.search(f"uploader:{Alice.identity}")
+    ]
+    assert sorted(results) == sorted([FileC.dhash])
+    # David looks for files uploaded by Alice
+    with ShouldRaise(status_code=400):
+        results = David.session.search(f"uploader:{Alice.identity}")
 
 
 def test_search_multi(admin_session):

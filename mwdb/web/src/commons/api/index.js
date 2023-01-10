@@ -411,8 +411,8 @@ function removeAttributePermission(key, group_name) {
     });
 }
 
-function downloadFile(id) {
-    return axios.get(`/file/${id}/download`, {
+function downloadFile(id, obfuscate = 0) {
+    return axios.get(`/file/${id}/download?obfuscate=${obfuscate}`, {
         responseType: "arraybuffer",
         responseEncoding: "binary",
     });

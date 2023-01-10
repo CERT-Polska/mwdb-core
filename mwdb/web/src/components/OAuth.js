@@ -1,144 +1,87 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
+import api from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
-import { View, getErrorMessage } from "@mwdb-web/commons/ui";
-import { ConfirmationModal, ShowIf } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/ui";
 
-export function OAuthLogin() {
-    const api = useContext(APIContext);
-    const [error, setError] = useState();
-    const [providers, setProviders] = useState([]);
-    const [chosenProvider, setChosenProvider] = useState();
-    const [isRedirectModalOpen, setRedirectModalOpen] = useState(false);
-    const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
-
-    async function getProviders() {
-        try {
-            const response = await api.oauthGetProviders();
-            setProviders(response.data["providers"]);
-        } catch (e) {
-            setError(e);
-        }
+async function authenticate(provider, action, errorFunction) {
+    try {
+        const response = await api.oauthAuthenticate(provider);
+        const expirationTime = Date.now() + 5 * 60 * 1000;
+        sessionStorage.setItem(
+            `openid_${response.data["state"]}`,
+            JSON.stringify({
+                provider: provider,
+                nonce: response.data["nonce"],
+                action: action,
+                expiration: expirationTime,
+            })
+        );
+        window.location = response.data["authorization_url"];
+    } catch (e) {
+        errorFunction(e);
     }
+}
 
-    async function authenticate(provider, action) {
-        try {
-            const response = await api.oauthAuthenticate(provider);
-            const expirationTime = Date.now() + 5 * 60 * 1000;
-            sessionStorage.setItem(
-                `openid_${response.data["state"]}`,
-                JSON.stringify({
-                    provider: provider,
-                    nonce: response.data["nonce"],
-                    action: action,
-                    expiration: expirationTime,
-                })
-            );
-            window.location = response.data["authorization_url"];
-        } catch (e) {
-            setError(e);
-        }
-    }
-
-    useEffect(() => {
-        getProviders();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+export function ProviderButton({ provider, color }) {
+    // todo: correct error handling
+    const [, setError] = useState();
+    const chosenProvider = provider;
 
     return (
-        <View error={error}>
-            <h2>External authentication</h2>
-            <p>
-                Select below the identity provider associated with your mwdb
-                account. By clicking on the identity provider below you will be
-                redirected to its authentication page. <br />
-                If you don't have an account associated with any of these
-                providers you can do this in the profile details. <br />
-                Alternatively, you can register a new account through an
-                external identity provider by{" "}
-                <Link
-                    to="#"
-                    onClick={(ev) => {
-                        ev.preventDefault();
-                        setRegisterModalOpen(true);
-                    }}
-                >
-                    clicking here
-                </Link>
-                .
-            </p>
-            <ShowIf condition={providers.length}>
-                {providers.map((provider) => (
-                    <div className="d-flex justify-content-center">
-                        <div className="col-6 text-center">
-                            <Link
-                                to="#"
-                                className="card btn-outline-secondary text-decoration-none"
-                                onClick={(ev) => {
-                                    ev.preventDefault();
-                                    setChosenProvider(provider);
-                                    setRedirectModalOpen(true);
-                                }}
-                            >
-                                <div className="card-body">
-                                    <h5>{provider}</h5>
-                                </div>
-                            </Link>
-                        </div>
-                    </div>
-                ))}
-            </ShowIf>
-            <ConfirmationModal
-                isOpen={isRedirectModalOpen}
-                onRequestClose={() => {
-                    setRedirectModalOpen(false);
-                    setChosenProvider("");
+        <button
+            onClick={(e) => {
+                e.preventDefault();
+                authenticate(chosenProvider, "authorize", setError);
+            }}
+            className="form-control btn btn-primary mb-1"
+            style={{
+                backgroundColor: color,
+                borderStyle: "none",
+            }}
+        >
+            Log in with {provider}
+        </button>
+    );
+}
+
+export function ProvidersSelectList({ providersList }) {
+    // todo: correct error handling
+    const [, setError] = useState();
+    const availableProviders = providersList;
+    const [chosenProvider, setChosenProvider] = useState();
+
+    return (
+        <form>
+            <select
+                className="custom-select"
+                onChange={(e) => {
+                    setChosenProvider(e.target.value);
                 }}
-                onConfirm={(e) => {
-                    e.preventDefault();
-                    authenticate(chosenProvider, "authorize");
-                }}
-                message={`Are you sure you want to redirect to ${chosenProvider} provider`}
-                buttonStyle="btn-danger"
-            />
-            <ConfirmationModal
-                isOpen={isRegisterModalOpen}
-                onRequestClose={() => setRegisterModalOpen(false)}
-                message="Choose OpenID Provider to register user"
-                onConfirm={(e) => {
-                    e.preventDefault();
-                    authenticate(chosenProvider, "register");
-                }}
-                buttonStyle="btn-info"
-                confirmText="Submit"
             >
-                <form onSubmit={(e) => {}}>
-                    <div>
-                        <select
-                            className="custom-select"
-                            value={chosenProvider}
-                            onChange={(ev) =>
-                                setChosenProvider(ev.target.value)
-                            }
-                        >
-                            <option value="" hidden>
-                                Select provider...
-                            </option>
-                            {providers.map((provider) => (
-                                <option value={provider}>{provider}</option>
-                            ))}
-                        </select>
-                    </div>
-                </form>
-            </ConfirmationModal>
-        </View>
+                <option value="" hidden>
+                    Select provider...
+                </option>
+                {availableProviders.map((provider) => (
+                    <option value={provider}>{provider}</option>
+                ))}
+            </select>
+            <button
+                className="form-control btn btn-primary mt-1"
+                style={{ backgroundColor: "#3c5799" }}
+                onClick={(e) => {
+                    e.preventDefault();
+                    authenticate(chosenProvider, "authorize", setError);
+                }}
+            >
+                Log in with selected provider
+            </button>
+        </form>
     );
 }
 
 export function OAuthAuthorize() {
-    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const navigate = useNavigate();
     // Current query set in URI path
@@ -190,7 +133,7 @@ export function OAuthAuthorize() {
                     replace: true,
                 });
             else {
-                navigate("/oauth/login", {
+                navigate("/login", {
                     state: {
                         error: getErrorMessage(e),
                     },

@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 
 import api from "@mwdb-web/commons/api";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import RichAttributeRenderer from "./RichAttribute/RichAttributeRenderer";
 
 import AceEditor from "react-ace";
 
@@ -13,8 +14,10 @@ import "ace-builds/src-noconflict/ext-searchbox";
 export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
     const [attributeDefinitions, setAttributeDefinitions] = useState({});
     const [attributeKey, setAttributeKey] = useState("");
+    const [richTemplate, setRichTemplate] = useState("");
     const [attributeValue, setAttributeValue] = useState("");
     const [attributeType, setAttributeType] = useState("string");
+    const [invalid, setInvalid] = useState(false);
     const [error, setError] = useState(null);
     const attributeForm = useRef(null);
 
@@ -35,6 +38,17 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
 
     function handleKeyChange(ev) {
         setAttributeKey(ev.target.value);
+        if (!ev.target.value.length) setRichTemplate("");
+        else {
+            setRichTemplate(
+                attributeDefinitions[ev.target.value].rich_template
+            );
+            setAttributeValue(
+                attributeDefinitions[ev.target.value].example_value || ""
+            );
+        }
+        setAttributeType("object");
+
         setError(null);
     }
 
@@ -81,7 +95,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             isOpen={isOpen}
             onRequestClose={onRequestClose}
             onConfirm={handleSubmit}
-            confirmDisabled={!attributesAvailable}
+            confirmDisabled={!attributesAvailable || (invalid && richTemplate)}
         >
             {error ? (
                 <div
@@ -123,7 +137,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                         </select>
                         {attributeDefinitions[attributeKey] &&
                         attributeDefinitions[attributeKey].description ? (
-                            <div className="form-hint">
+                            <div className="form-group pt-2">
                                 {attributeDefinitions[attributeKey].description}
                             </div>
                         ) : (
@@ -183,7 +197,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                                 wrapEnabled
                                 onChange={(input) => setAttributeValue(input)}
                                 value={attributeValue}
-                                width="300px"
+                                width="500px"
                                 height="150px"
                                 setOptions={{
                                     useWorker: false,
@@ -191,6 +205,31 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                             />
                         )}
                     </div>
+                    {richTemplate ? (
+                        <div className="form-group">
+                            <label>Rich attribute preview</label>
+                            <table
+                                className="table table-striped table-bordered table-hover data-table"
+                                style={{
+                                    width: `500px`,
+                                }}
+                            >
+                                <tbody>
+                                    <RichAttributeRenderer
+                                        template={richTemplate}
+                                        value={
+                                            attributeType === "string"
+                                                ? JSON.stringify(attributeValue)
+                                                : attributeValue
+                                        }
+                                        setInvalid={setInvalid}
+                                    />
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        []
+                    )}
                 </form>
             )}
         </ConfirmationModal>

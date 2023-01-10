@@ -38,7 +38,7 @@ import ProfileAPIKeys from "./components/Profile/Views/ProfileAPIKeys";
 import ProfileResetPassword from "./components/Profile/Views/ProfileResetPassword";
 import ProfileOAuth from "./components/Profile/Views/ProfileOAuth";
 
-import { OAuthLogin, OAuthAuthorize } from "./components/OAuth";
+import { OAuthAuthorize } from "./components/OAuth";
 
 import SettingsOverview from "./components/Settings/Views/SettingsOverview";
 import UsersPendingList from "./components/Settings/Views/UsersPendingList";
@@ -100,20 +100,12 @@ function SampleRouteFallback() {
 }
 
 function AppRoutes() {
-    const {
-        config: { is_registration_enabled: isRegistrationEnabled },
-    } = useContext(ConfigContext);
     return (
         <Routes>
             <Route path="login" element={<UserLogin />} />
-            {isRegistrationEnabled ? (
-                <Route path="register" element={<UserRegister />} />
-            ) : (
-                []
-            )}
+            <Route path="register" element={<UserRegister />} />
             <Route path="recover_password" element={<UserPasswordRecover />} />
             <Route path="setpasswd/:token" element={<UserSetPassword />} />
-            <Route path="oauth/login" element={<OAuthLogin />} />
             <Route path="oauth/callback" element={<OAuthAuthorize />} />
             <Route element={<RequiresAuth />}>
                 <Route path="/" element={<RecentSamples />} />

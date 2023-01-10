@@ -79,7 +79,6 @@ export default function RecentViewList(props) {
             })
             .catch((error) => {
                 if (cancelled) return;
-                // props.setError(error);
                 props.setQueryError(error);
                 listDispatch({
                     type: "pageLoaded",

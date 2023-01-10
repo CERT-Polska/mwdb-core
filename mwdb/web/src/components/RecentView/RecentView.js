@@ -216,7 +216,7 @@ export default function RecentView(props) {
                                     value="Count"
                                     onClick={() => {
                                         setSearchParams({
-                                            q: queryInput,
+                                            q: currentQuery,
                                             count: countingEnabled ? "0" : "1",
                                         });
                                     }}

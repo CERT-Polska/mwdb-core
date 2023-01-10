@@ -42,8 +42,6 @@ export default function RecentView(props) {
 
     const setCurrentQuery = useCallback(
         ({ query, enableCounting = countingEnabled }) => {
-            // If query is already submitted: do nothing
-            // if (query === submittedQuery) return;
             // Optionally convert query if only hash or hashes were provided
             query = multiFromHashes(query);
             // Set query in URL (currentQuery, countingEnabled)

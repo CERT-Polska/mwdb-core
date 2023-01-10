@@ -5,6 +5,7 @@ export const Capability = {
     shareQueriedObjects: "share_queried_objects",
     accessAllObjects: "access_all_objects",
     sharingWithAll: "sharing_with_all",
+    accessUploaderInfo: "access_uploader_info",
     addingTags: "adding_tags",
     removingTags: "removing_tags",
     addingComments: "adding_comments",
@@ -33,6 +34,8 @@ export let capabilitiesList = {
     [Capability.accessAllObjects]:
         "Has access to all new uploaded objects into system",
     [Capability.sharingWithAll]: "Can share objects with all groups in system",
+    [Capability.accessUploaderInfo]:
+        "Can view who uploaded object and filter by uploader",
     [Capability.addingTags]: "Can add tags",
     [Capability.removingTags]: "Can remove tags",
     [Capability.addingComments]: "Can add comments",

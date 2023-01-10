@@ -5,6 +5,7 @@ import shutil
 import tempfile
 
 import pyzipper
+from Cryptodome.Util.strxor import strxor_c
 from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
@@ -272,6 +273,32 @@ class File(Object):
             else:
                 while True:
                     chunk = fh.read(chunk_size)
+                    if chunk:
+                        yield chunk
+                    else:
+                        return
+        finally:
+            File.close(fh)
+
+    def iterate_obfuscated(self, chunk_size=1024 * 256):
+        r"""
+        Iterates over bytes in the file contents with xor applied
+        The idea behind xoring before send is to prevent browsers
+        from caching original samples (malware). Unxoring is provided
+        in mwdb\web\src\components\ShowSample.js in SamplePreview
+        """
+
+        def negate_bits(chunk):
+            return strxor_c(chunk, 255)
+
+        fh = self.open()
+        try:
+            if hasattr(fh, "stream"):
+                yield from map(negate_bits, fh.stream(chunk_size))
+            else:
+                while True:
+                    chunk = fh.read(chunk_size)
+                    chunk = negate_bits(chunk)
                     if chunk:
                         yield chunk
                     else:

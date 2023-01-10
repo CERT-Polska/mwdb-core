@@ -217,7 +217,11 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                                 <tbody>
                                     <RichAttributeRenderer
                                         template={richTemplate}
-                                        value={attributeType === "string" ? JSON.stringify(attributeValue) : attributeValue}
+                                        value={
+                                            attributeType === "string"
+                                                ? JSON.stringify(attributeValue)
+                                                : attributeValue
+                                        }
                                         setInvalid={setInvalid}
                                     />
                                 </tbody>

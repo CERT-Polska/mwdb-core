@@ -931,7 +931,8 @@ class Object(db.Model):
             uploaders = (
                 db.session.query(ObjectPermission)
                 .filter(ObjectPermission.object_id == self.id)
-                .filter(ObjectPermission.reason_type == "added")
+                .filter(ObjectPermission.reason_type == AccessType.ADDED)
+                .filter(ObjectPermission.related_object_id == self.id)
                 .filter(
                     or_(
                         ObjectPermission.related_user_id == g.auth_user.id,

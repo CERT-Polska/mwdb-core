@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
-import { NavDropdown } from "@mwdb-web/commons/ui";
+import { ConfirmationModal, NavDropdown } from "@mwdb-web/commons/ui";
 import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
 
 import logo from "../assets/logo.png";
@@ -89,6 +89,7 @@ export default function Navigation() {
     const config = useContext(ConfigContext);
     const remote = useRemote();
     const remotePath = useRemotePath();
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const navItems = config.isReady ? (
         <Extendable ident="navbar">
             {auth.isAuthenticated ? (
@@ -270,12 +271,45 @@ export default function Navigation() {
                                                         />
                                                         {auth.user.login}
                                                     </Link>
+                                                    <ConfirmationModal
+                                                        isOpen={isModalOpen}
+                                                        message="Logout"
+                                                        cancelText="Logout only from MWDB"
+                                                        confirmText="Logout from MWDB and OAuth"
+                                                        onRequestClose={() => {
+                                                            setIsModalOpen(
+                                                                false
+                                                            );
+                                                            auth.logout();
+                                                        }}
+                                                        onConfirm={() => {
+                                                            setIsModalOpen(
+                                                                false
+                                                            );
+                                                            auth.oAuthLogout();
+                                                            auth.logout();
+                                                        }}
+                                                        buttonStyle="btn-danger"
+                                                    >
+                                                        You are about to log out
+                                                        from MWDB
+                                                    </ConfirmationModal>
                                                     <a
                                                         className="btn btn-outline-danger"
                                                         href="#logout"
                                                         onClick={(ev) => {
                                                             ev.preventDefault();
-                                                            auth.logout();
+                                                            if (
+                                                                auth.user
+                                                                    .provider ===
+                                                                "mwdb"
+                                                            ) {
+                                                                auth.logout();
+                                                            } else {
+                                                                setIsModalOpen(
+                                                                    true
+                                                                );
+                                                            }
                                                         }}
                                                     >
                                                         Logout

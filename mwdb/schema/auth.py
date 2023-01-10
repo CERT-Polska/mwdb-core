@@ -47,6 +47,7 @@ class AuthSuccessResponseSchema(UserLoginSchemaBase):
     token = fields.Str(required=True, allow_none=False)
     capabilities = fields.List(fields.Str(), required=True, allow_none=False)
     groups = fields.List(fields.Str(), required=True, allow_none=False)
+    provider = fields.Str(required=True, allow_none=True)
 
 
 class AuthValidateTokenResponseSchema(UserLoginSchemaBase):

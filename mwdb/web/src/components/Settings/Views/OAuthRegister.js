@@ -56,7 +56,8 @@ export default function OAuthRegister() {
                 values.authorization_endpoint,
                 values.token_endpoint,
                 values.userinfo_endpoint,
-                values.jwks_endpoint
+                values.jwks_endpoint,
+                values.logout_endpoint
             );
             viewAlert.redirectToAlert({
                 target: `/settings/oauth`,
@@ -86,7 +87,8 @@ export default function OAuthRegister() {
         discoverURL,
         viewAlert,
     ]);
-    const autoFillCallback = useCallback(autoFill, [discoverData, values]);
+    // eslint-disable-next-line
+    const autoFillCallback = useCallback(autoFill, [discoverData]);
 
     useEffect(() => {
         getDiscover();

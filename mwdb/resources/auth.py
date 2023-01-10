@@ -109,6 +109,7 @@ class LoginResource(Resource):
 
         user.logged_on = datetime.datetime.now()
         db.session.commit()
+        g.auth_provider = "mwdb"
 
         auth_token = user.generate_session_token()
 
@@ -120,6 +121,7 @@ class LoginResource(Resource):
                 "token": auth_token,
                 "capabilities": user.capabilities,
                 "groups": user.group_names,
+                "provider": g.auth_provider,
             }
         )
 
@@ -425,6 +427,7 @@ class RefreshTokenResource(Resource):
                 "token": user.generate_session_token(),
                 "capabilities": user.capabilities,
                 "groups": user.group_names,
+                "provider": g.auth_provider,
             }
         )
 

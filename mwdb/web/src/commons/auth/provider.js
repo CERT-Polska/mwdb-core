@@ -74,7 +74,6 @@ export function AuthProvider(props) {
     const [session, _setSession] = useState(getStoredAuthSession());
     const refreshTimer = useRef(null);
     const isAuthenticated = !!session;
-    const [authProvider, setAuthProvider] = useState("");
 
     function setSession(newSession) {
         // Internal session setter which updates token used by Axios
@@ -101,10 +100,6 @@ export function AuthProvider(props) {
         setSession(newSession);
     }
 
-    function updateProvider(newProvider) {
-        setAuthProvider(newProvider);
-    }
-
     async function refreshSession() {
         try {
             // If not authenticated: just ignore that call
@@ -119,12 +114,20 @@ export function AuthProvider(props) {
         }
     }
 
-    function _logout(error){
+    async function oAuthLogout() {
+        try {
+            let response = await api.oauthGetLogoutLink(session.provider);
+            window.location.href = response.data.url;
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    function logout(error) {
         // Clears session state and redirects user to the UserLogin page
         let logoutReason = error
             ? { error }
             : { success: "User logged out successfully." };
-        setAuthProvider("");
         updateSession(null);
         navigate("/login", {
             state: {
@@ -132,33 +135,6 @@ export function AuthProvider(props) {
                 ...logoutReason,
             },
         });
-    }
-
-    function oAuthLogout(){
-        try {
-            let response = api.oauthGetLogoutLink(authProvider, session.token);
-            console.log(response);
-            window.location.href = response;
-        } catch(e) {
-            console.log(e);
-        }
-    }
-
-    function logout(error) {
-        if (error){
-            _logout(error);
-            return;
-        }
-        if (authProvider === ""){
-            _logout(error);
-            return;
-        }
-        let choice = window.confirm("Do you want to logout from OAuth, too?");
-        if (choice) {
-            oAuthLogout();
-            _logout(error);
-        }
-        _logout(error);
     }
 
     function hasCapability(capability) {
@@ -250,8 +226,8 @@ export function AuthProvider(props) {
                 hasCapability,
                 refreshSession,
                 updateSession,
-                updateProvider,
                 logout,
+                oAuthLogout,
             }}
         >
             {props.children}

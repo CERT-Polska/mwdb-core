@@ -99,6 +99,7 @@ response = mwdb_session.post(
         "userinfo_endpoint": "http://keycloak.:8080/realms/mwdb-oidc-dev/protocol/openid-connect/userinfo",
         "token_endpoint": "http://keycloak.:8080/realms/mwdb-oidc-dev/protocol/openid-connect/token",
         "jwks_endpoint": "http://keycloak.:8080/realms/mwdb-oidc-dev/protocol/openid-connect/certs",
+        "logout_endpoint": "http://127.0.0.1:8080/realms/mwdb-oidc-dev/protocol/openid-connect/logout",
     },
 )
 response.raise_for_status()

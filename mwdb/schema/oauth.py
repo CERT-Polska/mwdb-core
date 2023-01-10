@@ -9,6 +9,7 @@ class OpenIDProviderCreateRequestSchema(Schema):
     token_endpoint = fields.Str(required=True, allow_none=False)
     userinfo_endpoint = fields.Str(required=True, allow_none=False)
     jwks_endpoint = fields.Str(required=True, allow_none=True)
+    logout_endpoint = fields.Str(required=False, allow_none=True)
 
 
 class OpenIDProviderItemResponseSchema(OpenIDProviderCreateRequestSchema):
@@ -23,6 +24,7 @@ class OpenIDProviderUpdateRequestSchema(Schema):
     token_endpoint = fields.Str(missing=None)
     userinfo_endpoint = fields.Str(missing=None)
     jwks_endpoint = fields.Str(missing=None)
+    logout_endpoint = fields.Str(missing=None)
 
 
 class OpenIDAuthorizeRequestSchema(Schema):
@@ -43,3 +45,7 @@ class OpenIDLoginResponseSchema(Schema):
     authorization_url = fields.Str(required=True, allow_none=False)
     state = fields.Str(required=True, allow_none=False)
     nonce = fields.Str(required=True, allow_none=False)
+
+
+class OpenIDLogoutLinkResponseSchema(Schema):
+    url = fields.Str(required=True, allow_none=False)

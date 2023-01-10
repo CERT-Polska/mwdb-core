@@ -91,7 +91,8 @@ function oauthRegisterProvider(
     authorization_endpoint,
     token_endpoint,
     userinfo_endpoint,
-    jwks_endpoint
+    jwks_endpoint,
+    logout_endpoint
 ) {
     return axios.post(`/oauth`, {
         name,
@@ -101,6 +102,7 @@ function oauthRegisterProvider(
         token_endpoint,
         userinfo_endpoint,
         jwks_endpoint,
+        logout_endpoint,
     });
 }
 
@@ -124,10 +126,8 @@ function oauthGetIdentities() {
     return axios.get("/oauth/identities");
 }
 
-async function oauthGetLogoutLink(provider, token) {
-    const response = await axios.get(`/oauth/${provider}/logout`);
-    const baseURL = getApiForEnvironment();
-    return `${response}?id_token=${token}&post_logout_redirect_uri=${baseURL}`
+async function oauthGetLogoutLink(provider) {
+    return axios.get(`/oauth/${provider}/logout`);
 }
 
 function apiKeyAdd(login, name) {

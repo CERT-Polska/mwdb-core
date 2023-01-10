@@ -59,10 +59,10 @@ from mwdb.resources.oauth import (
     OpenIDAuthenticateResource,
     OpenIDAuthorizeResource,
     OpenIDBindAccountResource,
+    OpenIDLogoutResource,
     OpenIDProviderResource,
     OpenIDRegisterUserResource,
     OpenIDSingleProviderResource,
-    OpenIDLogoutResource,
 )
 from mwdb.resources.object import (
     ObjectCountResource,

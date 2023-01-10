@@ -17,6 +17,7 @@ from mwdb.schema.group import GroupNameSchemaBase
 from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,
     OpenIDLoginResponseSchema,
+    OpenIDLogoutLinkResponseSchema,
     OpenIDProviderCreateRequestSchema,
     OpenIDProviderItemResponseSchema,
     OpenIDProviderListResponseSchema,
@@ -100,6 +101,13 @@ class OpenIDProviderResource(Resource):
         if obj["jwks_endpoint"]:
             jwks_endpoint = obj["jwks_endpoint"]
 
+        logout_endpoint = None
+        if obj["logout_endpoint"]:
+            logout_endpoint = obj["logout_endpoint"]
+
+        if obj["name"] == "mwdb":
+            raise Conflict("This name is restricted")
+
         if db.session.query(
             exists().where(and_(OpenIDProvider.name == obj["name"]))
         ).scalar():
@@ -115,6 +123,7 @@ class OpenIDProviderResource(Resource):
             token_endpoint=obj["token_endpoint"],
             userinfo_endpoint=obj["userinfo_endpoint"],
             jwks_endpoint=jwks_endpoint,
+            logout_endpoint=logout_endpoint,
         )
 
         group_name = ("OpenID_" + obj["name"])[:32]
@@ -249,6 +258,10 @@ class OpenIDSingleProviderResource(Resource):
         jwks_endpoint = obj["jwks_endpoint"]
         if jwks_endpoint is not None:
             provider.jwks_endpoint = jwks_endpoint
+
+        logout_endpoint = obj["logout_endpoint"]
+        if logout_endpoint is not None:
+            provider.logout_endpoint = logout_endpoint
 
         db.session.commit()
 
@@ -400,6 +413,7 @@ class OpenIDAuthorizeResource(Resource):
             "User logged in via OpenID Provider",
             extra={"login": user.login, "provider": provider_name},
         )
+        g.auth_provider = provider_name
         schema = AuthSuccessResponseSchema()
         return schema.dump(
             {
@@ -407,6 +421,7 @@ class OpenIDAuthorizeResource(Resource):
                 "token": auth_token,
                 "capabilities": user.capabilities,
                 "groups": user.group_names,
+                "provider": g.auth_provider,
             }
         )
 
@@ -628,9 +643,9 @@ class OpenIDLogoutResource(Resource):
     def get(self, provider_name):
         """
         ---
-        summary: Get logout endpoint
+        summary: Get logout endpoint url
         description: |
-            Get logout endpoint
+            Get logout endpoint url
         security:
             - bearerAuth: []
         tags:
@@ -643,12 +658,15 @@ class OpenIDLogoutResource(Resource):
               description: OpenID provider name.
         responses:
             200:
-                description: When logged out successfully 
+                description: When logout endpoint was found
+                content:
+                  application/json:
+                    schema: OpenIDLogoutLinkResponseSchema
             404:
                 description: Requested provider doesn't exist
             412:
                 description: |
-                    end_session_endpoint is not specified for this provider
+                    Logout endpoint is not specified for this provider
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -662,6 +680,9 @@ class OpenIDLogoutResource(Resource):
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
         if provider.logout_endpoint is None:
-            raise PreconditionFailed(f"end_session_endpoint is not specified for {provider_name}")
+            raise PreconditionFailed(
+                f"end_session_endpoint is not specified for {provider_name}"
+            )
 
-        return provider.logout_endpoint
+        schema = OpenIDLogoutLinkResponseSchema()
+        return schema.dump({"url": provider.logout_endpoint})

@@ -119,7 +119,6 @@ export function OAuthAuthorize() {
                 });
             } else {
                 auth.updateSession(response.data);
-                auth.updateProvider(provider);
                 navigate("/", {
                     replace: true,
                 });

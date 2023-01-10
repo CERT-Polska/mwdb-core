@@ -68,7 +68,7 @@ export default function RecentView(props) {
     }, [currentQuery]);
 
     const submitQueryWithoutCount = useCallback(
-        async (query) => {
+        (query) => {
             let cancelled = false;
             // Only check if query is correct
             api.getObjectList(props.type, "", query)
@@ -89,12 +89,13 @@ export default function RecentView(props) {
     );
 
     const submitQueryWithCount = useCallback(
-        async (query) => {
+        (query) => {
             let cancelled = false;
             // Make preflight query to get count of results
             // and check if query is correct
-            await api
-                .getObjectCount(props.type, query)
+            // First nullify the current count
+            setObjectCount(null);
+            api.getObjectCount(props.type, query)
                 .then((response) => {
                     if (cancelled) return;
                     // If ok: commit query
@@ -118,7 +119,7 @@ export default function RecentView(props) {
             setCurrentQuery({
                 query,
             });
-            countingEnabled
+            return countingEnabled
                 ? submitQueryWithCount(query)
                 : submitQueryWithoutCount(query);
         },
@@ -131,12 +132,9 @@ export default function RecentView(props) {
     );
 
     useEffect(() => {
-        // // If query is already submitted: do nothing
-        if (submittedQuery === currentQuery) return;
-        // If query is empty, submit immediately
         if (!currentQuery) setSubmittedQuery("");
-        submitQuery(currentQuery);
-    }, [currentQuery, submitQuery, submittedQuery]);
+        return submitQuery(currentQuery);
+    }, [currentQuery, submitQuery]);
 
     const canAddQuickQuery =
         queryInput && !isLocked && queryInput === submittedQuery;
@@ -151,15 +149,19 @@ export default function RecentView(props) {
         []
     );
 
-    const objectCountMessage =
-        submittedQuery && objectCount !== null ? (
-            <div className="form-hint">
-                {objectCount}
-                {" results found"}
-            </div>
-        ) : (
-            []
-        );
+    let objectCountMessage = [];
+    if (submittedQuery && countingEnabled) {
+        if (objectCount === null) {
+            objectCountMessage = <div className="form-hint">Counting...</div>;
+        } else {
+            objectCountMessage = (
+                <div className="form-hint">
+                    {objectCount}
+                    {" results found"}
+                </div>
+            );
+        }
+    }
 
     return (
         <View fluid ident="recentObjects" error={error}>
@@ -201,10 +203,6 @@ export default function RecentView(props) {
                                     className="btn btn-outline-success rounded-0"
                                     type="submit"
                                     value="Search"
-                                    onClick={(ev) => {
-                                        ev.preventDefault();
-                                        submitQuery(queryInput);
-                                    }}
                                 />
                             </div>
                             <div className="btn-group">
@@ -221,8 +219,6 @@ export default function RecentView(props) {
                                             q: queryInput,
                                             count: countingEnabled ? "0" : "1",
                                         });
-                                        if (countingEnabled)
-                                            setObjectCount(null);
                                     }}
                                 />
                             </div>

@@ -914,7 +914,8 @@ class Object(db.Model):
             uploaders = (
                 db.session.query(ObjectPermission)
                 .filter(ObjectPermission.object_id == self.id)
-                .filter(ObjectPermission.reason_type == "added")
+                .filter(ObjectPermission.reason_type == AccessType.ADDED)
+                .filter(ObjectPermission.related_object_id == self.id)
                 .order_by(ObjectPermission.access_time.asc())
             ).all()
         # Others can see uploader only if they uploaded the object

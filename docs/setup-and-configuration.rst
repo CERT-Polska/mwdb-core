@@ -30,8 +30,11 @@ Your MWDB instance will be available on default HTTP port (80): http://127.0.0.1
 
 If you want to use Docker Compose for MWDB development, check out :ref:`Developer guide`.
 
-Standalone installation: Prerequisites
---------------------------------------
+Standalone installation
+-----------------------
+
+Step 1.: Prerequisites
+~~~~~~~~~~~~~~~~~~~~~~
 
 MWDB was tested on Debian-based systems, but should work as well on other Linux distributions.
 
@@ -70,8 +73,8 @@ It's highly recommended to create a fresh `virtualenv <https://docs.python.org/3
 
    The connection string is: ``postgresql://mwdb:mwdb@127.0.0.1:54322/mwdb``
 
-Standalone installation: mwdb-core package
-------------------------------------------
+Step 2.: Installation and configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The recommended installation method is pip:
 
@@ -172,19 +175,20 @@ See also: https://flask.palletsprojects.com/en/2.2.x/server/
 
    In standalone setup, remember to run ``mwdb-core configure`` after each version upgrade to apply database migrations.
 
-Standalone installation: setting up gunicorn and nginx
-------------------------------------------------------
+Step 3.: Setting up gunicorn and nginx
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It's recommended to deploy Flask applications using dedicated WSGI server. We highly recommend Gunicorn as it's used
 in our Docker images and combine it with Nginx serving as proxy server for best security and performance
 
 .. seealso::
 
-    https://flask.palletsprojects.com/en/2.2.x/deploying/
     https://flask.palletsprojects.com/en/2.2.x/deploying/gunicorn/
+
     https://docs.gunicorn.org/en/latest/deploy.html#deploying-gunicorn
 
-Proper configuration files and templates used in our Docker images can be found in `docker directory on Github <https://github.com/CERT-Polska/mwdb-core/tree/master/docker>`_
+Proper configuration files and templates used in our Docker images can be found in `docker directory on our Github repository
+<https://github.com/CERT-Polska/mwdb-core/tree/master/docker>`_
 
 Upgrading mwdb-core to latest version
 -------------------------------------

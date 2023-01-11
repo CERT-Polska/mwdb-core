@@ -1,8 +1,37 @@
 Setup and configuration
 =======================
 
-Prerequisites
--------------
+Installation and configuration with Docker Compose
+--------------------------------------------------
+
+The quickest way setup MWDB is to just clone the repository and use Docker-Compose with all batteries included.
+
+.. code-block:: console
+
+    $ git clone https://github.com/CERT-Polska/mwdb-core.git
+
+After cloning repository, the first step is to go to the ``mwdb-core`` directory and generate configuration using ``./gen_vars.sh`` script.
+
+.. code-block:: console
+
+   $ ./gen_vars.sh 
+   Credentials for initial mwdb account:
+
+   -----------------------------------------
+   Admin login: admin
+   Admin password: la/Z7MsmKA3UxW8Psrk1Opap
+   -----------------------------------------
+
+   Please be aware that initial account will be only set up on the first run. If you already have a database with at least one user, then this setting will be ignored for security reasons. You can always create an admin account manually by executing a command. See "flask create_admin --help" for reference.
+
+Then build images via ``docker-compose build`` and run MWDB via ``docker-compose up -d``.
+
+Your MWDB instance will be available on default HTTP port (80): http://127.0.0.1/
+
+If you want to use Docker Compose for MWDB development, check out :ref:`Developer guide`.
+
+Standalone installation: Prerequisites
+--------------------------------------
 
 MWDB was tested on Debian-based systems, but should work as well on other Linux distributions.
 
@@ -10,7 +39,7 @@ For production environments, you need to install:
 
 
 * **PostgreSQL database** (minimum supported version: 12, https://www.postgresql.org/download/linux/debian/)
-* **python-ssdeep library dependencies for Python 3** (https://python-ssdeep.readthedocs.io/en/latest/installation.html#id9) 
+* **python-ssdeep library dependencies for Python 3** (https://python-ssdeep.readthedocs.io/en/latest/installation.html#id9)
 
 Optionally you can install:
 
@@ -41,8 +70,8 @@ It's highly recommended to create a fresh `virtualenv <https://docs.python.org/3
 
    The connection string is: ``postgresql://mwdb:mwdb@127.0.0.1:54322/mwdb``
 
-Installation & Configuration
-----------------------------
+Standalone installation: mwdb-core package
+------------------------------------------
 
 The recommended installation method is pip:
 
@@ -87,14 +116,14 @@ Then, use ``mwdb-core configure`` to provide first configuration for your MWDB s
    3) Current directory
    : 3
 
-For first installation we recommend to install everything in current folder via ``3`` option. If you want to install MWDB system-wide or locally for user: choose ``1`` or ``2``. 
+For first installation we recommend to install everything in current folder via ``3`` option. If you want to install MWDB system-wide or locally for user: choose ``1`` or ``2``.
 
 Then, input the connection string for PostgreSQL database. The database must be online and reachable at the time of configuration. After that, you will be asked for path for uploads and instance base URL. If the default value is ok, press Enter:
 
 .. code-block::
 
    PostgreSQL database connection string [postgresql://localhost/mwdb]:
-   Uploads storage path [./uploads]: 
+   Uploads storage path [./uploads]:
    Base public URL of Malwarecage service [http://127.0.0.1]:
 
 Depending on the installation type, your configuration will be stored in ``mwdb.ini`` file and can be changed any time you want:
@@ -136,42 +165,29 @@ And you are done! ``run`` command will start the Flask server:
 
 Your MWDB instance will be available on port 5000 (use ``--port`` to change that): http://127.0.0.1:5000/
 
+Keep in mind that Flask server is meant to be used as development server and **is not suitable for production**.
+See also: https://flask.palletsprojects.com/en/2.2.x/server/
+
 .. warning::
 
-   Remember to run ``mwdb-core configure`` after each version upgrade to apply database migrations
+   In standalone setup, remember to run ``mwdb-core configure`` after each version upgrade to apply database migrations.
 
+Standalone installation: setting up gunicorn and nginx
+------------------------------------------------------
 
-Alternative setup with Docker Compose
---------------------------------------
+It's recommended to deploy Flask applications using dedicated WSGI server. We highly recommend Gunicorn as it's used
+in our Docker images and combine it with Nginx serving as proxy server for best security and performance
 
-The quickest way setup MWDB is to just clone the repository and use Docker-Compose. We recommend this method **only for testing** because it can be a bit more difficult to install extensions and integrate with other services.
+.. seealso::
 
-.. code-block:: console
+    https://flask.palletsprojects.com/en/2.2.x/deploying/
+    https://flask.palletsprojects.com/en/2.2.x/deploying/gunicorn/
+    https://docs.gunicorn.org/en/latest/deploy.html#deploying-gunicorn
 
-    $ git clone https://github.com/CERT-Polska/mwdb-core.git
+Proper configuration files and templates used in our Docker images can be found in `docker directory on Github <https://github.com/CERT-Polska/mwdb-core/tree/master/docker>`_
 
-After cloning repository, the first step is to go to the ``mwdb-core`` directory and generate configuration using ``./gen_vars.sh`` script.
-
-.. code-block:: console
-
-   $ ./gen_vars.sh 
-   Credentials for initial mwdb account:
-
-   -----------------------------------------
-   Admin login: admin
-   Admin password: la/Z7MsmKA3UxW8Psrk1Opap
-   -----------------------------------------
-
-   Please be aware that initial account will be only set up on the first run. If you already have a database with at least one user, then this setting will be ignored for security reasons. You can always create an admin account manually by executing a command. See "flask create_admin --help" for reference.
-
-Then build images via ``docker-compose build`` and run MWDB via ``docker-compose up -d``.
-
-Your MWDB instance will be available on default HTTP port (80): http://127.0.0.1/
-
-If you want to use Docker Compose for MWDB development, check out :ref:`Developer guide`.
-
-Upgrade mwdb-core to latest version
------------------------------------
+Upgrading mwdb-core to latest version
+-------------------------------------
 
 For standalone installation (pip-based), upgrade mwdb-core package to the latest version.
 

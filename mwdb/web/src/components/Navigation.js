@@ -276,11 +276,16 @@ export default function Navigation() {
                                                         message="Logout"
                                                         cancelText="Logout only from MWDB"
                                                         confirmText={`Logout from MWDB and ${auth.user.provider}`}
-                                                        onRequestClose={() => {
+                                                        onCancel={() => {
                                                             setIsModalOpen(
                                                                 false
                                                             );
                                                             auth.logout();
+                                                        }}
+                                                        onRequestClose={() => {
+                                                            setIsModalOpen(
+                                                                false
+                                                            );
                                                         }}
                                                         onConfirm={() => {
                                                             setIsModalOpen(

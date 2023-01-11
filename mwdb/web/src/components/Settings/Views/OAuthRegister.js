@@ -34,7 +34,8 @@ export default function OAuthRegister() {
         if (!discoverData) return;
         const keys = Object.keys(values);
         for (const i in keys) {
-            values[keys[i]] = discoverData[keys[i]];
+            if (typeof discoverData[keys[i]] !== "undefined")
+                values[keys[i]] = discoverData[keys[i]];
         }
         if (typeof discoverData["jwks_uri"] === "undefined")
             discoverData["jwks_uri"] = "";

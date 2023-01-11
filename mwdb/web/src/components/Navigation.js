@@ -275,7 +275,7 @@ export default function Navigation() {
                                                         isOpen={isModalOpen}
                                                         message="Logout"
                                                         cancelText="Logout only from MWDB"
-                                                        confirmText="Logout from MWDB and OAuth"
+                                                        confirmText={`Logout from MWDB and ${auth.user.provider}`}
                                                         onRequestClose={() => {
                                                             setIsModalOpen(
                                                                 false

@@ -203,10 +203,16 @@ export default function RecentView(props) {
                                     value="Search"
                                 />
                             </div>
-                            <div className="btn-group">
+                            <div
+                                className="btn-group"
+                                data-toggle="tooltip"
+                                title={`Turn ${
+                                    countingEnabled ? "off" : "on"
+                                } results counting`}
+                            >
                                 <input
                                     type="submit"
-                                    className={`btn btn-outline-info rounded-0 ${
+                                    className={`btn btn-outline-info rounded-0 shadow-none ${
                                         searchParams.get("count") === "1"
                                             ? "active"
                                             : ""
@@ -220,7 +226,6 @@ export default function RecentView(props) {
                                     }}
                                 />
                             </div>
-
                             <a
                                 href="https://mwdb.readthedocs.io/en/latest/user-guide/7-Lucene-search.html"
                                 className="btn btn-outline-primary"

@@ -11,6 +11,7 @@ The quickest way setup MWDB is to just clone the repository and use Docker-Compo
     $ git clone https://github.com/CERT-Polska/mwdb-core.git
 
 After cloning repository, the first step is to go to the ``mwdb-core`` directory and generate configuration using ``./gen_vars.sh`` script.
+Generated variables can be found in mwdb-vars.env.
 
 .. code-block:: console
 
@@ -42,7 +43,6 @@ For production environments, you need to install:
 
 
 * **PostgreSQL database** (minimum supported version: 12, https://www.postgresql.org/download/linux/debian/)
-* **python-ssdeep library dependencies for Python 3** (https://python-ssdeep.readthedocs.io/en/latest/installation.html#id9)
 
 Optionally you can install:
 

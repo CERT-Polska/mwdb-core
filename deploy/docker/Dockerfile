@@ -28,6 +28,7 @@ RUN mkdir -p /app/uploads/ && \
 
 ENV PYTHONPATH=/app
 ENV FLASK_APP=/app/mwdb/app.py
+# How many workers gunicorn should spawn by default
 WORKDIR /app
 
 CMD ["/app/start.sh"]

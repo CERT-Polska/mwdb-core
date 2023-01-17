@@ -23,7 +23,6 @@ services:
       MWDB_BASE_URL: http://127.0.0.1
       MWDB_ENABLE_RATE_LIMIT: 0
       MWDB_ENABLE_REGISTRATION: 1
-      UWSGI_PROCESSES: 4
       MWDB_MAIL_SMTP: "mailhog:1025"
       MWDB_MAIL_FROM: "noreply@mwdb.dev"
     volumes:

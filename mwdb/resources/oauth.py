@@ -679,7 +679,7 @@ class OpenIDLogoutResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        if provider.logout_endpoint is None:
+        if not provider.logout_endpoint:
             raise PreconditionFailed(
                 f"end_session_endpoint is not specified for {provider_name}"
             )

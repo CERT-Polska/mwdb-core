@@ -287,12 +287,13 @@ export default function Navigation() {
                                                                 false
                                                             );
                                                         }}
-                                                        onConfirm={() => {
+                                                        onConfirm={async () => {
                                                             setIsModalOpen(
                                                                 false
                                                             );
-                                                            auth.oAuthLogout();
-                                                            auth.logout();
+                                                            let e =
+                                                                await auth.oAuthLogout();
+                                                            auth.logout(e);
                                                         }}
                                                         buttonStyle="btn-danger"
                                                     >

@@ -118,8 +118,10 @@ export function AuthProvider(props) {
         try {
             let response = await api.oauthGetLogoutLink(session.provider);
             window.location.href = response.data.url;
+            return null;
         } catch (e) {
             console.log(e);
+            return e.response.data.message;
         }
     }
 

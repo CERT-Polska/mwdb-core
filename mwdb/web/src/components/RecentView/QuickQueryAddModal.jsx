@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { Alert, ConfirmationModal } from "../../commons/ui";
 
 export default function QuickQueryAddModal(props) {
     const [value, setValue] = useState("");

@@ -4,10 +4,10 @@ import { NavLink, useParams, Outlet } from "react-router-dom";
 import { faUserCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
-import { AuthContext } from "@mwdb-web/commons/auth";
-import { ConfigContext } from "@mwdb-web/commons/config";
-import { View, useViewAlert } from "@mwdb-web/commons/ui";
+import api from "../../commons/api";
+import { AuthContext } from "../../commons/auth";
+import { ConfigContext } from "../../commons/config";
+import { View, useViewAlert } from "../../commons/ui";
 
 function ProfileNav() {
     const config = useContext(ConfigContext);

@@ -1,9 +1,9 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
-import { addFieldToQuery, multiFromHashes } from "@mwdb-web/commons/helpers";
-import { View } from "@mwdb-web/commons/ui";
+import { APIContext } from "../../commons/api/context";
+import { addFieldToQuery, multiFromHashes } from "../../commons/helpers";
+import { View } from "../../commons/ui";
 
 import RecentViewList from "./RecentViewList";
 import QuickQuery from "./QuickQuery";

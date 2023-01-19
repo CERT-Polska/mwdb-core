@@ -67,14 +67,14 @@ import UserCapabilities from "./components/Settings/Views/UserCapabilities";
 import UserAPIKeys from "./components/Settings/Views/UserAPIKeys";
 import { AttributeEditTemplate } from "./components/Settings/Views/AttributeEditTemplate";
 
-import { Capability } from "@mwdb-web/commons/auth";
-import { ConfigContext } from "@mwdb-web/commons/config";
-import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
+import { Capability } from "./commons/auth";
+import { ConfigContext } from "./commons/config";
+import { fromPlugins, Extendable } from "./commons/plugins";
 import {
     ErrorBoundary,
     RequiresAuth,
     RequiresCapability,
-} from "@mwdb-web/commons/ui";
+} from "./commons/ui";
 
 function NavigateFor404() {
     /**
@@ -224,9 +224,9 @@ function AppRoutes() {
                         />
                     </Route>
                 </Route>
-                {fromPlugin("protectedRoutes")}
+                {fromPlugins("protectedRoutes")}
             </Route>
-            {fromPlugin("routes")}
+            {fromPlugins("routes")}
             <Route path="*" element={<NavigateFor404 />} />
         </Routes>
     );

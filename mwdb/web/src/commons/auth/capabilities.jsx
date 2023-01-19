@@ -1,4 +1,4 @@
-import { fromPlugin } from "../extensions";
+import { afterPluginsLoaded, fromPlugins } from "../plugins";
 
 export const Capability = {
     manageUsers: "manage_users",
@@ -61,6 +61,8 @@ export let capabilitiesList = {
     [Capability.removingKarton]: "Can remove analysis from object",
 };
 
-for (let extraCapabilities of fromPlugin("capabilities")) {
-    capabilitiesList = { ...capabilitiesList, ...extraCapabilities };
-}
+afterPluginsLoaded(() => {
+    for (let extraCapabilities of fromPlugins("capabilities")) {
+        capabilitiesList = { ...capabilitiesList, ...extraCapabilities };
+    }
+})

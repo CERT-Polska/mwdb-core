@@ -1,9 +1,9 @@
 import React from "react";
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
-import { TagList } from "@mwdb-web/commons/ui";
-import { DateString, Identicon, ObjectLink } from "@mwdb-web/commons/ui";
-import { humanFileSize } from "@mwdb-web/commons/helpers";
+import { TagList } from "../commons/ui";
+import { DateString, Identicon, ObjectLink } from "../commons/ui";
+import { humanFileSize } from "../commons/helpers";
 
 export function RecentFileRow(props) {
     const identicon = (

@@ -7,7 +7,7 @@ import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 
-import { DataTable, View } from "@mwdb-web/commons/ui";
+import { DataTable, View } from "../../commons/ui";
 import exampleTemplates, { makeContext } from "./exampleTemplates";
 
 function templateReducer(state, action) {

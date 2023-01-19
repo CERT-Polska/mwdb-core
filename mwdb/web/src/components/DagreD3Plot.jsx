@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 
 import * as dagreD3 from "dagre-d3";
 import * as d3 from "d3";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
+import { useRemotePath } from "../commons/remotes";
 
 function DagreD3Plot(props) {
     const remotePath = useRemotePath();

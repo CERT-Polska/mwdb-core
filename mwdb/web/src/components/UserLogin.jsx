@@ -1,11 +1,11 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 
-import { AuthContext } from "@mwdb-web/commons/auth";
-import { ConfigContext } from "@mwdb-web/commons/config";
-import api from "@mwdb-web/commons/api";
-import { Extension } from "@mwdb-web/commons/extensions";
-import { View, ShowIf } from "@mwdb-web/commons/ui";
+import { AuthContext } from "../commons/auth";
+import { ConfigContext } from "../commons/config";
+import api from "../commons/api";
+import { Extension } from "../commons/plugins";
+import { View, ShowIf } from "../commons/ui";
 import { ProviderButton, ProvidersSelectList } from "./OAuth";
 
 export default function UserLogin() {

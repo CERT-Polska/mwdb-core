@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
-import { capabilitiesList } from "@mwdb-web/commons/auth";
-import { intersperse } from "@mwdb-web/commons/helpers";
+import api from "../../../commons/api";
+import { capabilitiesList } from "../../../commons/auth";
+import { intersperse } from "../../../commons/helpers";
 import {
     Autocomplete,
     BootstrapSelect,
@@ -14,7 +14,7 @@ import {
     GroupBadge,
     ShowIf,
     useViewAlert,
-} from "@mwdb-web/commons/ui";
+} from "../../../commons/ui";
 
 function GroupAppliesTo({ group }) {
     if (group["name"] === "public")

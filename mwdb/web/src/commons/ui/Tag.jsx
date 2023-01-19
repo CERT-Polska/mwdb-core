@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faTimes } from "@fortawesome/free-solid-svg-icons";
 
-import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { makeSearchLink } from "../helpers";
 
 export function getStyleForTag(tag) {
     const styleList = {

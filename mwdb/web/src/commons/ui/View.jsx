@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Alert, getErrorMessage } from "./ErrorBoundary";
-import { Extendable } from "../extensions";
+import { Extendable } from "../plugins";
 
 function ViewAlert({ success, error, warning }) {
     const locationState = useLocation().state || {};

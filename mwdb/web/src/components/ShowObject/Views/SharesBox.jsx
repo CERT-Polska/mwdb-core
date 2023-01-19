@@ -3,16 +3,16 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLockOpen, faLock } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
-import { ObjectContext } from "@mwdb-web/commons/context";
-import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
+import { APIContext } from "../../../commons/api/context";
+import { ObjectContext } from "../../../commons/context";
+import { makeSearchLink } from "../../../commons/helpers";
+import { useRemotePath } from "../../../commons/remotes";
 import {
     DateString,
     ConfirmationModal,
     Autocomplete,
     ShareReasonString,
-} from "@mwdb-web/commons/ui";
+} from "../../../commons/ui";
 
 function groupShares(shares) {
     function timeCompare(a, b) {

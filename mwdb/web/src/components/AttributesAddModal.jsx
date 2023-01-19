@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 
-import api from "@mwdb-web/commons/api";
-import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import api from "../commons/api";
+import { ConfirmationModal } from "../commons/ui";
 import RichAttributeRenderer from "./RichAttribute/RichAttributeRenderer";
 
 import AceEditor from "react-ace";

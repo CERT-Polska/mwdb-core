@@ -14,7 +14,6 @@
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/react-fontawesome": "0.1.18",
     "@hookform/resolvers": "2.9.1",
-    "@mwdb-web/commons": "file:src/commons",
     "axios": "^0.27.2",
     "bootstrap": "4.3.1",
     "bootstrap-select": "^1.13.18",

@@ -1,10 +1,10 @@
 import React, { Suspense, useState, useLayoutEffect, useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
-import { capitalize } from "@mwdb-web/commons/helpers";
+import { APIContext } from "../commons/api/context";
+import { capitalize } from "../commons/helpers";
 
-import { Tag } from "@mwdb-web/commons/ui";
+import { Tag } from "../commons/ui";
 
 const DagreD3Plot = React.lazy(() => import("./DagreD3Plot"));
 

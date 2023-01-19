@@ -1,13 +1,13 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Navigate, useParams, useOutletContext } from "react-router-dom";
 
-import api from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import api from "../../../commons/api";
+import { AuthContext, Capability } from "../../../commons/auth";
 import {
     GroupBadge,
     useViewAlert,
     ConfirmationModal,
-} from "@mwdb-web/commons/ui";
+} from "../../../commons/ui";
 
 function ProfileGroupItems({ workspace, updateWorkspace }) {
     const { setAlert } = useViewAlert();

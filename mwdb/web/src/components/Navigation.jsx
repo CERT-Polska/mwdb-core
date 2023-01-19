@@ -11,11 +11,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { ConfigContext } from "@mwdb-web/commons/config";
-import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
-import { NavDropdown } from "@mwdb-web/commons/ui";
-import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
+import { AuthContext, Capability } from "../commons/auth";
+import { ConfigContext } from "../commons/config";
+import { fromPlugins, Extendable } from "../commons/plugins";
+import { NavDropdown } from "../commons/ui";
+import { useRemote, useRemotePath } from "../commons/remotes";
 
 import logo from "../assets/logo.png";
 
@@ -87,6 +87,7 @@ function UploadButton() {
 export default function Navigation() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
+
     const remote = useRemote();
     const remotePath = useRemotePath();
     const navItems = config.isReady ? (
@@ -165,12 +166,12 @@ export default function Navigation() {
                               </Link>,
                           ]
                         : []),
-                    ...fromPlugin("navdropdownAbout"),
+                    ...fromPlugins("navdropdownAbout"),
                 ]}
             />
             <NavDropdown
                 title="Extras"
-                elements={[...fromPlugin("navdropdownExtras")]}
+                elements={[...fromPlugins("navdropdownExtras")]}
             />
         </Extendable>
     ) : (

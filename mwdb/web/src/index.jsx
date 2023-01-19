@@ -3,24 +3,29 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 
-import { APIProvider } from "@mwdb-web/commons/api/provider";
-import { AuthProvider } from "@mwdb-web/commons/auth";
-import { ConfigProvider } from "@mwdb-web/commons/config";
+import { APIProvider } from "./commons/api/provider";
+import { AuthProvider } from "./commons/auth";
+import { ConfigProvider } from "./commons/config";
 
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
 import "./styles/index.css";
 import "swagger-ui-react/swagger-ui.css";
 
-const root = createRoot(document.getElementById("root"));
-root.render(
-    <BrowserRouter>
-        <AuthProvider>
-            <ConfigProvider>
-                <APIProvider>
-                    <App />
-                </APIProvider>
-            </ConfigProvider>
-        </AuthProvider>
-    </BrowserRouter>
-);
+// Virtual module provided by Vite custom plugin
+import {loadPlugins} from "./commons/plugins";
+
+loadPlugins().then(() => {
+    const root = createRoot(document.getElementById("root"));
+    root.render(
+        <BrowserRouter>
+            <AuthProvider>
+                <ConfigProvider>
+                    <APIProvider>
+                        <App />
+                    </APIProvider>
+                </ConfigProvider>
+            </AuthProvider>
+        </BrowserRouter>
+    );
+});

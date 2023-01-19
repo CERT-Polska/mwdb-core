@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
+import { ActionCopyToClipboard } from "../../commons/ui";
 
 export default function RecentInnerRow(props) {
     const classNames = (

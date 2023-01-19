@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { capitalize } from "@mwdb-web/commons/helpers";
+import { capitalize } from "../helpers";
 
 export const TabContext = React.createContext();
 export const useTabContext = () => useContext(TabContext);

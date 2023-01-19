@@ -2,9 +2,9 @@ import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 
-import api from "@mwdb-web/commons/api";
-import { ConfigContext } from "@mwdb-web/commons/config";
-import { View } from "@mwdb-web/commons/ui";
+import api from "../commons/api";
+import { ConfigContext } from "../commons/config";
+import { View } from "../commons/ui";
 
 export default function UserRegister() {
     const config = useContext(ConfigContext);

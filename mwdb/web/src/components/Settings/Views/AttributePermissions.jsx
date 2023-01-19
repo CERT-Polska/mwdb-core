@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useParams, useOutletContext } from "react-router-dom";
-import api from "@mwdb-web/commons/api";
+import api from "../../../commons/api";
 import {
     Autocomplete,
     ConfirmationModal,
     useViewAlert,
-} from "@mwdb-web/commons/ui";
+} from "../../../commons/ui";
 
 function AttributePermissionsItem({
     group,

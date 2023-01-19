@@ -5,13 +5,13 @@ import Pagination from "react-js-pagination";
 import { faTrash, faCrown, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "@mwdb-web/commons/api";
+import api from "../../../commons/api";
 import {
     useViewAlert,
     Autocomplete,
     ConfirmationModal,
     UserBadge,
-} from "@mwdb-web/commons/ui";
+} from "../../../commons/ui";
 
 function AddMemberForm({ newMemberItems, addMember }) {
     const [newMember, setNewMember] = useState("");

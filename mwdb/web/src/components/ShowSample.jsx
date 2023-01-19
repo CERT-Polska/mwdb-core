@@ -24,21 +24,21 @@ import {
     faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
+import { APIContext } from "../commons/api/context";
 import {
     makeSearchLink,
     makeSearchDateLink,
     humanFileSize,
-} from "@mwdb-web/commons/helpers";
-import { Extendable } from "@mwdb-web/commons/extensions";
+} from "../commons/helpers";
+import { Extendable } from "../commons/plugins";
 import {
     ActionCopyToClipboard,
     DataTable,
     DateString,
     Hash,
     HexView,
-} from "@mwdb-web/commons/ui";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
+} from "../commons/ui";
+import { useRemotePath } from "../commons/remotes";
 
 function SampleDetails() {
     const context = useContext(ObjectContext);

@@ -5,9 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRandom } from "@fortawesome/free-solid-svg-icons";
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
-import { TagList } from "@mwdb-web/commons/ui";
-import { DateString, ObjectLink, Hash } from "@mwdb-web/commons/ui";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
+import { TagList } from "../commons/ui";
+import { DateString, ObjectLink, Hash } from "../commons/ui";
+import { useRemotePath } from "../commons/remotes";
 
 export function RecentBlobRow(props) {
     const remotePath = useRemotePath();

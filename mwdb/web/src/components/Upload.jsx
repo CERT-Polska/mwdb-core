@@ -6,11 +6,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import AttributesAddModal from "./AttributesAddModal";
 
-import api from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { Autocomplete, DataTable, View } from "@mwdb-web/commons/ui";
-import { ConfigContext } from "@mwdb-web/commons/config";
-import { Extendable } from "@mwdb-web/commons/extensions";
+import api from "../commons/api";
+import { AuthContext, Capability } from "../commons/auth";
+import { Autocomplete, DataTable, View } from "../commons/ui";
+import { ConfigContext } from "../commons/config";
+import { Extendable } from "../commons/plugins";
 
 function UploadDropzone(props) {
     const onDrop = props.onDrop;

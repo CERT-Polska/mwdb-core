@@ -7,18 +7,20 @@ import {
     faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { ObjectContext } from "@mwdb-web/commons/context";
-import { fromPlugin, Extendable } from "@mwdb-web/commons/extensions";
-import { DataTable, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
-import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { ObjectContext } from "../../../commons/context";
+import { fromPlugins, Extendable, afterPluginsLoaded } from "../../../commons/plugins";
+import { DataTable, ActionCopyToClipboard } from "../../../commons/ui";
+import { makeSearchLink } from "../../../commons/helpers";
 import { useNavigate } from "react-router-dom";
 import { renderValue } from "../../RichAttribute/MarkedMustache";
 
 let attributeRenderers = {};
 
-for (let extraRenderers of fromPlugin("attributeRenderers")) {
-    attributeRenderers = { ...attributeRenderers, ...extraRenderers };
-}
+afterPluginsLoaded(() => {
+    for (let extraRenderers of fromPlugins("attributeRenderers")) {
+        attributeRenderers = {...attributeRenderers, ...extraRenderers};
+    }
+})
 
 function RichAttributeValue({ attributeDefinition, value }) {
     const { rich_template: richTemplate, key } = attributeDefinition;

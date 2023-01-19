@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
-import api from "@mwdb-web/commons/api";
-import { GroupBadge, useViewAlert } from "@mwdb-web/commons/ui";
+import api from "../../../commons/api";
+import { GroupBadge, useViewAlert } from "../../../commons/ui";
 
 export default function ProfileGroups() {
     const { redirectToAlert } = useViewAlert();

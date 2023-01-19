@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
+
 import ObjectLink from "./ObjectLink";
+import { useRemotePath } from "../remotes";
 import { makeSearchLink } from "../helpers";
 
 export default function ShareReasonString({

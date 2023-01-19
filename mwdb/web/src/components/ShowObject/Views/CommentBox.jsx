@@ -4,10 +4,10 @@ import Pagination from "react-js-pagination";
 
 import _ from "lodash";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { ObjectContext } from "@mwdb-web/commons/context";
-import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { APIContext } from "../../../commons/api/context";
+import { AuthContext, Capability } from "../../../commons/auth";
+import { ObjectContext } from "../../../commons/context";
+import { Identicon, ConfirmationModal } from "../../../commons/ui";
 
 function Comment(props) {
     return (

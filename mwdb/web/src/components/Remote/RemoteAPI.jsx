@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
-import { APIContext } from "@mwdb-web/commons/api/context";
-import api from "@mwdb-web/commons/api";
-import { useRemote } from "@mwdb-web/commons/remotes";
+import { APIContext } from "../../commons/api/context";
+import api from "../../commons/api";
+import { useRemote } from "../../commons/remotes";
 
 export default function RemoteAPI({ children }) {
     const remote = useRemote();

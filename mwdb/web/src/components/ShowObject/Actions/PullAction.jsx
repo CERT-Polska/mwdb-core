@@ -2,12 +2,12 @@ import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
-import { AuthContext } from "@mwdb-web/commons/auth";
-import { ObjectContext } from "@mwdb-web/commons/context";
-import { ObjectAction } from "@mwdb-web/commons/ui";
-import { ConfirmationModal } from "@mwdb-web/commons/ui";
-import { mapObjectType } from "@mwdb-web/commons/helpers";
+import { APIContext } from "../../../commons/api/context";
+import { AuthContext } from "../../../commons/auth";
+import { ObjectContext } from "../../../commons/context";
+import { ObjectAction } from "../../../commons/ui";
+import { ConfirmationModal } from "../../../commons/ui";
+import { mapObjectType } from "../../../commons/helpers";
 
 export default function PullAction() {
     const api = useContext(APIContext);

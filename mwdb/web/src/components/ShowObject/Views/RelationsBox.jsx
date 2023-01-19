@@ -4,19 +4,19 @@ import Pagination from "react-js-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
-import { Capability } from "@mwdb-web/commons/auth";
-import { AuthContext } from "@mwdb-web/commons/auth/context";
-import { ObjectContext } from "@mwdb-web/commons/context";
+import { APIContext } from "../../../commons/api/context";
+import { Capability } from "../../../commons/auth";
+import { AuthContext } from "../../../commons/auth/context";
+import { ObjectContext } from "../../../commons/context";
 import {
     ObjectLink,
     ActionCopyToClipboard,
     ConfirmationModal,
     TagList,
-} from "@mwdb-web/commons/ui";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
+} from "../../../commons/ui";
+import { useRemotePath } from "../../../commons/remotes";
 import RelationsAddModal from "../Actions/RelationsAddModal";
-import { updateActivePage } from "@mwdb-web/commons/helpers";
+import { updateActivePage } from "../../../commons/helpers";
 
 function paginateParentChildren(
     parents,

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, Outlet, Link, Route, Routes } from "react-router-dom";
 
-import api from "@mwdb-web/commons/api";
-import { useViewAlert } from "@mwdb-web/commons/ui";
+import api from "../../../commons/api";
+import { useViewAlert } from "../../../commons/ui";
 
 export default function UserView() {
     const { setAlert } = useViewAlert();

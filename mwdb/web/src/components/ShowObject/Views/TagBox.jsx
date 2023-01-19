@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
 
-import { APIContext } from "@mwdb-web/commons/api/context";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { ObjectContext } from "@mwdb-web/commons/context";
-import { ConfirmationModal } from "@mwdb-web/commons/ui";
-import { Autocomplete, TagList, Tag } from "@mwdb-web/commons/ui";
+import { APIContext } from "../../../commons/api/context";
+import { AuthContext, Capability } from "../../../commons/auth";
+import { ObjectContext } from "../../../commons/context";
+import { ConfirmationModal } from "../../../commons/ui";
+import { Autocomplete, TagList, Tag } from "../../../commons/ui";
 
 function TagForm(props) {
     const api = useContext(APIContext);

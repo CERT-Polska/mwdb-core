@@ -2,9 +2,9 @@ import React, { useContext } from "react";
 
 import ConfigTable from "../../ConfigTable";
 
-import { ObjectContext } from "@mwdb-web/commons/context";
-import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
+import { ObjectContext } from "../../../commons/context";
+import { ObjectAction, ObjectTab } from "../../../commons/ui";
+import { useRemotePath } from "../../../commons/remotes";
 
 export default function LatestConfigTab(props) {
     const context = useContext(ObjectContext);

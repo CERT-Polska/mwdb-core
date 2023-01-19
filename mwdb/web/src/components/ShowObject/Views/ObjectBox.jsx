@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 
-import { TabContext } from "@mwdb-web/commons/ui";
+import { TabContext } from "../../../commons/ui";
 
 function useComponentState(initialState) {
     // Functions (and components) are just called by useState and setter,

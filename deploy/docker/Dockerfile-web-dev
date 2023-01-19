@@ -11,4 +11,4 @@ RUN cd /app \
 ENV PROXY_BACKEND_URL http://mwdb.:8080
 
 WORKDIR /app
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "preview"]

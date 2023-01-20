@@ -7,10 +7,12 @@ RUN /app/venv/bin/pip --no-cache-dir install wheel
 RUN apk add --no-cache libffi libffi-dev py3-cffi build-base python3-dev automake m4 autoconf libtool gcc g++ musl-dev openssl-dev cargo postgresql-dev
 
 COPY requirements.txt /app
-COPY docker/plugins /app/plugins
+RUN /app/venv/bin/pip --no-cache-dir install -r /app/requirements.txt
 
+COPY docker/plugins /app/plugins
 ARG plugins
-RUN /app/venv/bin/pip --no-cache-dir install -r /app/requirements.txt $plugins $(find /app/plugins -name 'setup.py' | sort -u)
+RUN for plugin in $plugins $(find /app/plugins -name 'setup.py' -exec dirname {} \; | sort -u);  \
+    do /app/venv/bin/pip --no-cache-dir install $plugin; done
 
 FROM python:3.8-alpine
 

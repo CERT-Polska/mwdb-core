@@ -1,7 +1,7 @@
 import React, { Suspense, useState, useLayoutEffect, useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { APIContext } from "../commons/api/context";
+import { APIContext } from "../commons/api";
 import { capitalize } from "../commons/helpers";
 
 import { Tag } from "../commons/ui";

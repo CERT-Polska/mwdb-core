@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
-import { APIContext } from "../../commons/api/context";
-import { api } from "../../commons/api";
+import { api, APIContext } from "../../commons/api";
 import { useRemote } from "../../commons/remotes";
 
 export default function RemoteAPI({ children }) {

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "../../../commons/api/context";
+import { APIContext } from "../../../commons/api";
 import { AuthContext, Capability } from "../../../commons/auth";
 import { ObjectContext } from "../../../commons/context";
 import { ObjectAction, ConfirmationModal } from "../../../commons/ui";

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "../../commons/api/context";
+import { APIContext } from "../../commons/api";
 import { AuthContext, Capability } from "../../commons/auth";
 import { ConfirmationModal } from "../../commons/ui";
 

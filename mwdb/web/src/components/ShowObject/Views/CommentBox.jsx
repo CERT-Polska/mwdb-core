@@ -4,7 +4,7 @@ import Pagination from "react-js-pagination";
 
 import _ from "lodash";
 
-import { APIContext } from "../../../commons/api/context";
+import { APIContext } from "../../../commons/api";
 import { AuthContext, Capability } from "../../../commons/auth";
 import { ObjectContext } from "../../../commons/context";
 import { Identicon, ConfirmationModal } from "../../../commons/ui";

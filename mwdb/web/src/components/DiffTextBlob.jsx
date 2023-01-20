@@ -15,7 +15,7 @@ import DiffMatchPatch from "diff-match-patch";
 import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/theme-chrome";
 
-import { APIContext } from "../commons/api/context";
+import { APIContext } from "../commons/api";
 import { View } from "../commons/ui";
 import { useRemote } from "../commons/remotes";
 

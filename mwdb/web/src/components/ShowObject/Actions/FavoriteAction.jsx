@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as farStar } from "@fortawesome/free-regular-svg-icons";
 
-import { APIContext } from "../../../commons/api/context";
+import { APIContext } from "../../../commons/api";
 import { AuthContext, Capability } from "../../../commons/auth";
 import { ObjectContext } from "../../../commons/context";
 import { ObjectAction } from "../../../commons/ui";

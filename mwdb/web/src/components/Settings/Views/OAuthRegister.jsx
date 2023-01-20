@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 
-import { APIContext } from "../../../commons/api/context";
+import { APIContext } from "../../../commons/api";
 
 import { useViewAlert } from "../../../commons/ui";
 

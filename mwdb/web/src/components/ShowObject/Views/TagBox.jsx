@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 
-import { APIContext } from "../../../commons/api/context";
+import { APIContext } from "../../../commons/api";
 import { AuthContext, Capability } from "../../../commons/auth";
 import { ObjectContext } from "../../../commons/context";
 import { ConfirmationModal } from "../../../commons/ui";

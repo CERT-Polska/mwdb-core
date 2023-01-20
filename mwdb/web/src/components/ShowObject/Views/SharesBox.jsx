@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLockOpen, faLock } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "../../../commons/api/context";
+import { APIContext } from "../../../commons/api";
 import { ObjectContext } from "../../../commons/context";
 import { makeSearchLink } from "../../../commons/helpers";
 import { useRemotePath } from "../../../commons/remotes";

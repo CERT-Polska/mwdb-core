@@ -15,7 +15,7 @@ import ShareBox from "./Views/SharesBox";
 import TagBox from "./Views/TagBox";
 import AttributesBox from "./Views/AttributesBox";
 
-import { APIContext } from "../../commons/api/context";
+import { APIContext } from "../../commons/api";
 import { ConfigContext } from "../../commons/config";
 import { ObjectContext } from "../../commons/context";
 import { Extendable } from "../../commons/plugins";

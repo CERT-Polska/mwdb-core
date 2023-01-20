@@ -1,4 +1,5 @@
 import Axios from "axios";
+import React from "react";
 
 function getApiForEnvironment() {
     // Default API endpoint
@@ -643,3 +644,10 @@ export const api = {
     resubmitKartonAnalysis,
     removeKartonAnalysisFromObject,
 };
+
+export const APIContext = React.createContext({});
+export function APIProvider(props) {
+    return (
+        <APIContext.Provider value={api}>{props.children}</APIContext.Provider>
+    );
+}

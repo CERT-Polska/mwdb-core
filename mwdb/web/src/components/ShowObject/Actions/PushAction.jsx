@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "../../../commons/api/context";
+import { APIContext } from "../../../commons/api";
 import { ConfigContext } from "../../../commons/config";
 import { ObjectContext } from "../../../commons/context";
 import { ObjectAction } from "../../../commons/ui";

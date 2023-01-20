@@ -13,16 +13,16 @@ function findInstalledPlugins(namespace) {
 
 function pluginLoader() {
   /**
-   * Vite plugin which provides virtual module "@mwdb-core/plugins".
-   * Imports all plugins installed in @mwdb-core namespace.
+   * Vite plugin which provides virtual module "@mwdb-web/plugins".
+   * Imports all plugins installed in @mwdb-web namespace.
    *
    * Usage of virtual module:
    *
-   * import plugins from "@mwdb-core/plugins";
+   * import plugins from "@mwdb-web/plugins";
    *
    * plugins exposes dictionary {"plugin-name": pluginLoadFunction}
    */
-  const virtualModuleId = '@mwdb-core/plugins';
+  const virtualModuleId = '@mwdb-web/plugins';
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
 
   return {
@@ -34,9 +34,9 @@ function pluginLoader() {
     },
     load(id) {
       if(id === resolvedVirtualModuleId) {
-        const plugins = findInstalledPlugins("@mwdb-core");
+        const plugins = findInstalledPlugins("@mwdb-web");
         const exports = plugins.map(
-            (pluginName, index) => `"${pluginName}": import("@mwdb-core/${pluginName}"),`
+            (pluginName, index) => `"${pluginName}": import("@mwdb-web/${pluginName}"),`
         ).join("\n");
         return `export default { ${exports} };`;
       }
@@ -46,7 +46,7 @@ function pluginLoader() {
 
 function pluginExposeCommons() {
   /**
-   * Vite plugin that provides virtual module "@mwdb-core/commons/*".
+   * Vite plugin that provides virtual module "@mwdb-web/commons/*".
    *
    * It maps src/commons modules to virtual package, so they're
    * available for plugins via simple import.
@@ -55,12 +55,12 @@ function pluginExposeCommons() {
   return {
     name: 'expose-commons',
     resolveId(id) {
-      if(id.startsWith("@mwdb-core/commons/")) {
+      if(id.startsWith("@mwdb-web/commons/")) {
         return "\0" + id;
       }
     },
     load(id) {
-      if(id.startsWith("\0@mwdb-core/commons/")) {
+      if(id.startsWith("\0@mwdb-web/commons/")) {
         const modulesPath = id.split("/");
         if(modulesPath.length !== 3) {
           throw new Error(`Incorrect commons import '${id}', only one level deep allowed`)

@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
 
-import pluginLoaders from "@mwdb-core/plugins";
+import pluginLoaders from "@mwdb-web/plugins";
 
 let loadedPlugins = {};
 let pluginsLoadedCallbacks = [];

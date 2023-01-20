@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { APIContext } from "../../../commons/api";
+import { APIContext } from "@mwdb-web/commons/api";
 
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { useViewAlert } from "../../../commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function OAuthListProviders() {
     const api = useContext(APIContext);

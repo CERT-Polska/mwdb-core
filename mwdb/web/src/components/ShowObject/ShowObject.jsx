@@ -15,11 +15,11 @@ import ShareBox from "./Views/SharesBox";
 import TagBox from "./Views/TagBox";
 import AttributesBox from "./Views/AttributesBox";
 
-import { APIContext } from "../../commons/api";
-import { ConfigContext } from "../../commons/config";
-import { ObjectContext } from "../../commons/context";
-import { Extendable } from "../../commons/plugins";
-import { View } from "../../commons/ui";
+import { APIContext } from "@mwdb-web/commons/api";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { ObjectContext } from "@mwdb-web/commons/context";
+import { Extendable } from "@mwdb-web/commons/plugins";
+import { View } from "@mwdb-web/commons/ui";
 import KartonAnalysisBox from "./Views/KartonAnalysisBox";
 
 const initialObjectState = {

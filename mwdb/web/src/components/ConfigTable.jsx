@@ -9,15 +9,15 @@ import {
     makeSearchLink,
     makeSearchConfigLink,
     makeSearchDateLink,
-} from "../commons/helpers";
-import { Extendable } from "../commons/plugins";
+} from "@mwdb-web/commons/helpers";
+import { Extendable } from "@mwdb-web/commons/plugins";
 import {
     ActionCopyToClipboard,
     DataTable,
     DateString,
     ObjectLink,
-} from "../commons/ui";
-import { useRemotePath } from "../commons/remotes";
+} from "@mwdb-web/commons/ui";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 export function ConfigRow(props) {
     const key = props.configKey;

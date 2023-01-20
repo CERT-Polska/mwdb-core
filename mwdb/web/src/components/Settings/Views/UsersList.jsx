@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { api } from "../../../commons/api";
+import { api } from "@mwdb-web/commons/api";
 import {
     GroupBadge,
     PagedList,
     HighlightText,
     LimitTo,
     useViewAlert,
-} from "../../../commons/ui";
+} from "@mwdb-web/commons/ui";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faRobot } from "@fortawesome/free-solid-svg-icons";

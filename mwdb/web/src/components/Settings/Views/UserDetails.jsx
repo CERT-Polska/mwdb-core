@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import { api } from "../../../commons/api";
+import { api } from "@mwdb-web/commons/api";
 import {
     DateString,
     ConfirmationModal,
@@ -8,8 +8,8 @@ import {
     PseudoEditableItem,
     GroupBadge,
     useViewAlert,
-} from "../../../commons/ui";
-import { makeSearchLink } from "../../../commons/helpers";
+} from "@mwdb-web/commons/ui";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faTrash } from "@fortawesome/free-solid-svg-icons";
 

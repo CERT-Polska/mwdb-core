@@ -11,11 +11,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { AuthContext, Capability } from "../commons/auth";
-import { ConfigContext } from "../commons/config";
-import { fromPlugins, Extendable } from "../commons/plugins";
-import { NavDropdown } from "../commons/ui";
-import { useRemote, useRemotePath } from "../commons/remotes";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { fromPlugins, Extendable } from "@mwdb-web/commons/plugins";
+import { NavDropdown } from "@mwdb-web/commons/ui";
+import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
 
 import logo from "../assets/logo.png";
 

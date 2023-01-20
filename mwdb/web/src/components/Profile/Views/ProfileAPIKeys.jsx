@@ -5,13 +5,13 @@ import { useLocation, useOutletContext } from "react-router-dom";
 import { faCopy, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { api } from "../../../commons/api";
+import { api } from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
     DateString,
     ShowIf,
     useViewAlert,
-} from "../../../commons/ui";
+} from "@mwdb-web/commons/ui";
 
 function KeyNameModal({ isOpen, onConfirm, onClose }) {
     const [currentKeyName, setCurrentKeyName] = useState("");

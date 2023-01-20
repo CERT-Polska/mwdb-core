@@ -5,8 +5,8 @@ import { Link, useOutletContext } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
-import { api } from "../../../commons/api";
-import { ShowIf, useViewAlert } from "../../../commons/ui";
+import { api } from "@mwdb-web/commons/api";
+import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function UserResetPassword() {
     const viewAlert = useViewAlert();

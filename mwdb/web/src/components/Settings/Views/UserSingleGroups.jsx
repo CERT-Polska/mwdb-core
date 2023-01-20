@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { api } from "../../../commons/api";
+import { api } from "@mwdb-web/commons/api";
 import {
     Autocomplete,
     ConfirmationModal,
     GroupBadge,
     useViewAlert,
-} from "../../../commons/ui";
+} from "@mwdb-web/commons/ui";
 import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, useOutletContext } from "react-router-dom";

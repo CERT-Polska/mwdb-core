@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
-import { api } from "../../../commons/api";
-import { useViewAlert } from "../../../commons/ui";
+import { api } from "@mwdb-web/commons/api";
+import { useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function AttributeCreate() {
     const viewAlert = useViewAlert();

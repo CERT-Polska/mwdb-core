@@ -1,9 +1,9 @@
 import React, { useState, useContext } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 
-import { api } from "../commons/api";
-import { ConfigContext } from "../commons/config";
-import { View } from "../commons/ui";
+import { api } from "@mwdb-web/commons/api";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { View } from "@mwdb-web/commons/ui";
 
 export default function UserPasswordRecover() {
     const initialState = {

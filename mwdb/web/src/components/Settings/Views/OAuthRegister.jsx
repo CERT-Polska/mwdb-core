@@ -1,8 +1,8 @@
 import React, { useContext, useState } from "react";
 
-import { APIContext } from "../../../commons/api";
+import { APIContext } from "@mwdb-web/commons/api";
 
-import { useViewAlert } from "../../../commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function OAuthRegister() {
     const api = useContext(APIContext);

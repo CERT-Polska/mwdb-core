@@ -4,8 +4,8 @@ import { NavLink, Outlet } from "react-router-dom";
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { ConfigContext } from "../../commons/config";
-import { View, ShowIf } from "../../commons/ui";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { View, ShowIf } from "@mwdb-web/commons/ui";
 
 function SettingsNav() {
     const config = useContext(ConfigContext);

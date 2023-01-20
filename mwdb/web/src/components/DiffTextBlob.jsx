@@ -15,9 +15,9 @@ import DiffMatchPatch from "diff-match-patch";
 import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/theme-chrome";
 
-import { APIContext } from "../commons/api";
-import { View } from "../commons/ui";
-import { useRemote } from "../commons/remotes";
+import { APIContext } from "@mwdb-web/commons/api";
+import { View } from "@mwdb-web/commons/ui";
+import { useRemote } from "@mwdb-web/commons/remotes";
 
 function DiffTextBlobContentPresenter({ current, previous }) {
     const [markers, setMarkers] = useState([[], []]);

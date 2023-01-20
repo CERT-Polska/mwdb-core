@@ -2,14 +2,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { api } from "../../../commons/api";
+import { api } from "@mwdb-web/commons/api";
 import {
     LimitTo,
     UserBadge,
     PagedList,
     HighlightText,
     useViewAlert,
-} from "../../../commons/ui";
+} from "@mwdb-web/commons/ui";
 
 function GroupItem(props) {
     const lockAttributes = props.immutable

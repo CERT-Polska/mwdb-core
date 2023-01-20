@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { api } from "../../../commons/api";
+import { api } from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
     EditableItem,
     useViewAlert,
-} from "../../../commons/ui";
+} from "@mwdb-web/commons/ui";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useParams } from "react-router-dom";

@@ -1,8 +1,8 @@
 import React from "react";
 import { useOutletContext } from "react-router-dom";
 
-import { capabilitiesList } from "../../../commons/auth";
-import { GroupBadge } from "../../../commons/ui";
+import { capabilitiesList } from "@mwdb-web/commons/auth";
+import { GroupBadge } from "@mwdb-web/commons/ui";
 
 function CapabilitiesTable({ profile }) {
     if (!profile.capabilities) return [];

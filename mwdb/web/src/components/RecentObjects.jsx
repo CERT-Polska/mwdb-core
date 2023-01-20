@@ -1,7 +1,7 @@
 import React from "react";
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
-import { TagList, DateString, ObjectLink } from "../commons/ui";
+import { TagList, DateString, ObjectLink } from "@mwdb-web/commons/ui";
 
 export function RecentObjectRow(props) {
     const objectId = <ObjectLink type={props.type} id={props.id} />;

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import { api } from "../../../commons/api";
+import { api } from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
     EditableItem,
     PseudoEditableItem,
     FeatureSwitch,
     useViewAlert,
-} from "../../../commons/ui";
+} from "@mwdb-web/commons/ui";
 
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

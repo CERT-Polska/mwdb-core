@@ -1,9 +1,9 @@
 import React from "react";
 
 import { RecentView, RecentRow, RecentInnerRow } from "./RecentView";
-import { TagList } from "../commons/ui";
+import { TagList } from "@mwdb-web/commons/ui";
 
-import { DateString, ObjectLink } from "../commons/ui";
+import { DateString, ObjectLink } from "@mwdb-web/commons/ui";
 
 export function RecentConfigRow(props) {
     const family = (

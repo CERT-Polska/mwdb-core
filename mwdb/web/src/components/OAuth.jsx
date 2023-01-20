@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-import { api } from "../commons/api";
-import { AuthContext } from "../commons/auth";
-import { getErrorMessage } from "../commons/ui";
+import { api } from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { getErrorMessage } from "@mwdb-web/commons/ui";
 
 async function authenticate(provider, action, errorFunction) {
     try {

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
 
-import { api } from "../../../commons/api";
-import { useViewAlert } from "../../../commons/ui";
+import { api } from "@mwdb-web/commons/api";
+import { useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function GroupView() {
     const { setAlert } = useViewAlert();

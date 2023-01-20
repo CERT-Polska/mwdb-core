@@ -7,14 +7,14 @@ import {
     faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { ObjectContext } from "../../../commons/context";
+import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     fromPlugins,
     Extendable,
     afterPluginsLoaded,
-} from "../../../commons/plugins";
-import { DataTable, ActionCopyToClipboard } from "../../../commons/ui";
-import { makeSearchLink } from "../../../commons/helpers";
+} from "@mwdb-web/commons/plugins";
+import { DataTable, ActionCopyToClipboard } from "@mwdb-web/commons/ui";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { useNavigate } from "react-router-dom";
 import { renderValue } from "../../RichAttribute/MarkedMustache";
 

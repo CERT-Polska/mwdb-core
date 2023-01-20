@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { useRemote } from "../../commons/remotes";
-import { Alert } from "../../commons/ui";
+import { useRemote } from "@mwdb-web/commons/remotes";
+import { Alert } from "@mwdb-web/commons/ui";
 
 import RemoteAPI from "./RemoteAPI";
 

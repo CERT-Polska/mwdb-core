@@ -20,9 +20,9 @@ import {
     PullAction,
 } from "./ShowObject";
 
-import { downloadData } from "../commons/helpers";
-import { HexView } from "../commons/ui";
-import { useRemotePath } from "../commons/remotes";
+import { downloadData } from "@mwdb-web/commons/helpers";
+import { HexView } from "@mwdb-web/commons/ui";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 function ConfigDetails() {
     const context = useContext(ObjectContext);

@@ -27,10 +27,10 @@ import {
     makeSearchDateLink,
     downloadData,
     humanFileSize,
-} from "../commons/helpers";
-import { DataTable, DateString, HexView } from "../commons/ui";
-import { Extendable } from "../commons/plugins";
-import { useRemotePath } from "../commons/remotes";
+} from "@mwdb-web/commons/helpers";
+import { DataTable, DateString, HexView } from "@mwdb-web/commons/ui";
+import { Extendable } from "@mwdb-web/commons/plugins";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 function TextBlobDetails() {
     const context = useContext(ObjectContext);

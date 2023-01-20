@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "../../../commons/api";
-import { AuthContext, Capability } from "../../../commons/auth";
-import { ObjectContext } from "../../../commons/context";
-import { Extendable } from "../../../commons/plugins";
-import { ConfirmationModal } from "../../../commons/ui";
+import { APIContext } from "@mwdb-web/commons/api";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { ObjectContext } from "@mwdb-web/commons/context";
+import { Extendable } from "@mwdb-web/commons/plugins";
+import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 import Attributes from "./Attributes";
 import AttributesAddModal from "../../AttributesAddModal";

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 
-import { ConfigContext } from "../commons/config";
-import { View } from "../commons/ui";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { View } from "@mwdb-web/commons/ui";
 
 import logo from "../assets/logo.png";
 

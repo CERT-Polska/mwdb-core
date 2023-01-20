@@ -1,8 +1,8 @@
 import React, { Suspense, useContext, useEffect, useState } from "react";
 
-import { api } from "../commons/api";
-import { AuthContext } from "../commons/auth";
-import { View } from "../commons/ui";
+import { api } from "@mwdb-web/commons/api";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { View } from "@mwdb-web/commons/ui";
 
 const SwaggerUI = React.lazy(() => import("swagger-ui-react"));
 

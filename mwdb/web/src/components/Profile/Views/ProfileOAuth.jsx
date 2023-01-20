@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 
-import { APIContext } from "../../../commons/api";
+import { APIContext } from "@mwdb-web/commons/api";
 
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { ConfirmationModal, useViewAlert, ShowIf } from "../../../commons/ui";
+import { ConfirmationModal, useViewAlert, ShowIf } from "@mwdb-web/commons/ui";
 
 export default function ProfileOAuth() {
     const api = useContext(APIContext);

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 
-import { api } from "../../../commons/api";
-import { ShowIf, useViewAlert } from "../../../commons/ui";
+import { api } from "@mwdb-web/commons/api";
+import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function ProfileResetPassword() {
     const { profile } = useOutletContext();

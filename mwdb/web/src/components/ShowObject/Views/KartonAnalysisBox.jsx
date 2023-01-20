@@ -12,13 +12,13 @@ import {
     faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { APIContext } from "../../../commons/api";
-import { AuthContext, Capability } from "../../../commons/auth";
-import { ObjectContext } from "../../../commons/context";
-import { Extendable } from "../../../commons/plugins";
-import { makeSearchLink } from "../../../commons/helpers";
-import { ActionCopyToClipboard } from "../../../commons/ui";
-import { ConfirmationModal } from "../../../commons/ui";
+import { APIContext } from "@mwdb-web/commons/api";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { ObjectContext } from "@mwdb-web/commons/context";
+import { Extendable } from "@mwdb-web/commons/plugins";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
+import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 function KartonAnalysisRow({ analysis, removeAnalysis }) {
     const auth = useContext(AuthContext);

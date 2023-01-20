@@ -11,10 +11,10 @@ export { default as UploadChildAction } from "./Actions/UploadChildAction";
 export { default as PushAction } from "./Actions/PushAction";
 export { default as PullAction } from "./Actions/PullAction";
 
-export { ObjectContext } from "../../commons/context";
+export { ObjectContext } from "@mwdb-web/commons/context";
 export {
     ObjectTab,
     ObjectAction,
     TabContext,
     useTabContext,
-} from "../../commons/ui";
+} from "@mwdb-web/commons/ui";

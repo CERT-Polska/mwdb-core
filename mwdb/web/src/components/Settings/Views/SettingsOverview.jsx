@@ -1,8 +1,8 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 
-import { api } from "../../../commons/api";
-import { ConfigContext } from "../../../commons/config";
-import { useViewAlert } from "../../../commons/ui";
+import { api } from "@mwdb-web/commons/api";
+import { ConfigContext } from "@mwdb-web/commons/config";
+import { useViewAlert } from "@mwdb-web/commons/ui";
 
 function PluginItems(props) {
     const { name, info } = props;

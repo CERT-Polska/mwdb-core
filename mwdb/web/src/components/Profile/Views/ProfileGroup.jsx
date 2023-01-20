@@ -4,10 +4,10 @@ import { Link, Navigate, useParams, useOutletContext } from "react-router-dom";
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { api } from "../../../commons/api";
-import { AuthContext, Capability } from "../../../commons/auth";
-import { makeSearchLink } from "../../../commons/helpers";
-import { GroupBadge, ShowIf, useViewAlert } from "../../../commons/ui";
+import { api } from "@mwdb-web/commons/api";
+import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { GroupBadge, ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
 
 function ProfileItem(props) {
     if (!props.value) return [];

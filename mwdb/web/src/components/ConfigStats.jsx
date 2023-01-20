@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-import { api } from "../commons/api";
-import { DateString, SortedList, View } from "../commons/ui";
-import { makeSearchLink } from "../commons/helpers";
-import { useRemotePath } from "../commons/remotes";
+import { api } from "@mwdb-web/commons/api";
+import { DateString, SortedList, View } from "@mwdb-web/commons/ui";
+import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 function ConfigStatsItem(props) {
     const remotePath = useRemotePath();

@@ -1,8 +1,8 @@
 import React from "react";
 import Mustache from "mustache";
 import { lexer, defaults, Tokenizer } from "marked";
-import { DataTable } from "../../commons/ui";
-import { escapeSearchValue } from "../../commons/helpers";
+import { DataTable } from "@mwdb-web/commons/ui";
+import { escapeSearchValue } from "@mwdb-web/commons/helpers";
 import { Link } from "react-router-dom";
 
 /**

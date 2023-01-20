@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import {
     Autocomplete,
     ConfirmationModal,

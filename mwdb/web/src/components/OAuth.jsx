@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-import api from "../commons/api";
+import { api } from "../commons/api";
 import { AuthContext } from "../commons/auth";
 import { getErrorMessage } from "../commons/ui";
 

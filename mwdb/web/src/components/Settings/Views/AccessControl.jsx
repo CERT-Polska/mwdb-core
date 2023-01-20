@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { capabilitiesList } from "../../../commons/auth";
 import { intersperse } from "../../../commons/helpers";
 import {

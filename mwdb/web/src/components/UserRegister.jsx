@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 
-import api from "../commons/api";
+import { api } from "../commons/api";
 import { ConfigContext } from "../commons/config";
 import { View } from "../commons/ui";
 

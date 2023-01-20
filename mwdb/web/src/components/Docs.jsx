@@ -1,6 +1,6 @@
 import React, { Suspense, useContext, useEffect, useState } from "react";
 
-import api from "../commons/api";
+import { api } from "../commons/api";
 import { AuthContext } from "../commons/auth";
 import { View } from "../commons/ui";
 

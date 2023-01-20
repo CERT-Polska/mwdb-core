@@ -70,11 +70,7 @@ import { AttributeEditTemplate } from "./components/Settings/Views/AttributeEdit
 import { Capability } from "./commons/auth";
 import { ConfigContext } from "./commons/config";
 import { fromPlugins, Extendable } from "./commons/plugins";
-import {
-    ErrorBoundary,
-    RequiresAuth,
-    RequiresCapability,
-} from "./commons/ui";
+import { ErrorBoundary, RequiresAuth, RequiresCapability } from "./commons/ui";
 
 function NavigateFor404() {
     /**

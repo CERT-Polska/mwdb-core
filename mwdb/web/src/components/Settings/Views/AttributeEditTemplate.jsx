@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { useViewAlert } from "../../../commons/ui";
 
 import RichAttributePreview from "../../RichAttribute/RichAttributePreview";

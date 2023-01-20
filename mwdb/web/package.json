@@ -1,5 +1,5 @@
 {
-  "name": "mwdb-web",
+  "name": "mwdb-core",
   "version": "2.9.0",
   "private": true,
   "type": "module",

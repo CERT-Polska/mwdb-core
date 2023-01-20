@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 
-import api from "../commons/api";
+import { api } from "../commons/api";
 import { ConfirmationModal } from "../commons/ui";
 import RichAttributeRenderer from "./RichAttribute/RichAttributeRenderer";
 

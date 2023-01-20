@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { View } from "../commons/ui";
 
-import api from "../commons/api";
+import { api } from "../commons/api";
 
 export default function UserSetPassword() {
     const params = useParams();

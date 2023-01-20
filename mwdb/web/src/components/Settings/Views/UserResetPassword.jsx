@@ -5,7 +5,7 @@ import { Link, useOutletContext } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { ShowIf, useViewAlert } from "../../../commons/ui";
 
 export default function UserResetPassword() {

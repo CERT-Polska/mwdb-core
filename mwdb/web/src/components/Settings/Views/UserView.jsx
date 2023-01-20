@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, Outlet, Link, Route, Routes } from "react-router-dom";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { useViewAlert } from "../../../commons/ui";
 
 export default function UserView() {

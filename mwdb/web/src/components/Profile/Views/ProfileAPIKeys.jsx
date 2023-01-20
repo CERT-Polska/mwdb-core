@@ -5,7 +5,7 @@ import { useLocation, useOutletContext } from "react-router-dom";
 import { faCopy, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import {
     ConfirmationModal,
     DateString,

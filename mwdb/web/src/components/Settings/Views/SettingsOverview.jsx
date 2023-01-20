@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { ConfigContext } from "../../../commons/config";
 import { useViewAlert } from "../../../commons/ui";
 

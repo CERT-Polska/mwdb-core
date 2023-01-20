@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, Outlet, Routes, Route, useParams } from "react-router-dom";
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { useViewAlert } from "../../../commons/ui";
 
 export default function AttributeView() {

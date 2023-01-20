@@ -36,7 +36,7 @@ function pluginLoader() {
       if(id === resolvedVirtualModuleId) {
         const plugins = findInstalledPlugins("@mwdb-core");
         const exports = plugins.map(
-            (pluginName, index) => `"${pluginName}": import("${pluginName}"),`
+            (pluginName, index) => `"${pluginName}": import("@mwdb-core/${pluginName}"),`
         ).join("\n");
         return `export default { ${exports} };`;
       }
@@ -66,7 +66,8 @@ function pluginExposeCommons() {
           throw new Error(`Incorrect commons import '${id}', only one level deep allowed`)
         }
         const submodule = modulesPath[2];
-        return `export * from "./src/commons/${submodule}";`;
+        const submodulePath = path.join(__dirname, "src/commons", submodule);
+        return `export * from "${submodulePath}";`;
       }
     },
   }
@@ -78,7 +79,7 @@ export default defineConfig({
       pluginLoader(),
       pluginExposeCommons()
   ],
-  preview: {
+  server: {
     host: '0.0.0.0',
     port: 3000,
     strictPort: true,

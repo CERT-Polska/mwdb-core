@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-import api from "../commons/api";
+import { api } from "../commons/api";
 import { DateString, SortedList, View } from "../commons/ui";
 import { makeSearchLink } from "../commons/helpers";
 import { useRemotePath } from "../commons/remotes";

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { ShowIf, useViewAlert } from "../../../commons/ui";
 
 export default function ProfileResetPassword() {

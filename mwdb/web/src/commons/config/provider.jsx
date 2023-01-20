@@ -5,7 +5,7 @@ import React, {
     useReducer,
     useCallback,
 } from "react";
-import api from "../api";
+import { api } from "../api";
 import { ConfigContext } from "./context";
 import { AuthContext } from "../auth";
 

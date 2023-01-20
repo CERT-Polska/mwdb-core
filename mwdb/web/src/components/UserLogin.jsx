@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import { AuthContext } from "../commons/auth";
 import { ConfigContext } from "../commons/config";
-import api from "../commons/api";
+import { api } from "../commons/api";
 import { Extension } from "../commons/plugins";
 import { View, ShowIf } from "../commons/ui";
 import { ProviderButton, ProvidersSelectList } from "./OAuth";

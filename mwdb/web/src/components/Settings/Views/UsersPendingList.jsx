@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { ConfigContext } from "../../../commons/config";
 import {
     PagedList,

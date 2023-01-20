@@ -4,7 +4,7 @@ import { NavLink, useParams, Outlet } from "react-router-dom";
 import { faUserCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "../../commons/api";
+import { api } from "../../commons/api";
 import { AuthContext } from "../../commons/auth";
 import { ConfigContext } from "../../commons/config";
 import { View, useViewAlert } from "../../commons/ui";

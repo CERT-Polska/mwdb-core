@@ -8,7 +8,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ObjectContext } from "../../../commons/context";
-import { fromPlugins, Extendable, afterPluginsLoaded } from "../../../commons/plugins";
+import {
+    fromPlugins,
+    Extendable,
+    afterPluginsLoaded,
+} from "../../../commons/plugins";
 import { DataTable, ActionCopyToClipboard } from "../../../commons/ui";
 import { makeSearchLink } from "../../../commons/helpers";
 import { useNavigate } from "react-router-dom";
@@ -18,9 +22,9 @@ let attributeRenderers = {};
 
 afterPluginsLoaded(() => {
     for (let extraRenderers of fromPlugins("attributeRenderers")) {
-        attributeRenderers = {...attributeRenderers, ...extraRenderers};
+        attributeRenderers = { ...attributeRenderers, ...extraRenderers };
     }
-})
+});
 
 function RichAttributeValue({ attributeDefinition, value }) {
     const { rich_template: richTemplate, key } = attributeDefinition;

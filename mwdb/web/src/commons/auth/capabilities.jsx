@@ -65,4 +65,4 @@ afterPluginsLoaded(() => {
     for (let extraCapabilities of fromPlugins("capabilities")) {
         capabilitiesList = { ...capabilitiesList, ...extraCapabilities };
     }
-})
+});

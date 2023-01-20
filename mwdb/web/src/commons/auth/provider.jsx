@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import api from "../api";
+import { api } from "../api";
 
 import { Capability } from "./capabilities";
 import { AuthContext } from "./context";

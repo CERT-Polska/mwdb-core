@@ -13,7 +13,7 @@ import "./styles/index.css";
 import "swagger-ui-react/swagger-ui.css";
 
 // Virtual module provided by Vite custom plugin
-import {loadPlugins} from "./commons/plugins";
+import { loadPlugins } from "./commons/plugins";
 
 loadPlugins().then(() => {
     const root = createRoot(document.getElementById("root"));

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { GroupBadge, useViewAlert } from "../../../commons/ui";
 
 export default function ProfileGroups() {

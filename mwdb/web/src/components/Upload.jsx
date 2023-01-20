@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import AttributesAddModal from "./AttributesAddModal";
 
-import api from "../commons/api";
+import { api } from "../commons/api";
 import { AuthContext, Capability } from "../commons/auth";
 import { Autocomplete, DataTable, View } from "../commons/ui";
 import { ConfigContext } from "../commons/config";

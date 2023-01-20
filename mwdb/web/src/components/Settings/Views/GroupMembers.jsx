@@ -5,7 +5,7 @@ import Pagination from "react-js-pagination";
 import { faTrash, faCrown, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import {
     useViewAlert,
     Autocomplete,

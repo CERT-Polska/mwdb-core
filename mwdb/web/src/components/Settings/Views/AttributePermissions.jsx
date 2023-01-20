@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useParams, useOutletContext } from "react-router-dom";
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import {
     Autocomplete,
     ConfirmationModal,

@@ -1,13 +1,6 @@
 import Axios from "axios";
 
 function getApiForEnvironment() {
-    if (process.env.NODE_ENV === "development") {
-        // If application is running under development server (out of Docker)
-        return (
-            process.env.REACT_APP_API_URL.replace(/\/$/g, "") ||
-            "http://localhost:8080"
-        );
-    }
     // Default API endpoint
     return "/api";
 }
@@ -547,7 +540,7 @@ function removeKartonAnalysisFromObject(id, analysis_id) {
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
-const api = {
+export const api = {
     axios,
     getApiForEnvironment,
     getServerDocs,
@@ -650,4 +643,3 @@ const api = {
     resubmitKartonAnalysis,
     removeKartonAnalysisFromObject,
 };
-export default api;

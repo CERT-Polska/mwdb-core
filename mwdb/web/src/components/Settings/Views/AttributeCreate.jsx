@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import api from "../../../commons/api";
+import { api } from "../../../commons/api";
 import { useViewAlert } from "../../../commons/ui";
 
 export default function AttributeCreate() {

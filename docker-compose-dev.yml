@@ -57,6 +57,7 @@ services:
     volumes:
       - "./mwdb/web/public:/app/public"
       - "./mwdb/web/src:/app/src"
+      - "./docker/plugins:/app/plugins"
     restart: on-failure
   postgres:
     image: postgres

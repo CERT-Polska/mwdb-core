@@ -913,7 +913,7 @@ class Object(db.Model):
         shares = (
             db.session.query(ObjectPermission)
             .filter(permission_filter)
-            .order_by(ObjectPermission.access_time.desc())
+            .order_by(ObjectPermission.access_time.asc())
         ).all()
         return shares
 

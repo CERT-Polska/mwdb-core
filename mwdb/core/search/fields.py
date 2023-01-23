@@ -389,6 +389,17 @@ class UploaderField(BaseField):
                 .join(Member.group)
                 .filter(Group.name == value)
             ).all()
+        elif g.auth_user.has_rights(Capabilities.access_uploader_info):
+            uploaders = (
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
+                .filter(Group.name == value)
+            ).all()
+            # Regular users can see only uploads to its own groups
+            condition = and_(
+                condition, g.auth_user.is_member(ObjectPermission.group_id)
+            )
         else:
             uploaders = (
                 db.session.query(User)

@@ -7,6 +7,8 @@ class Capabilities(object):
     access_all_objects = "access_all_objects"
     # Can share objects with all groups, have access to complete list of groups
     sharing_with_all = "sharing_with_all"
+    # Can view who uploaded object and filter by uploader
+    access_uploader_info = "access_uploader_info"
     # Can add tags
     adding_tags = "adding_tags"
     # Can remove tags

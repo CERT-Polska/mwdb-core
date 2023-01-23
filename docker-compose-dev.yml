@@ -25,8 +25,7 @@ services:
       # NOTE: use gen_vars.sh in order to generate this file
       - mwdb-vars.env
     environment:
-      UWSGI_PY_AUTORELOAD: 1
-      UWSGI_ENABLE_THREADS: 1
+      HOT_RELOAD: 1
       MWDB_MAIL_SMTP: "mailhog:1025"
       MWDB_MAIL_FROM: "noreply@mwdb.dev"
       MWDB_RECAPTCHA_SITE_KEY: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
@@ -58,6 +57,7 @@ services:
     volumes:
       - "./mwdb/web/public:/app/public"
       - "./mwdb/web/src:/app/src"
+      - "./docker/plugins:/app/plugins"
     restart: on-failure
   postgres:
     image: postgres

@@ -19,6 +19,7 @@ export function getStyleForTag(tag) {
             "document:",
             "archive",
             "dump",
+            "misc:",
         ],
     };
 

@@ -10,13 +10,13 @@ import {
     faArchive,
 } from "@fortawesome/free-solid-svg-icons";
 
+import { APIContext } from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     ObjectAction,
     ObjectTab,
     ConfirmationModal,
 } from "@mwdb-web/commons/ui";
-import { APIContext } from "@mwdb-web/commons/api/context";
 import { humanFileSize, downloadData } from "@mwdb-web/commons/helpers";
 import ReactModal from "react-modal";
 

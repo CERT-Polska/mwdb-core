@@ -1,20 +1,25 @@
-FROM node:14 AS build
+FROM node:16-alpine AS build
+
+LABEL maintainer="info@cert.pl"
 
 COPY ./mwdb/web /app
-COPY ./docker/plugins /plugins
+COPY ./docker/plugins /app/plugins
 
+ARG web_plugins
 RUN cd /app \
-    && npm install --unsafe-perm . $(find /plugins -name 'package.json' -printf "%h\n" | sort -u) \
+    && npm install --unsafe-perm . $web_plugins $(find /app/plugins -name 'package.json' -exec dirname {} \; | sort -u) \
     && CI=true npm run build \
     && npm cache clean --force
 
 FROM nginx:stable
 
+LABEL maintainer="info@cert.pl"
+
 ENV PROXY_BACKEND_URL http://mwdb.:8080
 
 COPY docker/nginx.conf.template /etc/nginx/conf.d/default.conf.template
 COPY docker/start-web.sh /start-web.sh
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # Give +r to everything in /usr/share/nginx/html and +x for directories
 RUN chmod u=rX,go= -R /usr/share/nginx/html

@@ -7,4 +7,4 @@ until psql "$MWDB_POSTGRES_URI" -c "\q" ; do
 done
 
 echo "Configuring mwdb-core instance"
-mwdb-core configure --quiet basic && exec gunicorn
+/app/venv/bin/mwdb-core configure --quiet basic && exec /app/venv/bin/gunicorn

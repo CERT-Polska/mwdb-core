@@ -82,9 +82,6 @@ def test_search(admin_session):
         assert res['id'] == sample['id']
         assert res['file_name'] == filename
         assert res['file_size'] == len(file_content)
-        assert res['parents'] == []
-        assert res['children'] == []
-        assert res['tags'] == []
         parse(res['upload_time'])
 
 

@@ -50,7 +50,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "attribute": AttributeField(Object.attributes),
         "shared": ShareField(Object.shares),
         "sharer": SharerField(Object.shares),
-        "uploader": UploaderField(Object.related_shares),
+        "uploader": UploaderField(Object.shares),
         "upload_time": DatetimeField(Object.upload_time),
         "parent": RelationField(Object.parents),
         "child": RelationField(Object.children),

@@ -23,7 +23,6 @@ from mwdb.model import (
     User,
     db,
 )
-from mwdb.model.object import AccessType
 
 from .exceptions import (
     FieldNotQueryableException,
@@ -364,41 +363,23 @@ class ShareField(BaseField):
         return self.column.any(ObjectPermission.group_id == group_id)
 
 
-class UploaderField(BaseField):
+class SharerField(BaseField):
     def _get_condition(
         self, expression: Expression, subfields: List[Tuple[str, int]]
     ) -> Any:
         value = expression.unescaped_value
-        if value == "public":
-            raise ObjectNotFoundException(
-                "uploader:public is no-op, all uploaders are in public group"
-            )
 
-        # Look only for upload actions
-        # (reason_type=ADDED and uploaded_object=shared_object)
-        condition = and_(
-            ObjectPermission.reason_type == AccessType.ADDED,
-            ObjectPermission.related_object_id == ObjectPermission.object_id,
-        )
-
-        if g.auth_user.has_rights(Capabilities.manage_users):
+        if (
+            g.auth_user.has_rights(Capabilities.manage_users)
+            or g.auth_user.has_rights(Capabilities.sharing_with_all)
+            or g.auth_user.has_rights(Capabilities.access_uploader_info)
+        ):
             uploaders = (
                 db.session.query(User)
                 .join(User.memberships)
                 .join(Member.group)
                 .filter(Group.name == value)
             ).all()
-        elif g.auth_user.has_rights(Capabilities.access_uploader_info):
-            uploaders = (
-                db.session.query(User)
-                .join(User.memberships)
-                .join(Member.group)
-                .filter(Group.name == value)
-            ).all()
-            # Regular users can see only uploads to its own groups
-            condition = and_(
-                condition, g.auth_user.is_member(ObjectPermission.group_id)
-            )
         else:
             uploaders = (
                 db.session.query(User)
@@ -409,16 +390,58 @@ class UploaderField(BaseField):
                 )
                 .filter(or_(Group.name == value, User.login == value))
             ).all()
-            # Regular users can see only uploads to its own groups
-            condition = and_(
-                condition, g.auth_user.is_member(ObjectPermission.group_id)
-            )
         if not uploaders:
             raise ObjectNotFoundException(f"No such user or group: {value}")
 
         uploader_ids = [u.id for u in uploaders]
         return self.column.any(
-            and_(condition, ObjectPermission.related_user_id.in_(uploader_ids))
+            and_(
+                ObjectPermission.get_shares_filter(include_inherited_uploads=False),
+                ObjectPermission.related_user_id.in_(uploader_ids),
+            )
+        )
+
+
+class UploaderField(BaseField):
+    def _get_condition(
+        self, expression: Expression, subfields: List[Tuple[str, int]]
+    ) -> Any:
+        value = expression.unescaped_value
+        if value == "public":
+            raise ObjectNotFoundException(
+                "uploader:public is no-op, all uploaders are in public group"
+            )
+
+        if (
+            g.auth_user.has_rights(Capabilities.manage_users)
+            or g.auth_user.has_rights(Capabilities.sharing_with_all)
+            or g.auth_user.has_rights(Capabilities.access_uploader_info)
+        ):
+            uploaders = (
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
+                .filter(Group.name == value)
+            ).all()
+        else:
+            uploaders = (
+                db.session.query(User)
+                .join(User.memberships)
+                .join(Member.group)
+                .filter(
+                    and_(g.auth_user.is_member(Group.id), Group.workspace.is_(True))
+                )
+                .filter(or_(Group.name == value, User.login == value))
+            ).all()
+        if not uploaders:
+            raise ObjectNotFoundException(f"No such user or group: {value}")
+
+        uploader_ids = [u.id for u in uploaders]
+        return self.column.any(
+            and_(
+                ObjectPermission.get_uploaders_filter(),
+                ObjectPermission.related_user_id.in_(uploader_ids),
+            )
         )
 
 

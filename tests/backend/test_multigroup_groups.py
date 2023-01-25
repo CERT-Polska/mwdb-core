@@ -169,5 +169,5 @@ def test_multigroup_sharing(admin_session):
     }
     assert set(shares["groups"]).intersection(groups) == groups
     assert set(gr["group_name"] for gr in shares["shares"]).issuperset(
-        {Alice.identity, Bob.identity, Joe.identity, Workgroup.identity, admin_login()}
+        {Joe.identity, Workgroup.identity, admin_login()}
     )

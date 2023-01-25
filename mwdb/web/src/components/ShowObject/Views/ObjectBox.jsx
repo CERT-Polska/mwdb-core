@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import { TabContext } from "@mwdb-web/commons/ui";
+import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 function useComponentState(initialState) {
     // Functions (and components) are just called by useState and setter,
@@ -16,17 +17,17 @@ function useComponentState(initialState) {
 }
 
 export default function ObjectBox({ defaultTab, children }) {
+    const remotePath = useRemotePath();
     const location = useLocation();
     const [Component, setComponent] = useComponentState(() => []);
     const [actions, setActions] = useState([]);
+    const pathname = location.pathname.replace(remotePath, "");
     // /sample/:hash/details
     // routePath => /sample/:hash
     // tabPath => /details
-    const [objectType, hash, tab, subTab] = location.pathname
-        .split("/")
-        .slice(1);
+    const [objectType, hash, tab, subTab] = pathname.split("/").slice(1);
     function getTabLink(tab, subtab) {
-        return ["", objectType, hash, tab]
+        return [remotePath ? remotePath : "", objectType, hash, tab]
             .concat(subtab ? [subtab] : [])
             .join("/");
     }

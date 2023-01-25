@@ -680,9 +680,9 @@ class OpenIDLogoutResource(Resource):
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
         if not provider.logout_endpoint:
-            raise PreconditionFailed(
-                f"end_session_endpoint is not specified for {provider_name}"
-            )
+            raise NotFound(
+                f"Logout endpoint is not configured for '{provider_name}'"
+            )```
 
         schema = OpenIDLogoutLinkResponseSchema()
         return schema.dump({"url": provider.logout_endpoint})

@@ -4,7 +4,7 @@ from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.model import Group, Member, User, db
+from mwdb.model import Group, User, db
 from mwdb.model.object import AccessType
 from mwdb.schema.share import (
     ShareGroupListResponseSchema,
@@ -126,31 +126,10 @@ class ShareResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        shares = db_object.get_shares()
+        shares = db_object.get_uploaders() + db_object.get_shares()
 
-        if g.auth_user.has_rights(Capabilities.access_uploader_info):
-            schema = ShareInfoResponseSchema()
-            return schema.dump({"groups": group_names, "shares": shares})
-        else:
-            # list of user_ids who are in a common workspace with auth_user
-            users = (
-                db.session.query(User)
-                .join(User.memberships)
-                .join(Member.group)
-                .filter(g.auth_user.is_member(Group.id))
-                .filter(Group.workspace.is_(True))
-            ).all()
-            visible_users = [u.login for u in users]
-
-            schema = ShareInfoResponseSchema()
-            response = schema.dump({"groups": group_names, "shares": shares})
-
-            for share in response["shares"]:
-                if "related_user_login" in share.keys():
-                    if share["related_user_login"] not in visible_users:
-                        share["related_user_login"] = "$hidden"
-
-            return response
+        schema = ShareInfoResponseSchema()
+        return schema.dump({"groups": group_names, "shares": shares})
 
     @requires_authorization
     def put(self, type, identifier):

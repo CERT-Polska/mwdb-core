@@ -1,4 +1,4 @@
-"""Add access uploader info capability
+"""Add access_uploader_info capability for public and users with manage_users capability
 
 Revision ID: 25ea40a798ac
 Revises: c7c72fd7fac5

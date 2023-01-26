@@ -223,17 +223,32 @@ jobs:
         with:
           file: ./deploy/docker/Dockerfile
           tags: |
+            certpl/mwdb:${{ github.sha }}
             certpl/mwdb:master
           cache-from: |
             type=registry,ref=certpl/mwdb:buildcache
           cache-to: |
             type=registry,ref=certpl/mwdb:buildcache,mode=max
           push: true
+      - name: Build and push mwdb-core web-source image
+        uses: docker/build-push-action@v2
+        with:
+          file: ./deploy/docker/Dockerfile-web
+          target: build
+          tags: |
+            certpl/mwdb-web-source:${{ github.sha }}
+            certpl/mwdb-web-source:master
+          cache-from: |
+            type=registry,ref=certpl/mwdb-web-source:buildcache
+          cache-to: |
+            type=registry,ref=certpl/mwdb-web-source:buildcache,mode=max
+          push: true
       - name: Build and push mwdb-core web image
         uses: docker/build-push-action@v2
         with:
           file: ./deploy/docker/Dockerfile-web
           tags: |
+            certpl/mwdb-web:${{ github.sha }}
             certpl/mwdb-web:master
           cache-from: |
             type=registry,ref=certpl/mwdb-web:buildcache
@@ -265,6 +280,7 @@ jobs:
           file: ./tests/backend/Dockerfile
           context: tests/backend
           tags: |
+            certpl/mwdb-tests:${{ github.sha }}
             certpl/mwdb-tests:master
           cache-from: |
             type=registry,ref=certpl/mwdb-tests:buildcache
@@ -277,6 +293,7 @@ jobs:
           file: ./tests/frontend/Dockerfile
           context: tests/frontend
           tags: |
+            certpl/mwdb-web-tests:${{ github.sha }}
             certpl/mwdb-web-tests:master
           cache-from: |
             type=registry,ref=certpl/mwdb-web-tests:buildcache

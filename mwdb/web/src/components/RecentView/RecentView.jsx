@@ -40,30 +40,51 @@ export default function RecentView(props) {
         setQueryError(null);
     }
 
+    /**
+     * Here be dragons:
+     * - queryInput is what is currently in search input bar
+     * - currentQuery represents what is in &q= URL
+     * - submittedQuery is query that is currently used for listing
+     *
+     * When user goes directly into &q=... URL:
+     *     - currentQuery => queryInput (as initialState)
+     *     - currentQuery is submitted via submitQuery
+     * When user submits query in search input bar:
+     *     - queryInput => currentQuery (via setCurrentQuery)
+     *     - currentQuery is changed, so it is submitted via submitQuery (effect)
+     * When user clears search input bar:
+     *     - "" => queryInput => currentQuery => submittedQuery avoiding
+     *       submitQuery call
+     * When user switches counting:
+     *     - countingEnabled is changed, so it is submitted via submitQuery (effect)
+     */
+
     const setCurrentQuery = useCallback(
-        ({ query, enableCounting = countingEnabled }) => {
+        (query) => {
+            resetErrors();
             // Optionally convert query if only hash or hashes were provided
             query = multiFromHashes(query);
             // Set query in URL (currentQuery, countingEnabled)
-            setSearchParams({ q: query, count: enableCounting });
+            setSearchParams((prev) => {
+                if (query === prev.get("query"))
+                    throw new Error("Tried to set the same query twice");
+                return {
+                    q: query,
+                    count: prev.get("count") === "1" ? "1" : "0",
+                };
+            });
         },
-        [countingEnabled, setSearchParams]
+        [setSearchParams]
     );
 
     const addToQuery = useCallback(
         (field, value) => {
-            return setCurrentQuery({
-                query: addFieldToQuery(submittedQuery, field, value),
-            });
+            return setCurrentQuery(
+                addFieldToQuery(submittedQuery, field, value)
+            );
         },
         [submittedQuery, setCurrentQuery]
     );
-
-    // Synchronize input if currentQuery was changed
-    useEffect(() => {
-        setQueryInput(currentQuery);
-        resetErrors();
-    }, [currentQuery]);
 
     const submitQueryWithoutCount = useCallback(
         (query) => {
@@ -114,24 +135,20 @@ export default function RecentView(props) {
 
     const submitQuery = useCallback(
         (query) => {
-            setCurrentQuery({
-                query,
-            });
             return countingEnabled
                 ? submitQueryWithCount(query)
                 : submitQueryWithoutCount(query);
         },
-        [
-            countingEnabled,
-            setCurrentQuery,
-            submitQueryWithCount,
-            submitQueryWithoutCount,
-        ]
+        [countingEnabled, submitQueryWithCount, submitQueryWithoutCount]
     );
 
     useEffect(() => {
-        if (!currentQuery) setSubmittedQuery("");
-        return submitQuery(currentQuery);
+        setQueryInput(currentQuery);
+        if (!currentQuery) {
+            setSubmittedQuery("");
+        } else {
+            return submitQuery(currentQuery);
+        }
     }, [currentQuery, submitQuery]);
 
     const canAddQuickQuery =
@@ -168,9 +185,7 @@ export default function RecentView(props) {
                     className="searchForm"
                     onSubmit={(ev) => {
                         ev.preventDefault();
-                        setCurrentQuery({
-                            query: queryInput,
-                        });
+                        setCurrentQuery(queryInput);
                     }}
                 >
                     <div className="input-group">
@@ -181,9 +196,7 @@ export default function RecentView(props) {
                                 value="X"
                                 onClick={(ev) => {
                                     ev.preventDefault();
-                                    setCurrentQuery({
-                                        query: "",
-                                    });
+                                    setCurrentQuery("");
                                 }}
                             />
                         </div>
@@ -211,7 +224,7 @@ export default function RecentView(props) {
                                 } results counting`}
                             >
                                 <input
-                                    type="submit"
+                                    type="button"
                                     className={`btn btn-outline-info rounded-0 shadow-none ${
                                         searchParams.get("count") === "1"
                                             ? "active"
@@ -219,10 +232,17 @@ export default function RecentView(props) {
                                     }`}
                                     value="Count"
                                     onClick={() => {
-                                        setSearchParams({
-                                            q: currentQuery,
-                                            count: countingEnabled ? "0" : "1",
-                                        });
+                                        setSearchParams(
+                                            (prev) => {
+                                                return {
+                                                    q: prev.get("q"),
+                                                    count: countingEnabled
+                                                        ? "0"
+                                                        : "1",
+                                                };
+                                            },
+                                            { replace: true }
+                                        );
                                     }}
                                 />
                             </div>

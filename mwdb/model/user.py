@@ -169,7 +169,7 @@ class User(db.Model):
         return token
 
     @staticmethod
-    def _verify_token(token, fields, scope, return_provider=False):
+    def _verify_token(token, fields, scope):
         data = verify_token(token, scope)
         if data is None:
             return None
@@ -185,10 +185,7 @@ class User(db.Model):
             if data[field] != getattr(user_obj, field):
                 return None
 
-        if return_provider:
-            return user_obj, data["provider"]
-        else:
-            return user_obj
+        return user_obj
 
     def generate_session_token(self, provider=None):
         return self._generate_token(
@@ -211,7 +208,6 @@ class User(db.Model):
             token,
             ["password_ver", "identity_ver"],
             scope=AuthScope.session,
-            return_provider=True,
         )
 
     @staticmethod

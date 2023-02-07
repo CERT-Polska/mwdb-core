@@ -52,6 +52,30 @@ def verify_token(token: str, scope: AuthScope) -> Any:
     return data
 
 
+def get_provider_from_token(token: str, scope=AuthScope.session) -> Any:
+    try:
+        data = jwt.decode(
+            token,
+            key=app_config.mwdb.secret_key,
+            algorithms=["HS512"],
+            audience=app_config.mwdb.base_url,
+            options={"verify_aud": True},
+        )
+        if data.get("scope") != scope.value:
+            return None
+
+        if scope.value != "download_file" and "sub" not in data:
+            return None
+
+    except jwt.InvalidTokenError:
+        return None
+
+    if "provider" in data:
+        return data["provider"]
+    else:
+        return None
+
+
 def verify_legacy_token(token: str, required_fields: Set[str]) -> Any:
     try:
         data = jwt.decode(

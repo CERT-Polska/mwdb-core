@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from flask import g
-from sqlalchemy import and_, cast, distinct, exists, func, select
+from sqlalchemy import and_, cast, distinct, exists, func, or_, select
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, column_property, contains_eager
@@ -205,6 +205,63 @@ class ObjectPermission(db.Model):
             and self.reason_type == origin_share.reason_type
         )
 
+    @staticmethod
+    def get_uploaders_filter():
+        """
+        Prepares filter condition for ObjectPermission objects that describe
+        object direct uploaders visible for currently authenticated user
+        """
+        from .group import Group, Member
+
+        # Users with access_uploader_info can see every upload
+        if g.auth_user.has_rights(
+            Capabilities.access_uploader_info
+        ) or g.auth_user.has_rights(Capabilities.sharing_with_all):
+            return and_(
+                ObjectPermission.object_id == ObjectPermission.related_object_id,
+                ObjectPermission.reason_type == AccessType.ADDED,
+            )
+        else:
+            # list of user_ids who are in a common workspace with auth_user
+            members = (
+                db.session.query(Member.user_id)
+                .join(Group.members)
+                .filter(g.auth_user.is_member(Group.id))
+                .filter(Group.workspace.is_(True))
+            )
+            return and_(
+                ObjectPermission.object_id == ObjectPermission.related_object_id,
+                ObjectPermission.reason_type == AccessType.ADDED,
+                or_(
+                    ObjectPermission.related_user_id == g.auth_user.id,
+                    ObjectPermission.related_user_id.in_(members),
+                ),
+            )
+
+    @staticmethod
+    def get_shares_filter(include_inherited_uploads=True):
+        """
+        Prepares filter condition for ObjectPermission objects that describe
+        object shares visible for currently authenticated user
+
+        :param include_inherited_uploads: |
+            Include e.g. inherited ADDED entries, so get_shares_query
+            is complementary to get_uploaders_query.
+            If false: it returns only SHARED entries
+        """
+        if include_inherited_uploads:
+            type_filter = or_(
+                ObjectPermission.reason_type != "added",
+                ObjectPermission.related_object_id != ObjectPermission.object_id,
+            )
+        else:
+            type_filter = ObjectPermission.reason_type == AccessType.SHARED
+
+        if not g.auth_user.has_rights(Capabilities.sharing_with_all):
+            return and_(type_filter, g.auth_user.is_member(ObjectPermission.group_id))
+        else:
+            return type_filter
+
 
 class Object(db.Model):
     __tablename__ = "object"
@@ -277,6 +334,7 @@ class Object(db.Model):
         cascade="save-update, merge, delete",
         order_by=ObjectPermission.access_time.asc(),
     )
+
     related_shares = db.relationship(
         "ObjectPermission",
         lazy="dynamic",
@@ -566,19 +624,28 @@ class Object(db.Model):
 
         # Share with all specified groups
         for share_group in share_with:
-            created_object.give_access(
-                share_group.id,
-                AccessType.ADDED,
-                created_object,
-                g.auth_user,
-                commit=False,
-            )
+            if share_group.name == g.auth_user.login:
+                created_object.give_access(
+                    share_group.id,
+                    AccessType.ADDED,
+                    created_object,
+                    g.auth_user,
+                    commit=False,
+                )
+            else:
+                created_object.give_access(
+                    share_group.id,
+                    AccessType.SHARED,
+                    created_object,
+                    g.auth_user,
+                    commit=False,
+                )
 
         # Share with all groups that access all objects
         for all_access_group in Group.all_access_groups():
             created_object.give_access(
                 all_access_group.id,
-                AccessType.ADDED,
+                AccessType.SHARED,
                 created_object,
                 g.auth_user,
                 commit=False,
@@ -892,24 +959,29 @@ class Object(db.Model):
                 raise
         return True
 
+    def get_uploaders(self):
+        """
+        Gets all object uploads visible for currently authenticated user
+        :rtype: List[ObjectPermission]
+        """
+        return (
+            db.session.query(ObjectPermission)
+            .filter(ObjectPermission.object_id == self.id)
+            .filter(ObjectPermission.get_uploaders_filter())
+            .order_by(ObjectPermission.access_time.asc())
+        ).all()
+
     def get_shares(self):
         """
         Gets all object shares visible for currently authenticated user
         :rtype: List[ObjectPermission]
         """
-        permission_filter = ObjectPermission.object_id == self.id
-
-        if not g.auth_user.has_rights(Capabilities.sharing_with_all):
-            permission_filter = and_(
-                permission_filter, g.auth_user.is_member(ObjectPermission.group_id)
-            )
-
-        shares = (
+        return (
             db.session.query(ObjectPermission)
-            .filter(permission_filter)
+            .filter(ObjectPermission.object_id == self.id)
+            .filter(ObjectPermission.get_shares_filter())
             .order_by(ObjectPermission.access_time.asc())
         ).all()
-        return shares
 
     def _send_to_karton(self):
         raise NotImplementedError

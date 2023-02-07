@@ -258,6 +258,7 @@ There are also other fields that have special meaning. They will be described in
 
 
 * ``favorites:<string>``
+* ``sharer:<string>``
 * ``shared:<string>``
 * ``uploader:<string>``
 * ``parent:<subquery>``
@@ -385,12 +386,12 @@ so you can select only samples that were uploaded within the specific period of 
 
    upload_count:["5 TO *] AND upload_time:[2021-06-01 TO 2021-06-30]
 
-Group access queries (\ ``shared:`` and ``uploader:``\ )
+Group access queries (\ ``sharer:``, ``shared:`` and ``uploader:``\ )
 ------------------------------------------------------------
 
-Search engine supports ``shared:`` and ``uploader:`` special fields that are useful for filtering out specific user or group uploads.
+Search engine supports ``sharer:``, ``shared:`` and ``uploader:`` special fields that are useful for filtering out specific user or group uploads.
 
-
+* ``sharer:`` checks if object is explicitly shared with current user by specific user
 * ``shared:`` checks if object is explicitly shared with specific group or user
 * ``uploader:`` checks if object was uploaded by specified user or any user from specified group
 

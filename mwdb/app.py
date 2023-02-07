@@ -167,10 +167,11 @@ def require_auth():
     auth = request.headers.get("Authorization")
 
     g.auth_user = None
+    g.auth_provider = None
 
     if auth and auth.startswith("Bearer "):
         token = auth.split(" ", 1)[1]
-        g.auth_user = User.verify_session_token(token)
+        g.auth_user, g.auth_provider = User.verify_session_token(token)
         # Not a session token? Maybe APIKey token
         if g.auth_user is None:
             g.auth_user = APIKey.verify_token(token)

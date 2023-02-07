@@ -5,7 +5,7 @@ from flask import g, request
 from flask_restful import Resource
 from marshmallow import ValidationError
 from sqlalchemy import and_, exists, or_
-from werkzeug.exceptions import Conflict, Forbidden, NotFound, PreconditionFailed
+from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -407,13 +407,12 @@ class OpenIDAuthorizeResource(Resource):
         user.logged_on = datetime.datetime.now()
         db.session.commit()
 
-        auth_token = user.generate_session_token()
+        auth_token = user.generate_session_token(provider=provider_name)
 
         logger.info(
             "User logged in via OpenID Provider",
             extra={"login": user.login, "provider": provider_name},
         )
-        g.auth_provider = provider_name
         schema = AuthSuccessResponseSchema()
         return schema.dump(
             {
@@ -421,7 +420,7 @@ class OpenIDAuthorizeResource(Resource):
                 "token": auth_token,
                 "capabilities": user.capabilities,
                 "groups": user.group_names,
-                "provider": g.auth_provider,
+                "provider": provider_name,
             }
         )
 
@@ -501,7 +500,7 @@ class OpenIDRegisterUserResource(Resource):
         user.logged_on = datetime.datetime.now()
         db.session.commit()
 
-        auth_token = user.generate_session_token()
+        auth_token = user.generate_session_token(provider=provider_name)
 
         user_private_group = next(
             (g for g in user.groups if g.name == user.login), None
@@ -521,6 +520,7 @@ class OpenIDRegisterUserResource(Resource):
                 "token": auth_token,
                 "capabilities": user.capabilities,
                 "groups": user.group_names,
+                "provider": provider_name,
             }
         )
 
@@ -680,9 +680,7 @@ class OpenIDLogoutResource(Resource):
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
         if not provider.logout_endpoint:
-            raise NotFound(
-                f"Logout endpoint is not configured for '{provider_name}'"
-            )```
+            raise NotFound(f"Logout endpoint is not configured for '{provider_name}'")
 
         schema = OpenIDLogoutLinkResponseSchema()
         return schema.dump({"url": provider.logout_endpoint})

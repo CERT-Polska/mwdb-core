@@ -309,7 +309,7 @@ export default function Navigation() {
                                                             if (
                                                                 auth.user
                                                                     .provider ===
-                                                                "mwdb"
+                                                                null
                                                             ) {
                                                                 auth.logout();
                                                             } else {

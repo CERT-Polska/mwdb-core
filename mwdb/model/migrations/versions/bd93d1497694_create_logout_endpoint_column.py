@@ -18,16 +18,16 @@ depends_on = None
 def upgrade():
     op.execute(
         """
-    ALTER TABLE public.openid_provider
-    ADD logout_endpoint text;
-    """
+            ALTER TABLE public.openid_provider
+            ADD logout_endpoint text;
+        """
     )
 
 
 def downgrade():
     op.execute(
         """
-        ALTER TABLE public.openid_provider
-        DROP COLUMN logout_endpoint;
-    """
+            ALTER TABLE public.openid_provider
+            DROP COLUMN logout_endpoint;
+        """
     )

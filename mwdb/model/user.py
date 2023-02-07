@@ -154,19 +154,22 @@ class User(db.Model):
             db.session.commit()
         return user
 
-    def _generate_token(self, fields, scope, expiration):
+    def _generate_token(self, fields, scope, expiration, **kwargs):
         token = generate_token(
-            dict(
-                [("login", self.login)]
-                + [(field, getattr(self, field)) for field in fields]
-            ),
+            {
+                **dict(
+                    [("login", self.login)]
+                    + [(field, getattr(self, field)) for field in fields]
+                ),
+                **kwargs,
+            },
             scope,
             expiration,
         )
         return token
 
     @staticmethod
-    def _verify_token(token, fields, scope):
+    def _verify_token(token, fields, scope, return_provider=False):
         data = verify_token(token, scope)
         if data is None:
             return None
@@ -182,13 +185,17 @@ class User(db.Model):
             if data[field] != getattr(user_obj, field):
                 return None
 
-        return user_obj
+        if return_provider:
+            return user_obj, data["provider"]
+        else:
+            return user_obj
 
-    def generate_session_token(self):
+    def generate_session_token(self, provider=None):
         return self._generate_token(
             ["password_ver", "identity_ver"],
             scope=AuthScope.session,
             expiration=24 * 3600,
+            provider=provider,
         )
 
     def generate_set_password_token(self):
@@ -201,7 +208,10 @@ class User(db.Model):
     @staticmethod
     def verify_session_token(token):
         return User._verify_token(
-            token, ["password_ver", "identity_ver"], scope=AuthScope.session
+            token,
+            ["password_ver", "identity_ver"],
+            scope=AuthScope.session,
+            return_provider=True,
         )
 
     @staticmethod

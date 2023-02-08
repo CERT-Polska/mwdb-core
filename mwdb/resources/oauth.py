@@ -105,9 +105,6 @@ class OpenIDProviderResource(Resource):
         if obj["logout_endpoint"]:
             logout_endpoint = obj["logout_endpoint"]
 
-        if obj["name"] == "mwdb":
-            raise Conflict("This name is restricted")
-
         if db.session.query(
             exists().where(and_(OpenIDProvider.name == obj["name"]))
         ).scalar():

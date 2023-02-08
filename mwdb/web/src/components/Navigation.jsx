@@ -309,7 +309,10 @@ export default function Navigation() {
                                                             if (
                                                                 auth.user
                                                                     .provider ===
-                                                                null
+                                                                    null ||
+                                                                auth.user
+                                                                    .provider ===
+                                                                    undefined
                                                             ) {
                                                                 auth.logout();
                                                             } else {

@@ -159,13 +159,7 @@ class User(db.Model):
         for field in user_fields:
            token_data[field] = getattr(self, field)
         token = generate_token(
-            {
-                **dict(
-                    [("login", self.login)]
-                    + [(field, getattr(self, field)) for field in fields]
-                ),
-                **kwargs,
-            },
+            token_data,
             scope,
             expiration,
         )

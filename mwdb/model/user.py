@@ -154,7 +154,10 @@ class User(db.Model):
             db.session.commit()
         return user
 
-    def _generate_token(self, fields, scope, expiration, **kwargs):
+    def _generate_token(self, user_fields, scope, expiration, **extra_fields):
+        token_data = {"login": self.login, **extra_fields}
+        for field in user_fields:
+           token_data[field] = getattr(self, field)
         token = generate_token(
             {
                 **dict(

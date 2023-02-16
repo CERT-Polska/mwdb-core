@@ -182,7 +182,7 @@ class User(db.Model):
             if data[field] != getattr(user_obj, field):
                 return None
 
-        return user_obj
+        return user_obj, data.get("provider")
 
     def generate_session_token(self, provider=None):
         return self._generate_token(

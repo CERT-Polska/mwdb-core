@@ -1,11 +1,19 @@
 import datetime
 import hashlib
+import json
 
+import requests
 from flask import g, request
 from flask_restful import Resource
 from marshmallow import ValidationError
 from sqlalchemy import and_, exists, or_
-from werkzeug.exceptions import Conflict, Forbidden, NotFound
+from werkzeug.exceptions import (
+    BadRequest,
+    Conflict,
+    Forbidden,
+    NotFound,
+    ServiceUnavailable,
+)
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -16,6 +24,8 @@ from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.group import GroupNameSchemaBase
 from mwdb.schema.oauth import (
     OpenIDAuthorizeRequestSchema,
+    OpenIDDiscoveryDataResponseSchema,
+    OpenIDDiscoveryURLRequestSchema,
     OpenIDLoginResponseSchema,
     OpenIDLogoutLinkResponseSchema,
     OpenIDProviderCreateRequestSchema,
@@ -681,3 +691,75 @@ class OpenIDLogoutResource(Resource):
 
         schema = OpenIDLogoutLinkResponseSchema()
         return schema.dump({"url": provider.logout_endpoint})
+
+
+@rate_limited_resource
+class OpenIDDiscoveryResource(Resource):
+    @requires_authorization
+    def post(self):
+        """
+        ---
+        summary: Get discovery endpoint data
+        description: |
+            Get data from OIDC discovery endpoint
+        security:
+            - bearerAuth: []
+        tags:
+            - auth
+        requestBody:
+            description: URL to discovery endpoint
+            content:
+              application/json:
+                schema: OpenIDDiscoveryURLRequestSchema
+        responses:
+            200:
+                description: When data was successfully downloaded
+                content:
+                  application/json:
+                    schema: OpenIDDiscoveryDataResponseSchema
+            400:
+                description: Error occurred
+            404:
+                description: Invalid URL
+            503:
+                description: |
+                    Request canceled due to connection timeout.
+        """
+        schema = OpenIDDiscoveryURLRequestSchema()
+        obj = loads_schema(request.get_data(as_text=True), schema)
+        url = obj.get("url")
+
+        if url is None:
+            raise NotFound("URL cannot be empty")
+        try:
+            response = requests.get(url)
+        except requests.exceptions.MissingSchema:
+            raise NotFound(
+                "Cannot connect to given URL. Remember to use http:// or https://"
+            )
+        except requests.exceptions.ConnectionError:
+            raise NotFound("Cannot connect to given URL")
+        except requests.exceptions.Timeout:
+            raise ServiceUnavailable("Request timed out")
+        except requests.exceptions.RequestException as e:
+            raise BadRequest(e)
+
+        if not response.ok:
+            raise BadRequest("There was a problem while connecting to provided URL")
+
+        try:
+            data = json.loads(response.text)
+        except json.JSONDecodeError:
+            raise BadRequest("Problem with decoding JSON")
+
+        schema = OpenIDDiscoveryDataResponseSchema()
+        return schema.dump(
+            {
+                "pure": response.text,
+                "authorization_endpoint": data.get("authorization_endpoint"),
+                "token_endpoint": data.get("token_endpoint"),
+                "userinfo_endpoint": data.get("userinfo_endpoint"),
+                "jwks_endpoint": data.get("jwks_uri"),
+                "logout_endpoint": data.get("end_session_endpoint"),
+            }
+        )

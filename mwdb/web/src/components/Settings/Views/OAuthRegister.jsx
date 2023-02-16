@@ -2,11 +2,12 @@ import React, { useContext, useState } from "react";
 
 import { APIContext } from "@mwdb-web/commons/api";
 
-import { useViewAlert } from "@mwdb-web/commons/ui";
+import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
 
 export default function OAuthRegister() {
     const api = useContext(APIContext);
     const viewAlert = useViewAlert();
+    const [pureData, setPureData] = useState("");
     const [values, setValues] = useState({
         userinfo_endpoint: "",
         jwks_endpoint: "",
@@ -49,9 +50,69 @@ export default function OAuthRegister() {
         }
     }
 
+    async function updateDiscoveryData(url) {
+        try {
+            var req = await api.oauthGetDiscoveryData(url);
+            setPureData(JSON.stringify(JSON.parse(req.data.pure), null, 4));
+            setValues((prevState) => ({
+                ...prevState,
+                authorization_endpoint: req.data.authorization_endpoint,
+                token_endpoint: req.data.token_endpoint,
+                userinfo_endpoint: req.data.userinfo_endpoint,
+                jwks_endpoint: req.data.jwks_endpoint,
+                logout_endpoint: req.data.logout_endpoint,
+            }));
+            viewAlert.setAlert({ success: "Endpoints updated" });
+        } catch (error) {
+            viewAlert.setAlert({ error });
+        }
+    }
+
     return (
         <div className="container">
             <h2>Register new identity provider</h2>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    updateDiscoveryData(e.target.discover_endpoint.value);
+                }}
+            >
+                <div className="form-group">
+                    <label>Discover endpoint</label>
+                    <input
+                        type="text"
+                        name="discover_endpoint"
+                        className="form-control"
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <input
+                        type="submit"
+                        value="Get data"
+                        className="btn btn-secondary"
+                    />
+                </div>
+                <ShowIf condition={pureData}>
+                    <textarea
+                        type="text"
+                        rows="10"
+                        width="100%"
+                        className="form-control"
+                        value={pureData}
+                        disabled
+                    />
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => {
+                            setPureData("");
+                        }}
+                    >
+                        Hide output
+                    </button>
+                </ShowIf>
+            </form>
+
             <form
                 onSubmit={(ev) => {
                     ev.preventDefault();

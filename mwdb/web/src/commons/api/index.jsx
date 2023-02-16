@@ -120,8 +120,12 @@ function oauthGetIdentities() {
     return axios.get("/oauth/identities");
 }
 
-async function oauthGetLogoutLink(provider) {
+function oauthGetLogoutLink(provider) {
     return axios.get(`/oauth/${provider}/logout`);
+}
+
+function oauthGetDiscoveryData(url) {
+    return axios.post("/oauth/discovery", { url });
 }
 
 function apiKeyAdd(login, name) {
@@ -564,6 +568,7 @@ export const api = {
     oauthRemoveSingleProvider,
     oauthGetIdentities,
     oauthGetLogoutLink,
+    oauthGetDiscoveryData,
     authRefresh,
     authSetPassword,
     authRequestPasswordChange,

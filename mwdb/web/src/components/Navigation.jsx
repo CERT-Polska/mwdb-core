@@ -307,7 +307,8 @@ export default function Navigation() {
                                                         onClick={(ev) => {
                                                             ev.preventDefault();
                                                             if (
-                                                                !auth.user.provider
+                                                                !auth.user
+                                                                    .provider
                                                             ) {
                                                                 auth.logout();
                                                             } else {

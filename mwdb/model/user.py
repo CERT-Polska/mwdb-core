@@ -157,7 +157,7 @@ class User(db.Model):
     def _generate_token(self, user_fields, scope, expiration, **extra_fields):
         token_data = {"login": self.login, **extra_fields}
         for field in user_fields:
-           token_data[field] = getattr(self, field)
+            token_data[field] = getattr(self, field)
         token = generate_token(
             token_data,
             scope,
@@ -169,18 +169,18 @@ class User(db.Model):
     def _verify_token(token, fields, scope):
         data = verify_token(token, scope)
         if data is None:
-            return None
+            return None, None
 
         try:
             user_obj = User.query.filter(User.login == data["sub"]).one()
         except NoResultFound:
-            return None
+            return None, None
 
         for field in fields:
             if field not in data:
-                return None
+                return None, None
             if data[field] != getattr(user_obj, field):
-                return None
+                return None, None
 
         return user_obj, data.get("provider")
 

@@ -1,5 +1,6 @@
 import datetime
 import os
+from typing import Optional, Tuple
 
 import bcrypt
 from flask import g
@@ -166,21 +167,21 @@ class User(db.Model):
         return token
 
     @staticmethod
-    def _verify_token(token, fields, scope):
+    def _verify_token(token, fields, scope) -> Optional[Tuple["User", Optional[str]]]:
         data = verify_token(token, scope)
         if data is None:
-            return None, None
+            return None
 
         try:
             user_obj = User.query.filter(User.login == data["sub"]).one()
         except NoResultFound:
-            return None, None
+            return None
 
         for field in fields:
             if field not in data:
-                return None, None
+                return None
             if data[field] != getattr(user_obj, field):
-                return None, None
+                return None
 
         return user_obj, data.get("provider")
 
@@ -200,7 +201,7 @@ class User(db.Model):
         )
 
     @staticmethod
-    def verify_session_token(token):
+    def verify_session_token(token) -> Optional[Tuple["User", Optional[str]]]:
         return User._verify_token(
             token,
             ["password_ver", "identity_ver"],
@@ -208,12 +209,13 @@ class User(db.Model):
         )
 
     @staticmethod
-    def verify_set_password_token(token):
-        return User._verify_token(
+    def verify_set_password_token(token) -> Optional["User"]:
+        result = User._verify_token(
             token,
             ["password_ver"],
             scope=AuthScope.set_password,
         )
+        return None if result is None else result[0]
 
     @staticmethod
     def verify_legacy_token(token):

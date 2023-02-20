@@ -101,7 +101,7 @@ function AppRoutes() {
             <Route path="login" element={<UserLogin />} />
             <Route path="register" element={<UserRegister />} />
             <Route path="recover_password" element={<UserPasswordRecover />} />
-            <Route path="setpasswd/:token" element={<UserSetPassword />} />
+            <Route path="setpasswd" element={<UserSetPassword />} />
             <Route path="oauth/callback" element={<OAuthAuthorize />} />
             <Route element={<RequiresAuth />}>
                 <Route path="/" element={<RecentSamples />} />

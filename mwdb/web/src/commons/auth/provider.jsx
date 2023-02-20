@@ -114,6 +114,17 @@ export function AuthProvider(props) {
         }
     }
 
+    async function oAuthLogout() {
+        try {
+            let response = await api.oauthGetLogoutLink(session.provider);
+            window.location.href = response.data.url;
+            return null;
+        } catch (e) {
+            console.log(e);
+            return e.response.data.message;
+        }
+    }
+
     function logout(error) {
         // Clears session state and redirects user to the UserLogin page
         let logoutReason = error
@@ -218,6 +229,7 @@ export function AuthProvider(props) {
                 refreshSession,
                 updateSession,
                 logout,
+                oAuthLogout,
             }}
         >
             {props.children}

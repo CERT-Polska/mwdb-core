@@ -87,6 +87,34 @@ mwdb_session.headers = {
     "Content-Type": "application/json",
 }
 
+print("[+] Creating user foo in MWDB with password foofoofoo")
+
+response = mwdb_session.post(
+    "http://127.0.0.1/api/user/foo",
+    json={
+        "email": "foo@mwdb.local",
+        "feed_quality": "high",
+        "send_email": False,
+        "additional_info": "string"
+    }
+)
+response.raise_for_status()
+
+response = mwdb_session.get(
+    "http://127.0.0.1/api/user/foo/change_password"
+)
+response.raise_for_status()
+password_token = response.json()['token']
+
+response = requests.post(
+    "http://127.0.0.1/api/auth/change_password",
+    json={
+        "password": "foofoofoo",
+        "token": password_token
+    }
+)
+response.raise_for_status()
+
 print("[+] Registering new OIDC provider")
 
 response = mwdb_session.post(
@@ -99,6 +127,7 @@ response = mwdb_session.post(
         "userinfo_endpoint": "http://keycloak.:8080/realms/mwdb-oidc-dev/protocol/openid-connect/userinfo",
         "token_endpoint": "http://keycloak.:8080/realms/mwdb-oidc-dev/protocol/openid-connect/token",
         "jwks_endpoint": "http://keycloak.:8080/realms/mwdb-oidc-dev/protocol/openid-connect/certs",
+        "logout_endpoint": "http://127.0.0.1:8080/realms/mwdb-oidc-dev/protocol/openid-connect/logout",
     },
 )
 response.raise_for_status()

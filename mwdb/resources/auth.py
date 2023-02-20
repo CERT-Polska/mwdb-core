@@ -120,6 +120,7 @@ class LoginResource(Resource):
                 "token": auth_token,
                 "capabilities": user.capabilities,
                 "groups": user.group_names,
+                "provider": None,
             }
         )
 
@@ -235,6 +236,7 @@ class ChangePasswordResource(Resource):
         schema = AuthSetPasswordRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
+        # verify_set_password_token return tuple (user_obj, auth_provider)
         user = User.verify_set_password_token(obj["token"])
         if user is None:
             raise Forbidden("Set password token expired")
@@ -422,9 +424,10 @@ class RefreshTokenResource(Resource):
         return schema.dump(
             {
                 "login": user.login,
-                "token": user.generate_session_token(),
+                "token": user.generate_session_token(provider=g.auth_provider),
                 "capabilities": user.capabilities,
                 "groups": user.group_names,
+                "provider": g.auth_provider,
             }
         )
 

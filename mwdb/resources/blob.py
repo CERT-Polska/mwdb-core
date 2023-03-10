@@ -84,6 +84,13 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                 type: string
               description: Filter results using Lucene query
               required: false
+            - in: query
+              name: count
+              schema:
+                type: integer
+              description: Number of objects to return
+              required: false
+              default: 10
         responses:
             200:
                 description: List of text blobs

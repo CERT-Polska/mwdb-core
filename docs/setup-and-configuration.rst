@@ -308,6 +308,7 @@ Extra features:
 * ``remotes`` (comma separated strings) - list of MWDB remotes (experimental)
 * ``enable_hooks`` (0 or 1) - enable plugin hooks
 * ``enable_oidc`` (0 or 1) - enable OIDC (experimental)
+* ``listing_endpoints_count_limit`` (integer) - Limits number of objects returned by listing endpoints. Default is ``1000``.
 
 Registration feature settings:
 

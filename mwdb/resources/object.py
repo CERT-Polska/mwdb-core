@@ -156,11 +156,13 @@ class ObjectResource(Resource):
         description: |
             Returns list of objects matching provided query,
             ordered from the latest one.
+            If you want to fetch older objects use `older_than` parameter.
 
-            Limited to 10 objects, use `older_than` parameter to fetch more.
+            Numer of returned objects is limited by 'count' parameter
+            (default value is 10).
 
-            Don't rely on maximum count of returned objects
-            because it can be changed/parametrized in future.
+            `Note:` Maximal number of returned objects is limited in
+            MWDB's configuration (default value is 1 000)
         security:
             - bearerAuth: []
         tags:
@@ -222,6 +224,8 @@ class ObjectResource(Resource):
         else:
             db_query = db.session.query(self.ObjectType)
 
+        limit = min(obj["count"], app_config.mwdb.listing_endpoints_count_limit)
+
         db_query = db_query.filter(
             g.auth_user.has_access_to_object(Object.id)
         ).order_by(Object.id.desc())
@@ -231,7 +235,7 @@ class ObjectResource(Resource):
         elif obj["page"] is not None and obj["page"] > 1:
             db_query = db_query.offset((obj["page"] - 1) * 10)
 
-        objects = db_query.limit(10).all()
+        objects = db_query.limit(limit).all()
 
         schema = self.ListResponseSchema()
         return schema.dump(objects, many=True)

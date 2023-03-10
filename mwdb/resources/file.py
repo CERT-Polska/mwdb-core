@@ -1,8 +1,16 @@
 from flask import Response, g, request
 from flask_restful import Resource
-from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unauthorized
+from werkzeug.exceptions import (
+    BadRequest,
+    Conflict,
+    Forbidden,
+    NotAcceptable,
+    NotFound,
+    Unauthorized,
+)
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import File
@@ -183,6 +191,16 @@ class FileResource(ObjectResource, FileUploader):
         """
         schema = FileCreateRequestSchema()
         obj = load_schema(request.form.to_dict(), schema)
+
+        if app_config.mwdb.max_upload_size:
+            if (
+                int(request.headers.get("Content-Length"))
+                > app_config.mwdb.max_upload_size
+            ):
+                raise NotAcceptable(
+                    f"File you are trying to upload is bigger "
+                    f"than the configured limit: {app_config.mwdb.max_upload_size}B"
+                )
 
         return self.create_object(obj["options"])
 

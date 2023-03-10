@@ -287,6 +287,7 @@ Plugin settings:
 Storage settings:
 
 
+* ``max_upload_size`` (integer) - Maximal upload size in bytes. Keep in mind that this value refers to whole upload request (``Content-Lenght`` from request header), so the maximal file size is smaller than that by +/- 500B. Default is ``None``, which means there is no limit.
 * ``storage_provider`` (disk or s3) - If you want to use S3-compatible object storage instead of local file system, set this option to ``s3``. Default is ``disk``.
 * ``hash_pathing`` (0 or 1) - Should we break up the uploads into different folders. If you use S3-compatible storage, recommended option is ``0`` (default: ``1``).
 * ``s3_storage_endpoint`` (string) - S3 API endpoint for object storage. Required if you use S3-compatible storage.

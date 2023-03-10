@@ -70,6 +70,10 @@ class MWDBConfig(Config):
     )
     # File upload timeout
     file_upload_timeout = key(cast=int, required=False, default=60000)
+    # Maximal upload size, default is None (no limit)
+    # This value refers to whole upload request ('Content-Lenght' from request header)
+    # Maximal file size is smaller than that by +/- 500 B
+    max_upload_size = key(cast=int, required=False, default=None)
     # Folder for uploads
     uploads_folder = key(cast=path, required=False)
     # Should we break up the uploads into different folders for example:

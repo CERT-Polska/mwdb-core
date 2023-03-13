@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
+import Modal from "react-modal";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
@@ -18,6 +19,7 @@ export default function UserLogin() {
     const [password, setPassword] = useState("");
     const [loginError, setLoginError] = useState(null);
     const [providers, setProviders] = useState([]);
+    const [oAuthRegisterModalOpen, setOAuthRegisterModalOpen] = useState(false);
 
     const colorsList = ["#3c5799", "#01a0f6", "#d03f30", "#b4878b", "#444444"];
     const isOIDCEnabled = config.config["is_oidc_enabled"];
@@ -51,8 +53,61 @@ export default function UserLogin() {
 
     if (auth.isAuthenticated) return <Navigate to="/" />;
 
+    useEffect(() => {
+        if (location.state) {
+            if (
+                location.state.error === "Unknown identity" &&
+                config.config["is_registration_enabled"]
+            ) {
+                setOAuthRegisterModalOpen(true);
+            }
+        }
+    }, []);
+
     return (
         <div className="user-login">
+            <Modal
+                isOpen={oAuthRegisterModalOpen}
+                onRequestClose={() => setOAuthRegisterModalOpen(false)}
+                style={{
+                    content: {
+                        top: "50%",
+                        left: "50%",
+                        right: "auto",
+                        bottom: "auto",
+                        marginRight: "-50%",
+                        transform: "translate(-50%, -50%)",
+                    },
+                }}
+            >
+                <h6>
+                    We couldn't find an account associated with your oAuth
+                    identity.
+                    <br />
+                    Do you want to register?
+                </h6>
+                <br />
+                {providers.length <= 5 ? (
+                    providers.map((provider, i) => (
+                        <ProviderButton
+                            text="Register with "
+                            provider={provider}
+                            color={colorsList[i % colorsList.length]}
+                            action="register"
+                        />
+                    ))
+                ) : (
+                    <ProvidersSelectList providersList={providers} />
+                )}
+                <br />
+                <br />
+                <button
+                    onClick={() => setOAuthRegisterModalOpen(false)}
+                    className="form-control btn btn-secondary mb-1"
+                >
+                    Cancel
+                </button>
+            </Modal>
             <div className="background" />
             <View fluid ident="userLogin" error={loginError}>
                 <h2 align="center">Welcome to MWDB</h2>
@@ -122,27 +177,6 @@ export default function UserLogin() {
                                     provider={provider}
                                     color={colorsList[i % colorsList.length]}
                                     action="authorize"
-                                />
-                            ))
-                        ) : (
-                            <ProvidersSelectList providersList={providers} />
-                        )}
-                    </ShowIf>
-                    <ShowIf
-                        condition={
-                            providers.length &&
-                            config.config["is_registration_enabled"]
-                        }
-                    >
-                        <hr />
-                        <h6 align="center">Register using OAuth</h6>
-                        {providers.length <= 5 ? (
-                            providers.map((provider, i) => (
-                                <ProviderButton
-                                    text="Register with "
-                                    provider={provider}
-                                    color={colorsList[i % colorsList.length]}
-                                    action="register"
                                 />
                             ))
                         ) : (

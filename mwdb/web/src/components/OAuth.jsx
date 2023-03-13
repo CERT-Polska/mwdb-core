@@ -20,6 +20,7 @@ async function authenticate(provider, action, errorFunction) {
         );
         window.location = response.data["authorization_url"];
     } catch (e) {
+        console.log("AAAAAAAAA");
         errorFunction(e);
     }
 }

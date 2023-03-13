@@ -118,8 +118,31 @@ export default function UserLogin() {
                         {providers.length <= 5 ? (
                             providers.map((provider, i) => (
                                 <ProviderButton
+                                    text="Log in with "
                                     provider={provider}
                                     color={colorsList[i % colorsList.length]}
+                                    action="authorize"
+                                />
+                            ))
+                        ) : (
+                            <ProvidersSelectList providersList={providers} />
+                        )}
+                    </ShowIf>
+                    <ShowIf
+                        condition={
+                            providers.length &&
+                            config.config["is_registration_enabled"]
+                        }
+                    >
+                        <hr />
+                        <h6 align="center">Register using OAuth</h6>
+                        {providers.length <= 5 ? (
+                            providers.map((provider, i) => (
+                                <ProviderButton
+                                    text="Register with "
+                                    provider={provider}
+                                    color={colorsList[i % colorsList.length]}
+                                    action="register"
                                 />
                             ))
                         ) : (

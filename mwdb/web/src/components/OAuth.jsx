@@ -24,7 +24,7 @@ async function authenticate(provider, action, errorFunction) {
     }
 }
 
-export function ProviderButton({ provider, color }) {
+export function ProviderButton({ text, provider, color, action }) {
     // todo: correct error handling
     const [, setError] = useState();
     const chosenProvider = provider;
@@ -33,7 +33,7 @@ export function ProviderButton({ provider, color }) {
         <button
             onClick={(e) => {
                 e.preventDefault();
-                authenticate(chosenProvider, "authorize", setError);
+                authenticate(chosenProvider, action, setError);
             }}
             className="form-control btn btn-primary mb-1"
             style={{
@@ -41,7 +41,7 @@ export function ProviderButton({ provider, color }) {
                 borderStyle: "none",
             }}
         >
-            Log in with {provider}
+            {text + provider}
         </button>
     );
 }

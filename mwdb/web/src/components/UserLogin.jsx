@@ -1,5 +1,4 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import Modal from "react-modal";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
@@ -7,7 +6,8 @@ import { ConfigContext } from "@mwdb-web/commons/config";
 import { api } from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/plugins";
 import { View, ShowIf } from "@mwdb-web/commons/ui";
-import { ProviderButton, ProvidersSelectList } from "./OAuth";
+import { ProviderButton, ProvidersSelectList, authenticate } from "./OAuth";
+import { ConfirmationModal } from "../commons/ui";
 
 export default function UserLogin() {
     const auth = useContext(AuthContext);
@@ -56,7 +56,7 @@ export default function UserLogin() {
     useEffect(() => {
         if (location.state) {
             if (
-                location.state.error === "Unknown identity" &&
+                location.state.attemptedProvider &&
                 config.config["is_registration_enabled"]
             ) {
                 setOAuthRegisterModalOpen(true);
@@ -66,48 +66,26 @@ export default function UserLogin() {
 
     return (
         <div className="user-login">
-            <Modal
+            <ConfirmationModal
+                buttonStyle="btn-success"
                 isOpen={oAuthRegisterModalOpen}
-                onRequestClose={() => setOAuthRegisterModalOpen(false)}
-                style={{
-                    content: {
-                        top: "50%",
-                        left: "50%",
-                        right: "auto",
-                        bottom: "auto",
-                        marginRight: "-50%",
-                        transform: "translate(-50%, -50%)",
-                    },
+                onRequestClose={() => {
+                    setOAuthRegisterModalOpen(false);
+                    navigate("/login");
+                }}
+                onConfirm={() => {
+                    authenticate(
+                        location.state.attemptedProvider,
+                        "register",
+                        setLoginError
+                    );
+                    setOAuthRegisterModalOpen(false);
                 }}
             >
-                <h6>
-                    We couldn't find an account associated with your oAuth
-                    identity.
-                    <br />
-                    Do you want to register?
-                </h6>
-                <br />
-                {providers.length <= 5 ? (
-                    providers.map((provider, i) => (
-                        <ProviderButton
-                            text="Register with "
-                            provider={provider}
-                            color={colorsList[i % colorsList.length]}
-                            action="register"
-                        />
-                    ))
-                ) : (
-                    <ProvidersSelectList providersList={providers} />
-                )}
-                <br />
-                <br />
-                <button
-                    onClick={() => setOAuthRegisterModalOpen(false)}
-                    className="form-control btn btn-secondary mb-1"
-                >
-                    Cancel
-                </button>
-            </Modal>
+                We couldn't find an account associated with your oAuth identity.
+                Do you want to register using{" "}
+                {location.state ? location.state.attemptedProvider : ""}?
+            </ConfirmationModal>
             <div className="background" />
             <View fluid ident="userLogin" error={loginError}>
                 <h2 align="center">Welcome to MWDB</h2>

@@ -5,7 +5,7 @@ import { api } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { getErrorMessage } from "@mwdb-web/commons/ui";
 
-async function authenticate(provider, action, errorFunction) {
+export async function authenticate(provider, action, errorFunction) {
     try {
         const response = await api.oauthAuthenticate(provider);
         const expirationTime = Date.now() + 5 * 60 * 1000;
@@ -20,7 +20,6 @@ async function authenticate(provider, action, errorFunction) {
         );
         window.location = response.data["authorization_url"];
     } catch (e) {
-        console.log("AAAAAAAAA");
         errorFunction(e);
     }
 }
@@ -136,6 +135,7 @@ export function OAuthAuthorize() {
                 navigate("/login", {
                     state: {
                         error: getErrorMessage(e),
+                        attemptedProvider: provider,
                     },
                     replace: true,
                 });

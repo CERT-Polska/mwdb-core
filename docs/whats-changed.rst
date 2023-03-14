@@ -18,8 +18,67 @@ Complete changelog can be found here: `v2.9.0 changelog <https://github.com/CERT
 [Important change] Changes in share inheritance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[Important change] Changes in web plugins
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Important change] Changes in web plugins engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MWDB Core switched from `Create React App <https://create-react-app.dev/>`_ to `Vite <https://vitejs.dev/>`_ which uses
+Rollup instead of Webpack.
+
+1. First change you need to apply in plugin code is to rename all ``.js`` files to ``.jsx`` extension.
+
+   Remember to all references in ``package.json`` as well.
+
+   .. code-block:: diff
+
+      - "main": "frontend/index.js",
+      + "main": "frontend/index.jsx",
+
+2. ``@mwdb-web/commons`` is virtual package that is injected by plugin, so it's no longer installed into ``node_modules`` and
+   should be removed from ``peerDependency`` section in ``package.json``
+
+3. Don't use subpaths of ``@mwdb-web/commons/<module>``, all required things should be imported from main package.
+
+   .. code-block:: diff
+
+      - import { APIContext } from "@mwdb-web/commons/api/context";
+      + import { APIContext } from "@mwdb-web/commons/api";
+
+   If you don't do that, you'll get an error: ``"Incorrect commons import 'api', only one level deep allowed"``
+
+4. ``@mwdb-web/commons/api`` no longer serves ``api`` as default export. Use named import instead.
+
+    .. code-block:: diff
+
+       - import api from "@mwdb-web/commons/api";
+       + import { api } from "@mwdb-web/commons/api";
+
+5. Finally, your main plugin file (``index.jsx``) should export function that returns plugin specification instead of
+   exporting plugin specification directly.
+
+    .. code-block:: diff
+
+       - export default {
+       + export default () => ({
+          routes: [
+            <Route path='terms/:lang' element={<TermsOfUse />} />
+          ],
+          navdropdownAbout: [
+            <Link className="dropdown-item" to={'/terms/en'}>Terms of use</Link>
+          ],
+       - }
+       + })
+
+   That function is called at very early stage of web application initialization.
+   Plugins are imported before first render, so you don't have access to any useful context values though.
+
+Plugin modules are imported dynamically (using `import() <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import>`_ syntax).
+Check for any runtime errors in DevTools, especially noting messages like ``Plugin ${pluginName} failed to load``.
+
+[Docker] Replaced uWSGI with Gunicorn
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
 
 v2.8.0
 ------

@@ -7,6 +7,20 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrade mwdb-core to latest version`.
 
+v2.9.0
+------
+
+This release contains changes in sharing mechanism and uses slightly different web build engine, which breaks web plugin
+compatibility.
+
+Complete changelog can be found here: `v2.9.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.9.0>`_.
+
+[Important change] Changes in share inheritance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[Important change] Changes in web plugins
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 v2.8.0
 ------
 

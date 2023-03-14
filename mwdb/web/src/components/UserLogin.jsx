@@ -5,9 +5,8 @@ import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { api } from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/plugins";
-import { View, ShowIf } from "@mwdb-web/commons/ui";
+import { View, ShowIf, ConfirmationModal } from "@mwdb-web/commons/ui";
 import { ProviderButton, ProvidersSelectList, authenticate } from "./OAuth";
-import { ConfirmationModal } from "../commons/ui";
 
 export default function UserLogin() {
     const auth = useContext(AuthContext);
@@ -71,15 +70,20 @@ export default function UserLogin() {
                 isOpen={oAuthRegisterModalOpen}
                 onRequestClose={() => {
                     setOAuthRegisterModalOpen(false);
-                    navigate("/login");
+                    navigate("/login", {
+                        state: {
+                            error: location.state ? location.state.error : null,
+                        },
+                        replace: true,
+                    });
                 }}
                 onConfirm={() => {
+                    setOAuthRegisterModalOpen(false);
                     authenticate(
                         location.state.attemptedProvider,
                         "register",
                         setLoginError
                     );
-                    setOAuthRegisterModalOpen(false);
                 }}
             >
                 We couldn't find an account associated with your oAuth identity.
@@ -151,10 +155,8 @@ export default function UserLogin() {
                         {providers.length <= 5 ? (
                             providers.map((provider, i) => (
                                 <ProviderButton
-                                    text="Log in with "
                                     provider={provider}
                                     color={colorsList[i % colorsList.length]}
-                                    action="authorize"
                                 />
                             ))
                         ) : (

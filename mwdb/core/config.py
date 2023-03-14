@@ -89,6 +89,8 @@ class MWDBConfig(Config):
     s3_storage_bucket_name = key(cast=str, required=False)
     # S3 storage Authorize through IAM role (No credentials)
     s3_storage_iam_auth = key(cast=intbool, required=False)
+    # Limit number of objects returned by listing endpoints
+    listing_endpoints_count_limit = key(cast=int, required=False, default=1000)
 
     # Administrator account login
     admin_login = key(cast=str, required=False, default="admin")

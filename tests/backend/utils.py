@@ -245,6 +245,24 @@ class MwdbTest(object):
         res = self.session.delete(self.mwdb_url + "/object/" + identifier)
         res.raise_for_status()
         return res.json()
+    
+    def list_objects(self, query: str = None, count: int = None):
+        if query is None and count is None:
+            res = self.session.get(self.mwdb_url + "/object")
+            res.raise_for_status()
+            return res.json()
+        elif query is None and count is not None:
+            res = self.session.get(self.mwdb_url + "/object?count=" + str(count))
+            res.raise_for_status()
+            return res.json()
+        elif query is not None and count is None:
+            res = self.session.get(self.mwdb_url + "/object?query=" + query)
+            res.raise_for_status()
+            return res.json()
+        else:
+            res = self.session.get(f"{self.mwdb_url}/object?query={query}&count={count}")
+            res.raise_for_status()
+            return res.json()
 
     def add_tag(self, identifier, tag):
         res = self.session.put(

@@ -58,7 +58,7 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
             ordered from the latest one.
             If you want to fetch older blobs use `older_than` parameter.
 
-            Numer of returned blobs is limited by 'count' parameter
+            Number of returned blobs is limited by 'count' parameter
             (default value is 10).
 
             `Note:` Maximal number of returned blobs is limited in

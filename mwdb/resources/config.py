@@ -173,7 +173,7 @@ class ConfigResource(ObjectResource, ConfigUploader):
             ordered from the latest one.
             If you want to fetch older configs use `older_than` parameter.
 
-            Numer of returned configs is limited by 'count' parameter
+            Number of returned configs is limited by 'count' parameter
             (default value is 10).
 
             `Note:` Maximal number of returned configs is limited in

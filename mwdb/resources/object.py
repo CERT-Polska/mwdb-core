@@ -158,7 +158,7 @@ class ObjectResource(Resource):
             ordered from the latest one.
             If you want to fetch older objects use `older_than` parameter.
 
-            Numer of returned objects is limited by 'count' parameter
+            Number of returned objects is limited by 'count' parameter
             (default value is 10).
 
             `Note:` Maximal number of returned objects is limited in

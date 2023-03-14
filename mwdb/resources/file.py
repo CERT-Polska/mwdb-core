@@ -62,7 +62,7 @@ class FileResource(ObjectResource, FileUploader):
             ordered from the latest one.
             If you want to fetch older files use `older_than` parameter.
 
-            Numer of returned files is limited by 'count' parameter
+            Number of returned files is limited by 'count' parameter
             (default value is 10).
 
             `Note:` Maximal number of returned files is limited in

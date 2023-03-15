@@ -59,13 +59,15 @@ class FileResource(ObjectResource, FileUploader):
         ---
         summary: Search or list files
         description: |
-            Returns a list of files matching provided query,
+            Returns list of files matching provided query,
             ordered from the latest one.
+            If you want to fetch older files use `older_than` parameter.
 
-            Limited to 10 objects, use `older_than` parameter to fetch more.
+            Number of returned files is limited by 'count' parameter
+            (default value is 10).
 
-            Don't rely on maximum count of returned objects because
-            it can be changed/parametrized in future.
+            `Note:` Maximal number of returned files is limited in
+            MWDB's configuration (default value is 1 000)
         security:
             - bearerAuth: []
         tags:
@@ -76,7 +78,7 @@ class FileResource(ObjectResource, FileUploader):
               schema:
                 type: string
               description: |
-                Fetch objects which are older than the object specified by identifier.
+                Fetch files which are older than the object specified by identifier.
 
                 Used for pagination
               required: false
@@ -86,6 +88,13 @@ class FileResource(ObjectResource, FileUploader):
                 type: string
               description: Filter results using Lucene query
               required: false
+            - in: query
+              name: count
+              schema:
+                type: integer
+              description: Number of objects to return
+              required: false
+              default: 10
         responses:
             200:
                 description: List of files

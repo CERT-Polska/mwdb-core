@@ -5,4 +5,4 @@ Your mwdb-core account has been successfully registered.
 Here are your credentials:
 
 Login: {login}
-Set password link: {base_url}/setpasswd/{set_password_token}
+Set password link: {base_url}/setpasswd/?token={set_password_token}

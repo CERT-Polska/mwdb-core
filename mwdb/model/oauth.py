@@ -17,6 +17,7 @@ class OpenIDProvider(db.Model):
     token_endpoint = db.Column(db.Text, nullable=False)
     userinfo_endpoint = db.Column(db.Text, nullable=False)
     jwks_endpoint = db.Column(db.Text, nullable=True)
+    logout_endpoint = db.Column(db.Text, nullable=True)
 
     identities = db.relationship(
         "OpenIDUserIdentity",

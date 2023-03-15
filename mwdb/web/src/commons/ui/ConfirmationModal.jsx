@@ -44,7 +44,7 @@ export default function ConfirmationModal(props) {
                     type="button"
                     className="btn btn-secondary"
                     data-dismiss="modal"
-                    onClick={props.onRequestClose}
+                    onClick={props.onCancel || props.onRequestClose}
                     disabled={props.disabled}
                 >
                     {props.cancelText || "Close"}

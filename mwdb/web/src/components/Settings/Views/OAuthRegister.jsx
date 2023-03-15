@@ -15,6 +15,7 @@ export default function OAuthRegister() {
         authorization_endpoint: "",
         client_id: "",
         client_secret: "",
+        logout_endpoint: "",
     });
 
     function handleInputChange(event) {
@@ -36,7 +37,8 @@ export default function OAuthRegister() {
                 values.authorization_endpoint,
                 values.token_endpoint,
                 values.userinfo_endpoint,
-                values.jwks_endpoint
+                values.jwks_endpoint,
+                values.logout_endpoint
             );
             viewAlert.redirectToAlert({
                 target: `/settings/oauth`,
@@ -127,6 +129,16 @@ export default function OAuthRegister() {
                         type="text"
                         name="jwks_endpoint"
                         value={values.jwks_endpoint}
+                        onChange={handleInputChange}
+                        className="form-control"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Logout endpoint</label>
+                    <input
+                        type="text"
+                        name="logout_endpoint"
+                        value={values.logout_endpoint}
                         onChange={handleInputChange}
                         className="form-control"
                     />

@@ -19,6 +19,7 @@ class ObjectListRequestSchema(Schema):
     page = fields.Int(missing=None)  # legacy, to be removed in future
     query = fields.Str(missing=None)
     older_than = fields.Str(missing=None)
+    count = fields.Int(missing=10)
 
     @validates_schema
     def validate_key(self, data, **kwargs):

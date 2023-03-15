@@ -171,11 +171,13 @@ class ConfigResource(ObjectResource, ConfigUploader):
         description: |
             Returns list of configs matching provided query,
             ordered from the latest one.
+            If you want to fetch older configs use `older_than` parameter.
 
-            Limited to 10 objects, use `older_than` parameter to fetch more.
+            Number of returned configs is limited by 'count' parameter
+            (default value is 10).
 
-            Don't rely on maximum count of returned objects because it
-            can be changed/parametrized in future.
+            `Note:` Maximal number of returned configs is limited in
+            MWDB's configuration (default value is 1 000)
         security:
             - bearerAuth: []
         tags:
@@ -186,7 +188,7 @@ class ConfigResource(ObjectResource, ConfigUploader):
               schema:
                 type: string
               description: |
-                Fetch objects which are older than the object specified by identifier.
+                Fetch configs which are older than the object specified by identifier.
                 Used for pagination
               required: false
             - in: query
@@ -195,6 +197,13 @@ class ConfigResource(ObjectResource, ConfigUploader):
                 type: string
               description: Filter results using Lucene query
               required: false
+            - in: query
+              name: count
+              schema:
+                type: integer
+              description: Number of objects to return
+              required: false
+              default: 10
         responses:
             200:
                 description: List of configs

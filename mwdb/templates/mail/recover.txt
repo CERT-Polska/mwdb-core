@@ -2,7 +2,7 @@ Hi {login},
 
 We received a request to change your password.
 
-Set password link: {base_url}/setpasswd/{set_password_token}
+Set password link: {base_url}/setpasswd/?token={set_password_token}
 
 If you didn't request a password change, you can ignore this message
 and continue to use your current password. Someone probably typed in

@@ -1,7 +1,7 @@
 """add related_files table
 
 Revision ID: 3c610b0ddebc
-Revises: 717b5da712b8
+Revises: bd93d1497694
 Create Date: 2022-12-12 09:02:40.406370
 
 """
@@ -10,7 +10,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "3c610b0ddebc"
-down_revision = "717b5da712b8"
+down_revision = "bd93d1497694"
 branch_labels = None
 depends_on = None
 

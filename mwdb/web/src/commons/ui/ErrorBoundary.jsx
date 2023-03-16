@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useEffect, useState } from "react";
 import { intersperse } from "../helpers";
 
 export function getErrorMessage(error) {
@@ -23,16 +23,43 @@ export function getErrorMessage(error) {
 export function Alert(props) {
     if (props.error) {
         return (
-            <div className="alert alert-danger">
-                {getErrorMessage(props.error)}
-            </div>
+            <AlertMessage
+                type={"danger"}
+                message={getErrorMessage(props.error)}
+            />
         );
-    } else if (props.success) {
-        return <div className="alert alert-success">{props.success}</div>;
-    } else if (props.warning) {
-        return <div className="alert alert-warning">{props.warning}</div>;
     }
-    return <div />;
+    if (props.success) {
+        return <AlertMessage type={"success"} message={props.success} />;
+    }
+    if (props.warning) {
+        return <AlertMessage type={"warning"} message={props.warning} />;
+    }
+    return <></>;
+}
+
+function AlertMessage(props) {
+    const { type, message } = props;
+    const [isVisible, setIsVisible] = useState(true);
+
+    useEffect(() => {
+        setIsVisible(true);
+    }, [props]);
+    return (
+        <>
+            {isVisible && (
+                <div className={`alert alert-${type} alert-message`}>
+                    <span>{message}</span>
+                    <span
+                        className="alert-message__close"
+                        onClick={() => setIsVisible(false)}
+                    >
+                        X
+                    </span>
+                </div>
+            )}
+        </>
+    );
 }
 
 function CriticalError(props) {
@@ -58,6 +85,7 @@ function CriticalError(props) {
     );
 }
 
+//TODO: rewrite to function component
 export default class ErrorBoundary extends Component {
     state = {};
 

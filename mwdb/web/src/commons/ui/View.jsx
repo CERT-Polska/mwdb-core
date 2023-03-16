@@ -1,9 +1,9 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, memo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Alert, getErrorMessage } from "./ErrorBoundary";
 import { Extendable } from "../plugins";
 
-function ViewAlert({ success, error, warning }) {
+const ViewAlert = memo(function ({ success, error, warning }) {
     const locationState = useLocation().state || {};
     return (
         <Alert
@@ -12,7 +12,7 @@ function ViewAlert({ success, error, warning }) {
             warning={warning || locationState.warning}
         />
     );
-}
+});
 
 export function useViewAlert() {
     const navigate = useNavigate();

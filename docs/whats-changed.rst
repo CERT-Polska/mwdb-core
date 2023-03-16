@@ -51,7 +51,7 @@ Rollup instead of Webpack.
 
 1. First change you need to apply in plugin code is to rename all ``.js`` files to ``.jsx`` extension.
 
-   Remember to all references in ``package.json`` as well.
+   Remember to change all references in ``package.json`` as well.
 
    .. code-block:: diff
 

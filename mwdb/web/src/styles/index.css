@@ -405,6 +405,5 @@ table.table.share-table thead th {
 .alert-message__close {
     padding: 0.4rem 0.8rem;
     font-size: 1.2rem;
-    font-weight: 700;
     cursor: pointer;
 }

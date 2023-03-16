@@ -1,4 +1,6 @@
 import React, { Component, useEffect, useState } from "react";
+import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { intersperse } from "../helpers";
 
 export function getErrorMessage(error) {
@@ -45,16 +47,19 @@ function AlertMessage(props) {
     useEffect(() => {
         setIsVisible(true);
     }, [props]);
+
     return (
         <>
             {isVisible && (
                 <div className={`alert alert-${type} alert-message`}>
                     <span>{message}</span>
                     <span
+                        role="button"
+                        tabIndex={0}
                         className="alert-message__close"
                         onClick={() => setIsVisible(false)}
                     >
-                        X
+                        <FontAwesomeIcon icon={faClose} />
                     </span>
                 </div>
             )}

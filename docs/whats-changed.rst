@@ -15,8 +15,33 @@ compatibility.
 
 Complete changelog can be found here: `v2.9.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.9.0>`_.
 
-[Important change] Changes in share inheritance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Important change] Opt-in counting of search results
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In previous versions, click on "Search" button was counting all the results at once before showing the first part of them,
+which was time-consuming and heavy task for database. The actual count of results is usually not that useful for users to
+wait that much, unless they're checking it on purpose.
+
+In v2.9.0 there is extra "Count" button on search bar which switches between counting and non-counting search mode.
+We decided to make it non-counting by default for better search experience.
+
+[Important change] Changes in sharing model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When user uploads sample, they can use ``Share with`` field to choose with whom this sample should be shared. This action
+is noted with ``Added`` reason type which is set both for uploader and all groups that have got permission to see the sample.
+
+On the other hand, explicit shares are noted by different reason type: ``Shared``. That difference between ``Added`` and
+``Shared`` was not very clear, especially when inheritance comes into play so we decided to unify it.
+
+v2.9.0 sets ``Added`` reason type only for uploader. All groups being part of ``Share with`` are noted with ``Shared`` just like
+other explicit shares. To make it even more visible: uploaders, groups and inherited shares are shown in separate sections.
+
+.. image:: ../_static/sharing-v290.png
+   :target: ../_static/sharing-v290.png
+   :alt: Shares box in v2.9.0
+
+All objects are migrated to the new scheme automatically after upgrade.
 
 [Important change] Changes in web plugins engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,11 +99,16 @@ Rollup instead of Webpack.
 Plugin modules are imported dynamically (using `import() <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import>`_ syntax).
 Check for any runtime errors in DevTools, especially noting messages like ``Plugin ${pluginName} failed to load``.
 
-[Docker] Replaced uWSGI with Gunicorn
+[Important change] Replaced uWSGI with Gunicorn
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+``certpl/mwdb`` Docker image uses `Gunicorn <https://docs.gunicorn.org/en/stable/index.html>`_ instead of `uWSGI <https://uwsgi-docs.readthedocs.io/en/latest/>`_
+for serving Python WSGI application. If you have uWSGI-dependent configuration customized via environment variables, you need to change it
+to Gunicorn equivalent.
 
+Docker image by default spawns 4 sync workers and that number can be set via ``GUNICORN_WORKERS`` environment variable.
 
+For more information about configuring Gunicorn, check `Settings page in Gunicorn documentation <https://docs.gunicorn.org/en/stable/settings.html#>`_.
 
 v2.8.0
 ------

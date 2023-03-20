@@ -26,19 +26,12 @@ export default function RecentView(props) {
 
     // Query input state
     const [queryInput, setQueryInput] = useState(currentQuery);
-    // General error shown in Alert
-    const [error, setError] = useState(null);
     // Query error shown under the query bar
     const [queryError, setQueryError] = useState(null);
     const [objectCount, setObjectCount] = useState(null);
     // const [countingEnabled, setCountingEnabled] = useState(true);
     const countingEnabled = searchParams.get("count") === "1" ? 1 : 0;
     const isLocked = !queryError && submittedQuery !== currentQuery;
-
-    function resetErrors() {
-        setError(null);
-        setQueryError(null);
-    }
 
     /**
      * Here be dragons:
@@ -61,7 +54,7 @@ export default function RecentView(props) {
 
     const setCurrentQuery = useCallback(
         (query) => {
-            resetErrors();
+            setQueryError(null);
             // Optionally convert query if only hash or hashes were provided
             query = multiFromHashes(query);
             // Set query in URL (currentQuery, countingEnabled)
@@ -179,7 +172,7 @@ export default function RecentView(props) {
     }
 
     return (
-        <View fluid ident="recentObjects" error={error}>
+        <View fluid ident="recentObjects">
             <div className="table-responsive">
                 <form
                     className="searchForm"
@@ -277,7 +270,6 @@ export default function RecentView(props) {
                     headerComponent={props.headerComponent}
                     locked={isLocked}
                     disallowEmpty={props.disallowEmpty}
-                    setError={setError}
                     setQueryError={setQueryError}
                     addToQuery={addToQuery}
                 />

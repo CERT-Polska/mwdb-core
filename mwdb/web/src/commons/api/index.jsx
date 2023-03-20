@@ -63,7 +63,7 @@ function authRecoverPassword(login, email, recaptcha) {
 }
 
 function authGroups() {
-    return axios.get("/auth/groups");
+    return axios.get("/auth/groupsssss");
 }
 
 function oauthAuthenticate(provider) {

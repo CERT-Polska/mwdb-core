@@ -1,14 +1,22 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { api } from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/plugins";
-import { View, ShowIf, ConfirmationModal } from "@mwdb-web/commons/ui";
+import {
+    View,
+    ShowIf,
+    ConfirmationModal,
+    getErrorMessage,
+    useViewAlert,
+} from "@mwdb-web/commons/ui";
 import { ProviderButton, ProvidersSelectList, authenticate } from "./OAuth";
 
 export default function UserLogin() {
+    const { setAlert } = useViewAlert();
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
     const navigate = useNavigate();
@@ -16,7 +24,6 @@ export default function UserLogin() {
 
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
-    const [loginError, setLoginError] = useState(null);
     const [providers, setProviders] = useState([]);
     const [oAuthRegisterModalOpen, setOAuthRegisterModalOpen] = useState(false);
 
@@ -30,8 +37,13 @@ export default function UserLogin() {
             const prevLocation = locationState.prevLocation || "/";
             auth.updateSession(response.data);
             navigate(prevLocation);
+            toast(`Successfully logged into account: ${response.data.login}`, {
+                type: "success",
+            });
         } catch (error) {
-            setLoginError(error);
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     }
 
@@ -39,8 +51,10 @@ export default function UserLogin() {
         try {
             const response = await api.oauthGetProviders();
             setProviders(response.data["providers"]);
-        } catch (e) {
-            setLoginError(e);
+        } catch (error) {
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     }, []);
 
@@ -79,11 +93,7 @@ export default function UserLogin() {
                 }}
                 onConfirm={() => {
                     setOAuthRegisterModalOpen(false);
-                    authenticate(
-                        location.state.attemptedProvider,
-                        "register",
-                        setLoginError
-                    );
+                    authenticate(location.state.attemptedProvider, "register");
                 }}
             >
                 We couldn't find an account associated with your oAuth identity.
@@ -91,7 +101,7 @@ export default function UserLogin() {
                 {location.state ? location.state.attemptedProvider : ""}?
             </ConfirmationModal>
             <div className="background" />
-            <View fluid ident="userLogin" error={loginError}>
+            <View fluid ident="userLogin">
                 <h2 align="center">Welcome to MWDB</h2>
                 <h6 align="center">Log in using mwdb credentials</h6>
                 <form

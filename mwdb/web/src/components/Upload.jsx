@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
+import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
@@ -8,7 +9,12 @@ import AttributesAddModal from "./AttributesAddModal";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { Autocomplete, DataTable, View } from "@mwdb-web/commons/ui";
+import {
+    Autocomplete,
+    DataTable,
+    View,
+    getErrorMessage,
+} from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { Extendable } from "@mwdb-web/commons/plugins";
 
@@ -63,7 +69,6 @@ export default function Upload() {
     const searchParams = useSearchParams()[0];
 
     const [file, setFile] = useState(null);
-    const [error, setError] = useState(null);
     const [shareWith, setShareWith] = useState("default");
     const [group, setGroup] = useState("");
     const [groups, setGroups] = useState([]);
@@ -90,7 +95,9 @@ export default function Upload() {
             setGroups(groups);
             setShareWith(groups.length > 0 ? "default" : "private");
         } catch (error) {
-            setError(error);
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     }
 
@@ -133,11 +140,15 @@ export default function Upload() {
                 fileUploadTimeout
             );
             navigate("/file/" + response.data.sha256, {
-                state: { success: "File uploaded successfully." },
                 replace: true,
             });
+            toast("File uploaded successfully.", {
+                type: "success",
+            });
         } catch (error) {
-            setError(error);
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     };
 
@@ -160,7 +171,7 @@ export default function Upload() {
     };
 
     return (
-        <View ident="upload" error={error} showIf={groups !== null}>
+        <View ident="upload" showIf={groups !== null}>
             <Extendable ident="uploadForm">
                 <form>
                     <UploadDropzone

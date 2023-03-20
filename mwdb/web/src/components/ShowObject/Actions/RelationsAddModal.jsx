@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Alert, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { toast } from "react-toastify";
+import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default function RelationsAddModal(props) {
     const [relation, setRelation] = useState("");
@@ -14,9 +15,13 @@ export default function RelationsAddModal(props) {
 
     function handleSubmit(ev) {
         ev.preventDefault();
-        if (["parent", "child"].indexOf(relation) === -1)
-            props.onError("Please select parent or child relationship.");
-        else props.onSubmit(relation, value);
+        if (["parent", "child"].indexOf(relation) === -1) {
+            toast("Please select parent or child relationship.", {
+                type: "error",
+            });
+            return;
+        }
+        props.onSubmit(relation, value);
     }
 
     return (
@@ -29,7 +34,6 @@ export default function RelationsAddModal(props) {
             onConfirm={handleSubmit}
         >
             <form onSubmit={handleSubmit}>
-                <Alert error={props.error} />
                 <table>
                     <tr>
                         <td>

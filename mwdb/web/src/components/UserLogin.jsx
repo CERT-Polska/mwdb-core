@@ -85,9 +85,6 @@ export default function UserLogin() {
                 onRequestClose={() => {
                     setOAuthRegisterModalOpen(false);
                     navigate("/login", {
-                        state: {
-                            error: location.state ? location.state.error : null,
-                        },
                         replace: true,
                     });
                 }}

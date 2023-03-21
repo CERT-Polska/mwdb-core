@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useEffect, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "./ErrorBoundary";
@@ -7,41 +7,25 @@ import { Extendable } from "../plugins";
 export function useViewAlert() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [testSuccess, setTestSuccess] = useState("");
 
-    useEffect(() => {
-        if (testSuccess) {
-            toast(testSuccess, { type: "success" });
+    const setMessages = useCallback(({ success, error, warning }) => {
+        if (success) {
+            toast(success, { type: "success" });
         }
-    }, [testSuccess]);
 
-    // useEffect(() => {
-    //     if (location.state?.error) {
-    //         toast(getErrorMessage(location.state.error), { type: "error" });
-    //     }
-    // }, [location.state?.error]);
+        if (error) {
+            toast(getErrorMessage(error), { type: "error" });
+        }
 
-    // useEffect(() => {
-    //     if (location.state?.warning) {
-    //         toast(location.state.warning, { type: "warning" });
-    //     }
-    // }, [location.state?.warning]);
-
-    // useEffect(() => {
-    //     if (location.state?.success) {
-    //         console.log(location.state.success);
-    //         toast(location.state.success, { type: "success" });
-    //     }
-    // }, [location.state?.success]);
+        if (warning) {
+            toast(warning, { type: "warning" });
+        }
+    }, []);
 
     const setAlert = useCallback(
-        ({ success, error: rawError, warning, state }) => {
+        ({ success, error, warning, state }) => {
             const { pathname, search } = location;
-            const error = rawError && getErrorMessage(rawError);
-
-            if (success) {
-                setTestSuccess(success);
-            }
+            setMessages({ success, error, warning });
 
             navigate(
                 { pathname, search },
@@ -49,9 +33,6 @@ export function useViewAlert() {
                     state: {
                         ...location.state,
                         ...(state || {}),
-                        // success,
-                        // error,
-                        // warning,
                     },
                     replace: true,
                 }
@@ -61,14 +42,12 @@ export function useViewAlert() {
     );
 
     const redirectToAlert = useCallback(
-        ({ success, error: rawError, warning, target, state }) => {
-            const error = rawError && getErrorMessage(rawError);
+        ({ success, error, warning, target, state }) => {
+            setMessages({ success, error, warning });
+
             navigate(target, {
                 state: {
                     ...(state || {}),
-                    success,
-                    error,
-                    warning,
                 },
             });
         },

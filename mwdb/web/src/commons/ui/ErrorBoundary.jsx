@@ -1,6 +1,4 @@
-import React, { Component, useEffect, useState } from "react";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { Component } from "react";
 import { intersperse } from "../helpers";
 
 export function getErrorMessage(error) {
@@ -42,28 +40,11 @@ export function Alert(props) {
 
 function AlertMessage(props) {
     const { type, message } = props;
-    const [isVisible, setIsVisible] = useState(true);
-
-    useEffect(() => {
-        setIsVisible(true);
-    }, [props]);
 
     return (
-        <>
-            {isVisible && (
-                <div className={`alert alert-${type} alert-message`}>
-                    <span>{message}</span>
-                    <span
-                        role="button"
-                        tabIndex={0}
-                        className="alert-message__close"
-                        onClick={() => setIsVisible(false)}
-                    >
-                        <FontAwesomeIcon icon={faClose} />
-                    </span>
-                </div>
-            )}
-        </>
+        <div className={`alert alert-${type}`}>
+            <span>{message}</span>
+        </div>
     );
 }
 
@@ -90,7 +71,6 @@ function CriticalError(props) {
     );
 }
 
-//TODO: rewrite to function component
 export default class ErrorBoundary extends Component {
     state = {};
 

@@ -393,17 +393,3 @@ table.table.share-table thead th {
 .filter-option small.text-muted {
     display: none;
 }
-
-/* alert-message */
-.alert-message {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-}
-
-.alert-message__close {
-    padding: 0.4rem 0.8rem;
-    font-size: 1.2rem;
-    cursor: pointer;
-}

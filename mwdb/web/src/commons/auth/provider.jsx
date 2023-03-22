@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { api } from "../api";
@@ -6,7 +6,7 @@ import { api } from "../api";
 import { Capability } from "./capabilities";
 import { AuthContext } from "./context";
 
-const localStorageAuthKey = "user";
+export const localStorageAuthKey = "user";
 
 function isSessionValid(authSession) {
     if (!authSession || !authSession.token)
@@ -219,19 +219,22 @@ export function AuthProvider(props) {
         };
     }, []);
 
+    const value = useMemo(
+        () => ({
+            user: session,
+            isAuthenticated: !!session,
+            isAdmin: hasCapability(Capability.manageUsers),
+            hasCapability,
+            refreshSession,
+            updateSession,
+            logout,
+            oAuthLogout,
+        }),
+        [session, Capability]
+    );
+
     return (
-        <AuthContext.Provider
-            value={{
-                user: session,
-                isAuthenticated: !!session,
-                isAdmin: hasCapability(Capability.manageUsers),
-                hasCapability,
-                refreshSession,
-                updateSession,
-                logout,
-                oAuthLogout,
-            }}
-        >
+        <AuthContext.Provider value={value}>
             {props.children}
         </AuthContext.Provider>
     );

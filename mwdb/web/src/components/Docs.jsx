@@ -1,13 +1,12 @@
-import React, { Suspense, useContext, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState, memo } from "react";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext } from "@mwdb-web/commons/auth";
+import { localStorageAuthKey } from "@mwdb-web/commons/auth";
 import { View } from "@mwdb-web/commons/ui";
 
 const SwaggerUI = React.lazy(() => import("swagger-ui-react"));
 
-export default function Docs() {
-    const auth = useContext(AuthContext);
+const Docs = memo(() => {
     const [apiSpec, setApiSpec] = useState({});
 
     async function updateSpec() {
@@ -23,6 +22,18 @@ export default function Docs() {
         setApiSpec(spec.data);
     }
 
+    function requestInterceptor(req) {
+        const token = JSON.parse(
+            localStorage.getItem(localStorageAuthKey)
+        ).token;
+
+        if (token) {
+            req.headers.Authorization = `Bearer ${token}`;
+        }
+
+        return req;
+    }
+
     useEffect(() => {
         updateSpec();
     }, []);
@@ -34,14 +45,11 @@ export default function Docs() {
                     spec={apiSpec}
                     url=""
                     docExpansion="list"
-                    onComplete={(swagger) => {
-                        swagger.preauthorizeApiKey(
-                            "bearerAuth",
-                            auth.user.token
-                        );
-                    }}
+                    requestInterceptor={requestInterceptor}
                 />
             </Suspense>
         </View>
     );
-}
+});
+
+export default Docs;

@@ -11,12 +11,10 @@ import {
     ShowIf,
     ConfirmationModal,
     getErrorMessage,
-    useViewAlert,
 } from "@mwdb-web/commons/ui";
 import { ProviderButton, ProvidersSelectList, authenticate } from "./OAuth";
 
 export default function UserLogin() {
-    const { setAlert } = useViewAlert();
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
     const navigate = useNavigate();

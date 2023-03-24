@@ -260,11 +260,7 @@ export default function RecentView(props) {
                             type={props.type}
                             query={submittedQuery}
                             canAddQuickQuery={canAddQuickQuery}
-                            submitQuery={(query) =>
-                                setCurrentQuery({
-                                    query,
-                                })
-                            }
+                            submitQuery={(query) => setCurrentQuery(query)}
                             addToQuery={addToQuery}
                             setQueryError={setQueryError}
                         />

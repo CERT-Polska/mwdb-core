@@ -3,10 +3,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { api } from "../api";
 
+import { omit, isEqual, isNil } from "lodash";
 import { Capability } from "./capabilities";
 import { AuthContext } from "./context";
 
-const localStorageAuthKey = "user";
+export const localStorageAuthKey = "user";
 
 function isSessionValid(authSession) {
     if (!authSession || !authSession.token)
@@ -72,16 +73,20 @@ export function AuthProvider(props) {
     const location = useLocation();
     const navigate = useNavigate();
     const [session, _setSession] = useState(getStoredAuthSession());
-    const refreshTimer = useRef(null);
     const isAuthenticated = !!session;
 
     function setSession(newSession) {
         // Internal session setter which updates token used by Axios
         // before populating new state to the components
-        _setSession(() => {
-            setTokenForAPI(newSession && newSession.token);
-            return newSession;
-        });
+        setTokenForAPI(getStoredAuthSession() && getStoredAuthSession().token);
+        if (isNil(newSession)) {
+            _setSession(null);
+            return;
+        }
+        const newSessionWithoutToken = { ...omit(newSession, "token") };
+        if (!isEqual(session, newSessionWithoutToken)) {
+            _setSession(newSessionWithoutToken);
+        }
     }
 
     function updateSession(newSession) {
@@ -140,7 +145,9 @@ export function AuthProvider(props) {
     }
 
     function hasCapability(capability) {
-        return isAuthenticated && session.capabilities.indexOf(capability) >= 0;
+        return (
+            isAuthenticated && session?.capabilities.indexOf(capability) >= 0
+        );
     }
 
     // Effect for 401 Not authenticated to handle unexpected session expiration
@@ -189,23 +196,27 @@ export function AuthProvider(props) {
 
     // Effect for periodic session refresh
     useEffect(() => {
+        let timer;
         function setRefreshTimer() {
-            if (refreshTimer.current) return;
-            refreshTimer.current = setInterval(refreshSession, 60000);
-            refreshSession();
+            timer = setInterval(refreshSession, 60000);
         }
 
         function clearRefreshTimer() {
-            if (!refreshTimer.current) return;
-            clearInterval(refreshTimer.current);
-            refreshTimer.current = null;
+            clearInterval(timer);
         }
 
         // Set timer if user is logged in, clear otherwise
         (isAuthenticated ? setRefreshTimer : clearRefreshTimer)();
         return clearRefreshTimer;
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAuthenticated]);
+    }, [isAuthenticated, session]);
+
+    // Make sure that the token is not in the session.
+    useEffect(() => {
+        if (session?.token) {
+            _setSession(omit(session, "token"));
+        }
+    }, [session]);
 
     // Synchronize session in another window with local session state
     useEffect(() => {

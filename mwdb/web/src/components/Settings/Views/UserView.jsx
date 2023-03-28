@@ -1,13 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, Outlet, Link, Route, Routes } from "react-router-dom";
+import { isEmpty } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
-import { useViewAlert } from "@mwdb-web/commons/ui";
+import { useViewAlert, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default function UserView() {
     const { setAlert } = useViewAlert();
     const { login } = useParams();
     const [user, setUser] = useState({});
+    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
+
+    const getUser = useCallback(updateUser, [login, setAlert]);
 
     async function updateUser() {
         try {
@@ -18,7 +22,21 @@ export default function UserView() {
         }
     }
 
-    const getUser = useCallback(updateUser, [login, setAlert]);
+    async function changeCapabilities(capability) {
+        try {
+            const capabilities = user.capabilities.filter(
+                (item) => item !== capability
+            );
+            await api.updateGroup(user.login, { capabilities });
+            setCapabilitiesToDelete("");
+            getUser();
+            setAlert({
+                success: `Capabilities for ${user.login} successfully changed`,
+            });
+        } catch (error) {
+            setAlert({ error });
+        }
+    }
 
     useEffect(() => {
         getUser();
@@ -28,7 +46,7 @@ export default function UserView() {
 
     function BreadcrumbItems({ elements = [] }) {
         return [
-            <li className="breadcrumb-item">
+            <li className="breadcrumb-item" key="details">
                 <strong>Account details: </strong>
                 {elements.length > 0 ? (
                     <Link to={`/settings/user/${user.login}`}>
@@ -40,6 +58,7 @@ export default function UserView() {
             </li>,
             ...elements.map((element, index) => (
                 <li
+                    key={index}
                     className={`breadcrumb-item ${
                         index === elements.length - 1 ? "active" : ""
                     }`}
@@ -83,7 +102,18 @@ export default function UserView() {
                     </Routes>
                 </ol>
             </nav>
-            <Outlet context={{ user, getUser }} />
+            <ConfirmationModal
+                buttonStyle="badge-success"
+                confirmText="Yes"
+                message={`Are you sure you want to delete '${capabilitiesToDelete}' capabilities?`}
+                isOpen={!isEmpty(capabilitiesToDelete)}
+                onRequestClose={() => setCapabilitiesToDelete("")}
+                onConfirm={(ev) => {
+                    ev.preventDefault();
+                    changeCapabilities(capabilitiesToDelete);
+                }}
+            />
+            <Outlet context={{ user, getUser, setCapabilitiesToDelete }} />
         </div>
     );
 }

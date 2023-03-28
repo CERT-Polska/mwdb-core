@@ -135,8 +135,9 @@ export default function UserDetails() {
                                     .sort((groupA, groupB) =>
                                         groupA.name.localeCompare(groupB.name)
                                     )
-                                    .map((group) => (
+                                    .map((group, index) => (
                                         <GroupBadge
+                                            key={index}
                                             group={group}
                                             clickable
                                             basePath="/settings"

@@ -1,13 +1,30 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
+import { isEmpty } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
-import { useViewAlert } from "@mwdb-web/commons/ui";
+import { useViewAlert, ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default function GroupView() {
     const { setAlert } = useViewAlert();
     const { name } = useParams();
     const [group, setGroup] = useState({});
+    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
+
+    async function changeCapabilities(capability) {
+        try {
+            const capabilities = group.capabilities.filter(
+                (item) => item !== capability
+            );
+            await api.updateGroup(group.name, { capabilities });
+            setCapabilitiesToDelete("");
+            setAlert({
+                success: `Capabilities for ${group.name} successfully changed`,
+            });
+        } catch (error) {
+            setAlert({ error });
+        }
+    }
 
     async function updateGroup() {
         try {
@@ -28,7 +45,7 @@ export default function GroupView() {
 
     function BreadcrumbItems({ elements = [] }) {
         return [
-            <li className="breadcrumb-item">
+            <li className="breadcrumb-item" key="details">
                 <strong>Group details: </strong>
                 {elements.length > 0 ? (
                     <Link to={`/settings/group/${group.name}`}>
@@ -40,6 +57,7 @@ export default function GroupView() {
             </li>,
             ...elements.map((element, index) => (
                 <li
+                    key={index}
                     className={`breadcrumb-item ${
                         index === elements.length - 1 ? "active" : ""
                     }`}
@@ -69,7 +87,18 @@ export default function GroupView() {
                     </Routes>
                 </ol>
             </nav>
-            <Outlet context={{ group, getGroup }} />
+            <ConfirmationModal
+                buttonStyle="badge-success"
+                confirmText="Yes"
+                message={`Are you sure you want to delete '${capabilitiesToDelete}' capabilities?`}
+                isOpen={!isEmpty(capabilitiesToDelete)}
+                onRequestClose={() => setCapabilitiesToDelete("")}
+                onConfirm={(ev) => {
+                    ev.preventDefault();
+                    changeCapabilities(capabilitiesToDelete);
+                }}
+            />
+            <Outlet context={{ group, getGroup, setCapabilitiesToDelete }} />
         </div>
     );
 }

@@ -25,7 +25,7 @@ export default function AttributeView() {
 
     function BreadcrumbItems({ elements = [] }) {
         return [
-            <li className="breadcrumb-item">
+            <li className="breadcrumb-item" key="details">
                 <strong>Attribute details: </strong>
                 {elements.length > 0 ? (
                     <Link to={`/settings/attribute/${attribute.key}`}>
@@ -37,6 +37,7 @@ export default function AttributeView() {
             </li>,
             ...elements.map((element, index) => (
                 <li
+                    key={index}
                     className={`breadcrumb-item ${
                         index === elements.length - 1 ? "active" : ""
                     }`}

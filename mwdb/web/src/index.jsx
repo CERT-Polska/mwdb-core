@@ -21,7 +21,7 @@ loadPlugins().then(() => {
     const root = createRoot(document.getElementById("root"));
     root.render(
         <BrowserRouter>
-            <ToastContainer position="top-middle" />
+            <ToastContainer position="top-center" />
             <AuthProvider>
                 <ConfigProvider>
                     <APIProvider>

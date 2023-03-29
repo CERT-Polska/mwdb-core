@@ -13,6 +13,7 @@ export default function RemoteViews() {
         const toastId = "toast-remote-view";
         toast(message, {
             toastId: "toast-remote-view",
+            position: "bottom-right",
             type: "warning",
             autoClose: false,
             closeButton: false,

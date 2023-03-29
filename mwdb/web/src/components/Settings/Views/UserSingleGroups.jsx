@@ -64,8 +64,8 @@ function GroupsList({ groups, removeMember }) {
 
     return (
         <React.Fragment>
-            {groups.map((group) => (
-                <tr>
+            {groups.map((group, index) => (
+                <tr key={index}>
                     <th className="col">
                         <GroupBadge
                             group={group}

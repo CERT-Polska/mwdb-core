@@ -80,10 +80,14 @@ export default function ProfileGroups() {
                 <tbody>
                     {workspaces
                         .filter((group) => !group.private)
-                        .map((group) => (
+                        .map((group, index) => (
                             <tr>
                                 <td>
-                                    <GroupBadge group={group} clickable />{" "}
+                                    <GroupBadge
+                                        key={index}
+                                        group={group}
+                                        clickable
+                                    />{" "}
                                     <small className="text-muted">
                                         {group.users.length} members
                                     </small>

@@ -1,12 +1,18 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { find, isNil, isEmpty } from "lodash";
 
+import { api } from "@mwdb-web/commons/api";
 import { capabilitiesList } from "@mwdb-web/commons/auth";
-import { GroupBadge, BootstrapSelect } from "@mwdb-web/commons/ui";
+import {
+    GroupBadge,
+    BootstrapSelect,
+    ConfirmationModal,
+    useViewAlert,
+} from "@mwdb-web/commons/ui";
 
 function CapabilitiesTable({ profile }) {
     const { setCapabilitiesToDelete } = useOutletContext();
@@ -77,18 +83,22 @@ function CapabilitiesTable({ profile }) {
     );
 }
 
-export default function ProfileCapabilities({ profile }) {
-    // Component is reused by Settings
-    const outletContext = useOutletContext();
+function CapabilitiesSelect({ profile }) {
+    const { setAlert } = useViewAlert();
 
-    const isAccount = !isNil(profile.groups);
     const [chosenCapabilities, setChosenCapabilities] = useState([]);
     const [correctCapabilities, setCorrectCapabilities] = useState([]);
-    if (profile === undefined) {
-        profile = outletContext.profile;
-    }
+    const [isOpen, setIsOpen] = useState(false);
 
+    const isAccount = !isNil(profile.groups);
+    const group = isAccount ? profile.login : profile.name;
     const capabilities = Object.keys(capabilitiesList);
+    const changedCaps = capabilities.filter(
+        (cap) =>
+            chosenCapabilities.includes(cap) !==
+            correctCapabilities.includes(cap)
+    );
+
     const selectHandler = useCallback(
         (e, clickedIndex, isSelected) => {
             const selectedCaps = chosenCapabilities || [];
@@ -105,6 +115,22 @@ export default function ProfileCapabilities({ profile }) {
         },
         [chosenCapabilities, capabilities]
     );
+
+    async function changeCapabilities() {
+        try {
+            await api.updateGroup(group, { capabilities: chosenCapabilities });
+            setIsOpen(false);
+            setAlert({
+                success: `Group '${group}' capabilities successfully changed`,
+            });
+        } catch (error) {
+            setAlert({ error });
+        }
+    }
+
+    function dismissChanges() {
+        setChosenCapabilities(correctCapabilities);
+    }
 
     useEffect(() => {
         if (!isEmpty(profile)) {
@@ -126,12 +152,7 @@ export default function ProfileCapabilities({ profile }) {
     }, [profile]);
 
     return (
-        <div className="container">
-            <h2>Capabilities</h2>
-            <p className="lead">
-                Here is the list of {profile.groups ? "account" : "group"}{" "}
-                superpowers:
-            </p>
+        <div className="mb-3">
             <BootstrapSelect
                 data-multiple-separator={""}
                 data-live-search="true"
@@ -163,6 +184,56 @@ export default function ProfileCapabilities({ profile }) {
                     );
                 })}
             </BootstrapSelect>
+            {changedCaps.length > 0 && (
+                <div>
+                    <small>
+                        * There are pending changes. Click Apply if you want to
+                        commit them or Dismiss otherwise.
+                    </small>
+                </div>
+            )}
+            <button
+                className="btn btn-outline-success mr-1"
+                disabled={changedCaps.length === 0}
+                onClick={() => setIsOpen(true)}
+            >
+                <FontAwesomeIcon icon={faSave} /> Apply
+            </button>
+            <button
+                className="btn btn-outline-danger"
+                disabled={changedCaps.length === 0}
+                onClick={() => dismissChanges()}
+            >
+                <FontAwesomeIcon icon={faTimes} /> Dismiss
+            </button>
+            <ConfirmationModal
+                buttonStyle="badge-success"
+                confirmText="Yes"
+                message={`Are you sure you want to change '${group}' capabilities?`}
+                isOpen={isOpen}
+                onRequestClose={() => setIsOpen(false)}
+                onConfirm={changeCapabilities}
+            />
+        </div>
+    );
+}
+
+export default function ProfileCapabilities({ profile }) {
+    // Component is reused by Settings
+    const outletContext = useOutletContext();
+
+    if (profile === undefined) {
+        profile = outletContext.profile;
+    }
+
+    return (
+        <div className="container">
+            <h2>Capabilities</h2>
+            <p className="lead">
+                Here is the list of {profile.groups ? "account" : "group"}{" "}
+                superpowers:
+            </p>
+            <CapabilitiesSelect profile={profile} />
             <CapabilitiesTable profile={profile} />
         </div>
     );

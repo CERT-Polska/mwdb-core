@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, Outlet, Link, Route, Routes } from "react-router-dom";
-import { isEmpty } from "lodash";
+import { isEmpty, find } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert, ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -24,12 +24,14 @@ export default function UserView() {
 
     async function changeCapabilities(capability) {
         try {
-            const capabilities = user.capabilities.filter(
+            const foundUserCapabilities = find(user.groups, {
+                name: user.login,
+            }).capabilities;
+            const capabilities = foundUserCapabilities.filter(
                 (item) => item !== capability
             );
             await api.updateGroup(user.login, { capabilities });
             setCapabilitiesToDelete("");
-            getUser();
             setAlert({
                 success: `Capabilities for ${user.login} successfully changed`,
             });

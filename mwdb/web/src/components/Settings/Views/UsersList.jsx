@@ -56,8 +56,9 @@ function UserItem(props) {
                 <LimitTo count={5}>
                     {groups
                         .filter((group) => group.name !== props.login)
-                        .map((group) => (
+                        .map((group, index) => (
                             <GroupBadge
+                                key={index}
                                 group={group}
                                 clickable
                                 basePath="/settings"

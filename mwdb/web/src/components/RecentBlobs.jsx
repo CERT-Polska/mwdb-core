@@ -154,9 +154,11 @@ export default function RecentBlobs(props) {
     return (
         <React.Fragment>
             {diffWith ? (
-                <div className="alert alert-warning">
-                    Choose blob to diff with{" "}
-                    <ObjectLink type="text_blob" id={diffWith} inline />
+                <div className="container-fluid">
+                    <div className="alert alert-warning">
+                        Choose blob to diff with{" "}
+                        <ObjectLink type="text_blob" id={diffWith} inline />
+                    </div>
                 </div>
             ) : (
                 []

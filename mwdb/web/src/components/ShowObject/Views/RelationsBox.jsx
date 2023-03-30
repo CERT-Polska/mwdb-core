@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Pagination from "react-js-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -12,6 +13,7 @@ import {
     ActionCopyToClipboard,
     ConfirmationModal,
     TagList,
+    getErrorMessage,
 } from "@mwdb-web/commons/ui";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import RelationsAddModal from "../Actions/RelationsAddModal";
@@ -57,40 +59,57 @@ function RelationsBox(props) {
         useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
     const [relationToRemove, setRelationToRemove] = useState({});
-    const [modalError, setModalError] = useState("");
     const updateRelationsActivePage = props.updateRelationsActivePage;
 
     async function addObjectRelations(relation, value) {
         try {
-            if (relation === "child")
+            if (relation === "child") {
                 await api.addObjectRelation(context.object.id, value);
-            else if (relation === "parent")
+            }
+
+            if (relation === "parent") {
                 await api.addObjectRelation(value, context.object.id);
-        } catch (error) {
-            if (error.response && error.response.status === 404)
-                setModalError("Object not found or incorrect SHA256 hash.");
-            else setModalError(error);
-        } finally {
+            }
+
             context.updateObject();
             setAttributeAddModalOpen(false);
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                toast("Object not found or incorrect SHA256 hash.", {
+                    type: "error",
+                });
+            } else {
+                toast(getErrorMessage(error), {
+                    type: "error",
+                });
+            }
         }
     }
 
     async function removeObjectRelations(relation, value) {
         try {
             setDisabledModalButton(true);
-            if (relation === "child")
+            if (relation === "child") {
                 await api.removeObjectRelation(context.object.id, value);
-            else if (relation === "parent")
+            }
+
+            if (relation === "parent") {
                 await api.removeObjectRelation(value, context.object.id);
-        } catch (error) {
-            if (error.response && error.response.status === 404)
-                setModalError("Object not found or incorrect SHA256 hash.");
-            else setModalError(error);
-            setDisabledModalButton(false);
-        } finally {
+            }
+
             context.updateObject();
             setAttributeDeleteModalOpen(false);
+            setDisabledModalButton(false);
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                toast("Object not found or incorrect SHA256 hash.", {
+                    type: "error",
+                });
+            } else {
+                toast(getErrorMessage(error), {
+                    type: "error",
+                });
+            }
             setDisabledModalButton(false);
         }
     }
@@ -206,7 +225,6 @@ function RelationsBox(props) {
                         onClick={(ev) => {
                             ev.preventDefault();
                             setAttributeAddModalOpen(true);
-                            setModalError("");
                         }}
                     >
                         <FontAwesomeIcon icon={faPlus} pull="left" size="1x" />
@@ -233,9 +251,7 @@ function RelationsBox(props) {
             )}
             <RelationsAddModal
                 isOpen={isAttributeAddModalOpen}
-                error={modalError}
                 onSubmit={addObjectRelations}
-                onError={setModalError}
                 onRequestModalClose={() => setAttributeAddModalOpen(false)}
             />
             <ConfirmationModal

@@ -1,36 +1,38 @@
 import React, { useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Alert, getErrorMessage } from "./ErrorBoundary";
+import { toast } from "react-toastify";
+import { getErrorMessage } from "./ErrorBoundary";
 import { Extendable } from "../plugins";
-
-function ViewAlert({ success, error, warning }) {
-    const locationState = useLocation().state || {};
-    return (
-        <Alert
-            success={success || locationState.success}
-            error={error || locationState.error}
-            warning={warning || locationState.warning}
-        />
-    );
-}
 
 export function useViewAlert() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const setMessages = useCallback(({ success, error, warning }) => {
+        if (success) {
+            toast(success, { type: "success" });
+        }
+
+        if (error) {
+            toast(getErrorMessage(error), { type: "error" });
+        }
+
+        if (warning) {
+            toast(warning, { type: "warning" });
+        }
+    }, []);
+
     const setAlert = useCallback(
-        ({ success, error: rawError, warning, state }) => {
+        ({ success, error, warning, state }) => {
             const { pathname, search } = location;
-            const error = rawError && getErrorMessage(rawError);
+            setMessages({ success, error, warning });
+
             navigate(
                 { pathname, search },
                 {
                     state: {
                         ...location.state,
                         ...(state || {}),
-                        success,
-                        error,
-                        warning,
                     },
                     replace: true,
                 }
@@ -40,14 +42,12 @@ export function useViewAlert() {
     );
 
     const redirectToAlert = useCallback(
-        ({ success, error: rawError, warning, target, state }) => {
-            const error = rawError && getErrorMessage(rawError);
+        ({ success, error, warning, target, state }) => {
+            setMessages({ success, error, warning });
+
             navigate(target, {
                 state: {
                     ...(state || {}),
-                    success,
-                    error,
-                    warning,
                 },
             });
         },
@@ -60,23 +60,12 @@ export function useViewAlert() {
     );
 }
 
-export default function View({
-    ident,
-    children,
-    fluid,
-    style,
-    error,
-    success,
-    warning,
-    showIf = true,
-}) {
+export default function View({ ident, children, fluid, style, showIf = true }) {
     /**
      * View component for all main views. Views shouldn't be nested.
      * Properties spec:
      *
      * ident - identifier that makes View Extendable by plugins
-     * error/success/warning - shows alert with appropriate message
-     * location.state.error/success/warning - the same based on location.state
      * showIf - allows to show view conditionally (e.g. if all required data are loaded)
      * fluid - uses wide fluid view instead of default container
      * style - custom container styling
@@ -89,7 +78,6 @@ export default function View({
     // If condition is undefined => assume default true
     return (
         <div className={fluid ? "container-fluid" : "container"} style={style}>
-            <ViewAlert error={error} success={success} warning={warning} />
             {showIf ? viewLayout : []}
         </div>
     );

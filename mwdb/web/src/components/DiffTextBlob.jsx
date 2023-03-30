@@ -6,6 +6,7 @@ import React, {
     useRef,
 } from "react";
 import { Link, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
@@ -16,7 +17,7 @@ import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/theme-chrome";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { View } from "@mwdb-web/commons/ui";
+import { View, getErrorMessage } from "@mwdb-web/commons/ui";
 import { useRemote } from "@mwdb-web/commons/remotes";
 
 function DiffTextBlobContentPresenter({ current, previous }) {
@@ -163,7 +164,6 @@ export default function DiffTextBlob() {
     const remotePath = remote ? `/remote/${remote}` : "";
     const api = useContext(APIContext);
     const { current: currentHash, previous: previousHash } = useParams();
-    const [error, setError] = useState(null);
     const [currentBlob, setCurrentBlob] = useState(null);
     const [previousBlob, setPreviousBlob] = useState(null);
 
@@ -174,7 +174,9 @@ export default function DiffTextBlob() {
             setCurrentBlob(currentBlob.data);
             setPreviousBlob(previousBlob.data);
         } catch (error) {
-            setError(error);
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     }
 
@@ -189,7 +191,7 @@ export default function DiffTextBlob() {
     }, [getTextBlob]);
 
     return (
-        <View fluid error={error}>
+        <View fluid>
             {currentBlob && previousBlob ? (
                 <div className="card-body">
                     <div className="card-header">

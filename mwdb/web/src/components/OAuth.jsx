@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { getErrorMessage } from "@mwdb-web/commons/ui";
 
-export async function authenticate(provider, action, errorFunction) {
+export async function authenticate(provider, action) {
     try {
         const response = await api.oauthAuthenticate(provider);
         const expirationTime = Date.now() + 5 * 60 * 1000;
@@ -20,20 +21,20 @@ export async function authenticate(provider, action, errorFunction) {
         );
         window.location = response.data["authorization_url"];
     } catch (e) {
-        errorFunction(e);
+        toast(getErrorMessage(e), {
+            type: "error",
+        });
     }
 }
 
 export function ProviderButton({ provider, color }) {
-    // todo: correct error handling
-    const [, setError] = useState();
     const chosenProvider = provider;
 
     return (
         <button
             onClick={(e) => {
                 e.preventDefault();
-                authenticate(chosenProvider, "authorize", setError);
+                authenticate(chosenProvider, "authorize");
             }}
             className="form-control btn btn-primary mb-1"
             style={{
@@ -47,8 +48,6 @@ export function ProviderButton({ provider, color }) {
 }
 
 export function ProvidersSelectList({ providersList }) {
-    // todo: correct error handling
-    const [, setError] = useState();
     const availableProviders = providersList;
     const [chosenProvider, setChosenProvider] = useState();
 
@@ -72,7 +71,7 @@ export function ProvidersSelectList({ providersList }) {
                 style={{ backgroundColor: "#3c5799" }}
                 onClick={(e) => {
                     e.preventDefault();
-                    authenticate(chosenProvider, "authorize", setError);
+                    authenticate(chosenProvider, "authorize");
                 }}
             >
                 Log in with selected provider
@@ -91,11 +90,8 @@ export function OAuthAuthorize() {
     async function authorize() {
         const stateData = sessionStorage.getItem(`openid_${state}`);
         if (!stateData) {
-            navigate("/", {
-                state: {
-                    error: "Invalid state data",
-                },
-            });
+            toast("Invalid state data", { type: "error" });
+            navigate("/");
         }
         const { provider, nonce, action, expiration } = JSON.parse(stateData);
         sessionStorage.removeItem(`openid_${state}`);
@@ -111,10 +107,10 @@ export function OAuthAuthorize() {
                 state
             );
             if (action === "bind_account") {
+                toast("New external identity successfully added", {
+                    type: "success",
+                });
                 navigate("/profile/oauth", {
-                    state: {
-                        success: "New external identity successfully added",
-                    },
                     replace: true,
                 });
             } else {
@@ -124,17 +120,16 @@ export function OAuthAuthorize() {
                 });
             }
         } catch (e) {
-            if (action === "bind_account")
+            toast(getErrorMessage(e), {
+                type: "error",
+            });
+            if (action === "bind_account") {
                 navigate("/profile/oauth", {
-                    state: {
-                        error: getErrorMessage(e),
-                    },
                     replace: true,
                 });
-            else {
+            } else {
                 navigate("/login", {
                     state: {
-                        error: getErrorMessage(e),
                         attemptedProvider: provider,
                     },
                     replace: true,

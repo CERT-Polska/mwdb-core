@@ -20,6 +20,9 @@ export { default as SortedList } from "./SortedList";
 export { default as View, useViewAlert } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
 export { RequiresAuth, RequiresCapability } from "./RequiresAuth";
+export { default as FormError } from "./FormError";
+export { default as Label } from "./Label";
+export { default as LoadingSpinner } from "./LoadingSpinner";
 
 export { Tag, TagList, getStyleForTag } from "./Tag";
 export {

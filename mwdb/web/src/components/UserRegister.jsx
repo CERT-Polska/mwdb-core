@@ -1,36 +1,73 @@
 import React, { useContext, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
 import ReCAPTCHA from "react-google-recaptcha";
 import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { View, getErrorMessage } from "@mwdb-web/commons/ui";
+import {
+    View,
+    getErrorMessage,
+    Label,
+    FormError,
+    LoadingSpinner,
+} from "@mwdb-web/commons/ui";
+import { useNavRedirect } from "@mwdb-web/commons/hooks";
+
+const formFields = {
+    login: "login",
+    email: "email",
+    affiliation: "affiliation",
+    job_title: "job_title",
+    job_responsibilities: "job_responsibilities",
+    other_info: "other_info",
+};
+
+const validationSchema = Yup.object().shape({
+    login: Yup.string()
+        .required("Login is required")
+        .matches(
+            /[A-Za-z0-9_-]{1,32}/,
+            "Login must contain only letters, digits, '_'and '-' characters, max 32 characters allowed."
+        ),
+    email: Yup.string()
+        .required("Email is required")
+        .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, "Value is not email"),
+    affiliation: Yup.string().required("Affiliation is required"),
+    job_title: Yup.string().required("Job title is required"),
+
+    job_responsibilities: Yup.string().required(
+        "Job responsibilities is required"
+    ),
+    other_info: Yup.string().required("Other information is required"),
+});
+
+const formOptions = {
+    resolver: yupResolver(validationSchema),
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
+    shouldFocusError: true,
+};
 
 export default function UserRegister() {
     const config = useContext(ConfigContext);
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [disable, setDisable] = useState(false);
+    const { goBackToPrevLocation } = useNavRedirect();
+    const { register, handleSubmit, formState } = useForm(formOptions);
+    const { errors } = formState;
+
+    const [loading, setLoading] = useState(false);
     const [recaptcha, setRecaptcha] = useState(null);
-    const [state, setState] = useState({
-        login: "",
-        email: "",
-        affiliation: "",
-        job_title: "",
-        job_responsibilities: "",
-        other_info: "",
-    });
 
-    const locationState = location.state || {};
-
-    async function registerUser() {
+    async function registerUser(values) {
         try {
-            setDisable(true);
-            let additional_info = `Affiliation: ${state.affiliation}, Job title: ${state.job_title}, ${state.job_responsibilities} ${state.other_info}`;
-            let response = await api.registerUser(
-                state.login,
-                state.email,
+            setLoading(true);
+            const additional_info = `Affiliation: ${values.affiliation}, Job title: ${values.job_title}, ${values.job_responsibilities} ${values.other_info}`;
+            const response = await api.registerUser(
+                values.login,
+                values.email,
                 additional_info,
                 recaptcha
             );
@@ -39,38 +76,21 @@ export default function UserRegister() {
                         waiting for confirmation`,
                 { type: "success" }
             );
+            setLoading(false);
+            goBackToPrevLocation();
         } catch (e) {
             toast(getErrorMessage(e), {
                 type: "error",
             });
-            setDisable(false);
+            setLoading(false);
         }
     }
-
-    const handleInputChange = (event) => {
-        const target = event.target;
-        const value =
-            target.type === "checkbox" ? target.checked : target.value;
-        const name = target.name;
-
-        setState({
-            ...state,
-            [name]: value,
-        });
-    };
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        registerUser();
-    };
 
     return (
         <div className="register-form">
             <div className="register-form__background" />
             <div className="register-form__container">
-                <View
-                    ident="userRegister"
-                >
+                <View ident="userRegister">
                     <h2 className="text-center">Register user</h2>
                     <p className="text-center">
                         Provided data are needed for vetting process. Keep in
@@ -79,86 +99,84 @@ export default function UserRegister() {
                         this form, make sure you have read our{" "}
                         <Link to="/terms/en">Terms of use</Link>.
                     </p>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit(registerUser)}>
                         <div className="row">
                             <div className="form-group col-md">
-                                <label className="required">Login</label>
-                                <input
-                                    type="text"
-                                    name="login"
-                                    value={state.login}
-                                    onChange={handleInputChange}
-                                    className="form-control"
+                                <Label
+                                    label="Login"
                                     required
-                                    pattern="[A-Za-z0-9_-]{1,32}"
-                                    disabled={disable}
+                                    htmlFor={formFields.login}
                                 />
-                                <div className="form-hint">
-                                    Login must contain only letters, digits, '_'
-                                    and '-' characters, max 32 characters
-                                    allowed.
-                                </div>
+                                <input
+                                    {...register(formFields.login)}
+                                    id={formFields.login}
+                                    className="form-control"
+                                />
+
+                                <FormError errorField={errors.login} />
                             </div>
                             <div className="form-group col-md">
-                                <label className="required">
-                                    Business e-mail
-                                </label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={state.email}
-                                    onChange={handleInputChange}
-                                    className="form-control"
+                                <Label
+                                    label="Business e-mail"
                                     required
-                                    disabled={disable}
+                                    htmlFor={formFields.email}
                                 />
+                                <input
+                                    {...register(formFields.email)}
+                                    id={formFields.email}
+                                    className="form-control"
+                                />
+                                <FormError errorField={errors.email} />
                             </div>
                         </div>
                         <b>Additional information:</b>
                         <div className="row">
                             <div className="form-group col-md">
-                                <label className="required">Affiliation</label>
-                                <input
-                                    type="text"
-                                    name="affiliation"
-                                    value={state.affiliation}
-                                    onChange={handleInputChange}
-                                    className="form-control"
+                                <Label
+                                    label="Affiliation"
                                     required
-                                    disabled={disable}
+                                    htmlFor={formFields.affiliation}
                                 />
+                                <input
+                                    {...register(formFields.affiliation)}
+                                    id={formFields.affiliation}
+                                    className="form-control"
+                                />
+                                <FormError errorField={errors.affiliation} />
                                 <div className="form-hint">
                                     Provide name of company or university
                                 </div>
                             </div>
                             <div className="form-group col-md">
-                                <label className="required">Job Title</label>
-                                <input
-                                    type="text"
-                                    name="job_title"
-                                    value={state.job_title}
-                                    onChange={handleInputChange}
-                                    className="form-control"
+                                <Label
+                                    label="Job Title"
                                     required
-                                    disabled={disable}
+                                    htmlFor={formFields.job_title}
                                 />
+                                <input
+                                    {...register(formFields.job_title)}
+                                    id={formFields.job_title}
+                                    className="form-control"
+                                />
+                                <FormError errorField={errors.job_title} />
                                 <div className="form-hint">
                                     Provide your job title
                                 </div>
                             </div>
                         </div>
                         <div className="form-group">
-                            <label className="required">
-                                Job Responsibilities
-                            </label>
-                            <input
-                                type="text"
-                                name="job_responsibilities"
-                                value={state.job_responsibilities}
-                                onChange={handleInputChange}
-                                className="form-control"
+                            <Label
+                                label="Job Responsibilities"
                                 required
-                                disabled={disable}
+                                htmlFor={formFields.job_responsibilities}
+                            />
+                            <input
+                                {...register(formFields.job_responsibilities)}
+                                id={formFields.job_responsibilities}
+                                className="form-control"
+                            />
+                            <FormError
+                                errorField={errors.job_responsibilities}
                             />
                             <div className="form-hint">
                                 Provide your job responsibilities and experience
@@ -166,17 +184,17 @@ export default function UserRegister() {
                             </div>
                         </div>
                         <div className="form-group">
-                            <label className="required">
-                                Other information
-                            </label>
-                            <textarea
-                                name="other_info"
-                                value={state.other_info}
-                                onChange={handleInputChange}
-                                className="form-control"
+                            <Label
+                                label=" Other information"
                                 required
-                                disabled={disable}
+                                htmlFor={formFields.other_info}
                             />
+                            <textarea
+                                {...register(formFields.other_info)}
+                                id={formFields.other_info}
+                                className="form-control"
+                            />
+                            <FormError errorField={errors.other_info} />
                             <div className="form-hint">
                                 Provide additional information e.g. Twitter
                                 handle, invitation info, blog URL etc.
@@ -190,25 +208,22 @@ export default function UserRegister() {
                                     marginBottom: 12,
                                 }}
                                 sitekey={config.config["recaptcha_site_key"]}
-                                onChange={(value) => setRecaptcha(value)}
+                                onChange={setRecaptcha}
                             />
                         )}
                         <div className="d-flex justify-content-between">
                             <button
                                 className="btn btn-outline-primary btn-lg"
-                                onClick={() => {
-                                    const prevLocation =
-                                        locationState.prevLocation || "/";
-                                    navigate(prevLocation);
-                                }}
+                                onClick={goBackToPrevLocation}
                             >
                                 Back
                             </button>
                             <button
                                 type="submit"
                                 className="btn btn-primary btn-lg"
-                                disabled={disable}
+                                disabled={loading}
                             >
+                                <LoadingSpinner loading={loading} />
                                 Submit
                             </button>
                         </div>

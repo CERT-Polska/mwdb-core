@@ -1,63 +1,71 @@
 import React, { useState, useContext } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import { toast } from "react-toastify";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { View, getErrorMessage } from "@mwdb-web/commons/ui";
+import {
+    View,
+    getErrorMessage,
+    Label,
+    FormError,
+    LoadingSpinner,
+} from "@mwdb-web/commons/ui";
+import { useNavRedirect } from "@mwdb-web/commons/hooks";
+
+const formFields = {
+    login: "login",
+    email: "email",
+};
+
+const validationSchema = Yup.object().shape({
+    login: Yup.string().required("Login is required"),
+    email: Yup.string()
+        .required("Email is required")
+        .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, "Value is not email"),
+});
+
+const formOptions = {
+    resolver: yupResolver(validationSchema),
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
+    shouldFocusError: true,
+};
 
 export default function UserPasswordRecover() {
-    const initialState = {
-        login: "",
-        email: "",
-    };
-    const navigate = useNavigate();
-    const location = useLocation();
     const config = useContext(ConfigContext);
-    const [fieldState, setFieldState] = useState(initialState);
-    const [success, setSuccess] = useState(false);
+    const { goBackToPrevLocation } = useNavRedirect();
+    const { register, handleSubmit, formState, reset } = useForm(formOptions);
+    const { errors } = formState;
+
+    const [loading, setLoading] = useState(false);
     const [recaptcha, setRecaptcha] = useState(null);
 
-    const locationState = location.state || {};
-
-    const handleInputChange = (event) => {
-        const value = event.target.value;
-        const name = event.target.name;
-
-        setFieldState((fieldState) => ({
-            ...fieldState,
-            [name]: value,
-        }));
-    };
-
-    async function recoverPassword() {
+    async function recoverPassword(values) {
         try {
+            setLoading(true);
             await api.authRecoverPassword(
-                fieldState.login,
-                fieldState.email,
+                values.login,
+                values.email,
                 recaptcha
             );
-            setSuccess(true);
+
             toast("Password reset link has been sent to the e-mail address", {
                 type: "success",
             });
+            setLoading(false);
+            goBackToPrevLocation();
         } catch (error) {
             toast(getErrorMessage(error), {
                 type: "error",
             });
-            setFieldState(initialState);
+            setLoading(false);
+            reset();
         }
     }
-
-    const onCaptchaChange = (value) => {
-        setRecaptcha(value);
-    };
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        recoverPassword();
-    };
 
     return (
         <div className="user-password-recover">
@@ -65,36 +73,38 @@ export default function UserPasswordRecover() {
             <div className="user-password-recover__container">
                 <View>
                     <h2 className="text-center">Recover password</h2>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit(recoverPassword)}>
                         <div className="form-group">
-                            <label className="required">Login</label>
-                            <input
-                                type="text"
-                                name="login"
-                                value={fieldState.login}
-                                onChange={handleInputChange}
-                                className="form-control"
-                                disabled={success}
+                            <Label
+                                label="Login"
                                 required
+                                htmlFor={formFields.login}
                             />
+                            <input
+                                {...register(formFields.login)}
+                                id={formFields.login}
+                                className="form-control"
+                            />
+                            <FormError errorField={errors.login} />
                         </div>
                         <div className="form-group">
-                            <label className="required">Email</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={fieldState.email}
-                                onChange={handleInputChange}
-                                className="form-control"
-                                disabled={success}
+                            <Label
+                                label="Email"
                                 required
+                                htmlFor={formFields.email}
                             />
+                            <input
+                                {...register(formFields.email)}
+                                id={formFields.email}
+                                className="form-control"
+                            />
+                            <FormError errorField={errors.email} />
                         </div>
                         <div>
-                            <label>
+                            <p>
                                 Please enter the information above to recover
                                 your password.
-                            </label>
+                            </p>
                         </div>
                         {config.config["recaptcha_site_key"] && (
                             <ReCAPTCHA
@@ -104,25 +114,22 @@ export default function UserPasswordRecover() {
                                     marginBottom: 12,
                                 }}
                                 sitekey={config.config["recaptcha_site_key"]}
-                                onChange={onCaptchaChange}
+                                onChange={setRecaptcha}
                             />
                         )}
                         <div className="d-flex justify-content-between">
                             <button
                                 className="btn btn-outline-primary btn-lg"
-                                onClick={() => {
-                                    const prevLocation =
-                                        locationState.prevLocation || "/";
-                                    navigate(prevLocation);
-                                }}
+                                onClick={goBackToPrevLocation}
                             >
                                 Back
                             </button>
                             <button
                                 type="submit"
                                 className="btn btn-primary btn-lg"
-                                disabled={success}
+                                disabled={loading}
                             >
+                                <LoadingSpinner loading={loading} />
                                 Submit
                             </button>
                         </div>

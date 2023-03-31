@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,19 +17,22 @@ import {
     ObjectAction,
     ObjectTab,
     ConfirmationModal,
+    getErrorMessage,
 } from "@mwdb-web/commons/ui";
 import { humanFileSize, downloadData } from "@mwdb-web/commons/helpers";
 import ReactModal from "react-modal";
 
 async function updateRelatedFiles(api, context) {
-    const { setObjectError, updateObjectData } = context;
+    const { updateObjectData } = context;
     try {
         let response = await api.getListOfRelatedFiles(context.object.sha256);
         updateObjectData({
             related_files: response.data.related_files,
         });
     } catch (error) {
-        setObjectError(error);
+        toast(getErrorMessage(error), {
+            type: "error",
+        });
     }
 }
 
@@ -87,10 +91,19 @@ function RelatedFileItem({ file_name, file_size, sha256 }) {
                         setConfirmationModalOpen(false);
                     }}
                     onConfirm={async () => {
-                        await api.deleteRelatedFile(
-                            context.object.sha256,
-                            sha256
-                        );
+                        try {
+                            await api.deleteRelatedFile(
+                                context.object.sha256,
+                                sha256
+                            );
+                            toast("Related file deleted successfully", {
+                                type: "success",
+                            });
+                        } catch (error) {
+                            toast(getErrorMessage(error), {
+                                type: "error",
+                            });
+                        }
                         updateRelatedFiles(api, context);
                         setConfirmationModalOpen(false);
                     }}
@@ -106,11 +119,10 @@ function RelatedFileItem({ file_name, file_size, sha256 }) {
 function ShowRelatedFiles() {
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
-    const { setObjectError, updateObjectData } = context;
+    const { updateObjectData } = context;
 
     const getRelatedFiles = useCallback(updateRelatedFiles, [
         api,
-        setObjectError,
         updateObjectData,
         context.object.sha256,
     ]);
@@ -162,7 +174,6 @@ export default function RelatedFilesTab() {
     const [file, setFile] = useState(null);
     const context = useContext(ObjectContext);
     const api = useContext(APIContext);
-    const { setObjectError } = context;
 
     const modalStyle = {
         content: {
@@ -179,8 +190,13 @@ export default function RelatedFilesTab() {
         try {
             await api.uploadRelatedFile(file, context.object.sha256);
             updateRelatedFiles(api, context);
+            toast("Related file uploaded successfully", {
+                type: "success",
+            });
         } catch (error) {
-            setObjectError(error);
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     }
 

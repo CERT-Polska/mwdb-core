@@ -40,12 +40,14 @@ services:
   postgres:
     image: postgres
     restart: always
+    container_name: mwdb_core_e2e_postgres
     environment:
       POSTGRES_USER: mwdb
       POSTGRES_DB: mwdb
       POSTGRES_PASSWORD: e2e-postgres-password
   mwdb-tests:
     build: tests/backend
+    container_name: mwdb_core_e2e_tests
     depends_on:
       - mwdb
       - mwdb-web
@@ -61,6 +63,7 @@ services:
       MWDB_URL: http://mwdb-web./api
   web-tests:
     build: tests/frontend
+    container_name: mwdb_core_e2e_web_tests
     depends_on:
       - mwdb
       - mwdb-web

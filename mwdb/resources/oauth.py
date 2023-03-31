@@ -692,7 +692,6 @@ class OpenIDLogoutResource(Resource):
         schema = OpenIDLogoutLinkResponseSchema()
         return schema.dump({"url": provider.logout_endpoint})
 
-
 @rate_limited_resource
 class OpenIDDiscoveryResource(Resource):
     @requires_authorization

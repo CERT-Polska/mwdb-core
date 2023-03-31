@@ -1,12 +1,18 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { api } from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/plugins";
-import { View, ShowIf } from "@mwdb-web/commons/ui";
-import { ProviderButton, ProvidersSelectList } from "./OAuth";
+import {
+    View,
+    ShowIf,
+    ConfirmationModal,
+    getErrorMessage,
+} from "@mwdb-web/commons/ui";
+import { ProviderButton, ProvidersSelectList, authenticate } from "./OAuth";
 
 export default function UserLogin() {
     const auth = useContext(AuthContext);
@@ -16,8 +22,8 @@ export default function UserLogin() {
 
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
-    const [loginError, setLoginError] = useState(null);
     const [providers, setProviders] = useState([]);
+    const [oAuthRegisterModalOpen, setOAuthRegisterModalOpen] = useState(false);
 
     const colorsList = ["#3c5799", "#01a0f6", "#d03f30", "#b4878b", "#444444"];
     const isOIDCEnabled = config.config["is_oidc_enabled"];
@@ -29,8 +35,13 @@ export default function UserLogin() {
             const prevLocation = locationState.prevLocation || "/";
             auth.updateSession(response.data);
             navigate(prevLocation);
+            toast(`Successfully logged into account: ${response.data.login}`, {
+                type: "success",
+            });
         } catch (error) {
-            setLoginError(error);
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     }
 
@@ -38,8 +49,10 @@ export default function UserLogin() {
         try {
             const response = await api.oauthGetProviders();
             setProviders(response.data["providers"]);
-        } catch (e) {
-            setLoginError(e);
+        } catch (error) {
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     }, []);
 
@@ -51,10 +64,39 @@ export default function UserLogin() {
 
     if (auth.isAuthenticated) return <Navigate to="/" />;
 
+    useEffect(() => {
+        if (location.state) {
+            if (
+                location.state.attemptedProvider &&
+                config.config["is_registration_enabled"]
+            ) {
+                setOAuthRegisterModalOpen(true);
+            }
+        }
+    }, []);
+
     return (
         <div className="user-login">
+            <ConfirmationModal
+                buttonStyle="btn-success"
+                isOpen={oAuthRegisterModalOpen}
+                onRequestClose={() => {
+                    setOAuthRegisterModalOpen(false);
+                    navigate("/login", {
+                        replace: true,
+                    });
+                }}
+                onConfirm={() => {
+                    setOAuthRegisterModalOpen(false);
+                    authenticate(location.state.attemptedProvider, "register");
+                }}
+            >
+                We couldn't find an account associated with your oAuth identity.
+                Do you want to register using{" "}
+                {location.state ? location.state.attemptedProvider : ""}?
+            </ConfirmationModal>
             <div className="background" />
-            <View fluid ident="userLogin" error={loginError}>
+            <View fluid ident="userLogin">
                 <h2 align="center">Welcome to MWDB</h2>
                 <h6 align="center">Log in using mwdb credentials</h6>
                 <form

@@ -1,4 +1,4 @@
-Werkzeug==2.0.3
+Werkzeug==2.2.3
 gunicorn==20.1.0
 alembic==1.4.2
 Flask==2.0.2
@@ -18,7 +18,7 @@ python-json-logger==2.0.2
 click==7.1.2
 click-default-group==1.2.2
 PyYAML==5.4
-redis==4.3.4
+redis==4.5.3
 boto3==1.24.38
 typed-config==1.1.0
 karton-core==5.0.0

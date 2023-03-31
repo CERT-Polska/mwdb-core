@@ -8,6 +8,32 @@ from .utils import rand_string
 import random
 
 
+def test_listing_endpoints(admin_session):
+    test = admin_session
+
+    filename = base62uuid()
+    file_content = base62uuid()
+    for i in range(5):
+        test.add_sample(filename, file_content + str(i))
+
+    filename2 = base62uuid()
+    for i in range(7):
+        test.add_sample(filename2, file_content + str(5 + i))
+
+    # empty query, no count value -> default 10
+    listed_obj = test.list_objects()
+    assert len(listed_obj['objects']) == 10
+
+    listed_obj = test.list_objects(count=11)
+    assert len(listed_obj['objects']) == 11
+
+    listed_obj = test.list_objects(query=f'file.name:"{filename}"')
+    assert len(listed_obj['objects']) == 5
+
+    listed_obj = test.list_objects(query=f'file.name:"{filename}"', count=3)
+    assert len(listed_obj['objects']) == 3
+
+
 def test_file_name_search(admin_session):
     test = admin_session
 

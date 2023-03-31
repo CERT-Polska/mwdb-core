@@ -1,7 +1,7 @@
 """Tag model flattening
 
 Revision ID: d7725a4e500c
-Revises: b78affca7273
+Revises: 1b49fefdfcb0
 Create Date: 2022-09-01 16:18:42.355865
 
 """

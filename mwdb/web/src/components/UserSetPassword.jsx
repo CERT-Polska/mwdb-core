@@ -1,16 +1,17 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { View } from "@mwdb-web/commons/ui";
+import { toast } from "react-toastify";
+
+import { View, getErrorMessage } from "@mwdb-web/commons/ui";
 
 import { api } from "@mwdb-web/commons/api";
 
 export default function UserSetPassword() {
-    const params = useParams();
     const [success, setSuccess] = useState(false);
-    const [error, setError] = useState(false);
+    const token =
+        new URLSearchParams(window.location.search).get("token") || "";
 
     const validationSchema = Yup.object().shape({
         password: Yup.string()
@@ -30,21 +31,20 @@ export default function UserSetPassword() {
 
     async function onSubmit(form) {
         try {
-            let response = await api.authSetPassword(
-                params.token,
-                form.password
-            );
-            setSuccess(
-                `Password successfully changed for ${response.data.login}`
-            );
-            setError(false);
+            let response = await api.authSetPassword(token, form.password);
+            setSuccess(true);
+            toast(`Password successfully changed for ${response.data.login}`, {
+                type: "success",
+            });
         } catch (error) {
-            setError(error);
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     }
 
     return (
-        <View ident="userSetPassword" success={success} error={error}>
+        <View ident="userSetPassword">
             <form onSubmit={(e) => e.preventDefault()}>
                 <h2>Set password</h2>
                 <div className="form-group">
@@ -59,7 +59,11 @@ export default function UserSetPassword() {
                         {...register("password")}
                         disabled={success}
                     />
-                    {errors.password && <p>{errors.password.message}</p>}
+                    {errors.password && (
+                        <p className="invalid-feedback">
+                            {errors.password.message}
+                        </p>
+                    )}
                 </div>
                 <div className="form-group">
                     <label>Confirm password</label>
@@ -74,7 +78,9 @@ export default function UserSetPassword() {
                         disabled={success}
                     />
                     {errors.confirmPassword && (
-                        <p>{errors.confirmPassword.message}</p>
+                        <p className="invalid-feedback">
+                            {errors.confirmPassword.message}
+                        </p>
                     )}
                 </div>
                 <input

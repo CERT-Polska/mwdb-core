@@ -1,9 +1,10 @@
 import React, { useState, useContext } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
+import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { View } from "@mwdb-web/commons/ui";
+import { View, getErrorMessage } from "@mwdb-web/commons/ui";
 
 export default function UserPasswordRecover() {
     const initialState = {
@@ -14,7 +15,6 @@ export default function UserPasswordRecover() {
     const config = useContext(ConfigContext);
     const [fieldState, setFieldState] = useState(initialState);
     const [success, setSuccess] = useState(false);
-    const [error, setError] = useState(null);
     const [recaptcha, setRecaptcha] = useState(null);
 
     const handleInputChange = (event) => {
@@ -35,8 +35,13 @@ export default function UserPasswordRecover() {
                 recaptcha
             );
             setSuccess(true);
+            toast("Password reset link has been sent to the e-mail address", {
+                type: "success",
+            });
         } catch (error) {
-            setError(error);
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
             setFieldState(initialState);
         }
     }
@@ -50,12 +55,8 @@ export default function UserPasswordRecover() {
         recoverPassword();
     };
 
-    let successMessage = success && (
-        <div>Password reset link has been sent to the e-mail address</div>
-    );
-
     return (
-        <View success={successMessage} error={success ? null : error}>
+        <View>
             <h2>Recover password</h2>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">

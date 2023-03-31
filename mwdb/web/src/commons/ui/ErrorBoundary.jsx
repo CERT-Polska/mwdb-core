@@ -20,21 +20,6 @@ export function getErrorMessage(error) {
     return error.toString();
 }
 
-export function Alert(props) {
-    if (props.error) {
-        return (
-            <div className="alert alert-danger">
-                {getErrorMessage(props.error)}
-            </div>
-        );
-    } else if (props.success) {
-        return <div className="alert alert-success">{props.success}</div>;
-    } else if (props.warning) {
-        return <div className="alert alert-warning">{props.warning}</div>;
-    }
-    return <div />;
-}
-
 function CriticalError(props) {
     return (
         <div className="container-fluid">
@@ -78,7 +63,9 @@ export default class ErrorBoundary extends Component {
             // Fallback to single Alert
             return (
                 <div className="container-fluid">
-                    <Alert error={this.state.propsError} />
+                    <div className="alert alert-danger">
+                        {getErrorMessage(this.state.propsError)}
+                    </div>
                 </div>
             );
         } else return this.props.children;

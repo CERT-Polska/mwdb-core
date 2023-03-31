@@ -199,7 +199,6 @@ export default function QuickQuery(props) {
             />
             <QuickQueryAddModal
                 isOpen={addModalOpen}
-                query={props.query}
                 error={modalError}
                 onError={setModalError}
                 onSubmit={addQuery}

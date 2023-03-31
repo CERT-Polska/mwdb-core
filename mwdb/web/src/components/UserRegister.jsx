@@ -1,15 +1,14 @@
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
+import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { View } from "@mwdb-web/commons/ui";
+import { View, getErrorMessage } from "@mwdb-web/commons/ui";
 
 export default function UserRegister() {
     const config = useContext(ConfigContext);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState(null);
     const [disable, setDisable] = useState(false);
     const [recaptcha, setRecaptcha] = useState(null);
     const [state, setState] = useState({
@@ -31,10 +30,15 @@ export default function UserRegister() {
                 additional_info,
                 recaptcha
             );
-            setSuccess(response.data.login);
-            setError(null);
+            toast(
+                `User ${response.data.login} registration requested. Account is
+                        waiting for confirmation`,
+                { type: "success" }
+            );
         } catch (e) {
-            setError(e);
+            toast(getErrorMessage(e), {
+                type: "error",
+            });
             setDisable(false);
         }
     }
@@ -57,18 +61,7 @@ export default function UserRegister() {
     };
 
     return (
-        <View
-            ident="userRegister"
-            error={error}
-            success={
-                success && (
-                    <div>
-                        User {success} registration requested. Account is
-                        waiting for confirmation.
-                    </div>
-                )
-            }
-        >
+        <View ident="userRegister">
             <h2>Register user</h2>
             <p>
                 Provided data are needed for vetting process. Keep in mind that

@@ -5,6 +5,7 @@ import React, {
     useContext,
     useMemo,
 } from "react";
+import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -19,7 +20,7 @@ import { APIContext } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { View } from "@mwdb-web/commons/ui";
+import { View, getErrorMessage } from "@mwdb-web/commons/ui";
 import KartonAnalysisBox from "./Views/KartonAnalysisBox";
 
 const initialObjectState = {
@@ -66,14 +67,15 @@ export default function ShowObject({
         initialObjectState
     );
 
-    const setObjectError = useCallback(
-        (error) =>
-            setObjectState({
-                type: objectError,
-                error,
-            }),
-        []
-    );
+    const setObjectError = useCallback((error) => {
+        toast(getErrorMessage(error), {
+            type: "error",
+        });
+        setObjectState({
+            type: objectError,
+            error,
+        });
+    }, []);
 
     const updateObject = useCallback(
         async (doLoad) => {
@@ -167,7 +169,7 @@ export default function ShowObject({
 
     return (
         <ObjectContext.Provider value={context}>
-            <View fluid ident={ident} error={objectState.objectError}>
+            <View fluid ident={ident}>
                 {objectLayout}
             </View>
         </ObjectContext.Provider>

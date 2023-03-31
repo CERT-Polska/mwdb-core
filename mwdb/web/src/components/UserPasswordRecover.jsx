@@ -83,7 +83,9 @@ export default function UserPasswordRecover() {
                             <input
                                 {...register(formFields.login)}
                                 id={formFields.login}
-                                className="form-control"
+                                className={`form-control ${
+                                    errors.login ? "is-invalid" : ""
+                                }`}
                             />
                             <FormError errorField={errors.login} />
                         </div>
@@ -96,7 +98,9 @@ export default function UserPasswordRecover() {
                             <input
                                 {...register(formFields.email)}
                                 id={formFields.email}
-                                className="form-control"
+                                className={`form-control ${
+                                    errors.email ? "is-invalid" : ""
+                                }`}
                             />
                             <FormError errorField={errors.email} />
                         </div>

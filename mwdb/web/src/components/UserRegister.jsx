@@ -110,7 +110,9 @@ export default function UserRegister() {
                                 <input
                                     {...register(formFields.login)}
                                     id={formFields.login}
-                                    className="form-control"
+                                    className={`form-control ${
+                                        errors.login ? "is-invalid" : ""
+                                    }`}
                                 />
 
                                 <FormError errorField={errors.login} />
@@ -124,7 +126,9 @@ export default function UserRegister() {
                                 <input
                                     {...register(formFields.email)}
                                     id={formFields.email}
-                                    className="form-control"
+                                    className={`form-control ${
+                                        errors.email ? "is-invalid" : ""
+                                    }`}
                                 />
                                 <FormError errorField={errors.email} />
                             </div>
@@ -140,7 +144,9 @@ export default function UserRegister() {
                                 <input
                                     {...register(formFields.affiliation)}
                                     id={formFields.affiliation}
-                                    className="form-control"
+                                    className={`form-control ${
+                                        errors.affiliation ? "is-invalid" : ""
+                                    }`}
                                 />
                                 <FormError errorField={errors.affiliation} />
                                 <div className="form-hint">
@@ -156,7 +162,9 @@ export default function UserRegister() {
                                 <input
                                     {...register(formFields.job_title)}
                                     id={formFields.job_title}
-                                    className="form-control"
+                                    className={`form-control ${
+                                        errors.job_title ? "is-invalid" : ""
+                                    }`}
                                 />
                                 <FormError errorField={errors.job_title} />
                                 <div className="form-hint">
@@ -173,7 +181,11 @@ export default function UserRegister() {
                             <input
                                 {...register(formFields.job_responsibilities)}
                                 id={formFields.job_responsibilities}
-                                className="form-control"
+                                className={`form-control ${
+                                    errors.job_responsibilities
+                                        ? "is-invalid"
+                                        : ""
+                                }`}
                             />
                             <FormError
                                 errorField={errors.job_responsibilities}
@@ -185,14 +197,16 @@ export default function UserRegister() {
                         </div>
                         <div className="form-group">
                             <Label
-                                label=" Other information"
+                                label="Other information"
                                 required
                                 htmlFor={formFields.other_info}
                             />
                             <textarea
                                 {...register(formFields.other_info)}
                                 id={formFields.other_info}
-                                className="form-control"
+                                className={`form-control ${
+                                    errors.other_info ? "is-invalid" : ""
+                                }`}
                             />
                             <FormError errorField={errors.other_info} />
                             <div className="form-hint">

@@ -162,7 +162,7 @@ jobs:
         run: |
           docker-compose -f docker-compose-e2e.yml up -d mwdb-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t mwdb-tests
-          ([ $(docker wait mwdb-core_mwdb-tests_1) == 0 ])
+          ([ $(docker wait mwdb_core_e2e_tests) == 0 ])
       - name: Job failed - storing application logs
         if: ${{ failure() }}
         run: |
@@ -200,7 +200,17 @@ jobs:
         run: |
           docker-compose -f docker-compose-e2e.yml up -d web-tests
           docker-compose -f docker-compose-e2e.yml logs -f -t web-tests
-          ([ $(docker wait mwdb-core_web-tests_1) == 0 ])
+          ([ $(docker wait mwdb_core_web_tests) == 0 ])
+      - name: Job failed - storing videos from e2e tests
+        if: ${{ failure() }}
+        run: |
+          docker cp mwdb_core_e2e_web_tests:/app/cypress/videos ./artifacts
+      - name: Job failed - upload application logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: mwdb-e2e-web-videos
+          path: artifacts
   push_images:
     needs: [test_backend_e2e, test_frontend_e2e]
     name: Push images on Docker Hub

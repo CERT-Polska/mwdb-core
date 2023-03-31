@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { AuthContext } from "../auth";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export function RequiresAuth({ children }) {
     /**
@@ -8,16 +9,19 @@ export function RequiresAuth({ children }) {
      */
     const auth = useContext(AuthContext);
     const location = useLocation();
-    if (!auth.isAuthenticated)
+    if (!auth.isAuthenticated) {
+        toast("You need to authenticate before accessing this page", {
+            type: "error",
+        });
         return (
             <Navigate
                 to="/login"
                 state={{
                     prevLocation: location,
-                    error: "You need to authenticate before accessing this page",
                 }}
             />
         );
+    }
     return children ? children : <Outlet />;
 }
 
@@ -27,14 +31,11 @@ export function RequiresCapability({ capability, children }) {
      */
     const auth = useContext(AuthContext);
     const location = useLocation();
-    if (!auth.hasCapability(capability))
-        return (
-            <Navigate
-                to="/"
-                state={{
-                    error: `You don't have permission to access '${location.pathname}'`,
-                }}
-            />
-        );
+    if (!auth.hasCapability(capability)) {
+        toast(`You don't have permission to access '${location.pathname}'`, {
+            type: "error",
+        });
+        return <Navigate to="/" />;
+    }
     return children ? children : <Outlet />;
 }

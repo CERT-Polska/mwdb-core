@@ -6,11 +6,7 @@ export { default as ConfirmationModal } from "./ConfirmationModal";
 export { default as DataTable } from "./DataTable";
 export { default as DateString } from "./DateString";
 export { EditableItem, PseudoEditableItem } from "./EditableItem";
-export {
-    default as ErrorBoundary,
-    Alert,
-    getErrorMessage,
-} from "./ErrorBoundary";
+export { default as ErrorBoundary, getErrorMessage } from "./ErrorBoundary";
 export { default as FeatureSwitch } from "./FeatureSwitch";
 export { default as GroupBadge, UserBadge } from "./GroupBadge";
 export { default as Hash } from "./Hash";

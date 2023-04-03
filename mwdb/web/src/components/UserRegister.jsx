@@ -54,7 +54,7 @@ const formOptions = {
 
 export default function UserRegister() {
     const config = useContext(ConfigContext);
-    const { goBackToPrevLocation } = useNavRedirect();
+    const { redirectTo } = useNavRedirect();
     const { register, handleSubmit, formState } = useForm(formOptions);
     const { errors } = formState;
 
@@ -77,7 +77,7 @@ export default function UserRegister() {
                 { type: "success" }
             );
             setLoading(false);
-            goBackToPrevLocation();
+            redirectTo("/login");
         } catch (e) {
             toast(getErrorMessage(e), {
                 type: "error",
@@ -228,7 +228,7 @@ export default function UserRegister() {
                         <div className="d-flex justify-content-between">
                             <button
                                 className="btn btn-outline-primary btn-lg"
-                                onClick={goBackToPrevLocation}
+                                onClick={() => redirectTo("/login")}
                             >
                                 Back
                             </button>

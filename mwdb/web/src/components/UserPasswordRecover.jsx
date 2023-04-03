@@ -37,7 +37,7 @@ const formOptions = {
 
 export default function UserPasswordRecover() {
     const config = useContext(ConfigContext);
-    const { goBackToPrevLocation } = useNavRedirect();
+    const { redirectTo } = useNavRedirect();
     const { register, handleSubmit, formState, reset } = useForm(formOptions);
     const { errors } = formState;
 
@@ -57,7 +57,7 @@ export default function UserPasswordRecover() {
                 type: "success",
             });
             setLoading(false);
-            goBackToPrevLocation();
+            redirectTo("/login");
         } catch (error) {
             toast(getErrorMessage(error), {
                 type: "error",
@@ -124,7 +124,7 @@ export default function UserPasswordRecover() {
                         <div className="d-flex justify-content-between">
                             <button
                                 className="btn btn-outline-primary btn-lg"
-                                onClick={goBackToPrevLocation}
+                                onClick={() => redirectTo("/login")}
                             >
                                 Back
                             </button>

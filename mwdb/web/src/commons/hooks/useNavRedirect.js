@@ -5,6 +5,10 @@ export function useNavRedirect() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    function redirectTo(url) {
+        navigate(url);
+    }
+
     const goBackToPrevLocation = useCallback(() => {
         const locationState = location.state || {};
         const prevLocation = locationState.prevLocation || "/";
@@ -13,5 +17,6 @@ export function useNavRedirect() {
 
     return {
         goBackToPrevLocation,
+        redirectTo,
     };
 }

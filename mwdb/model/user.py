@@ -210,12 +210,11 @@ class User(db.Model):
 
     @staticmethod
     def verify_set_password_token(token) -> Optional["User"]:
-        result = User._verify_token(
+        return User._verify_token(
             token,
             ["password_ver"],
             scope=AuthScope.set_password,
         )
-        return None if result is None else result[0]
 
     @staticmethod
     def verify_legacy_token(token):

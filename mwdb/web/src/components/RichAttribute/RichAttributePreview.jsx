@@ -101,7 +101,9 @@ export default function RichAttributePreview({
             >
                 <option value="custom">(custom template)</option>
                 {exampleTemplates.map((value, index) => (
-                    <option value={index}>{value.name}</option>
+                    <option key={index} value={index}>
+                        {value.name}
+                    </option>
                 ))}
             </select>
             <div className="row">
@@ -132,7 +134,7 @@ export default function RichAttributePreview({
                             type="radio"
                             id="showValue"
                             checked={!showContext}
-                            onClick={() => setShowContext(false)}
+                            onChange={() => setShowContext(false)}
                         />
                         <label className="form-check-label" for="showValue">
                             Value
@@ -144,7 +146,7 @@ export default function RichAttributePreview({
                             type="radio"
                             id="showContext"
                             checked={showContext}
-                            onClick={() => setShowContext(true)}
+                            onChange={() => setShowContext(true)}
                         />
                         <label className="form-check-label" for="showContext">
                             Context
@@ -174,13 +176,11 @@ export default function RichAttributePreview({
             <div className="row">
                 <div className="col">
                     <strong>Preview</strong>
-                    <DataTable>
-                        <RichAttributeRenderer
-                            template={template}
-                            value={value}
-                            setInvalid={setInvalid}
-                        />
-                    </DataTable>
+                    <RichAttributeRenderer
+                        template={template}
+                        value={value}
+                        setInvalid={setInvalid}
+                    />
                 </div>
             </div>
             <div className="btn-group">

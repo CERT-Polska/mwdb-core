@@ -17,7 +17,7 @@ export default function QuickQueryAddModal(props) {
             onError("Please set name for your quick query.");
             return;
         }
-        const names = queries.map((x) => x.name);
+         const names = queries.map((x) => x.name);
         if (names.includes(value)) {
             onError("This query name already exists");
             return;

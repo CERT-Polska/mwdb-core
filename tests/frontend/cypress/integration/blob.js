@@ -32,7 +32,7 @@ describe("Blob view test - mwdb-core", function () {
 
     browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-    cy.contains("Blobs").click({ force: true });
+    cy.contains("Blobs").click({ timeout: 10000 });
 
     cy.get("@blobId").then((blobId) => {
       cy.get('.d-none a[href*="' + blobId + '"] > div').click({ force: true });

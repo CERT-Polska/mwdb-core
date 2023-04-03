@@ -30,7 +30,7 @@ describe("Sample view test - mwdb-core", function () {
       cy.visit("/");
       browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-      cy.contains("Samples").click({ force: true });
+      cy.contains("Samples").click({ timeout: 10000 });
       cy.get('.d-none a[href*="' + fileData.md5 + '"] > div').click({
         force: true,
       });

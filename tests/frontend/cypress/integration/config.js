@@ -36,7 +36,7 @@ describe("Config view test - mwdb-core", function () {
 
     browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-    cy.contains("Configs").click({ force: true });
+    cy.contains("Configs").click({ timeout: 10000 });
 
     cy.get("@configId").then((configId) => {
       cy.get('.d-none a[href*="' + configId + '"] > div').click({

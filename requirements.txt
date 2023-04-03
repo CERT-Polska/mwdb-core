@@ -18,7 +18,7 @@ python-json-logger==2.0.2
 click==7.1.2
 click-default-group==1.2.2
 PyYAML==5.4
-redis==4.3.4
+redis==4.5.4
 boto3==1.24.38
 typed-config==1.1.0
 karton-core==5.0.0

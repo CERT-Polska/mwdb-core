@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
+import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -76,7 +77,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             );
             setAttributeDefinitions(keyDefinitions);
         } catch (error) {
-            setError(error.toString());
+            toast(error.toString(), { type: "error" });
         }
     }
 
@@ -97,16 +98,6 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             onConfirm={handleSubmit}
             confirmDisabled={!attributesAvailable || (invalid && richTemplate)}
         >
-            {error ? (
-                <div
-                    className="alert alert-danger"
-                    style={{ "max-width": "300px" }}
-                >
-                    {error}
-                </div>
-            ) : (
-                []
-            )}
             {!attributesAvailable ? (
                 <div>
                     Sorry, there are no attributes you can set at this moment.
@@ -153,7 +144,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                                 name="value-type"
                                 checked={attributeType === "string"}
                                 value="string"
-                                onClick={handleTypeChange}
+                                onChange={handleTypeChange}
                             />
                             <label
                                 className="form-check-label"
@@ -170,7 +161,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                                 name="value-type"
                                 checked={attributeType === "object"}
                                 value="object"
-                                onClick={handleTypeChange}
+                                onChange={handleTypeChange}
                             />
                             <label
                                 className="form-check-label"
@@ -237,6 +228,14 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                     ) : (
                         []
                     )}
+                    <p
+                        className="invalid-feedback"
+                        style={{
+                            display: error ? "block" : "none",
+                        }}
+                    >
+                        {error}
+                    </p>
                 </form>
             )}
         </ConfirmationModal>

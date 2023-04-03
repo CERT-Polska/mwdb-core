@@ -1,21 +1,28 @@
-import React, { useState } from "react";
-import { Alert, ConfirmationModal } from "@mwdb-web/commons/ui";
+import React, { useEffect, useState } from "react";
+import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default function QuickQueryAddModal(props) {
+    const { isOpen, onSubmit, onRequestModalClose, error, onError } = props;
     const [value, setValue] = useState("");
+
+    useEffect(() => {
+        if (!isOpen) {
+            setValue("");
+        }
+    }, [isOpen]);
 
     const handleSubmit = (ev) => {
         if (!value) {
-            props.onError("Please set name for your quick query.");
+            onError("Please set name for your quick query.");
         } else {
             ev.preventDefault();
-            props.onSubmit(value);
+            onSubmit(value);
         }
     };
 
     const handleClose = (ev) => {
         ev.preventDefault();
-        props.onRequestModalClose(value);
+        onRequestModalClose(value);
     };
 
     return (
@@ -23,23 +30,24 @@ export default function QuickQueryAddModal(props) {
             buttonStyle="btn-success"
             confirmText="Add"
             message="Add new custom quick query"
-            isOpen={props.isOpen}
+            isOpen={isOpen}
             onRequestClose={handleClose}
             onConfirm={handleSubmit}
         >
             <form onSubmit={handleSubmit}>
-                <Alert error={props.error} />
-                <div className="row pb-2">
-                    <input
-                        type="text"
-                        className="form-control"
-                        style={{ width: "470px" }}
-                        placeholder="Set name for your quick query"
-                        onChange={(ev) => setValue(ev.target.value)}
-                        name="name"
-                        required
-                    />
-                </div>
+                <input
+                    type="text"
+                    className={`form-control ${
+                        error ? "is-invalid" : ""
+                    }`.trim()}
+                    style={{ width: "470px" }}
+                    placeholder="Set name for your quick query"
+                    value={value}
+                    onChange={(ev) => setValue(ev.target.value)}
+                    name="name"
+                    required
+                />
+                {error && <p className="invalid-feedback">{error}</p>}
             </form>
         </ConfirmationModal>
     );

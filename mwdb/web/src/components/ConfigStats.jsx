@@ -1,8 +1,14 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
-import { DateString, SortedList, View } from "@mwdb-web/commons/ui";
+import {
+    DateString,
+    SortedList,
+    View,
+    getErrorMessage,
+} from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 
@@ -33,14 +39,15 @@ export default function ConfigStats() {
     const [families, setFamilies] = useState([]);
     const [sortOrder, setSortOrder] = useState([0, 1]);
     const [filterValue, setFilterValue] = useState("*");
-    const [error, setError] = useState("");
 
     async function updateStats() {
         try {
             let response = await api.getConfigStats(filterValue);
             setFamilies(response.data.families);
         } catch (error) {
-            setError(error);
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
         }
     }
 
@@ -68,7 +75,7 @@ export default function ConfigStats() {
     }, [getStats]);
 
     return (
-        <View ident="configStats" error={error}>
+        <View ident="configStats">
             <h2>Global family statistics</h2>
             <div>
                 Show stats from:

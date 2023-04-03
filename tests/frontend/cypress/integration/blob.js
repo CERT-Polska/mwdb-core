@@ -32,17 +32,19 @@ describe("Blob view test - mwdb-core", function () {
 
     browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-    cy.contains("Blobs").click();
+    cy.contains("Blobs").click({ timeout: 10000 });
 
     cy.get("@blobId").then((blobId) => {
-      cy.get('.d-none a[href*="'+blobId+'"] > div').click();
-      cy.server().route('GET', '/api/blob/' + blobId).as('dataGetFirst');
+      cy.get('.d-none a[href*="' + blobId + '"] > div').click();
+      cy.server()
+        .route("GET", "/api/blob/" + blobId)
+        .as("dataGetFirst");
     });
 
     cy.get("div[class='ace_line']").should(($div) => {
-      const text = $div.text()
-      expect(text).to.include(blobContent)
-    })
+      const text = $div.text();
+      expect(text).to.include(blobContent);
+    });
 
     cy.contains("Details").click();
     cy.contains("Blob name");
@@ -53,9 +55,9 @@ describe("Blob view test - mwdb-core", function () {
     cy.contains("First seen");
     cy.contains("Last seen");
 
-    cy.get("a.nav-link").contains("Relations").click()
+    cy.get("a.nav-link").contains("Relations").click();
     cy.get("g[class='node expanded-node']");
-  
+
     cy.visit("/blob/fake");
     cy.contains(
       "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."

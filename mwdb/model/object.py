@@ -585,7 +585,7 @@ class Object(db.Model):
 
         We don't perform permission checks, all data needs to be validated by Resource.
         """
-        from .group import Group
+        # from .group import Group
 
         share_with = share_with or []
         attributes = attributes or []

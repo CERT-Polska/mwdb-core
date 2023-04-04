@@ -251,7 +251,7 @@ class ObjectPermission(db.Model):
         """
         if include_inherited_uploads:
             type_filter = or_(
-                ObjectPermission.reason_type != "added",
+                ObjectPermission.reason_type != AccessType.ADDED,
                 ObjectPermission.related_object_id != ObjectPermission.object_id,
             )
         else:
@@ -528,6 +528,9 @@ class Object(db.Model):
         Check whether user has access via explicit ObjectPermissions
         Used by Object.access
         """
+        if user.has_rights(Capabilities.access_all_objects):
+            return True
+
         return db.session.query(
             exists().where(
                 and_(
@@ -537,7 +540,7 @@ class Object(db.Model):
             )
         ).scalar()
 
-    def check_group_explicit_access(self, group):
+    def check_group_explicit_access(self, group):  # This function is not used anywhere
         """
         Check whether group has access via explicit ObjectPermissions
         Used by Object.access

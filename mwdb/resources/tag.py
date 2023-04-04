@@ -61,6 +61,7 @@ class TagListResource(Resource):
         schema = TagListRequestSchema()
         obj = load_schema(request.args, schema)
 
+        # changes here?
         tags = (
             db.session.query(Tag.tag)
             .distinct(Tag.tag)

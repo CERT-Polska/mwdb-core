@@ -206,7 +206,7 @@ function AppRoutes() {
                     <Route path="attributes" element={<AttributesList />} />
                     <Route path="attribute/new" element={<AttributeCreate />} />
                     <Route
-                        path="attribute/:attributeKey"
+                        path="attribute/:attributeKey/*"
                         element={<AttributeView />}
                     >
                         <Route index element={<AttributeDetails />} />

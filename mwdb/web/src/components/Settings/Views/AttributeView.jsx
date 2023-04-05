@@ -24,7 +24,6 @@ export default function AttributeView() {
     }, [getAttribute]);
 
     function BreadcrumbItems({ elements = [] }) {
-        console.log(elements);
         return [
             <li key={"attribute-details"} className="breadcrumb-item">
                 <strong>Attribute details: </strong>

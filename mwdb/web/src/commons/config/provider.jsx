@@ -5,6 +5,7 @@ import React, {
     useReducer,
     useCallback,
 } from "react";
+import _ from "lodash";
 import { api } from "../api";
 import { ConfigContext } from "./context";
 import { AuthContext } from "../auth";
@@ -69,7 +70,10 @@ export function ConfigProvider(props) {
     async function updatePendingUsers() {
         try {
             const response = await api.getPendingUsers();
-            setPendingUsers(response.data["users"]);
+            const users = response.data["users"];
+            if (!_.isEqual(users, pendingUsers)) {
+                setPendingUsers(users);
+            }
         } catch (error) {
             setServerConfig({
                 type: configError,
@@ -78,7 +82,7 @@ export function ConfigProvider(props) {
         }
     }
 
-    const getPendingUsers = useCallback(updatePendingUsers, []);
+    const getPendingUsers = useCallback(updatePendingUsers, [pendingUsers]);
 
     useEffect(() => {
         updateServerInfo();

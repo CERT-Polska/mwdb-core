@@ -14,10 +14,5 @@ export default function RichAttributeRenderer({ template, value, setInvalid }) {
         renderedValue = e.toString();
         setInvalid(true);
     }
-    return (
-        <tr>
-            <th>{"My attribute"}</th>
-            <td>{renderedValue}</td>
-        </tr>
-    );
+    return renderedValue;
 }

@@ -62,8 +62,6 @@ export default function UserLogin() {
         }
     }, [getProviders, isOIDCEnabled]);
 
-    if (auth.isAuthenticated) return <Navigate to="/" />;
-
     useEffect(() => {
         if (location.state) {
             if (
@@ -74,6 +72,8 @@ export default function UserLogin() {
             }
         }
     }, []);
+
+    if (auth.isAuthenticated) return <Navigate to="/" />;
 
     return (
         <div className="user-login">

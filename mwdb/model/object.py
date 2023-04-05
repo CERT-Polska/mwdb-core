@@ -251,7 +251,7 @@ class ObjectPermission(db.Model):
         """
         if include_inherited_uploads:
             type_filter = or_(
-                ObjectPermission.reason_type != "added",
+                ObjectPermission.reason_type != AccessType.ADDED,
                 ObjectPermission.related_object_id != ObjectPermission.object_id,
             )
         else:

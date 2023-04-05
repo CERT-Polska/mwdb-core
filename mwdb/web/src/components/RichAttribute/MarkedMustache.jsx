@@ -1,5 +1,6 @@
 import React from "react";
 import Mustache from "mustache";
+import { uniqueId } from "lodash";
 import { lexer, defaults, Tokenizer } from "marked";
 import { DataTable } from "@mwdb-web/commons/ui";
 import { escapeSearchValue } from "@mwdb-web/commons/helpers";
@@ -214,27 +215,37 @@ function renderTokens(tokens, options) {
             return token.text;
         },
         strong(token) {
-            return <strong>{renderTokens(token.tokens, options)}</strong>;
+            return (
+                <strong key={uniqueId()}>
+                    {renderTokens(token.tokens, options)}
+                </strong>
+            );
         },
         em(token) {
-            return <em>{renderTokens(token.tokens, options)}</em>;
+            return (
+                <em key={uniqueId()}>{renderTokens(token.tokens, options)}</em>
+            );
         },
         del(token) {
-            return <del>{renderTokens(token.tokens, options)}</del>;
+            return (
+                <del key={uniqueId()}>
+                    {renderTokens(token.tokens, options)}
+                </del>
+            );
         },
         hr(token) {
-            return <hr />;
+            return <hr key={uniqueId()} />;
         },
         blockquote(token) {
             return (
-                <blockquote className="blockquote">
+                <blockquote key={uniqueId()} className="blockquote">
                     {renderTokens(token.tokens, options)}
                 </blockquote>
             );
         },
         paragraph(token) {
             return (
-                <p style={{ margin: "0" }}>
+                <p key={uniqueId()} style={{ margin: "0" }}>
                     {renderTokens(token.tokens, options)}
                 </p>
             );
@@ -246,6 +257,7 @@ function renderTokens(tokens, options) {
                     "?" + new URLSearchParams({ q: query }).toString();
                 return (
                     <Link
+                        key={uniqueId()}
                         to={{
                             pathname: options.searchEndpoint,
                             search,
@@ -256,37 +268,41 @@ function renderTokens(tokens, options) {
                 );
             }
             return (
-                <a href={token.href}>{renderTokens(token.tokens, options)}</a>
+                <a key={uniqueId()} href={token.href}>
+                    {renderTokens(token.tokens, options)}
+                </a>
             );
         },
         list(token) {
             return (
-                <ul style={{ margin: "0" }}>
+                <ul key={uniqueId()} style={{ margin: "0" }}>
                     {token.items.map((item) => renderTokens([item]))}
                 </ul>
             );
         },
         list_item(token) {
-            return <li>{renderTokens(token.tokens)}</li>;
+            return <li key={uniqueId()}>{renderTokens(token.tokens)}</li>;
         },
         html(token) {
             return token.text;
         },
         table(token) {
             return (
-                <DataTable>
+                <DataTable key={uniqueId()}>
                     <thead>
                         <tr>
-                            {token.header.map((head) => (
-                                <th>{renderTokens(head.tokens, options)}</th>
+                            {token.header.map((head, index) => (
+                                <th key={index}>
+                                    {renderTokens(head.tokens, options)}
+                                </th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {token.rows.map((row) => (
-                            <tr>
-                                {row.map((cell) => (
-                                    <td>
+                        {token.rows.map((row, rowsIndex) => (
+                            <tr key={rowsIndex}>
+                                {row.map((cell, cellIndex) => (
+                                    <td key={cellIndex}>
                                         {renderTokens(cell.tokens, options)}
                                     </td>
                                 ))}
@@ -297,10 +313,10 @@ function renderTokens(tokens, options) {
             );
         },
         codespan(token) {
-            return <code>{token.text}</code>;
+            return <code key={uniqueId()}>{token.text}</code>;
         },
         code(token) {
-            return <pre>{token.text}</pre>;
+            return <pre key={uniqueId()}>{token.text}</pre>;
         },
         space() {
             return [];

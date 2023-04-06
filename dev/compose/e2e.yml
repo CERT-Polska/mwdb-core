@@ -3,6 +3,10 @@ services:
   mwdb:
     environment:
       MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
+  postgres:
+    container_name: mwdb_core_e2e_postgres
+    volumes:
+      - mwdb-postgres-e2e:/var/lib/postgresql/data
   mwdb-tests:
     build: ./tests/backend
     container_name: mwdb_core_e2e_tests
@@ -34,3 +38,5 @@ services:
     environment:
       MWDB_ADMIN_LOGIN: admin
       MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
+volumes:
+  mwdb-postgres-e2e:

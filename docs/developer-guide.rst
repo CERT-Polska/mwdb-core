@@ -4,19 +4,17 @@ Developer guide
 Setting up development environment
 ----------------------------------
 
-Generate configuration using ``./gen_vars.sh`` as for production installation.
-
-Then build images using 
+Build images using
 
 .. code-block::
 
-    docker-compose -f docker-compose-dev.yml build
+    ./dev-compose.sh build
 
 and run MWDB via 
 
 .. code-block::
 
-    docker-compose -f docker-compose-dev.yml up -d
+    ./dev-compose.sh up
 
 After a minute - MWDB should be accessible via ``http://127.0.0.1`` with enabled hot-reload and debug facilities.
 
@@ -29,7 +27,7 @@ All changes in code are automatically reloaded excluding:
 
 In cases mentioned above - Docker images need to be rebuilt.
 
-Password for administration account is available in ``mwdb-vars.env`` file in ``MWDB_ADMIN_PASSWORD`` field.
+Password for administration account ``admin`` is ``admin`` and is configured in ``dev/mwdb.ini`` configuration file
 
 Testing mail-related features
 -----------------------------

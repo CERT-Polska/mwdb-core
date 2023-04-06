@@ -13,7 +13,7 @@ services:
       - redis
     environment:
       MWDB_POSTGRES_URI: "postgresql://mwdb:dev-postgres-password@postgres./mwdb"
-    image: certpl
+    image: certpl/mwdb
     restart: on-failure
     volumes:
       - "../../docker/mail_templates:/app/mail_templates"

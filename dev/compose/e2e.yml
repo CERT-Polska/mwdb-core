@@ -1,0 +1,36 @@
+version: "3.3"
+services:
+  mwdb:
+    environment:
+      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
+  mwdb-tests:
+    build: ./tests/backend
+    container_name: mwdb_core_e2e_tests
+    depends_on:
+      - mwdb
+      - mwdb-web
+      - mailhog
+      - karton-system
+      - karton-classifier
+      - karton-dashboard
+      - karton-mwdb-reporter
+    image: certpl/mwdb-tests
+    environment:
+      MWDB_ADMIN_LOGIN: admin
+      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
+      MWDB_URL: http://mwdb-web./api
+  web-tests:
+    build: ./tests/frontend
+    container_name: mwdb_core_e2e_web_tests
+    depends_on:
+      - mwdb
+      - mwdb-web
+      - mailhog
+      - karton-system
+      - karton-classifier
+      - karton-dashboard
+      - karton-mwdb-reporter
+    image: certpl/mwdb-web-tests
+    environment:
+      MWDB_ADMIN_LOGIN: admin
+      MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password

@@ -1,0 +1,23 @@
+# Docker Compose file for mwdb-core development environment
+
+version: "3.3"
+services:
+  mwdb:
+    environment:
+      MWDB_ENABLE_OIDC: 1
+  keycloak_postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: bn_keycloak
+      POSTGRES_DB: bitnami_keycloak
+      POSTGRES_PASSWORD: bn_keycloak_password
+  keycloak:
+    image: bitnami/keycloak:latest
+    depends_on:
+      - keycloak_postgres
+    environment:
+      KEYCLOAK_DATABASE_HOST: keycloak_postgres
+      KEYCLOAK_DATABASE_PASSWORD: bn_keycloak_password
+    ports:
+      - "127.0.0.1:8180:8080"

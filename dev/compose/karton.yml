@@ -1,0 +1,42 @@
+# Requires minio-base.yml
+version: "3.3"
+services:
+  mwdb:
+    depends_on:
+      - minio
+    environment:
+      MWDB_ENABLE_KARTON: 1
+    volumes:
+      - "../karton.ini:/etc/karton/karton.ini"
+  karton-system:
+    image: certpl/karton-system:v5.0.0
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - "../karton.ini:/etc/karton/karton.ini"
+    entrypoint: karton-system
+    command: --setup-bucket
+  karton-classifier:
+    image: certpl/karton-classifier:v1.4.0
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - "../karton.ini:/etc/karton/karton.ini"
+  karton-dashboard:
+    image: certpl/karton-dashboard:v1.4.0
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - "../karton.ini:/etc/karton/karton.ini"
+    ports:
+      - "127.0.0.1:8030:5000"
+  karton-mwdb-reporter:
+    image: certpl/karton-mwdb-reporter:v1.2.0
+    depends_on:
+      - redis
+      - minio
+    volumes:
+      - "../karton.ini:/etc/karton/karton.ini"

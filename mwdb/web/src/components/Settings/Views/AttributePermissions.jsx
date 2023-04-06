@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useParams, useOutletContext } from "react-router-dom";
 import { isEmpty } from "lodash";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import { api } from "@mwdb-web/commons/api";
 import {
     Autocomplete,
@@ -111,21 +114,60 @@ function AttributePermissionsItem({
     );
 }
 
-function AttributePermissionsBox({
+function AttributePermissionsGroupInput({
     permissions,
     groups,
     addGroup,
-    updateGroup,
-    removeGroup,
+    groupName,
+    setGroupName,
 }) {
-    const [newMember, setNewMember] = useState("");
+    const [disabledAddGroupHint, setDisabledAddGroupHint] = useState("");
 
-    const isAddGroupDisabled = useMemo(() => {
-        const isGroupAlreadyAdded =
-            Object.keys(permissions).includes(newMember);
-        return !newMember || isGroupAlreadyAdded;
-    }, [newMember, permissions]);
+    const isGroupAlreadyAdded = useMemo(() => {
+        return Object.keys(permissions).includes(groupName);
+    }, [groupName, permissions]);
 
+    useEffect(() => {
+        setDisabledAddGroupHint("");
+        if (!groupName) {
+            setDisabledAddGroupHint("Select group to add");
+        }
+        if (isGroupAlreadyAdded) {
+            setDisabledAddGroupHint("Selected group is already added");
+        }
+    }, [groupName, isGroupAlreadyAdded]);
+
+    return (
+        <div className="card">
+            <div className="card-body">
+                <Autocomplete
+                    value={groupName}
+                    items={groups.filter(
+                        (item) =>
+                            item.name
+                                .toLowerCase()
+                                .indexOf(groupName.toLowerCase()) !== -1
+                    )}
+                    getItemValue={(item) => item.name}
+                    onChange={(value) => setGroupName(value)}
+                    className="form-control"
+                    placeholder="Group name"
+                />
+                <button
+                    type="button"
+                    className="btn btn-outline-success mt-2 mr-1"
+                    onClick={() => groupName && addGroup(groupName)}
+                    disabled={!groupName || isGroupAlreadyAdded}
+                    title={disabledAddGroupHint}
+                >
+                    <FontAwesomeIcon icon={faPlus} /> Add group
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function AttributePermissionsList({ permissions, updateGroup, removeGroup }) {
     return (
         <table className="table table-striped table-bordered wrap-table">
             <thead>
@@ -147,33 +189,6 @@ function AttributePermissionsBox({
                             removeGroup={removeGroup}
                         />
                     ))}
-                <tr>
-                    <td>
-                        <Autocomplete
-                            value={newMember}
-                            items={groups.filter(
-                                (item) =>
-                                    item.name
-                                        .toLowerCase()
-                                        .indexOf(newMember.toLowerCase()) !== -1
-                            )}
-                            getItemValue={(item) => item.name}
-                            onChange={(value) => setNewMember(value)}
-                            className="form-control"
-                        />
-                    </td>
-                    <td />
-                    <td>
-                        <button
-                            type="button"
-                            className="btn btn-success"
-                            onClick={() => newMember && addGroup(newMember)}
-                            disabled={isAddGroupDisabled}
-                        >
-                            Add group
-                        </button>
-                    </td>
-                </tr>
             </tbody>
         </table>
     );
@@ -186,6 +201,7 @@ export function AttributesPermissions() {
     const [allGroups, setAllGroups] = useState([]);
     const [permissions, setPermissions] = useState({});
     const [modalSpec, setModalSpec] = useState({});
+    const [groupName, setGroupName] = useState("");
 
     const updateAttributePermissions = useCallback(async () => {
         const response = await api.getAttributePermissions(attributeKey);
@@ -213,6 +229,7 @@ export function AttributesPermissions() {
                 false
             );
             await updateAttributePermissions();
+            setGroupName("");
         } catch (error) {
             setAlert({ error });
         }
@@ -279,10 +296,15 @@ export function AttributesPermissions() {
 
     return (
         <>
-            <AttributePermissionsBox
+            <AttributePermissionsGroupInput
                 permissions={permissions}
                 groups={allGroups}
                 addGroup={addGroup}
+                groupName={groupName}
+                setGroupName={setGroupName}
+            />
+            <AttributePermissionsList
+                permissions={permissions}
                 updateGroup={handleUpdateGroup}
                 removeGroup={handleRemoveGroup}
             />

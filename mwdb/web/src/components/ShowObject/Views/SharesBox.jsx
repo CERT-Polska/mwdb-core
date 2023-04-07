@@ -303,7 +303,7 @@ function SharesBox() {
                     shares={shares}
                     groups={groups}
                     handleShare={!api.remote ? handleShare : null}
-                    currentFile={context.object.sha256}
+                    currentFile={context.object.id}
                     direct
                 />
             </div>
@@ -318,7 +318,7 @@ function SharesBox() {
                 <SharesList
                     shares={shares}
                     groups={groups}
-                    currentFile={context.object.sha256}
+                    currentFile={context.object.id}
                 />
             </div>
         </div>

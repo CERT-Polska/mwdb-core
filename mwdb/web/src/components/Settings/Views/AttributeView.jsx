@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, Outlet, Routes, Route, useParams } from "react-router-dom";
+import { isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/ui";
 
@@ -17,14 +18,13 @@ export default function AttributeView() {
         }
     }
 
-    const getAttribute = useCallback(updateAttribute, [attributeKey, setAlert]);
+    const getAttribute = useCallback(updateAttribute, [attributeKey]);
 
     useEffect(() => {
         getAttribute();
     }, [getAttribute]);
 
     function BreadcrumbItems({ elements = [] }) {
-        console.log(elements);
         return [
             <li key={"attribute-details"} className="breadcrumb-item">
                 <strong>Attribute details: </strong>
@@ -49,7 +49,8 @@ export default function AttributeView() {
         ];
     }
 
-    if (!attribute) return [];
+    if (isEmpty(attribute)) return [];
+
     return (
         <div className="container">
             <nav aria-label="breadcrumb">

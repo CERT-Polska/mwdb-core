@@ -38,7 +38,7 @@ export default function ProfileGroup() {
         }
     }
 
-    const getWorkspaces = useCallback(updateWorkspaces, [redirectToAlert]);
+    const getWorkspaces = useCallback(updateWorkspaces, []);
 
     useEffect(() => {
         getWorkspaces();
@@ -47,15 +47,13 @@ export default function ProfileGroup() {
     if (!workspaces) return [];
 
     const group = profile.groups.find((group) => group.name === groupName);
-    if (!group)
-        return (
-            <Navigate
-                to="/profile"
-                state={{
-                    error: `Group ${groupName} doesn't exist`,
-                }}
-            />
-        );
+    if (!group) {
+        redirectToAlert({
+            target: "/profile",
+            error: `Group ${groupName} doesn't exist`,
+        });
+        return <></>;
+    }
     // Merge it with workspace info
     const workspace = workspaces.find((group) => group.name === groupName);
 

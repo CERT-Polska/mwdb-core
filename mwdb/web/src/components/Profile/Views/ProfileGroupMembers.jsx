@@ -90,7 +90,7 @@ export default function ProfileGroupMembers() {
             });
         }
     }
-    const getWorkspaces = useCallback(updateWorkspaces, [redirectToAlert]);
+    const getWorkspaces = useCallback(updateWorkspaces, []);
 
     useEffect(() => {
         getWorkspaces();
@@ -99,15 +99,14 @@ export default function ProfileGroupMembers() {
     if (!workspaces) return [];
 
     const group = profile.groups.find((group) => group.name === groupName);
-    if (!group)
-        return (
-            <Navigate
-                to="/profile"
-                state={{
-                    error: `Group ${groupName} doesn't exist`,
-                }}
-            />
-        );
+    if (!group) {
+        redirectToAlert({
+            target: "/profile",
+            error: `Group ${groupName} doesn't exist`,
+        });
+        return <></>;
+    }
+
     if (group.private) return <Navigate to={`/profile/user/${group.name}`} />;
 
     // Merge it with workspace info

@@ -18,7 +18,7 @@ export default function GroupView() {
         }
     }
 
-    const getGroup = useCallback(updateGroup, [name, setAlert]);
+    const getGroup = useCallback(updateGroup, [name]);
 
     useEffect(() => {
         getGroup();

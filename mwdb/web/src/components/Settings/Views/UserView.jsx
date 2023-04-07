@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, Outlet, Link, Route, Routes } from "react-router-dom";
+import { isEmpty } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/ui";
@@ -18,13 +19,13 @@ export default function UserView() {
         }
     }
 
-    const getUser = useCallback(updateUser, [login, setAlert]);
+    const getUser = useCallback(updateUser, [login]);
 
     useEffect(() => {
         getUser();
     }, [getUser]);
 
-    if (!user) return [];
+    if (isEmpty(user)) return <></>;
 
     function BreadcrumbItems({ elements = [] }) {
         return [

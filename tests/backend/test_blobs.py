@@ -1,5 +1,6 @@
 from .relations import *
 from .utils import random_name, rand_string
+from mwdb.core.log import getLogger
 
 
 def test_adding_blobs(admin_session):
@@ -115,6 +116,7 @@ def test_blob_search_multi(admin_session):
 
 
 def test_blob_search_upload_count(admin_session):
+    getLogger().warning("\ntest_blob_search_upload_count\n")
     blob_name = rand_string(15)
     blob_content = """
     TESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
@@ -138,6 +140,8 @@ def test_blob_search_upload_count(admin_session):
         users_session.login_as(user['user_name'], user['user_password'])
         blob = users_session.add_blob(None, blobname=blob_name, blobtype="inject", content=blob_content)
         users_session.add_tag(blob["id"], tag)
+
+    getLogger().warning("\n" + str(found_configs) + "\n")
 
     found_configs = admin_session.search(f'tag:{tag} AND blob.upload_count:{len(test_users)}')
     assert len(found_configs) == 1

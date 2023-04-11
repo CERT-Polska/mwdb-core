@@ -10,6 +10,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from mwdb.core.auth import AuthScope, generate_token, verify_legacy_token, verify_token
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.log import getLogger
 
 from . import db
 from .group import Group, Member
@@ -258,7 +259,9 @@ class User(db.Model):
         """
         Query filter for objects visible by this user
         """
+        getLogger().warning(f"\nAAA {self.login}\n")
         if self.has_rights(Capabilities.access_all_objects):
+            getLogger().warning(f"\nBBB {self.login}\n")
             return True
 
         return object_id.in_(

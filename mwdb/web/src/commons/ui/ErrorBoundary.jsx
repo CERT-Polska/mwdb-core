@@ -37,7 +37,7 @@ function CriticalError(props) {
                     bug report.
                 </p>
                 <hr />
-                <p className="mb-0">{props.error.toString()}</p>
+                <pre style={{ color: "red" }}>{props.error}</pre>
             </div>
         </div>
     );
@@ -57,17 +57,21 @@ export default class ErrorBoundary extends Component {
     }
 
     render() {
-        if (this.state.renderError)
-            return <CriticalError error={this.state.renderError} />;
-        else if (this.state.propsError) {
+        if (this.state.renderError) {
+            return <CriticalError error={this.state.renderError.stack} />;
+        }
+
+        if (this.state.propsError) {
             // Fallback to single Alert
             return (
                 <div className="container-fluid">
                     <div className="alert alert-danger">
-                        {getErrorMessage(this.state.propsError)}
+                        {this.state.propsError.stack}
                     </div>
                 </div>
             );
-        } else return this.props.children;
+        }
+
+        return this.props.children;
     }
 }

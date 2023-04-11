@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import Pagination from "react-js-pagination";
+import { isEmpty } from "lodash";
 
 import { faTrash, faCrown, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -82,8 +83,8 @@ function MemberList({ members, admins, setAdminMembership, removeMember }) {
 
     return (
         <React.Fragment>
-            {members.map((member) => (
-                <tr>
+            {members.map((member, index) => (
+                <tr key={index}>
                     <th className="col">
                         <UserBadge
                             user={member}
@@ -159,6 +160,10 @@ export default function GroupMembers() {
     const [allUsers, setAllUsers] = useState([]);
     const [activePage, setActivePage] = useState(1);
 
+    useEffect(() => {
+        getAllUsers();
+    }, []);
+
     async function addMember(login) {
         try {
             await api.addGroupMember(group.name, login);
@@ -194,7 +199,7 @@ export default function GroupMembers() {
         }
     }
 
-    async function updateAllUsers() {
+    async function getAllUsers() {
         try {
             let response = await api.getUsers();
             setAllUsers(response.data.users);
@@ -203,19 +208,13 @@ export default function GroupMembers() {
         }
     }
 
-    const getAllUsers = useCallback(updateAllUsers, [setAlert]);
+    if (isEmpty(group)) return <></>;
 
-    useEffect(() => {
-        getAllUsers();
-    }, [getAllUsers]);
-
-    if (Object.keys(group).length === 0) return [];
-
-    let usersItems = group.users
+    const usersItems = group.users
         .map((user) => ({ login: user }))
         .sort((userA, userB) => userA.login.localeCompare(userB.login));
 
-    let allUsersItems = allUsers.filter(
+    const allUsersItems = allUsers.filter(
         (v) => !usersItems.map((c) => c.login).includes(v.login)
     );
 

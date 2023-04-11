@@ -29,7 +29,7 @@ export default function UserView() {
 
     function BreadcrumbItems({ elements = [] }) {
         return [
-            <li className="breadcrumb-item">
+            <li className="breadcrumb-item" key="account-details">
                 <strong>Account details: </strong>
                 {elements.length > 0 ? (
                     <Link to={`/settings/user/${user.login}`}>
@@ -41,6 +41,7 @@ export default function UserView() {
             </li>,
             ...elements.map((element, index) => (
                 <li
+                    key={index}
                     className={`breadcrumb-item ${
                         index === elements.length - 1 ? "active" : ""
                     }`}

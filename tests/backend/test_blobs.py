@@ -1,6 +1,5 @@
 from .relations import *
 from .utils import random_name, rand_string
-from time import sleep
 
 
 def test_adding_blobs(admin_session):
@@ -142,8 +141,6 @@ def test_blob_search_upload_count(admin_session):
 
     found_configs = admin_session.search(f'tag:{tag}')
     assert len(found_configs) == 1
-
-    sleep(1)
 
     found_configs = admin_session.search(f'tag:{tag} AND blob.upload_count:{len(test_users)}')
     assert len(found_configs) == 1

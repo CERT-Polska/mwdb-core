@@ -281,7 +281,7 @@ class Object(db.Model):
                 ObjectPermission.reason_type == AccessType.ADDED,
             )
         ),
-        deferred=True,
+        deferred=False,
     )
 
     __mapper_args__ = {"polymorphic_identity": "object", "polymorphic_on": type}

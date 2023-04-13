@@ -45,7 +45,7 @@ function UploadDropzone(props) {
             <div className="card">
                 <div className="card-body">
                     <h5 className="card-title">
-                        <FontAwesomeIcon icon={faUpload} size="x" />
+                        <FontAwesomeIcon icon={faUpload} />
                         &nbsp;
                         {props.file ? (
                             <span>
@@ -85,27 +85,6 @@ export default function Upload() {
         if (searchParams.get("parent")) navigate("/upload");
         setParent("");
     };
-
-    async function updateGroups() {
-        try {
-            let response = await api.getShareInfo();
-            let groups = response.data.groups;
-            groups.splice(groups.indexOf("public"), 1);
-            groups.splice(groups.indexOf(auth.user.login), 1);
-            setGroups(groups);
-            setShareWith(groups.length > 0 ? "default" : "private");
-        } catch (error) {
-            toast(getErrorMessage(error), {
-                type: "error",
-            });
-        }
-    }
-
-    const getGroups = useCallback(updateGroups, [auth.user.login]);
-
-    useEffect(() => {
-        getGroups();
-    }, [getGroups]);
 
     const updateSharingMode = (ev) => {
         setShareWith(ev.target.value);
@@ -170,6 +149,25 @@ export default function Upload() {
         ]);
     };
 
+    useEffect(() => {
+        getGroups();
+    }, [auth?.user?.login]);
+
+    async function getGroups() {
+        try {
+            let response = await api.getShareInfo();
+            let groups = response.data.groups;
+            groups.splice(groups.indexOf("public"), 1);
+            groups.splice(groups.indexOf(auth.user.login), 1);
+            setGroups(groups);
+            setShareWith(groups.length > 0 ? "default" : "private");
+        } catch (error) {
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
+        }
+    }
+
     return (
         <View ident="upload" showIf={groups !== null}>
             <Extendable ident="uploadForm">
@@ -179,7 +177,7 @@ export default function Upload() {
                         onDrop={(data) => setFile(data)}
                     />
                     <div className="form-group">
-                        {auth.hasCapability(Capability.addingParents) ? (
+                        {auth.hasCapability(Capability.addingParents) && (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label className="input-group-text">
@@ -204,8 +202,6 @@ export default function Upload() {
                                     />
                                 </div>
                             </div>
-                        ) : (
-                            []
                         )}
                         <div className="input-group mb-3">
                             <div className="input-group-prepend">
@@ -220,10 +216,13 @@ export default function Upload() {
                             >
                                 {groups.length
                                     ? [
-                                          <option value="default">
+                                          <option
+                                              key={"default"}
+                                              value="default"
+                                          >
                                               All my groups
                                           </option>,
-                                          <option value="single">
+                                          <option key={"single"} value="single">
                                               Single group...
                                           </option>,
                                       ]

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -40,7 +40,20 @@ export default function ConfigStats() {
     const [sortOrder, setSortOrder] = useState([0, 1]);
     const [filterValue, setFilterValue] = useState("*");
 
-    async function updateStats() {
+    const columns = ["family", "last_upload", "count"];
+    const sortCriterion = columns[sortOrder[0]];
+    const sortOrderVariable = sortOrder[1];
+    const items = families.sort((a, b) => {
+        if (a[sortCriterion] < b[sortCriterion]) return -sortOrderVariable;
+        if (a[sortCriterion] > b[sortCriterion]) return sortOrderVariable;
+        return 0;
+    });
+
+    useEffect(() => {
+        getStats();
+    }, [filterValue]);
+
+    async function getStats() {
         try {
             let response = await api.getConfigStats(filterValue);
             setFamilies(response.data.families);
@@ -51,29 +64,6 @@ export default function ConfigStats() {
         }
     }
 
-    const columns = ["family", "last_upload", "count"];
-    const sortCriterion = columns[sortOrder[0]];
-    const sortOrderVariable = sortOrder[1];
-    const items = families.sort((a, b) => {
-        if (a[sortCriterion] < b[sortCriterion]) return -sortOrderVariable;
-        if (a[sortCriterion] > b[sortCriterion]) return sortOrderVariable;
-        return 0;
-    });
-
-    const onSort = (sortOrder) => {
-        setSortOrder(sortOrder);
-    };
-
-    const onChangeFilter = (ev) => {
-        setFilterValue(ev.target.value);
-    };
-
-    const getStats = useCallback(updateStats, [filterValue]);
-
-    useEffect(() => {
-        getStats();
-    }, [getStats]);
-
     return (
         <View ident="configStats">
             <h2>Global family statistics</h2>
@@ -82,7 +72,7 @@ export default function ConfigStats() {
                 <select
                     className="custom-select"
                     value={filterValue}
-                    onChange={onChangeFilter}
+                    onChange={(ev) => setFilterValue(ev.target.value)}
                 >
                     <option value="*">all time</option>
                     <option value="24h">last 24 hours</option>
@@ -97,7 +87,7 @@ export default function ConfigStats() {
                 items={items}
                 columnNames={["Family", "Last upload", "Unique configs"]}
                 sortOrder={sortOrder}
-                onSort={onSort}
+                onSort={setSortOrder}
             />
         </View>
     );

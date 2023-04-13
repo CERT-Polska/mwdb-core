@@ -98,9 +98,9 @@ function ShareGroupItem({ reason, shares, showDhash }) {
                 </tr>
             </thead>
             <tbody>
-                {shares.map((share) => {
+                {shares.map((share, index) => {
                     return (
-                        <tr className="d-flex">
+                        <tr key={index} className="d-flex">
                             <td className="col-6">
                                 <Link
                                     to={makeSearchLink({
@@ -214,18 +214,20 @@ function SharesList({ shares, groups, handleShare, currentFile, direct }) {
         const groupedItems = groupShares(filteredShares);
         return (
             <div>
-                {groupedItems.map((sharesGroup) => (
-                    <ShareGroupItem {...sharesGroup} showDhash={!direct} />
+                {groupedItems.map((sharesGroup, index) => (
+                    <ShareGroupItem
+                        key={index}
+                        {...sharesGroup}
+                        showDhash={!direct}
+                    />
                 ))}
-                {handleShare ? (
+                {handleShare && (
                     <ShareForm onSubmit={handleShare} groups={groups} />
-                ) : (
-                    []
                 )}
             </div>
         );
     } else {
-        return <div class="card-body text-muted">No shares to display</div>;
+        return <div className="card-body text-muted">No shares to display</div>;
     }
 }
 

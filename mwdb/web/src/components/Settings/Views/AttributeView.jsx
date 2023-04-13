@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Outlet, Routes, Route, useParams } from "react-router-dom";
 import { isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
@@ -9,7 +9,11 @@ export default function AttributeView() {
     const { attributeKey } = useParams();
     const [attribute, setAttribute] = useState({});
 
-    async function updateAttribute() {
+    useEffect(() => {
+        getAttribute();
+    }, [attributeKey]);
+
+    async function getAttribute() {
         try {
             let response = await api.getAttributeDefinition(attributeKey);
             setAttribute(response.data);
@@ -17,12 +21,6 @@ export default function AttributeView() {
             setAlert({ error });
         }
     }
-
-    const getAttribute = useCallback(updateAttribute, [attributeKey]);
-
-    useEffect(() => {
-        getAttribute();
-    }, [getAttribute]);
 
     function BreadcrumbItems({ elements = [] }) {
         return [
@@ -49,7 +47,7 @@ export default function AttributeView() {
         ];
     }
 
-    if (isEmpty(attribute)) return [];
+    if (isEmpty(attribute)) return <></>;
 
     return (
         <div className="container">

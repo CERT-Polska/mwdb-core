@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Outlet, Link, Route, Routes } from "react-router-dom";
 import { isEmpty } from "lodash";
 
@@ -10,7 +10,11 @@ export default function UserView() {
     const { login } = useParams();
     const [user, setUser] = useState({});
 
-    async function updateUser() {
+    useEffect(() => {
+        getUser();
+    }, [login]);
+
+    async function getUser() {
         try {
             const response = await api.getUser(login);
             setUser(response.data);
@@ -18,12 +22,6 @@ export default function UserView() {
             setAlert({ error });
         }
     }
-
-    const getUser = useCallback(updateUser, [login]);
-
-    useEffect(() => {
-        getUser();
-    }, [getUser]);
 
     if (isEmpty(user)) return <></>;
 

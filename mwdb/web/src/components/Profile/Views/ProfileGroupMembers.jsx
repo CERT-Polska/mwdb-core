@@ -1,5 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Navigate, useParams, useOutletContext } from "react-router-dom";
+import { isEmpty } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -34,7 +35,7 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
             {workspace.users
                 .sort((userA, userB) => userA.localeCompare(userB))
                 .map((login, idx) => (
-                    <tr className="nested d-flex">
+                    <tr className="nested d-flex" key={idx}>
                         <td className="col-8">
                             <GroupBadge
                                 key={idx}
@@ -67,7 +68,7 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
                     handleRemoveMember(removeUser);
                 }}
                 message={`Are you sure to delete ${removeUser} user from group?`}
-            />{" "}
+            />
         </React.Fragment>
     );
 }
@@ -79,7 +80,13 @@ export default function ProfileGroupMembers() {
     const { group: groupName } = useParams();
     const [workspaces, setWorkspaces] = useState();
 
-    async function updateWorkspaces() {
+    const group = profile.groups.find((group) => group.name === groupName);
+
+    useEffect(() => {
+        getWorkspaces();
+    }, []);
+
+    async function getWorkspaces() {
         try {
             const response = await api.authGroups();
             setWorkspaces(response.data["groups"]);
@@ -90,16 +97,10 @@ export default function ProfileGroupMembers() {
             });
         }
     }
-    const getWorkspaces = useCallback(updateWorkspaces, []);
 
-    useEffect(() => {
-        getWorkspaces();
-    }, [getWorkspaces]);
+    if (isEmpty(workspaces)) return <></>;
 
-    if (!workspaces) return [];
-
-    const group = profile.groups.find((group) => group.name === groupName);
-    if (!group) {
+    if (isEmpty(group)) {
         redirectToAlert({
             target: "/profile",
             error: `Group ${groupName} doesn't exist`,

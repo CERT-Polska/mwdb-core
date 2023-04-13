@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import { intersperse } from "../helpers";
 
 export function getErrorMessage(error) {
@@ -21,6 +21,8 @@ export function getErrorMessage(error) {
 }
 
 function CriticalError(props) {
+    const [show, setShow] = useState(false);
+
     return (
         <div className="container-fluid">
             <div className="alert alert-danger" role="alert">
@@ -37,7 +39,18 @@ function CriticalError(props) {
                     bug report.
                 </p>
                 <hr />
-                <pre style={{ color: "red" }}>{props.error}</pre>
+                <p style={{ fontWeight: 700 }}>Error: {props.error.message}</p>
+                <button
+                    className="btn btn-danger"
+                    onClick={() => setShow(!show)}
+                >
+                    {`${show ? "Hide" : "Show"} error stack`}
+                </button>
+                {show && (
+                    <pre style={{ color: "red", marginTop: 20 }}>
+                        {props.error.stack}
+                    </pre>
+                )}
             </div>
         </div>
     );
@@ -58,7 +71,7 @@ export default class ErrorBoundary extends Component {
 
     render() {
         if (this.state.renderError) {
-            return <CriticalError error={this.state.renderError.stack} />;
+            return <CriticalError error={this.state.renderError} />;
         }
 
         if (this.state.propsError) {
@@ -66,7 +79,7 @@ export default class ErrorBoundary extends Component {
             return (
                 <div className="container-fluid">
                     <div className="alert alert-danger">
-                        {this.state.propsError.stack}
+                        {this.state.propsError}
                     </div>
                 </div>
             );

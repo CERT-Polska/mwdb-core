@@ -28,27 +28,27 @@ export default function SortedList(props) {
     return (
         <table className="table table-striped table-bordered">
             <thead>
-                {columnNames.map((h, idx) => (
-                    <th
-                        key={idx}
-                        onClick={(ev) => {
-                            ev.preventDefault();
-                            handleSort(idx);
-                        }}
-                        style={{ cursor: "pointer" }}
-                    >
-                        {h}
-                        {!unsortable.includes(h) ? (
-                            <FontAwesomeIcon
-                                icon={sortIcon(idx)}
-                                pull="right"
-                                size="x"
-                            />
-                        ) : (
-                            []
-                        )}
-                    </th>
-                ))}
+                <tr>
+                    {columnNames.map((h, idx) => (
+                        <th
+                            key={idx}
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                handleSort(idx);
+                            }}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {h}
+                            {!unsortable.includes(h) && (
+                                <FontAwesomeIcon
+                                    icon={sortIcon(idx)}
+                                    pull="right"
+                                    size="sm"
+                                />
+                            )}
+                        </th>
+                    ))}
+                </tr>
             </thead>
             <tbody>
                 {props.items.length ? (

@@ -8,6 +8,7 @@ import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 import QuickQueryAddModal from "./QuickQueryAddModal";
+import { toast } from "react-toastify";
 
 function QuickQueryItem(props) {
     return (
@@ -88,6 +89,19 @@ export default function QuickQuery(props) {
         }
     };
 
+    const checkIfQueryNotExist = () => {
+        const isQueriesIncludeNewQuery = queries
+            .map((x) => x.query)
+            .includes(props.query);
+        if (isQueriesIncludeNewQuery) {
+            toast("You are trying to add a query that already exists.", {
+                type: "error",
+            });
+            return false;
+        }
+        return true;
+    };
+
     const predefinedQueryBadges = [
         !api.remote && (
             <UploaderQueryItem
@@ -165,10 +179,10 @@ export default function QuickQuery(props) {
             style={{ cursor: "pointer" }}
             data-toggle="tooltip"
             title="Save current search as Quick query"
-            onClick={(ev) => {
-                ev.preventDefault();
-                if (props.canAddQuickQuery) {
+            onClick={() => {
+                if (props.canAddQuickQuery && checkIfQueryNotExist()) {
                     setAddModalOpen(true);
+                    props.setQueryError("");
                 } else {
                     props.setQueryError(
                         "Provided query must be submitted before adding to Quick query bar"
@@ -202,6 +216,7 @@ export default function QuickQuery(props) {
                 error={modalError}
                 onError={setModalError}
                 onSubmit={addQuery}
+                queries={queries}
                 onRequestModalClose={() => {
                     setModalError(null);
                     setAddModalOpen(false);

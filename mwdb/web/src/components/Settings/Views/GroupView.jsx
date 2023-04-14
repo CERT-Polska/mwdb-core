@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { isEmpty } from "lodash";
 import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
 import { isEmpty } from "lodash";
 
@@ -26,7 +27,11 @@ export default function GroupView() {
         }
     }
 
-    async function updateGroup() {
+    useEffect(() => {
+        getGroup();
+    }, [name]);
+
+    async function getGroup() {
         try {
             const response = await api.getGroup(name);
             setGroup(response.data);
@@ -35,17 +40,11 @@ export default function GroupView() {
         }
     }
 
-    const getGroup = useCallback(updateGroup, [name, setAlert]);
-
-    useEffect(() => {
-        getGroup();
-    }, [getGroup]);
-
-    if (!group) return [];
+    if (isEmpty(group)) return <></>;
 
     function BreadcrumbItems({ elements = [] }) {
         return [
-            <li className="breadcrumb-item" key="details">
+            <li className="breadcrumb-item" key={"Group details"}>
                 <strong>Group details: </strong>
                 {elements.length > 0 ? (
                     <Link to={`/settings/group/${group.name}`}>

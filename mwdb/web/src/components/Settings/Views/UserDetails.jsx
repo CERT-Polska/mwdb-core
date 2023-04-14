@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { isEmpty } from "lodash";
 import { Link, useOutletContext } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
 import {
@@ -74,7 +75,7 @@ export default function UserDetails() {
         }
     }
 
-    if (!user) return [];
+    if (isEmpty(user)) return <></>;
 
     return (
         <div className="container">
@@ -137,7 +138,7 @@ export default function UserDetails() {
                                     )
                                     .map((group, index) => (
                                         <GroupBadge
-                                            key={index}
+                                            key={group.name}
                                             group={group}
                                             clickable
                                             basePath="/settings"

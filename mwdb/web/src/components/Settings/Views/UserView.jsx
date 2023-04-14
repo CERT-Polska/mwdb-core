@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Outlet, Link, Route, Routes } from "react-router-dom";
 import { isEmpty, find } from "lodash";
 
@@ -13,7 +13,11 @@ export default function UserView() {
 
     const getUser = useCallback(updateUser, [login, setAlert]);
 
-    async function updateUser() {
+    useEffect(() => {
+        getUser();
+    }, [login]);
+
+    async function getUser() {
         try {
             const response = await api.getUser(login);
             setUser(response.data);
@@ -40,15 +44,11 @@ export default function UserView() {
         }
     }
 
-    useEffect(() => {
-        getUser();
-    }, [getUser]);
-
-    if (!user) return [];
+   if (isEmpty(user)) return <></>;
 
     function BreadcrumbItems({ elements = [] }) {
         return [
-            <li className="breadcrumb-item" key="details">
+            <li className="breadcrumb-item" key="account-details">
                 <strong>Account details: </strong>
                 {elements.length > 0 ? (
                     <Link to={`/settings/user/${user.login}`}>

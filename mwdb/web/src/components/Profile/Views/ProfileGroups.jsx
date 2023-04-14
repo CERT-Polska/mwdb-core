@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { isEmpty } from "lodash";
 import { useOutletContext } from "react-router-dom";
 
 import { api } from "@mwdb-web/commons/api";
@@ -9,7 +10,11 @@ export default function ProfileGroups() {
     const { profile } = useOutletContext();
     const [workspaces, setWorkspaces] = useState();
 
-    async function updateWorkspaces() {
+    useEffect(() => {
+        getWorkspaces();
+    }, []);
+
+    async function getWorkspaces() {
         try {
             const response = await api.authGroups();
             setWorkspaces(response.data["groups"]);
@@ -21,13 +26,7 @@ export default function ProfileGroups() {
         }
     }
 
-    const getWorkspaces = useCallback(updateWorkspaces, [redirectToAlert]);
-
-    useEffect(() => {
-        getWorkspaces();
-    }, [getWorkspaces]);
-
-    if (!workspaces) return [];
+    if (isEmpty(workspaces)) return <></>;
 
     return (
         <div className="container">
@@ -47,7 +46,7 @@ export default function ProfileGroups() {
                                     .includes(group.name)
                         )
                         .map((group) => (
-                            <tr>
+                            <tr key={group.name}>
                                 <td>
                                     <GroupBadge group={group} clickable />
                                 </td>
@@ -60,7 +59,7 @@ export default function ProfileGroups() {
                 Workgroups allow you to share objects with other people you
                 trust e.g. members of your organization.
             </p>
-            <p>
+            <div>
                 People from the same workgroup:
                 <ul>
                     <li>
@@ -75,19 +74,15 @@ export default function ProfileGroups() {
                         workgroup administrator rights are given;
                     </li>
                 </ul>
-            </p>
+            </div>
             <table className="table table-bordered wrap-table">
                 <tbody>
                     {workspaces
                         .filter((group) => !group.private)
-                        .map((group, index) => (
-                            <tr>
+                        .map((group) => (
+                            <tr key={group.name}>
                                 <td>
-                                    <GroupBadge
-                                        key={index}
-                                        group={group}
-                                        clickable
-                                    />{" "}
+                                    <GroupBadge group={group} clickable />{" "}
                                     <small className="text-muted">
                                         {group.users.length} members
                                     </small>

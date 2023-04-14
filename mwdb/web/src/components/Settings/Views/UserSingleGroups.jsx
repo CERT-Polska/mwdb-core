@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
+import { isEmpty } from "lodash";
+
 import { api } from "@mwdb-web/commons/api";
 import {
     Autocomplete,
@@ -64,8 +66,8 @@ function GroupsList({ groups, removeMember }) {
 
     return (
         <React.Fragment>
-            {groups.map((group, index) => (
-                <tr key={index}>
+            {groups.map((group) => (
+                <tr key={group.name}>
                     <th className="col">
                         <GroupBadge
                             group={group}
@@ -135,7 +137,7 @@ export default function UserSingleGroups() {
         }
     }
 
-    async function updateAllGroups() {
+    async function getAllGroups() {
         try {
             let response = await api.getGroups();
             setAllGroups(response.data.groups);
@@ -144,13 +146,11 @@ export default function UserSingleGroups() {
         }
     }
 
-    const getAllGroups = useCallback(updateAllGroups, [setAlert]);
-
     useEffect(() => {
         getAllGroups();
-    }, [getAllGroups]);
+    }, []);
 
-    if (Object.keys(user).length === 0) return [];
+    if (isEmpty(user)) return <></>;
 
     let groupItems = user.groups
         .filter((group) => group.name !== "public" && group.name !== user.login)

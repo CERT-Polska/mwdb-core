@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { isEmpty } from "lodash";
 import { Link, useParams, useOutletContext } from "react-router-dom";
 import { isEmpty } from "lodash";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -220,6 +221,11 @@ export function AttributesPermissions() {
         setPermissions(attributePermissions);
     }, [attributeKey]);
 
+    useEffect(() => {
+        updateAllGroups();
+        updateAttributePermissions();
+    }, []);
+
     async function addGroup(group) {
         try {
             await api.setAttributePermission(
@@ -274,25 +280,16 @@ export function AttributesPermissions() {
         });
     }
 
-    const updateAllGroups = useCallback(async () => {
+    async function updateAllGroups() {
         try {
             const response = await api.getGroups();
             setAllGroups(response.data.groups);
         } catch (error) {
             setAlert({ error });
         }
-    }, [setAlert]);
+    }
 
-    const getUpdate = useCallback(() => {
-        updateAllGroups();
-        updateAttributePermissions();
-    }, [updateAllGroups, updateAttributePermissions]);
-
-    useEffect(() => {
-        getUpdate();
-    }, [getUpdate]);
-
-    if (Object.keys(attribute).length === 0) return <></>;
+    if (isEmpty(attribute)) return <></>;
 
     return (
         <>

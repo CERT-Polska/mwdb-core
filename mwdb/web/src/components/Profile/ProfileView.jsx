@@ -1,5 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavLink, useParams, Outlet } from "react-router-dom";
+import { isEmpty } from "lodash";
 
 import { faUserCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -49,7 +50,11 @@ export default function ProfileView() {
     const user = useParams().user || auth.user.login;
     const [profile, setProfile] = useState();
 
-    async function updateProfile() {
+    useEffect(() => {
+        getProfile();
+    }, [user]);
+
+    async function getProfile() {
         try {
             const response = await api.getUserProfile(user);
             setProfile(response.data);
@@ -61,13 +66,7 @@ export default function ProfileView() {
         }
     }
 
-    const getProfile = useCallback(updateProfile, [user, redirectToAlert]);
-
-    useEffect(() => {
-        getProfile();
-    }, [getProfile]);
-
-    if (!profile || profile.login !== user) return [];
+    if (isEmpty(profile) || profile.login !== user) return <></>;
 
     return (
         <View ident="profile" fluid>

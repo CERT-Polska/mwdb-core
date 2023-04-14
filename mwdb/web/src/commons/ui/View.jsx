@@ -54,10 +54,7 @@ export function useViewAlert() {
         [navigate]
     );
 
-    return useMemo(
-        () => ({ setAlert, redirectToAlert }),
-        [setAlert, redirectToAlert]
-    );
+    return { setAlert, redirectToAlert };
 }
 
 export default function View({ ident, children, fluid, style, showIf = true }) {

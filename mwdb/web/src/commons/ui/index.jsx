@@ -37,7 +37,7 @@ export function LimitTo({ children, count }) {
     const more =
         children.length > count
             ? [
-                  <small className="text-muted">
+                  <small className="text-muted" key={"more-children"}>
                       {" "}
                       and {children.length - 5} more
                   </small>,

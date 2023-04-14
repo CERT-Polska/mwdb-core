@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api } from "@mwdb-web/commons/api";
@@ -58,6 +58,7 @@ function UserItem(props) {
                         .filter((group) => group.name !== props.login)
                         .map((group) => (
                             <GroupBadge
+                                key={group.name}
                                 group={group}
                                 clickable
                                 basePath="/settings"
@@ -75,21 +76,6 @@ export default function UsersList() {
     const [activePage, setActivePage] = useState(1);
     const [userFilter, setUserFilter] = useState("");
 
-    async function updateUsers() {
-        try {
-            const response = await api.getUsers();
-            setUsers(response.data["users"]);
-        } catch (error) {
-            setAlert({ error });
-        }
-    }
-
-    const getUsers = useCallback(updateUsers, [setAlert]);
-
-    useEffect(() => {
-        getUsers();
-    }, [getUsers]);
-
     const query = userFilter.toLowerCase();
     const items = users
         .filter(
@@ -98,6 +84,19 @@ export default function UsersList() {
                 user.email.toLowerCase().includes(query)
         )
         .sort((userA, userB) => userA.login.localeCompare(userB.login));
+
+    useEffect(() => {
+        getUsers();
+    }, []);
+
+    async function getUsers() {
+        try {
+            const response = await api.getUsers();
+            setUsers(response.data["users"]);
+        } catch (error) {
+            setAlert({ error });
+        }
+    }
 
     return (
         <div className="container">

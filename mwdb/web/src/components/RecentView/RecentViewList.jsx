@@ -45,13 +45,11 @@ export default function RecentViewList(props) {
         elements: [],
         hasMorePages: false,
     });
-    const infiniteScroll = useRef(null);
     const pendingLoad = listState.pageToLoad > listState.loadedPages;
     const hasMore = listState.hasMorePages && !pendingLoad;
 
     // If query changes, reset state
     useEffect(() => {
-        if (infiniteScroll.current) infiniteScroll.current.pageLoaded = 0;
         // If there is no submitted query (after mount): do nothing
         if (props.query === null) return;
         if (!props.query && props.disallowEmpty) {
@@ -106,7 +104,6 @@ export default function RecentViewList(props) {
                 <Header />
             </thead>
             <InfiniteScroll
-                ref={infiniteScroll}
                 loadMore={(page) => {
                     if (!hasMore) return;
                     listDispatch({ type: "loadNextPage" });

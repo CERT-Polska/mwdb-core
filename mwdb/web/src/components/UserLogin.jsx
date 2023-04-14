@@ -35,9 +35,6 @@ export default function UserLogin() {
             const prevLocation = locationState.prevLocation || "/";
             auth.updateSession(response.data);
             navigate(prevLocation);
-            toast(`Successfully logged into account: ${response.data.login}`, {
-                type: "success",
-            });
         } catch (error) {
             toast(getErrorMessage(error), {
                 type: "error",

@@ -11,8 +11,6 @@ export default function UserView() {
     const [user, setUser] = useState({});
     const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
 
-    const getUser = useCallback(updateUser, [login, setAlert]);
-
     useEffect(() => {
         getUser();
     }, [login]);
@@ -20,6 +18,7 @@ export default function UserView() {
     async function getUser() {
         try {
             const response = await api.getUser(login);
+            console.log(response);
             setUser(response.data);
         } catch (error) {
             setAlert({ error });
@@ -35,6 +34,7 @@ export default function UserView() {
                 (item) => item !== capability
             );
             await api.updateGroup(user.login, { capabilities });
+            getUser();
             setCapabilitiesToDelete("");
             setAlert({
                 success: `Capabilities for ${user.login} successfully changed`,
@@ -44,7 +44,7 @@ export default function UserView() {
         }
     }
 
-   if (isEmpty(user)) return <></>;
+    if (isEmpty(user)) return <></>;
 
     function BreadcrumbItems({ elements = [] }) {
         return [

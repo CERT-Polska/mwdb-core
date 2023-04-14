@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { isEmpty } from "lodash";
 import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
-import { isEmpty } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert, ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -19,6 +18,7 @@ export default function GroupView() {
             );
             await api.updateGroup(group.name, { capabilities });
             setCapabilitiesToDelete("");
+            getGroup();
             setAlert({
                 success: `Capabilities for ${group.name} successfully changed`,
             });

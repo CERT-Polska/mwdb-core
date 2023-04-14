@@ -83,7 +83,7 @@ function CapabilitiesTable({ profile }) {
     );
 }
 
-function CapabilitiesSelect({ profile }) {
+function CapabilitiesSelect({ profile, getData }) {
     const { setAlert } = useViewAlert();
 
     const [chosenCapabilities, setChosenCapabilities] = useState([]);
@@ -119,9 +119,10 @@ function CapabilitiesSelect({ profile }) {
     async function changeCapabilities() {
         try {
             await api.updateGroup(group, { capabilities: chosenCapabilities });
+            getData();
             setIsOpen(false);
             setAlert({
-                success: `Group '${group}' capabilities successfully changed`,
+                success: `Capabilities for ${group} successfully changed`,
             });
         } catch (error) {
             setAlert({ error });
@@ -218,7 +219,7 @@ function CapabilitiesSelect({ profile }) {
     );
 }
 
-export default function ProfileCapabilities({ profile }) {
+export default function ProfileCapabilities({ profile, getData }) {
     // Component is reused by Settings
     const outletContext = useOutletContext();
 
@@ -233,7 +234,7 @@ export default function ProfileCapabilities({ profile }) {
                 Here is the list of {profile.groups ? "account" : "group"}{" "}
                 superpowers:
             </p>
-            <CapabilitiesSelect profile={profile} />
+            <CapabilitiesSelect profile={profile} getData={getData} />
             <CapabilitiesTable profile={profile} />
         </div>
     );

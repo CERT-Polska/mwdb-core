@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
+import { isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
 import {
     ConfirmationModal,
@@ -62,13 +63,11 @@ export default function OAuthProvider() {
         }
     }
 
-    const getProvider = useCallback(updateProvider, [name, viewAlert]);
-
     useEffect(() => {
-        getProvider();
-    }, [getProvider]);
+        updateProvider();
+    }, [name]);
 
-    if (!provider) return [];
+    if (isEmpty(provider)) return <></>;
 
     return (
         <div className="container">

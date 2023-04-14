@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { isEmpty } from "lodash";
 
 import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -206,7 +207,7 @@ export default function AccessControl() {
     const [disabledModalButton, setDisabledModalButton] = useState(false);
     const [changeToApply, setChangeToApply] = useState({});
 
-    async function updateGroups() {
+    async function getGroups() {
         try {
             const response = await api.getGroups();
             const groupList = response.data["groups"].sort(
@@ -225,7 +226,7 @@ export default function AccessControl() {
         try {
             setDisabledModalButton(true);
             await api.updateGroup(group, { capabilities });
-            await updateGroups();
+            await getGroups();
             setAlert({
                 success: `Group '${group}' capabilities successfully changed`,
             });
@@ -237,13 +238,11 @@ export default function AccessControl() {
         }
     }
 
-    const getGroups = useCallback(updateGroups, [setAlert]);
-
     useEffect(() => {
         getGroups();
-    }, [getGroups]);
+    }, []);
 
-    if (!groups) return [];
+    if (isEmpty(groups)) return <></>;
 
     return (
         <div className="container">
@@ -263,21 +262,25 @@ export default function AccessControl() {
                 <tbody>
                     {groups
                         .filter((group) => group.capabilities.length > 0)
-                        .map((group) => [
-                            <CapabilitiesHeader group={group} />,
-                            <CapabilitiesList
-                                capabilities={group.capabilities}
-                                onDelete={(capToRemove) => {
-                                    setChangeToApply({
-                                        group: group.name,
-                                        capabilities: group.capabilities.filter(
-                                            (cap) => cap !== capToRemove
-                                        ),
-                                    });
-                                    setChangeModalOpen(true);
-                                }}
-                            />,
-                        ])}
+                        .map((group) => (
+                            <React.Fragment key={group.name}>
+                                <CapabilitiesHeader group={group} />,
+                                <CapabilitiesList
+                                    capabilities={group.capabilities}
+                                    onDelete={(capToRemove) => {
+                                        setChangeToApply({
+                                            group: group.name,
+                                            capabilities:
+                                                group.capabilities.filter(
+                                                    (cap) => cap !== capToRemove
+                                                ),
+                                        });
+                                        setChangeModalOpen(true);
+                                    }}
+                                />
+                                ,
+                            </React.Fragment>
+                        ))}
                 </tbody>
             </table>
             <ConfirmationModal

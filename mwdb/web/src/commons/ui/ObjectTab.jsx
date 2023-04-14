@@ -14,7 +14,14 @@ export function ObjectTab(props) {
     useEffect(() => {
         if (context.tab !== props.tab) return;
         context.setComponent(props.component || (() => []));
-        context.setActions(props.actions || []);
+        context.setActions(
+            props.actions?.map((action, index) => {
+                return {
+                    ...action,
+                    key: index,
+                };
+            }) || []
+        );
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [context.tab]);
 
@@ -26,11 +33,7 @@ export function ObjectTab(props) {
                     context.tab === props.tab ? "active" : ""
                 }`}
             >
-                {props.icon ? (
-                    <FontAwesomeIcon icon={props.icon} size="1x" />
-                ) : (
-                    []
-                )}
+                {props.icon && <FontAwesomeIcon icon={props.icon} size="1x" />}
                 {props.label || capitalize(props.tab)}
             </Link>
         </li>
@@ -45,11 +48,7 @@ export function ObjectAction(props) {
                 className="nav-link"
                 onClick={() => props.action && props.action()}
             >
-                {props.icon ? (
-                    <FontAwesomeIcon icon={props.icon} size="1x" />
-                ) : (
-                    []
-                )}
+                {props.icon && <FontAwesomeIcon icon={props.icon} size="1x" />}
                 {capitalize(props.label)}
             </Link>
         </li>

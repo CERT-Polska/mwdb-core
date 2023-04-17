@@ -101,5 +101,11 @@ services:
     depends_on:
       - redis
       - minio
+      - mwdb-web
     volumes:
       - "./dev/karton.ini:/etc/karton/karton.ini"
+    env_file:
+      - mwdb-vars.env
+    environment:
+      KARTON_MWDB_USERNAME: ${MWDB_ADMIN_LOGIN}
+      KARTON_MWDB_PASSWORD: ${MWDB_ADMIN_PASSWORD}

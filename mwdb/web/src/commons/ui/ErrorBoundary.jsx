@@ -39,12 +39,12 @@ function CriticalError(props) {
                     bug report.
                 </p>
                 <hr />
-                <p style={{ fontWeight: 700 }}>Error: {props.error.message}</p>
+                <p style={{ fontWeight: 700 }}>{props.error.message}</p>
                 <button
                     className="btn btn-danger"
                     onClick={() => setShow(!show)}
                 >
-                    {`${show ? "Hide" : "Show"} error stack`}
+                    {`${show ? "Hide" : "Show"} details`}
                 </button>
                 {show && (
                     <pre style={{ color: "red", marginTop: 20 }}>

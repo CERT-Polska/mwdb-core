@@ -123,19 +123,12 @@ function AttributePermissionsGroupInput({
 }) {
     const [disabledAddGroupHint, setDisabledAddGroupHint] = useState("");
 
-    const isGroupAlreadyAdded = useMemo(() => {
-        return Object.keys(permissions).includes(groupName);
-    }, [groupName, permissions]);
-
     useEffect(() => {
         setDisabledAddGroupHint("");
         if (!groupName) {
             setDisabledAddGroupHint("Select group to add");
         }
-        if (isGroupAlreadyAdded) {
-            setDisabledAddGroupHint("Selected group is already added");
-        }
-    }, [groupName, isGroupAlreadyAdded]);
+    }, [groupName]);
 
     return (
         <div className="card">
@@ -143,10 +136,7 @@ function AttributePermissionsGroupInput({
                 <Autocomplete
                     value={groupName}
                     items={groups.filter(
-                        (item) =>
-                            item.name
-                                .toLowerCase()
-                                .indexOf(groupName.toLowerCase()) !== -1
+                        (item) => !Object.keys(permissions).includes(item.name)
                     )}
                     getItemValue={(item) => item.name}
                     onChange={(value) => setGroupName(value)}
@@ -157,7 +147,7 @@ function AttributePermissionsGroupInput({
                     type="button"
                     className="btn btn-outline-success mt-2 mr-1"
                     onClick={() => groupName && addGroup(groupName)}
-                    disabled={!groupName || isGroupAlreadyAdded}
+                    disabled={!groupName}
                     title={disabledAddGroupHint}
                 >
                     <FontAwesomeIcon icon={faPlus} /> Add group

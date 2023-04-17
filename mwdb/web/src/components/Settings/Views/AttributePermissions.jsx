@@ -121,15 +121,6 @@ function AttributePermissionsGroupInput({
     groupName,
     setGroupName,
 }) {
-    const [disabledAddGroupHint, setDisabledAddGroupHint] = useState("");
-
-    useEffect(() => {
-        setDisabledAddGroupHint("");
-        if (!groupName) {
-            setDisabledAddGroupHint("Select group to add");
-        }
-    }, [groupName]);
-
     return (
         <div className="card">
             <div className="card-body">
@@ -148,7 +139,7 @@ function AttributePermissionsGroupInput({
                     className="btn btn-outline-success mt-2 mr-1"
                     onClick={() => groupName && addGroup(groupName)}
                     disabled={!groupName}
-                    title={disabledAddGroupHint}
+                    title={!groupName ? "Select group to add" : ""}
                 >
                     <FontAwesomeIcon icon={faPlus} /> Add group
                 </button>

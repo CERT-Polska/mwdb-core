@@ -4,17 +4,18 @@ import { Link } from "react-router-dom";
 import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { find, isNil, isEmpty } from "lodash";
-
 import { api } from "@mwdb-web/commons/api";
-import { capabilitiesList } from "@mwdb-web/commons/auth";
+import { capabilitiesList, Capability } from "@mwdb-web/commons/auth";
 import {
     GroupBadge,
     BootstrapSelect,
     ConfirmationModal,
     useViewAlert,
 } from "@mwdb-web/commons/ui";
+import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 
 function CapabilitiesTable({ profile }) {
+    const { userHasCapabilities } = useCheckCapabilities();
     const { setCapabilitiesToDelete } = useOutletContext();
 
     function isUserDeleteButtonRender(cap) {
@@ -35,19 +36,21 @@ function CapabilitiesTable({ profile }) {
             <tbody>
                 {profile.capabilities.sort().map((cap) => (
                     <tr key={cap}>
-                        <td className="col-auto">
-                            {isDeleteButtonRender(cap) && (
-                                <Link
-                                    to={"#"}
-                                    onClick={(ev) => {
-                                        ev.preventDefault();
-                                        setCapabilitiesToDelete(cap);
-                                    }}
-                                >
-                                    <FontAwesomeIcon icon={faTimes} />
-                                </Link>
-                            )}
-                        </td>
+                        {userHasCapabilities(Capability.manageUsers) && (
+                            <td className="col-auto">
+                                {isDeleteButtonRender(cap) && (
+                                    <Link
+                                        to={"#"}
+                                        onClick={(ev) => {
+                                            ev.preventDefault();
+                                            setCapabilitiesToDelete(cap);
+                                        }}
+                                    >
+                                        <FontAwesomeIcon icon={faTimes} />
+                                    </Link>
+                                )}
+                            </td>
+                        )}
                         <td>
                             <span className="badge badge-success">{cap}</span>
                         </td>
@@ -154,37 +157,58 @@ function CapabilitiesSelect({ profile, getData }) {
 
     return (
         <div className="mb-3">
-            <BootstrapSelect
-                data-multiple-separator={""}
-                data-live-search="true"
-                noneSelectedText={"No capabilities selected"}
-                className={"form-control"}
-                multiple
-                onChange={selectHandler}
-            >
-                {capabilities.map((cap) => {
-                    const selectedCaps = chosenCapabilities || [];
-                    const selected = selectedCaps.includes(cap);
-                    const changed =
-                        chosenCapabilities.includes(cap) !==
-                        correctCapabilities.includes(cap);
+            <div className="row">
+                <BootstrapSelect
+                    data-multiple-separator={""}
+                    data-live-search="true"
+                    noneSelectedText={"No capabilities selected"}
+                    className={"col-lg-9"}
+                    multiple
+                    onChange={selectHandler}
+                >
+                    {capabilities.map((cap) => {
+                        const selectedCaps = chosenCapabilities || [];
+                        const selected = selectedCaps.includes(cap);
+                        const changed =
+                            chosenCapabilities.includes(cap) !==
+                            correctCapabilities.includes(cap);
 
-                    return (
-                        <option
-                            key={cap}
-                            data-content={`
+                        return (
+                            <option
+                                key={cap}
+                                data-content={`
                             ${changed ? "*" : ""}
                                 <span class='badge badge-success'>${cap}</span>
                                 <small class="text-muted">${cap}</small>
                             `}
-                            value={cap}
-                            selected={selected}
-                        >
-                            {cap}
-                        </option>
-                    );
-                })}
-            </BootstrapSelect>
+                                value={cap}
+                                selected={selected}
+                            >
+                                {cap}
+                            </option>
+                        );
+                    })}
+                </BootstrapSelect>
+                <div
+                    className="col-lg-3 justify-content-between"
+                    style={{ display: "flex" }}
+                >
+                    <button
+                        className="btn btn-outline-success"
+                        disabled={changedCaps.length === 0}
+                        onClick={() => setIsOpen(true)}
+                    >
+                        <FontAwesomeIcon icon={faSave} /> Apply
+                    </button>
+                    <button
+                        className="btn btn-outline-danger"
+                        disabled={changedCaps.length === 0}
+                        onClick={() => dismissChanges()}
+                    >
+                        <FontAwesomeIcon icon={faTimes} /> Dismiss
+                    </button>
+                </div>
+            </div>
             {changedCaps.length > 0 && (
                 <div>
                     <small>
@@ -193,20 +217,6 @@ function CapabilitiesSelect({ profile, getData }) {
                     </small>
                 </div>
             )}
-            <button
-                className="btn btn-outline-success mr-1"
-                disabled={changedCaps.length === 0}
-                onClick={() => setIsOpen(true)}
-            >
-                <FontAwesomeIcon icon={faSave} /> Apply
-            </button>
-            <button
-                className="btn btn-outline-danger"
-                disabled={changedCaps.length === 0}
-                onClick={() => dismissChanges()}
-            >
-                <FontAwesomeIcon icon={faTimes} /> Dismiss
-            </button>
             <ConfirmationModal
                 buttonStyle="badge-success"
                 confirmText="Yes"
@@ -222,6 +232,7 @@ function CapabilitiesSelect({ profile, getData }) {
 export default function ProfileCapabilities({ profile, getData }) {
     // Component is reused by Settings
     const outletContext = useOutletContext();
+    const { userHasCapabilities } = useCheckCapabilities();
 
     if (profile === undefined) {
         profile = outletContext.profile;
@@ -234,7 +245,9 @@ export default function ProfileCapabilities({ profile, getData }) {
                 Here is the list of {profile.groups ? "account" : "group"}{" "}
                 superpowers:
             </p>
-            <CapabilitiesSelect profile={profile} getData={getData} />
+            {userHasCapabilities(Capability.manageUsers) && (
+                <CapabilitiesSelect profile={profile} getData={getData} />
+            )}
             <CapabilitiesTable profile={profile} />
         </div>
     );

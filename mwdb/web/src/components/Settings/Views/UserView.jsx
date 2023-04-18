@@ -18,7 +18,6 @@ export default function UserView() {
     async function getUser() {
         try {
             const response = await api.getUser(login);
-            console.log(response);
             setUser(response.data);
         } catch (error) {
             setAlert({ error });

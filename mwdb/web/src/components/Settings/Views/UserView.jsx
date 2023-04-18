@@ -3,13 +3,14 @@ import { useParams, Outlet, Link, Route, Routes } from "react-router-dom";
 import { isEmpty, find } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
-import { useViewAlert, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/ui";
+import DeleteCapabilityModal from "./DeleteCapabilityModal";
 
 export default function UserView() {
+    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
     const { setAlert } = useViewAlert();
     const { login } = useParams();
     const [user, setUser] = useState({});
-    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
 
     useEffect(() => {
         getUser();
@@ -24,7 +25,7 @@ export default function UserView() {
         }
     }
 
-    async function changeCapabilities(capability) {
+    async function changeCapabilities(capability, callback) {
         try {
             const foundUserCapabilities = find(user.groups, {
                 name: user.login,
@@ -34,10 +35,7 @@ export default function UserView() {
             );
             await api.updateGroup(user.login, { capabilities });
             getUser();
-            setCapabilitiesToDelete("");
-            setAlert({
-                success: `Capabilities for ${user.login} successfully changed`,
-            });
+            callback();
         } catch (error) {
             setAlert({ error });
         }
@@ -103,16 +101,11 @@ export default function UserView() {
                     </Routes>
                 </ol>
             </nav>
-            <ConfirmationModal
-                buttonStyle="badge-success"
-                confirmText="Yes"
-                message={`Are you sure you want to delete '${capabilitiesToDelete}' capabilities?`}
-                isOpen={!isEmpty(capabilitiesToDelete)}
-                onRequestClose={() => setCapabilitiesToDelete("")}
-                onConfirm={(ev) => {
-                    ev.preventDefault();
-                    changeCapabilities(capabilitiesToDelete);
-                }}
+            <DeleteCapabilityModal
+                changeCapabilities={changeCapabilities}
+                capabilitiesToDelete={capabilitiesToDelete}
+                setCapabilitiesToDelete={setCapabilitiesToDelete}
+                successMessage={`Capabilities for ${user.login} successfully changed`}
             />
             <Outlet context={{ user, getUser, setCapabilitiesToDelete }} />
         </div>

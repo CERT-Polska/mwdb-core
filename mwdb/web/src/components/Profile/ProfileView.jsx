@@ -8,7 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { View, useViewAlert, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { View, useViewAlert } from "@mwdb-web/commons/ui";
+import DeleteCapabilityModal from "../Settings/Views/DeleteCapabilityModal";
 
 function ProfileNav() {
     const config = useContext(ConfigContext);
@@ -55,17 +56,14 @@ export default function ProfileView() {
         getProfile();
     }, [user]);
 
-    async function changeCapabilities(capability) {
+    async function changeCapabilities(capability, callback) {
         try {
             const capabilities = profile.capabilities.filter(
                 (item) => item !== capability
             );
             await api.updateGroup(profile.login, { capabilities });
             getProfile();
-            setCapabilitiesToDelete("");
-            setAlert({
-                success: `Capabilities for ${user.login} successfully changed`,
-            });
+            callback();
         } catch (error) {
             setAlert({ error });
         }
@@ -101,16 +99,11 @@ export default function ProfileView() {
                     />
                 </div>
             </div>
-            <ConfirmationModal
-                buttonStyle="badge-success"
-                confirmText="Yes"
-                message={`Are you sure you want to delete '${capabilitiesToDelete}' capabilities?`}
-                isOpen={!isEmpty(capabilitiesToDelete)}
-                onRequestClose={() => setCapabilitiesToDelete("")}
-                onConfirm={(ev) => {
-                    ev.preventDefault();
-                    changeCapabilities(capabilitiesToDelete);
-                }}
+            <DeleteCapabilityModal
+                changeCapabilities={changeCapabilities}
+                capabilitiesToDelete={capabilitiesToDelete}
+                setCapabilitiesToDelete={setCapabilitiesToDelete}
+                successMessage={`Capabilities for ${user} successfully changed`}
             />
         </View>
     );

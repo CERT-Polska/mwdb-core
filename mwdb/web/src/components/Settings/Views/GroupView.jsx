@@ -3,7 +3,8 @@ import { isEmpty } from "lodash";
 import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
 
 import { api } from "@mwdb-web/commons/api";
-import { useViewAlert, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/ui";
+import DeleteCapabilityModal from "./DeleteCapabilityModal";
 
 export default function GroupView() {
     const { setAlert } = useViewAlert();
@@ -11,17 +12,14 @@ export default function GroupView() {
     const [group, setGroup] = useState({});
     const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
 
-    async function changeCapabilities(capability) {
+    async function changeCapabilities(capability, callback) {
         try {
             const capabilities = group.capabilities.filter(
                 (item) => item !== capability
             );
             await api.updateGroup(group.name, { capabilities });
-            setCapabilitiesToDelete("");
             getGroup();
-            setAlert({
-                success: `Capabilities for ${group.name} successfully changed`,
-            });
+            callback();
         } catch (error) {
             setAlert({ error });
         }
@@ -86,16 +84,11 @@ export default function GroupView() {
                     </Routes>
                 </ol>
             </nav>
-            <ConfirmationModal
-                buttonStyle="badge-success"
-                confirmText="Yes"
-                message={`Are you sure you want to delete '${capabilitiesToDelete}' capabilities?`}
-                isOpen={!isEmpty(capabilitiesToDelete)}
-                onRequestClose={() => setCapabilitiesToDelete("")}
-                onConfirm={(ev) => {
-                    ev.preventDefault();
-                    changeCapabilities(capabilitiesToDelete);
-                }}
+            <DeleteCapabilityModal
+                changeCapabilities={changeCapabilities}
+                capabilitiesToDelete={capabilitiesToDelete}
+                setCapabilitiesToDelete={setCapabilitiesToDelete}
+                successMessage={`Capabilities for ${group.name} successfully changed`}
             />
             <Outlet context={{ group, getGroup, setCapabilitiesToDelete }} />
         </div>

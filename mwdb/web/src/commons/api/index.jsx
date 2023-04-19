@@ -444,6 +444,10 @@ function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
 }
 
+function uploadConfig(body) {
+    return axios.post("/config", body);
+}
+
 function getRemoteNames() {
     return axios.get("/remote");
 }
@@ -627,6 +631,7 @@ export const api = {
     requestFileDownloadLink,
     requestZipFileDownloadLink,
     uploadFile,
+    uploadConfig,
     getRemoteNames,
     pushObjectRemote,
     pullObjectRemote,

@@ -63,21 +63,56 @@ function RemoteDropdown() {
     );
 }
 
-function UploadButton() {
+function UploadDropdown() {
+    const uploadElement = [
+        {
+            capability: Capability.addingFiles,
+            type: "File",
+            link: "/file_upload",
+        },
+        {
+            capability: Capability.addingBlobs,
+            type: "Blob",
+            link: "/blob_upload",
+        },
+        {
+            capability: Capability.addingConfigs,
+            type: "Config",
+            link: "/config_upload",
+        },
+    ];
+    return (
+        <NavDropdown
+            icon={faUpload}
+            title="Upload"
+            elements={uploadElement.map((ele) => {
+                return (
+                    <UploadButton
+                        key={ele.type}
+                        capability={ele.capability}
+                        type={ele.type}
+                        link={ele.link}
+                    />
+                );
+            })}
+        />
+    );
+}
+
+function UploadButton({ capability, type, link }) {
     const auth = useContext(AuthContext);
-    const buttonLink = auth.hasCapability(Capability.addingFiles) ? (
-        <Link className="nav-link" to={"/upload"}>
-            <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
-            Upload
+    const buttonLink = auth.hasCapability(capability) ? (
+        <Link className="dropdown-item" to={link}>
+            {type}
         </Link>
     ) : (
-        <div className="nav-link text-muted">
+        <div className="dropdown-item text-muted">
             <span
                 data-toggle="tooltip"
-                title="File upload is disabled for your account"
+                title={`${type} upload is disabled for your account`}
+                style={{ cursor: "not-allowed" }}
             >
-                <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
-                Upload
+                {type}
             </span>
         </div>
     );
@@ -123,7 +158,7 @@ export default function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <UploadButton />
+                        <UploadDropdown />
                     </li>
                 </Extendable>
             ) : (

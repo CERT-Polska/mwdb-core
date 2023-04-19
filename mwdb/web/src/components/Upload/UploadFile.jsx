@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
-import AttributesAddModal from "./AttributesAddModal";
+import AttributesAddModal from "../AttributesAddModal";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -61,7 +61,7 @@ function UploadDropzone(props) {
     );
 }
 
-export default function Upload() {
+export default function UploadFile() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
     const fileUploadTimeout = config.config["file_upload_timeout"];
@@ -108,6 +108,8 @@ export default function Upload() {
         else if (shareWith === "single")
             return `The sample will be accessible only for you and chosen group.`;
     };
+
+    console.log(parent);
 
     const handleSubmit = async () => {
         try {
@@ -169,8 +171,8 @@ export default function Upload() {
     }
 
     return (
-        <View ident="upload" showIf={groups !== null}>
-            <Extendable ident="uploadForm">
+        <View ident="fileUpload" showIf={groups !== null}>
+            <Extendable ident="fileUploadForm">
                 <form>
                     <UploadDropzone
                         file={file}

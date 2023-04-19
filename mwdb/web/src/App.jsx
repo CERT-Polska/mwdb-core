@@ -17,7 +17,7 @@ import ShowSample from "./components/ShowSample";
 import ShowConfig from "./components/ShowConfig";
 import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
-import Upload from "./components/Upload";
+import UploadFile from "./components/Upload/UploadFile";
 import UserLogin from "./components/UserLogin";
 import UserRegister from "./components/UserRegister";
 import UserSetPassword from "./components/UserSetPassword";
@@ -71,6 +71,7 @@ import { Capability } from "./commons/auth";
 import { ConfigContext } from "./commons/config";
 import { fromPlugins, Extendable } from "./commons/plugins";
 import { ErrorBoundary, RequiresAuth, RequiresCapability } from "./commons/ui";
+import UploadConfig from "./components/Upload/UploadConfig";
 
 function NavigateFor404() {
     /**
@@ -109,10 +110,28 @@ function AppRoutes() {
                 <Route path="blobs" element={<RecentBlobs />} />
                 <Route path="search" element={<Search />} />
                 <Route
-                    path="upload"
+                    path="file_upload"
                     element={
                         <RequiresCapability capability={Capability.addingFiles}>
-                            <Upload />
+                            <UploadFile />
+                        </RequiresCapability>
+                    }
+                />
+                <Route
+                    path="blob_upload"
+                    element={
+                        <RequiresCapability capability={Capability.addingBlobs}>
+                            <UploadFile />
+                        </RequiresCapability>
+                    }
+                />
+                <Route
+                    path="config_upload"
+                    element={
+                        <RequiresCapability
+                            capability={Capability.addingConfigs}
+                        >
+                            <UploadConfig />
                         </RequiresCapability>
                     }
                 />

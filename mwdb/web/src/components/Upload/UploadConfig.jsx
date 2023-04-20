@@ -186,55 +186,48 @@ export default function UploadConfig() {
                                 </div>
                             </div>
                         )}
-                        {attributes.length > 0 && (
-                            <div>
-                                <h5>Attributes</h5>
-                                <DataTable>
-                                    {attributes.map((attr, idx) => (
-                                        <tr key={idx} className="centered">
-                                            <th>{attr.key}</th>
-                                            <td>
-                                                {typeof attr.value ===
-                                                "string" ? (
-                                                    attr.value
-                                                ) : (
-                                                    <pre className="attribute-object">
-                                                        {"(object)"}{" "}
-                                                        {JSON.stringify(
-                                                            attr.value,
-                                                            null,
-                                                            4
-                                                        )}
-                                                    </pre>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <input
-                                                    value="Dismiss"
-                                                    className="btn btn-danger"
-                                                    type="button"
-                                                    onClick={() =>
-                                                        onAttributeRemove(idx)
-                                                    }
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </DataTable>
-                            </div>
-                        )}
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                            }}
-                        >
+                        <div className="d-flex align-items-center">
+                            <h5 className="mb-0 mr-3">Attributes</h5>
                             <input
                                 value="Add attribute"
                                 className="btn btn-info"
                                 type="button"
                                 onClick={() => setAttributeModalOpen(true)}
                             />
+                        </div>
+
+                        <DataTable>
+                            {attributes.map((attr, idx) => (
+                                <tr key={idx} className="centered">
+                                    <th>{attr.key}</th>
+                                    <td>
+                                        {typeof attr.value === "string" ? (
+                                            attr.value
+                                        ) : (
+                                            <pre className="attribute-object">
+                                                {"(object)"}{" "}
+                                                {JSON.stringify(
+                                                    attr.value,
+                                                    null,
+                                                    4
+                                                )}
+                                            </pre>
+                                        )}
+                                    </td>
+                                    <td>
+                                        <input
+                                            value="Dismiss"
+                                            className="btn btn-danger"
+                                            type="button"
+                                            onClick={() =>
+                                                onAttributeRemove(idx)
+                                            }
+                                        />
+                                    </td>
+                                </tr>
+                            ))}
+                        </DataTable>
+                        <div className="d-flex justify-content-end">
                             <input
                                 value="Upload config"
                                 className="btn btn-success"

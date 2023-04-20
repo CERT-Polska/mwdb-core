@@ -234,7 +234,7 @@ export default function UploadFile() {
                                 {getSharingModeHint()}
                             </div>
                         </div>
-                        {shareWith === "single" ? (
+                        {shareWith === "single" && (
                             <div className="mb-3">
                                 <Autocomplete
                                     value={group}
@@ -259,60 +259,49 @@ export default function UploadFile() {
                                     </div>
                                 </Autocomplete>
                             </div>
-                        ) : (
-                            []
                         )}
-                        {attributes.length > 0 ? (
-                            <div>
-                                <h5>Attributes</h5>
-                                <DataTable>
-                                    {attributes.map((attr, idx) => (
-                                        <tr key={idx} className="centered">
-                                            <th>{attr.key}</th>
-                                            <td>
-                                                {typeof attr.value ===
-                                                "string" ? (
-                                                    attr.value
-                                                ) : (
-                                                    <pre className="attribute-object">
-                                                        {"(object)"}{" "}
-                                                        {JSON.stringify(
-                                                            attr.value,
-                                                            null,
-                                                            4
-                                                        )}
-                                                    </pre>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <input
-                                                    value="Dismiss"
-                                                    className="btn btn-danger"
-                                                    type="button"
-                                                    onClick={() =>
-                                                        onAttributeRemove(idx)
-                                                    }
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </DataTable>
-                            </div>
-                        ) : (
-                            []
-                        )}
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                            }}
-                        >
+                        <div className="d-flex align-items-center">
+                            <h5 className="mr-3 mb-0">Attributes</h5>
                             <input
                                 value="Add attribute"
                                 className="btn btn-info"
                                 type="button"
                                 onClick={() => setAttributeModalOpen(true)}
                             />
+                        </div>
+                        <DataTable>
+                            {attributes.map((attr, idx) => (
+                                <tr key={idx} className="centered">
+                                    <th>{attr.key}</th>
+                                    <td>
+                                        {typeof attr.value === "string" ? (
+                                            attr.value
+                                        ) : (
+                                            <pre className="attribute-object">
+                                                {"(object)"}{" "}
+                                                {JSON.stringify(
+                                                    attr.value,
+                                                    null,
+                                                    4
+                                                )}
+                                            </pre>
+                                        )}
+                                    </td>
+                                    <td>
+                                        <input
+                                            value="Dismiss"
+                                            className="btn btn-danger"
+                                            type="button"
+                                            onClick={() =>
+                                                onAttributeRemove(idx)
+                                            }
+                                        />
+                                    </td>
+                                </tr>
+                            ))}
+                        </DataTable>
+
+                        <div className="d-flex justify-content-end">
                             <input
                                 value="Upload file"
                                 className="btn btn-success"

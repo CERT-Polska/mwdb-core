@@ -77,8 +77,9 @@ export default function ProfileGroup() {
                                 .sort((userA, userB) =>
                                     userA.localeCompare(userB)
                                 )
-                                .map((login) => (
+                                .map((login, index) => (
                                     <GroupBadge
+                                        key={index}
                                         group={{
                                             name: login,
                                             private: true,
@@ -96,8 +97,9 @@ export default function ProfileGroup() {
                                 .sort((userA, userB) =>
                                     userA.localeCompare(userB)
                                 )
-                                .map((login) => (
+                                .map((login, index) => (
                                     <GroupBadge
+                                        key={index}
                                         group={{
                                             name: login,
                                             private: true,

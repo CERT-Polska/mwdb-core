@@ -10,7 +10,7 @@ function CapabilitiesTable({ profile }) {
         <table className="table table-bordered wrap-table">
             <tbody>
                 {profile.capabilities.sort().map((cap) => (
-                    <tr>
+                    <tr key={cap}>
                         <th>
                             <span className="badge badge-success">{cap}</span>
                         </th>
@@ -28,8 +28,9 @@ function CapabilitiesTable({ profile }) {
                                             .filter((group) =>
                                                 group.capabilities.includes(cap)
                                             )
-                                            .map((group) => (
+                                            .map((group, index) => (
                                                 <GroupBadge
+                                                    key={index}
                                                     group={group}
                                                     clickable
                                                 />

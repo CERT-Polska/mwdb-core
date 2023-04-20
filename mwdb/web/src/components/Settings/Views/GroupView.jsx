@@ -39,6 +39,7 @@ export default function GroupView() {
             </li>,
             ...elements.map((element, index) => (
                 <li
+                    key={index}
                     className={`breadcrumb-item ${
                         index === elements.length - 1 ? "active" : ""
                     }`}

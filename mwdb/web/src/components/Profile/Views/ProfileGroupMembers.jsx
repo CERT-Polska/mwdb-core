@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Navigate, useParams, useOutletContext } from "react-router-dom";
-import { isEmpty } from "lodash";
+import { isEmpty, isNil } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -110,6 +110,8 @@ export default function ProfileGroupMembers() {
 
     // Merge it with workspace info
     const workspace = workspaces.find((group) => group.name === groupName);
+
+    if (isNil(workspace)) return <></>;
 
     if (
         !(

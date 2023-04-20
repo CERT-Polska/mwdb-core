@@ -8,7 +8,12 @@ import AttributesAddModal from "../AttributesAddModal";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { DataTable, View, getErrorMessage } from "@mwdb-web/commons/ui";
+import {
+    DataTable,
+    View,
+    getErrorMessage,
+    FormError,
+} from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { useJsonParseError } from "@mwdb-web/commons/hooks";
 
@@ -20,6 +25,7 @@ export default function UploadConfig() {
 
     const [parent, setParent] = useState("");
     const [family, setFamily] = useState("");
+    const [configType, setConfigType] = useState("static");
     const [attributes, setAttributes] = useState([]);
     const [attributeModalOpen, setAttributeModalOpen] = useState(false);
     const { errorMessage: cfgErrorMessage } = useJsonParseError(cfg);
@@ -30,7 +36,7 @@ export default function UploadConfig() {
     };
 
     const handleParentClear = () => {
-        if (searchParams.get("parent")) navigate("/upload");
+        if (searchParams.get("parent")) navigate("/config_upload");
         setParent("");
     };
 
@@ -40,14 +46,14 @@ export default function UploadConfig() {
                 cfg: JSON.parse(cfg),
                 family,
                 parent: !isEmpty(parent) ? parent : undefined,
+                config_type: configType,
                 attributes,
             };
-            console.log(body);
             let response = await api.uploadConfig(body);
             navigate("/config/" + response.data.id, {
                 replace: true,
             });
-            toast("File uploaded successfully.", {
+            toast("Config uploaded successfully.", {
                 type: "success",
             });
         } catch (error) {
@@ -80,25 +86,60 @@ export default function UploadConfig() {
             <Extendable ident="configUploadForm">
                 <form>
                     <div className="form-group">
-                        <AceEditor
-                            mode="json"
-                            theme="github"
-                            wrapEnabled
-                            onChange={(input) => setCfg(input)}
-                            value={cfg}
-                            width="500px"
-                            height="150px"
-                            setOptions={{
-                                useWorker: false,
-                            }}
-                        />
+                        <div className="input-group mb-3">
+                            <div className="input-group-prepend">
+                                <label
+                                    htmlFor="config"
+                                    className="input-group-text"
+                                >
+                                    Config
+                                </label>
+                                <AceEditor
+                                    id="config"
+                                    mode="json"
+                                    theme="github"
+                                    wrapEnabled
+                                    onChange={(input) => setCfg(input)}
+                                    value={cfg}
+                                    height="260px"
+                                    setOptions={{
+                                        useWorker: false,
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <FormError errorField={{ message: cfgErrorMessage }} />
+                        <div className="input-group mb-3">
+                            <div className="input-group-prepend">
+                                <label
+                                    htmlFor="config_type"
+                                    className="input-group-text"
+                                >
+                                    Config type
+                                </label>
+                            </div>
+                            <select
+                                id="config_type"
+                                className="custom-select"
+                                value={configType}
+                                onChange={(e) => setConfigType(e.target.value)}
+                            >
+                                <option value="static">Static</option>
+                                <option value="dynamic">Dynamic</option>
+                            </select>
+                        </div>
                         <div className="input-group mb-3 mt-3">
                             <div className="input-group-prepend">
-                                <label className="input-group-text">
+                                <label
+                                    htmlFor="family"
+                                    className="input-group-text"
+                                >
                                     Family
                                 </label>
                             </div>
                             <input
+                                id="family"
                                 className="form-control"
                                 type="text"
                                 style={{ fontSize: "medium" }}
@@ -118,11 +159,15 @@ export default function UploadConfig() {
                         {auth.hasCapability(Capability.addingParents) && (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
-                                    <label className="input-group-text">
+                                    <label
+                                        htmlFor="parent"
+                                        className="input-group-text"
+                                    >
                                         Parent
                                     </label>
                                 </div>
                                 <input
+                                    id="parent"
                                     className="form-control"
                                     type="text"
                                     style={{ fontSize: "medium" }}
@@ -178,19 +223,27 @@ export default function UploadConfig() {
                                 </DataTable>
                             </div>
                         )}
-                        <div id="test">{cfgErrorMessage}</div>
-                        <input
-                            value="Upload Config"
-                            className="btn btn-success"
-                            type="button"
-                            onClick={handleSubmit}
-                        />
-                        <input
-                            value="Add attribute"
-                            className="btn btn-success"
-                            type="button"
-                            onClick={() => setAttributeModalOpen(true)}
-                        />
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <input
+                                value="Add attribute"
+                                className="btn btn-info"
+                                type="button"
+                                onClick={() => setAttributeModalOpen(true)}
+                            />
+                            <input
+                                value="Upload config"
+                                className="btn btn-success"
+                                type="button"
+                                //TODO: uncommnent before review
+                                // disabled={cfgErrorMessage || cfg === "{}"}
+                                onClick={handleSubmit}
+                            />
+                        </div>
                     </div>
                 </form>
             </Extendable>

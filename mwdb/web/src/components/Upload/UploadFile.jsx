@@ -82,7 +82,7 @@ export default function UploadFile() {
     };
 
     const handleParentClear = () => {
-        if (searchParams.get("parent")) navigate("/upload");
+        if (searchParams.get("parent")) navigate("/file_upload");
         setParent("");
     };
 
@@ -108,8 +108,6 @@ export default function UploadFile() {
         else if (shareWith === "single")
             return `The sample will be accessible only for you and chosen group.`;
     };
-
-    console.log(parent);
 
     const handleSubmit = async () => {
         try {
@@ -303,19 +301,26 @@ export default function UploadFile() {
                         ) : (
                             []
                         )}
-                        <input
-                            value="Upload File"
-                            className="btn btn-success"
-                            type="button"
-                            onClick={handleSubmit}
-                            disabled={!file}
-                        />
-                        <input
-                            value="Add attribute"
-                            className="btn btn-success"
-                            type="button"
-                            onClick={() => setAttributeModalOpen(true)}
-                        />
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <input
+                                value="Add attribute"
+                                className="btn btn-info"
+                                type="button"
+                                onClick={() => setAttributeModalOpen(true)}
+                            />
+                            <input
+                                value="Upload file"
+                                className="btn btn-success"
+                                type="button"
+                                disabled={!file}
+                                onClick={handleSubmit}
+                            />
+                        </div>
                     </div>
                 </form>
             </Extendable>

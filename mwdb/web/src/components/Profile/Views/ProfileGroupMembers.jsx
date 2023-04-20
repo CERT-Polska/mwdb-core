@@ -78,7 +78,7 @@ export default function ProfileGroupMembers() {
     const { redirectToAlert } = useViewAlert();
     const { profile } = useOutletContext();
     const { group: groupName } = useParams();
-    const [workspaces, setWorkspaces] = useState();
+    const [workspaces, setWorkspaces] = useState([]);
 
     const group = profile.groups.find((group) => group.name === groupName);
 
@@ -97,8 +97,6 @@ export default function ProfileGroupMembers() {
             });
         }
     }
-
-    if (isEmpty(workspaces)) return <></>;
 
     if (isEmpty(group)) {
         redirectToAlert({

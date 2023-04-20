@@ -75,7 +75,7 @@ export default function ProfileGroups() {
             </div>
             <table className="table table-bordered wrap-table">
                 <tbody>
-                    {workspaces && workspaces
+                    {workspaces
                         .filter((group) => !group.private)
                         .map((group) => (
                             <tr key={group.name}>

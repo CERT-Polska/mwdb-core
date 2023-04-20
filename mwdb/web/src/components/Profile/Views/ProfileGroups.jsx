@@ -8,7 +8,7 @@ import { GroupBadge, useViewAlert } from "@mwdb-web/commons/ui";
 export default function ProfileGroups() {
     const { redirectToAlert } = useViewAlert();
     const { profile } = useOutletContext();
-    const [workspaces, setWorkspaces] = useState();
+    const [workspaces, setWorkspaces] = useState([]);
 
     useEffect(() => {
         getWorkspaces();
@@ -25,8 +25,6 @@ export default function ProfileGroups() {
             });
         }
     }
-
-    if (isEmpty(workspaces)) return <></>;
 
     return (
         <div className="container">

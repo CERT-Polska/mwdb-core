@@ -152,11 +152,11 @@ export default function UserSingleGroups() {
 
     if (isEmpty(user)) return <></>;
 
-    let groupItems = user.groups
+    const groupItems = user.groups
         .filter((group) => group.name !== "public" && group.name !== user.login)
         .sort((groupA, groupB) => groupA.name.localeCompare(groupB.name));
 
-    let allGroupItems = allGroups.filter(
+    const allGroupItems = allGroups.filter(
         (group) =>
             !user.groups.map((g) => g.name).includes(group.name) &&
             !group.private &&

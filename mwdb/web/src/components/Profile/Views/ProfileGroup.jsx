@@ -25,7 +25,7 @@ export default function ProfileGroup() {
     const { profile } = useOutletContext();
     const { redirectToAlert } = useViewAlert();
     const { group: groupName } = useParams();
-    const [workspaces, setWorkspaces] = useState();
+    const [workspaces, setWorkspaces] = useState([]);
 
     const group = profile.groups.find((group) => group.name === groupName);
 
@@ -44,8 +44,6 @@ export default function ProfileGroup() {
             });
         }
     }
-
-    if (isEmpty(workspaces)) return <></>;
 
     if (isEmpty(group)) {
         redirectToAlert({

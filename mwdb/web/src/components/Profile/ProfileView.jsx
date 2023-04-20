@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { NavLink, useParams, Outlet } from "react-router-dom";
-import { isEmpty } from "lodash";
 
 import { faUserCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -49,7 +48,7 @@ export default function ProfileView() {
     const auth = useContext(AuthContext);
     const { redirectToAlert, setAlert } = useViewAlert();
     const user = useParams().user || auth.user.login;
-    const [profile, setProfile] = useState();
+    const [profile, setProfile] = useState({});
     const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
 
     useEffect(() => {
@@ -81,7 +80,7 @@ export default function ProfileView() {
         }
     }
 
-    if (isEmpty(profile) || profile.login !== user) return <></>;
+    if (profile.login !== user) return <></>;
 
     return (
         <View ident="profile" fluid>

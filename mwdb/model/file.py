@@ -87,6 +87,7 @@ class File(Object):
         share_with=None,
         analysis_id=None,
         tags=None,
+        share_3rd_party=None,
     ):
         file_stream.seek(0, os.SEEK_END)
         file_size = file_stream.tell()
@@ -105,6 +106,7 @@ class File(Object):
             sha256=sha256,
             sha512=calc_hash(file_stream, hashlib.sha512(), lambda h: h.hexdigest()),
             ssdeep=calc_ssdeep(file_stream),
+            share_3rd_party=share_3rd_party,
         )
 
         file_obj, is_new = cls._get_or_create(
@@ -114,6 +116,7 @@ class File(Object):
             share_with=share_with,
             analysis_id=analysis_id,
             tags=tags,
+            share_3rd_party=share_3rd_party,
         )
 
         # Check if add new alternative file name

@@ -42,6 +42,7 @@ class ObjectCreateRequestSchemaBase(Schema):
     karton_id = fields.UUID(missing=None)
     karton_arguments = fields.Dict(missing={}, keys=fields.Str(), values=fields.Str())
     tags = fields.Nested(TagRequestSchema, many=True, missing=[])
+    share_3rd_party = fields.Boolean(missing=True)
 
 
 class ObjectLegacyMetakeysMixin(Schema):

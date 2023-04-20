@@ -35,6 +35,7 @@ class TextBlob(Object):
         share_with=None,
         analysis_id=None,
         tags=None,
+        share_3rd_party=None,
     ):
         dhash = hashlib.sha256(content.encode("utf-8")).hexdigest()
 
@@ -45,6 +46,7 @@ class TextBlob(Object):
             blob_type=blob_type,
             last_seen=datetime.datetime.utcnow(),
             _content=content.encode("unicode_escape").decode("utf-8"),
+            share_3rd_party=share_3rd_party,
         )
         blob_obj, is_new = cls._get_or_create(
             blob_obj,
@@ -53,6 +55,7 @@ class TextBlob(Object):
             share_with=share_with,
             analysis_id=analysis_id,
             tags=tags,
+            share_3rd_party=share_3rd_party,
         )
         # If object exists yet: we need to refresh last_seen timestamp
         if not is_new:

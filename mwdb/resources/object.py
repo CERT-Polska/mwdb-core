@@ -54,7 +54,9 @@ class ObjectUploader:
     def on_reuploaded(self, object, params):
         hooks.on_reuploaded_object(object)
 
-    def _create_object(self, spec, parent, share_with, attributes, analysis_id, tags):
+    def _create_object(
+        self, spec, parent, share_with, attributes, analysis_id, tags, share_3rd_party
+    ):
         # To be implemented by specialized uploaders (e.g. FileUploader)
         raise NotImplementedError
 
@@ -121,8 +123,17 @@ class ObjectUploader:
         # Tags argument
         tags = params.get("tags")
 
+        if params["share_3rd_party"] is None:
+            share_3rd_party = True
+
         item, is_new = self._create_object(
-            params, parent_object, share_with, attributes, analysis_id, tags
+            params,
+            parent_object,
+            share_with,
+            attributes,
+            analysis_id,
+            tags,
+            share_3rd_party,
         )
 
         try:

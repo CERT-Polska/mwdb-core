@@ -33,6 +33,7 @@ def send_file_to_karton(file) -> str:
                 "attributes": file.get_attributes(
                     as_dict=True, check_permissions=False
                 ),
+                "share_3rd_party": file.share_3rd_party,
             },
             priority=task_priority,
         )
@@ -52,6 +53,7 @@ def send_config_to_karton(config) -> str:
             "config": config.cfg,
             "dhash": config.dhash,
             "attributes": config.get_attributes(as_dict=True, check_permissions=False),
+            "share_3rd_party": config.share_3rd_party,
         },
     )
     producer.send_task(task)
@@ -68,6 +70,7 @@ def send_blob_to_karton(blob) -> str:
             "content": blob.content,
             "dhash": blob.dhash,
             "attributes": blob.get_attributes(as_dict=True, check_permissions=False),
+            "share_3rd_party": blob.share_3rd_party,
         },
     )
     producer.send_task(task)

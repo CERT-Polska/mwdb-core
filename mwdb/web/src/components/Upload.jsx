@@ -77,11 +77,6 @@ export default function Upload() {
     const [attributeModalOpen, setAttributeModalOpen] = useState(false);
     const [share3rdParty, setShare3rdParty] = useState(true);
 
-    function handleCheckBoxChange(event){
-        console.log("AAA");
-        setShare3rdParty(event.target.checked);
-    }
-
     const handleParentChange = (ev) => {
         ev.preventDefault();
         setParent(ev.target.value);
@@ -308,13 +303,15 @@ export default function Upload() {
                         ) : (
                             []
                         )}
-                        <div className="form-group">                            
+                        <div className="form-group">
                             <input
                                 type="checkbox"
                                 name="share_3rd"
                                 id="share_3rd_party"
                                 checked={share3rdParty}
-                                onChange={() => setShare3rdParty(!share3rdParty)}
+                                onChange={() =>
+                                    setShare3rdParty(!share3rdParty)
+                                }
                             />
                             <label>&nbsp;Share with third parties</label>
                         </div>

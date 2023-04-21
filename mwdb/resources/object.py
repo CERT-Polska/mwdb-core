@@ -123,9 +123,7 @@ class ObjectUploader:
         # Tags argument
         tags = params.get("tags")
 
-        share_3rd_party = (
-            True if params["share_3rd_party"] is None else params["share_3rd_party"]
-        )
+        share_3rd_party = params["share_3rd_party"]
 
         item, is_new = self._create_object(
             params,

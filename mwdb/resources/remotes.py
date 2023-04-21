@@ -196,13 +196,10 @@ class RemoteFilePullResource(RemotePullResource):
         response = remote.request("GET", f"file/{identifier}").json()
         file_name = response["file_name"]
         if "share_3rd_party" in response:
-            share_3rd_party = (
-                True
-                if response["share_3rd_party"] is None
-                else response["share_3rd_party"]
-            )
+            share_3rd_party = response["share_3rd_party"]
         else:
             share_3rd_party = True
+
         response = remote.request("GET", f"file/{identifier}/download", stream=True)
         options = loads_schema(
             request.get_data(as_text=True), RemoteOptionsRequestSchema()
@@ -284,13 +281,10 @@ class RemoteConfigPullResource(RemotePullResource):
         remote = RemoteAPI(remote_name)
         config_spec = remote.request("GET", f"config/{identifier}").json()
         if "share_3rd_party" in config_spec:
-            share_3rd_party = (
-                True
-                if config_spec["share_3rd_party"] is None
-                else config_spec["share_3rd_party"]
-            )
+            share_3rd_party = config_spec["share_3rd_party"]
         else:
             share_3rd_party = True
+
         options = loads_schema(
             request.get_data(as_text=True), RemoteOptionsRequestSchema()
         )
@@ -391,12 +385,12 @@ class RemoteTextBlobPullResource(RemotePullResource):
         """
         remote = RemoteAPI(remote_name)
         spec = remote.request("GET", f"blob/{identifier}").json()
+
         if "share_3rd_party" in spec:
-            share_3rd_party = (
-                True if spec["share_3rd_party"] is None else spec["share_3rd_party"]
-            )
+            share_3rd_party = spec["share_3rd_party"]
         else:
             share_3rd_party = True
+
         options = loads_schema(
             request.get_data(as_text=True), RemoteOptionsRequestSchema()
         )

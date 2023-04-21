@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -7,17 +7,11 @@ import AceEditor from "react-ace";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import AttributesAddModal from "../AttributesAddModal";
-
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import {
-    DataTable,
-    View,
-    getErrorMessage,
-    FormError,
-} from "@mwdb-web/commons/ui";
+import { View, getErrorMessage, FormError } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/plugins";
+import { Attributes } from "./components/Attributes";
 
 const formFields = {
     cfg: "cfg",
@@ -49,13 +43,13 @@ const validationSchema = Yup.object().shape({
             }
         },
     }),
+    [formFields.family]: Yup.string().required("Family is required."),
 });
 
-export default function UploadConfig() {
+export default function UploadConfigView() {
     const auth = useContext(AuthContext);
     const navigate = useNavigate();
     const searchParams = useSearchParams()[0];
-    const [attributeModalOpen, setAttributeModalOpen] = useState(false);
 
     const formOptions = {
         resolver: yupResolver(validationSchema),
@@ -75,15 +69,6 @@ export default function UploadConfig() {
         formState: { errors },
         control,
     } = useForm(formOptions);
-
-    const {
-        fields: attributes,
-        append: appendAttribute,
-        remove: removeAttribute,
-    } = useFieldArray({
-        control,
-        name: formFields.attributes,
-    });
 
     const handleParentClear = () => {
         if (searchParams.get("parent")) navigate("/config_upload");
@@ -113,17 +98,6 @@ export default function UploadConfig() {
         }
     };
 
-    const onAttributeAdd = (key, value) => {
-        for (let attr of attributes)
-            if (attr.key === key && attr.value === value) {
-                // that key, value was added yet
-                setAttributeModalOpen(false);
-                return;
-            }
-        appendAttribute({ key, value });
-        setAttributeModalOpen(false);
-    };
-
     return (
         <View ident="configUpload">
             <Extendable ident="configUploadForm">
@@ -150,26 +124,7 @@ export default function UploadConfig() {
                                 </label>
                             </div>
                         </div>
-
                         <FormError errorField={errors[formFields.cfg]} />
-                        <div className="input-group mb-3">
-                            <div className="input-group-prepend">
-                                <label
-                                    htmlFor={formFields.config_type}
-                                    className="input-group-text"
-                                >
-                                    Config type
-                                </label>
-                            </div>
-                            <select
-                                {...register(formFields.config_type)}
-                                id={formFields.config_type}
-                                className="custom-select"
-                            >
-                                <option value="static">Static</option>
-                                <option value="dynamic">Dynamic</option>
-                            </select>
-                        </div>
                         <div className="input-group mb-3 mt-3">
                             <div className="input-group-prepend">
                                 <label
@@ -197,7 +152,9 @@ export default function UploadConfig() {
                                     }
                                 />
                             </div>
+                            <FormError errorField={errors[formFields.family]} />
                         </div>
+
                         {auth.hasCapability(Capability.addingParents) && (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
@@ -227,45 +184,30 @@ export default function UploadConfig() {
                                 </div>
                             </div>
                         )}
-                        <div className="d-flex align-items-center">
-                            <h5 className="mb-0 mr-3">Attributes</h5>
-                            <input
-                                value="Add attribute"
-                                className="btn btn-info"
-                                type="button"
-                                onClick={() => setAttributeModalOpen(true)}
-                            />
+                        <div className="input-group mb-3">
+                            <div className="input-group-prepend">
+                                <label
+                                    htmlFor={formFields.config_type}
+                                    className="input-group-text"
+                                >
+                                    Config type
+                                </label>
+                            </div>
+                            <select
+                                {...register(formFields.config_type)}
+                                id={formFields.config_type}
+                                className="custom-select"
+                            >
+                                <option value="static">Static</option>
+                                <option value="dynamic">Dynamic</option>
+                            </select>
                         </div>
-
-                        <DataTable>
-                            {attributes.map((attr, idx) => (
-                                <tr key={idx} className="centered">
-                                    <th>{attr.key}</th>
-                                    <td>
-                                        {typeof attr.value === "string" ? (
-                                            attr.value
-                                        ) : (
-                                            <pre className="attribute-object">
-                                                {"(object)"}{" "}
-                                                {JSON.stringify(
-                                                    attr.value,
-                                                    null,
-                                                    4
-                                                )}
-                                            </pre>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <input
-                                            value="Dismiss"
-                                            className="btn btn-danger"
-                                            type="button"
-                                            onClick={() => removeAttribute(idx)}
-                                        />
-                                    </td>
-                                </tr>
-                            ))}
-                        </DataTable>
+                        <Attributes
+                            {...useFieldArray({
+                                control,
+                                name: formFields.attributes,
+                            })}
+                        />
                         <div className="d-flex justify-content-end">
                             <input
                                 value="Upload config"
@@ -276,11 +218,6 @@ export default function UploadConfig() {
                     </div>
                 </form>
             </Extendable>
-            <AttributesAddModal
-                isOpen={attributeModalOpen}
-                onRequestClose={() => setAttributeModalOpen(false)}
-                onAdd={onAttributeAdd}
-            />
         </View>
     );
 }

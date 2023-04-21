@@ -17,7 +17,8 @@ import ShowSample from "./components/ShowSample";
 import ShowConfig from "./components/ShowConfig";
 import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
-import UploadFile from "./components/Upload/UploadFile";
+import UploadFileView from "./components/Upload/UploadFileView";
+import UploadConfigView from "./components/Upload/UploadConfigView";
 import UserLogin from "./components/UserLogin";
 import UserRegister from "./components/UserRegister";
 import UserSetPassword from "./components/UserSetPassword";
@@ -71,7 +72,6 @@ import { Capability } from "./commons/auth";
 import { ConfigContext } from "./commons/config";
 import { fromPlugins, Extendable } from "./commons/plugins";
 import { ErrorBoundary, RequiresAuth, RequiresCapability } from "./commons/ui";
-import UploadConfig from "./components/Upload/UploadConfig";
 
 function NavigateFor404() {
     /**
@@ -113,7 +113,7 @@ function AppRoutes() {
                     path="file_upload"
                     element={
                         <RequiresCapability capability={Capability.addingFiles}>
-                            <UploadFile />
+                            <UploadFileView />
                         </RequiresCapability>
                     }
                 />
@@ -121,7 +121,7 @@ function AppRoutes() {
                     path="blob_upload"
                     element={
                         <RequiresCapability capability={Capability.addingBlobs}>
-                            <UploadFile />
+                            <UploadFileView />
                         </RequiresCapability>
                     }
                 />
@@ -131,7 +131,7 @@ function AppRoutes() {
                         <RequiresCapability
                             capability={Capability.addingConfigs}
                         >
-                            <UploadConfig />
+                            <UploadConfigView />
                         </RequiresCapability>
                     }
                 />

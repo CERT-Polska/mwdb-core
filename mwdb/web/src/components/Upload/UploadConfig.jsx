@@ -1,8 +1,11 @@
 import React, { useContext, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useForm, useFieldArray } from "react-hook-form";
 import { toast } from "react-toastify";
 import { isEmpty } from "lodash";
 import AceEditor from "react-ace";
+import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import AttributesAddModal from "../AttributesAddModal";
 
@@ -15,39 +18,86 @@ import {
     FormError,
 } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { useJsonParseError } from "@mwdb-web/commons/hooks";
+
+const formFields = {
+    cfg: "cfg",
+    family: "family",
+    parent: "parent",
+    config_type: "config_type",
+    attributes: "attributes",
+};
+
+const validationSchema = Yup.object().shape({
+    [formFields.cfg]: Yup.string().test({
+        message: ({ value }) => {
+            if (!value) {
+                return "";
+            }
+            try {
+                JSON.parse(value);
+                return "";
+            } catch (err) {
+                return err.toString();
+            }
+        },
+        test: (value) => {
+            try {
+                JSON.parse(value);
+                return true;
+            } catch (err) {
+                return false;
+            }
+        },
+    }),
+});
 
 export default function UploadConfig() {
     const auth = useContext(AuthContext);
     const navigate = useNavigate();
     const searchParams = useSearchParams()[0];
-    const [cfg, setCfg] = useState("{}");
-
-    const [parent, setParent] = useState("");
-    const [family, setFamily] = useState("");
-    const [configType, setConfigType] = useState("static");
-    const [attributes, setAttributes] = useState([]);
     const [attributeModalOpen, setAttributeModalOpen] = useState(false);
-    const { errorMessage: cfgErrorMessage } = useJsonParseError(cfg);
 
-    const handleParentChange = (ev) => {
-        ev.preventDefault();
-        setParent(ev.target.value);
+    const formOptions = {
+        resolver: yupResolver(validationSchema),
+        mode: "onSubmit",
+        reValidateMode: "onSubmit",
+        defaultValues: {
+            [formFields.cfg]: "{}",
+            [formFields.parent]: searchParams.get("parent") || "",
+            [formFields.attributes]: [],
+        },
     };
+
+    const {
+        register,
+        setValue,
+        handleSubmit,
+        formState: { errors },
+        control,
+    } = useForm(formOptions);
+
+    const {
+        fields: attributes,
+        append: appendAttribute,
+        remove: removeAttribute,
+    } = useFieldArray({
+        control,
+        name: formFields.attributes,
+    });
 
     const handleParentClear = () => {
         if (searchParams.get("parent")) navigate("/config_upload");
-        setParent("");
+        setValue(formFields.parent, "");
     };
 
-    const handleSubmit = async () => {
+    const onSubmit = async (values) => {
         try {
             const body = {
-                cfg: JSON.parse(cfg),
-                family,
-                parent: !isEmpty(parent) ? parent : undefined,
-                config_type: configType,
-                attributes,
+                ...values,
+                [formFields.cfg]: JSON.parse(values[formFields.cfg]),
+                [formFields.parent]: !isEmpty(values[formFields.parent])
+                    ? values[formFields.parent]
+                    : undefined,
             };
             let response = await api.uploadConfig(body);
             navigate("/config/" + response.data.id, {
@@ -70,60 +120,51 @@ export default function UploadConfig() {
                 setAttributeModalOpen(false);
                 return;
             }
-        setAttributes([...attributes, { key, value }]);
+        appendAttribute({ key, value });
         setAttributeModalOpen(false);
-    };
-
-    const onAttributeRemove = (idx) => {
-        setAttributes([
-            ...attributes.slice(0, idx),
-            ...attributes.slice(idx + 1),
-        ]);
     };
 
     return (
         <View ident="configUpload">
             <Extendable ident="configUploadForm">
-                <form>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="form-group">
                         <div className="input-group mb-3">
                             <div className="input-group-prepend">
-                                <label
-                                    htmlFor="config"
-                                    className="input-group-text"
-                                >
+                                <label className="input-group-text">
                                     Config
+                                    <AceEditor
+                                        {...register(formFields.cfg)}
+                                        defaultValue="{}"
+                                        mode="json"
+                                        theme="github"
+                                        wrapEnabled
+                                        onChange={(input) =>
+                                            setValue(formFields.cfg, input)
+                                        }
+                                        height="260px"
+                                        setOptions={{
+                                            useWorker: false,
+                                        }}
+                                    />
                                 </label>
-                                <AceEditor
-                                    id="config"
-                                    mode="json"
-                                    theme="github"
-                                    wrapEnabled
-                                    onChange={(input) => setCfg(input)}
-                                    value={cfg}
-                                    height="260px"
-                                    setOptions={{
-                                        useWorker: false,
-                                    }}
-                                />
                             </div>
                         </div>
 
-                        <FormError errorField={{ message: cfgErrorMessage }} />
+                        <FormError errorField={errors[formFields.cfg]} />
                         <div className="input-group mb-3">
                             <div className="input-group-prepend">
                                 <label
-                                    htmlFor="config_type"
+                                    htmlFor={formFields.config_type}
                                     className="input-group-text"
                                 >
                                     Config type
                                 </label>
                             </div>
                             <select
-                                id="config_type"
+                                {...register(formFields.config_type)}
+                                id={formFields.config_type}
                                 className="custom-select"
-                                value={configType}
-                                onChange={(e) => setConfigType(e.target.value)}
                             >
                                 <option value="static">Static</option>
                                 <option value="dynamic">Dynamic</option>
@@ -132,27 +173,28 @@ export default function UploadConfig() {
                         <div className="input-group mb-3 mt-3">
                             <div className="input-group-prepend">
                                 <label
-                                    htmlFor="family"
+                                    htmlFor={formFields.family}
                                     className="input-group-text"
                                 >
                                     Family
                                 </label>
                             </div>
                             <input
-                                id="family"
+                                {...register(formFields.family)}
+                                id={formFields.family}
                                 className="form-control"
                                 type="text"
                                 style={{ fontSize: "medium" }}
                                 placeholder="Family"
-                                value={family}
-                                onChange={(e) => setFamily(e.target.value)}
                             />
                             <div className="input-group-append">
                                 <input
                                     className="btn btn-outline-danger"
                                     type="button"
                                     value="Clear"
-                                    onClick={() => setFamily("")}
+                                    onClick={() =>
+                                        setValue(formFields.family, "")
+                                    }
                                 />
                             </div>
                         </div>
@@ -160,20 +202,19 @@ export default function UploadConfig() {
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label
-                                        htmlFor="parent"
+                                        htmlFor={formFields.parent}
                                         className="input-group-text"
                                     >
                                         Parent
                                     </label>
                                 </div>
                                 <input
-                                    id="parent"
+                                    {...register(formFields.parent)}
+                                    id={formFields.parent}
                                     className="form-control"
                                     type="text"
                                     style={{ fontSize: "medium" }}
                                     placeholder="(Optional) Type parent identifier..."
-                                    value={searchParams.get("parent") || parent}
-                                    onChange={handleParentChange}
                                     disabled={searchParams.get("parent")}
                                 />
                                 <div className="input-group-append">
@@ -219,9 +260,7 @@ export default function UploadConfig() {
                                             value="Dismiss"
                                             className="btn btn-danger"
                                             type="button"
-                                            onClick={() =>
-                                                onAttributeRemove(idx)
-                                            }
+                                            onClick={() => removeAttribute(idx)}
                                         />
                                     </td>
                                 </tr>
@@ -231,10 +270,7 @@ export default function UploadConfig() {
                             <input
                                 value="Upload config"
                                 className="btn btn-success"
-                                type="button"
-                                //TODO: uncommnent before review
-                                // disabled={cfgErrorMessage || cfg === "{}"}
-                                onClick={handleSubmit}
+                                type="submit"
                             />
                         </div>
                     </div>

@@ -34,12 +34,12 @@ class TextBlobUploader(ObjectUploader):
                 spec["content"],
                 spec["blob_name"],
                 spec["blob_type"],
+                share_3rd_party=share_3rd_party,
                 parent=parent,
                 share_with=share_with,
                 attributes=attributes,
                 analysis_id=analysis_id,
                 tags=tags,
-                share_3rd_party=share_3rd_party,
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a blob")

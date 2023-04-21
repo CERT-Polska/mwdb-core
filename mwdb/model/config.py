@@ -30,13 +30,13 @@ class Config(Object):
         cls,
         cfg,
         family,
+        share_3rd_party,
         config_type=None,
         parent=None,
         attributes=None,
         share_with=None,
         analysis_id=None,
         tags=None,
-        share_3rd_party=None,
     ):
         dhash = config_dhash(cfg)
 
@@ -49,12 +49,12 @@ class Config(Object):
         )
         return cls._get_or_create(
             cfg_obj,
+            share_3rd_party=share_3rd_party,
             parent=parent,
             attributes=attributes,
             share_with=share_with,
             analysis_id=analysis_id,
             tags=tags,
-            share_3rd_party=share_3rd_party,
         )
 
     def _send_to_karton(self):

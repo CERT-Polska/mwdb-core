@@ -36,12 +36,12 @@ class FileUploader(ObjectUploader):
             return File.get_or_create(
                 request.files["file"].filename,
                 request.files["file"].stream,
+                share_3rd_party=share_3rd_party,
                 parent=parent,
                 share_with=share_with,
                 attributes=attributes,
                 analysis_id=analysis_id,
                 tags=tags,
-                share_3rd_party=share_3rd_party,
             )
         except ObjectTypeConflictError:
             raise Conflict("Object already exists and is not a file")

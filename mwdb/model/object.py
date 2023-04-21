@@ -565,12 +565,12 @@ class Object(db.Model):
     def _get_or_create(
         cls,
         obj,
+        share_3rd_party,
         parent=None,
         attributes=None,
         share_with=None,
         analysis_id=None,
         tags=None,
-        share_3rd_party=True,
     ):
         """
         Polymophic get or create pattern, useful in dealing with race condition

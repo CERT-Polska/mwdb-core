@@ -55,6 +55,7 @@ class TextBlob(Object):
             attributes=attributes,
             share_with=share_with,
             analysis_id=analysis_id,
+            tags=tags,
         )
         # If object exists yet: we need to refresh last_seen timestamp
         if not is_new:

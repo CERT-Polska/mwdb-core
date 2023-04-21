@@ -36,7 +36,7 @@ function FlagBadge({ enabled }) {
 export default function SettingsOverview() {
     const config = useContext(ConfigContext);
     const { setAlert } = useViewAlert();
-    const [extendedInfo, setExtendedInfo] = useState();
+    const [extendedInfo, setExtendedInfo] = useState({});
 
     useEffect(() => {
         getExtendedInfo();

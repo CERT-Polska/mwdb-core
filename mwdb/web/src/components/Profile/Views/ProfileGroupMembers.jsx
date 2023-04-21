@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Navigate, useParams, useOutletContext } from "react-router-dom";
-import { isEmpty } from "lodash";
+import { isEmpty, isNil } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -78,7 +78,7 @@ export default function ProfileGroupMembers() {
     const { redirectToAlert } = useViewAlert();
     const { profile } = useOutletContext();
     const { group: groupName } = useParams();
-    const [workspaces, setWorkspaces] = useState();
+    const [workspaces, setWorkspaces] = useState([]);
 
     const group = profile.groups.find((group) => group.name === groupName);
 
@@ -98,8 +98,6 @@ export default function ProfileGroupMembers() {
         }
     }
 
-    if (isEmpty(workspaces)) return <></>;
-
     if (isEmpty(group)) {
         redirectToAlert({
             target: "/profile",
@@ -112,6 +110,8 @@ export default function ProfileGroupMembers() {
 
     // Merge it with workspace info
     const workspace = workspaces.find((group) => group.name === groupName);
+
+    if (isNil(workspace)) return <></>;
 
     if (
         !(

@@ -3,6 +3,6 @@ import { useOutletContext } from "react-router-dom";
 import ProfileCapabilities from "../../Profile/Views/ProfileCapabilities";
 
 export default function UserCapabilities() {
-    const { user } = useOutletContext();
-    return <ProfileCapabilities profile={user} />;
+    const { user, getUser } = useOutletContext();
+    return <ProfileCapabilities profile={user} getData={getUser} />;
 }

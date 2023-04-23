@@ -160,13 +160,13 @@ jobs:
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          docker-compose -f docker-compose-e2e.yml up -d mwdb-tests
-          docker-compose -f docker-compose-e2e.yml logs -f -t mwdb-tests
+          ./dev-compose.sh --with e2e --with karton up -d mwdb-tests
+          ./dev-compose.sh --with e2e --with karton logs -f -t mwdb-tests
           ([ $(docker wait mwdb_core_e2e_tests) == 0 ])
       - name: Job failed - storing application logs
         if: ${{ failure() }}
         run: |
-          docker-compose -f docker-compose-e2e.yml logs --no-color -t mwdb > ./mwdb-e2e-logs
+          ./dev-compose.sh --with e2e --with karton logs --no-color -t mwdb > ./mwdb-e2e-logs
       - name: Job failed - upload application logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
@@ -198,8 +198,8 @@ jobs:
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          docker-compose -f docker-compose-e2e.yml up -d web-tests
-          docker-compose -f docker-compose-e2e.yml logs -f -t web-tests
+          ./dev-compose.sh --with e2e --with karton up -d web-tests
+          ./dev-compose.sh --with e2e --with karton logs -f -t web-tests
           ([ $(docker wait mwdb_core_e2e_web_tests) == 0 ])
       - name: Job failed - storing videos from e2e tests
         if: ${{ failure() }}

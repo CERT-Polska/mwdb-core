@@ -1,0 +1,18 @@
+version: "3.3"
+services:
+  mwdb:
+    environment:
+      HOT_RELOAD: 1
+    volumes:
+      - "../../mwdb:/app/mwdb"
+  mwdb-web:
+    build:
+      dockerfile: ./deploy/docker/Dockerfile-web-dev
+    environment:
+      NODE_ENV: development
+    image: certpl/mwdb-web-dev
+    volumes:
+      - "../../mwdb/web/public:/app/public"
+      - "../../mwdb/web/src:/app/src"
+      - "../../docker/plugins:/app/plugins"
+    restart: on-failure

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -24,25 +24,31 @@ const formFields = {
     job_title: "job_title",
     job_responsibilities: "job_responsibilities",
     other_info: "other_info",
+    recaptcha: "recaptcha",
 };
 
 const validationSchema = Yup.object().shape({
-    login: Yup.string()
+    [formFields.login]: Yup.string()
         .required("Login is required")
         .matches(
             /[A-Za-z0-9_-]{1,32}/,
             "Login must contain only letters, digits, '_'and '-' characters, max 32 characters allowed."
         ),
-    email: Yup.string()
+    [formFields.email]: Yup.string()
         .required("Email is required")
         .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, "Value is not email"),
-    affiliation: Yup.string().required("Affiliation is required"),
-    job_title: Yup.string().required("Job title is required"),
+    [formFields.affiliation]: Yup.string().required("Affiliation is required"),
+    [formFields.job_title]: Yup.string().required("Job title is required"),
 
-    job_responsibilities: Yup.string().required(
+    [formFields.job_responsibilities]: Yup.string().required(
         "Job responsibilities is required"
     ),
-    other_info: Yup.string().required("Other information is required"),
+    [formFields.other_info]: Yup.string().required(
+        "Other information is required"
+    ),
+    [formFields.recaptcha]: Yup.string()
+        .nullable()
+        .required("Recaptcha is required"),
 });
 
 const formOptions = {
@@ -55,11 +61,15 @@ const formOptions = {
 export default function UserRegister() {
     const config = useContext(ConfigContext);
     const { redirectTo } = useNavRedirect();
-    const { register, handleSubmit, formState } = useForm(formOptions);
-    const { errors } = formState;
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        formState: { errors },
+    } = useForm(formOptions);
 
     const [loading, setLoading] = useState(false);
-    const [recaptcha, setRecaptcha] = useState(null);
+    const captchaRef = useRef(null);
 
     async function registerUser(values) {
         try {
@@ -69,7 +79,7 @@ export default function UserRegister() {
                 values.login,
                 values.email,
                 additional_info,
-                recaptcha
+                values.recaptcha
             );
             toast(
                 `User ${response.data.login} registration requested. Account is
@@ -83,6 +93,9 @@ export default function UserRegister() {
                 type: "error",
             });
             setLoading(false);
+        } finally {
+            captchaRef.current?.reset();
+            setValue(formFields.recaptcha, null);
         }
     }
 
@@ -215,15 +228,25 @@ export default function UserRegister() {
                             </div>
                         </div>
                         {config.config["recaptcha_site_key"] && (
-                            <ReCAPTCHA
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    marginBottom: 12,
-                                }}
-                                sitekey={config.config["recaptcha_site_key"]}
-                                onChange={setRecaptcha}
-                            />
+                            <>
+                                <ReCAPTCHA
+                                    ref={captchaRef}
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        marginBottom: 12,
+                                    }}
+                                    sitekey={
+                                        config.config["recaptcha_site_key"]
+                                    }
+                                    onChange={(val) =>
+                                        setValue(formFields.recaptcha, val)
+                                    }
+                                />
+                                <div className="text-center">
+                                    <FormError errorField={errors.recaptcha} />
+                                </div>
+                            </>
                         )}
                         <div className="d-flex justify-content-between">
                             <button

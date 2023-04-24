@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
@@ -19,13 +19,17 @@ import { useNavRedirect } from "@mwdb-web/commons/hooks";
 const formFields = {
     login: "login",
     email: "email",
+    recaptcha: "recaptcha",
 };
 
 const validationSchema = Yup.object().shape({
-    login: Yup.string().required("Login is required"),
-    email: Yup.string()
+    [formFields.login]: Yup.string().required("Login is required"),
+    [formFields.email]: Yup.string()
         .required("Email is required")
         .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, "Value is not email"),
+    [formFields.recaptcha]: Yup.string()
+        .nullable()
+        .required("Recaptcha is required"),
 });
 
 const formOptions = {
@@ -38,11 +42,16 @@ const formOptions = {
 export default function UserPasswordRecover() {
     const config = useContext(ConfigContext);
     const { redirectTo } = useNavRedirect();
-    const { register, handleSubmit, formState, reset } = useForm(formOptions);
-    const { errors } = formState;
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+        setValue,
+    } = useForm(formOptions);
 
     const [loading, setLoading] = useState(false);
-    const [recaptcha, setRecaptcha] = useState(null);
+    const captchaRef = useRef(null);
 
     async function recoverPassword(values) {
         try {
@@ -50,7 +59,7 @@ export default function UserPasswordRecover() {
             await api.authRecoverPassword(
                 values.login,
                 values.email,
-                recaptcha
+                values.recaptcha
             );
 
             toast("Password reset link has been sent to the e-mail address", {
@@ -64,6 +73,9 @@ export default function UserPasswordRecover() {
             });
             setLoading(false);
             reset();
+        } finally {
+            captchaRef.current?.reset();
+            setValue(formFields.recaptcha, null);
         }
     }
 
@@ -111,15 +123,25 @@ export default function UserPasswordRecover() {
                             </p>
                         </div>
                         {config.config["recaptcha_site_key"] && (
-                            <ReCAPTCHA
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    marginBottom: 12,
-                                }}
-                                sitekey={config.config["recaptcha_site_key"]}
-                                onChange={setRecaptcha}
-                            />
+                            <>
+                                <ReCAPTCHA
+                                    ref={captchaRef}
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        marginBottom: 12,
+                                    }}
+                                    sitekey={
+                                        config.config["recaptcha_site_key"]
+                                    }
+                                    onChange={(val) =>
+                                        setValue(formFields.recaptcha, val)
+                                    }
+                                />
+                                <div className="text-center">
+                                    <FormError errorField={errors.recaptcha} />
+                                </div>
+                            </>
                         )}
                         <div className="d-flex justify-content-between">
                             <button

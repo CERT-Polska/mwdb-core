@@ -123,7 +123,7 @@ class ObjectUploader:
         # Tags argument
         tags = params.get("tags")
 
-        share_3rd_party = params["share_3rd_party"]
+        share_3rd_party = params.get("share_3rd_party", True)
 
         item, is_new = self._create_object(
             params,

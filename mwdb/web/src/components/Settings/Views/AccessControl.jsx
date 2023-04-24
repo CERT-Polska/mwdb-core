@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { isEmpty } from "lodash";
 
 import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -29,11 +28,11 @@ function GroupAppliesTo({ group }) {
             <small className="text-muted">
                 Applies to{" "}
                 {intersperse(
-                    group["users"]
-                        .slice(0, 3)
-                        .map((user) => (
-                            <Link to={`/settings/user/${user}`}>{user}</Link>
-                        )),
+                    group["users"].slice(0, 3).map((user) => (
+                        <Link key={user} to={`/settings/user/${user}`}>
+                            {user}
+                        </Link>
+                    )),
                     ", "
                 )}
                 {group["users"].length > 3
@@ -59,7 +58,7 @@ function CapabilitiesHeader({ group }) {
 
 function CapabilitiesList({ capabilities, onDelete }) {
     return capabilities.map((cap) => (
-        <tr>
+        <tr key={cap}>
             <td className="col-auto">
                 <Link
                     to={"#"}
@@ -158,6 +157,7 @@ function CapabilityChangeCard({ groups, onSubmit }) {
                         const selected = selectedCaps.includes(cap);
                         return (
                             <option
+                                key={cap}
                                 data-content={`
                                 ${changed ? "*" : ""}
                                 <span class='badge badge-success'>${cap}</span>
@@ -200,7 +200,7 @@ function CapabilityChangeCard({ groups, onSubmit }) {
 }
 
 export default function AccessControl() {
-    const [groups, setGroups] = useState(null);
+    const [groups, setGroups] = useState([]);
     const { setAlert } = useViewAlert();
 
     const [isChangeModalOpen, setChangeModalOpen] = useState(false);
@@ -242,8 +242,6 @@ export default function AccessControl() {
         getGroups();
     }, []);
 
-    if (isEmpty(groups)) return <></>;
-
     return (
         <div className="container">
             <h2>Access control</h2>
@@ -264,7 +262,7 @@ export default function AccessControl() {
                         .filter((group) => group.capabilities.length > 0)
                         .map((group) => (
                             <React.Fragment key={group.name}>
-                                <CapabilitiesHeader group={group} />,
+                                <CapabilitiesHeader group={group} />
                                 <CapabilitiesList
                                     capabilities={group.capabilities}
                                     onDelete={(capToRemove) => {
@@ -278,7 +276,6 @@ export default function AccessControl() {
                                         setChangeModalOpen(true);
                                     }}
                                 />
-                                ,
                             </React.Fragment>
                         ))}
                 </tbody>

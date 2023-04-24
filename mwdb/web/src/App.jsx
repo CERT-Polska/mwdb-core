@@ -19,6 +19,7 @@ import ShowTextBlob from "./components/ShowTextBlob";
 import DiffTextBlob from "./components/DiffTextBlob";
 import UploadFileView from "./components/Upload/UploadFileView";
 import UploadConfigView from "./components/Upload/UploadConfigView";
+import UploadBlobView from "./components/Upload/UploadBlobView";
 import UserLogin from "./components/UserLogin";
 import UserRegister from "./components/UserRegister";
 import UserSetPassword from "./components/UserSetPassword";
@@ -121,7 +122,7 @@ function AppRoutes() {
                     path="blob_upload"
                     element={
                         <RequiresCapability capability={Capability.addingBlobs}>
-                            <UploadFileView />
+                            <UploadBlobView />
                         </RequiresCapability>
                     }
                 />

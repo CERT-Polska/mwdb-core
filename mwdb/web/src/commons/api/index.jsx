@@ -430,18 +430,30 @@ async function requestZipFileDownloadLink(id) {
     return `${baseURL}/file/${id}/download/zip?token=${response.data.token}`;
 }
 
-function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
+function uploadFile(body) {
+    const { file, parent, shareWith, attributes, fileUploadTimeout } = body;
     let formData = new FormData();
     formData.append("file", file);
     formData.append(
         "options",
         JSON.stringify({
             parent: parent || null,
-            upload_as: upload_as,
+            upload_as: shareWith,
             attributes: attributes,
         })
     );
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
+}
+
+function uploadBlob(body) {
+    const { name, shareWith, parent, type } = body;
+    return axios.post(`/blob`, {
+        ...body,
+        blob_name: name,
+        blob_type: type,
+        upload_as: shareWith,
+        parent: parent || null,
+    });
 }
 
 function uploadConfig(body) {
@@ -632,6 +644,7 @@ export const api = {
     requestZipFileDownloadLink,
     uploadFile,
     uploadConfig,
+    uploadBlob,
     getRemoteNames,
     pushObjectRemote,
     pullObjectRemote,

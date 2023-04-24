@@ -17,12 +17,13 @@ import {
 } from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { UploadDropzone } from "./common/UploadDropzone";
 import { useGroup } from "./common/hooks/useGroup";
 import { getSharingModeHint, sharingModeToUploadParam } from "./common/helpers";
 
 const formFields = {
-    file: "file",
+    content: "content",
+    type: "type",
+    name: "name",
     parent: "parent",
     shareWith: "shareWith",
     group: "group",
@@ -30,17 +31,19 @@ const formFields = {
 };
 
 const validationSchema = Yup.object().shape({
-    [formFields.file]: Yup.mixed().required("File is required"),
+    [formFields.content]: Yup.string().required("Content is required"),
+    [formFields.type]: Yup.string().required("Type is required"),
+    [formFields.name]: Yup.string().required("Name is required"),
 });
 
-export default function UploadFileView() {
+export default function UploadBlobView() {
     const searchParams = useSearchParams()[0];
     const formOptions = {
         resolver: yupResolver(validationSchema),
         mode: "onSubmit",
         reValidateMode: "onSubmit",
         defaultValues: {
-            [formFields.file]: null,
+            [formFields.content]: "",
             [formFields.shareWith]: "",
             [formFields.group]: "",
             [formFields.parent]: searchParams.get("parent") || "",
@@ -59,15 +62,14 @@ export default function UploadFileView() {
 
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-    const fileUploadTimeout = config.config["file_upload_timeout"];
     const navigate = useNavigate();
 
     const { groups } = useGroup(setValue, formFields.shareWith);
 
-    const { file, shareWith, group } = watch();
+    const { shareWith, group } = watch();
 
     const handleParentClear = () => {
-        if (searchParams.get("parent")) navigate("/file_upload");
+        if (searchParams.get("parent")) navigate("/blob_upload");
         setValue(formFields.parent, "");
     };
 
@@ -85,13 +87,12 @@ export default function UploadFileView() {
                     values[formFields.shareWith],
                     values[formFields.group]
                 ),
-                fileUploadTimeout,
             };
-            const response = await api.uploadFile(body);
-            navigate("/file/" + response.data.sha256, {
+            const response = await api.uploadBlob(body);
+            navigate("/blob/" + response.data.id, {
                 replace: true,
             });
-            toast("File uploaded successfully.", {
+            toast("Blob uploaded successfully.", {
                 type: "success",
             });
         } catch (error) {
@@ -102,17 +103,64 @@ export default function UploadFileView() {
     };
 
     return (
-        <View ident="fileUpload" showIf={groups !== null}>
-            <Extendable ident="fileUploadForm">
-                <h2>File upload</h2>
+        <View ident="blobUpload" showIf={groups !== null}>
+            <Extendable ident="blobUploadForm">
+                <h2>Blob upload</h2>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <UploadDropzone
-                        file={file}
-                        onDrop={(data) => {
-                            setValue(formFields.file, data);
-                        }}
-                    />
-                    <FormError errorField={errors[formFields.file]} />
+                    <div className="input-group mb-3">
+                        <div className="input-group-prepend">
+                            <label
+                                className="input-group-text"
+                                htmlFor={formFields.content}
+                            >
+                                Content
+                            </label>
+                        </div>
+                        <textarea
+                            {...register(formFields.content)}
+                            placeholder="Blob content"
+                            className="form-control"
+                        />
+                        <FormError errorField={errors[formFields.content]} />
+                    </div>
+                    <div className="input-group mb-3">
+                        <div className="input-group-prepend">
+                            <label
+                                className="input-group-text"
+                                htmlFor={formFields.name}
+                            >
+                                Name
+                            </label>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <input
+                                {...register(formFields.name)}
+                                placeholder="Blob name"
+                                className="form-control"
+                                style={{ height: "100%" }}
+                            />
+                        </div>
+                        <FormError errorField={errors[formFields.name]} />
+                    </div>
+                    <div className="input-group mb-3">
+                        <div className="input-group-prepend">
+                            <label
+                                className="input-group-text"
+                                htmlFor={formFields.type}
+                            >
+                                Type
+                            </label>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <input
+                                {...register(formFields.type)}
+                                className="form-control"
+                                placeholder="Blob type"
+                                style={{ height: "100%" }}
+                            />
+                        </div>
+                        <FormError errorField={errors[formFields.type]} />
+                    </div>
                     <div className="form-group">
                         {auth.hasCapability(Capability.addingParents) && (
                             <div className="input-group mb-3">
@@ -212,10 +260,9 @@ export default function UploadFileView() {
 
                         <div className="d-flex justify-content-end">
                             <input
-                                value="Upload file"
+                                value="Upload blob"
                                 className="btn btn-success"
                                 type="submit"
-                                disabled={!file}
                             />
                         </div>
                     </div>

@@ -155,10 +155,7 @@ function AppRoutes() {
                         element={<ProfileGroupMembers />}
                     />
                     <Route path="groups" element={<ProfileGroups />} />
-                    <Route
-                        path="capabilities"
-                        element={<ProfileCapabilities />}
-                    />
+                    <Route path="capabilities" element={<UserCapabilities />} />
                     <Route path="api-keys" element={<ProfileAPIKeys />} />
                     <Route
                         path="reset-password"

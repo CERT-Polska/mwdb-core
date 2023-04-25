@@ -27,6 +27,9 @@ function CapabilitiesTable({ profile }) {
     }
 
     function isDeleteButtonRender(cap) {
+        if (cap === Capability.manageUsers) {
+            return false;
+        }
         return !isNil(profile.login) ? isUserDeleteButtonRender(cap) : true;
     }
 

@@ -4,7 +4,8 @@ version: "3.3"
 services:
   minio:
     image: minio/minio
-    command: "server --address 0.0.0.0:9000 --console-address :8070 /data"
+    entrypoint: sh
+    command: -c "mkdir -p /data/mwdb && minio server --address 0.0.0.0:9000 --console-address :8070 /data"
     volumes:
       - /tmp/minio:/data
     ports:
@@ -65,6 +66,8 @@ services:
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - postgres-vars.env
+    ports:
+      - "127.0.0.1:54322:5432"
   redis:
     image: redis:alpine
   mailhog:

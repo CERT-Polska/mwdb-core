@@ -251,12 +251,13 @@ class GroupResource(Resource):
         if obj["workspace"] is not None:
             group.workspace = obj["workspace"]
 
-        if (user is not None
-            and user.login == group.name 
-            and Capabilities.manage_users 
-            not in group.capabilities):
+        if (
+            user is not None
+            and user.login == group.name
+            and Capabilities.manage_users not in group.capabilities
+        ):
             raise Forbidden(f"Can't remove '{Capabilities.manage_users }', yourself")
-            
+
         db.session.commit()
 
         hooks.on_updated_group(group)

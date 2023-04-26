@@ -243,6 +243,13 @@ class GroupResource(Resource):
             group.name = obj["name"]
 
         if obj["capabilities"] is not None:
+            if (
+                user.login == group.name
+                and Capabilities.manage_users not in obj["capabilities"]
+            ):
+                raise Forbidden(
+                    f"Can't remove '{Capabilities.manage_users }', yourself"
+                )
             group.capabilities = obj["capabilities"]
 
         if obj["default"] is not None:
@@ -250,13 +257,6 @@ class GroupResource(Resource):
 
         if obj["workspace"] is not None:
             group.workspace = obj["workspace"]
-
-        if (
-            user is not None
-            and user.login == group.name
-            and Capabilities.manage_users not in group.capabilities
-        ):
-            raise Forbidden(f"Can't remove '{Capabilities.manage_users }', yourself")
 
         db.session.commit()
 

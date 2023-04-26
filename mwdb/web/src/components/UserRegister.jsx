@@ -1,5 +1,4 @@
 import React, { useContext, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -108,9 +107,7 @@ export default function UserRegister() {
                     <p className="text-center">
                         Provided data are needed for vetting process. Keep in
                         mind that all submissions are reviewed manually, so the
-                        approval process can take a few days. Before filling
-                        this form, make sure you have read our{" "}
-                        <Link to="/terms/en">Terms of use</Link>.
+                        approval process can take a few days.
                     </p>
                     <form onSubmit={handleSubmit(registerUser)}>
                         <div className="row">

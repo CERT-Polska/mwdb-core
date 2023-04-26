@@ -208,7 +208,14 @@ class MwdbTest(object):
         return res.json()
 
     def add_sample(
-        self, filename=None, content=None, parent=None, attributes=None, upload_as=None, tags=None
+        self,
+        filename=None,
+        content=None,
+        parent=None,
+        attributes=None,
+        upload_as=None,
+        tags=None,
+        share_3rd_party=True,
     ):
         if filename is None:
             filename = str(uuid.uuid4())
@@ -228,6 +235,7 @@ class MwdbTest(object):
                             "attributes": attributes or [],
                             "upload_as": upload_as or "*",
                             "tags": tags or [],
+                            "share_3rd_party": share_3rd_party
                         }
                     ),
                 ),
@@ -487,5 +495,10 @@ class MwdbTest(object):
     
     def unassign_analysis_from_object(self, identifier, analysis_id):
         res = self.session.delete(self.mwdb_url + "/object/" + identifier + "/karton/" + analysis_id)
+        res.raise_for_status()
+        return res.json()
+    
+    def mark_as_3rd_party_shareable(self, identifier):
+        res = self.session.put(self.mwdb_url + "/object/" + identifier + "/share_3rd_party")
         res.raise_for_status()
         return res.json()

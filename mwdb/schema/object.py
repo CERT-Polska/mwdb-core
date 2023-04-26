@@ -112,6 +112,7 @@ class ObjectItemResponseSchema(Schema):
     attributes = fields.Nested(
         AttributeItemResponseSchema, many=True, required=True, allow_none=False
     )
+    share_3rd_party = fields.Boolean(required=True, allow_none=False)
 
     @post_dump(pass_original=True)
     def get_accessible_attributes(self, data, object, **kwargs):

@@ -25,6 +25,7 @@ export const Capability = {
     kartonAssign: "karton_assign",
     kartonReanalyze: "karton_reanalyze",
     removingKarton: "karton_unassign",
+    modify3rdPartySharing: "modify_3rd_party_sharing",
 };
 
 export let capabilitiesList = {
@@ -59,6 +60,8 @@ export let capabilitiesList = {
         "Can assign existing analysis to the object (required by karton-mwdb-reporter)",
     [Capability.kartonReanalyze]: "Can resubmit any object for analysis",
     [Capability.removingKarton]: "Can remove analysis from object",
+    [Capability.modify3rdPartySharing]:
+        "Can mark objects as shareable with 3rd parties",
 };
 
 afterPluginsLoaded(() => {

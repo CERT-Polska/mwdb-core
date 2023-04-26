@@ -1,6 +1,6 @@
 from .relations import *
 from .utils import ShouldRaise, MwdbTest
-
+from .utils import base62uuid
 
 def test_share_with_foreign(admin_session):
     testCase = RelationTestCase(admin_session)
@@ -129,3 +129,30 @@ def test_list_groups_for_share(admin_session):
         "registered",
         "public"
     ])
+
+
+def test_3rd_party_share(admin_session):
+    testCase = RelationTestCase(admin_session)
+    
+    Alice = testCase.new_user("Alice")
+    Bob = testCase.new_user("Bob")
+    Charlie = testCase.new_user("Charlie", capabilities=["modify_3rd_party_sharing"])
+
+    ##### test modifying "share_3rd_party with capability"
+    fileA = Alice.session.add_sample(upload_as="public", share_3rd_party=False)
+    
+    with ShouldRaise(403):
+        Bob.session.mark_as_3rd_party_shareable(fileA["id"])
+
+    Charlie.session.mark_as_3rd_party_shareable(fileA["id"])
+    #####
+
+    ##### test reuploading the same object
+    fileB = Alice.session.add_sample(upload_as="public", share_3rd_party=False)
+
+    assert fileB["share_3rd_party"] == False
+
+    Bob.session.add_sample(upload_as="public", share_3rd_party=True)
+    obj = admin_session.get_sample(fileB["id"])
+    assert obj["share_3rd_party"] == True
+    #####

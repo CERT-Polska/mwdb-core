@@ -555,6 +555,11 @@ function removeKartonAnalysisFromObject(id, analysis_id) {
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
+function enableSharing3rdParty(identifier) {
+    console.log(`/object/${identifier}/share_3rd_party`);
+    return axios.put(`/object/${identifier}/share_3rd_party`);
+}
+
 export const api = {
     axios,
     getApiForEnvironment,
@@ -658,6 +663,7 @@ export const api = {
     getKartonAnalysisStatus,
     resubmitKartonAnalysis,
     removeKartonAnalysisFromObject,
+    enableSharing3rdParty,
 };
 
 export const APIContext = React.createContext({});

@@ -304,16 +304,22 @@ export default function Upload() {
                             []
                         )}
                         <div className="form-group">
-                            <input
-                                type="checkbox"
-                                name="share_3rd"
-                                id="share_3rd_party"
-                                checked={share3rdParty}
-                                onChange={() =>
-                                    setShare3rdParty(!share3rdParty)
-                                }
-                            />
-                            <label>&nbsp;Share with third parties</label>
+                            <label>Share with third parties</label>
+                            <div className="material-switch">
+                                <input
+                                    type="checkbox"
+                                    name="share_3rd"
+                                    id="share_3rd_party"
+                                    checked={share3rdParty}
+                                    onChange={() =>
+                                        setShare3rdParty(!share3rdParty)
+                                    }
+                                />
+                                <label
+                                    htmlFor="share_3rd_party"
+                                    className="bg-primary"
+                                />
+                            </div>
                         </div>
                         <input
                             value="Upload File"

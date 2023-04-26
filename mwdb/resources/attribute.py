@@ -95,9 +95,7 @@ class AttributeListResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        attributes = db_object.get_attributes(
-            show_hidden=show_hidden, show_karton=False
-        )
+        attributes = db_object.get_attributes(show_hidden=show_hidden)
         schema = AttributeListResponseSchema()
         return schema.dump({"attributes": attributes})
 
@@ -167,7 +165,7 @@ class AttributeListResource(Resource):
 
         db.session.commit()
         db.session.refresh(db_object)
-        attributes = db_object.get_attributes(show_karton=False)
+        attributes = db_object.get_attributes()
         attribute = next((attr for attr in attributes if attr.key == key), None)
         if is_new:
             hooks.on_created_attribute(db_object, attribute)

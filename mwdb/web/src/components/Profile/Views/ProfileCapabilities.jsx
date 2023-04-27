@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
@@ -8,9 +8,9 @@ import { api } from "@mwdb-web/commons/api";
 import { capabilitiesList, Capability } from "@mwdb-web/commons/auth";
 import {
     GroupBadge,
-    BootstrapSelect,
     ConfirmationModal,
     useViewAlert,
+    Select,
 } from "@mwdb-web/commons/ui";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 
@@ -102,23 +102,6 @@ function CapabilitiesSelect({ profile, getData }) {
             correctCapabilities.includes(cap)
     );
 
-    const selectHandler = useCallback(
-        (e, clickedIndex, isSelected) => {
-            const selectedCaps = chosenCapabilities || [];
-            if (isSelected)
-                setChosenCapabilities(
-                    selectedCaps.concat(capabilities[clickedIndex])
-                );
-            else
-                setChosenCapabilities(
-                    selectedCaps.filter(
-                        (cap) => cap !== capabilities[clickedIndex]
-                    )
-                );
-        },
-        [chosenCapabilities, capabilities]
-    );
-
     async function changeCapabilities() {
         try {
             await api.updateGroup(group, { capabilities: chosenCapabilities });
@@ -130,6 +113,15 @@ function CapabilitiesSelect({ profile, getData }) {
         } catch (error) {
             setAlert({ error });
         }
+    }
+
+    function onSelectChange(values) {
+        setChosenCapabilities(values.map((x) => x.value));
+    }
+
+    function renderSelectLabel(cap) {
+        const changed = changedCaps.includes(cap);
+        return changed ? `* ${cap}` : cap;
     }
 
     function dismissChanges() {
@@ -158,41 +150,25 @@ function CapabilitiesSelect({ profile, getData }) {
     return (
         <div className="mb-3">
             <div className="row">
-                <BootstrapSelect
-                    data-multiple-separator={""}
-                    data-live-search="true"
-                    noneSelectedText={"No capabilities selected"}
+                <Select
                     className={"col-lg-9"}
-                    multiple
-                    onChange={selectHandler}
-                >
-                    {capabilities.map((cap) => {
-                        const selectedCaps = chosenCapabilities || [];
-                        const selected = selectedCaps.includes(cap);
-                        const changed =
-                            chosenCapabilities.includes(cap) !==
-                            correctCapabilities.includes(cap);
-
-                        return (
-                            <option
-                                key={cap}
-                                data-content={`
-                            ${changed ? "*" : ""}
-                                <span class='badge badge-success'>${cap}</span>
-                                <small class="text-muted">${cap}</small>
-                            `}
-                                value={cap}
-                                selected={selected}
-                            >
-                                {cap}
-                            </option>
-                        );
+                    placeholder={"No capabilities selected"}
+                    isMulti
+                    options={capabilities.map((cap) => {
+                        return {
+                            value: cap,
+                            label: renderSelectLabel(cap),
+                        };
                     })}
-                </BootstrapSelect>
-                <div
-                    className="col-lg-3 justify-content-between"
-                    style={{ display: "flex" }}
-                >
+                    value={chosenCapabilities.map((cap) => ({
+                        value: cap,
+                        label: renderSelectLabel(cap),
+                    }))}
+                    onChange={onSelectChange}
+                    closeMenuOnSelect={false}
+                    hideSelectedOptions={false}
+                />
+                <div className="col-lg-3 d-flex justify-content-between align-items-center">
                     <button
                         className="btn btn-outline-success"
                         disabled={changedCaps.length === 0}

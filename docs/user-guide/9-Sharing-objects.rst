@@ -270,6 +270,11 @@ Each capability has its own name and scope:
 
   Can manually resubmit object to Karton.
 
+*
+  **modify_3rd_party_sharing - Can mark objects as shareable with 3rd parties**
+
+  Can manually mark object as shareable with 3rd parties - it can be done only for objects, which are visible for this user.
+
 User capabilities are the sum of all group capabilities. If you want to enable capability system-wide (e.g. enable all users to add tags), enable that capability for ``registered`` group or ``public`` group if you want to include guests.
 
 In mwdb.cert.pl service - ``registered`` group is allowed to:

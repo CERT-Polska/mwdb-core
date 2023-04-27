@@ -47,7 +47,7 @@ class Capabilities(object):
     karton_reanalyze = "karton_reanalyze"
     # Can remove Karton analysis from the object
     karton_unassign = "karton_unassign"
-    # Can mark object as shareable with 3rd parites
+    # Can mark object as shareable with 3rd parties
     modify_3rd_party_sharing = "modify_3rd_party_sharing"
 
     @classmethod

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import ReactDOM from "react-dom";
+import { useEffect, useRef } from "react";
+import { renderToString } from "react-dom/server";
 
 import * as dagreD3 from "dagre-d3";
 import * as d3 from "d3";
@@ -31,16 +31,13 @@ function DagreD3Plot(props) {
             props.height / 3 - 100
         );
 
-    const renderNodeElement = async (node) => {
+    const renderNodeElement = (node) => {
         const parentNode = document.createElement("div");
-        // ReactDOM.render is asynchronic - node render is deferred
-        return new Promise((resolve) => {
-            ReactDOM.render(
-                <NodeComponent node={node} remotePath={remotePath} />,
-                parentNode,
-                () => resolve(parentNode)
-            );
-        });
+        const nodeComponent = (
+            <NodeComponent node={node} remotePath={remotePath} />
+        );
+        parentNode.innerHTML = renderToString(nodeComponent);
+        return parentNode;
     };
 
     const enterRenderContext = () => {
@@ -94,12 +91,10 @@ function DagreD3Plot(props) {
         const svgGroup = d3.select(nodeSvg.current.firstChild);
 
         // Render all node components
-        let renderedNodes = await Promise.all(
-            props.nodes.map(async (node) => [
-                node,
-                await renderNodeElement(node),
-            ])
-        );
+        let renderedNodes = props.nodes.map((node) => [
+            node,
+            renderNodeElement(node),
+        ]);
 
         for (let [node, element] of renderedNodes) {
             graph.setNode(node.id, {
@@ -133,6 +128,9 @@ function DagreD3Plot(props) {
             );
         svg.call(zoom);
 
+        // TODO:
+        // This method may cause the browser to become unresponsive when dealing with large amounts of data,
+        // so it should be improved in the future.
         renderer(svgGroup, graph);
 
         svg.selectAll(".dagre-d3 .node").on("click", (id) =>

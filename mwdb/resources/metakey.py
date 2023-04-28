@@ -100,7 +100,7 @@ class MetakeyResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        metakeys = db_object.get_attributes(show_hidden=show_hidden)
+        metakeys = db_object.get_attributes(show_hidden=show_hidden, show_karton=True)
         schema = MetakeyListResponseSchema()
         return schema.dump({"metakeys": metakeys})
 
@@ -179,7 +179,7 @@ class MetakeyResource(Resource):
 
         db.session.commit()
         db.session.refresh(db_object)
-        metakeys = db_object.get_attributes()
+        metakeys = db_object.get_attributes(show_karton=True)
         schema = MetakeyListResponseSchema()
         return schema.dump({"metakeys": metakeys})
 

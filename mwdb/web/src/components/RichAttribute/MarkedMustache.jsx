@@ -203,6 +203,13 @@ class MarkedTokenizer extends Tokenizer {
 const mustacheWriter = new MustacheWriter();
 const markedTokenizer = new MarkedTokenizer();
 
+const tableClasses = {
+    table: "marked-table",
+    row: "marked-table-row",
+    cell: "marked-table-cell",
+    header: "marked-table-header",
+};
+
 // Custom renderer into React components
 function renderTokens(tokens, options) {
     const renderers = {
@@ -310,6 +317,37 @@ function renderTokens(tokens, options) {
                         ))}
                     </tbody>
                 </DataTable>
+            );
+        },
+        table(token) {
+            return (
+                <div className="table-responsive" key={uniqueId()}>
+                    <div
+                        className={`${tableClasses.table} table table-striped table-bordered table-hover`}
+                    >
+                        <div
+                            className={`${tableClasses.header} ${tableClasses.row}`}
+                        >
+                            {token.header.map((head, index) => (
+                                <div className={tableClasses.cell} key={index}>
+                                    {renderTokens(head.tokens, options)}
+                                </div>
+                            ))}
+                        </div>
+                        {token.rows.map((row, rowsIndex) => (
+                            <div key={rowsIndex} className={tableClasses.row}>
+                                {row.map((cell, cellIndex) => (
+                                    <div
+                                        key={cellIndex}
+                                        className={tableClasses.cell}
+                                    >
+                                        {renderTokens(cell.tokens, options)}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                </div>
             );
         },
         codespan(token) {

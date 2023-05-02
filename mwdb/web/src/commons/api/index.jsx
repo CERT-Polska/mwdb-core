@@ -6,6 +6,8 @@ function getApiForEnvironment() {
     return "/api";
 }
 
+//TODO: rewrite to TS
+
 let axios = Axios.create({
     baseURL: getApiForEnvironment(),
     timeout: 8000,

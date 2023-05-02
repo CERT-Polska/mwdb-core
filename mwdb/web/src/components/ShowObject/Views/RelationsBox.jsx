@@ -2,7 +2,13 @@ import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import Pagination from "react-js-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFile, faTable, faScroll, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+    faFile,
+    faTable,
+    faScroll,
+    faPlus,
+    faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";

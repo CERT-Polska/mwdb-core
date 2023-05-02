@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import Pagination from "react-js-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faFile, faTable, faScroll, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";
@@ -217,6 +217,7 @@ function RelationsBox(props) {
     return (
         <div className="card card-default">
             <div className="card-header">
+                {props.icon && <FontAwesomeIcon icon={props.icon} size="1x" />}
                 {props.header || "Relations"}
                 {!api.remote ? (
                     <Link
@@ -297,6 +298,7 @@ function TypedRelationsBox(props) {
             <div>
                 <RelationsBox
                     header={`${props.header}: ${typedRelationsCount}`}
+                    icon={props.icon}
                     updateRelationsActivePage={() =>
                         updateActivePage(
                             activePage,
@@ -334,18 +336,21 @@ export default function MultiRelationsBox() {
             <TypedRelationsBox
                 header="Related samples"
                 type="file"
+                icon={faFile}
                 itemsCountPerPage={itemsCountPerPage}
                 {...{ parents, children }}
             />
             <TypedRelationsBox
                 header="Related configs"
                 type="static_config"
+                icon={faTable}
                 itemsCountPerPage={itemsCountPerPage}
                 {...{ parents, children }}
             />
             <TypedRelationsBox
                 header="Related blobs"
                 type="text_blob"
+                icon={faScroll}
                 itemsCountPerPage={itemsCountPerPage}
                 {...{ parents, children }}
             />

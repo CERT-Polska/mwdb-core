@@ -81,7 +81,6 @@ export default function ShowObject({
         async (doLoad) => {
             try {
                 let response = await api.getObject(objectType, objectId);
-                console.log({ response, objectType });
                 setObjectState({
                     type: doLoad ? objectLoad : objectUpdate,
                     object: response.data,

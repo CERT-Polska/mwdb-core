@@ -25,11 +25,22 @@ export type Capabality =
     | "adding_parents";
 
 export type User = {
-    capabilities: Capabality[];
-    groups: string[];
     login: string;
-    provider: null | string;
-    token: string;
+    groups: string[] | Group[];
+    capabilities: Capabality[];
+    additional_info?: string;
+    api_keys?: ApiKey[];
+    disabled?: boolean;
+    email?: string;
+    feed_quality?: string;
+    pending?: boolean;
+    requested_on?: string | Date;
+    provider?: null | string;
+    token?: string;
+    logged_on?: string | Date;
+    registered_on?: string | Date;
+    registrar_login?: string | Date;
+    set_password_on?: string | Date;
 };
 
 export type Group = {
@@ -49,6 +60,16 @@ export type Attribute = {
     key: string;
     id: number;
     value: unknown;
+};
+
+export type AttributeDefinition = {
+    description: string;
+    example_value: string;
+    hidden: boolean;
+    key: string;
+    label: string;
+    rich_template: string;
+    url_template: string;
 };
 
 export type Tag = {
@@ -104,4 +125,87 @@ export type BlobData = ObjectCommonData & {
     last_seen: string | Date;
     latest_config: unknown;
     type: "text_blob";
+};
+
+export type ObjectListItem = {
+    file_name: string;
+    file_size: number;
+    file_type: string;
+    id: string;
+    md5: string;
+    sha1: string;
+    sha256: string;
+    tags: Tag[];
+    type: "file";
+    upload_time: string | Date;
+};
+
+export type ConfigListItem = {
+    config_type: ConfigType;
+    family: string;
+    id: string;
+    tags: Tag[];
+    type: "static_config";
+    upload_time: string | Date;
+};
+
+export type BlobListItem = {
+    blob_name: string;
+    blob_size: number;
+    blob_type: string;
+    id: string;
+    last_seen: string | Date;
+    type: "text_blob";
+    tags: Tag[];
+};
+
+export type Comment = {
+    author: string;
+    comment: string;
+    id: number;
+    timestamp: string | Date;
+};
+
+export type Share = {
+    access_reason: string;
+    access_time: string | Date;
+    group_name: string;
+    reason_type: string;
+    related_object_dhash: string;
+    related_object_type: ObjectType;
+    related_user_login: string;
+};
+
+export type Query = {
+    id: number;
+    name: string;
+    query: string;
+    type: ObjectType;
+};
+
+export type ApiKey = {
+    id: string;
+    issued_on: string | Date;
+    issuer_login: string;
+    name: string;
+};
+
+export type Family = {
+    count: number;
+    family: string;
+    last_upload: string;
+};
+
+export type KartonAnalyse = {
+    status: string;
+    id: string;
+    processing_in: Record<
+        `additionalProp${number}`,
+        {
+            status: string[];
+            received_from: string[];
+        }
+    >;
+    arguments: Record<`additionalProp${number}`, string>;
+    last_update: string | Date;
 };

@@ -1,4 +1,16 @@
+import Axios from "axios";
+import React from "react";
 import {
+    AcceptPendingUserResponse,
+    AddAttributeDefinitionReguest,
+    AddAttributeDefinitionResponse,
+    AddGroupMemberResponse,
+    AddObjectAttributeResponse,
+    AddObjectCommentResponse,
+    AddObjectFavoriteResponse,
+    AddObjectRelationResponse,
+    AddObjectTagResponse,
+    AddQuickQueryResponse,
     ApiKeyAddResponse,
     ApiKeyRemoveResponse,
     AuthGrupsResponse,
@@ -7,24 +19,74 @@ import {
     AuthRefreshResponse,
     AuthRequestPasswordChangeResponse,
     AuthSetPasswordResponse,
+    CreateUserResponse,
+    DeleteQuickQueryResponse,
+    DownloadFileResponse,
+    DownloadRemoteFileResponse,
+    GenerateSetPasswordResponse,
+    GetAttributeDefinitionResponse,
+    GetAttributeDefinitionsResponse,
+    GetConigStatsResponse,
+    GetGroupResponse,
+    GetGroupsResponse,
+    GetKartonAnalysesListResponse,
+    GetKartonAnalysisStatusResponse,
+    GetObjectAttributesResponse,
+    GetObjectCommentsResponse,
+    GetObjectCountResponse,
+    GetObjectListResponse,
+    GetObjectRelationsResponse,
     GetObjectResponse,
+    GetObjectSharesResponse,
+    GetObjectTagsResponse,
+    GetPendingUsersResponse,
+    GetQuickQueriesResponse,
+    GetRemoteNamesResponse,
+    GetRemoteObjectAttributesResponse,
+    GetRemoteObjectCommentsResponse,
+    GetRemoteObjectCountResponse,
+    GetRemoteObjectListResponse,
+    GetRemoteObjectRelationsResponse,
+    GetRemoteObjectResponse,
+    GetRemoteObjectSharesResponse,
+    GetRemoteObjectTagsResponse,
+    GetShareInfoResponse,
+    GetTagsResponse,
+    GetUserProfileResponse,
+    GetUserResponse,
+    GetUsersResponse,
+    PullObjectRemoteResponse,
+    PushObjectRemoteResponse,
+    RegisterGroupResponse,
+    RegisterUserResponse,
+    RejectPendingUserResponse,
+    RemoveAttributeDefinitionResponse,
+    RemoveGroupMemberResponse,
+    RemoveGroupResponse,
+    RemoveKartonAnalysisFromObject,
+    RemoveObjectAttributeResponse,
+    RemoveObjectCommentResponse,
+    RemoveObjectFavoriteResponse,
+    RemoveObjectRelationResponse,
+    RemoveObjectResponse,
+    RemoveObjectTagResponse,
+    RemoveUserResponse,
+    ResubmitKartonAnalysisResponse,
     ServerAdminInfoResponse,
     ServerDocsResponse,
     ServerInfoResponse,
+    SetGroupAdminResponse,
+    SetUserDisabledResponse,
+    ShareObjectWithResponse,
+    UpdateAttributeDefinitionRequest,
+    UpdateAttributeDefinitionResponse,
+    UpdateGroupResponse,
+    UpdateUserRequest,
+    UpdateUserResponse,
+    UploadFileResponse,
+    UserRequestPasswordChangeResponse,
 } from "@mwdb-web/types/api";
-import { ObjectType } from "@mwdb-web/types/types";
-import Axios from "axios";
-import React from "react";
-
-export type UpdateAttributeDefinitionParams = {
-    key: string;
-    label: string;
-    description: string;
-    url_template: string;
-    rich_template: string;
-    example_value: string;
-    hidden: boolean;
-};
+import { Attribute, ObjectType } from "@mwdb-web/types/types";
 
 function getApiForEnvironment() {
     // Default API endpoint
@@ -176,187 +238,223 @@ function getObject(type: ObjectType, id: number): GetObjectResponse {
     return axios.get(`/${type}/${id}`);
 }
 
-function getObjectList(type: ObjectType, older_than: string, query: string) {
+function getObjectList(
+    type: ObjectType,
+    older_than: string,
+    query: string
+): GetObjectListResponse {
     return axios.get(`/${type}`, {
         params: { older_than, query },
     });
 }
 
-function getObjectCount(type: any, query: string) {
+function getObjectCount(
+    type: ObjectType,
+    query: string
+): GetObjectCountResponse {
     return axios.get(`/${type}/count`, {
         params: { query },
     });
 }
 
-function getTags(query: string) {
+function getTags(query: string): GetTagsResponse {
     return axios.get(`/tag`, {
         params: { query },
     });
 }
 
-function getShareInfo() {
+function getShareInfo(): GetShareInfoResponse {
     return axios.get("/share");
 }
 
-function getObjectTags(id: number) {
+function getObjectTags(id: number): GetObjectTagsResponse {
     return axios.get(`/object/${id}/tag`);
 }
 
-function getObjectComments(id: number) {
+function getObjectComments(id: number): GetObjectCommentsResponse {
     return axios.get(`/object/${id}/comment`);
 }
 
-function getObjectRelations(id: number) {
+function getObjectRelations(id: number): GetObjectRelationsResponse {
     return axios.get(`/object/${id}/relations`);
 }
 
-function addObjectRelation(parent: string, child: string) {
+function addObjectRelation(
+    parent: string,
+    child: string
+): AddObjectRelationResponse {
     return axios.put(`/object/${parent}/child/${child}`);
 }
 
-function removeObjectRelation(parent: string, child: string) {
+function removeObjectRelation(
+    parent: string,
+    child: string
+): RemoveObjectRelationResponse {
     return axios.delete(`/object/${parent}/child/${child}`);
 }
 
-function getObjectShares(id: number) {
+function getObjectShares(id: number): GetObjectSharesResponse {
     return axios.get(`/object/${id}/share`);
 }
 
-function getObjectAttributes(id: number) {
+function getObjectAttributes(id: number): GetObjectAttributesResponse {
     return axios.get(`/object/${id}/attribute`);
 }
 
-function removeObject(id: number) {
+function removeObject(id: number): RemoveObjectResponse {
     return axios.delete(`/object/${id}`);
 }
 
-function addObjectTag(id: number, tag: string) {
+function addObjectTag(id: number, tag: string): AddObjectTagResponse {
     return axios.put(`/object/${id}/tag`, { tag });
 }
 
-function removeObjectTag(id: string, tag: string) {
+function removeObjectTag(id: string, tag: string): RemoveObjectTagResponse {
     return axios.delete(`/object/${id}/tag`, {
         params: { tag },
     });
 }
 
-function addObjectComment(id: number, comment: string) {
+function addObjectComment(
+    id: number,
+    comment: string
+): AddObjectCommentResponse {
     return axios.post(`/object/${id}/comment`, { comment });
 }
 
-function removeObjectComment(id: number, comment_id: number) {
+function removeObjectComment(
+    id: number,
+    comment_id: number
+): RemoveObjectCommentResponse {
     return axios.delete(`/object/${id}/comment/${comment_id}`);
 }
 
-function addObjectAttribute(object_id: number, key: string, value: string) {
+function addObjectAttribute(
+    object_id: number,
+    key: string,
+    value: string
+): AddObjectAttributeResponse {
     return axios.post(`/object/${object_id}/attribute`, { key, value });
 }
 
-function removeObjectAttribute(object_id: number, attribute_id: number) {
+function removeObjectAttribute(
+    object_id: number,
+    attribute_id: number
+): RemoveObjectAttributeResponse {
     return axios.delete(`/object/${object_id}/attribute/${attribute_id}`);
 }
 
-function addObjectFavorite(id: number) {
+function addObjectFavorite(id: number): AddObjectFavoriteResponse {
     return axios.put(`/object/${id}/favorite`);
 }
 
-function removeObjectFavorite(id: number) {
+function removeObjectFavorite(id: number): RemoveObjectFavoriteResponse {
     return axios.delete(`/object/${id}/favorite`);
 }
 
-function shareObjectWith(id: number, group: string) {
+function shareObjectWith(id: number, group: string): ShareObjectWithResponse {
     return axios.put(`/object/${id}/share`, { group });
 }
 
-function search(query: string) {
-    return axios.post(`/search`, { query });
-}
-
-function addQuickQuery(type: string, name: string, query: string) {
+function addQuickQuery(
+    type: string,
+    name: string,
+    query: string
+): AddQuickQueryResponse {
     return axios.post(`/${type}/quick_query`, { type, name, query });
 }
 
-function getQuickQueries(type: any) {
+function getQuickQueries(type: ObjectType): GetQuickQueriesResponse {
     return axios.get(`/${type}/quick_query`);
 }
 
-function deleteQuickQuery(id: number) {
+function deleteQuickQuery(id: number): DeleteQuickQueryResponse {
     return axios.delete(`/quick_query/${id}`);
 }
 
-function getGroups() {
+function getGroups(): GetGroupsResponse {
     return axios.get("/group");
 }
 
-function getGroup(name: string) {
+function getGroup(name: string): GetGroupResponse {
     return axios.get(`/group/${name}`);
 }
 
-function registerGroup(name: string) {
+function registerGroup(name: string): RegisterGroupResponse {
     return axios.post(`/group/${name}`, { name });
 }
 
-function updateGroup(name: string, value: string) {
+function updateGroup(name: string, value: string): UpdateGroupResponse {
     return axios.put(`/group/${name}`, value);
 }
 
-function removeGroup(name: string) {
+function removeGroup(name: string): RemoveGroupResponse {
     return axios.delete(`/group/${name}`);
 }
 
-function addGroupMember(name: string, member: string) {
+function addGroupMember(name: string, member: string): AddGroupMemberResponse {
     return axios.post(`/group/${name}/member/${member}`);
 }
 
-function removeGroupMember(name: string, member: string) {
+function removeGroupMember(
+    name: string,
+    member: string
+): RemoveGroupMemberResponse {
     return axios.delete(`/group/${name}/member/${member}`);
 }
 
-function setGroupAdmin(name: string, member: string, group_admin: any) {
+function setGroupAdmin(
+    name: string,
+    member: string,
+    group_admin: boolean
+): SetGroupAdminResponse {
     return axios.put(`/group/${name}/member/${member}`, { group_admin });
 }
 
-function getUsers() {
+function getUsers(): GetUsersResponse {
     return axios.get("/user", { timeout: undefined });
 }
 
-function getPendingUsers() {
+function getPendingUsers(): GetPendingUsersResponse {
     return axios.get("/user", {
         timeout: undefined,
         params: { pending: 1 },
     });
 }
 
-function acceptPendingUser(login: string) {
+function acceptPendingUser(login: string): AcceptPendingUserResponse {
     return axios.post(`/user/${login}/pending`);
 }
 
-function rejectPendingUser(login: string, send_email: string) {
+function rejectPendingUser(
+    login: string,
+    send_email: string
+): RejectPendingUserResponse {
     return axios.delete(`/user/${login}/pending`, { params: { send_email } });
 }
 
-function getUser(login: string) {
+function getUser(login: string): GetUserResponse {
     return axios.get(`/user/${login}`);
 }
 
-function getUserProfile(login: string) {
+function getUserProfile(login: string): GetUserProfileResponse {
     return axios.get(`/profile/${login}`);
 }
 
-function generateApiToken(login: string, expiration: number) {
-    expiration = expiration || 3600 * 24 * 365 * 10;
-    return axios.post(`/user/${login}/api_token`, { expiration });
-}
-
-function generateSetPasswordToken(login: string) {
+function generateSetPasswordToken(login: string): GenerateSetPasswordResponse {
     return axios.get(`/user/${login}/change_password`);
 }
 
-function userRequestPasswordChange(login: string) {
+function userRequestPasswordChange(
+    login: string
+): UserRequestPasswordChangeResponse {
     return axios.post(`/user/${login}/request_password_change`);
 }
 
-function setUserDisabled(login: string, disabled: boolean) {
+function setUserDisabled(
+    login: string,
+    disabled: boolean
+): SetUserDisabledResponse {
     return axios.put(`/user/${login}`, { disabled });
 }
 
@@ -366,7 +464,7 @@ function createUser(
     additional_info: string,
     feed_quality: string,
     send_email: string
-) {
+): CreateUserResponse {
     return axios.post(`/user/${login}`, {
         login,
         email,
@@ -381,7 +479,7 @@ function registerUser(
     email: string,
     additional_info: string,
     recaptcha: string
-) {
+): RegisterUserResponse {
     return axios.post(`/auth/register`, {
         login,
         email,
@@ -390,10 +488,8 @@ function registerUser(
     });
 }
 
-function updateUser(
-    login: string,
-    { email, additionalInfo, feedQuality }: any
-) {
+function updateUser(values: UpdateUserRequest): UpdateUserResponse {
+    const { email, login, additionalInfo, feedQuality } = values;
     return axios.put(`/user/${login}`, {
         email,
         additional_info: additionalInfo,
@@ -401,32 +497,26 @@ function updateUser(
     });
 }
 
-function removeUser(login: string) {
+function removeUser(login: string): RemoveUserResponse {
     return axios.delete(`/user/${login}`);
 }
 
-function getAttributeDefinitions(access: string) {
+function getAttributeDefinitions(
+    access: string
+): GetAttributeDefinitionsResponse {
     return axios.get("/attribute", {
         params: { access },
     });
 }
 
-function getAttributeDefinition(key: string) {
+function getAttributeDefinition(key: string): GetAttributeDefinitionResponse {
     return axios.get(`/attribute/${key}`);
 }
 
 function addAttributeDefinition(
-    key: string,
-    label: string,
-    description: string,
-    hidden: boolean
-) {
-    return axios.post("/attribute", {
-        key,
-        label,
-        description,
-        hidden,
-    });
+    values: AddAttributeDefinitionReguest
+): AddAttributeDefinitionResponse {
+    return axios.post("/attribute", values);
 }
 
 function updateAttributeDefinition({
@@ -437,7 +527,7 @@ function updateAttributeDefinition({
     rich_template,
     example_value,
     hidden,
-}: UpdateAttributeDefinitionParams) {
+}: UpdateAttributeDefinitionRequest): UpdateAttributeDefinitionResponse {
     return axios.put(`/attribute/${key}`, {
         label,
         description,
@@ -469,26 +559,29 @@ function setAttributePermission(
     });
 }
 
-function removeAttributePermission(key: string, group_name: string) {
+function removeAttributePermission(
+    key: string,
+    group_name: string
+): RemoveAttributeDefinitionResponse {
     return axios.delete(`/attribute/${key}/permissions`, {
         params: { group_name },
     });
 }
 
-function downloadFile(id: number, obfuscate: number = 0) {
+function downloadFile(id: number, obfuscate: number = 0): DownloadFileResponse {
     return axios.get(`/file/${id}/download?obfuscate=${obfuscate}`, {
         responseType: "arraybuffer",
         responseEncoding: "binary",
     });
 }
 
-async function requestFileDownloadLink(id: number) {
+async function requestFileDownloadLink(id: number): Promise<string> {
     const response = await axios.post(`/file/${id}/download`);
     const baseURL = getApiForEnvironment();
     return `${baseURL}/file/${id}/download?token=${response.data.token}`;
 }
 
-async function requestZipFileDownloadLink(id: number) {
+async function requestZipFileDownloadLink(id: number): Promise<string> {
     const response = await axios.post(`/file/${id}/download/zip`);
     const baseURL = getApiForEnvironment();
     return `${baseURL}/file/${id}/download/zip?token=${response.data.token}`;
@@ -498,9 +591,9 @@ function uploadFile(
     file: File,
     parent: string,
     upload_as: string,
-    attributes: any[],
+    attributes: Attribute[],
     fileUploadTimeout: number
-) {
+): UploadFileResponse {
     let formData = new FormData();
     formData.append("file", file);
     formData.append(
@@ -514,37 +607,33 @@ function uploadFile(
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
 }
 
-function getRemoteNames() {
+function getRemoteNames(): GetRemoteNamesResponse {
     return axios.get("/remote");
 }
 
 function pushObjectRemote(
     remote: string,
-    type: any,
+    type: ObjectType,
     identifier: string,
     upload_as: string
-) {
+): PushObjectRemoteResponse {
     return axios.post(`/remote/${remote}/push/${type}/${identifier}`, {
-        upload_as: upload_as,
+        upload_as,
     });
 }
 
 function pullObjectRemote(
     remote: string,
-    type: any,
+    type: ObjectType,
     identifier: string,
     upload_as: string
-) {
+): PullObjectRemoteResponse {
     return axios.post(`/remote/${remote}/pull/${type}/${identifier}`, {
-        upload_as: upload_as,
+        upload_as,
     });
 }
 
-function getObjectRemote(remote: string, identifier: string) {
-    return axios.get(`/remote/${remote}/api/object/${identifier}`);
-}
-
-function getConfigStats(fromTime: number | string) {
+function getConfigStats(fromTime: number | string): GetConigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,
@@ -552,55 +641,84 @@ function getConfigStats(fromTime: number | string) {
     });
 }
 
-function getRemoteObject(remote: string, type: any, id: number) {
+function getRemoteObject(
+    remote: string,
+    type: ObjectType,
+    id: number
+): GetRemoteObjectResponse {
     return axios.get(`/remote/${remote}/api/${type}/${id}`);
 }
 
 function getRemoteObjectList(
     remote: string,
-    type: any,
+    type: ObjectType,
     older_than: string,
     query: string
-) {
+): GetRemoteObjectListResponse {
     return axios.get(`/remote/${remote}/api/${type}`, {
         params: { older_than, query },
     });
 }
 
-function getRemoteObjectCount(remote: string, type: string, query: string) {
+function getRemoteObjectCount(
+    remote: string,
+    type: string,
+    query: string
+): GetRemoteObjectCountResponse {
     return axios.get(`/remote/${remote}/api/${type}/count`, {
         params: { query },
     });
 }
 
-function getRemoteObjectTags(remote: string, id: number) {
+function getRemoteObjectTags(
+    remote: string,
+    id: number
+): GetRemoteObjectTagsResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/tag`);
 }
 
-function getRemoteObjectComments(remote: string, id: number) {
+function getRemoteObjectComments(
+    remote: string,
+    id: number
+): GetRemoteObjectCommentsResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/comment`);
 }
 
-function getRemoteObjectRelations(remote: string, id: number) {
+function getRemoteObjectRelations(
+    remote: string,
+    id: number
+): GetRemoteObjectRelationsResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/relations`);
 }
 
-function getRemoteObjectShares(remote: string, id: number) {
+function getRemoteObjectShares(
+    remote: string,
+    id: number
+): GetRemoteObjectSharesResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/share`);
 }
 
-function getRemoteObjectAttributes(remote: string, id: number) {
+function getRemoteObjectAttributes(
+    remote: string,
+    id: number
+): GetRemoteObjectAttributesResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/attribute`);
 }
 
-function downloadRemoteFile(remote: string, id: number) {
+function downloadRemoteFile(
+    remote: string,
+    id: number
+): DownloadRemoteFileResponse {
     return axios.get(`/remote/${remote}/api/file/${id}/download`, {
         responseType: "arraybuffer",
         responseEncoding: "binary",
     });
 }
 
-async function requestRemoteFileDownloadLink(remote: string, id: number) {
+async function requestRemoteFileDownloadLink(
+    remote: string,
+    id: number
+): Promise<string> {
     const response = await axios.post(
         `/remote/${remote}/api/file/${id}/download`
     );
@@ -608,7 +726,10 @@ async function requestRemoteFileDownloadLink(remote: string, id: number) {
     return `${baseURL}/remote/${remote}/api/file/${id}/download?token=${response.data.token}`;
 }
 
-async function requestRemoteZipFileDownloadLink(remote: string, id: number) {
+async function requestRemoteZipFileDownloadLink(
+    remote: string,
+    id: number
+): Promise<string> {
     const response = await axios.post(
         `/remote/${remote}/api/file/${id}/download/zip`
     );
@@ -616,19 +737,25 @@ async function requestRemoteZipFileDownloadLink(remote: string, id: number) {
     return `${baseURL}/remote/${remote}/api/file/${id}/download/zip?token=${response.data.token}`;
 }
 
-function getKartonAnalysesList(id: number) {
+function getKartonAnalysesList(id: number): GetKartonAnalysesListResponse {
     return axios.get(`/object/${id}/karton`);
 }
 
-function getKartonAnalysisStatus(id: number, analysis_id: number) {
+function getKartonAnalysisStatus(
+    id: number,
+    analysis_id: number
+): GetKartonAnalysisStatusResponse {
     return axios.get(`/object/${id}/karton/${analysis_id}`);
 }
 
-function resubmitKartonAnalysis(id: number) {
+function resubmitKartonAnalysis(id: number): ResubmitKartonAnalysisResponse {
     return axios.post(`/object/${id}/karton`);
 }
 
-function removeKartonAnalysisFromObject(id: number, analysis_id: number) {
+function removeKartonAnalysisFromObject(
+    id: number,
+    analysis_id: number
+): RemoveKartonAnalysisFromObject {
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
@@ -671,7 +798,6 @@ export const api = {
     addObjectFavorite,
     removeObjectFavorite,
     shareObjectWith,
-    search,
     getQuickQueries,
     addQuickQuery,
     deleteQuickQuery,
@@ -689,7 +815,6 @@ export const api = {
     getUsers,
     getUser,
     getUserProfile,
-    generateApiToken,
     generateSetPasswordToken,
     userRequestPasswordChange,
     setUserDisabled,
@@ -715,7 +840,6 @@ export const api = {
     getRemoteNames,
     pushObjectRemote,
     pullObjectRemote,
-    getObjectRemote,
     getConfigStats,
     getObjectRelations,
     addObjectRelation,
@@ -737,8 +861,12 @@ export const api = {
     removeKartonAnalysisFromObject,
 };
 
+type APIProviderProps = {
+    children: React.ReactNode;
+};
+
 export const APIContext = React.createContext({});
-export function APIProvider(props: any) {
+export function APIProvider(props: APIProviderProps) {
     return (
         <APIContext.Provider value={api}>{props.children}</APIContext.Provider>
     );

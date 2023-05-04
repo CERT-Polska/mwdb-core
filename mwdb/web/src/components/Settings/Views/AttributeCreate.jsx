@@ -26,12 +26,10 @@ export default function AttributeCreate() {
 
     async function createAttribute() {
         try {
-            await api.addAttributeDefinition(
-                values.attributeKey,
-                values.label,
-                values.description,
-                values.hidden
-            );
+            await api.addAttributeDefinition({
+                ...values,
+                key: values.attributeKey,
+            });
             viewAlert.redirectToAlert({
                 target: `/settings/attribute/${values.attributeKey}`,
                 success: "Attribute created successfully.",

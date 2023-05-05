@@ -3,7 +3,11 @@ import { AuthContext } from "../auth";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
-export function RequiresAuth({ children }) {
+type Props = {
+    children: React.ReactNode;
+};
+
+export function RequiresAuth({ children }: Props) {
     /**
      * Wrapper for views that require authentication
      */
@@ -21,21 +25,6 @@ export function RequiresAuth({ children }) {
                 }}
             />
         );
-    }
-    return children ? children : <Outlet />;
-}
-
-export function RequiresCapability({ capability, children }) {
-    /**
-     * Wrapper for views that require additional capability
-     */
-    const auth = useContext(AuthContext);
-    const location = useLocation();
-    if (!auth.hasCapability(capability)) {
-        toast(`You don't have permission to access '${location.pathname}'`, {
-            type: "error",
-        });
-        return <Navigate to="/" />;
     }
     return children ? children : <Outlet />;
 }

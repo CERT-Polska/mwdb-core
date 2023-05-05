@@ -113,7 +113,7 @@ function CommentList({ comments, removeComment }) {
             itemsCountPerPage * activePage
         )
         .map((comment, index) => (
-            <React.Fragment>
+            <React.Fragment key={index}>
                 <Comment
                     id={comment.id}
                     comment={comment.comment}

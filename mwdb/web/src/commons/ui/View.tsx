@@ -1,14 +1,22 @@
-import React, { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "./ErrorBoundary";
 import { Extendable } from "../plugins";
+import { AxiosServerErrors } from "@mwdb-web/types/types";
+
+type Messages = {
+    success?: string;
+    error?: AxiosServerErrors;
+    warning?: string;
+};
 
 export function useViewAlert() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const setMessages = useCallback(({ success, error, warning }) => {
+    const setMessages = useCallback(({ success, error, warning }: Messages) => {
+        console.log({ success, error, warning });
         if (success) {
             toast(success, { type: "success" });
         }
@@ -23,7 +31,7 @@ export function useViewAlert() {
     }, []);
 
     const setAlert = useCallback(
-        ({ success, error, warning, state }) => {
+        ({ success, error, warning, state }: any) => {
             const { pathname, search } = location;
             setMessages({ success, error, warning });
 
@@ -42,7 +50,7 @@ export function useViewAlert() {
     );
 
     const redirectToAlert = useCallback(
-        ({ success, error, warning, target, state }) => {
+        ({ success, error, warning, target, state }: any) => {
             setMessages({ success, error, warning });
 
             navigate(target, {
@@ -57,7 +65,13 @@ export function useViewAlert() {
     return { setAlert, redirectToAlert };
 }
 
-export default function View({ ident, children, fluid, style, showIf = true }) {
+export default function View({
+    ident,
+    children,
+    fluid,
+    style,
+    showIf = true,
+}: any) {
     /**
      * View component for all main views. Views shouldn't be nested.
      * Properties spec:

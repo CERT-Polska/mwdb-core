@@ -1,3 +1,5 @@
+import { AxiosError } from "axios";
+
 export type Capabality =
     | "personalize"
     | "share_queried_objects"
@@ -209,3 +211,8 @@ export type KartonAnalyse = {
     arguments: Record<`additionalProp${number}`, string>;
     last_update: string | Date;
 };
+
+export type AxiosServerErrors = AxiosError<{
+    message?: string;
+    errors?: Record<string, string>;
+}>;

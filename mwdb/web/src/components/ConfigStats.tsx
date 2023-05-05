@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -11,8 +11,9 @@ import {
 } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
+import { Family } from "@mwdb-web/types/types";
 
-function ConfigStatsItem(props) {
+function ConfigStatsItem(props: Family) {
     const remotePath = useRemotePath();
     return (
         <tr>
@@ -36,14 +37,14 @@ function ConfigStatsItem(props) {
 }
 
 export default function ConfigStats() {
-    const [families, setFamilies] = useState([]);
-    const [sortOrder, setSortOrder] = useState([0, 1]);
-    const [filterValue, setFilterValue] = useState("*");
+    const [families, setFamilies] = useState<Family[]>([]);
+    const [sortOrder, setSortOrder] = useState<number[]>([0, 1]);
+    const [filterValue, setFilterValue] = useState<string>("*");
 
-    const columns = ["family", "last_upload", "count"];
+    const columns: (keyof Family)[] = ["family", "last_upload", "count"];
     const sortCriterion = columns[sortOrder[0]];
     const sortOrderVariable = sortOrder[1];
-    const items = families.sort((a, b) => {
+    const items: Family[] = families.sort((a, b) => {
         if (a[sortCriterion] < b[sortCriterion]) return -sortOrderVariable;
         if (a[sortCriterion] > b[sortCriterion]) return sortOrderVariable;
         return 0;
@@ -55,9 +56,9 @@ export default function ConfigStats() {
 
     async function getStats() {
         try {
-            let response = await api.getConfigStats(filterValue);
+            const response = await api.getConfigStats(filterValue);
             setFamilies(response.data.families);
-        } catch (error) {
+        } catch (error: any) {
             toast(getErrorMessage(error), {
                 type: "error",
             });
@@ -82,7 +83,7 @@ export default function ConfigStats() {
                     <option value="90d">last 90 days</option>
                 </select>
             </div>
-            <SortedList
+            <SortedList<Family>
                 listItem={ConfigStatsItem}
                 items={items}
                 columnNames={["Family", "Last upload", "Unique configs"]}

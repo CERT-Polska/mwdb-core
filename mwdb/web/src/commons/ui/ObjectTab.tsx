@@ -4,17 +4,24 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { capitalize } from "../helpers";
+//TODO: fix this component
 
-export const TabContext = React.createContext();
+export const TabContext = React.createContext({});
 export const useTabContext = () => useContext(TabContext);
 
-export function ObjectTab(props) {
+export function ObjectTab(props: any) {
     const context = useTabContext();
 
+    console.log({ props, context });
+
     useEffect(() => {
+        //@ts-ignore
         if (context.tab !== props.tab) return;
+        //@ts-ignore
         context.setComponent(props.component || (() => []));
+        //@ts-ignore
         context.setActions(
+            //@ts-ignore
             props.actions?.map((action, index) => {
                 return {
                     ...action,
@@ -23,13 +30,18 @@ export function ObjectTab(props) {
             }) || []
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps
+        //@ts-ignore
     }, [context.tab]);
 
     return (
         <li className="nav-item">
             <Link
-                to={context.getTabLink(props.tab)}
+                to={
+                    //@ts-ignore
+                    context.getTabLink(props.tab)
+                }
                 className={`nav-link ${
+                    //@ts-ignore
                     context.tab === props.tab ? "active" : ""
                 }`}
             >
@@ -40,7 +52,7 @@ export function ObjectTab(props) {
     );
 }
 
-export function ObjectAction(props) {
+export function ObjectAction(props: any) {
     return (
         <li className="nav-item">
             <Link

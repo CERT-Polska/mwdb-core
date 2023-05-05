@@ -1,24 +1,31 @@
-import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faSort,
     faSortUp,
     faSortDown,
 } from "@fortawesome/free-solid-svg-icons";
+import { isNil } from "lodash";
 
-export default function SortedList(props) {
+type Props<T> = {
+    listItem: (props: T) => JSX.Element;
+    sortOrder: number[];
+    onSort: (values: number[]) => void;
+    items: T[];
+    columnNames: string[];
+};
+
+export default function SortedList<T>(props: Props<T>) {
     const ListItem = props.listItem;
-    const columnNames = props.columnNames || ListItem.columnNames;
-    const unsortable = props.unsortable || [];
+    const columnNames = props.columnNames;
 
-    function sortIcon(idx) {
+    function sortIcon(idx: number) {
         let sortOrder = props.sortOrder || [-1, 0];
         if (idx !== sortOrder[0]) return faSort;
         if (sortOrder[1] === 1) return faSortDown;
         if (sortOrder[1] === -1) return faSortUp;
     }
 
-    function handleSort(idx) {
+    function handleSort(idx: number) {
         let newSortOrder = [idx, 1];
         let sortOrder = props.sortOrder || [-1, 0];
         if (idx === sortOrder[0]) newSortOrder = [idx, -sortOrder[1]];
@@ -29,7 +36,7 @@ export default function SortedList(props) {
         <table className="table table-striped table-bordered">
             <thead>
                 <tr>
-                    {columnNames.map((h, idx) => (
+                    {columnNames.map((h: string, idx: number) => (
                         <th
                             key={idx}
                             onClick={(ev) => {
@@ -39,9 +46,9 @@ export default function SortedList(props) {
                             style={{ cursor: "pointer" }}
                         >
                             {h}
-                            {!unsortable.includes(h) && (
+                            {!isNil(sortIcon(idx)) && (
                                 <FontAwesomeIcon
-                                    icon={sortIcon(idx)}
+                                    icon={sortIcon(idx)!}
                                     pull="right"
                                     size="sm"
                                 />
@@ -52,7 +59,7 @@ export default function SortedList(props) {
             </thead>
             <tbody>
                 {props.items.length ? (
-                    props.items.map((item, idx) => (
+                    props.items.map((item: T, idx: number) => (
                         <ListItem key={idx} {...item} />
                     ))
                 ) : (

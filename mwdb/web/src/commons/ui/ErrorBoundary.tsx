@@ -1,7 +1,8 @@
-import React, { Component, useState } from "react";
+import { Component, ReactNode, useState } from "react";
 import { intersperse } from "../helpers";
+import { AxiosServerErrors } from "@mwdb-web/types/types";
 
-export function getErrorMessage(error) {
+export function getErrorMessage(error: AxiosServerErrors): string | string[] {
     if (error.response) {
         if (error.response.data.message) {
             return error.response.data.message;
@@ -10,8 +11,8 @@ export function getErrorMessage(error) {
             let messages = Object.keys(error.response.data.errors).map(
                 (key) => {
                     if (key === "_schema")
-                        return error.response.data.errors[key];
-                    else return `${key}: ${error.response.data.errors[key]}`;
+                        return error.response!.data.errors![key];
+                    else return `${key}: ${error.response!.data.errors![key]}`;
                 }
             );
             return intersperse(messages, <br />);
@@ -20,8 +21,12 @@ export function getErrorMessage(error) {
     return error.toString();
 }
 
-function CriticalError(props) {
-    const [show, setShow] = useState(false);
+type CriticalErrorProps = {
+    error: Error;
+};
+
+function CriticalError(props: CriticalErrorProps) {
+    const [show, setShow] = useState<boolean>(false);
 
     return (
         <div className="container-fluid">
@@ -56,15 +61,31 @@ function CriticalError(props) {
     );
 }
 
-export default class ErrorBoundary extends Component {
-    state = {};
+type ErrorBoundaryProps = {
+    error?: Error;
+    children: ReactNode;
+};
 
-    static getDerivedStateFromProps(props) {
+type ErrorBoundaryState = {
+    propsError?: Error;
+    renderError?: Error;
+};
+
+export default class ErrorBoundary extends Component<
+    ErrorBoundaryProps,
+    ErrorBoundaryState
+> {
+    state = {
+        renderError: undefined,
+        propsError: undefined,
+    };
+
+    static getDerivedStateFromProps(props: ErrorBoundaryProps) {
         // Derived state for external critical errors
         return { propsError: props.error };
     }
 
-    static getDerivedStateFromError(error) {
+    static getDerivedStateFromError(error: ErrorBoundaryState) {
         // Derived state for render() errors
         return { renderError: error };
     }

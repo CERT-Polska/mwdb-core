@@ -5,9 +5,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import { makeSearchLink } from "../helpers";
+import { Tag as TagType } from "@mwdb-web/types/types";
 
-export function getStyleForTag(tag) {
-    const styleList = {
+type StyleList = {
+    primary: string[];
+    warning: string[];
+    success: string[];
+    secondary: string[];
+};
+
+export function getStyleForTag(tag: string) {
+    const styleList: StyleList = {
         primary: ["spam", "src:", "uploader:", "feed:"],
         warning: ["ripped:", "contains:", "matches:", "maybe:"],
         success: ["static:", "dynamic:"],
@@ -25,15 +33,26 @@ export function getStyleForTag(tag) {
 
     for (let style of Object.keys(styleList)) {
         if (
-            styleList[style].filter((t) =>
+            styleList[style as keyof StyleList].filter((t: string) =>
                 t.endsWith(":") ? tag.startsWith(t) : tag === t
             ).length > 0
         )
             return style;
     }
+
     if (tag.indexOf(":") !== -1) return "info";
     return "danger";
 }
+
+type TagProps = {
+    tag: string;
+    searchEndpoint?: string;
+    tagClick?: (ev: React.MouseEvent, tag: string) => void;
+    tagRemove?: (ev: React.MouseEvent, tag: string) => void;
+    searchable?: boolean;
+    deletable?: boolean;
+    filterable?: boolean;
+};
 
 export function Tag({
     tag,
@@ -43,7 +62,7 @@ export function Tag({
     searchable = true,
     deletable,
     filterable,
-}) {
+}: TagProps) {
     const badgeStyle = getStyleForTag(tag);
     return (
         <div className="tag">
@@ -67,7 +86,7 @@ export function Tag({
                     <span
                         className="tag-link"
                         role="button"
-                        onClick={(ev) => tagRemove(ev, tag)}
+                        onClick={(ev) => tagRemove && tagRemove(ev, tag)}
                     >
                         <FontAwesomeIcon
                             icon={filterable ? faBan : faTimes}
@@ -81,8 +100,12 @@ export function Tag({
     );
 }
 
-export function TagList({ tags, ...props }) {
+type TagListProps = TagProps & {
+    tags: TagType[];
+};
+
+export function TagList({ tags, ...props }: TagListProps) {
     return tags
-        .sort((a, b) => a.tag.localeCompare(b.tag))
-        .map((tag) => <Tag tag={tag.tag} key={tag.tag} {...props} />);
+        .sort((a: TagType, b: TagType) => a.tag.localeCompare(b.tag))
+        .map((tag: TagType) => <Tag {...props} tag={tag.tag} key={tag.tag} />);
 }

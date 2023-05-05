@@ -1,9 +1,17 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
 import ObjectLink from "./ObjectLink";
 import { useRemotePath } from "../remotes";
 import { makeSearchLink } from "../helpers";
+import { ObjectType } from "@mwdb-web/types/types";
+
+type Props = {
+    reasonType: string;
+    relatedObjectDHash: string;
+    relatedObjectType: ObjectType;
+    relatedUserLogin: string;
+    showDhash: boolean;
+};
 
 export default function ShareReasonString({
     reasonType,
@@ -11,7 +19,7 @@ export default function ShareReasonString({
     relatedObjectType,
     relatedUserLogin,
     showDhash,
-}) {
+}: Props) {
     const remotePath = useRemotePath();
     const reasonText =
         reasonType.charAt(0).toUpperCase() + reasonType.slice(1).toLowerCase();

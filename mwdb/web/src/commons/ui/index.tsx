@@ -1,6 +1,5 @@
 import React from "react";
 
-//TODO: add types to this folder
 export { default as Autocomplete } from "./Autocomplete";
 export { default as BootstrapSelect } from "./BootstrapSelect";
 export { default as ConfirmationModal } from "./ConfirmationModal";
@@ -20,7 +19,8 @@ export { default as ShareReasonString } from "./ShareReasonString";
 export { default as SortedList } from "./SortedList";
 export { default as View, useViewAlert } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
-export { RequiresAuth, RequiresCapability } from "./RequiresAuth";
+export { RequiresAuth } from "./RequiresAuth";
+export { RequiresCapability } from "./RequiresCapability";
 
 export { Tag, TagList, getStyleForTag } from "./Tag";
 export {
@@ -30,11 +30,11 @@ export {
     ObjectAction,
 } from "./ObjectTab";
 
-export function ShowIf({ condition, children }) {
+export function ShowIf({ condition, children }: any) {
     return condition ? children : [];
 }
 
-export function LimitTo({ children, count }) {
+export function LimitTo({ children, count }: any) {
     const more =
         children.length > count
             ? [
@@ -47,7 +47,7 @@ export function LimitTo({ children, count }) {
     return [...children.slice(0, count), ...more];
 }
 
-export function HighlightText(props) {
+export function HighlightText(props: any) {
     let text = React.Children.toArray(props.children)[0].toString();
 
     if (!props.filterValue) return text;
@@ -56,7 +56,7 @@ export function HighlightText(props) {
     let filterValue = props.caseSensitive
         ? props.filterValue
         : props.filterValue.toLowerCase();
-    let elements = [];
+    let elements: any[] = [];
 
     for (
         var prevIndex = 0, index = filteredText.indexOf(filterValue);

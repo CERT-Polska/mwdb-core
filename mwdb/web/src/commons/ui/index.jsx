@@ -1,5 +1,6 @@
 import React from "react";
 
+//TODO: add types to this folder
 export { default as Autocomplete } from "./Autocomplete";
 export { default as BootstrapSelect } from "./BootstrapSelect";
 export { default as ConfirmationModal } from "./ConfirmationModal";

@@ -168,6 +168,11 @@ pre.attribute-object {
     display: inline-block;
 }
 
+.required:after {
+    content: "*";
+    color: red;
+}
+
 /***
  User login CSS
  ***/
@@ -199,6 +204,62 @@ div.user-login .container-fluid {
     div.user-login .container-fluid {
         margin-top: -12pt;
         padding: 2rem 2rem;
+    }
+}
+
+/* Register form */
+.register-form__container {
+    background-color: white;
+    padding: 3rem;
+    border-radius: 10px;
+    max-width: 700px;
+    margin: 2rem auto;
+}
+@media (max-width: 768px) {
+    .register-form__container {
+        margin: 0 auto;
+        padding: 1rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .register-form__background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        box-sizing: border-box;
+        background-color: #f2f2f2;
+        z-index: -1;
+        height: 100vh;
+        width: 100vw;
+    }
+}
+
+/* Recover password form */
+.user-password-recover__container {
+    background-color: white;
+    padding: 3rem;
+    border-radius: 10px;
+    max-width: 450px;
+    margin: 2rem auto;
+}
+@media (max-width: 576px) {
+    .user-password-recover__container {
+        margin: 0 auto;
+        padding: 1rem;
+    }
+}
+
+@media (min-width: 576px) {
+    .user-password-recover__background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        box-sizing: border-box;
+        background-color: #f2f2f2;
+        z-index: -1;
+        height: 100vh;
+        width: 100vw;
     }
 }
 
@@ -385,6 +446,7 @@ table.table.share-table thead th {
 
 /* Navigation icons */
 .nav-item svg,
+.card-header svg,
 .detailed-view-header svg {
     margin-right: 6pt;
 }

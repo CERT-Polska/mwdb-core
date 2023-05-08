@@ -136,7 +136,7 @@ export default function UserDetails() {
                                     .sort((groupA, groupB) =>
                                         groupA.name.localeCompare(groupB.name)
                                     )
-                                    .map((group) => (
+                                    .map((group, index) => (
                                         <GroupBadge
                                             key={group.name}
                                             group={group}

@@ -1,6 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { isEmpty } from "lodash";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useParams, useOutletContext } from "react-router-dom";
+import { isEmpty } from "lodash";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import { api } from "@mwdb-web/commons/api";
 import {
     Autocomplete,
@@ -8,110 +11,94 @@ import {
     useViewAlert,
 } from "@mwdb-web/commons/ui";
 
+const permissionKeys = ["read", "set"];
+
+function setInitPermission(permission) {
+    return permissionKeys.reduce((prev, next) => {
+        return {
+            ...prev,
+            [next]: permission[next],
+        };
+    }, {});
+}
+
 function AttributePermissionsItem({
     group,
     permission,
     updateGroup,
     removeGroup,
 }) {
-    const [changedPermission, setChangedPermission] = useState({
-        read: permission.read,
-        set: permission.set,
-    });
+    const [changedPermission, setChangedPermission] = useState(
+        setInitPermission(permission)
+    );
 
-    function switchPermission(access) {
+    const switchPermission = useCallback((access) => {
         setChangedPermission((prevState) => {
             const state = { ...prevState };
             state[access] = !state[access];
             return state;
         });
-    }
+    }, []);
 
-    function isChanged(access) {
-        return changedPermission[access] !== permission[access];
-    }
+    const isChanged = useCallback(
+        (access) => {
+            return changedPermission[access] !== permission[access];
+        },
+        [changedPermission, permission]
+    );
+
+    const isCanUpdate = useMemo(() => {
+        return permissionKeys.reduce((prev, next) => {
+            if (!prev) {
+                return false;
+            }
+            return !isChanged(next);
+        }, true);
+    }, [isChanged]);
+
+    const renderPermission = useCallback(
+        (access) => {
+            return (
+                <div key={access} className="material-switch">
+                    <input
+                        type="checkbox"
+                        className="custom-control-input"
+                        id={`${group}-${access}Switch`}
+                        onChange={() => {
+                            switchPermission(access);
+                        }}
+                        checked={changedPermission[access]}
+                    />
+                    <label
+                        className="bg-primary"
+                        htmlFor={`${group}-${access}Switch`}
+                    />
+                    <div style={{ width: 60 }}>
+                        {isChanged(access) && (
+                            <span style={{ color: "red" }}>*</span>
+                        )}
+                        <span>{`Can ${access}`}</span>
+                    </div>
+                </div>
+            );
+        },
+        [changedPermission, group, permission]
+    );
 
     return (
         <tr key={group}>
             <td>
                 <Link to={`/settings/group/${group}`}>{group}</Link>
             </td>
-            <td>
-                <table className="float-left">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div className="material-switch">
-                                    <input
-                                        type="checkbox"
-                                        className="custom-control-input"
-                                        id={`${group}-readSwitch`}
-                                        onChange={() => {
-                                            switchPermission("read");
-                                        }}
-                                        checked={changedPermission["read"]}
-                                    />
-                                    <label
-                                        className="bg-primary"
-                                        htmlFor={`${group}-readSwitch`}
-                                    />
-                                </div>
-                                <div>
-                                    {isChanged("read") ? (
-                                        <span style={{ color: "red" }}>*</span>
-                                    ) : (
-                                        []
-                                    )}
-                                    Can read
-                                </div>
-                            </td>
-                            <td>
-                                <div className="material-switch">
-                                    <input
-                                        type="checkbox"
-                                        className="custom-control-input"
-                                        id={`${group}-setSwitch`}
-                                        onChange={() => {
-                                            switchPermission("set");
-                                        }}
-                                        checked={changedPermission["set"]}
-                                    />
-                                    <label
-                                        className="bg-primary"
-                                        htmlFor={`${group}-setSwitch`}
-                                    />
-                                </div>
-                                <div>
-                                    {isChanged("set") ? (
-                                        <span
-                                            style={{
-                                                color: "red",
-                                            }}
-                                        >
-                                            *
-                                        </span>
-                                    ) : (
-                                        []
-                                    )}
-                                    Can set
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <td style={{ display: "flex", gap: 10 }}>
+                {permissionKeys.map((per) => renderPermission(per))}
             </td>
             <td>
                 <button
                     type="button"
-                    className="btn btn-primary"
-                    disabled={!isChanged("read") && !isChanged("set")}
-                    onClick={() =>
-                        updateGroup(
-                            group,
-                            changedPermission["read"],
-                            changedPermission["set"]
-                        )
-                    }
+                    className="btn btn-primary mr-3"
+                    disabled={isCanUpdate}
+                    onClick={() => updateGroup(group, changedPermission)}
                 >
                     Update
                 </button>
@@ -127,15 +114,41 @@ function AttributePermissionsItem({
     );
 }
 
-function AttributePermissionsBox({
+function AttributePermissionsGroupInput({
     permissions,
     groups,
     addGroup,
-    updateGroup,
-    removeGroup,
+    groupName,
+    setGroupName,
 }) {
-    const [newMember, setNewMember] = useState("");
+    return (
+        <div className="card">
+            <div className="card-body">
+                <Autocomplete
+                    value={groupName}
+                    items={groups.filter(
+                        (item) => !Object.keys(permissions).includes(item.name)
+                    )}
+                    getItemValue={(item) => item.name}
+                    onChange={(value) => setGroupName(value)}
+                    className="form-control"
+                    placeholder="Group name"
+                />
+                <button
+                    type="button"
+                    className="btn btn-outline-success mt-2 mr-1"
+                    onClick={() => groupName && addGroup(groupName)}
+                    disabled={!groupName}
+                    title={!groupName ? "Select group to add" : ""}
+                >
+                    <FontAwesomeIcon icon={faPlus} /> Add group
+                </button>
+            </div>
+        </div>
+    );
+}
 
+function AttributePermissionsList({ permissions, updateGroup, removeGroup }) {
     return (
         <table className="table table-striped table-bordered wrap-table">
             <thead>
@@ -157,33 +170,6 @@ function AttributePermissionsBox({
                             removeGroup={removeGroup}
                         />
                     ))}
-                <tr>
-                    <td>
-                        <Autocomplete
-                            value={newMember}
-                            items={groups.filter(
-                                (item) =>
-                                    item.name
-                                        .toLowerCase()
-                                        .indexOf(newMember.toLowerCase()) !== -1
-                            )}
-                            getItemValue={(item) => item.name}
-                            onChange={(value) => setNewMember(value)}
-                            className="form-control"
-                        />
-                    </td>
-                    <td />
-                    <td>
-                        <button
-                            type="button"
-                            className="btn btn-success"
-                            onClick={() => newMember && addGroup(newMember)}
-                            disabled={!newMember}
-                        >
-                            Add group
-                        </button>
-                    </td>
-                </tr>
             </tbody>
         </table>
     );
@@ -196,16 +182,22 @@ export function AttributesPermissions() {
     const [allGroups, setAllGroups] = useState([]);
     const [permissions, setPermissions] = useState({});
     const [modalSpec, setModalSpec] = useState({});
-    const [isModalOpen, setModalOpen] = useState(false);
+    const [groupName, setGroupName] = useState("");
 
     const updateAttributePermissions = useCallback(async () => {
-        let response = await api.getAttributePermissions(attributeKey);
-        let attributePermissions = {};
-        for (let permission of response.data["attribute_permissions"])
-            attributePermissions[permission["group_name"]] = {
-                read: permission["can_read"],
-                set: permission["can_set"],
-            };
+        const response = await api.getAttributePermissions(attributeKey);
+        const attributePermissions = response.data.attribute_permissions.reduce(
+            (prev, next) => {
+                return {
+                    ...prev,
+                    [next.group_name]: {
+                        read: next.can_read,
+                        set: next.can_set,
+                    },
+                };
+            },
+            {}
+        );
         setPermissions(attributePermissions);
     }, [attributeKey]);
 
@@ -223,32 +215,28 @@ export function AttributesPermissions() {
                 false
             );
             await updateAttributePermissions();
+            setGroupName("");
         } catch (error) {
             setAlert({ error });
         }
     }
 
-    async function updateGroup(group, can_read, can_set) {
+    async function updateGroup(group, permissions) {
+        const { read, set } = permissions;
         try {
-            await api.setAttributePermission(
-                attribute.key,
-                group,
-                can_read,
-                can_set
-            );
+            await api.setAttributePermission(attribute.key, group, read, set);
             await updateAttributePermissions();
-            setModalOpen(false);
+            setModalSpec({});
         } catch (error) {
             setAlert({ error });
         }
     }
 
-    function handleUpdateGroup(group, can_read, can_set) {
-        setModalOpen(true);
+    function handleUpdateGroup(group, permissions) {
         setModalSpec({
-            action: () => updateGroup(group, can_read, can_set),
+            action: () => updateGroup(group, permissions),
             message: `Update ${group} group permissions`,
-            buttonStyle: "bg-primary",
+            buttonStyle: "btn-primary",
             confirmText: "Update",
         });
     }
@@ -257,18 +245,17 @@ export function AttributesPermissions() {
         try {
             await api.removeAttributePermission(attribute.key, group);
             await updateAttributePermissions();
-            setModalOpen(false);
+            setModalSpec({});
         } catch (error) {
             setAlert({ error });
         }
     }
 
     function handleRemoveGroup(group) {
-        setModalOpen(true);
         setModalSpec({
             action: () => removeGroup(group),
             message: `Remove ${group} group permissions`,
-            buttonStyle: "bg-danger",
+            buttonStyle: "btn-danger",
             confirmText: "Remove",
         });
     }
@@ -285,22 +272,27 @@ export function AttributesPermissions() {
     if (isEmpty(attribute)) return <></>;
 
     return (
-        <React.Fragment>
-            <AttributePermissionsBox
+        <>
+            <AttributePermissionsGroupInput
                 permissions={permissions}
                 groups={allGroups}
                 addGroup={addGroup}
+                groupName={groupName}
+                setGroupName={setGroupName}
+            />
+            <AttributePermissionsList
+                permissions={permissions}
                 updateGroup={handleUpdateGroup}
                 removeGroup={handleRemoveGroup}
             />
             <ConfirmationModal
-                isOpen={isModalOpen}
-                onRequestClose={() => setModalOpen(false)}
+                isOpen={!isEmpty(modalSpec)}
+                onRequestClose={() => setModalSpec({})}
                 onConfirm={modalSpec.action}
                 message={modalSpec.message}
                 buttonStyle={modalSpec.buttonStyle}
                 confirmText={modalSpec.confirmText}
             />
-        </React.Fragment>
+        </>
     );
 }

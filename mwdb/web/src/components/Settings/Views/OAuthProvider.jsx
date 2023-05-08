@@ -23,7 +23,7 @@ function ProviderItem(props) {
 export default function OAuthProvider() {
     const viewAlert = useViewAlert();
     const { name } = useParams();
-    const [provider, setProvider] = useState(null);
+    const [provider, setProvider] = useState({});
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 

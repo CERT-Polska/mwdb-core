@@ -117,7 +117,7 @@ class ObjectItemResponseSchema(Schema):
         """
         Replace all object attributes with attributes accessible for current user
         """
-        object_attributes = object.get_attributes(show_karton=False)
+        object_attributes = object.get_attributes()
         schema = AttributeItemResponseSchema()
         attributes_serialized = schema.dump(object_attributes, many=True)
         return {**data, "attributes": attributes_serialized}

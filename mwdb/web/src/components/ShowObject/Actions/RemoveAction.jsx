@@ -6,13 +6,17 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { APIContext } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
-import { ObjectAction, ConfirmationModal } from "@mwdb-web/commons/ui";
+import {
+    ObjectAction,
+    ConfirmationModal,
+    useViewAlert,
+} from "@mwdb-web/commons/ui";
 
 export default function RemoveAction() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
-    const navigate = useNavigate();
+    const { redirectToAlert } = useViewAlert();
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [disabledModalButton, setDisabledModalButton] = useState(false);
@@ -21,7 +25,10 @@ export default function RemoveAction() {
         setDisabledModalButton(true);
         try {
             await api.removeObject(context.object.id);
-            navigate(context.searchEndpoint);
+            redirectToAlert({
+                target: context.searchEndpoint,
+                success: "Object was successfully removed",
+            });
         } catch (error) {
             setDisabledModalButton(false);
             setDeleteModalOpen(false);

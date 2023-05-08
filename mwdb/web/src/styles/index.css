@@ -385,6 +385,7 @@ table.table.share-table thead th {
 
 /* Navigation icons */
 .nav-item svg,
+.card-header svg,
 .detailed-view-header svg {
     margin-right: 6pt;
 }

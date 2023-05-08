@@ -1,27 +1,29 @@
 import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import { capitalize } from "../helpers";
-//TODO: fix this component
+import { TabContextValues } from "@mwdb-web/types/types";
 
-export const TabContext = React.createContext({});
+export const TabContext = React.createContext({} as TabContextValues);
 export const useTabContext = () => useContext(TabContext);
 
-export function ObjectTab(props: any) {
-    const context = useTabContext();
+type Props = {
+    actions: JSX.Element[];
+    component: JSX.Element;
+    icon: IconProp;
+    tab: string;
+    label?: string;
+};
 
-    console.log({ props, context });
+export function ObjectTab(props: Props) {
+    const context: TabContextValues = useTabContext();
 
     useEffect(() => {
-        //@ts-ignore
         if (context.tab !== props.tab) return;
-        //@ts-ignore
-        context.setComponent(props.component || (() => []));
-        //@ts-ignore
+        context.setComponent(props.component);
         context.setActions(
-            //@ts-ignore
             props.actions?.map((action, index) => {
                 return {
                     ...action,
@@ -30,38 +32,18 @@ export function ObjectTab(props: any) {
             }) || []
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        //@ts-ignore
     }, [context.tab]);
 
     return (
         <li className="nav-item">
             <Link
-                to={
-                    //@ts-ignore
-                    context.getTabLink(props.tab)
-                }
+                to={context.getTabLink(props.tab)}
                 className={`nav-link ${
-                    //@ts-ignore
                     context.tab === props.tab ? "active" : ""
                 }`}
             >
                 {props.icon && <FontAwesomeIcon icon={props.icon} size="1x" />}
                 {props.label || capitalize(props.tab)}
-            </Link>
-        </li>
-    );
-}
-
-export function ObjectAction(props: any) {
-    return (
-        <li className="nav-item">
-            <Link
-                to={props.link ? props.link : "#"}
-                className="nav-link"
-                onClick={() => props.action && props.action()}
-            >
-                {props.icon && <FontAwesomeIcon icon={props.icon} size="1x" />}
-                {capitalize(props.label)}
             </Link>
         </li>
     );

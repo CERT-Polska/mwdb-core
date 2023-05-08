@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
-import AceEditor from "react-ace";
+import { useState, useEffect, useCallback } from "react";
+import AceEditor, { IEditorProps } from "react-ace";
 
 import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/mode-json";
@@ -7,47 +7,42 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 
 class HexViewNumberRenderer {
-    getText(session, row) {
-        return (row << 4).toString(16).padStart(8, "0");
-    }
-
-    getWidth(session, lastLineNumber, config) {
-        return (
-            Math.max(
-                this.getText(session, lastLineNumber).length,
-                this.getText(session, config.lastRow + 1).length,
-                2
-            ) * config.characterWidth
-        );
-    }
-
-    update(e, editor) {
+    update(editor: IEditorProps) {
         editor.renderer.$loop.schedule(editor.renderer.CHANGE_GUTTER);
     }
 
-    attach(editor) {
+    attach(editor: IEditorProps) {
         editor.renderer.$gutterLayer.$renderer = this;
         editor.on("changeSelection", this.update);
-        this.update(null, editor);
+        this.update(editor);
     }
 
-    detach(editor) {
+    detach(editor: IEditorProps) {
         if (editor.renderer.$gutterLayer.$renderer === this)
             editor.renderer.$gutterLayer.$renderer = null;
         editor.off("changeSelection", this.update);
-        this.update(null, editor);
+        this.update(editor);
     }
 }
 
-export default function HexView(props) {
-    const [originalContent, setOriginalContent] = useState(null);
-    const [hexlifiedContent, setHexlifiedContent] = useState(null);
-    const [editor, setEditor] = useState(null);
+type Content = string | ArrayBuffer;
 
-    const setEditorRef = useCallback((node) => {
+type Props = {
+    content: Content;
+    mode: "raw" | "hex";
+    showInvisibles: boolean;
+    json?: boolean;
+};
+
+export default function HexView(props: Props) {
+    const [originalContent, setOriginalContent] = useState<Content>();
+    const [hexlifiedContent, setHexlifiedContent] = useState<string>();
+    const [editor, setEditor] = useState<IEditorProps | null>(null);
+
+    const setEditorRef = useCallback((node: AceEditor) => {
         if (node) {
             setEditor(node.editor);
-            node.editor.gotoLine(1);
+            node.editor.gotoLine(1, 0, false);
         } else {
             setEditor(null);
         }
@@ -64,7 +59,7 @@ export default function HexView(props) {
     }, [editor, props.mode]);
 
     const getContent = () => {
-        let rows = [];
+        const rows = [];
         if (!props.content) return "";
         if (props.mode === "raw") {
             if (props.content instanceof ArrayBuffer)

@@ -1,11 +1,10 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import { makeSearchLink } from "../helpers";
-import { Tag as TagType } from "@mwdb-web/types/types";
+import { TagProps } from "@mwdb-web/types/props";
 
 type StyleList = {
     primary: string[];
@@ -14,7 +13,7 @@ type StyleList = {
     secondary: string[];
 };
 
-export function getStyleForTag(tag: string) {
+function getStyleForTag(tag: string) {
     const styleList: StyleList = {
         primary: ["spam", "src:", "uploader:", "feed:"],
         warning: ["ripped:", "contains:", "matches:", "maybe:"],
@@ -43,16 +42,6 @@ export function getStyleForTag(tag: string) {
     if (tag.indexOf(":") !== -1) return "info";
     return "danger";
 }
-
-type TagProps = {
-    tag: string;
-    searchEndpoint?: string;
-    tagClick?: (ev: React.MouseEvent, tag: string) => void;
-    tagRemove?: (ev: React.MouseEvent, tag: string) => void;
-    searchable?: boolean;
-    deletable?: boolean;
-    filterable?: boolean;
-};
 
 export function Tag({
     tag,
@@ -98,14 +87,4 @@ export function Tag({
             </span>
         </div>
     );
-}
-
-type TagListProps = TagProps & {
-    tags: TagType[];
-};
-
-export function TagList({ tags, ...props }: TagListProps) {
-    return tags
-        .sort((a: TagType, b: TagType) => a.tag.localeCompare(b.tag))
-        .map((tag: TagType) => <Tag {...props} tag={tag.tag} key={tag.tag} />);
 }

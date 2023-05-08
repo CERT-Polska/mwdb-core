@@ -1,7 +1,10 @@
-import React from "react";
+type Props = {
+    hash?: string;
+    inline?: boolean;
+};
 
-export default function Hash(props) {
-    if (!props.hash) return [];
+export default function Hash(props: Props) {
+    if (!props.hash) return <></>;
     if (props.inline) {
         return <span className="text-monospace">{props.hash}</span>;
     }

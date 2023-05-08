@@ -1,9 +1,19 @@
-import React from "react";
 import Modal from "react-modal";
 
 Modal.setAppElement("#root");
 
-export default function ConfirmationModal(props) {
+type Props = ReactModal.Props & {
+    message: string;
+    onCancel?: React.MouseEventHandler<HTMLButtonElement>;
+    cancelText?: string;
+    disabled?: boolean;
+    buttonStyle?: string;
+    onConfirm?: React.MouseEventHandler<HTMLButtonElement>;
+    confirmDisabled?: boolean;
+    confirmText?: string;
+};
+
+export default function ConfirmationModal(props: Props) {
     const modalStyle = {
         content: {
             top: "50%",
@@ -17,6 +27,7 @@ export default function ConfirmationModal(props) {
 
     return (
         <Modal
+            {...props}
             isOpen={props.isOpen}
             onRequestClose={props.onRequestClose}
             onAfterOpen={props.onAfterOpen}

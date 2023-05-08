@@ -116,7 +116,7 @@ export function AttributeDetails() {
                 {attribute["hidden"] ? (
                     <span className="badge badge-success">Enabled</span>
                 ) : (
-                    []
+                    <></>
                 )}
                 <div>
                     Hidden attributes have protected values. Attribute values

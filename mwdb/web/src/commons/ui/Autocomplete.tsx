@@ -1,6 +1,20 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 
-export default function Autocomplete({
+type AutocompleteItem<T> = {
+    item: T;
+};
+
+type Props<T> = {
+    items: T[];
+    getItemValue?: (item: T) => T;
+    renderItem?: (props: AutocompleteItem<T>) => JSX.Element;
+    value: string;
+    onChange: (value: T | string) => void;
+    children?: JSX.Element;
+    prependChildren?: boolean;
+};
+
+export default function Autocomplete<T>({
     items,
     getItemValue,
     renderItem,
@@ -9,11 +23,11 @@ export default function Autocomplete({
     children,
     prependChildren,
     ...inputProps
-}) {
+}: Props<T>) {
     const itemValue = getItemValue || ((item) => item);
     const ItemComponent = renderItem || (({ item }) => itemValue(item));
     const menuStyle = items.length === 0 ? { display: "none" } : {};
-    const inputRef = useRef(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     return (
         <div className="dropdown input-group">
@@ -26,17 +40,18 @@ export default function Autocomplete({
                 ref={inputRef}
             />
             <div className="dropdown-menu" role="menu" style={menuStyle}>
-                {items.map((item) => (
+                {items.map((item, index) => (
                     <button
-                        key={itemValue(item)}
+                        key={index}
                         className="dropdown-item"
                         type="button"
                         onClick={(ev) => {
                             onChange(itemValue(item));
                             // Focus on input after choosing dropdown item
-                            inputRef.current.focus();
+                            inputRef.current?.focus();
                         }}
                     >
+                        {/* @ts-ignore */}
                         <ItemComponent item={item} />
                     </button>
                 ))}

@@ -1,8 +1,11 @@
-import React from "react";
+type Props = {
+    indent?: number;
+    children: JSX.Element | JSX.Element[];
+};
 
-export default function DataTable(props) {
-    let indentLevel = props.indent || 0;
-    let indentWidth = `${indentLevel * 8}pt`;
+export default function DataTable(props: Props) {
+    const indentLevel = props.indent || 0;
+    const indentWidth = `${indentLevel * 8}pt`;
 
     return (
         <table

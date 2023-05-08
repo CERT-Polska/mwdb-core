@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
 
-export default function FeatureSwitch({
-    name,
-    value,
-    disabled,
-    onUpdate,
-    children,
-}) {
+type Props = {
+    name: string;
+    value: boolean;
+    children: JSX.Element | JSX.Element[];
+    disabled?: boolean;
+    onUpdate: (value: Record<string, boolean>) => Promise<void>;
+};
+
+export default function FeatureSwitch(props: Props) {
+    const { name, value, disabled = false, onUpdate, children } = props;
     const [isModalOpen, setModalOpen] = useState(false);
     const button = value ? (
         <button

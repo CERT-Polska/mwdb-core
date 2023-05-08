@@ -104,7 +104,7 @@ export default function GroupDetails() {
                 {group["workspace"] ? (
                     <span className="badge badge-success">Enabled</span>
                 ) : (
-                    []
+                    <></>
                 )}
                 <div>
                     Converts group to the workgroup, so users will see each
@@ -121,7 +121,7 @@ export default function GroupDetails() {
                 {group["default"] ? (
                     <span className="badge badge-success">Enabled</span>
                 ) : (
-                    []
+                    <></>
                 )}
                 <div>Automatically adds new users to this group.</div>
             </FeatureSwitch>

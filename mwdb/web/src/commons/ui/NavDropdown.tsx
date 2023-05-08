@@ -1,7 +1,14 @@
-import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
-export default function NavDropdown(props) {
+type Props = {
+    title: string;
+    icon: IconProp;
+    elements: JSX.Element[];
+    badge?: string;
+};
+
+export default function NavDropdown(props: Props) {
     if (!props.elements.length) return <div />;
     return (
         <li className="nav-item dropdown">

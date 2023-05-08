@@ -1,10 +1,11 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
 import { faUser, faUsers, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { GrpupBadgeProps } from "@mwdb-web/types/props";
 
-export default function GroupBadge({ group, clickable, basePath }) {
+export default function GroupBadge(props: GrpupBadgeProps) {
+    const { group, clickable, basePath } = props;
     const icon = group.private
         ? faUser
         : group.name === "public"
@@ -31,17 +32,5 @@ export default function GroupBadge({ group, clickable, basePath }) {
         >
             {badge}
         </Link>
-    );
-}
-
-export function UserBadge({ user, ...props }) {
-    return (
-        <GroupBadge
-            group={{
-                name: user.login,
-                private: true,
-            }}
-            {...props}
-        />
     );
 }

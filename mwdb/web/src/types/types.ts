@@ -46,12 +46,12 @@ export type User = {
 };
 
 export type Group = {
+    name: string;
+    private: boolean;
     admins: string[];
     capabilities: Capabality[];
     default: boolean;
     immutable: boolean;
-    name: string;
-    private: boolean;
     users: string[];
     workspace: boolean;
 };
@@ -216,3 +216,11 @@ export type AxiosServerErrors = AxiosError<{
     message?: string;
     errors?: Record<string, string>;
 }>;
+
+export type TabContextValues = {
+    tab?: string;
+    subTab?: string;
+    getTabLink: (tab: string, subtab?: string) => string;
+    setComponent: (newComponent: JSX.Element) => void;
+    setActions: (actions: JSX.Element[]) => void;
+};

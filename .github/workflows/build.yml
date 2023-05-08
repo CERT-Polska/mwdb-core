@@ -363,7 +363,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           file: ./deploy/docker/Dockerfile-web-unit-test
-          context: mwdb/web
           tags: |
             certpl/mwdb-web-unit-tests:${{ github.sha }}
             certpl/mwdb-web-unit-tests:master

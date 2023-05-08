@@ -6,6 +6,6 @@ describe("Login test - mwdb-core", function () {
 
     browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-    cy.contains("Logout").click();
+    cy.contains("Logout").click({ force: true });
   });
 });

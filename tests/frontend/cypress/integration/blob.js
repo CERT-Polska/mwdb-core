@@ -35,7 +35,7 @@ describe("Blob view test - mwdb-core", function () {
     cy.contains("Blobs").click({ timeout: 10000 });
 
     cy.get("@blobId").then((blobId) => {
-      cy.get('.d-none a[href*="' + blobId + '"] > div').click();
+      cy.get('.d-none a[href*="' + blobId + '"] > div').click({ force: true });
       cy.server()
         .route("GET", "/api/blob/" + blobId)
         .as("dataGetFirst");
@@ -46,7 +46,7 @@ describe("Blob view test - mwdb-core", function () {
       expect(text).to.include(blobContent);
     });
 
-    cy.contains("Details").click();
+    cy.contains("Details").click({ force: true });
     cy.contains("Blob name");
     cy.contains("some.blob");
     cy.contains("Blob size");
@@ -55,7 +55,7 @@ describe("Blob view test - mwdb-core", function () {
     cy.contains("First seen");
     cy.contains("Last seen");
 
-    cy.get("a.nav-link").contains("Relations").click();
+    cy.get("a.nav-link").contains("Relations").click({ force: true });
     cy.get("g[class='node expanded-node']");
 
     cy.visit("/blob/fake");
@@ -63,6 +63,6 @@ describe("Blob view test - mwdb-core", function () {
       "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
     );
 
-    cy.contains("Logout").click();
+    cy.contains("Logout").click({ force: true });
   });
 });

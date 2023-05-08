@@ -1,4 +1,11 @@
-import React, { Suspense, useState, useLayoutEffect, useContext } from "react";
+import React, {
+    Suspense,
+    useState,
+    useLayoutEffect,
+    useContext,
+    useEffect,
+} from "react";
+import { isEmpty } from "lodash";
 import { useSearchParams } from "react-router-dom";
 
 import { APIContext } from "@mwdb-web/commons/api";
@@ -7,6 +14,12 @@ import { capitalize } from "@mwdb-web/commons/helpers";
 import { Tag } from "@mwdb-web/commons/ui";
 
 const DagreD3Plot = React.lazy(() => import("./DagreD3Plot"));
+
+const nodeStatuses = {
+    initial: "initial",
+    showGraph: "showGraph",
+    showWarning: "showWarning",
+};
 
 function RelationsNode(props) {
     const typeMapping = {
@@ -66,6 +79,31 @@ function RelationsNode(props) {
     );
 }
 
+function RelationToManyNode({ setNodesStatus, nodesLength }) {
+    console.log({ setNodesStatus, nodesLength });
+    return (
+        <>
+            <div
+                className="alert alert-warning"
+                style={{ margin: "10px 20px", fontSize: 18 }}
+            >
+                The relationships for a given object will amount to{" "}
+                <span className="font-weight-bold">{nodesLength}</span>{" "}
+                elements, displaying such a quantity of connections may affect
+                the application's performance.
+            </div>
+            <div class="text-center mb-2">
+                <button
+                    className="btn btn-warning"
+                    onClick={() => setNodesStatus(nodeStatuses.showGraph)}
+                >
+                    Show relations anyway
+                </button>
+            </div>
+        </>
+    );
+}
+
 function RelationsPlot(props) {
     const api = useContext(APIContext);
     const [searchParams, setSearchParams] = useSearchParams();
@@ -74,6 +112,8 @@ function RelationsPlot(props) {
         height: "900",
         width: "100%",
     };
+
+    const [nodesStatus, setNodesStatus] = useState("initial");
 
     const [nodes, setNodes] = useState({
         nodes: [],
@@ -187,16 +227,42 @@ function RelationsPlot(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => {
+        const limit = 500;
+        if (!isEmpty(nodes.nodes) || !isEmpty(nodes.edges)) {
+            const elementsLength = Math.max(
+                nodes.nodes.length,
+                nodes.edges.length
+            );
+            setNodesStatus(
+                elementsLength < limit
+                    ? nodeStatuses.showGraph
+                    : nodeStatuses.showWarning
+            );
+        }
+    }, [nodes]);
+
     return (
         <Suspense fallback={<div />}>
-            <DagreD3Plot
-                width={defaultProps.width}
-                height={height ? height : defaultProps.height}
-                nodes={nodes.nodes}
-                edges={nodes.edges}
-                onNodeClick={onNodeClick}
-                nodeComponent={RelationsNode}
-            />
+            {nodesStatus === nodeStatuses.showGraph && (
+                <DagreD3Plot
+                    width={defaultProps.width}
+                    height={height ? height : defaultProps.height}
+                    nodes={nodes.nodes}
+                    edges={nodes.edges}
+                    onNodeClick={onNodeClick}
+                    nodeComponent={RelationsNode}
+                />
+            )}
+            {nodesStatus === nodeStatuses.showWarning && (
+                <RelationToManyNode
+                    setNodesStatus={setNodesStatus}
+                    nodesLength={Math.max(
+                        nodes.nodes.length,
+                        nodes.edges.length
+                    )}
+                />
+            )}
         </Suspense>
     );
 }

@@ -295,32 +295,6 @@ function renderTokens(tokens, options) {
         },
         table(token) {
             return (
-                <DataTable key={uniqueId()}>
-                    <thead>
-                        <tr>
-                            {token.header.map((head, index) => (
-                                <th key={index}>
-                                    {renderTokens(head.tokens, options)}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {token.rows.map((row, rowsIndex) => (
-                            <tr key={rowsIndex}>
-                                {row.map((cell, cellIndex) => (
-                                    <td key={cellIndex}>
-                                        {renderTokens(cell.tokens, options)}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </DataTable>
-            );
-        },
-        table(token) {
-            return (
                 <div className="table-responsive" key={uniqueId()}>
                     <div
                         className={`${tableClasses.table} table table-striped table-bordered table-hover`}

@@ -819,7 +819,11 @@ class Object(db.Model):
         return is_removed
 
     def get_attributes(
-        self, as_dict=False, check_permissions=True, show_hidden=False, show_karton=True
+        self,
+        as_dict=False,
+        check_permissions=True,
+        show_hidden=False,
+        show_karton=False,
     ):
         """
         Gets all object attributes

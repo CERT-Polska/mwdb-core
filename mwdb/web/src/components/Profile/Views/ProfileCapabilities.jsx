@@ -1,11 +1,15 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useContext } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { find, isNil, isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
-import { capabilitiesList, Capability } from "@mwdb-web/commons/auth";
+import {
+    capabilitiesList,
+    Capability,
+    AuthContext,
+} from "@mwdb-web/commons/auth";
 import {
     GroupBadge,
     BootstrapSelect,
@@ -15,6 +19,7 @@ import {
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 
 function CapabilitiesTable({ profile }) {
+    const { user } = useContext(AuthContext);
     const { userHasCapabilities } = useCheckCapabilities();
     const { setCapabilitiesToDelete } = useOutletContext();
 
@@ -27,6 +32,11 @@ function CapabilitiesTable({ profile }) {
     }
 
     function isDeleteButtonRender(cap) {
+        const userOrGroupName = profile.name || profile.login;
+        const isManageUsersCapability = cap === Capability.manageUsers;
+        if (isManageUsersCapability && userOrGroupName === user.login) {
+            return false;
+        }
         return !isNil(profile.login) ? isUserDeleteButtonRender(cap) : true;
     }
 

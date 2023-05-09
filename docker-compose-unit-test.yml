@@ -1,0 +1,10 @@
+# Docker Compose file for mwdb-core unit test
+
+version: "3.3"
+services:
+  web-unit-tests:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile-web-unit-test
+    container_name: mwdb_core_unit_web_tests
+    image: certpl/mwdb-web-unit-tests

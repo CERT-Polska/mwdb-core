@@ -1,2 +1,2 @@
-export * from "./useCheckCapabilities";
-export { useComponentState } from "./useComponentState";
+export { useNavRedirect } from "./useNavRedirect";
+export { useCheckCapabilities } from "./useCheckCapabilities";

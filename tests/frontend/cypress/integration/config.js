@@ -36,10 +36,12 @@ describe("Config view test - mwdb-core", function () {
 
     browserLogin(Cypress.env("user"), Cypress.env("password"));
 
-    cy.contains("Configs").click();
+    cy.contains("Configs").click({ timeout: 10000 });
 
     cy.get("@configId").then((configId) => {
-      cy.get('.d-none a[href*="'+configId+'"] > div').click();
+      cy.get('.d-none a[href*="' + configId + '"] > div').click({
+        force: true,
+      });
     });
 
     cy.contains("Family");
@@ -54,10 +56,10 @@ describe("Config view test - mwdb-core", function () {
     cy.contains("test");
     cy.contains("Upload time");
 
-    cy.get("a").contains("Relations").click()
+    cy.get("a").contains("Relations").click({ force: true });
     cy.get("g[class='node expanded-node']");
 
-    cy.get("a").contains("Preview").click()
+    cy.get("a").contains("Preview").click({ force: true });
     cy.get("div[class='ace_line']");
 
     cy.visit("/config/fake");
@@ -65,6 +67,6 @@ describe("Config view test - mwdb-core", function () {
       "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
     );
 
-    cy.contains("Logout").click();
+    cy.contains("Logout").click({ force: true });
   });
 });

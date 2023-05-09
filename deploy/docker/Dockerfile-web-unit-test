@@ -1,0 +1,8 @@
+FROM node:16-alpine AS build
+
+LABEL maintainer="info@cert.pl"
+
+COPY ./mwdb/web/ ./
+RUN npm install
+
+CMD ["npm", "test"]

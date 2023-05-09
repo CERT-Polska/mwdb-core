@@ -1,5 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Navigate, useParams, useOutletContext } from "react-router-dom";
+import { isEmpty, isNil } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
@@ -34,7 +35,7 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
             {workspace.users
                 .sort((userA, userB) => userA.localeCompare(userB))
                 .map((login, idx) => (
-                    <tr className="nested d-flex">
+                    <tr className="nested d-flex" key={idx}>
                         <td className="col-8">
                             <GroupBadge
                                 key={idx}
@@ -67,7 +68,7 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
                     handleRemoveMember(removeUser);
                 }}
                 message={`Are you sure to delete ${removeUser} user from group?`}
-            />{" "}
+            />
         </React.Fragment>
     );
 }
@@ -77,9 +78,15 @@ export default function ProfileGroupMembers() {
     const { redirectToAlert } = useViewAlert();
     const { profile } = useOutletContext();
     const { group: groupName } = useParams();
-    const [workspaces, setWorkspaces] = useState();
+    const [workspaces, setWorkspaces] = useState([]);
 
-    async function updateWorkspaces() {
+    const group = profile.groups.find((group) => group.name === groupName);
+
+    useEffect(() => {
+        getWorkspaces();
+    }, []);
+
+    async function getWorkspaces() {
         try {
             const response = await api.authGroups();
             setWorkspaces(response.data["groups"]);
@@ -90,28 +97,21 @@ export default function ProfileGroupMembers() {
             });
         }
     }
-    const getWorkspaces = useCallback(updateWorkspaces, [redirectToAlert]);
 
-    useEffect(() => {
-        getWorkspaces();
-    }, [getWorkspaces]);
+    if (isEmpty(group)) {
+        redirectToAlert({
+            target: "/profile",
+            error: `Group ${groupName} doesn't exist`,
+        });
+        return <></>;
+    }
 
-    if (!workspaces) return [];
-
-    const group = profile.groups.find((group) => group.name === groupName);
-    if (!group)
-        return (
-            <Navigate
-                to="/profile"
-                state={{
-                    error: `Group ${groupName} doesn't exist`,
-                }}
-            />
-        );
     if (group.private) return <Navigate to={`/profile/user/${group.name}`} />;
 
     // Merge it with workspace info
     const workspace = workspaces.find((group) => group.name === groupName);
+
+    if (isNil(workspace)) return <></>;
 
     if (
         !(

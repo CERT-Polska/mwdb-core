@@ -1,15 +1,22 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Outlet, Link, Route, Routes } from "react-router-dom";
+import { isEmpty, find } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/ui";
+import DeleteCapabilityModal from "./DeleteCapabilityModal";
 
 export default function UserView() {
+    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
     const { setAlert } = useViewAlert();
     const { login } = useParams();
     const [user, setUser] = useState({});
 
-    async function updateUser() {
+    useEffect(() => {
+        getUser();
+    }, [login]);
+
+    async function getUser() {
         try {
             const response = await api.getUser(login);
             setUser(response.data);
@@ -18,17 +25,27 @@ export default function UserView() {
         }
     }
 
-    const getUser = useCallback(updateUser, [login, setAlert]);
+    async function changeCapabilities(capability, callback) {
+        try {
+            const foundUserCapabilities = find(user.groups, {
+                name: user.login,
+            }).capabilities;
+            const capabilities = foundUserCapabilities.filter(
+                (item) => item !== capability
+            );
+            await api.updateGroup(user.login, { capabilities });
+            getUser();
+            callback();
+        } catch (error) {
+            setAlert({ error });
+        }
+    }
 
-    useEffect(() => {
-        getUser();
-    }, [getUser]);
-
-    if (!user) return [];
+    if (isEmpty(user)) return <></>;
 
     function BreadcrumbItems({ elements = [] }) {
         return [
-            <li className="breadcrumb-item">
+            <li className="breadcrumb-item" key="account-details">
                 <strong>Account details: </strong>
                 {elements.length > 0 ? (
                     <Link to={`/settings/user/${user.login}`}>
@@ -40,6 +57,7 @@ export default function UserView() {
             </li>,
             ...elements.map((element, index) => (
                 <li
+                    key={index}
                     className={`breadcrumb-item ${
                         index === elements.length - 1 ? "active" : ""
                     }`}
@@ -83,7 +101,13 @@ export default function UserView() {
                     </Routes>
                 </ol>
             </nav>
-            <Outlet context={{ user, getUser }} />
+            <DeleteCapabilityModal
+                changeCapabilities={changeCapabilities}
+                capabilitiesToDelete={capabilitiesToDelete}
+                setCapabilitiesToDelete={setCapabilitiesToDelete}
+                successMessage={`Capabilities for ${user.login} successfully changed`}
+            />
+            <Outlet context={{ user, getUser, setCapabilitiesToDelete }} />
         </div>
     );
 }

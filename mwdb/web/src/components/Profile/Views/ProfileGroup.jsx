@@ -1,5 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, Navigate, useParams, useOutletContext } from "react-router-dom";
+import { isEmpty } from "lodash";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,9 +25,15 @@ export default function ProfileGroup() {
     const { profile } = useOutletContext();
     const { redirectToAlert } = useViewAlert();
     const { group: groupName } = useParams();
-    const [workspaces, setWorkspaces] = useState();
+    const [workspaces, setWorkspaces] = useState([]);
 
-    async function updateWorkspaces() {
+    const group = profile.groups.find((group) => group.name === groupName);
+
+    useEffect(() => {
+        getWorkspaces();
+    }, []);
+
+    async function getWorkspaces() {
         try {
             const response = await api.authGroups();
             setWorkspaces(response.data["groups"]);
@@ -38,24 +45,13 @@ export default function ProfileGroup() {
         }
     }
 
-    const getWorkspaces = useCallback(updateWorkspaces, [redirectToAlert]);
-
-    useEffect(() => {
-        getWorkspaces();
-    }, [getWorkspaces]);
-
-    if (!workspaces) return [];
-
-    const group = profile.groups.find((group) => group.name === groupName);
-    if (!group)
-        return (
-            <Navigate
-                to="/profile"
-                state={{
-                    error: `Group ${groupName} doesn't exist`,
-                }}
-            />
-        );
+    if (isEmpty(group)) {
+        redirectToAlert({
+            target: "/profile",
+            error: `Group ${groupName} doesn't exist`,
+        });
+        return <></>;
+    }
     // Merge it with workspace info
     const workspace = workspaces.find((group) => group.name === groupName);
 
@@ -79,8 +75,9 @@ export default function ProfileGroup() {
                                 .sort((userA, userB) =>
                                     userA.localeCompare(userB)
                                 )
-                                .map((login) => (
+                                .map((login, index) => (
                                     <GroupBadge
+                                        key={index}
                                         group={{
                                             name: login,
                                             private: true,
@@ -98,8 +95,9 @@ export default function ProfileGroup() {
                                 .sort((userA, userB) =>
                                     userA.localeCompare(userB)
                                 )
-                                .map((login) => (
+                                .map((login, index) => (
                                     <GroupBadge
+                                        key={index}
                                         group={{
                                             name: login,
                                             private: true,

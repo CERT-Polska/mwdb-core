@@ -1,4 +1,5 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { isEmpty } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
@@ -24,12 +25,24 @@ function PluginItems(props) {
     );
 }
 
+function FlagBadge({ enabled }) {
+    return enabled ? (
+        <span className="badge badge-success">enabled</span>
+    ) : (
+        <span className="badge badge-danger">disabled</span>
+    );
+}
+
 export default function SettingsOverview() {
     const config = useContext(ConfigContext);
     const { setAlert } = useViewAlert();
-    const [extendedInfo, setExtendedInfo] = useState();
+    const [extendedInfo, setExtendedInfo] = useState({});
 
-    async function updateExtendedInfo() {
+    useEffect(() => {
+        getExtendedInfo();
+    }, []);
+
+    async function getExtendedInfo() {
         try {
             const response = await api.getServerAdminInfo();
             setExtendedInfo(response.data);
@@ -38,21 +51,7 @@ export default function SettingsOverview() {
         }
     }
 
-    function FlagBadge({ enabled }) {
-        return enabled ? (
-            <span className="badge badge-success">enabled</span>
-        ) : (
-            <span className="badge badge-danger">disabled</span>
-        );
-    }
-
-    const getExtendedInfo = useCallback(updateExtendedInfo, [setAlert]);
-
-    useEffect(() => {
-        getExtendedInfo();
-    }, [getExtendedInfo]);
-
-    if (!extendedInfo) return [];
+    if (isEmpty(extendedInfo)) return <></>;
 
     const plugins = Object.entries(extendedInfo["active_plugins"])
         .sort()

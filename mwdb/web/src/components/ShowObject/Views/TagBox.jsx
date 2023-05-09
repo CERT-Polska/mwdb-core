@@ -70,7 +70,7 @@ export default function TagBox() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
-    const [modalIsOpen, setModalIsOpen] = useState(null);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
     const [tagToRemove, setTagToRemove] = useState(false);
 
     const objectId = context.object.id;

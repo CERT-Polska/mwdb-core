@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Outlet, Routes, Route, useParams } from "react-router-dom";
+import { isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/ui";
 
@@ -8,7 +9,11 @@ export default function AttributeView() {
     const { attributeKey } = useParams();
     const [attribute, setAttribute] = useState({});
 
-    async function updateAttribute() {
+    useEffect(() => {
+        getAttribute();
+    }, [attributeKey]);
+
+    async function getAttribute() {
         try {
             let response = await api.getAttributeDefinition(attributeKey);
             setAttribute(response.data);
@@ -17,15 +22,9 @@ export default function AttributeView() {
         }
     }
 
-    const getAttribute = useCallback(updateAttribute, [attributeKey, setAlert]);
-
-    useEffect(() => {
-        getAttribute();
-    }, [getAttribute]);
-
     function BreadcrumbItems({ elements = [] }) {
         return [
-            <li className="breadcrumb-item">
+            <li className="breadcrumb-item" key="details">
                 <strong>Attribute details: </strong>
                 {elements.length > 0 ? (
                     <Link to={`/settings/attribute/${attribute.key}`}>
@@ -37,6 +36,7 @@ export default function AttributeView() {
             </li>,
             ...elements.map((element, index) => (
                 <li
+                    key={index}
                     className={`breadcrumb-item ${
                         index === elements.length - 1 ? "active" : ""
                     }`}
@@ -47,7 +47,8 @@ export default function AttributeView() {
         ];
     }
 
-    if (!attribute) return [];
+    if (isEmpty(attribute)) return <></>;
+
     return (
         <div className="container">
             <nav aria-label="breadcrumb">

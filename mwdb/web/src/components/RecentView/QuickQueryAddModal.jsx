@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
 export default function QuickQueryAddModal(props) {
-    const { isOpen, onSubmit, onRequestModalClose, error, onError } = props;
+    const { isOpen, onSubmit, onRequestModalClose, error, onError, queries } =
+        props;
     const [value, setValue] = useState("");
 
     useEffect(() => {
@@ -14,10 +15,15 @@ export default function QuickQueryAddModal(props) {
     const handleSubmit = (ev) => {
         if (!value) {
             onError("Please set name for your quick query.");
-        } else {
-            ev.preventDefault();
-            onSubmit(value);
+            return;
         }
+        const names = queries.map((x) => x.name);
+        if (names.includes(value)) {
+            onError("This query name already exists");
+            return;
+        }
+        ev.preventDefault();
+        onSubmit(value);
     };
 
     const handleClose = (ev) => {

@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
@@ -21,6 +22,11 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
     const [invalid, setInvalid] = useState(false);
     const [error, setError] = useState(null);
     const attributeForm = useRef(null);
+    const attributesAvailable = !isEmpty(attributeDefinitions);
+
+    useEffect(() => {
+        getAttributeDefinitions();
+    }, []);
 
     function handleSubmit(ev) {
         if (ev) ev.preventDefault();
@@ -63,7 +69,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
         setError(null);
     }
 
-    async function updateAttributeDefinitions() {
+    async function getAttributeDefinitions() {
         try {
             const response = await api.getAttributeDefinitions("set");
             const keyDefinitions = response.data[
@@ -80,13 +86,6 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             toast(error.toString(), { type: "error" });
         }
     }
-
-    const getAttributeDefinitions = useCallback(updateAttributeDefinitions, []);
-    const attributesAvailable = Object.keys(attributeDefinitions).length !== 0;
-
-    useEffect(() => {
-        getAttributeDefinitions();
-    }, [getAttributeDefinitions]);
 
     return (
         <ConfirmationModal
@@ -206,15 +205,22 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                                 }}
                             >
                                 <tbody>
-                                    <RichAttributeRenderer
-                                        template={richTemplate}
-                                        value={
-                                            attributeType === "string"
-                                                ? JSON.stringify(attributeValue)
-                                                : attributeValue
-                                        }
-                                        setInvalid={setInvalid}
-                                    />
+                                    <tr>
+                                        <th>{"My attribute"}</th>
+                                        <td>
+                                            <RichAttributeRenderer
+                                                template={richTemplate}
+                                                value={
+                                                    attributeType === "string"
+                                                        ? JSON.stringify(
+                                                              attributeValue
+                                                          )
+                                                        : attributeValue
+                                                }
+                                                setInvalid={setInvalid}
+                                            />
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

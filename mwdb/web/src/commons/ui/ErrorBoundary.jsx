@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import { intersperse } from "../helpers";
 
 export function getErrorMessage(error) {
@@ -21,6 +21,8 @@ export function getErrorMessage(error) {
 }
 
 function CriticalError(props) {
+    const [show, setShow] = useState(false);
+
     return (
         <div className="container-fluid">
             <div className="alert alert-danger" role="alert">
@@ -37,7 +39,18 @@ function CriticalError(props) {
                     bug report.
                 </p>
                 <hr />
-                <p className="mb-0">{props.error.toString()}</p>
+                <p style={{ fontWeight: 700 }}>{props.error.message}</p>
+                <button
+                    className="btn btn-danger"
+                    onClick={() => setShow(!show)}
+                >
+                    {`${show ? "Hide" : "Show"} details`}
+                </button>
+                {show && (
+                    <pre style={{ color: "red", marginTop: 20 }}>
+                        {props.error.stack}
+                    </pre>
+                )}
             </div>
         </div>
     );
@@ -57,17 +70,21 @@ export default class ErrorBoundary extends Component {
     }
 
     render() {
-        if (this.state.renderError)
+        if (this.state.renderError) {
             return <CriticalError error={this.state.renderError} />;
-        else if (this.state.propsError) {
+        }
+
+        if (this.state.propsError) {
             // Fallback to single Alert
             return (
                 <div className="container-fluid">
                     <div className="alert alert-danger">
-                        {getErrorMessage(this.state.propsError)}
+                        {this.state.propsError}
                     </div>
                 </div>
             );
-        } else return this.props.children;
+        }
+
+        return this.props.children;
     }
 }

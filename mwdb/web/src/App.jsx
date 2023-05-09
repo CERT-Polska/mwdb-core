@@ -135,10 +135,7 @@ function AppRoutes() {
                         element={<ProfileGroupMembers />}
                     />
                     <Route path="groups" element={<ProfileGroups />} />
-                    <Route
-                        path="capabilities"
-                        element={<ProfileCapabilities />}
-                    />
+                    <Route path="capabilities" element={<UserCapabilities />} />
                     <Route path="api-keys" element={<ProfileAPIKeys />} />
                     <Route
                         path="reset-password"
@@ -176,7 +173,7 @@ function AppRoutes() {
                     <Route path="pending" element={<UsersPendingList />} />
                     <Route path="users" element={<UsersList />} />
                     <Route path="user/new" element={<UserCreate />} />
-                    <Route path="user/:login" element={<UserView />}>
+                    <Route path="user/:login/*" element={<UserView />}>
                         <Route index element={<UserDetails />} />
                         <Route
                             path="capabilities"
@@ -191,7 +188,7 @@ function AppRoutes() {
                     </Route>
                     <Route path="groups" element={<GroupsList />} />
                     <Route path="group/new" element={<GroupCreate />} />
-                    <Route path="group/:name" element={<GroupView />}>
+                    <Route path="group/:name/*" element={<GroupView />}>
                         <Route index element={<GroupDetails />} />
                         <Route
                             path="capabilities"
@@ -206,7 +203,7 @@ function AppRoutes() {
                     <Route path="attributes" element={<AttributesList />} />
                     <Route path="attribute/new" element={<AttributeCreate />} />
                     <Route
-                        path="attribute/:attributeKey"
+                        path="attribute/:attributeKey/*"
                         element={<AttributeView />}
                     >
                         <Route index element={<AttributeDetails />} />

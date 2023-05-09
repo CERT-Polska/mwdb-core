@@ -35,9 +35,6 @@ export default function UserLogin() {
             const prevLocation = locationState.prevLocation || "/";
             auth.updateSession(response.data);
             navigate(prevLocation);
-            toast(`Successfully logged into account: ${response.data.login}`, {
-                type: "success",
-            });
         } catch (error) {
             toast(getErrorMessage(error), {
                 type: "error",
@@ -62,8 +59,6 @@ export default function UserLogin() {
         }
     }, [getProviders, isOIDCEnabled]);
 
-    if (auth.isAuthenticated) return <Navigate to="/" />;
-
     useEffect(() => {
         if (location.state) {
             if (
@@ -74,6 +69,8 @@ export default function UserLogin() {
             }
         }
     }, []);
+
+    if (auth.isAuthenticated) return <Navigate to="/" />;
 
     return (
         <div className="user-login">
@@ -107,7 +104,7 @@ export default function UserLogin() {
                 >
                     <Extension ident="userLoginNote" />
                     <div className="form-group">
-                        <label>Login</label>
+                        <label className="required">Login</label>
                         <input
                             type="text"
                             name="login"
@@ -118,7 +115,7 @@ export default function UserLogin() {
                         />
                     </div>
                     <div className="form-group">
-                        <label>Password</label>
+                        <label className="required">Password</label>
                         <input
                             type="password"
                             name="password"

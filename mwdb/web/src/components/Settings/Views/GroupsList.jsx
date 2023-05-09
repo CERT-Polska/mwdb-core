@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLock, faLockOpen } from "@fortawesome/free-solid-svg-icons";
 
 import { api } from "@mwdb-web/commons/api";
 import {
@@ -13,8 +14,8 @@ import {
 
 function GroupItem(props) {
     const lockAttributes = props.immutable
-        ? { icon: "lock", tip: "Immutable group" }
-        : { icon: "lock-open", tip: "Mutable group" };
+        ? { icon: faLock, tip: "Immutable group" }
+        : { icon: faLockOpen, tip: "Mutable group" };
 
     return (
         <tr key={props.name}>
@@ -40,6 +41,7 @@ function GroupItem(props) {
                     <LimitTo count={5}>
                         {props.users.map((login) => (
                             <UserBadge
+                                key={login}
                                 user={{ login }}
                                 clickable
                                 basePath="/settings"
@@ -58,7 +60,17 @@ export default function GroupsList() {
     const [activePage, setActivePage] = useState(1);
     const [groupFilter, setGroupFilter] = useState("");
 
-    async function updateGroups() {
+    const query = groupFilter.toLowerCase();
+    const items = groups
+        .filter((group) => !group.private)
+        .filter((group) => group.name.toLowerCase().includes(query))
+        .sort((groupA, groupB) => groupA.name.localeCompare(groupB.name));
+
+    useEffect(() => {
+        getGroups();
+    }, []);
+
+    async function getGroups() {
         try {
             const response = await api.getGroups();
             setGroups(response.data["groups"]);
@@ -66,18 +78,6 @@ export default function GroupsList() {
             setAlert({ error });
         }
     }
-
-    const getGroups = useCallback(updateGroups, [setAlert]);
-
-    useEffect(() => {
-        getGroups();
-    }, [getGroups]);
-
-    const query = groupFilter.toLowerCase();
-    const items = groups
-        .filter((group) => !group.private)
-        .filter((group) => group.name.toLowerCase().includes(query))
-        .sort((groupA, groupB) => groupA.name.localeCompare(groupB.name));
 
     return (
         <div className="container">

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api } from "@mwdb-web/commons/api";
@@ -34,7 +34,16 @@ export default function AttributesList() {
     const [activePage, setActivePage] = useState(1);
     const [attributeFilter, setAttributeFilter] = useState("");
 
-    async function updateAttributes() {
+    const query = attributeFilter.toLowerCase();
+    const items = attributes
+        .filter((attribute) => attribute.key.toLowerCase().includes(query))
+        .sort((attrA, attrB) => attrA.key.localeCompare(attrB.key));
+
+    useEffect(() => {
+        getAttributes();
+    }, []);
+
+    async function getAttributes() {
         try {
             const response = await api.getAttributeDefinitions("manage");
             setAttributes(
@@ -46,17 +55,6 @@ export default function AttributesList() {
             setAlert({ error });
         }
     }
-
-    const getAttributes = useCallback(updateAttributes, [setAlert]);
-
-    useEffect(() => {
-        getAttributes();
-    }, [getAttributes]);
-
-    const query = attributeFilter.toLowerCase();
-    const items = attributes
-        .filter((attribute) => attribute.key.toLowerCase().includes(query))
-        .sort((attrA, attrB) => attrA.key.localeCompare(attrB.key));
 
     return (
         <div className="container">

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { renderToString } from "react-dom/server";
+import { createRoot } from "react-dom/client";
 
 import * as dagreD3 from "dagre-d3";
 import * as d3 from "d3";
@@ -18,7 +18,6 @@ function DagreD3Plot(props) {
         svgClone: null,
         transform: null,
     });
-    const NodeComponent = props.nodeComponent;
 
     const nodeSvg = useRef(null);
 
@@ -31,13 +30,30 @@ function DagreD3Plot(props) {
             props.height / 3 - 100
         );
 
-    const renderNodeElement = (node) => {
+    const renderNodeElement = async (node) => {
+        // This method renders React element into HTML to meet DagreD3 requirements
+        // Create container node and make React root
         const parentNode = document.createElement("div");
-        const nodeComponent = (
-            <NodeComponent node={node} remotePath={remotePath} />
-        );
-        parentNode.innerHTML = renderToString(nodeComponent);
-        return parentNode;
+        const root = createRoot(parentNode);
+
+        // render() doesn't provide any callback to notify when rendering is done
+        // So we need to make wrapper with useEffect.
+        // Unfortunately we can't use flushSync for that.
+        await new Promise((resolve) => {
+            function NodeComponent() {
+                const Node = props.nodeComponent;
+                useEffect(() => {
+                    resolve();
+                }, []);
+                return <Node node={node} remotePath={remotePath} />;
+            }
+            root.render(<NodeComponent />);
+        });
+        // Extract HTML when it's rendered and unmount root to unregister effects and
+        // other React things
+        const renderedNode = parentNode.outerHTML;
+        root.unmount();
+        return renderedNode;
     };
 
     const enterRenderContext = () => {
@@ -91,15 +107,17 @@ function DagreD3Plot(props) {
         const svgGroup = d3.select(nodeSvg.current.firstChild);
 
         // Render all node components
-        let renderedNodes = props.nodes.map((node) => [
-            node,
-            renderNodeElement(node),
-        ]);
+        let renderedNodes = await Promise.all(
+            props.nodes.map(async (node) => [
+                node,
+                await renderNodeElement(node),
+            ])
+        );
 
         for (let [node, element] of renderedNodes) {
             graph.setNode(node.id, {
                 labelType: "html",
-                label: element.outerHTML,
+                label: element,
                 class: node.expanded ? "expanded-node" : "not-expanded-node",
             });
         }

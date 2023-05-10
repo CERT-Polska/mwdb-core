@@ -56,7 +56,7 @@ class OpenIDDiscoveryURLRequestSchema(Schema):
 
 
 class OpenIDDiscoveryDataResponseSchema(Schema):
-    pure = fields.Str(required=False, allow_none=True)
+    pure = fields.Str(required=True, allow_none=False)
     authorization_endpoint = fields.Str(required=False, allow_none=True)
     token_endpoint = fields.Str(required=False, allow_none=True)
     userinfo_endpoint = fields.Str(required=False, allow_none=True)

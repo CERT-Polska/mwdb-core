@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { api } from "../api";
@@ -6,16 +6,17 @@ import { api } from "../api";
 import { omit, isEqual, isNil } from "lodash";
 import { Capability } from "./capabilities";
 import { AuthContext } from "./context";
+import { AuthContextValues, Capabality, User } from "@mwdb-web/types/types";
 
 export const localStorageAuthKey = "user";
 
-function isSessionValid(authSession) {
+function isSessionValid(authSession: User) {
     if (!authSession || !authSession.token)
         // Token is missing
         return false;
     if (
         JSON.parse(atob(authSession.token.split(".")[0])).exp <=
-        new Date() / 1000
+        new Date().getTime() / 1000
     )
         // Token expired
         return false;
@@ -40,13 +41,13 @@ function getStoredAuthSession() {
     }
 }
 
-function setTokenForAPI(token) {
+function setTokenForAPI(token: string) {
     api.axios.defaults.headers.common["Authorization"] = token
         ? "Bearer " + token
-        : null;
+        : false;
 }
 
-function useAxiosEffect(func) {
+function useAxiosEffect(func: () => () => void) {
     /***
      * This is special kind of effect that runs *before* render (like componentWillMount).
      * In the same time, it keeps the original useEffect's clean-up behavior.
@@ -54,7 +55,7 @@ function useAxiosEffect(func) {
      * It's required to do proper Axios setup (side-effect) before children are rendered
      * to prevent premature API requests before the auth token is recovered from localStorage.
      */
-    const cleanup = useRef(null);
+    const cleanup = useRef<any>(null);
 
     if (cleanup.current === null) {
         // Run on first render and set the cleanup callback
@@ -69,13 +70,18 @@ function useAxiosEffect(func) {
     }, []);
 }
 
-export function AuthProvider(props) {
+type AuthProviderProps = {
+    children: JSX.Element;
+};
+
+export function AuthProvider(props: AuthProviderProps) {
+    console.log(props);
     const location = useLocation();
     const navigate = useNavigate();
     const [session, _setSession] = useState(getStoredAuthSession());
     const isAuthenticated = !!session;
 
-    function setSession(newSession) {
+    function setSession(newSession: User | null) {
         // Internal session setter which updates token used by Axios
         // before populating new state to the components
         setTokenForAPI(getStoredAuthSession() && getStoredAuthSession().token);
@@ -89,7 +95,7 @@ export function AuthProvider(props) {
         }
     }
 
-    function updateSession(newSession) {
+    function updateSession(newSession: User | null) {
         // Updates local session state
         // To be used by UserLogin and other authentication frontends
         if (newSession && !isSessionValid(newSession))
@@ -124,13 +130,13 @@ export function AuthProvider(props) {
             let response = await api.oauthGetLogoutLink(session.provider);
             window.location.href = response.data.url;
             return null;
-        } catch (e) {
+        } catch (e: any) {
             console.log(e);
             return e.response.data.message;
         }
     }
 
-    function logout(error) {
+    function logout(error?: string) {
         // Clears session state and redirects user to the UserLogin page
         let logoutReason = error
             ? { error }
@@ -144,7 +150,7 @@ export function AuthProvider(props) {
         });
     }
 
-    function hasCapability(capability) {
+    function hasCapability(capability: Capabality) {
         return (
             isAuthenticated && session?.capabilities.indexOf(capability) >= 0
         );
@@ -196,7 +202,7 @@ export function AuthProvider(props) {
 
     // Effect for periodic session refresh
     useEffect(() => {
-        let timer;
+        let timer: NodeJS.Timeout;
         function setRefreshTimer() {
             timer = setInterval(refreshSession, 60000);
         }
@@ -230,19 +236,19 @@ export function AuthProvider(props) {
         };
     }, []);
 
+    const values: AuthContextValues = {
+        user: session,
+        isAuthenticated: !!session,
+        isAdmin: hasCapability(Capability.manageUsers),
+        hasCapability,
+        refreshSession,
+        updateSession,
+        logout,
+        oAuthLogout,
+    };
+
     return (
-        <AuthContext.Provider
-            value={{
-                user: session,
-                isAuthenticated: !!session,
-                isAdmin: hasCapability(Capability.manageUsers),
-                hasCapability,
-                refreshSession,
-                updateSession,
-                logout,
-                oAuthLogout,
-            }}
-        >
+        <AuthContext.Provider value={values}>
             {props.children}
         </AuthContext.Provider>
     );

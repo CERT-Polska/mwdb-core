@@ -17,7 +17,8 @@ import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/theme-chrome";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { View, getErrorMessage } from "@mwdb-web/commons/ui";
+import { View } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useRemote } from "@mwdb-web/commons/remotes";
 
 function DiffTextBlobContentPresenter({ current, previous }) {

@@ -224,3 +224,40 @@ export type TabContextValues = {
     setComponent: (newComponent: JSX.Element) => void;
     setActions: (actions: JSX.Element[]) => void;
 };
+
+export type ConfigContextValues = {
+    config: Partial<ServerInfo>;
+    configError: unknown;
+    isReady: boolean;
+    update: () => Promise<void>;
+    pendingUsers: User[];
+    getPendingUsers: () => Promise<void>;
+};
+
+export type AuthContextValues = {
+    user: User;
+    isAuthenticated: boolean;
+    isAdmin: boolean;
+    hasCapability: (cap: Capabality) => boolean;
+    refreshSession: () => Promise<void>;
+    updateSession: (newSession: User) => void;
+    logout: (error?: string) => void;
+    oAuthLogout: () => Promise<any>;
+};
+
+export type GenericOrJSX<T> = T | JSX.Element;
+
+export type ServerInfo = {
+    request_timeout: number;
+    is_karton_enabled: boolean;
+    statement_timeout: number;
+    is_oidc_enabled: boolean;
+    is_authenticated: boolean;
+    is_maintenance_set: boolean;
+    recaptcha_site_key: string;
+    file_upload_timeout: number;
+    server_version: string;
+    is_registration_enabled: boolean;
+    instance_name: string;
+    remotes: string[];
+};

@@ -1,7 +1,11 @@
-import React from "react";
 import { isNil } from "lodash";
+import { FieldError } from "react-hook-form";
 
-export default function FormError(props) {
+type Props = {
+    errorField?: FieldError;
+};
+
+export function FormError(props: Props) {
     const { errorField } = props;
     if (isNil(errorField)) {
         return <></>;

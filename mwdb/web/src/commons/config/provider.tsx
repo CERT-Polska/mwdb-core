@@ -1,24 +1,40 @@
-import React, {
+import {
     useState,
     useContext,
     useEffect,
     useReducer,
     useCallback,
+    Reducer,
 } from "react";
-import _ from "lodash";
+import { isEqual } from "lodash";
 import { api } from "../api";
 import { ConfigContext } from "./context";
 import { AuthContext } from "../auth";
+import { ConfigContextValues, ServerInfo, User } from "@mwdb-web/types/types";
 
 const configUpdate = Symbol("configUpdate");
 const configError = Symbol("configError");
 
-function serverConfigReducer(state, action) {
+type ServerConfigReducerState = {
+    config: Partial<ServerInfo>;
+    error?: Error | unknown;
+};
+
+type ServerConfigReducerAction = {
+    type: typeof configUpdate | typeof configError;
+    config: Partial<ServerInfo>;
+    error?: Error | unknown;
+};
+
+function serverConfigReducer(
+    state: ServerConfigReducerState,
+    action: ServerConfigReducerAction
+) {
     switch (action.type) {
         case configUpdate:
             return {
                 config: { ...state.config, ...action.config },
-                error: null,
+                error: undefined,
             };
         case configError:
             return { config: state.config, error: action.error };
@@ -27,13 +43,18 @@ function serverConfigReducer(state, action) {
     }
 }
 
-export function ConfigProvider(props) {
+type Props = {
+    children: JSX.Element;
+};
+
+export function ConfigProvider(props: Props) {
     const auth = useContext(AuthContext);
-    const [serverConfig, setServerConfig] = useReducer(serverConfigReducer, {
+    const [serverConfig, setServerConfig] = useReducer<
+        Reducer<ServerConfigReducerState, ServerConfigReducerAction>
+    >(serverConfigReducer, {
         config: {},
-        error: null,
     });
-    const [pendingUsers, setPendingUsers] = useState([]);
+    const [pendingUsers, setPendingUsers] = useState<User[]>([]);
 
     async function updateServerInfo() {
         try {
@@ -45,6 +66,7 @@ export function ConfigProvider(props) {
         } catch (error) {
             setServerConfig({
                 type: configError,
+                config: {},
                 error,
             });
         }
@@ -62,6 +84,7 @@ export function ConfigProvider(props) {
         } catch (error) {
             setServerConfig({
                 type: configError,
+                config: {},
                 error,
             });
         }
@@ -70,13 +93,14 @@ export function ConfigProvider(props) {
     async function updatePendingUsers() {
         try {
             const response = await api.getPendingUsers();
-            const users = response.data["users"];
-            if (!_.isEqual(users, pendingUsers)) {
+            const users = response.data.users;
+            if (!isEqual(users, pendingUsers)) {
                 setPendingUsers(users);
             }
         } catch (error) {
             setServerConfig({
                 type: configError,
+                config: {},
                 error,
             });
         }
@@ -93,16 +117,20 @@ export function ConfigProvider(props) {
     }, [auth.isAuthenticated]);
 
     useEffect(() => {
-        if (Number.isInteger(serverConfig.config["request_timeout"])) {
+        if (
+            serverConfig.config &&
+            Number.isInteger(serverConfig.config.request_timeout)
+        ) {
             api.axios.defaults.timeout = serverConfig.config["request_timeout"];
         }
     }, [serverConfig]);
 
     useEffect(() => {
         if (
+            serverConfig.config &&
             auth.isAuthenticated &&
             auth.isAdmin &&
-            serverConfig.config["is_registration_enabled"]
+            serverConfig.config.is_registration_enabled
         ) {
             let timer = setInterval(getPendingUsers, 15000);
             getPendingUsers();
@@ -117,17 +145,17 @@ export function ConfigProvider(props) {
         getPendingUsers,
     ]);
 
+    const values: ConfigContextValues = {
+        config: serverConfig.config,
+        configError: serverConfig.error,
+        isReady: !!serverConfig.config?.server_version,
+        update: updateServerInfo,
+        pendingUsers: pendingUsers,
+        getPendingUsers: getPendingUsers,
+    };
+
     return (
-        <ConfigContext.Provider
-            value={{
-                config: serverConfig.config,
-                configError: serverConfig.error,
-                isReady: !!serverConfig.config["server_version"],
-                update: updateServerInfo,
-                pendingUsers: pendingUsers,
-                getPendingUsers: getPendingUsers,
-            }}
-        >
+        <ConfigContext.Provider value={values}>
             {props.children}
         </ConfigContext.Provider>
     );

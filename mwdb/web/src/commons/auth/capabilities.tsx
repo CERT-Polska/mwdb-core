@@ -1,6 +1,33 @@
 import { afterPluginsLoaded, fromPlugins } from "../plugins";
 
-export const Capability = {
+type CapabilityObjectType = {
+    manageUsers: "manage_users";
+    shareQueriedObjects: "share_queried_objects";
+    accessAllObjects: "access_all_objects";
+    sharingWithAll: "sharing_with_all";
+    accessUploaderInfo: "access_uploader_info";
+    addingTags: "adding_tags";
+    removingTags: "removing_tags";
+    addingComments: "adding_comments";
+    removingComments: "removing_comments";
+    addingParents: "adding_parents";
+    removingParents: "removing_parents";
+    readingAllAttributes: "reading_all_attributes";
+    addingAllAttributes: "adding_all_attributes";
+    removingAttributes: "removing_attributes";
+    addingFiles: "adding_files";
+    addingConfigs: "adding_configs";
+    addingBlobs: "adding_blobs";
+    unlimitedRequests: "unlimited_requests";
+    removingObjects: "removing_objects";
+    manageProfile: "manage_profile";
+    personalize: "personalize";
+    kartonAssign: "karton_assign";
+    kartonReanalyze: "karton_reanalyze";
+    removingKarton: "karton_unassign";
+};
+
+export const Capability: CapabilityObjectType = {
     manageUsers: "manage_users",
     shareQueriedObjects: "share_queried_objects",
     accessAllObjects: "access_all_objects",
@@ -27,7 +54,10 @@ export const Capability = {
     removingKarton: "karton_unassign",
 };
 
-export let capabilitiesList = {
+export let capabilitiesList: Record<
+    CapabilityObjectType[keyof CapabilityObjectType],
+    string
+> = {
     [Capability.manageUsers]:
         "Managing users and groups (system administration)",
     [Capability.shareQueriedObjects]: "Query for all objects in system",

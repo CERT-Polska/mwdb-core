@@ -1,7 +1,19 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
-export default function LoadingSpinner(props) {
-    //types is one of: [primary, secondary, success, danger, warning, info, light, dark]
+type Props = {
+    type:
+        | "primary"
+        | "secondary"
+        | "success"
+        | "danger"
+        | "danger"
+        | "info"
+        | "light"
+        | "dark";
+    loading: boolean;
+};
+
+export function LoadingSpinner(props: Props) {
     const { loading, type } = props;
     if (!loading) {
         return <></>;

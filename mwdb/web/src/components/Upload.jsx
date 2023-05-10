@@ -9,12 +9,8 @@ import AttributesAddModal from "./AttributesAddModal";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import {
-    Autocomplete,
-    DataTable,
-    View,
-    getErrorMessage,
-} from "@mwdb-web/commons/ui";
+import { Autocomplete, DataTable, View } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { Extendable } from "@mwdb-web/commons/plugins";
 

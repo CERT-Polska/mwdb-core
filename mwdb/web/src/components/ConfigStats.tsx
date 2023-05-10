@@ -3,13 +3,8 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
-import {
-    DateString,
-    SortedList,
-    View,
-    getErrorMessage,
-} from "@mwdb-web/commons/ui";
-import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { DateString, SortedList, View } from "@mwdb-web/commons/ui";
+import { makeSearchLink, getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { Family } from "@mwdb-web/types/types";
 

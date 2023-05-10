@@ -13,6 +13,7 @@ import {
     ObjectListItem,
     Query,
     RelatedObject,
+    ServerInfo,
     Share,
     Tag,
     User,
@@ -20,7 +21,7 @@ import {
 
 export type Response<T, C = any> = Promise<AxiosResponse<T, C>>;
 
-export type ServerInfoResponse = Response<{ status: string }>;
+export type ServerInfoResponse = Response<ServerInfo>;
 
 type ServerDocsInfo = {
     description: string;
@@ -163,7 +164,7 @@ export type SetGroupAdminResponse = Response<{
 
 export type GetUsersResponse = Response<User[]>;
 
-export type GetPendingUsersResponse = Response<User[]>;
+export type GetPendingUsersResponse = Response<{ users: User[] }>;
 
 export type AcceptPendingUserResponse = Response<{
     login: string;

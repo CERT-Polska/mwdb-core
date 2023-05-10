@@ -20,7 +20,8 @@ import { APIContext } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { View, getErrorMessage } from "@mwdb-web/commons/ui";
+import { View } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import KartonAnalysisBox from "./Views/KartonAnalysisBox";
 
 const initialObjectState = {

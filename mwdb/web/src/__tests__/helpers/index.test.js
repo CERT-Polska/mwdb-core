@@ -41,6 +41,18 @@ describe("intersperse", () => {
         const result = intersperse([1, 2, 3], ["-", "."]);
         expect(expected).toEqual(result);
     });
+
+    it("should intersperse a single JSX item in an array", () => {
+        const expected = [1, <br />, 2, <br />, 3];
+        const result = intersperse([1, 2, 3], <br />);
+        expect(expected).toEqual(result);
+    });
+
+    it("should intersperse a multiple JSX items in an array", () => {
+        const expected = [1, <br />, <div />, 2, <br />, <div />, 3];
+        const result = intersperse([1, 2, 3], [<br />, <div />]);
+        expect(expected).toEqual(result);
+    });
 });
 
 describe("mapObjectType", () => {

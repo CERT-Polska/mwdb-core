@@ -7,13 +7,8 @@ import * as Yup from "yup";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import {
-    View,
-    getErrorMessage,
-    Label,
-    FormError,
-    LoadingSpinner,
-} from "@mwdb-web/commons/ui";
+import { View, Label, FormError, LoadingSpinner } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useNavRedirect } from "@mwdb-web/commons/hooks";
 
 const formFields = {

@@ -4,8 +4,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 
-import { View, getErrorMessage } from "@mwdb-web/commons/ui";
-
+import { View } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { api } from "@mwdb-web/commons/api";
 
 export default function UserSetPassword() {

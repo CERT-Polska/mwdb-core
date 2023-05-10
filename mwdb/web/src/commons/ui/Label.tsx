@@ -1,6 +1,10 @@
-import React from "react";
+type Props = {
+    label: string;
+    required?: boolean;
+    htmlFor?: string;
+};
 
-export default function Label(props) {
+export function Label(props: Props) {
     const { label, required, htmlFor } = props;
 
     return (

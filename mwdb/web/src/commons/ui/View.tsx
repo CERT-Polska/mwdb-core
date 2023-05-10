@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import { getErrorMessage } from "./ErrorBoundary";
 import { Extendable } from "../plugins";
 import { AxiosServerErrors } from "@mwdb-web/types/types";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 
 type Messages = {
     success?: string;

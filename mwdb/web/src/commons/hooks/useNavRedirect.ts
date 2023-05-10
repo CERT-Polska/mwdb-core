@@ -5,7 +5,7 @@ export function useNavRedirect() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    function redirectTo(url) {
+    function redirectTo(url: string) {
         navigate(url);
     }
 

@@ -1,4 +1,11 @@
-export function escapeSearchValue(input) {
+type SearchParams = {
+    field: string | string[];
+    value: string;
+    noEscape?: boolean;
+    pathname?: string;
+};
+
+export function escapeSearchValue(input: string | JSON) {
     if (typeof input === "string") {
         input = JSON.stringify(input);
     } else {
@@ -7,11 +14,15 @@ export function escapeSearchValue(input) {
     return input;
 }
 
-export function escapeSearchField(field) {
+export function escapeSearchField(field: string) {
     return field.replace(/[.\\ *:]/g, "\\$&");
 }
 
-export function makeSearchParams({ field, value, noEscape = false }) {
+export function makeSearchParams({
+    field,
+    value,
+    noEscape = false,
+}: SearchParams) {
     return (
         "?" +
         new URLSearchParams({
@@ -20,22 +31,27 @@ export function makeSearchParams({ field, value, noEscape = false }) {
     );
 }
 
-export function makeSearchLink({ field, value, noEscape = false, pathname }) {
+export function makeSearchLink({
+    field,
+    value,
+    noEscape = false,
+    pathname,
+}: SearchParams) {
     return {
         pathname,
         search: makeSearchParams({ field, value, noEscape }),
     };
 }
 
-export function makeSearchConfigLink({ field, value, pathname }) {
+export function makeSearchConfigLink({ field, value, pathname }: SearchParams) {
     return makeSearchLink({
         pathname,
-        field: `cfg.${field.join(".")}`,
+        field: Array.isArray(field) ? `cfg.${field.join(".")}` : `cfg.${field}`,
         value,
     });
 }
 
-export function makeSearchDateLink({ field, value, pathname }) {
+export function makeSearchDateLink({ field, value, pathname }: SearchParams) {
     return makeSearchLink({
         pathname,
         field,
@@ -44,7 +60,7 @@ export function makeSearchDateLink({ field, value, pathname }) {
     });
 }
 
-export function isHash(element) {
+export function isHash(element: string): boolean {
     return (
         /^[0-9a-fA-F]{8}$/g.test(element) ||
         /^[0-9a-fA-F]{32}$/g.test(element) ||
@@ -54,19 +70,23 @@ export function isHash(element) {
     );
 }
 
-export function multiFromHashes(query) {
+export function multiFromHashes(query: string): string {
     const elements = query.split(/\s+/);
     if (elements.every(isHash))
         return `multi:"${elements.join(" ").toLowerCase()}"`;
     return query;
 }
 
-export function addFieldToQuery(query, field, value) {
+export function addFieldToQuery(
+    query: string,
+    field: string,
+    value: string
+): string {
     const OP_NOT = "NOT ";
     const OP_AND = " AND ";
     const OP_PRE_AND = "AND ";
 
-    let negateQueryComponent = (component) =>
+    let negateQueryComponent = (component: string) =>
         component.startsWith(OP_NOT)
             ? component.substring(OP_NOT.length)
             : OP_NOT + component;

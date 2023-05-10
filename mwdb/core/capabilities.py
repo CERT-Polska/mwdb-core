@@ -47,6 +47,12 @@ class Capabilities(object):
     karton_reanalyze = "karton_reanalyze"
     # Can remove Karton analysis from the object
     karton_unassign = "karton_unassign"
+    # Can view and download RelatedFiles
+    access_related_files = "access_related_files"
+    # Can upload new RelatedFiles
+    adding_related_files = "adding_related_files"
+    # Can remove existing RelatedFiles
+    removing_related_files = "removing_related_files"
 
     @classmethod
     def all(cls):

@@ -5,6 +5,7 @@ import random
 import string
 import time
 import uuid
+import hashlib
 
 import baseconv
 import requests
@@ -17,6 +18,10 @@ def base62uuid():
     uuid4_as_hex = str(uuid.uuid4()).replace("-", "")
     uuid4_as_int = int(uuid4_as_hex, 16)
     return converter.encode(uuid4_as_int)
+
+
+def calc_sha256(content):
+    return hashlib.sha256(bytes(str(content), "utf-8")).hexdigest()
 
 
 def rand_string(size=20):
@@ -489,3 +494,25 @@ class MwdbTest(object):
         res = self.session.delete(self.mwdb_url + "/object/" + identifier + "/karton/" + analysis_id)
         res.raise_for_status()
         return res.json()
+
+    def get_related_files(self, identifier):
+        res = self.session.get(self.mwdb_url + "/object/" + identifier + "/related_file")
+        res.raise_for_status()
+        return res.json()
+
+    def add_related_file(self, main_obj_identifier, filename=None, content=None):
+        if filename is None:
+            filename = str(uuid.uuid4())
+
+        if content is None:
+            content = str(uuid.uuid4())
+
+        res = self.session.post(
+            self.mwdb_url + "/object/" + main_obj_identifier + "/related_file",
+            files={"file": (filename, content)},
+        )
+        res.raise_for_status()
+
+    def remove_related_file(self, main_obj_identifier, identifier):
+        res = self.session.delete(self.mwdb_url + "/object/" + main_obj_identifier + "/related_file/" + identifier)
+        res.raise_for_status()

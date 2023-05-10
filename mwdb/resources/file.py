@@ -5,7 +5,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unaut
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.model import File
+from mwdb.model import File, Object, RelatedFile, db
 from mwdb.model.file import EmptyFileError
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import (
@@ -14,6 +14,7 @@ from mwdb.schema.file import (
     FileItemResponseSchema,
     FileLegacyCreateRequestSchema,
     FileListResponseSchema,
+    RelatedFileResponseSchema,
 )
 
 from . import load_schema, requires_authorization, requires_capabilities
@@ -613,3 +614,324 @@ class FileDownloadZipResource(Resource):
         download_token = file.generate_download_token()
         schema = FileDownloadTokenResponseSchema()
         return schema.dump({"token": download_token})
+
+
+@rate_limited_resource
+class RelatedFileResource(Resource):
+    def get(self, type, main_obj_identifier):
+        """
+        ---
+        summary: Get list of related files
+        description: |
+            Returns list of related files for an object specified by sha256
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
+              required: true
+        responses:
+            200:
+                description: List of related files
+                content:
+                  application/json:
+                    schema: RelatedFileResponseSchema
+            404:
+                description: |
+                    There is no object with provided sha256
+                    or user doesn't have access to it
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        main_object = (
+            db.session.query(Object)
+            .filter(Object.dhash == main_obj_identifier)
+            .filter(g.auth_user.has_access_to_object(Object.id))
+        ).first()
+
+        if main_object is None:
+            raise NotFound(
+                "There is no object with provided sha256 or you don't have access to it"
+            )
+
+        if g.auth_user.has_rights(Capabilities.access_related_files):
+            related_files = (
+                db.session.query(RelatedFile)
+                .filter(RelatedFile.object_id == main_object.id)
+                .all()
+            )
+        else:
+            related_files = []
+
+        schema = RelatedFileResponseSchema()
+        return schema.dump({"related_files": related_files})
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.adding_related_files)
+    def post(self, type, main_obj_identifier):
+        """
+        ---
+        summary: Upload related file
+        description: |
+            Uploads a new related file.
+
+            Requires `adding_related_files` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
+              required: true
+        requestBody:
+            required: true
+            content:
+              multipart/form-data:
+                schema:
+                  type: object
+                  properties:
+                    file:
+                      type: string
+                      format: binary
+                      description: Related file contents to be uploaded
+                  required:
+                    - file
+        responses:
+            200:
+                description: OK
+            400:
+                description: Related file is empty
+            403:
+                description: When user doesn't have `adding_related_files` capability
+            404:
+                description: |
+                    There is no object with provided sha256
+                    or user doesn't have access to it
+            409:
+                description: Such related file already exists
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        try:
+            RelatedFile.create(
+                request.files["file"].filename,
+                request.files["file"].stream,
+                main_obj_identifier,
+            )
+        except EmptyFileError:
+            raise BadRequest("Related file cannot be empty")
+        except ValueError:
+            raise NotFound(
+                "There is no object with provided sha256 or you don't have access to it"
+            )
+        except FileExistsError:
+            raise Conflict("Such related file already exists")
+
+        return Response("OK")
+
+
+class RelatedFileItemResource(Resource):
+    @requires_authorization
+    @requires_capabilities(Capabilities.access_related_files)
+    def get(self, type, main_obj_identifier, identifier):
+        """
+        ---
+        summary: Download related file
+        description: |
+            Returns related file contents.
+
+            Requires `access_related_files` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              required: true
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
+            - in: path
+              name: identifier
+              required: true
+              schema:
+                type: string
+              description: Related file identifier (SHA256)
+        responses:
+            200:
+                description: Related file contents
+                content:
+                  application/octet-stream:
+                    schema:
+                      type: string
+                      format: binary
+            403:
+                description: When user doesn't have `access_related_files` capability
+            404:
+                description: |
+                    When related file doesn't exist
+                    or user doesn't have access to it.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+
+        if not g.auth_user:
+            raise Unauthorized("Not authenticated.")
+
+        try:
+            related_file_obj = RelatedFile.access(main_obj_identifier, identifier)
+        except ValueError:
+            raise NotFound("Related file not found")
+
+        return Response(
+            related_file_obj.iterate(),
+            content_type="application/octet-stream",
+            headers={
+                "Content-disposition": f"attachment; filename={related_file_obj.sha256}"
+            },
+        )
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.removing_related_files)
+    def delete(self, type, main_obj_identifier, identifier):
+        """
+        ---
+        summary: Delete related file
+        description: |
+            Removes a related file from the database.
+
+            Requires `removing_related_files` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              required: true
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
+            - in: path
+              name: identifier
+              required: true
+              schema:
+                type: string
+              description: Related file identifier (SHA256)
+        responses:
+            200:
+                description: When related file was deleted
+            403:
+                description: When user doesn't have `removing_related_files` capability
+            404:
+                description: |
+                    When related file doesn't exist
+                    or user doesn't have access to it.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        try:
+            RelatedFile.delete(main_obj_identifier, identifier)
+        except ValueError:
+            raise NotFound(
+                "There is no file with provided sha256 or you don't have access to it"
+            )
+
+        return Response("OK")
+
+
+class RelatedFileZipDownloadResource(Resource):
+    def get(self, type, main_obj_identifier):
+        """
+        ---
+        summary: Download every related file for a provided main object
+        description: |
+            Returns zipped related file contents.
+
+            Requires `access_related_files` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - related_file
+        parameters:
+            - in: path
+              name: type
+              schema:
+                type: string
+                enum: [file, config, blob, object]
+              description: Type of object
+            - in: path
+              name: main_obj_identifier
+              required: true
+              schema:
+                type: string
+              description: Main object identifier (SHA256)
+        responses:
+            200:
+                description: Contents of related file
+                content:
+                  application/octet-stream:
+                    schema:
+                      type: string
+                      format: binary
+            403:
+                description: When user doesn't have `access_related_files` capability
+            404:
+                description: |
+                    There is no object with provided sha256
+                    or user doesn't have access to it
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        try:
+            zipped_related_files = RelatedFile.zip_all(main_obj_identifier)
+        except ValueError:
+            raise NotFound(
+                "There is no object with provided sha256 or you don't have access to it"
+            )
+
+        zip_file_name = "related_files_" + main_obj_identifier + ".zip"
+        return Response(
+            zipped_related_files,
+            content_type="application/octet-stream",
+            headers={"Content-disposition": f"attachment; filename={zip_file_name}"},
+        )

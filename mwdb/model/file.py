@@ -6,22 +6,22 @@ import tempfile
 
 import pyzipper
 from Cryptodome.Util.strxor import strxor_c
-from sqlalchemy import or_
+from flask import g
+from sqlalchemy import not_, or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from werkzeug.utils import secure_filename
 
 from mwdb.core.auth import AuthScope, generate_token, verify_token
 from mwdb.core.config import StorageProviderType, app_config
-from mwdb.core.karton import send_file_to_karton
-from mwdb.core.util import (
-    calc_crc32,
-    calc_hash,
-    calc_magic,
-    calc_ssdeep,
-    get_fd_path,
-    get_s3_client,
+from mwdb.core.file_util import (
+    delete_from_storage,
+    get_from_storage,
+    iterate_buffer,
+    write_to_storage,
 )
+from mwdb.core.karton import send_file_to_karton
+from mwdb.core.util import calc_crc32, calc_hash, calc_magic, calc_ssdeep, get_fd_path
 
 from . import db
 from .object import Object
@@ -126,28 +126,7 @@ class File(Object):
                 file_obj.alt_names.append(original_filename)
 
         if is_new:
-            file_stream.seek(0, os.SEEK_SET)
-            if app_config.mwdb.storage_provider == StorageProviderType.S3:
-                get_s3_client(
-                    app_config.mwdb.s3_storage_endpoint,
-                    app_config.mwdb.s3_storage_access_key,
-                    app_config.mwdb.s3_storage_secret_key,
-                    app_config.mwdb.s3_storage_region_name,
-                    app_config.mwdb.s3_storage_secure,
-                    app_config.mwdb.s3_storage_iam_auth,
-                ).put_object(
-                    Bucket=app_config.mwdb.s3_storage_bucket_name,
-                    Key=file_obj._calculate_path(),
-                    Body=file_stream,
-                )
-            elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
-                with open(file_obj._calculate_path(), "wb") as f:
-                    shutil.copyfileobj(file_stream, f)
-            else:
-                raise RuntimeError(
-                    f"StorageProvider {app_config.mwdb.storage_provider} "
-                    f"is not supported"
-                )
+            write_to_storage(file_stream, file_obj)
 
         file_obj.upload_stream = file_stream
         return file_obj, is_new
@@ -223,34 +202,7 @@ class File(Object):
                 stream = os.fdopen(dupfd, "rb")
                 stream.seek(0, os.SEEK_SET)
                 return stream
-        if app_config.mwdb.storage_provider == StorageProviderType.S3:
-            # Stream coming from Boto3 get_object is not buffered and not seekable.
-            # We need to download it to the temporary file first.
-            stream = tempfile.TemporaryFile(mode="w+b")
-            try:
-                get_s3_client(
-                    app_config.mwdb.s3_storage_endpoint,
-                    app_config.mwdb.s3_storage_access_key,
-                    app_config.mwdb.s3_storage_secret_key,
-                    app_config.mwdb.s3_storage_region_name,
-                    app_config.mwdb.s3_storage_secure,
-                    app_config.mwdb.s3_storage_iam_auth,
-                ).download_fileobj(
-                    Bucket=app_config.mwdb.s3_storage_bucket_name,
-                    Key=self._calculate_path(),
-                    Fileobj=stream,
-                )
-                stream.seek(0, io.SEEK_SET)
-                return stream
-            except Exception:
-                stream.close()
-                raise
-        elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
-            return open(self._calculate_path(), "rb")
-        else:
-            raise RuntimeError(
-                f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
-            )
+        return get_from_storage(self)
 
     def read(self):
         """
@@ -355,3 +307,206 @@ class File(Object):
 
     def _send_to_karton(self):
         return send_file_to_karton(self)
+
+
+class RelatedFile(db.Model):
+    __tablename__ = "related_file"
+
+    id = db.Column(db.Integer, primary_key=True)
+    object_id = db.Column(
+        db.Integer,
+        db.ForeignKey("object.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    file_name = db.Column(db.String, nullable=False)
+    file_size = db.Column(db.Integer, nullable=False)
+    sha256 = db.Column(db.String, nullable=False)
+
+    related_object = db.relationship(
+        "Object",
+        back_populates="related_files",
+        lazy=True,
+    )
+
+    def _calculate_path(self):
+        if app_config.mwdb.storage_provider == StorageProviderType.DISK:
+            # upload_path = (
+            #     "related_files"
+            #     if app_config.mwdb.related_files_folder == ""
+            #     else app_config.mwdb.related_files_folder + "/related_files"
+            # )
+            upload_path = "/app/uploads/related_files"
+        elif app_config.mwdb.storage_provider == StorageProviderType.S3:
+            upload_path = "related_files/"
+        else:
+            raise RuntimeError(
+                f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
+            )
+
+        sample_sha256 = self.sha256.lower()
+
+        if app_config.mwdb.hash_pathing:
+            # example: related_files/9/f/8/6/9f86d0818...
+            upload_path = os.path.join(upload_path, *list(sample_sha256)[0:4])
+
+        if app_config.mwdb.storage_provider == StorageProviderType.DISK:
+            upload_path = os.path.abspath(upload_path)
+            os.makedirs(upload_path, mode=0o755, exist_ok=True)
+
+        return os.path.join(upload_path, sample_sha256)
+
+    @classmethod
+    def create(
+        cls,
+        file_name,
+        file_stream,
+        main_obj_dhash,
+    ):
+        file_stream.seek(0, os.SEEK_END)
+        file_size = file_stream.tell()
+        if file_size == 0:
+            raise EmptyFileError
+
+        sha256 = calc_hash(file_stream, hashlib.sha256(), lambda h: h.hexdigest())
+
+        main_obj = (
+            db.session.query(Object).filter(Object.dhash == main_obj_dhash).first()
+        )
+        # If main file doesn't exist or no access
+        if main_obj is None or not main_obj.has_explicit_access(g.auth_user):
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+
+        is_new = True
+        new_related_file = (
+            db.session.query(RelatedFile).filter(RelatedFile.sha256 == sha256).first()
+        )
+        # If RelatedFile already exists
+        if new_related_file is not None:
+            is_new = False
+            new_related_file = (
+                db.session.query(RelatedFile)
+                .filter(RelatedFile.sha256 == sha256)
+                .filter(RelatedFile.object_id == main_obj.id)
+                .first()
+            )
+            # If RelatedFile related to main_obj already exists
+            if new_related_file is not None:
+                raise FileExistsError("Related file with this sha256 already exists")
+
+        new_related_file = RelatedFile(
+            object_id=main_obj.id,
+            file_name=secure_filename(file_name),
+            file_size=file_size,
+            sha256=sha256,
+        )
+
+        if is_new:
+            write_to_storage(file_stream, new_related_file)
+
+        db.session.add(new_related_file)
+        db.session.commit()
+
+    @classmethod
+    def access(cls, main_obj_identifier, identifier):
+        main_obj = (
+            db.session.query(Object).filter(Object.dhash == main_obj_identifier).first()
+        )
+        if main_obj is None:
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+        if not main_obj.has_explicit_access(g.auth_user):
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+
+        related_file = (
+            db.session.query(RelatedFile)
+            .filter(RelatedFile.sha256 == identifier)
+            .filter(RelatedFile.object_id == main_obj.id)
+            .first()
+        )
+        # Empty list - no such RelatedFile
+        if related_file is None:
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+
+        return related_file
+
+    @classmethod
+    def delete(cls, main_obj_identifier, identifier):
+        main_obj = (
+            db.session.query(Object).filter(Object.dhash == main_obj_identifier).first()
+        )
+        if main_obj is None:
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+        if not main_obj.has_explicit_access(g.auth_user):
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+
+        related_file_obj = (
+            db.session.query(RelatedFile)
+            .filter(RelatedFile.sha256 == identifier)
+            .filter(RelatedFile.object_id == main_obj.id)
+            .first()
+        )
+
+        if related_file_obj is None:
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+
+        is_last = False
+        other_related_file_obj = (
+            db.session.query(RelatedFile)
+            .filter(RelatedFile.sha256 == identifier)
+            .filter(not_(RelatedFile.object_id == main_obj.id))
+            .first()
+        )
+        if other_related_file_obj is None:
+            is_last = True
+
+        if is_last:
+            delete_from_storage(related_file_obj)
+
+        db.session.delete(related_file_obj)
+        db.session.commit()
+        return
+
+    def open(self):
+        """
+        Opens the related file stream with contents.
+        """
+        return get_from_storage(self)
+
+    def iterate(self, chunk_size=1024 * 256):
+        """
+        Iterates over bytes in the file contents
+        """
+        return iterate_buffer(self, chunk_size)
+
+    @classmethod
+    def zip_all(cls, main_obj_identifier):
+        main_obj = (
+            db.session.query(Object).filter(Object.dhash == main_obj_identifier).first()
+        )
+        if main_obj is None:
+            raise ValueError(
+                "There is no object with this sha256 or you don't have access"
+            )
+        related_files = (
+            db.session.query(RelatedFile).filter(RelatedFile.object_id == main_obj.id)
+        ).all()
+
+        with tempfile.NamedTemporaryFile() as temp_file:
+            with open(temp_file.name, "rb") as reader:
+                with pyzipper.ZipFile(temp_file, "w") as zip_file:
+                    for rf in related_files:
+                        zip_file.write(rf._calculate_path(), arcname=rf.file_name)
+                return reader.read()

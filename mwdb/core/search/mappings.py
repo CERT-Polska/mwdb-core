@@ -23,6 +23,7 @@ from .fields import (
     JSONField,
     ListField,
     MultiField,
+    RelatedField,
     RelationField,
     ShareField,
     SharerField,
@@ -58,6 +59,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "karton": UUIDField(Object.analyses, KartonAnalysis.id),
         "comment_author": CommentAuthorField(Object.comment_authors, User.login),
         "upload_count": UploadCountField(Object.upload_count),
+        "related": RelatedField(Object.related_files),
     },
     File.__name__: {
         "name": FileNameField(File.file_name),

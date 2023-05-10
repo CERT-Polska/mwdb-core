@@ -444,6 +444,32 @@ function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
 }
 
+function uploadRelatedFile(file, mainFileDhash, type = "object") {
+    let formData = new FormData();
+    formData.append("file", file);
+    return axios.post(`/${type}/${mainFileDhash}/related_file`, formData);
+}
+
+function downloadRelatedFile(mainFileDhash, id, type = "object") {
+    return axios.get(`/${type}/${mainFileDhash}/related_file/${id}`, {
+        responseType: "arraybuffer",
+        responseEncoding: "binary",
+    });
+}
+
+function deleteRelatedFile(mainFileDhash, id, type = "object") {
+    return axios.delete(`/${type}/${mainFileDhash}/related_file/${id}`);
+}
+
+function getListOfRelatedFiles(mainFileDhash, type = "object") {
+    return axios.get(`/${type}/${mainFileDhash}/related_file`);
+}
+
+function getZippedRelatedFilesLink(mainFileDhash, type = "object") {
+    const baseURL = getApiForEnvironment();
+    return `${baseURL}/${type}/${mainFileDhash}/related_file/zip`;
+}
+
 function getRemoteNames() {
     return axios.get("/remote");
 }
@@ -627,6 +653,11 @@ export const api = {
     requestFileDownloadLink,
     requestZipFileDownloadLink,
     uploadFile,
+    uploadRelatedFile,
+    downloadRelatedFile,
+    deleteRelatedFile,
+    getListOfRelatedFiles,
+    getZippedRelatedFilesLink,
     getRemoteNames,
     pushObjectRemote,
     pullObjectRemote,

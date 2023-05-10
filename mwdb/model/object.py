@@ -314,6 +314,12 @@ class Object(db.Model):
         lazy="joined",
         cascade="save-update, merge, delete",
     )
+    related_files = db.relationship(
+        "RelatedFile",
+        back_populates="related_object",
+        lazy=True,
+        cascade="save-update, merge, delete",
+    )
 
     followers = db.relationship(
         "User", secondary=favorites, back_populates="favorites", lazy="joined"

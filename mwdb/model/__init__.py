@@ -47,7 +47,7 @@ from .attribute import Attribute, AttributeDefinition, AttributePermission  # no
 from .blob import TextBlob  # noqa: E402
 from .comment import Comment  # noqa: E402
 from .config import Config, StaticConfig  # noqa: E402
-from .file import File  # noqa: E402
+from .file import File, RelatedFile  # noqa: E402
 from .group import Group, Member  # noqa: E402
 from .karton import KartonAnalysis, karton_object  # noqa: E402
 from .oauth import OpenIDProvider, OpenIDUserIdentity  # noqa: E402
@@ -76,6 +76,7 @@ __all__ = [
     "OpenIDProvider",
     "OpenIDUserIdentity",
     "relation",
+    "RelatedFile",
     "QuickQuery",
     "Tag",
     "User",

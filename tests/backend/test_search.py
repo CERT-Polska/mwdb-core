@@ -2,7 +2,7 @@ import time
 import datetime
 
 from .relations import *
-from .utils import base62uuid
+from .utils import base62uuid, calc_sha256
 from .utils import ShouldRaise
 from .utils import rand_string
 import random
@@ -706,3 +706,85 @@ def test_search_multi(admin_session):
     wildcard_hash = samples[0].get("sha512")[:-100] + "*"
     with ShouldRaise(status_code=400):
         found_objs = test.search(f'file.multi:"{wildcard_hash}"')
+
+
+def test_related_files_search(admin_session):
+    test = admin_session
+
+    filename = base62uuid()
+
+    # File A
+    file_content = base62uuid()
+    FileA = test.add_sample(filename, file_content)
+
+    test.add_related_file(FileA["sha256"], "related.txt", "b"*1024)
+    test.add_related_file(FileA["sha256"], "related.mp3")
+    test.add_related_file(FileA["sha256"], "related.png")
+
+    # File 2
+    file_content = base62uuid()
+    FileB = test.add_sample(filename, file_content)
+
+    test.add_related_file(FileB["sha256"], "related.txt", "b"*2048)
+    test.add_related_file(FileB["sha256"], "related.mp3")
+    test.add_related_file(FileB["sha256"], "related.jpg")
+    test.add_related_file(FileB["sha256"], "related.csv")
+    
+    # Related file name
+    results = [
+        result["id"] for result in
+        test.search(f'related.name:"*.png" AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileA["sha256"]])
+    results = [
+        result["id"] for result in
+        test.search(f'related.name:"related.mp3" AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileA["sha256"], FileB["sha256"]])
+
+    # Related file size
+    results = [
+        result["id"] for result in
+        test.search(f'related.size:">2000" AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileB["sha256"]])
+    results = [
+        result["id"] for result in
+        test.search(f'related.size:"<=2048" AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileA["sha256"], FileB["sha256"]])
+    results = [
+        result["id"] for result in
+        test.search(f'related.size:[1000 TO 1100] AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileA["sha256"]])
+
+    # Related file sha256
+    sha256 = calc_sha256("b"*1024)
+    results = [
+        result["id"] for result in
+        test.search(f'related.sha256:"{sha256}" AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileA["sha256"]])
+
+    # Related file count
+    results = [
+        result["id"] for result in
+        test.search(f'related.count:"3" AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileA["sha256"]])
+    results = [
+        result["id"] for result in
+        test.search(f'related.count:">3" AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileB["sha256"]])
+    results = [
+        result["id"] for result in
+        test.search(f'related.count:"<=4" AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileA["sha256"], FileB["sha256"]])
+    results = [
+        result["id"] for result in
+        test.search(f'related.count:[1 TO 3] AND file.name:"{filename}"')
+    ]
+    assert sorted(results) == sorted([FileA["sha256"]])

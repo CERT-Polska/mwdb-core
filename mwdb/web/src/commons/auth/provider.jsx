@@ -125,7 +125,6 @@ export function AuthProvider(props) {
             window.location.href = response.data.url;
             return null;
         } catch (e) {
-            console.log(e);
             return e.response.data.message;
         }
     }

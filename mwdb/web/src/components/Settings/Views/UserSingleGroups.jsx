@@ -6,8 +6,8 @@ import {
     Autocomplete,
     ConfirmationModal,
     GroupBadge,
-    useViewAlert,
 } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, useOutletContext } from "react-router-dom";

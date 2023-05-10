@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, Routes, Route, useParams } from "react-router-dom";
 import { isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
-import { useViewAlert } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 export default function AttributeView() {
     const { setAlert } = useViewAlert();

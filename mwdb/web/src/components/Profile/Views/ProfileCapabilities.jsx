@@ -14,8 +14,8 @@ import {
     GroupBadge,
     BootstrapSelect,
     ConfirmationModal,
-    useViewAlert,
 } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 
 function CapabilitiesTable({ profile }) {

@@ -221,7 +221,7 @@ export type TabContextValues = {
     tab?: string;
     subTab?: string;
     getTabLink: (tab: string, subtab?: string) => string;
-    setComponent: (newComponent: JSX.Element) => void;
+    setComponent: (newComponent: React.ComponentType) => void;
     setActions: (actions: JSX.Element[]) => void;
 };
 

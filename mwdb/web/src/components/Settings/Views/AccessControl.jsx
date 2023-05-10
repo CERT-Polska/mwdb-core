@@ -13,8 +13,8 @@ import {
     ConfirmationModal,
     GroupBadge,
     ShowIf,
-    useViewAlert,
 } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 function GroupAppliesTo({ group }) {
     if (group["name"] === "public")

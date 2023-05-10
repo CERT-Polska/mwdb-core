@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api } from "@mwdb-web/commons/api";
-import { PagedList, useViewAlert } from "@mwdb-web/commons/ui";
+import { PagedList } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 function AttributeItem({ attribute }) {
     return (

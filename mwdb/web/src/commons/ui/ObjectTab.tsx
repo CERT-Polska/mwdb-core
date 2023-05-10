@@ -6,12 +6,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { capitalize } from "../helpers";
 import { TabContextValues } from "@mwdb-web/types/types";
 
-export const TabContext = React.createContext({} as TabContextValues);
+export const TabContext = React.createContext<TabContextValues>(
+    {} as TabContextValues
+);
 export const useTabContext = () => useContext(TabContext);
 
 type Props = {
     actions: JSX.Element[];
-    component: JSX.Element;
+    component: React.ComponentType;
     icon: IconProp;
     tab: string;
     label?: string;

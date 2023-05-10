@@ -9,8 +9,8 @@ import {
     UserBadge,
     PagedList,
     HighlightText,
-    useViewAlert,
 } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 function GroupItem(props) {
     const lockAttributes = props.immutable

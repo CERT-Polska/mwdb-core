@@ -6,12 +6,8 @@ import { faCopy, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { api } from "@mwdb-web/commons/api";
-import {
-    ConfirmationModal,
-    DateString,
-    ShowIf,
-    useViewAlert,
-} from "@mwdb-web/commons/ui";
+import { ConfirmationModal, DateString, ShowIf } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 function KeyNameModal({ isOpen, onConfirm, onClose }) {
     const [currentKeyName, setCurrentKeyName] = useState("");

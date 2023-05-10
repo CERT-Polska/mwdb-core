@@ -192,7 +192,7 @@ export default function DiffTextBlob() {
     }, [getTextBlob]);
 
     return (
-        <View fluid>
+        <View ident="diffTextBlob" fluid>
             {currentBlob && previousBlob ? (
                 <div className="card-body">
                     <div className="card-header">

@@ -78,7 +78,7 @@ export default function UserPasswordRecover() {
         <div className="user-password-recover">
             <div className="user-password-recover__background" />
             <div className="user-password-recover__container">
-                <View>
+                <View ident="userPasswordRecover">
                     <h2 className="text-center">Recover password</h2>
                     <form onSubmit={handleSubmit(recoverPassword)}>
                         <div className="form-group">

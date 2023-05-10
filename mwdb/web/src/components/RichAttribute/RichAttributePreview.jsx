@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect } from "react";
+import { useReducer, useState, useEffect } from "react";
 import AceEditor from "react-ace";
 import RichAttributeRenderer from "./RichAttributeRenderer";
 
@@ -7,11 +7,10 @@ import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 
-import { DataTable, View } from "@mwdb-web/commons/ui";
+import { View } from "@mwdb-web/commons/ui";
 import exampleTemplates, { makeContext } from "./exampleTemplates";
 
 function templateReducer(state, action) {
-    console.log(state, action);
     if (action.type === "edit") {
         if (state.chosenExample === "custom") {
             // Editing custom template

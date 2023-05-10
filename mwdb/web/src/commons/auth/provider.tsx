@@ -75,7 +75,6 @@ type AuthProviderProps = {
 };
 
 export function AuthProvider(props: AuthProviderProps) {
-    console.log(props);
     const location = useLocation();
     const navigate = useNavigate();
     const [session, _setSession] = useState(getStoredAuthSession());
@@ -131,7 +130,6 @@ export function AuthProvider(props: AuthProviderProps) {
             window.location.href = response.data.url;
             return null;
         } catch (e: any) {
-            console.log(e);
             return e.response.data.message;
         }
     }

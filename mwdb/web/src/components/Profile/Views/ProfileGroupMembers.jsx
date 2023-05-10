@@ -4,11 +4,8 @@ import { isEmpty, isNil } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import {
-    GroupBadge,
-    useViewAlert,
-    ConfirmationModal,
-} from "@mwdb-web/commons/ui";
+import { GroupBadge, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 function ProfileGroupItems({ workspace, updateWorkspace }) {
     const { setAlert } = useViewAlert();

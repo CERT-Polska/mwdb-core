@@ -7,7 +7,7 @@ import { Capabality } from "@mwdb-web/types/types";
 
 type Props = {
     children: React.ReactNode;
-    capability: Capabality[];
+    capability: Capabality;
 };
 
 export function RequiresCapability({ capability, children }: Props) {

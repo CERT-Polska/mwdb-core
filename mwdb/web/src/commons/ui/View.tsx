@@ -1,69 +1,12 @@
-import { useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
 import { Extendable } from "../plugins";
-import { AxiosServerErrors } from "@mwdb-web/types/types";
-import { getErrorMessage } from "@mwdb-web/commons/helpers";
 
-type Messages = {
-    success?: string;
-    error?: AxiosServerErrors;
-    warning?: string;
+type Props = {
+    ident: string;
+    children: JSX.Element | JSX.Element[];
+    fluid?: boolean;
+    style?: React.CSSProperties;
+    showIf?: boolean;
 };
-
-export function useViewAlert() {
-    const navigate = useNavigate();
-    const location = useLocation();
-
-    const setMessages = useCallback(({ success, error, warning }: Messages) => {
-        console.log({ success, error, warning });
-        if (success) {
-            toast(success, { type: "success" });
-        }
-
-        if (error) {
-            toast(getErrorMessage(error), { type: "error" });
-        }
-
-        if (warning) {
-            toast(warning, { type: "warning" });
-        }
-    }, []);
-
-    const setAlert = useCallback(
-        ({ success, error, warning, state }: any) => {
-            const { pathname, search } = location;
-            setMessages({ success, error, warning });
-
-            navigate(
-                { pathname, search },
-                {
-                    state: {
-                        ...location.state,
-                        ...(state || {}),
-                    },
-                    replace: true,
-                }
-            );
-        },
-        [location, navigate]
-    );
-
-    const redirectToAlert = useCallback(
-        ({ success, error, warning, target, state }: any) => {
-            setMessages({ success, error, warning });
-
-            navigate(target, {
-                state: {
-                    ...(state || {}),
-                },
-            });
-        },
-        [navigate]
-    );
-
-    return { setAlert, redirectToAlert };
-}
 
 export default function View({
     ident,
@@ -71,7 +14,7 @@ export default function View({
     fluid,
     style,
     showIf = true,
-}: any) {
+}: Props) {
     /**
      * View component for all main views. Views shouldn't be nested.
      * Properties spec:

@@ -17,7 +17,7 @@ export { default as ObjectLink } from "./ObjectLink";
 export { default as PagedList } from "./PagedList";
 export { default as ShareReasonString } from "./ShareReasonString";
 export { default as SortedList } from "./SortedList";
-export { default as View, useViewAlert } from "./View";
+export { default as View } from "./View";
 export { default as ActionCopyToClipboard } from "./ActionCopyToClipboard";
 export { RequiresAuth } from "./RequiresAuth";
 export { RequiresCapability } from "./RequiresCapability";

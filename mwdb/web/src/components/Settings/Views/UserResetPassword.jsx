@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Link, useOutletContext } from "react-router-dom";
 
@@ -6,7 +6,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
 import { api } from "@mwdb-web/commons/api";
-import { ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
+import { ShowIf } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 export default function UserResetPassword() {
     const viewAlert = useViewAlert();

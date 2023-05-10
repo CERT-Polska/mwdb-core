@@ -40,8 +40,7 @@ export default function ObjectBox({ defaultTab, children }: Props) {
                 <ul className="nav nav-tabs mr-auto">{children}</ul>
                 <ul className="nav nav-pills ml-auto">{actions}</ul>
             </nav>
-            {/* @ts-ignore */}
-            {Component && <Component />}
+            <Component />
         </TabContext.Provider>
     );
 }

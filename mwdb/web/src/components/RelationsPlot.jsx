@@ -80,7 +80,6 @@ function RelationsNode(props) {
 }
 
 function RelationToManyNode({ setNodesStatus, nodesLength }) {
-    console.log({ setNodesStatus, nodesLength });
     return (
         <>
             <div

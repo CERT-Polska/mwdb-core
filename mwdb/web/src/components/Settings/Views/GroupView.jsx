@@ -3,7 +3,7 @@ import { isEmpty } from "lodash";
 import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
 
 import { api } from "@mwdb-web/commons/api";
-import { useViewAlert } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 import DeleteCapabilityModal from "./DeleteCapabilityModal";
 
 export default function GroupView() {

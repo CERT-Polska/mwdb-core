@@ -25,7 +25,9 @@ export default function Autocomplete<T>({
     ...inputProps
 }: Props<T>) {
     const itemValue = getItemValue || ((item) => item);
-    const ItemComponent = renderItem || (({ item }) => itemValue(item));
+    const ItemComponent =
+        renderItem ||
+        ((({ item }) => itemValue(item)) as React.ComponentType<{ item: T }>);
     const menuStyle = items.length === 0 ? { display: "none" } : {};
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +53,6 @@ export default function Autocomplete<T>({
                             inputRef.current?.focus();
                         }}
                     >
-                        {/* @ts-ignore */}
                         <ItemComponent item={item} />
                     </button>
                 ))}

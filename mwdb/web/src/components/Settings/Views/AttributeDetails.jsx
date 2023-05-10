@@ -6,8 +6,8 @@ import {
     EditableItem,
     PseudoEditableItem,
     FeatureSwitch,
-    useViewAlert,
 } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

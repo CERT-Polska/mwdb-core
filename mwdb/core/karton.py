@@ -27,13 +27,17 @@ def send_file_to_karton(file) -> str:
             TaskPriority.NORMAL if feed_quality == "high" else TaskPriority.LOW
         )
         task = Task(
-            headers={"type": "sample", "kind": "raw", "quality": feed_quality},
+            headers={
+                "type": "sample",
+                "kind": "raw",
+                "quality": feed_quality,
+                "share_3rd_party": file.share_3rd_party,
+            },
             payload={
                 "sample": Resource(file.file_name, fd=file_stream, sha256=file.sha256),
                 "attributes": file.get_attributes(
                     as_dict=True, check_permissions=False
                 ),
-                "share_3rd_party": file.share_3rd_party,
             },
             priority=task_priority,
         )
@@ -48,12 +52,16 @@ def send_file_to_karton(file) -> str:
 def send_config_to_karton(config) -> str:
     producer = get_karton_producer()
     task = Task(
-        headers={"type": "config", "kind": config.config_type, "family": config.family},
+        headers={
+            "type": "config",
+            "kind": config.config_type,
+            "family": config.family,
+            "share_3rd_party": config.share_3rd_party,
+        },
         payload={
             "config": config.cfg,
             "dhash": config.dhash,
             "attributes": config.get_attributes(as_dict=True, check_permissions=False),
-            "share_3rd_party": config.share_3rd_party,
         },
     )
     producer.send_task(task)
@@ -65,12 +73,15 @@ def send_config_to_karton(config) -> str:
 def send_blob_to_karton(blob) -> str:
     producer = get_karton_producer()
     task = Task(
-        headers={"type": "blob", "kind": blob.blob_type},
+        headers={
+            "type": "blob",
+            "kind": blob.blob_type,
+            "share_3rd_party": blob.share_3rd_party,
+        },
         payload={
             "content": blob.content,
             "dhash": blob.dhash,
             "attributes": blob.get_attributes(as_dict=True, check_permissions=False),
-            "share_3rd_party": blob.share_3rd_party,
         },
     )
     producer.send_task(task)

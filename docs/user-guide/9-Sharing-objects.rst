@@ -287,3 +287,17 @@ In mwdb.cert.pl service - ``registered`` group is allowed to:
 You can easily check your capabilities in ``Profile`` view.
 
 Plugins are allowed to extend the set of capabilities in case MWDB administrator wants to require additional permission for using them.
+
+Sharing with third parties
+--------------------------
+
+Files, configs and blobs uploaded to ``mwdb.cert.pl`` may be shared with our partners.
+Sharing occurs when the object is analyzed by :ref:`karton <Karton integration guide>` - some pipelines may share data with third parties.
+If you want your upload not to be shared with third parties, you can specify it during upload (with MWDB 2.9.0 or newer).
+
+After upload, marking objects as shareable is possible only for users with ``modify_3rd_party_sharing`` capability.
+
+If object was shareable at any time, we reserve right to share it:
+   - If one object was uploaded multiple times and at least one of them was marked as shareable with third parties, 
+   the object will be marked as shareable
+   - Marking objects as shareable is irreversible

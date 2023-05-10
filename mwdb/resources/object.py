@@ -605,4 +605,4 @@ class ObjectShare3rdPartyResource(Resource):
         selected_object.share_3rd_party = True
         db.session.commit()
 
-        return "OK"
+        return

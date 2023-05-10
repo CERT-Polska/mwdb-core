@@ -556,7 +556,6 @@ function removeKartonAnalysisFromObject(id, analysis_id) {
 }
 
 function enableSharing3rdParty(identifier) {
-    console.log(`/object/${identifier}/share_3rd_party`);
     return axios.put(`/object/${identifier}/share_3rd_party`);
 }
 

@@ -455,3 +455,36 @@ table.table.share-table thead th {
 .filter-option small.text-muted {
     display: none;
 }
+
+/* Marked table */
+.marked-table {
+    display: table;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.marked-table-row {
+    display: table-row;
+}
+
+.marked-table-row:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.marked-table-row:hover {
+    color: #212529;
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+.marked-table-cell {
+    display: table-cell;
+    padding: 0.5rem;
+    vertical-align: top;
+    border: 1px solid #dee2e6;
+}
+
+.marked-table-header {
+    font-weight: bold;
+    background-color: #f9fafb;
+    border-bottom: 1px solid #dee2e6;
+}

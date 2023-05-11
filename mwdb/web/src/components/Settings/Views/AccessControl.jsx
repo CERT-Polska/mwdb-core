@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -9,10 +9,10 @@ import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { intersperse } from "@mwdb-web/commons/helpers";
 import {
     Autocomplete,
-    BootstrapSelect,
     ConfirmationModal,
     GroupBadge,
     ShowIf,
+    Select,
 } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 
@@ -84,41 +84,32 @@ function CapabilitiesList({ capabilities, onDelete }) {
 function CapabilityChangeCard({ groups, onSubmit }) {
     const [groupName, setGroupName] = useState("");
     const [chosenGroup, setChosenGroup] = useState({});
-    const [chosenCapabilities, setChosenCapabilities] = useState();
+    const [chosenCapabilities, setChosenCapabilities] = useState([]);
 
     const capabilities = Object.keys(capabilitiesList);
     const originalCaps = chosenGroup.capabilities || [];
     const changedCaps = capabilities.filter(
-        (cap) =>
-            (chosenCapabilities || []).includes(cap) !==
-            originalCaps.includes(cap)
+        (cap) => chosenCapabilities.includes(cap) !== originalCaps.includes(cap)
     );
-    const selectHandler = useCallback(
-        (e, clickedIndex, isSelected) => {
-            const selectedCaps = chosenCapabilities || [];
-            if (isSelected)
-                setChosenCapabilities(
-                    selectedCaps.concat(capabilities[clickedIndex])
-                );
-            else
-                setChosenCapabilities(
-                    selectedCaps.filter(
-                        (cap) => cap !== capabilities[clickedIndex]
-                    )
-                );
-        },
-        [chosenCapabilities, capabilities]
-    );
+
+    function onSelectChange(values) {
+        setChosenCapabilities(values.map((x) => x.value));
+    }
 
     function dismissChanges() {
         setChosenCapabilities(chosenGroup.capabilities);
+    }
+
+    function renderSelectLabel(cap) {
+        const changed = changedCaps.includes(cap);
+        return changed ? `* ${cap}` : cap;
     }
 
     useEffect(() => {
         const matchedGroup =
             groups.find((group) => group.name === groupName) || {};
         setChosenGroup(matchedGroup);
-        setChosenCapabilities(matchedGroup.capabilities);
+        setChosenCapabilities(matchedGroup.capabilities || []);
     }, [groups, groupName]);
 
     return (
@@ -138,40 +129,29 @@ function CapabilityChangeCard({ groups, onSubmit }) {
                     placeholder="Group name"
                     renderItem={({ item }) => <GroupBadge group={item} />}
                 />
-                <BootstrapSelect
-                    data-multiple-separator={""}
-                    data-live-search="true"
-                    noneSelectedText={
-                        chosenCapabilities === undefined
+                <Select
+                    placeholder={
+                        !groupName
                             ? "Provide group name first"
                             : "No additional capabilities enabled"
                     }
-                    className={"form-control"}
-                    multiple
-                    disabled={chosenCapabilities === undefined}
-                    onChange={selectHandler}
-                >
-                    {capabilities.map((cap) => {
-                        const selectedCaps = chosenCapabilities || [];
-                        const changed = changedCaps.includes(cap);
-                        const selected = selectedCaps.includes(cap);
-                        return (
-                            <option
-                                key={cap}
-                                data-content={`
-                                ${changed ? "*" : ""}
-                                <span class='badge badge-success'>${cap}</span>
-                                <small class="text-muted">${
-                                    capabilitiesList[cap]
-                                }</small>
-                            `}
-                                selected={selected}
-                            >
-                                {cap}
-                            </option>
-                        );
+                    isMulti
+                    options={capabilities.map((cap) => {
+                        return {
+                            value: cap,
+                            label: renderSelectLabel(cap),
+                        };
                     })}
-                </BootstrapSelect>
+                    value={chosenCapabilities.map((cap) => ({
+                        value: cap,
+                        label: renderSelectLabel(cap),
+                    }))}
+                    onChange={onSelectChange}
+                    closeMenuOnSelect={false}
+                    hideSelectedOptions={false}
+                    isDisabled={!groupName}
+                />
+
                 {changedCaps.length > 0 && (
                     <div>
                         <small>

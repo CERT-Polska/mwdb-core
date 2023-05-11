@@ -135,7 +135,7 @@ export default function RichAttributePreview({
                             checked={!showContext}
                             onChange={() => setShowContext(false)}
                         />
-                        <label className="form-check-label" for="showValue">
+                        <label className="form-check-label" htmlFor="showValue">
                             Value
                         </label>
                     </div>
@@ -147,7 +147,10 @@ export default function RichAttributePreview({
                             checked={showContext}
                             onChange={() => setShowContext(true)}
                         />
-                        <label className="form-check-label" for="showContext">
+                        <label
+                            className="form-check-label"
+                            htmlFor="showContext"
+                        >
                             Context
                         </label>
                     </div>

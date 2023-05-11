@@ -1,5 +1,4 @@
 export { default as Autocomplete } from "./Autocomplete";
-export { default as BootstrapSelect } from "./BootstrapSelect";
 export { default as ConfirmationModal } from "./ConfirmationModal";
 export { default as DataTable } from "./DataTable";
 export { default as DateString } from "./DateString";
@@ -31,3 +30,4 @@ export { HighlightText } from "./HighlightText";
 export { Label } from "./Label";
 export { LoadingSpinner } from "./LoadingSpinner";
 export { FormError } from "./FormError";
+export { Select } from "./Select";

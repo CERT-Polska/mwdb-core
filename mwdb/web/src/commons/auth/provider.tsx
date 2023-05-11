@@ -7,6 +7,7 @@ import { omit, isEqual, isNil } from "lodash";
 import { Capability } from "./capabilities";
 import { AuthContext } from "./context";
 import { AuthContextValues, Capabality, User } from "@mwdb-web/types/types";
+import { AuthProviderProps } from "@mwdb-web/types/props";
 
 export const localStorageAuthKey = "user";
 
@@ -69,10 +70,6 @@ function useAxiosEffect(func: () => () => void) {
         };
     }, []);
 }
-
-type AuthProviderProps = {
-    children: JSX.Element;
-};
 
 export function AuthProvider(props: AuthProviderProps) {
     const location = useLocation();

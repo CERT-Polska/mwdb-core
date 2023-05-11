@@ -1,10 +1,11 @@
+import { GenericOrJSX } from "@mwdb-web/types/types";
 import { capitalize, intersperse, mapObjectType } from "../../commons/helpers";
 
 describe("capitalize", () => {
     test("should return empty string when param is not typeof string", () => {
         const string = {};
         const expected = "";
-        const result = capitalize(string);
+        const result = capitalize(string as string);
         expect(result).toEqual(expected);
     });
 
@@ -25,20 +26,20 @@ describe("capitalize", () => {
 
 describe("intersperse", () => {
     test("should return an empty array when passed an empty array", () => {
-        const expected = [];
+        const expected: GenericOrJSX<string>[] = [];
         const result = intersperse([], "-");
         expect(result).toEqual(expected);
     });
 
     it("should intersperse a single item in an array", () => {
-        const expected = [1, "-", 2, "-", 3];
-        const result = intersperse([1, 2, 3], "-");
+        const expected = ["1", "-", "2", "-", "3"];
+        const result = intersperse(["1", "2", "3"], "-");
         expect(result).toEqual(expected);
     });
 
     it("should intersperse multiple items in an array", () => {
-        const expected = [1, "-", ".", 2, "-", ".", 3];
-        const result = intersperse([1, 2, 3], ["-", "."]);
+        const expected = ["1", "-", ".", "2", "-", ".", "3"];
+        const result = intersperse(["1", "2", "3"], ["-", "."]);
         expect(expected).toEqual(result);
     });
 

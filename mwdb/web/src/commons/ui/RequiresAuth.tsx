@@ -4,7 +4,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
 type Props = {
-    children: React.ReactNode;
+    children?: JSX.Element;
 };
 
 export function RequiresAuth({ children }: Props) {

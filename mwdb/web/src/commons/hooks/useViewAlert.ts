@@ -11,13 +11,13 @@ import { getErrorMessage } from "@mwdb-web/commons/helpers";
 
 type Messages = {
     success?: string;
-    error?: AxiosServerErrors;
+    error?: AxiosServerErrors | any;
     warning?: string;
 };
 
-type SetAlertProps = NavigateOptions & Messages;
+export type SetAlertProps = NavigateOptions & Messages;
 
-type RedirectToAlertProps = SetAlertProps & {
+export type RedirectToAlertProps = SetAlertProps & {
     target: To;
 };
 
@@ -43,7 +43,6 @@ export function useViewAlert() {
         ({ success, error, warning, state }: SetAlertProps) => {
             const { pathname, search } = location;
             setMessages({ success, error, warning });
-            console.log({ state });
 
             navigate(
                 { pathname, search },

@@ -12,4 +12,9 @@ module.exports = {
         "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}",
     ],
     moduleFileExtensions: ["js", "jsx", "ts", "tsx"],
+    moduleNameMapper: {
+        "^@mwdb-web/commons/(.*)$": "<rootDir>/src/commons/$1",
+        "^@mwdb-web/plugins$": "<rootDir>/src/mocks/plugins.ts",
+    },
+    resetMocks: true,
 };

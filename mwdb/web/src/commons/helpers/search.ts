@@ -5,7 +5,7 @@ type SearchParams = {
     pathname?: string;
 };
 
-export function escapeSearchValue(input: string | JSON) {
+export function escapeSearchValue(input: unknown | JSON) {
     if (typeof input === "string") {
         input = JSON.stringify(input);
     } else {

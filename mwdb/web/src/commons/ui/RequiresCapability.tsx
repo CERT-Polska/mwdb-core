@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../auth";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { Capabality } from "@mwdb-web/types/types";
 
 type Props = {
-    children: React.ReactNode;
+    children: JSX.Element;
     capability: Capabality;
 };
 

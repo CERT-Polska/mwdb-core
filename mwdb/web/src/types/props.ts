@@ -15,3 +15,7 @@ export type GrpupBadgeProps = {
     basePath?: string;
     clickable?: boolean;
 };
+
+export type AuthProviderProps = {
+    children: JSX.Element;
+};

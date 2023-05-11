@@ -208,13 +208,23 @@ class MwdbTest(object):
         return res.json()
 
     def add_sample(
-        self, filename=None, content=None, parent=None, attributes=None, upload_as=None, tags=None
+        self,
+        filename=None,
+        content=None,
+        parent=None,
+        attributes=None,
+        upload_as=None,
+        tags=None,
+        share_3rd_party=None,
     ):
         if filename is None:
             filename = str(uuid.uuid4())
 
         if content is None:
             content = str(uuid.uuid4())
+
+        if share_3rd_party is None:
+            share_3rd_party = True
 
         res = self.session.post(
             self.mwdb_url + "/file",
@@ -228,6 +238,7 @@ class MwdbTest(object):
                             "attributes": attributes or [],
                             "upload_as": upload_as or "*",
                             "tags": tags or [],
+                            "share_3rd_party": share_3rd_party
                         }
                     ),
                 ),
@@ -395,10 +406,18 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.content
 
-    def add_config(self, parent, family, config_json, tags=None):
+    def add_config(self, parent, family, config_json, tags=None, share_3rd_party=None):
+        if share_3rd_party is None:
+            share_3rd_party = True
         res = self.session.post(
             self.mwdb_url + "/config",
-            json={"family": family, "cfg": config_json, "parent": parent, "tags": tags or []},
+            json={
+                "family": family,
+                "cfg": config_json,
+                "parent": parent,
+                "tags": tags or [],
+                "share_3rd_party": share_3rd_party,
+            },
         )
         res.raise_for_status()
         return res.json()
@@ -418,7 +437,9 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def add_blob(self, parent, blobname=None, blobtype=None, content=None, tags=None):
+    def add_blob(self, parent, blobname=None, blobtype=None, content=None, tags=None, share_3rd_party=None):
+        if share_3rd_party is None:
+            share_3rd_party = True
         res = self.session.post(
             self.mwdb_url + "/blob",
             json={
@@ -427,6 +448,7 @@ class MwdbTest(object):
                 "content": content or str(uuid.uuid4()),
                 "parent": parent,
                 "tags": tags or [],
+                "share_3rd_party": share_3rd_party
             },
         )
         res.raise_for_status()
@@ -487,5 +509,10 @@ class MwdbTest(object):
     
     def unassign_analysis_from_object(self, identifier, analysis_id):
         res = self.session.delete(self.mwdb_url + "/object/" + identifier + "/karton/" + analysis_id)
+        res.raise_for_status()
+        return res.json()
+    
+    def mark_as_3rd_party_shareable(self, identifier):
+        res = self.session.put(self.mwdb_url + "/object/" + identifier + "/share_3rd_party")
         res.raise_for_status()
         return res.json()

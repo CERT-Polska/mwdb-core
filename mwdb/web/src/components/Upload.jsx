@@ -304,8 +304,7 @@ export default function Upload() {
                             []
                         )}
                         <div className="form-group">
-                            <label>Share with third parties</label>
-                            <div className="material-switch">
+                            <div className="material-switch make-horizontal">
                                 <input
                                     type="checkbox"
                                     name="share_3rd"
@@ -320,6 +319,7 @@ export default function Upload() {
                                     className="bg-primary"
                                 />
                             </div>
+                            <label>&nbsp; Share with third parties</label>
                         </div>
                         <input
                             value="Upload File"

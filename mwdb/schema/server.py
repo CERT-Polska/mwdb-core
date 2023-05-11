@@ -13,6 +13,9 @@ class ServerInfoResponseSchema(Schema):
     is_registration_enabled = fields.Boolean(required=True, allow_none=False)
     is_karton_enabled = fields.Boolean(required=True, allow_none=False)
     is_oidc_enabled = fields.Boolean(required=True, allow_none=False)
+    is_3rd_party_sharing_consent_enabled = fields.Boolean(
+        required=True, allow_none=False
+    )
     recaptcha_site_key = fields.Str(required=True, allow_none=True)
     request_timeout = fields.Int(required=True, allow_none=False)
     file_upload_timeout = fields.Int(required=True, allow_none=False)

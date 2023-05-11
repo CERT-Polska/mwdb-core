@@ -7,11 +7,10 @@ import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 
-import { DataTable, View } from "@mwdb-web/commons/ui";
+import { View } from "@mwdb-web/commons/ui";
 import exampleTemplates, { makeContext } from "./exampleTemplates";
 
 function templateReducer(state, action) {
-    console.log(state, action);
     if (action.type === "edit") {
         if (state.chosenExample === "custom") {
             // Editing custom template
@@ -136,7 +135,7 @@ export default function RichAttributePreview({
                             checked={!showContext}
                             onChange={() => setShowContext(false)}
                         />
-                        <label className="form-check-label" for="showValue">
+                        <label className="form-check-label" htmlFor="showValue">
                             Value
                         </label>
                     </div>
@@ -148,7 +147,10 @@ export default function RichAttributePreview({
                             checked={showContext}
                             onChange={() => setShowContext(true)}
                         />
-                        <label className="form-check-label" for="showContext">
+                        <label
+                            className="form-check-label"
+                            htmlFor="showContext"
+                        >
                             Context
                         </label>
                     </div>

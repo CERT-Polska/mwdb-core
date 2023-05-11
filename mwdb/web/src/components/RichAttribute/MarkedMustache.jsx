@@ -203,6 +203,13 @@ class MarkedTokenizer extends Tokenizer {
 const mustacheWriter = new MustacheWriter();
 const markedTokenizer = new MarkedTokenizer();
 
+const tableClasses = {
+    table: "marked-table",
+    row: "marked-table-row",
+    cell: "marked-table-cell",
+    header: "marked-table-header",
+};
+
 // Custom renderer into React components
 function renderTokens(tokens, options) {
     const renderers = {
@@ -288,28 +295,33 @@ function renderTokens(tokens, options) {
         },
         table(token) {
             return (
-                <DataTable key={uniqueId()}>
-                    <thead>
-                        <tr>
+                <div className="table-responsive" key={uniqueId()}>
+                    <div
+                        className={`${tableClasses.table} table table-striped table-bordered table-hover`}
+                    >
+                        <div
+                            className={`${tableClasses.header} ${tableClasses.row}`}
+                        >
                             {token.header.map((head, index) => (
-                                <th key={index}>
+                                <div className={tableClasses.cell} key={index}>
                                     {renderTokens(head.tokens, options)}
-                                </th>
+                                </div>
                             ))}
-                        </tr>
-                    </thead>
-                    <tbody>
+                        </div>
                         {token.rows.map((row, rowsIndex) => (
-                            <tr key={rowsIndex}>
+                            <div key={rowsIndex} className={tableClasses.row}>
                                 {row.map((cell, cellIndex) => (
-                                    <td key={cellIndex}>
+                                    <div
+                                        key={cellIndex}
+                                        className={tableClasses.cell}
+                                    >
                                         {renderTokens(cell.tokens, options)}
-                                    </td>
+                                    </div>
                                 ))}
-                            </tr>
+                            </div>
                         ))}
-                    </tbody>
-                </DataTable>
+                    </div>
+                </div>
             );
         },
         codespan(token) {

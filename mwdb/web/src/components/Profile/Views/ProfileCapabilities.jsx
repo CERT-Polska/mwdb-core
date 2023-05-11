@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
@@ -10,11 +10,7 @@ import {
     Capability,
     AuthContext,
 } from "@mwdb-web/commons/auth";
-import {
-    GroupBadge,
-    ConfirmationModal,
-    Select,
-} from "@mwdb-web/commons/ui";
+import { GroupBadge, ConfirmationModal, Select } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 

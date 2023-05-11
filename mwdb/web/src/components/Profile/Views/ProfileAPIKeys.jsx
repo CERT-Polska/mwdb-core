@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useLocation, useOutletContext } from "react-router-dom";
 

@@ -93,7 +93,7 @@ class ConfigUploader(ObjectUploader):
         super().on_reuploaded(object, params)
         hooks.on_reuploaded_config(object)
 
-    def _get_embedded_blob(self, in_blob, share_with, attributes):
+    def _get_embedded_blob(self, in_blob, share_with, attributes, share_3rd_party):
         if isinstance(in_blob, dict):
             schema = BlobCreateSpecSchema()
             blob_spec = load_schema(in_blob, schema)
@@ -103,6 +103,7 @@ class ConfigUploader(ObjectUploader):
                     blob_spec["content"],
                     blob_spec["blob_name"],
                     blob_spec["blob_type"],
+                    share_3rd_party=share_3rd_party,
                     parent=None,
                     share_with=share_with,
                     attributes=attributes,
@@ -120,7 +121,9 @@ class ConfigUploader(ObjectUploader):
                 "'in-blob' key must be set to blob SHA256 hash or blob specification"
             )
 
-    def _create_object(self, spec, parent, share_with, attributes, analysis_id, tags):
+    def _create_object(
+        self, spec, parent, share_with, attributes, analysis_id, tags, share_3rd_party
+    ):
         try:
             blobs = []
             config = dict(spec["cfg"])
@@ -130,7 +133,7 @@ class ConfigUploader(ObjectUploader):
                     if not g.auth_user.has_rights(Capabilities.adding_blobs):
                         raise Forbidden("You are not permitted to add blob objects")
                     blob_obj = self._get_embedded_blob(
-                        second["in-blob"], share_with, attributes
+                        second["in-blob"], share_with, attributes, share_3rd_party
                     )
                     config[first]["in-blob"] = blob_obj.dhash
                     blobs.append(blob_obj)
@@ -140,7 +143,8 @@ class ConfigUploader(ObjectUploader):
             obj, is_new = Config.get_or_create(
                 config,
                 spec["family"],
-                spec["config_type"],
+                share_3rd_party=share_3rd_party,
+                config_type=spec["config_type"],
                 parent=parent,
                 share_with=share_with,
                 attributes=attributes,

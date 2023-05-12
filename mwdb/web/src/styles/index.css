@@ -269,6 +269,10 @@ div.user-login .container-fluid {
 	JSFiddle : https://jsfiddle.net/djibe89/9deak9dh/
 ***/
 
+.make-horizontal {
+    display: inline-block;
+}
+
 .material-switch > input[type="checkbox"] {
     display: none;
 }

@@ -25,6 +25,7 @@ type CapabilityObjectType = {
     kartonAssign: "karton_assign";
     kartonReanalyze: "karton_reanalyze";
     removingKarton: "karton_unassign";
+    modify3rdPartySharing: "modify_3rd_party_sharing";
 };
 
 export const Capability: CapabilityObjectType = {

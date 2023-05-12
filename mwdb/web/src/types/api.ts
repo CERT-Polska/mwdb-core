@@ -286,4 +286,6 @@ export type ResubmitKartonAnalysisResponse = Response<{
     status: string;
 }>;
 
-export type RemoveKartonAnalysisFromObject = Response<null>;
+export type RemoveKartonAnalysisFromObjectResponse = Response<null>;
+
+export type EnableSharing3rdPartyReponse = Response<null>;

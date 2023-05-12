@@ -30,6 +30,7 @@ class Config(Object):
         cls,
         cfg,
         family,
+        share_3rd_party,
         config_type=None,
         parent=None,
         attributes=None,
@@ -44,9 +45,11 @@ class Config(Object):
             _cfg=config_encode(cfg),
             family=family,
             config_type=config_type or "static",
+            share_3rd_party=share_3rd_party,
         )
         return cls._get_or_create(
             cfg_obj,
+            share_3rd_party=share_3rd_party,
             parent=parent,
             attributes=attributes,
             share_with=share_with,

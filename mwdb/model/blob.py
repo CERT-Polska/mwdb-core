@@ -30,6 +30,7 @@ class TextBlob(Object):
         content,
         blob_name,
         blob_type,
+        share_3rd_party,
         parent=None,
         attributes=None,
         share_with=None,
@@ -45,9 +46,11 @@ class TextBlob(Object):
             blob_type=blob_type,
             last_seen=datetime.datetime.utcnow(),
             _content=content.encode("unicode_escape").decode("utf-8"),
+            share_3rd_party=share_3rd_party,
         )
         blob_obj, is_new = cls._get_or_create(
             blob_obj,
+            share_3rd_party=share_3rd_party,
             parent=parent,
             attributes=attributes,
             share_with=share_with,

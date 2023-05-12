@@ -15,6 +15,7 @@ import CommentBox from "./Views/CommentBox";
 import ShareBox from "./Views/SharesBox";
 import TagBox from "./Views/TagBox";
 import AttributesBox from "./Views/AttributesBox";
+import Share3rdPartyBox from "./Views/Share3rdPartyBox";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
@@ -126,6 +127,10 @@ export default function ShowObject({
                                 </Extendable>
                             </div>
                             <AttributesBox />
+                            <Share3rdPartyBox
+                                isEnabled={objectState.object.share_3rd_party}
+                                objectId={objectState.object.id}
+                            />
                         </Extendable>
                     </div>
                     <div className="col-md-5">

@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { TabContext } from "@mwdb-web/commons/ui";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { useComponentState } from "@mwdb-web/commons/hooks";
-import { TabContextValues } from "@mwdb-web/types/types";
+import { TabContextValues } from "@mwdb-web/types/context";
 
 type Props = {
     defaultTab: string;

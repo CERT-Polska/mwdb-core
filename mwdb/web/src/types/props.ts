@@ -11,11 +11,15 @@ export type TagProps = {
 };
 
 export type GroupBadgeProps = {
-    group: Group;
+    group: Partial<Group>;
     basePath?: string;
     clickable?: boolean;
 };
 
 export type AuthProviderProps = {
+    children: JSX.Element;
+};
+
+export type APIProviderProps = {
     children: JSX.Element;
 };

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, Navigate, useParams, useOutletContext } from "react-router-dom";
 import { isEmpty } from "lodash";
 
@@ -11,23 +11,16 @@ import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { GroupBadge, ShowIf } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { Capability } from "@mwdb-web/types/types";
-
-function ProfileItem(props) {
-    if (!props.value) return [];
-    return (
-        <tr className="d-flex">
-            <th className="col-3">{props.label}</th>
-            <td className="col-9">{props.children || props.value}</td>
-        </tr>
-    );
-}
+import { ProfileItem } from "../common/ProfileItem";
+import { ProfileOutletContext } from "@mwdb-web/types/context";
+import { Group } from "@mwdb-web/types/types";
 
 export default function ProfileGroup() {
     const auth = useContext(AuthContext);
-    const { profile } = useOutletContext();
+    const { profile }: ProfileOutletContext = useOutletContext();
     const { redirectToAlert } = useViewAlert();
     const { group: groupName } = useParams();
-    const [workspaces, setWorkspaces] = useState([]);
+    const [workspaces, setWorkspaces] = useState<Group[]>([]);
 
     const group = profile.groups.find((group) => group.name === groupName);
 
@@ -38,7 +31,7 @@ export default function ProfileGroup() {
     async function getWorkspaces() {
         try {
             const response = await api.authGroups();
-            setWorkspaces(response.data["groups"]);
+            setWorkspaces(response.data.groups);
         } catch (error) {
             redirectToAlert({
                 target: "/profile",
@@ -70,43 +63,47 @@ export default function ProfileGroup() {
                     <ProfileItem label="Name" value={group.name} />
                     <ProfileItem
                         label="Group admins"
-                        value={workspace && workspace.admins.length}
+                        value={workspace?.admins.length}
                     >
-                        {workspace &&
-                            workspace.admins
-                                .sort((userA, userB) =>
-                                    userA.localeCompare(userB)
-                                )
-                                .map((login, index) => (
-                                    <GroupBadge
-                                        key={index}
-                                        group={{
-                                            name: login,
-                                            private: true,
-                                        }}
-                                        clickable
-                                    />
-                                ))}
+                        <>
+                            {workspace &&
+                                workspace.admins
+                                    .sort((userA: string, userB: string) =>
+                                        userA.localeCompare(userB)
+                                    )
+                                    .map((login: string, index: number) => (
+                                        <GroupBadge
+                                            key={index}
+                                            group={{
+                                                name: login,
+                                                private: true,
+                                            }}
+                                            clickable
+                                        />
+                                    ))}
+                        </>
                     </ProfileItem>
                     <ProfileItem
                         label="Members"
                         value={workspace && workspace.users.length}
                     >
-                        {workspace &&
-                            workspace.users
-                                .sort((userA, userB) =>
-                                    userA.localeCompare(userB)
-                                )
-                                .map((login, index) => (
-                                    <GroupBadge
-                                        key={index}
-                                        group={{
-                                            name: login,
-                                            private: true,
-                                        }}
-                                        clickable
-                                    />
-                                ))}
+                        <>
+                            {workspace &&
+                                workspace.users
+                                    .sort((userA: string, userB: string) =>
+                                        userA.localeCompare(userB)
+                                    )
+                                    .map((login: string, index: number) => (
+                                        <GroupBadge
+                                            key={index}
+                                            group={{
+                                                name: login,
+                                                private: true,
+                                            }}
+                                            clickable
+                                        />
+                                    ))}
+                        </>
                     </ProfileItem>
                 </tbody>
             </table>

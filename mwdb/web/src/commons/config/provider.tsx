@@ -10,7 +10,8 @@ import { isEqual } from "lodash";
 import { api } from "../api";
 import { ConfigContext } from "./context";
 import { AuthContext } from "../auth";
-import { ConfigContextValues, ServerInfo, User } from "@mwdb-web/types/types";
+import { ServerInfo, User } from "@mwdb-web/types/types";
+import { ConfigContextValues } from "@mwdb-web/types/context";
 
 const configUpdate = Symbol("configUpdate");
 const configError = Symbol("configError");

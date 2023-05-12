@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { NavLink, useParams, Outlet } from "react-router-dom";
 
 import { faUserCog } from "@fortawesome/free-solid-svg-icons";
@@ -10,6 +10,7 @@ import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import DeleteCapabilityModal from "../Settings/Views/DeleteCapabilityModal";
+import { Capability, User } from "@mwdb-web/types/types";
 
 function ProfileNav() {
     const config = useContext(ConfigContext);
@@ -32,12 +33,10 @@ function ProfileNav() {
                 <NavLink end to="/profile/api-keys" className="nav-link">
                     API keys
                 </NavLink>
-                {config.config["is_oidc_enabled"] ? (
+                {config.config["is_oidc_enabled"] && (
                     <NavLink end to="/profile/oauth" className="nav-link">
                         OpenID Connect
                     </NavLink>
-                ) : (
-                    []
                 )}
             </div>
             <hr />
@@ -48,15 +47,18 @@ function ProfileNav() {
 export default function ProfileView() {
     const auth = useContext(AuthContext);
     const { redirectToAlert, setAlert } = useViewAlert();
-    const user = useParams().user || auth.user.login;
-    const [profile, setProfile] = useState({});
+    const userLogin = useParams().user || auth.user.login;
+    const [profile, setProfile] = useState<User>({} as User);
     const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
 
     useEffect(() => {
         getProfile();
-    }, [user]);
+    }, [userLogin]);
 
-    async function changeCapabilities(capability, callback) {
+    async function changeCapabilities(
+        capability: Capability,
+        callback: Function
+    ) {
         try {
             const capabilities = profile.capabilities.filter(
                 (item) => item !== capability
@@ -71,7 +73,7 @@ export default function ProfileView() {
 
     async function getProfile() {
         try {
-            const response = await api.getUserProfile(user);
+            const response = await api.getUserProfile(userLogin);
             setProfile(response.data);
         } catch (error) {
             redirectToAlert({
@@ -81,7 +83,7 @@ export default function ProfileView() {
         }
     }
 
-    if (profile.login !== user) return <></>;
+    if (profile.login !== userLogin) return <></>;
 
     return (
         <View ident="profile" fluid>
@@ -103,7 +105,7 @@ export default function ProfileView() {
                 changeCapabilities={changeCapabilities}
                 capabilitiesToDelete={capabilitiesToDelete}
                 setCapabilitiesToDelete={setCapabilitiesToDelete}
-                successMessage={`Capabilities for ${user} successfully changed`}
+                successMessage={`Capabilities for ${userLogin} successfully changed`}
             />
         </View>
     );

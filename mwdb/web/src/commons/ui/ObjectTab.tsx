@@ -4,7 +4,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { capitalize } from "../helpers";
-import { TabContextValues } from "@mwdb-web/types/types";
+import { TabContextValues } from "@mwdb-web/types/context";
 
 export const TabContext = React.createContext<TabContextValues>(
     {} as TabContextValues

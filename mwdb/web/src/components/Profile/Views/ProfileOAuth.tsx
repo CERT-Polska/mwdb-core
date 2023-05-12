@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { APIContext } from "@mwdb-web/commons/api";
+import { api } from "@mwdb-web/commons/api";
 
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,22 +9,21 @@ import { ConfirmationModal, ShowIf } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 export default function ProfileOAuth() {
-    const api = useContext(APIContext);
     const viewAlert = useViewAlert();
-    const [providers, setProviders] = useState([]);
-    const [identities, setIdentities] = useState([]);
-    const [chosenProvider, setChosenProvider] = useState();
-    const [addModalOpen, setAddModalOpen] = useState(false);
+    const [providers, setProviders] = useState<string[]>([]);
+    const [identities, setIdentities] = useState<string[]>([]);
+    const [chosenProvider, setChosenProvider] = useState<string>("");
+    const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
 
     async function getProviders() {
         try {
             const providersResponse = await api.oauthGetProviders();
             const identitiesResponse = await api.oauthGetIdentities();
-            const identitiesData = identitiesResponse.data["providers"];
+            const identitiesData = identitiesResponse.data.providers;
             setIdentities(identitiesData);
             setProviders(
-                providersResponse.data["providers"].filter(
-                    (p) => identitiesData.indexOf(p) === -1
+                providersResponse.data.providers.filter(
+                    (p: string) => identitiesData.indexOf(p) === -1
                 )
             );
         } catch (error) {
@@ -32,7 +31,7 @@ export default function ProfileOAuth() {
         }
     }
 
-    async function bindProvider(provider) {
+    async function bindProvider(provider: string) {
         try {
             const response = await api.oauthAuthenticate(provider);
             let expirationTime = new Date();
@@ -77,18 +76,20 @@ export default function ProfileOAuth() {
                     provider.
                 </p>
             )}
-            <ShowIf condition={identities.length}>
-                {identities.map((identity) => (
-                    <div key={identity} className="card">
-                        <div className="card-body">
-                            <h5 className="card-subtitle text-muted">
-                                <span className="text-monospace list-inline-item">
-                                    {identity}
-                                </span>
-                            </h5>
+            <ShowIf condition={identities.length !== 0}>
+                <>
+                    {identities.map((identity) => (
+                        <div key={identity} className="card">
+                            <div className="card-body">
+                                <h5 className="card-subtitle text-muted">
+                                    <span className="text-monospace list-inline-item">
+                                        {identity}
+                                    </span>
+                                </h5>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </>
             </ShowIf>
             {providers.length ? (
                 <div>

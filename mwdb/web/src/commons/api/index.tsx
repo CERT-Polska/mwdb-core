@@ -609,7 +609,8 @@ function uploadFile(
     parent: string,
     upload_as: string,
     attributes: Attribute[],
-    fileUploadTimeout: number
+    fileUploadTimeout: number,
+    share3rdParty: boolean
 ): UploadFileResponse {
     let formData = new FormData();
     formData.append("file", file);
@@ -619,6 +620,7 @@ function uploadFile(
             parent: parent || null,
             upload_as: upload_as,
             attributes: attributes,
+            share_3rd_party: share3rdParty,
         })
     );
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
@@ -776,6 +778,10 @@ function removeKartonAnalysisFromObject(
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
+function enableSharing3rdParty(identifier: string) {
+    return axios.put(`/object/${identifier}/share_3rd_party`);
+}
+
 export const api = {
     axios,
     getApiForEnvironment,
@@ -876,6 +882,7 @@ export const api = {
     getKartonAnalysisStatus,
     resubmitKartonAnalysis,
     removeKartonAnalysisFromObject,
+    enableSharing3rdParty,
 };
 
 // TODO: api context is not needed, remove it when all components will rewrite to TypeScript

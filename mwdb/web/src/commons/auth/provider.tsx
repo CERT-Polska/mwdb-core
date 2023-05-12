@@ -6,8 +6,9 @@ import { api } from "../api";
 import { omit, isEqual, isNil } from "lodash";
 import { Capability } from "./capabilities";
 import { AuthContext } from "./context";
-import { AuthContextValues, Capabality, User } from "@mwdb-web/types/types";
+import { Capabality, User } from "@mwdb-web/types/types";
 import { AuthProviderProps } from "@mwdb-web/types/props";
+import { AuthContextValues } from "@mwdb-web/types/context";
 
 export const localStorageAuthKey = "user";
 

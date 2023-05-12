@@ -55,6 +55,12 @@ import {
     GetUserProfileResponse,
     GetUserResponse,
     GetUsersResponse,
+    OauthGetIdentitiesResponse,
+    OauthGetLogoutLinkResponse,
+    OauthGetProvidersResponse,
+    OauthGetSingleProviderResponse,
+    OauthRemoveSingleProviderResponse,
+    OauthUpdateSingleProviderResponse,
     PullObjectRemoteResponse,
     PushObjectRemoteResponse,
     RegisterGroupResponse,
@@ -63,7 +69,7 @@ import {
     RemoveAttributeDefinitionResponse,
     RemoveGroupMemberResponse,
     RemoveGroupResponse,
-    RemoveKartonAnalysisFromObject,
+    RemoveKartonAnalysisFromObjectResponse,
     RemoveObjectAttributeResponse,
     RemoveObjectCommentResponse,
     RemoveObjectFavoriteResponse,
@@ -86,7 +92,8 @@ import {
     UploadFileResponse,
     UserRequestPasswordChangeResponse,
 } from "@mwdb-web/types/api";
-import { Attribute, ObjectType } from "@mwdb-web/types/types";
+import { Attribute, Capabality, ObjectType } from "@mwdb-web/types/types";
+import { APIProviderProps } from "@mwdb-web/types/props";
 
 function getApiForEnvironment() {
     // Default API endpoint
@@ -202,27 +209,34 @@ function oauthRegisterProvider(
     });
 }
 
-function oauthGetProviders() {
+function oauthGetProviders(): OauthGetProvidersResponse {
     return axios.get("/oauth");
 }
 
-function oauthGetSingleProvider(provider_name: string) {
+function oauthGetSingleProvider(
+    provider_name: string
+): OauthGetSingleProviderResponse {
     return axios.get(`/oauth/${provider_name}`);
 }
 
-function oauthUpdateSingleProvider(name: string, value: string) {
+function oauthUpdateSingleProvider(
+    name: string,
+    value: string
+): OauthUpdateSingleProviderResponse {
     return axios.put(`/oauth/${name}`, value);
 }
 
-function oauthRemoveSingleProvider(name: string) {
+function oauthRemoveSingleProvider(
+    name: string
+): OauthRemoveSingleProviderResponse {
     return axios.delete(`/oauth/${name}`);
 }
 
-function oauthGetIdentities() {
+function oauthGetIdentities(): OauthGetIdentitiesResponse {
     return axios.get("/oauth/identities");
 }
 
-function oauthGetLogoutLink(provider: string) {
+function oauthGetLogoutLink(provider: string): OauthGetLogoutLinkResponse {
     return axios.get(`/oauth/${provider}/logout`);
 }
 
@@ -230,7 +244,7 @@ function apiKeyAdd(login: string, name: string): ApiKeyAddResponse {
     return axios.post(`/user/${login}/api_key`, { name });
 }
 
-function apiKeyRemove(key_id: number): ApiKeyRemoveResponse {
+function apiKeyRemove(key_id: number | string): ApiKeyRemoveResponse {
     return axios.delete(`/api_key/${key_id}`);
 }
 
@@ -384,7 +398,10 @@ function registerGroup(name: string): RegisterGroupResponse {
     return axios.post(`/group/${name}`, { name });
 }
 
-function updateGroup(name: string, value: string): UpdateGroupResponse {
+function updateGroup(
+    name: string,
+    value: { capabilities: Capabality[] }
+): UpdateGroupResponse {
     return axios.put(`/group/${name}`, value);
 }
 
@@ -755,7 +772,7 @@ function resubmitKartonAnalysis(id: number): ResubmitKartonAnalysisResponse {
 function removeKartonAnalysisFromObject(
     id: number,
     analysis_id: number
-): RemoveKartonAnalysisFromObject {
+): RemoveKartonAnalysisFromObjectResponse {
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
@@ -861,10 +878,7 @@ export const api = {
     removeKartonAnalysisFromObject,
 };
 
-type APIProviderProps = {
-    children: React.ReactNode;
-};
-
+// TODO: api context is not needed, remove it when all components will rewrite to TypeScript
 export const APIContext = React.createContext({});
 export function APIProvider(props: APIProviderProps) {
     return (

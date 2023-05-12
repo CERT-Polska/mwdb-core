@@ -1,5 +1,6 @@
 import { AxiosResponse } from "axios";
 import {
+    ApiKey,
     Attribute,
     AttributeDefinition,
     BlobData,
@@ -63,15 +64,9 @@ export type AuthRecoverPasswordResponse = Response<{
     login: string;
 }>;
 
-export type AuthGrupsResponse = Response<Group>;
+export type AuthGrupsResponse = Response<{ groups: Group[] }>;
 
-export type ApiKeyAddResponse = Response<{
-    issuer_login: string;
-    name: string;
-    id: string;
-    token: string;
-    issued_on: string | Date;
-}>;
+export type ApiKeyAddResponse = Response<ApiKey>;
 
 export type ApiKeyRemoveResponse = Response<null>;
 
@@ -287,4 +282,22 @@ export type ResubmitKartonAnalysisResponse = Response<{
     status: string;
 }>;
 
-export type RemoveKartonAnalysisFromObject = Response<null>;
+export type RemoveKartonAnalysisFromObjectResponse = Response<null>;
+
+export type OauthGetProvidersResponse = Response<{
+    providers: string[];
+}>;
+
+export type OauthGetIdentitiesResponse = Response<{
+    providers: string[];
+}>;
+
+export type OauthGetSingleProviderResponse = Response<string>;
+
+export type OauthUpdateSingleProviderResponse = Response<string>;
+
+export type OauthRemoveSingleProviderResponse = Response<null>;
+
+export type OauthGetLogoutLinkResponse = Response<{
+    url: string;
+}>;

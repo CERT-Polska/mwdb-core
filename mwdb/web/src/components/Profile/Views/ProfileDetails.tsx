@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
@@ -7,20 +7,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { DateString, ShowIf } from "@mwdb-web/commons/ui";
-
-function ProfileItem(props) {
-    if (!props.value) return [];
-    return (
-        <tr className="d-flex">
-            <th className="col-3">{props.label}</th>
-            <td className="col-9">{props.children || props.value}</td>
-        </tr>
-    );
-}
+import { ProfileItem } from "../common/ProfileItem";
+import { ProfileOutletContext } from "@mwdb-web/types/context";
 
 export default function ProfileDetails() {
     const auth = useContext(AuthContext);
-    const { profile } = useOutletContext();
+    const { profile }: ProfileOutletContext = useOutletContext();
     const isCurrentUser = profile.login === auth.user.login;
 
     return (
@@ -56,12 +48,17 @@ export default function ProfileDetails() {
                             auth.hasCapability(Capability.personalize)
                         }
                     >
-                        <Link className="nav-link" to="/profile/api-keys">
-                            Set up API keys
-                        </Link>
-                        <Link className="nav-link" to="/profile/reset-password">
-                            Reset password
-                        </Link>
+                        <>
+                            <Link className="nav-link" to="/profile/api-keys">
+                                Set up API keys
+                            </Link>
+                            <Link
+                                className="nav-link"
+                                to="/profile/reset-password"
+                            >
+                                Reset password
+                            </Link>
+                        </>
                     </ShowIf>
                     <Link
                         className="nav-link"

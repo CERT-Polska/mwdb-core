@@ -4,11 +4,12 @@ import { Link, useOutletContext } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
 import { ShowIf } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { ProfileOutletContext } from "@mwdb-web/types/context";
 
 export default function ProfileResetPassword() {
-    const { profile } = useOutletContext();
+    const { profile }: ProfileOutletContext = useOutletContext();
     const viewAlert = useViewAlert();
-    const [pending, setPending] = useState(false);
+    const [pending, setPending] = useState<boolean>(false);
 
     async function resetPassword() {
         setPending(true);
@@ -34,24 +35,26 @@ export default function ProfileResetPassword() {
                 </p>
                 <p className="card-text">Continue?</p>
                 <ShowIf condition={!pending}>
-                    <button
-                        type="button"
-                        className="btn btn-outline-success card-link"
-                        onClick={(ev) => {
-                            ev.preventDefault();
-                            resetPassword();
-                        }}
-                    >
-                        Send password reset link
-                    </button>
-                    <Link to="/profile" className="card-link">
+                    <>
                         <button
                             type="button"
-                            className="btn btn-outline-danger"
+                            className="btn btn-outline-success card-link"
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                resetPassword();
+                            }}
                         >
-                            Cancel
+                            Send password reset link
                         </button>
-                    </Link>
+                        <Link to="/profile" className="card-link">
+                            <button
+                                type="button"
+                                className="btn btn-outline-danger"
+                            >
+                                Cancel
+                            </button>
+                        </Link>
+                    </>
                 </ShowIf>
             </div>
         </div>

@@ -1,8 +1,8 @@
 import { renderHook } from "@testing-library/react";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
-import { AuthContextValues } from "@mwdb-web/types/types";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { AuthProviderProps } from "@mwdb-web/types/props";
+import { AuthContextValues } from "@mwdb-web/types/context";
 
 describe("useCheckCapabilities", () => {
     const authContextValue = {

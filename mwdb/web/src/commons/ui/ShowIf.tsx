@@ -1,8 +1,8 @@
 type Props = {
     condition: boolean;
-    children: JSX.Element | JSX.Element[];
+    children: JSX.Element;
 };
 
 export function ShowIf({ condition, children }: Props) {
-    return condition ? children : [];
+    return condition ? children : <></>;
 }

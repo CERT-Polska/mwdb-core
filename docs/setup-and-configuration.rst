@@ -237,6 +237,10 @@ If you want to store files using object storage, open the ``mwdb.ini`` file and 
 
 If you use Docker-based setup, all the configuration can be set using environment variables (e.g. ``MWDB_STORAGE_PROVIDER=s3``).
 
+.. note::
+
+   If you are using ``karton``, we highly recommend creating a separate bucket for it.
+   Failing to do so might result in data loss caused by ``karton's`` garbage collector. 
 
 Advanced configuration
 ----------------------

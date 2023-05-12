@@ -1,18 +1,29 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { renderValue } from "./MarkedMustache";
 
 import { makeContext } from "./exampleTemplates";
 
 export default function RichAttributeRenderer({ template, value, setInvalid }) {
-    let renderedValue;
-    try {
-        renderedValue = renderValue(template, makeContext(JSON.parse(value)), {
-            searchEndpoint: "/",
-        });
-        setInvalid(false);
-    } catch (e) {
-        renderedValue = e.toString();
-        setInvalid(true);
-    }
-    return renderedValue;
+    const [renderResult, setRenderResult] = useState(<></>);
+
+    useEffect(() => {
+        try {
+            const renderedValue = renderValue(
+                template,
+                makeContext(JSON.parse(value)),
+                {
+                    searchEndpoint: "/",
+                }
+            );
+            setRenderResult(renderedValue);
+            setInvalid(false);
+        } catch (e) {
+            setRenderResult(e.toString());
+            if (setInvalid) {
+                setInvalid(true);
+            }
+        }
+    }, [template, value]);
+
+    return renderResult;
 }

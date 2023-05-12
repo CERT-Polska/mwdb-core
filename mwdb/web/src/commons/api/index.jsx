@@ -434,7 +434,14 @@ async function requestZipFileDownloadLink(id) {
     return `${baseURL}/file/${id}/download/zip?token=${response.data.token}`;
 }
 
-function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
+function uploadFile(
+    file,
+    parent,
+    upload_as,
+    attributes,
+    fileUploadTimeout,
+    share3rdParty
+) {
     let formData = new FormData();
     formData.append("file", file);
     formData.append(
@@ -443,6 +450,7 @@ function uploadFile(file, parent, upload_as, attributes, fileUploadTimeout) {
             parent: parent || null,
             upload_as: upload_as,
             attributes: attributes,
+            share_3rd_party: share3rdParty,
         })
     );
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
@@ -551,6 +559,10 @@ function removeKartonAnalysisFromObject(id, analysis_id) {
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
+function enableSharing3rdParty(identifier) {
+    return axios.put(`/object/${identifier}/share_3rd_party`);
+}
+
 export const api = {
     axios,
     getApiForEnvironment,
@@ -655,6 +667,7 @@ export const api = {
     getKartonAnalysisStatus,
     resubmitKartonAnalysis,
     removeKartonAnalysisFromObject,
+    enableSharing3rdParty,
 };
 
 export const APIContext = React.createContext({});

@@ -82,6 +82,7 @@ class File(Object):
         cls,
         file_name,
         file_stream,
+        share_3rd_party,
         parent=None,
         attributes=None,
         share_with=None,
@@ -105,10 +106,12 @@ class File(Object):
             sha256=sha256,
             sha512=calc_hash(file_stream, hashlib.sha512(), lambda h: h.hexdigest()),
             ssdeep=calc_ssdeep(file_stream),
+            share_3rd_party=share_3rd_party,
         )
 
         file_obj, is_new = cls._get_or_create(
             file_obj,
+            share_3rd_party=share_3rd_party,
             parent=parent,
             attributes=attributes,
             share_with=share_with,

@@ -50,7 +50,7 @@ class RelationTestObject(RelationTestEntity):
         session = context.session
         self.dhash = self._create_object(session, self.identity)["id"]
 
-    def _create_object(self, session, identity, parent=None, upload_as=None):
+    def _create_object(self, session, identity, parent=None, upload_as=None, share_3rd_party=None):
         raise NotImplementedError()
 
     def _access_object(self, session):
@@ -100,14 +100,18 @@ class RelationTestObject(RelationTestEntity):
 
         return BoundTestSample(self, children, should_access)
 
-    def create(self, group=None, parent=None, upload_as=None):
+    def create(self, group=None, parent=None, upload_as=None, share_3rd_party=None):
         if group is None:
             session = self.context.session
         else:
             session = group.session
 
         self._create_object(
-            session, self.identity, parent=parent and parent.dhash, upload_as=upload_as
+            session,
+            self.identity,
+            parent=parent and parent.dhash,
+            upload_as=upload_as,
+            share_3rd_party=share_3rd_party
         )
 
     def should_access(self, group):
@@ -130,9 +134,13 @@ class RelationTestObject(RelationTestEntity):
 
 
 class RelationTestSample(RelationTestObject):
-    def _create_object(self, session, identity, parent=None, upload_as=None):
+    def _create_object(self, session, identity, parent=None, upload_as=None, share_3rd_party=None):
         return session.add_sample(
-            identity, identity, parent=parent, upload_as=upload_as
+            identity,
+            identity,
+            parent=parent,
+            upload_as=upload_as,
+            share_3rd_party=share_3rd_party,
         )
 
     def _access_object(self, session):
@@ -140,7 +148,7 @@ class RelationTestSample(RelationTestObject):
 
 
 class RelationTestConfig(RelationTestObject):
-    def _create_object(self, session, identity, parent=None, upload_as=None):
+    def _create_object(self, session, identity, parent=None, upload_as=None, share_3rd_party=None):
         return session.add_config(
             parent,
             "malwarex",
@@ -150,6 +158,7 @@ class RelationTestConfig(RelationTestObject):
                 "array": [identity, identity],
                 "nested": {"nestedkey": identity},
             },
+            share_3rd_party=share_3rd_party,
         )
 
     def _access_object(self, session):
@@ -157,9 +166,13 @@ class RelationTestConfig(RelationTestObject):
 
 
 class RelationTestBlob(RelationTestObject):
-    def _create_object(self, session, identity, parent=None, upload_as=None):
+    def _create_object(self, session, identity, parent=None, upload_as=None, share_3rd_party=None):
         return session.add_blob(
-            parent, blobname="malwarex.inject", blobtype="inject", content=identity
+            parent,
+            blobname="malwarex.inject",
+            blobtype="inject",
+            content=identity,
+            share_3rd_party=share_3rd_party,
         )
 
     def _access_object(self, session):

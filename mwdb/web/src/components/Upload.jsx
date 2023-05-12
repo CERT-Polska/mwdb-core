@@ -75,6 +75,7 @@ export default function Upload() {
     const [parent, setParent] = useState("");
     const [attributes, setAttributes] = useState([]);
     const [attributeModalOpen, setAttributeModalOpen] = useState(false);
+    const [share3rdParty, setShare3rdParty] = useState(true);
 
     const handleParentChange = (ev) => {
         ev.preventDefault();
@@ -116,7 +117,8 @@ export default function Upload() {
                 searchParams.get("parent") || parent,
                 sharingModeToUploadParam(),
                 attributes,
-                fileUploadTimeout
+                fileUploadTimeout,
+                share3rdParty
             );
             navigate("/file/" + response.data.sha256, {
                 replace: true,
@@ -301,6 +303,24 @@ export default function Upload() {
                         ) : (
                             []
                         )}
+                        <div className="form-group">
+                            <div className="material-switch make-horizontal">
+                                <input
+                                    type="checkbox"
+                                    name="share_3rd"
+                                    id="share_3rd_party"
+                                    checked={share3rdParty}
+                                    onChange={() =>
+                                        setShare3rdParty(!share3rdParty)
+                                    }
+                                />
+                                <label
+                                    htmlFor="share_3rd_party"
+                                    className="bg-primary"
+                                />
+                            </div>
+                            <label>&nbsp; Share with third parties</label>
+                        </div>
                         <input
                             value="Upload File"
                             className="btn btn-success"

@@ -272,6 +272,7 @@ class Object(db.Model):
     upload_time = db.Column(
         db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow
     )
+    share_3rd_party = db.Column(db.Boolean, nullable=False)
 
     upload_count = column_property(
         select([func.count(distinct(ObjectPermission.related_user_id))]).where(
@@ -564,6 +565,7 @@ class Object(db.Model):
     def _get_or_create(
         cls,
         obj,
+        share_3rd_party,
         parent=None,
         attributes=None,
         share_with=None,
@@ -664,6 +666,10 @@ class Object(db.Model):
         for tag in tags:
             tag_name = tag["tag"]
             created_object.add_tag(tag_name, commit=False)
+
+        created_object.share_3rd_party = (
+            created_object.share_3rd_party or share_3rd_party
+        )
 
         return created_object, is_new
 

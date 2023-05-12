@@ -270,6 +270,11 @@ Each capability has its own name and scope:
 
   Can manually resubmit object to Karton.
 
+*
+  **modify_3rd_party_sharing - Can mark objects as shareable with 3rd parties**
+
+  Can manually mark object as shareable with 3rd parties - it can be done only for objects, which are visible for this user.
+
 User capabilities are the sum of all group capabilities. If you want to enable capability system-wide (e.g. enable all users to add tags), enable that capability for ``registered`` group or ``public`` group if you want to include guests.
 
 In mwdb.cert.pl service - ``registered`` group is allowed to:
@@ -282,3 +287,17 @@ In mwdb.cert.pl service - ``registered`` group is allowed to:
 You can easily check your capabilities in ``Profile`` view.
 
 Plugins are allowed to extend the set of capabilities in case MWDB administrator wants to require additional permission for using them.
+
+Sharing with third parties
+--------------------------
+
+Files, configs and blobs uploaded to ``mwdb.cert.pl`` may be shared with our partners.
+Sharing occurs when the object is analyzed by :ref:`karton <Karton integration guide>` - some pipelines may share data with third parties.
+If you want your upload not to be shared with third parties, you can specify it during upload (with MWDB 2.9.0 or newer).
+
+After upload, marking objects as shareable is possible only for users with ``modify_3rd_party_sharing`` capability.
+
+If object was shareable at any time, we reserve right to share it:
+   - If one object was uploaded multiple times and at least one of them was marked as shareable with third parties, 
+   the object will be marked as shareable
+   - Marking objects as shareable is irreversible

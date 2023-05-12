@@ -54,7 +54,9 @@ class ObjectUploader:
     def on_reuploaded(self, object, params):
         hooks.on_reuploaded_object(object)
 
-    def _create_object(self, spec, parent, share_with, attributes, analysis_id, tags):
+    def _create_object(
+        self, spec, parent, share_with, attributes, analysis_id, tags, share_3rd_party
+    ):
         # To be implemented by specialized uploaders (e.g. FileUploader)
         raise NotImplementedError
 
@@ -121,8 +123,16 @@ class ObjectUploader:
         # Tags argument
         tags = params.get("tags")
 
+        share_3rd_party = params.get("share_3rd_party", True)
+
         item, is_new = self._create_object(
-            params, parent_object, share_with, attributes, analysis_id, tags
+            params,
+            parent_object,
+            share_with,
+            attributes,
+            analysis_id,
+            tags,
+            share_3rd_party,
         )
 
         try:
@@ -547,3 +557,52 @@ class ObjectFavoriteResource(Resource):
                 "Object unmarked as favorite",
                 extra={"user": user.login, "object_id": identifier},
             )
+
+
+@rate_limited_resource
+class ObjectShare3rdPartyResource(Resource):
+    @requires_authorization
+    @requires_capabilities(Capabilities.modify_3rd_party_sharing)
+    def put(self, identifier):
+        """
+        ---
+        summary: Mark object as shareable with third parties
+        description: |
+            Mark an object as shareable with third parties
+
+            Requires `modify_3rd_party_sharing` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - object
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: Object identifier
+        responses:
+            200:
+                description: |
+                    Marked object as shareable or it was already marked as shareable
+            400:
+                description: When request body is invalid
+            403:
+                description: |
+                    When user doesn't have `modify_3rd_party_sharing` capability.
+            404:
+                description: When object doesn't exist.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+
+        selected_object = Object.access(identifier)
+
+        if selected_object is None:
+            raise NotFound("Object not found")
+
+        selected_object.share_3rd_party = True
+        db.session.commit()
+
+        return

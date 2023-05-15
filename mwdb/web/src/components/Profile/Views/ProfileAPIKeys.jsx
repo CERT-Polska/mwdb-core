@@ -68,7 +68,7 @@ export default function ProfileAPIKeys({ profile, getProfile }) {
     // Component is reused by Settings
     if (profile === undefined) {
         profile = outletContext.profile;
-        getProfile = outletContext.getProfile;
+        getProfile = outletContext.getUser;
     }
 
     function closeKeyNameModal() {

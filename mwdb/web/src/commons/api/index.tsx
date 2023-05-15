@@ -600,7 +600,7 @@ async function requestFileDownloadLink(id: number): Promise<string> {
     return `${baseURL}/file/${id}/download?token=${response.data.token}`;
 }
 
-async function requestZipFileDownloadLink(id: number): Promise<string> {
+async function requestZipFileDownloadLink(id: string): Promise<string> {
     const response = await axios.post(`/file/${id}/download/zip`);
     const baseURL = getApiForEnvironment();
     return `${baseURL}/file/${id}/download/zip?token=${response.data.token}`;

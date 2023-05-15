@@ -1,15 +1,20 @@
 import { useMemo } from "react";
 import { api, APIContext } from "@mwdb-web/commons/api";
 import { useRemote } from "@mwdb-web/commons/remotes";
+import { RemoteApiContextValues } from "@mwdb-web/types/context";
 
-export default function RemoteAPI({ children }) {
-    const remote = useRemote();
-    const remoteApi = useMemo(
+type Props = {
+    children: JSX.Element;
+};
+
+export default function RemoteAPI({ children }: Props) {
+    const remote = useRemote() ?? "";
+    const remoteApi: RemoteApiContextValues = useMemo(
         () => ({
             ...api,
             remote,
-            getObjectCount: (type, older_than, query) =>
-                api.getRemoteObjectCount(remote, type, older_than, query),
+            getObjectCount: (type, query) =>
+                api.getRemoteObjectCount(remote, type, query),
             getObjectList: (type, older_than, query) =>
                 api.getRemoteObjectList(remote, type, older_than, query),
             getObject: (type, id) => api.getRemoteObject(remote, type, id),
@@ -24,7 +29,7 @@ export default function RemoteAPI({ children }) {
             requestFileDownloadLink: (id) =>
                 api.requestRemoteFileDownloadLink(remote, id),
             requestRemoteZipFileDownloadLink: (id) =>
-                api.requestZipFileDownloadLink(remote, id),
+                api.requestZipFileDownloadLink(id),
         }),
         [remote]
     );

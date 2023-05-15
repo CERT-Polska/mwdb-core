@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { api, APIContext } from "@mwdb-web/commons/api";
 import { useRemote } from "@mwdb-web/commons/remotes";
 

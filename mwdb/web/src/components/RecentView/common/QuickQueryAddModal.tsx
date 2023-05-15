@@ -1,10 +1,20 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { Query } from "@mwdb-web/types/types";
 
-export default function QuickQueryAddModal(props) {
+type Props = {
+    isOpen: boolean;
+    onSubmit: (query: string) => void;
+    onRequestModalClose: (query: string) => void;
+    queries: Query[];
+    onError: (error: string) => void;
+    error?: string;
+};
+
+export function QuickQueryAddModal(props: Props) {
     const { isOpen, onSubmit, onRequestModalClose, error, onError, queries } =
         props;
-    const [value, setValue] = useState("");
+    const [value, setValue] = useState<string>("");
 
     useEffect(() => {
         if (!isOpen) {
@@ -12,21 +22,21 @@ export default function QuickQueryAddModal(props) {
         }
     }, [isOpen]);
 
-    const handleSubmit = (ev) => {
+    const handleSubmit = (ev?: React.FormEvent<HTMLFormElement>) => {
         if (!value) {
             onError("Please set name for your quick query.");
             return;
         }
-        const names = queries.map((x) => x.name);
+        const names = queries.map((x: Query) => x.name);
         if (names.includes(value)) {
             onError("This query name already exists");
             return;
         }
-        ev.preventDefault();
+        ev && ev.preventDefault();
         onSubmit(value);
     };
 
-    const handleClose = (ev) => {
+    const handleClose = (ev: React.MouseEvent | React.KeyboardEvent) => {
         ev.preventDefault();
         onRequestModalClose(value);
     };
@@ -38,7 +48,7 @@ export default function QuickQueryAddModal(props) {
             message="Add new custom quick query"
             isOpen={isOpen}
             onRequestClose={handleClose}
-            onConfirm={handleSubmit}
+            onConfirm={() => handleSubmit()}
         >
             <form onSubmit={handleSubmit}>
                 <input

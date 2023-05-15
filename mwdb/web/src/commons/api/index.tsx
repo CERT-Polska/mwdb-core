@@ -94,6 +94,7 @@ import {
 } from "@mwdb-web/types/api";
 import { Attribute, Capabality, ObjectType } from "@mwdb-web/types/types";
 import { APIProviderProps } from "@mwdb-web/types/props";
+import { ApiContextValues } from "@mwdb-web/types/context";
 
 function getApiForEnvironment() {
     // Default API endpoint
@@ -885,8 +886,7 @@ export const api = {
     enableSharing3rdParty,
 };
 
-// TODO: api context is not needed, remove it when all components will rewrite to TypeScript
-export const APIContext = React.createContext({});
+export const APIContext = React.createContext({} as ApiContextValues);
 export function APIProvider(props: APIProviderProps) {
     return (
         <APIContext.Provider value={api}>{props.children}</APIContext.Provider>

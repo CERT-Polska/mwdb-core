@@ -24,7 +24,8 @@ export type Capabality =
     | "karton_reanalyze"
     | "access_all_objects"
     | "removing_attributes"
-    | "adding_parents";
+    | "adding_parents"
+    | "modify_3rd_party_sharing";
 
 export type User = {
     login: string;

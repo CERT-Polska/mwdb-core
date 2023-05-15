@@ -1,3 +1,4 @@
+import { api } from "@mwdb-web/commons/api";
 import { Capabality, ServerInfo, User } from "./types";
 
 export type TabContextValues = {
@@ -26,6 +27,10 @@ export type AuthContextValues = {
     updateSession: (newSession: User) => void;
     logout: (error?: string) => void;
     oAuthLogout: () => Promise<any>;
+};
+
+export type ApiContextValues = typeof api & {
+    remote?: string;
 };
 
 export type ProfileOutletContext = {

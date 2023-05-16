@@ -10,7 +10,23 @@ import "ace-builds/src-noconflict/ext-searchbox";
 import { View } from "@mwdb-web/commons/ui";
 import exampleTemplates, { makeContext } from "./exampleTemplates";
 
-function templateReducer(state, action) {
+type TemplateReducerState = {
+    chosenExample: string;
+    templateInput: string;
+    valueInput: string;
+};
+
+type TemplateReducerAction = {
+    type: "edit" | "choose";
+    chosenExample?: string;
+    templateInput?: string;
+    valueInput?: string;
+};
+
+function templateReducer(
+    state: TemplateReducerState,
+    action: TemplateReducerAction
+): TemplateReducerState {
     if (action.type === "edit") {
         if (state.chosenExample === "custom") {
             // Editing custom template
@@ -32,21 +48,32 @@ function templateReducer(state, action) {
                 templateInput:
                     action.templateInput !== undefined
                         ? action.templateInput
-                        : exampleTemplates[state.chosenExample].template,
+                        : exampleTemplates[+state.chosenExample!].template,
                 valueInput:
                     action.valueInput !== undefined
                         ? action.valueInput
-                        : exampleTemplates[state.chosenExample].value,
+                        : exampleTemplates[+state.chosenExample!].value,
             };
         }
     } else if (action.type === "choose") {
         // New example chosen. Remember custom fields but show new example
         return {
             ...state,
-            chosenExample: action.chosenExample,
+            chosenExample: action.chosenExample ?? "",
         };
     }
+    return {
+        ...state,
+    };
 }
+
+type Props = {
+    storedRichTemplate: string;
+    storedExampleValue: string;
+    onStore: (template: string, value: string) => void;
+    onCancel: () => void;
+    onDelete: () => void;
+};
 
 export default function RichAttributePreview({
     storedRichTemplate,
@@ -54,32 +81,32 @@ export default function RichAttributePreview({
     onStore,
     onCancel,
     onDelete,
-}) {
+}: Props) {
     const [templateState, dispatch] = useReducer(templateReducer, {
         chosenExample: "custom",
         templateInput: storedRichTemplate,
         valueInput: storedExampleValue,
     });
-    const [showContext, setShowContext] = useState(false);
-    const [invalid, setInvalid] = useState(false);
-    const [contextValue, setContextValue] = useState(null);
+    const [showContext, setShowContext] = useState<boolean>(false);
+    const [invalid, setInvalid] = useState<boolean>(false);
+    const [contextValue, setContextValue] = useState<Object | null>(null);
 
-    function chooseTemplate(ev) {
+    function chooseTemplate(ev: React.ChangeEvent<HTMLSelectElement>) {
         const index = ev.target.value;
         dispatch({ type: "choose", chosenExample: index });
     }
 
-    function editTemplate(field, newValue) {
+    function editTemplate(field: string, newValue: string) {
         dispatch({ type: "edit", [field]: newValue });
     }
 
     const template =
         templateState.chosenExample !== "custom"
-            ? exampleTemplates[templateState.chosenExample].template
+            ? exampleTemplates[+templateState.chosenExample].template
             : templateState.templateInput;
     const value =
         templateState.chosenExample !== "custom"
-            ? exampleTemplates[templateState.chosenExample].value
+            ? exampleTemplates[+templateState.chosenExample].value
             : templateState.valueInput;
 
     useEffect(() => {

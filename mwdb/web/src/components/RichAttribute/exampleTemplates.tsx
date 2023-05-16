@@ -1,4 +1,4 @@
-function dedent(templateStrings, ...values) {
+function dedent<T>(templateStrings: TemplateStringsArray, ...values: T[]) {
     // Based on https://github.com/MartinKolarik/dedent-js
     let matches = [];
     let strings =
@@ -44,7 +44,7 @@ function dedent(templateStrings, ...values) {
     return string;
 }
 
-export function makeContext(attributeValue) {
+export function makeContext<T>(attributeValue: T) {
     return {
         value: attributeValue,
         object: {
@@ -67,7 +67,7 @@ export function makeContext(attributeValue) {
     };
 }
 
-function makeValue(attributeValue) {
+function makeValue<T>(attributeValue: T) {
     return JSON.stringify(attributeValue, null, 4);
 }
 

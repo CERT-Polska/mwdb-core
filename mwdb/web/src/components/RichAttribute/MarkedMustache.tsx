@@ -1,10 +1,11 @@
-import React from "react";
-import Mustache from "mustache";
-import { uniqueId } from "lodash";
-import { lexer, defaults, Tokenizer } from "marked";
-import { DataTable } from "@mwdb-web/commons/ui";
-import { escapeSearchValue } from "@mwdb-web/commons/helpers";
-import { Link } from "react-router-dom";
+import Mustache, { Context } from "mustache";
+import { marked, Tokenizer } from "marked";
+import {
+    escapeSearchValue,
+    Option,
+    renderTokens,
+    Token,
+} from "@mwdb-web/commons/helpers";
 
 /**
  * Markdown with Mustache templates for React
@@ -18,18 +19,18 @@ import { Link } from "react-router-dom";
  * - Removed HTML escaping on Marked level
  */
 
-function appendToLastElement(array, value) {
+function appendToLastElement(array: string[], value: string) {
     // (["a", "b", "c"], "d") => ["a", "b", "cd"]
     return [...array.slice(0, -1), array[array.length - 1] + value];
 }
 
-function splitName(name) {
+function splitName(name: string) {
     if (name === ".")
         // Special case for "this"
         return [];
     return name
         .split(/(?<!\\)((?:\\\\)*[.])/g)
-        .reduce((acc, current, index) => {
+        .reduce((acc: string[], current: string, index: number) => {
             const unescapedCurrent = current.replaceAll(/\\([.\\])/g, "$1");
             if (index % 2) {
                 // Last character is a dot, rest must be appended to last element
@@ -42,7 +43,7 @@ function splitName(name) {
         }, []);
 }
 
-function makeQuery(path, value, attributeKey) {
+function makeQuery(path: string[], value: string, attributeKey: string) {
     if (path[0] !== "value" && path[0] !== "value*")
         /**
          * TODO: value* should be interpreted as attribute.<attributeKey>*
@@ -54,7 +55,9 @@ function makeQuery(path, value, attributeKey) {
 }
 
 class SearchReference {
-    constructor(query, value) {
+    query: string;
+    value: string;
+    constructor(query: string, value: string) {
         this.query = query;
         this.value = value;
     }
@@ -66,7 +69,7 @@ class SearchReference {
     }
 }
 
-function escapeMarkdown(string) {
+function escapeMarkdown(string: string) {
     // Escape Markdown characters
     // https://www.markdownguide.org/basic-syntax/#escaping-characters
     return String(string).replace(/([\\`*_{}[\]<>()#+-,!|])/g, "\\$1");
@@ -74,7 +77,10 @@ function escapeMarkdown(string) {
 
 // Extended context to provide special Mustache values in future
 class MustacheContext extends Mustache.Context {
-    constructor(view, parent, globalView) {
+    globalView: any;
+    lastPath: string[] | null;
+    lastValue: string | null;
+    constructor(view: Object, parent?: Context, globalView?: any) {
         super(view, parent);
         this.globalView = globalView === undefined ? view : globalView;
         // Stored absolute path of last lookup
@@ -83,20 +89,21 @@ class MustacheContext extends Mustache.Context {
         this.lastValue = null;
     }
 
-    push(view) {
+    push(view: Object): Context {
         return new MustacheContext(view, this, this.globalView);
     }
 
     getParentPath() {
         if (!this.parent) return [];
-        const parentPath = this.parent.lastPath;
-        if (Array.isArray(this.parent.lastValue))
+        const parentContext = this.parent as MustacheContext;
+        const parentPath = parentContext.lastPath;
+        if (Array.isArray(parentContext.lastValue))
             // If last value is array, add array operator to the last path element
-            return appendToLastElement(parentPath, "*");
+            return appendToLastElement(parentPath!, "*");
         return parentPath;
     }
 
-    lookup(name) {
+    lookup(name: string) {
         let searchable = false;
         // Check for searchable mark at the beginning
         if (name[0] === "@") {
@@ -111,7 +118,7 @@ class MustacheContext extends Mustache.Context {
                 return undefined;
             currentObject = currentObject[element];
         }
-        this.lastPath = this.getParentPath().concat(path);
+        this.lastPath = this.getParentPath()!.concat(path);
         this.lastValue = currentObject;
         if (searchable) {
             if (
@@ -139,7 +146,7 @@ class MustacheWriter extends Mustache.Writer {
         return escapeMarkdown;
     }
 
-    escapedValue(token, context) {
+    escapedValue(token: string[], context: Context) {
         // https://github.com/janl/mustache.js/blob/550d1da9e3f322649d04b4795f5356914f6fd7e8/mustache.js#L663
         const value = context.lookup(token[1]);
         if (value instanceof SearchReference) {
@@ -148,17 +155,19 @@ class MustacheWriter extends Mustache.Writer {
             return typeof value === "number"
                 ? String(value)
                 : escapeMarkdown(value);
+        return "";
     }
 
-    render(template, view) {
-        return super.render(template, new MustacheContext(view, null));
+    render(template: string, view: Object) {
+        return super.render(template, new MustacheContext(view));
     }
 }
 
 // Overrides to not use HTML escape
 // https://github.com/markedjs/marked/blob/e3f8cd7c7ce75ce4f7e22bd082c45deb1678846d/src/Tokenizer.js#L67
 class MarkedTokenizer extends Tokenizer {
-    escape(src) {
+    rules: any;
+    escape(src: string): any {
         const cap = this.rules.inline.escape.exec(src);
         if (cap) {
             return {
@@ -170,7 +179,7 @@ class MarkedTokenizer extends Tokenizer {
         return false;
     }
 
-    codespan(src) {
+    codespan(src: string): any {
         const cap = this.rules.inline.code.exec(src);
         if (cap) {
             let text = cap[2].replace(/\n/g, " ");
@@ -187,7 +196,7 @@ class MarkedTokenizer extends Tokenizer {
         }
     }
 
-    inlineText(src, smartypants) {
+    inlineText(src: string, smartypants: (cap: string) => string): any {
         const cap = this.rules.inline.text.exec(src);
         if (cap) {
             let text = this.options.smartypants ? smartypants(cap[0]) : cap[0];
@@ -203,151 +212,11 @@ class MarkedTokenizer extends Tokenizer {
 const mustacheWriter = new MustacheWriter();
 const markedTokenizer = new MarkedTokenizer();
 
-const tableClasses = {
-    table: "marked-table",
-    row: "marked-table-row",
-    cell: "marked-table-cell",
-    header: "marked-table-header",
-};
-
-// Custom renderer into React components
-function renderTokens(tokens, options) {
-    const renderers = {
-        text(token) {
-            return token.tokens
-                ? renderTokens(token.tokens, options)
-                : token.text;
-        },
-        escape(token) {
-            return token.text;
-        },
-        strong(token) {
-            return (
-                <strong key={uniqueId()}>
-                    {renderTokens(token.tokens, options)}
-                </strong>
-            );
-        },
-        em(token) {
-            return (
-                <em key={uniqueId()}>{renderTokens(token.tokens, options)}</em>
-            );
-        },
-        del(token) {
-            return (
-                <del key={uniqueId()}>
-                    {renderTokens(token.tokens, options)}
-                </del>
-            );
-        },
-        hr(token) {
-            return <hr key={uniqueId()} />;
-        },
-        blockquote(token) {
-            return (
-                <blockquote key={uniqueId()} className="blockquote">
-                    {renderTokens(token.tokens, options)}
-                </blockquote>
-            );
-        },
-        paragraph(token) {
-            return (
-                <p key={uniqueId()} style={{ margin: "0" }}>
-                    {renderTokens(token.tokens, options)}
-                </p>
-            );
-        },
-        link(token) {
-            if (token.href.startsWith("search#")) {
-                const query = token.href.slice("search#".length);
-                const search =
-                    "?" + new URLSearchParams({ q: query }).toString();
-                return (
-                    <Link
-                        key={uniqueId()}
-                        to={{
-                            pathname: options.searchEndpoint,
-                            search,
-                        }}
-                    >
-                        {renderTokens(token.tokens, options)}
-                    </Link>
-                );
-            }
-            return (
-                <a key={uniqueId()} href={token.href}>
-                    {renderTokens(token.tokens, options)}
-                </a>
-            );
-        },
-        list(token) {
-            return (
-                <ul key={uniqueId()} style={{ margin: "0" }}>
-                    {token.items.map((item) => renderTokens([item]))}
-                </ul>
-            );
-        },
-        list_item(token) {
-            return <li key={uniqueId()}>{renderTokens(token.tokens)}</li>;
-        },
-        html(token) {
-            return token.text;
-        },
-        table(token) {
-            return (
-                <div className="table-responsive" key={uniqueId()}>
-                    <div
-                        className={`${tableClasses.table} table table-striped table-bordered table-hover`}
-                    >
-                        <div
-                            className={`${tableClasses.header} ${tableClasses.row}`}
-                        >
-                            {token.header.map((head, index) => (
-                                <div className={tableClasses.cell} key={index}>
-                                    {renderTokens(head.tokens, options)}
-                                </div>
-                            ))}
-                        </div>
-                        {token.rows.map((row, rowsIndex) => (
-                            <div key={rowsIndex} className={tableClasses.row}>
-                                {row.map((cell, cellIndex) => (
-                                    <div
-                                        key={cellIndex}
-                                        className={tableClasses.cell}
-                                    >
-                                        {renderTokens(cell.tokens, options)}
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        },
-        codespan(token) {
-            return <code key={uniqueId()}>{token.text}</code>;
-        },
-        code(token) {
-            return <pre key={uniqueId()}>{token.text}</pre>;
-        },
-        space() {
-            return [];
-        },
-    };
-    return tokens.map((token) => {
-        const renderer = renderers[token.type];
-        if (!renderer) {
-            return [<i>{`(No renderer for ${token.type})`}</i>];
-        }
-        return renderer(token);
-    });
-}
-
-export function renderValue(template, value, options) {
+export function renderValue(template: string, value: Object, options: Option) {
     const markdown = mustacheWriter.render(template, value);
-    const tokens = lexer(markdown, {
-        ...defaults,
+    const tokens = marked.lexer(markdown, {
+        ...marked.defaults,
         tokenizer: markedTokenizer,
-    });
+    }) as Token[];
     return <div>{renderTokens(tokens, options)}</div>;
 }

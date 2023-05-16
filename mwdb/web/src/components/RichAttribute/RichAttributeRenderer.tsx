@@ -3,7 +3,17 @@ import { renderValue } from "./MarkedMustache";
 
 import { makeContext } from "./exampleTemplates";
 
-export default function RichAttributeRenderer({ template, value, setInvalid }) {
+type Props = {
+    template: string;
+    value: string;
+    setInvalid: (valid: boolean) => void;
+};
+
+export default function RichAttributeRenderer({
+    template,
+    value,
+    setInvalid,
+}: Props) {
     const [renderResult, setRenderResult] = useState(<></>);
 
     useEffect(() => {
@@ -17,7 +27,7 @@ export default function RichAttributeRenderer({ template, value, setInvalid }) {
             );
             setRenderResult(renderedValue);
             setInvalid(false);
-        } catch (e) {
+        } catch (e: any) {
             setRenderResult(e.toString());
             if (setInvalid) {
                 setInvalid(true);

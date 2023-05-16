@@ -33,10 +33,11 @@ export type AuthContextValues = {
     oAuthLogout: () => Promise<any>;
 };
 
-export type ApiContextValues = typeof api;
+export type ApiContextValues = typeof api & {
+    remote?: string;
+};
 
 export type RemoteApiContextValues = ApiContextValues & {
-    remote: string;
     getObjectCount: (
         type: ObjectType,
         query: string

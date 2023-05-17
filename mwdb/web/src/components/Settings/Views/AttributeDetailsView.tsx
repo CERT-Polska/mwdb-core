@@ -11,24 +11,15 @@ import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AttributeItem } from "../common/AttributeItem";
 
-function AttributeItem(props) {
-    let value = props.value ? props.value : "never";
-    return (
-        <tr className="d-flex">
-            <th className="col-3">{props.label}</th>
-            <td className="col-9">{props.children || value}</td>
-        </tr>
-    );
-}
-
-export function AttributeDetails() {
+export function AttributeDetailsView() {
     const viewAlert = useViewAlert();
-    const { attribute, getAttribute } = useOutletContext();
+    const { attribute, getAttribute }: any = useOutletContext();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
-    async function handleSubmit(newValue) {
+    async function handleSubmit(newValue: any) {
         if (newValue.hidden === "Enabled") {
             newValue.hidden = true;
         } else if (newValue.hidden === "Disabled") {
@@ -39,6 +30,7 @@ export function AttributeDetails() {
                 key: attribute.key,
                 label: newValue.label,
                 description: newValue.description,
+                //@ts-ignore
                 urlTemplate: newValue["url_template"],
                 hidden: newValue.hidden,
             });

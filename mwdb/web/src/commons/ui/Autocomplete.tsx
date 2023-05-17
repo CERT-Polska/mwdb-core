@@ -4,12 +4,15 @@ type AutocompleteItem<T> = {
     item: T;
 };
 
-type Props<T> = React.HTMLProps<HTMLInputElement> & {
+type Props<T> = Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    "onChange"
+> & {
     items: T[];
-    getItemValue?: (item: T) => T;
+    getItemValue?: (item: T) => string;
     renderItem?: (props: AutocompleteItem<T>) => JSX.Element;
     value: string;
-    onChange: (value: T | string) => void;
+    onChange: (value: string) => void;
     children?: JSX.Element;
     prependChildren?: boolean;
 };
@@ -36,8 +39,11 @@ export default function Autocomplete<T>({
             {prependChildren ? children : []}
             <input
                 value={value}
-                onChange={(ev) => onChange(ev.target.value)}
-                {...(inputProps || {})}
+                onChange={(ev) => {
+                    console.log(ev);
+                    onChange(ev.target.value);
+                }}
+                {...inputProps}
                 data-toggle="dropdown"
                 ref={inputRef}
             />
@@ -47,8 +53,8 @@ export default function Autocomplete<T>({
                         key={index}
                         className="dropdown-item"
                         type="button"
-                        onClick={(ev) => {
-                            onChange(itemValue(item));
+                        onClick={() => {
+                            onChange(itemValue(item) as string);
                             // Focus on input after choosing dropdown item
                             inputRef.current?.focus();
                         }}
@@ -57,7 +63,7 @@ export default function Autocomplete<T>({
                     </button>
                 ))}
             </div>
-            {prependChildren ? [] : children}
+            {prependChildren ? <></> : children}
         </div>
     );
 }

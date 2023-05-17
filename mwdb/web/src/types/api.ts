@@ -132,7 +132,7 @@ export type GetQuickQueriesResponse = Response<Query[]>;
 
 export type DeleteQuickQueryResponse = Response<null>;
 
-export type GetGroupsResponse = Response<Group[]>;
+export type GetGroupsResponse = Response<{ groups: Group[] }>;
 
 export type GetGroupResponse = Response<Group>;
 
@@ -213,9 +213,9 @@ export type GetAttributeDefinitionResponse = Response<AttributeDefinition>;
 
 export type AddAttributeDefinitionReguest = {
     key: string;
-    label: string;
-    description: string;
-    hidden: boolean;
+    label?: string;
+    description?: string;
+    hidden?: boolean;
 };
 
 export type AddAttributeDefinitionResponse = Response<AttributeDefinition>;

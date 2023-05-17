@@ -33,7 +33,6 @@ import ProfileDetails from "./components/Profile/Views/ProfileDetails";
 import ProfileGroup from "./components/Profile/Views/ProfileGroup";
 import ProfileGroupMembers from "./components/Profile/Views/ProfileGroupMembers";
 import ProfileGroups from "./components/Profile/Views/ProfileGroups";
-import ProfileCapabilities from "./components/Profile/Views/ProfileCapabilities";
 import ProfileAPIKeys from "./components/Profile/Views/ProfileAPIKeys";
 import ProfileResetPassword from "./components/Profile/Views/ProfileResetPassword";
 import ProfileOAuth from "./components/Profile/Views/ProfileOAuth";
@@ -48,14 +47,14 @@ import UserView from "./components/Settings/Views/UserView";
 import GroupCreate from "./components/Settings/Views/GroupCreate";
 import GroupView from "./components/Settings/Views/GroupView";
 import GroupsList from "./components/Settings/Views/GroupsList";
-import AccessControl from "./components/Settings/Views/AccessControl";
+import { AccessControlView } from "./components/Settings/Views/AccessControlView";
 import OAuthListProviders from "./components/Settings/Views/OAuthListProviders";
 import OAuthRegister from "./components/Settings/Views/OAuthRegister";
 import OAuthProvider from "./components/Settings/Views/OAuthProvider";
 import AttributesList from "./components/Settings/Views/AttributesList";
-import AttributeCreate from "./components/Settings/Views/AttributeCreate";
+import { AttributeCreateView } from "./components/Settings/Views/AttributeCreateView";
 import AttributeView from "./components/Settings/Views/AttributeView";
-import { AttributeDetails } from "./components/Settings/Views/AttributeDetails";
+import { AttributeDetailsView } from "./components/Settings/Views/AttributeDetailsView";
 import { AttributesPermissions } from "./components/Settings/Views/AttributePermissions";
 import GroupDetails from "./components/Settings/Views/GroupDetails";
 import GroupCapabilities from "./components/Settings/Views/GroupCapabilities";
@@ -197,17 +196,23 @@ function AppRoutes() {
                         />
                         <Route path="members" element={<GroupMembers />} />
                     </Route>
-                    <Route path="capabilities" element={<AccessControl />} />
+                    <Route
+                        path="capabilities"
+                        element={<AccessControlView />}
+                    />
                     <Route path="oauth" element={<OAuthListProviders />} />
                     <Route path="oauth/register" element={<OAuthRegister />} />
                     <Route path="oauth/:name" element={<OAuthProvider />} />
                     <Route path="attributes" element={<AttributesList />} />
-                    <Route path="attribute/new" element={<AttributeCreate />} />
+                    <Route
+                        path="attribute/new"
+                        element={<AttributeCreateView />}
+                    />
                     <Route
                         path="attribute/:attributeKey/*"
                         element={<AttributeView />}
                     >
-                        <Route index element={<AttributeDetails />} />
+                        <Route index element={<AttributeDetailsView />} />
                         <Route
                             path="permissions"
                             element={<AttributesPermissions />}

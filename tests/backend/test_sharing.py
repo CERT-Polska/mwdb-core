@@ -132,6 +132,11 @@ def test_list_groups_for_share(admin_session):
 
 
 def test_3rd_party_share(admin_session):
+    # check if test_3rd_party_share is enabled
+    resp = admin_session.request("get", "/server")
+    if not resp.get("is_3rd_party_sharing_consent_enabled", False):
+        return
+
     testCase = RelationTestCase(admin_session)
     
     Alice = testCase.new_user("Alice")

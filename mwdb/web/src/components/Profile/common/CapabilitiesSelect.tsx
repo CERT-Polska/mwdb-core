@@ -2,16 +2,17 @@ import { useState, useEffect } from "react";
 import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { find, isNil, isEmpty } from "lodash";
+import { MultiValue } from "react-select";
 import { api } from "@mwdb-web/commons/api";
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { ConfirmationModal, Select } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { Capabality, User } from "@mwdb-web/types/types";
 
-type SelectOptionType = {
+type SelectOptionsType = MultiValue<{
     label: string;
     value: Capabality;
-};
+}>;
 
 type Props = {
     profile: User;
@@ -51,7 +52,7 @@ export function CapabilitiesSelect({ profile, getData }: Props) {
         }
     }
 
-    function onSelectChange(newValue: SelectOptionType[]) {
+    function onSelectChange(newValue: SelectOptionsType) {
         setChosenCapabilities(newValue.map((x) => x.value));
     }
 
@@ -100,9 +101,7 @@ export function CapabilitiesSelect({ profile, getData }: Props) {
                         value: cap,
                         label: renderSelectLabel(cap),
                     }))}
-                    onChange={(newValues) =>
-                        onSelectChange(newValues as SelectOptionType[])
-                    }
+                    onChange={onSelectChange}
                     closeMenuOnSelect={false}
                     hideSelectedOptions={false}
                 />

@@ -12,6 +12,7 @@ import { AuthContext, Capability } from "@mwdb-web/commons/auth";
 import {
     Autocomplete,
     DataTable,
+    ShowIf,
     View,
     getErrorMessage,
 } from "@mwdb-web/commons/ui";
@@ -303,24 +304,32 @@ export default function Upload() {
                         ) : (
                             []
                         )}
-                        <div className="form-group">
-                            <div className="material-switch make-horizontal">
-                                <input
-                                    type="checkbox"
-                                    name="share_3rd"
-                                    id="share_3rd_party"
-                                    checked={share3rdParty}
-                                    onChange={() =>
-                                        setShare3rdParty(!share3rdParty)
-                                    }
-                                />
-                                <label
-                                    htmlFor="share_3rd_party"
-                                    className="bg-primary"
-                                />
+                        <ShowIf
+                            condition={
+                                config.config[
+                                    "is_3rd_party_sharing_consent_enabled"
+                                ]
+                            }
+                        >
+                            <div className="form-group">
+                                <div className="material-switch make-horizontal">
+                                    <input
+                                        type="checkbox"
+                                        name="share_3rd"
+                                        id="share_3rd_party"
+                                        checked={share3rdParty}
+                                        onChange={() =>
+                                            setShare3rdParty(!share3rdParty)
+                                        }
+                                    />
+                                    <label
+                                        htmlFor="share_3rd_party"
+                                        className="bg-primary"
+                                    />
+                                </div>
+                                <label>&nbsp; Share with third parties</label>
                             </div>
-                            <label>&nbsp; Share with third parties</label>
-                        </div>
+                        </ShowIf>
                         <input
                             value="Upload File"
                             className="btn btn-success"

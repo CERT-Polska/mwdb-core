@@ -28,6 +28,7 @@ export type ServerInfoResponse = Response<{
     is_registration_enabled: boolean;
     is_karton_enabled: boolean;
     is_oidc_enabled: boolean;
+    is_3rd_party_sharing_consent_enabled: boolean;
     recaptcha_site_key: boolean;
     request_timeout: number;
     file_upload_timeout: number;

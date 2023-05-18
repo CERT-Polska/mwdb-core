@@ -171,7 +171,7 @@ function CommentBox() {
 
     async function updateComments() {
         try {
-            let response = await api.getObjectComments(objectId);
+            const response = await api.getObjectComments(objectId);
             updateObjectData({
                 comments: response.data,
             });

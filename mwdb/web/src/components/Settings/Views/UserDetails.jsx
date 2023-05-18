@@ -34,7 +34,7 @@ export default function UserDetails() {
 
     async function handleSubmit(newValue) {
         try {
-            await api.updateUser(user.login, newValue);
+            await api.updateUser({ ...newValue, login: user.login });
             viewAlert.setAlert({
                 success: "User successfully updated.",
             });

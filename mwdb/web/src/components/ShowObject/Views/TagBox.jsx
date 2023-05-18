@@ -28,7 +28,7 @@ function TagForm(props) {
             return;
         }
         try {
-            let response = await api.getTags(value);
+            const response = await api.getTags(value);
             setTags(response.data.map((t) => t.tag));
         } catch (error) {
             context.setObjectError(error);

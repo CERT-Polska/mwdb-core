@@ -28,11 +28,11 @@ export default function UserResetPassword() {
 
     async function generatePasswordResetLink() {
         try {
-            let getURLFromToken = (token) =>
+            const getURLFromToken = (token) =>
                 encodeURI(
                     `${window.location.origin}/setpasswd/?token=${token}`
                 );
-            let response = await api.generateSetPasswordToken(user.login);
+            const response = await api.generateSetPasswordToken(user.login);
             setPasswordURL(getURLFromToken(response.data.token));
         } catch (error) {
             viewAlert.setAlert({ error });

@@ -1,5 +1,11 @@
 import { api } from "@mwdb-web/commons/api";
-import { Capabality, ObjectType, ServerInfo, User } from "./types";
+import {
+    AttributeDefinition,
+    Capabality,
+    ObjectType,
+    ServerInfo,
+    User,
+} from "./types";
 import {
     GetRemoteObjectCountResponse,
     GetRemoteObjectListResponse,
@@ -53,4 +59,9 @@ export type ProfileOutletContext = {
     getUser: () => Promise<void>;
     setCapabilitiesToDelete: (cap: Capabality) => void;
     profile: User;
+};
+
+export type AttributeOutletContext = {
+    attribute: AttributeDefinition;
+    getAttribute: () => void;
 };

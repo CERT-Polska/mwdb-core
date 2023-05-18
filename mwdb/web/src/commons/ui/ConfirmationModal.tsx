@@ -3,7 +3,7 @@ import Modal from "react-modal";
 Modal.setAppElement("#root");
 
 type Props = ReactModal.Props & {
-    message: string;
+    message?: string;
     onCancel?: React.MouseEventHandler<HTMLButtonElement>;
     cancelText?: string;
     disabled?: boolean;

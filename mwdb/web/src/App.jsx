@@ -55,7 +55,7 @@ import AttributesList from "./components/Settings/Views/AttributesList";
 import { AttributeCreateView } from "./components/Settings/Views/AttributeCreateView";
 import AttributeView from "./components/Settings/Views/AttributeView";
 import { AttributeDetailsView } from "./components/Settings/Views/AttributeDetailsView";
-import { AttributesPermissions } from "./components/Settings/Views/AttributePermissions";
+import { AttributesPermissionsView } from "./components/Settings/Views/AttributePermissionsView";
 import GroupDetails from "./components/Settings/Views/GroupDetails";
 import GroupCapabilities from "./components/Settings/Views/GroupCapabilities";
 import GroupMembers from "./components/Settings/Views/GroupMembers";
@@ -64,7 +64,7 @@ import UserResetPassword from "./components/Settings/Views/UserResetPassword";
 import UserSingleGroups from "./components/Settings/Views/UserSingleGroups";
 import UserCapabilities from "./components/Settings/Views/UserCapabilities";
 import UserAPIKeys from "./components/Settings/Views/UserAPIKeys";
-import { AttributeEditTemplate } from "./components/Settings/Views/AttributeEditTemplate";
+import { AttributeEditTemplateView } from "./components/Settings/Views/AttributeEditTemplateView";
 
 import { Capability } from "./commons/auth";
 import { ConfigContext } from "./commons/config";
@@ -214,11 +214,11 @@ function AppRoutes() {
                         <Route index element={<AttributeDetailsView />} />
                         <Route
                             path="permissions"
-                            element={<AttributesPermissions />}
+                            element={<AttributesPermissionsView />}
                         />
                         <Route
                             path="edit-template"
-                            element={<AttributeEditTemplate />}
+                            element={<AttributeEditTemplateView />}
                         />
                     </Route>
                 </Route>

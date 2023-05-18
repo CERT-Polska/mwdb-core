@@ -12,26 +12,24 @@ import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AttributeItem } from "../common/AttributeItem";
+import { AttributeOutletContext } from "@mwdb-web/types/context";
+import { AttributeDefinition } from "@mwdb-web/types/types";
 
 export function AttributeDetailsView() {
     const viewAlert = useViewAlert();
-    const { attribute, getAttribute }: any = useOutletContext();
-    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
+    const { attribute, getAttribute }: AttributeOutletContext =
+        useOutletContext();
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const [isDeleteModalDisabled, setDeleteModalDisabled] =
+        useState<boolean>(false);
 
-    async function handleSubmit(newValue: any) {
-        if (newValue.hidden === "Enabled") {
-            newValue.hidden = true;
-        } else if (newValue.hidden === "Disabled") {
-            newValue.hidden = false;
-        }
+    async function handleSubmit(newValue: Partial<AttributeDefinition>) {
         try {
             await api.updateAttributeDefinition({
                 key: attribute.key,
                 label: newValue.label,
                 description: newValue.description,
-                //@ts-ignore
-                urlTemplate: newValue["url_template"],
+                url_template: newValue.url_template,
                 hidden: newValue.hidden,
             });
         } catch (error) {
@@ -77,7 +75,7 @@ export function AttributeDetailsView() {
                     >
                         <EditableItem
                             name="url_template"
-                            defaultValue={attribute["url_template"]}
+                            defaultValue={attribute.url_template}
                             onSubmit={handleSubmit}
                         />
                     </AttributeItem>
@@ -92,7 +90,7 @@ export function AttributeDetailsView() {
                                     wordBreak: "break-all",
                                 }}
                             >
-                                {attribute["rich_template"]}
+                                {attribute.rich_template}
                             </pre>
                         </PseudoEditableItem>
                     </AttributeItem>

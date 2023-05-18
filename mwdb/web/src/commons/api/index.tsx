@@ -23,7 +23,7 @@ import {
     DeleteQuickQueryResponse,
     DownloadFileResponse,
     DownloadRemoteFileResponse,
-    EnableSharing3rdPartyReponse,
+    EnableSharing3rdPartyResponse,
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
@@ -764,7 +764,7 @@ function removeKartonAnalysisFromObject(
 
 function enableSharing3rdParty(
     identifier: string
-): EnableSharing3rdPartyReponse {
+): EnableSharing3rdPartyResponse {
     return axios.put(`/object/${identifier}/share_3rd_party`);
 }
 

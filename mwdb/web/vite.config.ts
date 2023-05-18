@@ -55,12 +55,19 @@ export default defineConfig({
             typescript: true,
         }),
     ],
-    // Expose mwdb/web/src as @mwdb-web to make it
-    // reachable for plugins
+    /**
+     * Expose mwdb/web/src as @mwdb-web to make it
+     * reachable for plugins. The only thing that must
+     * be excluded from that aliasing is @mwdb-web/plugins
+     * that is virtual package provided by pluginLoader.
+     */
     resolve: {
-        alias: {
-            "@mwdb-web": resolve(__dirname, "./src")
-        },
+        alias: [
+            {
+                find: /^@mwdb-web(?!\/plugins)/,
+                replacement: resolve(__dirname, "./src")
+            }
+        ]
     },
     server: {
         host: "0.0.0.0",

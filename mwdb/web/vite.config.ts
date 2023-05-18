@@ -64,7 +64,7 @@ export default defineConfig({
     resolve: {
         alias: [
             {
-                find: /^@mwdb-web(?!\/plugins)/,
+                find: /^@mwdb-web(?!\/(plugins$|plugin-))/,
                 replacement: resolve(__dirname, "./src")
             }
         ]

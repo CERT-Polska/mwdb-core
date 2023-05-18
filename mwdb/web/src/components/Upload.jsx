@@ -158,8 +158,8 @@ export default function Upload() {
 
     async function getGroups() {
         try {
-            let response = await api.getShareInfo();
-            let groups = response.data.groups;
+            const response = await api.getShareInfo();
+            const groups = response.data.groups;
             groups.splice(groups.indexOf("public"), 1);
             groups.splice(groups.indexOf(auth.user.login), 1);
             setGroups(groups);

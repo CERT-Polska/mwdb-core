@@ -237,7 +237,8 @@ class ChangePasswordResource(Resource):
         obj = loads_schema(request.get_data(as_text=True), schema)
 
         # verify_set_password_token return tuple (user_obj, auth_provider)
-        user = User.verify_set_password_token(obj["token"])
+        user = User.verify_set_password_token(obj["token"])[0]
+
         if user is None:
             raise Forbidden("Set password token expired")
 

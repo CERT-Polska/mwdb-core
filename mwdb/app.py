@@ -59,6 +59,7 @@ from mwdb.resources.oauth import (
     OpenIDAuthenticateResource,
     OpenIDAuthorizeResource,
     OpenIDBindAccountResource,
+    OpenIDDiscoveryResource,
     OpenIDLogoutResource,
     OpenIDProviderResource,
     OpenIDRegisterUserResource,
@@ -172,9 +173,8 @@ def require_auth():
 
     if auth and auth.startswith("Bearer "):
         token = auth.split(" ", 1)[1]
-        result = User.verify_session_token(token)
-        if result is not None:
-            g.auth_user, g.auth_provider = result
+        g.auth_user, g.auth_provider = User.verify_session_token(token)
+
         # Not a session token? Maybe APIKey token
         if g.auth_user is None:
             g.auth_user = APIKey.verify_token(token)
@@ -349,6 +349,7 @@ if app_config.mwdb.enable_oidc:
     api.add_resource(OpenIDBindAccountResource, "/oauth/<provider_name>/bind_account")
     api.add_resource(OpenIDRegisterUserResource, "/oauth/<provider_name>/register")
     api.add_resource(OpenIDLogoutResource, "/oauth/<provider_name>/logout")
+    api.add_resource(OpenIDDiscoveryResource, "/oauth/discovery")
 
 # Remote endpoints
 api.add_resource(RemoteListResource, "/remote")

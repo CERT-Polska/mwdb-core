@@ -170,18 +170,18 @@ class User(db.Model):
     def _verify_token(token, fields, scope) -> Optional[Tuple["User", Optional[str]]]:
         data = verify_token(token, scope)
         if data is None:
-            return None
+            return None, None
 
         try:
             user_obj = User.query.filter(User.login == data["sub"]).one()
         except NoResultFound:
-            return None
+            return None, None
 
         for field in fields:
             if field not in data:
-                return None
+                return None, None
             if data[field] != getattr(user_obj, field):
-                return None
+                return None, None
 
         return user_obj, data.get("provider")
 
@@ -210,12 +210,11 @@ class User(db.Model):
 
     @staticmethod
     def verify_set_password_token(token) -> Optional["User"]:
-        result = User._verify_token(
+        return User._verify_token(
             token,
             ["password_ver"],
             scope=AuthScope.set_password,
         )
-        return None if result is None else result[0]
 
     @staticmethod
     def verify_legacy_token(token):

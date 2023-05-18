@@ -237,3 +237,8 @@ export type ServerInfo = {
     instance_name: string;
     remotes: string[];
 };
+
+export type Permission = {
+    read: boolean;
+    set: boolean;
+};

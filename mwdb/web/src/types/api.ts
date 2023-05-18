@@ -220,11 +220,19 @@ export type AddAttributeDefinitionReguest = {
 
 export type AddAttributeDefinitionResponse = Response<AttributeDefinition>;
 
-export type UpdateAttributeDefinitionRequest = AttributeDefinition;
+export type UpdateAttributeDefinitionRequest = Partial<AttributeDefinition>;
 
 export type UpdateAttributeDefinitionResponse = Response<AttributeDefinition>;
 
 export type RemoveAttributeDefinitionResponse = Response<null>;
+
+export type GetAttributePermissionsResponse = Response<{
+    attribute_permissions: {
+        can_read: boolean;
+        can_set: boolean;
+        group_name: string;
+    }[];
+}>;
 
 export type DownloadFileResponse = Response<{ token: string }>;
 

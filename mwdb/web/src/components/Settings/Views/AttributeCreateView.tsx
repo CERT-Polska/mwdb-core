@@ -88,9 +88,7 @@ export function AttributeCreateView() {
                     <input
                         {...register("label" as keyof FormValues)}
                         id={"label" as keyof FormValues}
-                        className={`form-control ${
-                            errors.label ? "is-invalid" : ""
-                        }`}
+                        className={`form-control`}
                     />
                 </div>
                 <div className="form-group">
@@ -101,9 +99,7 @@ export function AttributeCreateView() {
                     <input
                         {...register("description" as keyof FormValues)}
                         id={"description" as keyof FormValues}
-                        className={`form-control ${
-                            errors.description ? "is-invalid" : ""
-                        }`}
+                        className={`form-control`}
                     />
                 </div>
                 <div className="form-group">

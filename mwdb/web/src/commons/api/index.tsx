@@ -27,6 +27,7 @@ import {
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
+    GetAttributePermissionsResponse,
     GetConfigStatsResponse,
     GetGroupResponse,
     GetGroupsResponse,
@@ -561,15 +562,17 @@ function removeAttributeDefinition(key: string) {
     return axios.delete(`/attribute/${key}`);
 }
 
-function getAttributePermissions(key: string) {
+function getAttributePermissions(
+    key?: string
+): GetAttributePermissionsResponse {
     return axios.get(`/attribute/${key}/permissions`);
 }
 
 function setAttributePermission(
     key: string,
     group_name: string,
-    can_read: string,
-    can_set: string
+    can_read: boolean,
+    can_set: boolean
 ) {
     return axios.put(`/attribute/${key}/permissions`, {
         group_name,

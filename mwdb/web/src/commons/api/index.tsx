@@ -13,7 +13,7 @@ import {
     AddQuickQueryResponse,
     ApiKeyAddResponse,
     ApiKeyRemoveResponse,
-    AuthGrupsResponse,
+    AuthGroupsResponse,
     AuthLoginResponse,
     AuthRecoverPasswordResponse,
     AuthRefreshResponse,
@@ -27,7 +27,7 @@ import {
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
-    GetConigStatsResponse,
+    GetConfigStatsResponse,
     GetGroupResponse,
     GetGroupsResponse,
     GetKartonAnalysesListResponse,
@@ -158,7 +158,7 @@ function authRecoverPassword(
     return axios.post("/auth/recover_password", { login, email, recaptcha });
 }
 
-function authGroups(): AuthGrupsResponse {
+function authGroups(): AuthGroupsResponse {
     return axios.get("/auth/groups");
 }
 
@@ -636,7 +636,7 @@ function pullObjectRemote(
     });
 }
 
-function getConfigStats(fromTime: number | string): GetConigStatsResponse {
+function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,

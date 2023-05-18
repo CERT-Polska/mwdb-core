@@ -8,7 +8,7 @@ import {
     ConfigListItem,
     Family,
     Group,
-    KartonAnalyse,
+    KartonAnalysis,
     ObjectData,
     ObjectListItem,
     Query,
@@ -18,7 +18,7 @@ import {
     User,
 } from "./types";
 
-export type Response<T, C = any> = Promise<AxiosResponse<T, C>>;
+export type Response<T> = Promise<AxiosResponse<T>>;
 
 export type ServerInfoResponse = Response<{ status: string }>;
 
@@ -62,7 +62,7 @@ export type AuthRecoverPasswordResponse = Response<{
     login: string;
 }>;
 
-export type AuthGrupsResponse = Response<Group>;
+export type AuthGroupsResponse = Response<Group>;
 
 export type ApiKeyAddResponse = Response<{
     issuer_login: string;
@@ -240,7 +240,7 @@ export type PushObjectRemoteResponse = Response<null>;
 
 export type PullObjectRemoteResponse = Response<null>;
 
-export type GetConigStatsResponse = Response<{
+export type GetConfigStatsResponse = Response<{
     families: Family[];
 }>;
 
@@ -275,14 +275,14 @@ export type GetRemoteObjectAttributesResponse = Response<Attribute[]>;
 export type DownloadRemoteFileResponse = Response<{ token: string }>;
 
 export type GetKartonAnalysesListResponse = Response<{
-    analyses: KartonAnalyse[];
+    analyses: KartonAnalysis[];
     status: string;
 }>;
 
-export type GetKartonAnalysisStatusResponse = Response<KartonAnalyse>;
+export type GetKartonAnalysisStatusResponse = Response<KartonAnalysis>;
 
 export type ResubmitKartonAnalysisResponse = Response<{
-    analyses: KartonAnalyse[];
+    analyses: KartonAnalysis[];
     status: string;
 }>;
 

@@ -20,7 +20,19 @@ import {
 
 export type Response<T> = Promise<AxiosResponse<T>>;
 
-export type ServerInfoResponse = Response<{ status: string }>;
+export type ServerInfoResponse = Response<{
+    server_version: string;
+    is_authenticated: boolean;
+    instance_name: string;
+    is_maintenance_set: boolean;
+    is_registration_enabled: boolean;
+    is_karton_enabled: boolean;
+    is_oidc_enabled: boolean;
+    recaptcha_site_key: boolean;
+    request_timeout: number;
+    file_upload_timeout: number;
+    statement_timeout: number;
+}>;
 
 type ServerDocsInfo = {
     description: string;
@@ -288,4 +300,4 @@ export type ResubmitKartonAnalysisResponse = Response<{
 
 export type RemoveKartonAnalysisFromObjectResponse = Response<null>;
 
-export type EnableSharing3rdPartyReponse = Response<null>;
+export type EnableSharing3rdPartyResponse = Response<null>;

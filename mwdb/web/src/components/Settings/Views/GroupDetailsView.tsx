@@ -13,31 +13,25 @@ import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { DetailsRecord } from "../common/DetailsRecord";
+import { GroupOutletContext } from "@mwdb-web/types/context";
+import { Group } from "@mwdb-web/types/types";
 
-function GroupItem(props) {
-    let value = props.value ? props.value : "never";
-    return (
-        <tr className="d-flex">
-            <th className="col-3">{props.label}</th>
-            <td className="col-9">{props.children || value}</td>
-        </tr>
-    );
-}
-
-export default function GroupDetails() {
+export function GroupDetailsView() {
     const viewAlert = useViewAlert();
-    const { group, getGroup } = useOutletContext();
-    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
+    const { group, getGroup }: GroupOutletContext = useOutletContext();
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const [isDeleteModalDisabled, setDeleteModalDisabled] =
+        useState<boolean>(false);
 
-    async function handleUpdate(newValue) {
+    async function handleUpdate(newValue: Partial<Group>) {
         try {
             await api.updateGroup(group.name, newValue);
             viewAlert.redirectToAlert({
-                target: `/settings/group/${newValue["name"] || group.name}`,
+                target: `/settings/group/${newValue.name || group.name}`,
                 success: `Group has been successfully updated.`,
             });
-            if (!newValue["name"]) getGroup();
+            if (!newValue.name) getGroup();
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -64,16 +58,16 @@ export default function GroupDetails() {
         <div className="container">
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
-                    <GroupItem label="Group name">
+                    <DetailsRecord label="Group name">
                         <EditableItem
                             name="name"
-                            defaultValue={group.name}
+                            defaultValue={group.name!}
                             onSubmit={handleUpdate}
                             required
                             pattern="[A-Za-z0-9_-]{1,32}"
                         />
-                    </GroupItem>
-                    <GroupItem label="Members">
+                    </DetailsRecord>
+                    <DetailsRecord label="Members">
                         <PseudoEditableItem
                             editLocation={`/settings/group/${group.name}/members`}
                         >
@@ -84,6 +78,7 @@ export default function GroupDetails() {
                                     )
                                     .map((user) => (
                                         <UserBadge
+                                            group={{}}
                                             key={user}
                                             user={{ login: user }}
                                             clickable
@@ -91,7 +86,7 @@ export default function GroupDetails() {
                                         />
                                     ))}
                         </PseudoEditableItem>
-                    </GroupItem>
+                    </DetailsRecord>
                 </tbody>
             </table>
             <b>Group features:</b>

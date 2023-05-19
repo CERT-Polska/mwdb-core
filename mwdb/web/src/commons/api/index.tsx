@@ -93,7 +93,12 @@ import {
     UploadFileResponse,
     UserRequestPasswordChangeResponse,
 } from "@mwdb-web/types/api";
-import { Attribute, Capabality, ObjectType } from "@mwdb-web/types/types";
+import {
+    Attribute,
+    Capabality,
+    ObjectType,
+    Provider,
+} from "@mwdb-web/types/types";
 import { APIProviderProps } from "@mwdb-web/types/props";
 import { ApiContextValues } from "@mwdb-web/types/context";
 
@@ -189,26 +194,8 @@ function oauthCallback(
     });
 }
 
-function oauthRegisterProvider(
-    name: string,
-    client_id: number,
-    client_secret: string,
-    authorization_endpoint: string,
-    token_endpoint: string,
-    userinfo_endpoint: string,
-    jwks_endpoint: string,
-    logout_endpoint: string
-) {
-    return axios.post(`/oauth`, {
-        name,
-        client_id,
-        client_secret,
-        authorization_endpoint,
-        token_endpoint,
-        userinfo_endpoint,
-        jwks_endpoint,
-        logout_endpoint,
-    });
+function oauthRegisterProvider(values: Provider) {
+    return axios.post(`/oauth`, values);
 }
 
 function oauthGetProviders(): OauthGetProvidersResponse {
@@ -223,7 +210,7 @@ function oauthGetSingleProvider(
 
 function oauthUpdateSingleProvider(
     name: string,
-    value: string
+    value: Partial<Provider>
 ): OauthUpdateSingleProviderResponse {
     return axios.put(`/oauth/${name}`, value);
 }
@@ -402,7 +389,7 @@ function registerGroup(name: string): RegisterGroupResponse {
 
 function updateGroup(
     name: string,
-    value: { capabilities: Capabality[] }
+    value: { capabilities?: Capabality[]; name?: string }
 ): UpdateGroupResponse {
     return axios.put(`/group/${name}`, value);
 }
@@ -528,7 +515,7 @@ function getAttributeDefinitions(
     });
 }
 
-function getAttributeDefinition(key: string): GetAttributeDefinitionResponse {
+function getAttributeDefinition(key?: string): GetAttributeDefinitionResponse {
     return axios.get(`/attribute/${key}`);
 }
 

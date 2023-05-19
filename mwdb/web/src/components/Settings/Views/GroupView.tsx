@@ -1,18 +1,24 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { isEmpty } from "lodash";
 import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
 
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
-import DeleteCapabilityModal from "./DeleteCapabilityModal";
+import { DeleteCapabilityModal } from "../common/DeleteCapabilityModal";
+import { Capabality, Group } from "@mwdb-web/types/types";
 
-export default function GroupView() {
+export function GroupView() {
     const { setAlert } = useViewAlert();
     const { name } = useParams();
-    const [group, setGroup] = useState({});
-    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
+    const [group, setGroup] = useState<Group>({} as Group);
+    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState<
+        Capabality | ""
+    >("");
 
-    async function changeCapabilities(capability, callback) {
+    async function changeCapabilities(
+        capability: Capabality | "",
+        callback: () => void
+    ) {
         try {
             const capabilities = group.capabilities.filter(
                 (item) => item !== capability
@@ -31,7 +37,7 @@ export default function GroupView() {
 
     async function getGroup() {
         try {
-            const response = await api.getGroup(name);
+            const response = await api.getGroup(name ?? "");
             setGroup(response.data);
         } catch (error) {
             setAlert({ error });
@@ -40,29 +46,31 @@ export default function GroupView() {
 
     if (isEmpty(group)) return <></>;
 
-    function BreadcrumbItems({ elements = [] }) {
-        return [
-            <li className="breadcrumb-item" key={"Group details"}>
-                <strong>Group details: </strong>
-                {elements.length > 0 ? (
-                    <Link to={`/settings/group/${group.name}`}>
-                        {group.name}
-                    </Link>
-                ) : (
-                    <span>{group.name}</span>
-                )}
-            </li>,
-            ...elements.map((element, index) => (
-                <li
-                    key={index}
-                    className={`breadcrumb-item ${
-                        index === elements.length - 1 ? "active" : ""
-                    }`}
-                >
-                    {element}
+    function BreadcrumbItems({ elements = [] }: { elements?: string[] }) {
+        return (
+            <>
+                <li className="breadcrumb-item" key={"Group details"}>
+                    <strong>Group details: </strong>
+                    {elements.length > 0 ? (
+                        <Link to={`/settings/group/${group.name}`}>
+                            {group.name}
+                        </Link>
+                    ) : (
+                        <span>{group.name}</span>
+                    )}
                 </li>
-            )),
-        ];
+                {...elements.map((element, index) => (
+                    <li
+                        key={index}
+                        className={`breadcrumb-item ${
+                            index === elements.length - 1 ? "active" : ""
+                        }`}
+                    >
+                        {element}
+                    </li>
+                ))}
+            </>
+        );
     }
 
     return (

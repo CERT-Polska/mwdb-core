@@ -2,9 +2,11 @@ import { HTMLAttributes, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
 import { EditButton } from "./EditButton";
+import { InputHTMLAttributes } from "react";
+import { SelectHTMLAttributes } from "react";
 
-type Select = HTMLAttributes<HTMLSelectElement>;
-type Input = HTMLAttributes<HTMLInputElement>;
+type Select = SelectHTMLAttributes<HTMLSelectElement>;
+type Input = InputHTMLAttributes<HTMLInputElement>;
 
 type SelectOrInput = Select | Input;
 

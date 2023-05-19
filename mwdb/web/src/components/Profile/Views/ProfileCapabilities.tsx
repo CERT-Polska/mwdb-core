@@ -3,7 +3,7 @@ import { Capability } from "@mwdb-web/commons/auth";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 import { CapabilitiesTable } from "../common/CapabilitiesTable";
 import { CapabilitiesSelect } from "../common/CapabilitiesSelect";
-import { User } from "@mwdb-web/types/types";
+import { Group, User } from "@mwdb-web/types/types";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 
 type Props = {

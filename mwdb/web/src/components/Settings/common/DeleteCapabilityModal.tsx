@@ -1,8 +1,19 @@
 import { isEmpty } from "lodash";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { Capabality } from "@mwdb-web/types/types";
 
-function DeleteCapabilityModal(props) {
+type Props = {
+    capabilitiesToDelete: Capabality | "";
+    changeCapabilities: (
+        capability: Capabality | "",
+        callback: () => void
+    ) => Promise<void>;
+    setCapabilitiesToDelete: (cap: Capabality | "") => void;
+    successMessage: string;
+};
+
+export function DeleteCapabilityModal(props: Props) {
     const {
         changeCapabilities,
         capabilitiesToDelete,
@@ -31,5 +42,3 @@ function DeleteCapabilityModal(props) {
         />
     );
 }
-
-export default DeleteCapabilityModal;

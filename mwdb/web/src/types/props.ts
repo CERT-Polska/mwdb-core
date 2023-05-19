@@ -10,7 +10,7 @@ export type TagProps = {
     filterable?: boolean;
 };
 
-export type GrpupBadgeProps = {
+export type GroupBadgeProps = {
     group: Partial<Group>;
     basePath?: string;
     clickable?: boolean;

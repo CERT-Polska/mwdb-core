@@ -13,5 +13,5 @@ export function LimitTo({ children, count }: Props) {
                   </small>,
               ]
             : [];
-    return [...children.slice(0, count), ...more];
+    return <> {[...children.slice(0, count), ...more]}</>;
 }

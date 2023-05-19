@@ -2,6 +2,7 @@ import { api } from "@mwdb-web/commons/api";
 import {
     AttributeDefinition,
     Capabality,
+    Group,
     ObjectType,
     ServerInfo,
     User,
@@ -64,4 +65,14 @@ export type ProfileOutletContext = {
 export type AttributeOutletContext = {
     attribute: AttributeDefinition;
     getAttribute: () => void;
+};
+
+export type UserOutletContext = {
+    group: User;
+    getGroup: () => Promise<void>;
+};
+
+export type GroupOutletContext = {
+    group: Group;
+    getGroup: () => Promise<void>;
 };

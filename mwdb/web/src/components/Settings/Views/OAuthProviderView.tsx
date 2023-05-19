@@ -6,34 +6,26 @@ import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useParams } from "react-router-dom";
+import { DetailsRecord } from "../common/DetailsRecord";
+import { Provider } from "@mwdb-web/types/types";
 
-function ProviderItem(props) {
-    let value = props.value ? props.value : "never";
-    return (
-        <tr className="d-flex">
-            <th className="col-3">{props.label}</th>
-            <td className="col-9">{props.children || value}</td>
-        </tr>
-    );
-}
-
-export default function OAuthProvider() {
+export function OAuthProviderView() {
     const viewAlert = useViewAlert();
     const { name } = useParams();
-    const [provider, setProvider] = useState({});
+    const [provider, setProvider] = useState<Provider>({} as Provider);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
 
     async function updateProvider() {
         try {
-            const response = await api.oauthGetSingleProvider(name);
+            const response = await api.oauthGetSingleProvider(name ?? "");
             setProvider(response.data);
         } catch (error) {
             viewAlert.setAlert({ error });
         }
     }
 
-    async function handleSubmit(newValue) {
+    async function handleSubmit(newValue: Partial<Provider>) {
         try {
             await api.oauthUpdateSingleProvider(provider.name, newValue);
             viewAlert.setAlert({
@@ -78,15 +70,15 @@ export default function OAuthProvider() {
             </nav>
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
-                    <ProviderItem label="Client ID">
+                    <DetailsRecord label="Client ID">
                         <EditableItem
                             name="client_id"
                             type="client_id"
                             defaultValue={provider.client_id}
                             onSubmit={handleSubmit}
                         />
-                    </ProviderItem>
-                    <ProviderItem label="Client secret">
+                    </DetailsRecord>
+                    <DetailsRecord label="Client secret">
                         <EditableItem
                             name="client_secret"
                             type="client_secret"
@@ -94,47 +86,47 @@ export default function OAuthProvider() {
                             onSubmit={handleSubmit}
                             masked
                         />
-                    </ProviderItem>
-                    <ProviderItem label="Authorization endpoint">
+                    </DetailsRecord>
+                    <DetailsRecord label="Authorization endpoint">
                         <EditableItem
                             name="authorization_endpoint"
                             type="authorization_endpoint"
                             defaultValue={provider.authorization_endpoint}
                             onSubmit={handleSubmit}
                         />
-                    </ProviderItem>
-                    <ProviderItem label="Token endpoint">
+                    </DetailsRecord>
+                    <DetailsRecord label="Token endpoint">
                         <EditableItem
                             name="token_endpoint"
                             type="token_endpoint"
                             defaultValue={provider.token_endpoint}
                             onSubmit={handleSubmit}
                         />
-                    </ProviderItem>
-                    <ProviderItem label="Userinfo endpoint">
+                    </DetailsRecord>
+                    <DetailsRecord label="Userinfo endpoint">
                         <EditableItem
                             name="userinfo_endpoint"
                             type="userinfo_endpoint"
                             defaultValue={provider.userinfo_endpoint}
                             onSubmit={handleSubmit}
                         />
-                    </ProviderItem>
-                    <ProviderItem label="JWKS endpoint">
+                    </DetailsRecord>
+                    <DetailsRecord label="JWKS endpoint">
                         <EditableItem
                             name="jwks_endpoint"
                             type="jwks_endpoint"
                             defaultValue={provider.jwks_endpoint}
                             onSubmit={handleSubmit}
                         />
-                    </ProviderItem>
-                    <ProviderItem label="Logout endpoint">
+                    </DetailsRecord>
+                    <DetailsRecord label="Logout endpoint">
                         <EditableItem
                             name="logout_endpoint"
                             type="logout_endpoint"
                             defaultValue={provider.logout_endpoint}
                             onSubmit={handleSubmit}
                         />
-                    </ProviderItem>
+                    </DetailsRecord>
                 </tbody>
             </table>
             <b>Actions:</b>

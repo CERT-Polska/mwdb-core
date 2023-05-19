@@ -16,9 +16,10 @@ type FormValues = {
 const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
     attributeKey: Yup.string()
         .required("Login is required")
+        .max(32, "Max 32 characters allowed.")
         .matches(
-            /[a-z0-9_-]{1,32}/,
-            "Key must contain only lowercase letters and digits, max 32 characters allowed."
+            /[a-z0-9_-]/,
+            "Key must contain only lowercase letters and digits"
         ),
     label: Yup.string(),
     description: Yup.string(),

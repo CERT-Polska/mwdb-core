@@ -8,15 +8,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 
-export default function OAuthListProviders() {
+export function OAuthListProvidersView() {
     const api = useContext(APIContext);
     const viewAlert = useViewAlert();
-    const [providers, setProviders] = useState([]);
+    const [providers, setProviders] = useState<string[]>([]);
 
     async function getProviders() {
         try {
             const response = await api.oauthGetProviders();
-            setProviders(response.data["providers"]);
+            setProviders(response.data.providers);
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -34,7 +34,7 @@ export default function OAuthListProviders() {
                 Here are the list of registered external identity providers:
             </p>
             {providers.length ? (
-                <React.Fragment>
+                <>
                     {providers.map((provider) => (
                         <Link
                             key={provider}
@@ -50,13 +50,13 @@ export default function OAuthListProviders() {
                             </div>
                         </Link>
                     ))}
-                </React.Fragment>
+                </>
             ) : (
-                <React.Fragment>
+                <>
                     <p className="font-weight-bold">
                         There is no registered identity provider.
                     </p>
-                </React.Fragment>
+                </>
             )}
             <div>
                 <ul className="nav flex-column">

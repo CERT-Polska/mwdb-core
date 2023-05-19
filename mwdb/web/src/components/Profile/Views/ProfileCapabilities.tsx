@@ -2,7 +2,7 @@ import { useOutletContext } from "react-router-dom";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 import { CapabilitiesTable } from "../common/CapabilitiesTable";
 import { CapabilitiesSelect } from "../common/CapabilitiesSelect";
-import { Capability, User } from "@mwdb-web/types/types";
+import { Capability, Group, User } from "@mwdb-web/types/types";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 
 type Props = {

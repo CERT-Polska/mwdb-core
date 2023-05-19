@@ -4,7 +4,7 @@ type Props = {
 };
 
 export function HighlightText(props: Props) {
-    if (!props.filterValue) return props.children;
+    if (!props.filterValue) return <>{props.children}</>;
 
     const filteredText = props.children.toLowerCase();
     const filterValue = props.filterValue.toLowerCase();
@@ -28,5 +28,5 @@ export function HighlightText(props: Props) {
     }
 
     elements.push(props.children.slice(prevIndex));
-    return elements;
+    return <>{elements}</>;
 }

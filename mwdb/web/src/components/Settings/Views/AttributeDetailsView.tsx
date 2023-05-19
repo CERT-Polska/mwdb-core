@@ -11,7 +11,7 @@ import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AttributeItem } from "../common/AttributeItem";
+import { DetailsRecord } from "../common/DetailsRecord";
 import { AttributeOutletContext } from "@mwdb-web/types/context";
 import { AttributeDefinition } from "@mwdb-web/types/types";
 
@@ -56,21 +56,21 @@ export function AttributeDetailsView() {
         <div className="container">
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
-                    <AttributeItem label="Label">
+                    <DetailsRecord label="Label">
                         <EditableItem
                             name="label"
                             defaultValue={attribute.label}
                             onSubmit={handleSubmit}
                         />
-                    </AttributeItem>
-                    <AttributeItem label="Description">
+                    </DetailsRecord>
+                    <DetailsRecord label="Description">
                         <EditableItem
                             name="description"
                             defaultValue={attribute.description}
                             onSubmit={handleSubmit}
                         />
-                    </AttributeItem>
-                    <AttributeItem
+                    </DetailsRecord>
+                    <DetailsRecord
                         label={<React.Fragment>URL template</React.Fragment>}
                     >
                         <EditableItem
@@ -78,8 +78,8 @@ export function AttributeDetailsView() {
                             defaultValue={attribute.url_template}
                             onSubmit={handleSubmit}
                         />
-                    </AttributeItem>
-                    <AttributeItem label="Rich template">
+                    </DetailsRecord>
+                    <DetailsRecord label="Rich template">
                         <PseudoEditableItem
                             editLocation={`/settings/attribute/${attribute.key}/edit-template`}
                         >
@@ -93,7 +93,7 @@ export function AttributeDetailsView() {
                                 {attribute.rich_template}
                             </pre>
                         </PseudoEditableItem>
-                    </AttributeItem>
+                    </DetailsRecord>
                 </tbody>
             </table>
             <b>Attribute features:</b>

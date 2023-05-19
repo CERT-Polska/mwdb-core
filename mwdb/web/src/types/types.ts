@@ -242,3 +242,14 @@ export type Permission = {
     read: boolean;
     set: boolean;
 };
+
+export type Provider = {
+    name: string;
+    client_id: string;
+    client_secret: string;
+    authorization_endpoint: string;
+    token_endpoint: string;
+    userinfo_endpoint: string;
+    jwks_endpoint: string;
+    logout_endpoint: string;
+};

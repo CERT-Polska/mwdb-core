@@ -4,7 +4,7 @@ import { isEmpty, find } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
-import DeleteCapabilityModal from "./DeleteCapabilityModal";
+import { DeleteCapabilityModal } from "../common/DeleteCapabilityModal";
 
 export default function UserView() {
     const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");

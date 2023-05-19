@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import {
     Routes,
     Route,
@@ -44,21 +44,21 @@ import UsersPendingList from "./components/Settings/Views/UsersPendingList";
 import UsersList from "./components/Settings/Views/UsersList";
 import UserCreate from "./components/Settings/Views/UserCreate";
 import UserView from "./components/Settings/Views/UserView";
-import GroupCreate from "./components/Settings/Views/GroupCreate";
-import GroupView from "./components/Settings/Views/GroupView";
-import GroupsList from "./components/Settings/Views/GroupsList";
+import { GroupCreateView } from "./components/Settings/Views/GroupCreateView";
+import { GroupView } from "./components/Settings/Views/GroupView";
+import { GroupsListView } from "./components/Settings/Views/GroupsListView";
 import { AccessControlView } from "./components/Settings/Views/AccessControlView";
-import OAuthListProviders from "./components/Settings/Views/OAuthListProviders";
-import OAuthRegister from "./components/Settings/Views/OAuthRegister";
-import OAuthProvider from "./components/Settings/Views/OAuthProvider";
-import AttributesList from "./components/Settings/Views/AttributesList";
+import { OAuthListProvidersView } from "./components/Settings/Views/OAuthListProvidersView";
+import { OAuthRegisterView } from "./components/Settings/Views/OAuthRegisterView";
+import { OAuthProviderView } from "./components/Settings/Views/OAuthProviderView";
+import { AttributesListView } from "./components/Settings/Views/AttributesListView";
 import { AttributeCreateView } from "./components/Settings/Views/AttributeCreateView";
-import AttributeView from "./components/Settings/Views/AttributeView";
+import { AttributeView } from "./components/Settings/Views/AttributeView";
 import { AttributeDetailsView } from "./components/Settings/Views/AttributeDetailsView";
 import { AttributesPermissionsView } from "./components/Settings/Views/AttributePermissionsView";
-import GroupDetails from "./components/Settings/Views/GroupDetails";
-import GroupCapabilities from "./components/Settings/Views/GroupCapabilities";
-import GroupMembers from "./components/Settings/Views/GroupMembers";
+import { GroupDetailsView } from "./components/Settings/Views/GroupDetailsView";
+import { GroupCapabilitiesView } from "./components/Settings/Views/GroupCapabilitiesView";
+import { GroupMembersView } from "./components/Settings/Views/GroupMembersView";
 import UserDetails from "./components/Settings/Views/UserDetails";
 import UserResetPassword from "./components/Settings/Views/UserResetPassword";
 import UserSingleGroups from "./components/Settings/Views/UserSingleGroups";
@@ -186,24 +186,27 @@ function AppRoutes() {
                         />
                         <Route path="groups" element={<UserSingleGroups />} />
                     </Route>
-                    <Route path="groups" element={<GroupsList />} />
-                    <Route path="group/new" element={<GroupCreate />} />
+                    <Route path="groups" element={<GroupsListView />} />
+                    <Route path="group/new" element={<GroupCreateView />} />
                     <Route path="group/:name/*" element={<GroupView />}>
-                        <Route index element={<GroupDetails />} />
+                        <Route index element={<GroupDetailsView />} />
                         <Route
                             path="capabilities"
-                            element={<GroupCapabilities />}
+                            element={<GroupCapabilitiesView />}
                         />
-                        <Route path="members" element={<GroupMembers />} />
+                        <Route path="members" element={<GroupMembersView />} />
                     </Route>
                     <Route
                         path="capabilities"
                         element={<AccessControlView />}
                     />
-                    <Route path="oauth" element={<OAuthListProviders />} />
-                    <Route path="oauth/register" element={<OAuthRegister />} />
-                    <Route path="oauth/:name" element={<OAuthProvider />} />
-                    <Route path="attributes" element={<AttributesList />} />
+                    <Route path="oauth" element={<OAuthListProvidersView />} />
+                    <Route
+                        path="oauth/register"
+                        element={<OAuthRegisterView />}
+                    />
+                    <Route path="oauth/:name" element={<OAuthProviderView />} />
+                    <Route path="attributes" element={<AttributesListView />} />
                     <Route
                         path="attribute/new"
                         element={<AttributeCreateView />}

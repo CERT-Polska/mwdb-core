@@ -40,7 +40,6 @@ export default function Autocomplete<T>({
             <input
                 value={value}
                 onChange={(ev) => {
-                    console.log(ev);
                     onChange(ev.target.value);
                 }}
                 {...inputProps}

@@ -6,7 +6,7 @@ type Props = {
     value: boolean;
     children: React.ReactNode;
     disabled?: boolean;
-    onUpdate: (value: Record<string, boolean>) => Promise<void>;
+    onUpdate: (value: Record<string, boolean | string>) => Promise<void>;
 };
 
 export default function FeatureSwitch(props: Props) {

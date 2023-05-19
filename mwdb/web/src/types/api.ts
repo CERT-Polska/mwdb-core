@@ -12,6 +12,7 @@ import {
     KartonAnalysis,
     ObjectData,
     ObjectListItem,
+    Provider,
     Query,
     RelatedObject,
     ServerInfo,
@@ -159,7 +160,7 @@ export type SetGroupAdminResponse = Response<{
     name: string;
 }>;
 
-export type GetUsersResponse = Response<User[]>;
+export type GetUsersResponse = Response<{ users: User[] }>;
 
 export type GetPendingUsersResponse = Response<{ users: User[] }>;
 
@@ -207,7 +208,9 @@ export type UpdateUserResponse = Response<User>;
 
 export type RemoveUserResponse = Response<null>;
 
-export type GetAttributeDefinitionsResponse = Response<AttributeDefinition[]>;
+export type GetAttributeDefinitionsResponse = Response<{
+    attribute_definitions: AttributeDefinition[];
+}>;
 
 export type GetAttributeDefinitionResponse = Response<AttributeDefinition>;
 
@@ -304,7 +307,7 @@ export type OauthGetIdentitiesResponse = Response<{
     providers: string[];
 }>;
 
-export type OauthGetSingleProviderResponse = Response<string>;
+export type OauthGetSingleProviderResponse = Response<Provider>;
 
 export type OauthUpdateSingleProviderResponse = Response<string>;
 

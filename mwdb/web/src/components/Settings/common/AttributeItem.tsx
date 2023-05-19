@@ -1,15 +1,30 @@
+import { AttributeDefinition } from "@mwdb-web/types/types";
+import { Link } from "react-router-dom";
+
 type Props = {
-    value?: string;
-    children?: JSX.Element;
-    label: string | JSX.Element;
+    attribute: AttributeDefinition;
 };
 
-export function AttributeItem(props: Props) {
-    const value = props.value ? props.value : "never";
+export function AttributeItem({ attribute }: Props) {
     return (
-        <tr className="d-flex">
-            <th className="col-3">{props.label}</th>
-            <td className="col-9">{props.children || value}</td>
+        <tr>
+            <td>
+                <Link to={`/settings/attribute/${attribute.key}`}>
+                    {attribute.key}
+                </Link>
+                &nbsp;
+                {attribute.label && <span>({attribute.label})</span>}
+            </td>
+            <td>
+                {attribute.description || (
+                    <div className="text-muted">(Not defined)</div>
+                )}
+            </td>
+            <td>
+                {attribute["url_template"] || (
+                    <div className="text-muted">(Not defined)</div>
+                )}
+            </td>
         </tr>
     );
 }

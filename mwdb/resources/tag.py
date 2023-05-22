@@ -5,7 +5,7 @@ from werkzeug.exceptions import NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.model import Object, Tag, db
+from mwdb.model import Tag, db
 from mwdb.schema.tag import (
     TagItemResponseSchema,
     TagListRequestSchema,
@@ -63,8 +63,7 @@ class TagListResource(Resource):
         tags = (
             db.session.query(Tag.tag)
             .distinct(Tag.tag)
-            .join(Tag.object)
-            .filter(g.auth_user.has_access_to_object(Object.id))
+            .filter(g.auth_user.has_access_to_object(Tag.object_id))
         )
 
         tag_prefix = obj["query"]

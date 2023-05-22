@@ -13,7 +13,7 @@ import {
     AddQuickQueryResponse,
     ApiKeyAddResponse,
     ApiKeyRemoveResponse,
-    AuthGrupsResponse,
+    AuthGroupsResponse,
     AuthLoginResponse,
     AuthRecoverPasswordResponse,
     AuthRefreshResponse,
@@ -23,11 +23,11 @@ import {
     DeleteQuickQueryResponse,
     DownloadFileResponse,
     DownloadRemoteFileResponse,
-    EnableSharing3rdPartyReponse,
+    EnableSharing3rdPartyResponse,
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
-    GetConigStatsResponse,
+    GetConfigStatsResponse,
     GetGroupResponse,
     GetGroupsResponse,
     GetKartonAnalysesListResponse,
@@ -64,7 +64,7 @@ import {
     RemoveAttributeDefinitionResponse,
     RemoveGroupMemberResponse,
     RemoveGroupResponse,
-    RemoveKartonAnalysisFromObject,
+    RemoveKartonAnalysisFromObjectResponse,
     RemoveObjectAttributeResponse,
     RemoveObjectCommentResponse,
     RemoveObjectFavoriteResponse,
@@ -158,7 +158,7 @@ function authRecoverPassword(
     return axios.post("/auth/recover_password", { login, email, recaptcha });
 }
 
-function authGroups(): AuthGrupsResponse {
+function authGroups(): AuthGroupsResponse {
     return axios.get("/auth/groups");
 }
 
@@ -636,7 +636,7 @@ function pullObjectRemote(
     });
 }
 
-function getConfigStats(fromTime: number | string): GetConigStatsResponse {
+function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,
@@ -758,13 +758,13 @@ function resubmitKartonAnalysis(id: number): ResubmitKartonAnalysisResponse {
 function removeKartonAnalysisFromObject(
     id: number,
     analysis_id: number
-): RemoveKartonAnalysisFromObject {
+): RemoveKartonAnalysisFromObjectResponse {
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
 function enableSharing3rdParty(
     identifier: string
-): EnableSharing3rdPartyReponse {
+): EnableSharing3rdPartyResponse {
     return axios.put(`/object/${identifier}/share_3rd_party`);
 }
 

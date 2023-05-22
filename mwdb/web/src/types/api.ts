@@ -8,7 +8,7 @@ import {
     ConfigListItem,
     Family,
     Group,
-    KartonAnalyse,
+    KartonAnalysis,
     ObjectData,
     ObjectListItem,
     Query,
@@ -19,6 +19,22 @@ import {
     User,
 } from "./types";
 
+export type Response<T> = Promise<AxiosResponse<T>>;
+
+export type ServerInfoResponse = Response<{
+    server_version: string;
+    is_authenticated: boolean;
+    instance_name: string;
+    is_maintenance_set: boolean;
+    is_registration_enabled: boolean;
+    is_karton_enabled: boolean;
+    is_oidc_enabled: boolean;
+    is_3rd_party_sharing_consent_enabled: boolean;
+    recaptcha_site_key: boolean;
+    request_timeout: number;
+    file_upload_timeout: number;
+    statement_timeout: number;
+}>;
 export type Response<T, C = any> = Promise<AxiosResponse<T, C>>;
 
 export type ServerInfoResponse = Response<ServerInfo>;
@@ -63,7 +79,7 @@ export type AuthRecoverPasswordResponse = Response<{
     login: string;
 }>;
 
-export type AuthGrupsResponse = Response<Group>;
+export type AuthGroupsResponse = Response<Group>;
 
 export type ApiKeyAddResponse = Response<{
     issuer_login: string;
@@ -241,7 +257,7 @@ export type PushObjectRemoteResponse = Response<null>;
 
 export type PullObjectRemoteResponse = Response<null>;
 
-export type GetConigStatsResponse = Response<{
+export type GetConfigStatsResponse = Response<{
     families: Family[];
 }>;
 
@@ -276,17 +292,17 @@ export type GetRemoteObjectAttributesResponse = Response<Attribute[]>;
 export type DownloadRemoteFileResponse = Response<{ token: string }>;
 
 export type GetKartonAnalysesListResponse = Response<{
-    analyses: KartonAnalyse[];
+    analyses: KartonAnalysis[];
     status: string;
 }>;
 
-export type GetKartonAnalysisStatusResponse = Response<KartonAnalyse>;
+export type GetKartonAnalysisStatusResponse = Response<KartonAnalysis>;
 
 export type ResubmitKartonAnalysisResponse = Response<{
-    analyses: KartonAnalyse[];
+    analyses: KartonAnalysis[];
     status: string;
 }>;
 
-export type RemoveKartonAnalysisFromObject = Response<null>;
+export type RemoveKartonAnalysisFromObjectResponse = Response<null>;
 
-export type EnableSharing3rdPartyReponse = Response<null>;
+export type EnableSharing3rdPartyResponse = Response<null>;

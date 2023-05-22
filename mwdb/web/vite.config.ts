@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
 
 import fs from "fs";
-import { join } from "path";
+import { join, resolve } from "path";
 
 function findInstalledPlugins(namespace) {
     const modulesDir = join(__dirname, "node_modules", namespace);
@@ -47,46 +47,28 @@ function pluginLoader() {
     };
 }
 
-function pluginExposeCommons() {
-    /**
-     * Vite plugin that provides virtual module "@mwdb-web/commons/*".
-     *
-     * It maps src/commons modules to virtual package, so they're
-     * available for plugins via simple import.
-     */
-
-    return {
-        name: "expose-commons",
-        resolveId(id) {
-            if (id.startsWith("@mwdb-web/commons/")) {
-                return "\0" + id;
-            }
-        },
-        load(id) {
-            if (id.startsWith("\0@mwdb-web/commons/")) {
-                const modulesPath = id.split("/");
-                if (modulesPath.length !== 3) {
-                    throw new Error(
-                        `Incorrect commons import '${id}', only one level deep allowed`
-                    );
-                }
-                const submodule = modulesPath[2];
-                const submodulePath = join(__dirname, "src/commons", submodule);
-                return `export * from "${submodulePath}";`;
-            }
-        },
-    };
-}
-
 export default defineConfig({
     plugins: [
         react(),
         pluginLoader(),
-        pluginExposeCommons(),
         checker({
             typescript: true,
         }),
     ],
+    /**
+     * Expose mwdb/web/src as @mwdb-web to make it
+     * reachable for plugins. The only thing that must
+     * be excluded from that aliasing is @mwdb-web/plugins
+     * that is virtual package provided by pluginLoader.
+     */
+    resolve: {
+        alias: [
+            {
+                find: /^@mwdb-web(?!\/(plugins$|plugin-))/,
+                replacement: resolve(__dirname, "./src")
+            }
+        ]
+    },
     server: {
         host: "0.0.0.0",
         port: 3000,

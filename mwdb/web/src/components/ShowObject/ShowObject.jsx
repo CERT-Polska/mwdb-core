@@ -127,10 +127,18 @@ export default function ShowObject({
                                 </Extendable>
                             </div>
                             <AttributesBox />
-                            <Share3rdPartyBox
-                                isEnabled={objectState.object.share_3rd_party}
-                                objectId={objectState.object.id}
-                            />
+                            {config.config[
+                                "is_3rd_party_sharing_consent_enabled"
+                            ] ? (
+                                <Share3rdPartyBox
+                                    isEnabled={
+                                        objectState.object.share_3rd_party
+                                    }
+                                    objectId={objectState.object.id}
+                                />
+                            ) : (
+                                []
+                            )}
                         </Extendable>
                     </div>
                     <div className="col-md-5">

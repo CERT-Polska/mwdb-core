@@ -3,11 +3,11 @@ import { Capability } from "@mwdb-web/commons/auth";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 import { CapabilitiesTable } from "../common/CapabilitiesTable";
 import { CapabilitiesSelect } from "../common/CapabilitiesSelect";
-import { User } from "@mwdb-web/types/types";
+import { Group, User } from "@mwdb-web/types/types";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 
 type Props = {
-    profile?: User;
+    profile?: User | Group;
     getData: () => Promise<void>;
 };
 
@@ -24,7 +24,7 @@ export default function ProfileCapabilities({ profile, getData }: Props) {
         <div className="container">
             <h2>Capabilities</h2>
             <p className="lead">
-                Here is the list of {profile.groups ? "account" : "group"}{" "}
+                Here is the list of {"groups" in profile ? "account" : "group"}{" "}
                 superpowers:
             </p>
             {userHasCapabilities(Capability.manageUsers) && (

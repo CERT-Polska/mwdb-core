@@ -68,9 +68,7 @@ export type AttributeOutletContext = {
 };
 
 export type UserOutletContext = {
-    // group: User;
     user: User;
-    // getGroup: () => Promise<void>;
     getUser: () => Promise<void>;
 };
 

@@ -15,7 +15,7 @@ import { Capabality, Group, User } from "@mwdb-web/types/types";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 
 type Props = {
-    profile: User;
+    profile: User | Group;
 };
 
 export function CapabilitiesTable({ profile }: Props) {
@@ -24,23 +24,31 @@ export function CapabilitiesTable({ profile }: Props) {
     const { setCapabilitiesToDelete }: ProfileOutletContext =
         useOutletContext();
 
+    const isAccount = "login" in profile;
+
     function isUserDeleteButtonRender(cap: Capabality) {
-        const userCap = find(profile.groups, {
-            name: profile.login,
-        });
-        if (isNil(userCap)) {
-            return false;
+        if ("groups" in profile) {
+            const userCap = find(profile.groups, {
+                name: profile.login,
+            });
+            if (isNil(userCap)) {
+                return false;
+            }
+            return userCap.capabilities.includes(cap);
         }
-        return userCap.capabilities.includes(cap);
+        return false;
     }
 
     function isDeleteButtonRender(cap: Capabality) {
-        const userOrGroupName = profile.name || profile.login;
+        let userOrGroupName = profile.name;
+        if ("groups" in profile && !userOrGroupName) {
+            userOrGroupName = profile.login;
+        }
         const isManageUsersCapability = cap === Capability.manageUsers;
         if (isManageUsersCapability && userOrGroupName === user.login) {
             return false;
         }
-        return !isNil(profile.login) ? isUserDeleteButtonRender(cap) : true;
+        return isAccount ? isUserDeleteButtonRender(cap) : true;
     }
 
     if (!profile.capabilities) return <></>;
@@ -72,7 +80,7 @@ export function CapabilitiesTable({ profile }: Props) {
                                 {capabilitiesList[cap] || "(no description)"}
                             </div>
                             <div>
-                                {profile.groups && (
+                                {isAccount && (
                                     <span>
                                         <small className="text-muted">
                                             Got from:

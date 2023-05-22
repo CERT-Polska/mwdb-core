@@ -4,9 +4,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api";
 
 import { omit, isEqual, isNil } from "lodash";
-import { Capability } from "./capabilities";
+import { Capabilities } from "./capabilities";
 import { AuthContext } from "./context";
-import { AuthContextValues, Capabality, User } from "@mwdb-web/types/types";
+import { AuthContextValues, Capability, User } from "@mwdb-web/types/types";
 import { AuthProviderProps } from "@mwdb-web/types/props";
 
 export const localStorageAuthKey = "user";
@@ -145,7 +145,7 @@ export function AuthProvider(props: AuthProviderProps) {
         });
     }
 
-    function hasCapability(capability: Capabality) {
+    function hasCapability(capability: Capability) {
         return (
             isAuthenticated && session?.capabilities.indexOf(capability) >= 0
         );
@@ -234,7 +234,7 @@ export function AuthProvider(props: AuthProviderProps) {
     const values: AuthContextValues = {
         user: session,
         isAuthenticated: !!session,
-        isAdmin: hasCapability(Capability.manageUsers),
+        isAdmin: hasCapability(Capabilities.manageUsers),
         hasCapability,
         refreshSession,
         updateSession,

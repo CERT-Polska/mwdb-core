@@ -238,7 +238,7 @@ export type AuthContextValues = {
     user: User;
     isAuthenticated: boolean;
     isAdmin: boolean;
-    hasCapability: (cap: Capabality) => boolean;
+    hasCapability: (cap: Capability) => boolean;
     refreshSession: () => Promise<void>;
     updateSession: (newSession: User) => void;
     logout: (error?: string) => void;

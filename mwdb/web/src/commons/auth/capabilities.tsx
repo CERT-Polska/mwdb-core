@@ -28,7 +28,7 @@ type CapabilityObjectType = {
     modify3rdPartySharing: "modify_3rd_party_sharing";
 };
 
-export const Capability: CapabilityObjectType = {
+export const Capabilities: CapabilityObjectType = {
     manageUsers: "manage_users",
     shareQueriedObjects: "share_queried_objects",
     accessAllObjects: "access_all_objects",
@@ -60,38 +60,40 @@ export let capabilitiesList: Record<
     CapabilityObjectType[keyof CapabilityObjectType],
     string
 > = {
-    [Capability.manageUsers]:
+    [Capabilities.manageUsers]:
         "Managing users and groups (system administration)",
-    [Capability.shareQueriedObjects]: "Query for all objects in system",
-    [Capability.accessAllObjects]:
+    [Capabilities.shareQueriedObjects]: "Query for all objects in system",
+    [Capabilities.accessAllObjects]:
         "Has access to all new uploaded objects into system",
-    [Capability.sharingWithAll]: "Can share objects with all groups in system",
-    [Capability.accessUploaderInfo]:
+    [Capabilities.sharingWithAll]:
+        "Can share objects with all groups in system",
+    [Capabilities.accessUploaderInfo]:
         "Can view who uploaded object and filter by uploader",
-    [Capability.addingTags]: "Can add tags",
-    [Capability.removingTags]: "Can remove tags",
-    [Capability.addingComments]: "Can add comments",
-    [Capability.removingComments]: "Can remove (all) comments",
-    [Capability.addingParents]: "Can specify parent of uploaded object",
-    [Capability.removingParents]:
+    [Capabilities.addingTags]: "Can add tags",
+    [Capabilities.removingTags]: "Can remove tags",
+    [Capabilities.addingComments]: "Can add comments",
+    [Capabilities.removingComments]: "Can remove (all) comments",
+    [Capabilities.addingParents]: "Can specify parent of uploaded object",
+    [Capabilities.removingParents]:
         "Can remove parent of object and inherited permissions from that relation",
-    [Capability.readingAllAttributes]:
+    [Capabilities.readingAllAttributes]:
         "Has access to all attributes of object (including hidden)",
-    [Capability.addingAllAttributes]: "Can add all attributes to object",
-    [Capability.removingAttributes]: "Can remove attribute from objects",
-    [Capability.addingFiles]: "Can upload files",
-    [Capability.addingConfigs]: "Can upload configs",
-    [Capability.addingBlobs]: "Can upload text blobs",
-    [Capability.unlimitedRequests]:
+    [Capabilities.addingAllAttributes]: "Can add all attributes to object",
+    [Capabilities.removingAttributes]: "Can remove attribute from objects",
+    [Capabilities.addingFiles]: "Can upload files",
+    [Capabilities.addingConfigs]: "Can upload configs",
+    [Capabilities.addingBlobs]: "Can upload text blobs",
+    [Capabilities.unlimitedRequests]:
         "API requests are not rate-limited for this group",
-    [Capability.removingObjects]: "Can remove objects",
-    [Capability.manageProfile]: "Can manage own profile",
-    [Capability.personalize]: "Can mark favorites and manage own quick queries",
-    [Capability.kartonAssign]:
+    [Capabilities.removingObjects]: "Can remove objects",
+    [Capabilities.manageProfile]: "Can manage own profile",
+    [Capabilities.personalize]:
+        "Can mark favorites and manage own quick queries",
+    [Capabilities.kartonAssign]:
         "Can assign existing analysis to the object (required by karton-mwdb-reporter)",
-    [Capability.kartonReanalyze]: "Can resubmit any object for analysis",
-    [Capability.removingKarton]: "Can remove analysis from object",
-    [Capability.modify3rdPartySharing]:
+    [Capabilities.kartonReanalyze]: "Can resubmit any object for analysis",
+    [Capabilities.removingKarton]: "Can remove analysis from object",
+    [Capabilities.modify3rdPartySharing]:
         "Can mark objects as shareable with 3rd parties",
 };
 

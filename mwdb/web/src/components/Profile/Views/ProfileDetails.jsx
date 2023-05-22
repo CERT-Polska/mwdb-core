@@ -4,7 +4,7 @@ import { Link, useOutletContext } from "react-router-dom";
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { DateString, ShowIf } from "@mwdb-web/commons/ui";
 
@@ -53,7 +53,7 @@ export default function ProfileDetails() {
                     <ShowIf
                         condition={
                             isCurrentUser &&
-                            auth.hasCapability(Capability.personalize)
+                            auth.hasCapability(Capabilities.personalize)
                         }
                     >
                         <Link className="nav-link" to="/profile/api-keys">
@@ -74,7 +74,7 @@ export default function ProfileDetails() {
                         Search for uploads
                     </Link>
                     <ShowIf
-                        condition={auth.hasCapability(Capability.manageUsers)}
+                        condition={auth.hasCapability(Capabilities.manageUsers)}
                     >
                         <Link
                             className="nav-link"

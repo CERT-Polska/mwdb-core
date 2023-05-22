@@ -7,7 +7,7 @@ import { find, isNil, isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
 import {
     capabilitiesList,
-    Capability,
+    Capabilities,
     AuthContext,
 } from "@mwdb-web/commons/auth";
 import { GroupBadge, ConfirmationModal, Select } from "@mwdb-web/commons/ui";
@@ -29,7 +29,7 @@ function CapabilitiesTable({ profile }) {
 
     function isDeleteButtonRender(cap) {
         const userOrGroupName = profile.name || profile.login;
-        const isManageUsersCapability = cap === Capability.manageUsers;
+        const isManageUsersCapability = cap === Capabilities.manageUsers;
         if (isManageUsersCapability && userOrGroupName === user.login) {
             return false;
         }
@@ -42,7 +42,7 @@ function CapabilitiesTable({ profile }) {
             <tbody>
                 {profile.capabilities.sort().map((cap) => (
                     <tr key={cap}>
-                        {userHasCapabilities(Capability.manageUsers) && (
+                        {userHasCapabilities(Capabilities.manageUsers) && (
                             <td className="col-auto">
                                 {isDeleteButtonRender(cap) && (
                                     <Link
@@ -227,7 +227,7 @@ export default function ProfileCapabilities({ profile, getData }) {
                 Here is the list of {profile.groups ? "account" : "group"}{" "}
                 superpowers:
             </p>
-            {userHasCapabilities(Capability.manageUsers) && (
+            {userHasCapabilities(Capabilities.manageUsers) && (
                 <CapabilitiesSelect profile={profile} getData={getData} />
             )}
             <CapabilitiesTable profile={profile} />

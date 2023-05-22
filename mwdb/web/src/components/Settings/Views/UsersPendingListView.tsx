@@ -5,13 +5,21 @@ import { api } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { PagedList, DateString, ConfirmationModal } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { User } from "@mwdb-web/types/types";
 
-export default function UsersPendingList() {
+type ModalSpec = {
+    action?: () => void;
+    message?: string;
+    buttonStyle?: string;
+    confirmText?: string;
+};
+
+export function UsersPendingListView() {
     const viewAlert = useViewAlert();
     const { pendingUsers, getPendingUsers } = useContext(ConfigContext);
-    const [activePage, setActivePage] = useState(1);
-    const [userFilter, setUserFilter] = useState("");
-    const [modalSpec, setModalSpec] = useState({});
+    const [activePage, setActivePage] = useState<number>(1);
+    const [userFilter, setUserFilter] = useState<string>("");
+    const [modalSpec, setModalSpec] = useState<ModalSpec>({});
 
     useEffect(() => {
         getPendingUsers();
@@ -22,15 +30,19 @@ export default function UsersPendingList() {
         .filter(
             (user) =>
                 user.login.toLowerCase().includes(query) ||
-                user.email.toLowerCase().includes(query)
+                user.email?.toLowerCase().includes(query)
         )
-        .sort(
-            (userA, userB) =>
-                new Date(userA["requested_on"]) -
-                new Date(userB["requested_on"])
-        );
+        .sort((userA, userB) => {
+            const dateA = userA.requested_on
+                ? new Date(userA.requested_on)
+                : new Date(0);
+            const dateB = userB.requested_on
+                ? new Date(userB.requested_on)
+                : new Date(0);
+            return dateA.getTime() - dateB.getTime();
+        });
 
-    async function acceptUser(login) {
+    async function acceptUser(login: string) {
         try {
             await api.acceptPendingUser(login);
             viewAlert.setAlert({
@@ -42,7 +54,7 @@ export default function UsersPendingList() {
         }
     }
 
-    async function rejectUser(login, mailNotification) {
+    async function rejectUser(login: string, mailNotification: boolean) {
         try {
             await api.rejectPendingUser(login, mailNotification);
             viewAlert.setAlert({
@@ -54,7 +66,7 @@ export default function UsersPendingList() {
         }
     }
 
-    function selectAcceptUser(login) {
+    function selectAcceptUser(login: string) {
         setModalSpec({
             message: `Register an account ${login}?`,
             action: () => {
@@ -66,7 +78,7 @@ export default function UsersPendingList() {
         });
     }
 
-    function selectRejectUser(login, mailNotification) {
+    function selectRejectUser(login: string, mailNotification: boolean) {
         const message = mailNotification
             ? `Reject an account ${login}?`
             : `Reject an account ${login} without email notification?`;
@@ -81,7 +93,7 @@ export default function UsersPendingList() {
         });
     }
 
-    function PendingUserItem(props) {
+    function PendingUserItem(props: User) {
         return (
             <tr>
                 <td>

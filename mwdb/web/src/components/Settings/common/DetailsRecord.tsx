@@ -1,5 +1,5 @@
 type Props = {
-    value?: string;
+    value?: string | number;
     children?: JSX.Element;
     label: string | JSX.Element;
 };

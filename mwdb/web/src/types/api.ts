@@ -1,5 +1,6 @@
 import { AxiosResponse } from "axios";
 import {
+    ActivePlugin,
     ApiKey,
     Attribute,
     AttributeDefinition,
@@ -15,6 +16,7 @@ import {
     Provider,
     Query,
     RelatedObject,
+    ServerAdminInfo,
     ServerInfo,
     Share,
     Tag,
@@ -43,11 +45,7 @@ export type ServerDocsResponse = Response<{
     servers: ServerDocsServer[];
 }>;
 
-export type ServerAdminInfoResponse = Response<{
-    active_plugins: object;
-    plugins_enabled: boolean;
-    rate_limit_enabled: boolean;
-}>;
+export type ServerAdminInfoResponse = Response<ServerAdminInfo>;
 
 export type AuthLoginResponse = Response<User>;
 

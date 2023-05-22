@@ -5,12 +5,15 @@ import { isEmpty, find } from "lodash";
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { DeleteCapabilityModal } from "../common/DeleteCapabilityModal";
+import { Capability, User } from "@mwdb-web/types/types";
 
-export default function UserView() {
-    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
+export function UserView() {
+    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState<
+        Capability | ""
+    >("");
     const { setAlert } = useViewAlert();
     const { login } = useParams();
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState<User>({} as User);
 
     useEffect(() => {
         getUser();
@@ -18,18 +21,22 @@ export default function UserView() {
 
     async function getUser() {
         try {
-            const response = await api.getUser(login);
+            const response = await api.getUser(login!);
             setUser(response.data);
         } catch (error) {
             setAlert({ error });
         }
     }
 
-    async function changeCapabilities(capability, callback) {
+    async function changeCapabilities(
+        capability: Capability | "",
+        callback: () => void
+    ) {
         try {
-            const foundUserCapabilities = find(user.groups, {
-                name: user.login,
-            }).capabilities;
+            const foundUserCapabilities =
+                find(user.groups, {
+                    name: user.login,
+                })?.capabilities ?? [];
             const capabilities = foundUserCapabilities.filter(
                 (item) => item !== capability
             );
@@ -43,29 +50,31 @@ export default function UserView() {
 
     if (isEmpty(user)) return <></>;
 
-    function BreadcrumbItems({ elements = [] }) {
-        return [
-            <li className="breadcrumb-item" key="account-details">
-                <strong>Account details: </strong>
-                {elements.length > 0 ? (
-                    <Link to={`/settings/user/${user.login}`}>
-                        {user.login}
-                    </Link>
-                ) : (
-                    <span>{user.login}</span>
-                )}
-            </li>,
-            ...elements.map((element, index) => (
-                <li
-                    key={index}
-                    className={`breadcrumb-item ${
-                        index === elements.length - 1 ? "active" : ""
-                    }`}
-                >
-                    {element}
+    function BreadcrumbItems({ elements = [] }: { elements?: string[] }) {
+        return (
+            <>
+                <li className="breadcrumb-item" key="account-details">
+                    <strong>Account details: </strong>
+                    {elements.length > 0 ? (
+                        <Link to={`/settings/user/${user.login}`}>
+                            {user.login}
+                        </Link>
+                    ) : (
+                        <span>{user.login}</span>
+                    )}
                 </li>
-            )),
-        ];
+                {...elements.map((element, index) => (
+                    <li
+                        key={index}
+                        className={`breadcrumb-item ${
+                            index === elements.length - 1 ? "active" : ""
+                        }`}
+                    >
+                        {element}
+                    </li>
+                ))}
+            </>
+        );
     }
 
     return (

@@ -27,7 +27,7 @@ import UserPasswordRecover from "./components/UserPasswordRecover";
 import Docs from "./components/Docs";
 import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
-import SettingsView from "./components/Settings/SettingsView";
+import { SettingsView } from "./components/Settings/Views/SettingsView";
 
 import ProfileDetails from "./components/Profile/Views/ProfileDetails";
 import ProfileGroup from "./components/Profile/Views/ProfileGroup";
@@ -39,11 +39,11 @@ import ProfileOAuth from "./components/Profile/Views/ProfileOAuth";
 
 import { OAuthAuthorize } from "./components/OAuth";
 
-import SettingsOverview from "./components/Settings/Views/SettingsOverview";
-import UsersPendingList from "./components/Settings/Views/UsersPendingList";
-import UsersList from "./components/Settings/Views/UsersList";
-import UserCreate from "./components/Settings/Views/UserCreate";
-import UserView from "./components/Settings/Views/UserView";
+import { SettingsOverviewView } from "./components/Settings/Views/SettingsOverviewView";
+import { UsersPendingListView } from "./components/Settings/Views/UsersPendingListView";
+import { UsersListView } from "./components/Settings/Views/UsersListView";
+import { UserCreateView } from "./components/Settings/Views/UserCreateView";
+import { UserView } from "./components/Settings/Views/UserView";
 import { GroupCreateView } from "./components/Settings/Views/GroupCreateView";
 import { GroupView } from "./components/Settings/Views/GroupView";
 import { GroupsListView } from "./components/Settings/Views/GroupsListView";
@@ -59,11 +59,11 @@ import { AttributesPermissionsView } from "./components/Settings/Views/Attribute
 import { GroupDetailsView } from "./components/Settings/Views/GroupDetailsView";
 import { GroupCapabilitiesView } from "./components/Settings/Views/GroupCapabilitiesView";
 import { GroupMembersView } from "./components/Settings/Views/GroupMembersView";
-import UserDetails from "./components/Settings/Views/UserDetails";
-import UserResetPassword from "./components/Settings/Views/UserResetPassword";
-import UserSingleGroups from "./components/Settings/Views/UserSingleGroups";
-import UserCapabilities from "./components/Settings/Views/UserCapabilities";
-import UserAPIKeys from "./components/Settings/Views/UserAPIKeys";
+import { UserDetailsView } from "./components/Settings/Views/UserDetailsView";
+import { UserResetPasswordView } from "./components/Settings/Views/UserResetPasswordView";
+import { UserSingleGroupsView } from "./components/Settings/Views/UserSingleGroupsView";
+import { UserCapabilitiesView } from "./components/Settings/Views/UserCapabilitiesView";
+import { UserAPIKeysView } from "./components/Settings/Views/UserAPIKeysView";
 import { AttributeEditTemplateView } from "./components/Settings/Views/AttributeEditTemplateView";
 
 import { ConfigContext } from "./commons/config";
@@ -135,7 +135,10 @@ function AppRoutes() {
                         element={<ProfileGroupMembers />}
                     />
                     <Route path="groups" element={<ProfileGroups />} />
-                    <Route path="capabilities" element={<UserCapabilities />} />
+                    <Route
+                        path="capabilities"
+                        element={<UserCapabilitiesView />}
+                    />
                     <Route path="api-keys" element={<ProfileAPIKeys />} />
                     <Route
                         path="reset-password"
@@ -169,22 +172,25 @@ function AppRoutes() {
                         </RequiresCapability>
                     }
                 >
-                    <Route index element={<SettingsOverview />} />
-                    <Route path="pending" element={<UsersPendingList />} />
-                    <Route path="users" element={<UsersList />} />
-                    <Route path="user/new" element={<UserCreate />} />
+                    <Route index element={<SettingsOverviewView />} />
+                    <Route path="pending" element={<UsersPendingListView />} />
+                    <Route path="users" element={<UsersListView />} />
+                    <Route path="user/new" element={<UserCreateView />} />
                     <Route path="user/:login/*" element={<UserView />}>
-                        <Route index element={<UserDetails />} />
+                        <Route index element={<UserDetailsView />} />
                         <Route
                             path="capabilities"
-                            element={<UserCapabilities />}
+                            element={<UserCapabilitiesView />}
                         />
-                        <Route path="api-keys" element={<UserAPIKeys />} />
+                        <Route path="api-keys" element={<UserAPIKeysView />} />
                         <Route
                             path="password"
-                            element={<UserResetPassword />}
+                            element={<UserResetPasswordView />}
                         />
-                        <Route path="groups" element={<UserSingleGroups />} />
+                        <Route
+                            path="groups"
+                            element={<UserSingleGroupsView />}
+                        />
                     </Route>
                     <Route path="groups" element={<GroupsListView />} />
                     <Route path="group/new" element={<GroupCreateView />} />

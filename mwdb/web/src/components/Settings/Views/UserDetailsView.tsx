@@ -13,26 +13,21 @@ import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { DetailsRecord } from "../common/DetailsRecord";
+import { UserOutletContext } from "@mwdb-web/types/context";
+import { UpdateUserRequest } from "@mwdb-web/types/api";
 
-function UserItem(props) {
-    let value = props.value ? props.value : "never";
-    return (
-        <tr className="d-flex">
-            <th className="col-3">{props.label}</th>
-            <td className="col-9">{props.children || value}</td>
-        </tr>
-    );
-}
-
-export default function UserDetails() {
+export function UserDetailsView() {
     const viewAlert = useViewAlert();
-    const { user, getUser } = useOutletContext();
-    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
-    const [isBlockModalOpen, setBlockModalOpen] = useState(false);
-    const [isBlockModalDisabled, setBlockModalDisabled] = useState(false);
+    const { user, getUser }: UserOutletContext = useOutletContext();
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const [isDeleteModalDisabled, setDeleteModalDisabled] =
+        useState<boolean>(false);
+    const [isBlockModalOpen, setBlockModalOpen] = useState<boolean>(false);
+    const [isBlockModalDisabled, setBlockModalDisabled] =
+        useState<boolean>(false);
 
-    async function handleSubmit(newValue) {
+    async function handleSubmit(newValue: Partial<UpdateUserRequest>) {
         try {
             await api.updateUser({ ...newValue, login: user.login });
             viewAlert.setAlert({
@@ -45,7 +40,7 @@ export default function UserDetails() {
         }
     }
 
-    async function setDisabledState(ban) {
+    async function setDisabledState(ban: boolean) {
         try {
             setBlockModalDisabled(true);
             await api.setUserDisabled(user.login, ban);
@@ -81,25 +76,25 @@ export default function UserDetails() {
         <div className="container">
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
-                    <UserItem label="E-mail">
+                    <DetailsRecord label="E-mail">
                         <EditableItem
                             name="email"
                             type="email"
-                            defaultValue={user.email}
+                            defaultValue={user.email!}
                             onSubmit={handleSubmit}
                         />
-                    </UserItem>
-                    <UserItem label="Additional info">
+                    </DetailsRecord>
+                    <DetailsRecord label="Additional info">
                         <EditableItem
                             name="additionalInfo"
-                            defaultValue={user.additional_info}
+                            defaultValue={user.additional_info!}
                             onSubmit={handleSubmit}
                         />
-                    </UserItem>
-                    <UserItem label="Feed quality">
+                    </DetailsRecord>
+                    <DetailsRecord label="Feed quality">
                         <EditableItem
                             name="feedQuality"
-                            defaultValue={user.feed_quality}
+                            defaultValue={user.feed_quality!}
                             onSubmit={handleSubmit}
                             badge
                             selective
@@ -107,23 +102,29 @@ export default function UserDetails() {
                             <option value="high">high</option>
                             <option value="low">low</option>
                         </EditableItem>
-                    </UserItem>
-                    <UserItem label="Requested on" value={user.requested_on}>
+                    </DetailsRecord>
+                    <DetailsRecord
+                        label="Requested on"
+                        value={user.requested_on}
+                    >
                         <DateString date={user.requested_on} />
-                    </UserItem>
-                    <UserItem label="Registered on" value={user.registered_on}>
+                    </DetailsRecord>
+                    <DetailsRecord
+                        label="Registered on"
+                        value={user.registered_on}
+                    >
                         <DateString date={user.registered_on} />
-                    </UserItem>
-                    <UserItem label="Last login" value={user.logged_on}>
+                    </DetailsRecord>
+                    <DetailsRecord label="Last login" value={user.logged_on}>
                         <DateString date={user.logged_on} />
-                    </UserItem>
-                    <UserItem
+                    </DetailsRecord>
+                    <DetailsRecord
                         label="Last password set"
                         value={user.set_password_on}
                     >
                         <DateString date={user.set_password_on} />
-                    </UserItem>
-                    <UserItem
+                    </DetailsRecord>
+                    <DetailsRecord
                         label="Groups"
                         value={user.groups && user.groups.length}
                     >
@@ -145,7 +146,7 @@ export default function UserDetails() {
                                         />
                                     ))}
                         </PseudoEditableItem>
-                    </UserItem>
+                    </DetailsRecord>
                 </tbody>
             </table>
             <b>Actions:</b>

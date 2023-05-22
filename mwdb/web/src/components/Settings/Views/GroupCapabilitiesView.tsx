@@ -1,10 +1,8 @@
 import { useOutletContext } from "react-router-dom";
 import ProfileCapabilities from "../../Profile/Views/ProfileCapabilities";
-import { UserOutletContext } from "@mwdb-web/types/context";
+import { GroupOutletContext } from "@mwdb-web/types/context";
 
 export function GroupCapabilitiesView() {
-    //TODO: fix before review
-    const { group, getGroup }: any = useOutletContext();
-    console.log(group);
+    const { group, getGroup }: GroupOutletContext = useOutletContext();
     return <ProfileCapabilities profile={group} getData={getGroup} />;
 }

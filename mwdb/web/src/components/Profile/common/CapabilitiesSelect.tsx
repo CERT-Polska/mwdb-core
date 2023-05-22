@@ -7,7 +7,7 @@ import { api } from "@mwdb-web/commons/api";
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { ConfirmationModal, Select } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
-import { Capability, User } from "@mwdb-web/types/types";
+import { Capability, Group, User } from "@mwdb-web/types/types";
 
 type SelectOptionsType = MultiValue<{
     label: string;
@@ -15,7 +15,7 @@ type SelectOptionsType = MultiValue<{
 }>;
 
 type Props = {
-    profile: User;
+    profile: User | Group;
     getData: () => Promise<void>;
 };
 
@@ -30,7 +30,7 @@ export function CapabilitiesSelect({ profile, getData }: Props) {
     >([]);
     const [isOpen, setIsOpen] = useState(false);
 
-    const isAccount = !isNil(profile.groups);
+    const isAccount = "groups" in profile;
     const group = isAccount ? profile.login : profile.name;
     const capabilities = Object.keys(capabilitiesList) as Capability[];
     const changedCaps = capabilities.filter(

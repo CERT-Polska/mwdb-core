@@ -68,8 +68,6 @@ Rollup instead of Webpack.
       - import { APIContext } from "@mwdb-web/commons/api/context";
       + import { APIContext } from "@mwdb-web/commons/api";
 
-   If you don't do that, you'll get an error: ``"Incorrect commons import 'api', only one level deep allowed"``
-
 4. ``@mwdb-web/commons/api`` no longer serves ``api`` as default export. Use named import instead.
 
     .. code-block:: diff
@@ -107,6 +105,8 @@ for serving Python WSGI application. If you have uWSGI-dependent configuration c
 to Gunicorn equivalent.
 
 Docker image by default spawns 4 sync workers and that number can be set via ``GUNICORN_WORKERS`` environment variable.
+
+In addition, application code is no longer loaded lazily by default. If you want to keep that behavior, set ``PRELOAD_APP`` environment variable to ``1``.
 
 For more information about configuring Gunicorn, check `Settings page in Gunicorn documentation <https://docs.gunicorn.org/en/stable/settings.html#>`_.
 

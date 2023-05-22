@@ -96,6 +96,7 @@ import {
 import {
     Attribute,
     Capabality,
+    CreateUser,
     ObjectType,
     Provider,
 } from "@mwdb-web/types/types";
@@ -434,7 +435,7 @@ function acceptPendingUser(login: string): AcceptPendingUserResponse {
 
 function rejectPendingUser(
     login: string,
-    send_email: string
+    send_email: boolean
 ): RejectPendingUserResponse {
     return axios.delete(`/user/${login}/pending`, { params: { send_email } });
 }
@@ -464,20 +465,8 @@ function setUserDisabled(
     return axios.put(`/user/${login}`, { disabled });
 }
 
-function createUser(
-    login: string,
-    email: string,
-    additional_info: string,
-    feed_quality: string,
-    send_email: string
-): CreateUserResponse {
-    return axios.post(`/user/${login}`, {
-        login,
-        email,
-        additional_info,
-        feed_quality,
-        send_email,
-    });
+function createUser(values: CreateUser): CreateUserResponse {
+    return axios.post(`/user/${values.login}`, values);
 }
 
 function registerUser(

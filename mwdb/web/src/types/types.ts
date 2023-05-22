@@ -36,15 +36,15 @@ export type User = {
     api_keys?: ApiKey[];
     disabled?: boolean;
     email?: string;
-    feed_quality?: string;
+    feed_quality?: FeedQuality;
     pending?: boolean;
-    requested_on?: string | Date;
+    requested_on?: string;
     provider?: null | string;
     token?: string;
-    logged_on?: string | Date;
-    registered_on?: string | Date;
-    registrar_login?: string | Date;
-    set_password_on?: string | Date;
+    logged_on?: string;
+    registered_on?: string;
+    registrar_login?: string;
+    set_password_on?: string;
 };
 
 export type Group = {
@@ -84,7 +84,7 @@ export type RelatedObject = {
     id: string;
     tags: Tag[];
     type: ObjectType;
-    upload_time: string | Date;
+    upload_time: string;
 };
 
 export type ConfigType = "static" | "dynamic";
@@ -96,7 +96,7 @@ type ObjectCommonData = {
     id: string;
     parents: RelatedObject[];
     tags: Tag[];
-    upload_time: string | Date;
+    upload_time: string;
 };
 
 export type ObjectData = ObjectCommonData & {
@@ -126,7 +126,7 @@ export type BlobData = ObjectCommonData & {
     blob_size: number;
     blob_type: string;
     content: string;
-    last_seen: string | Date;
+    last_seen: string;
     latest_config: unknown;
     type: "text_blob";
 };
@@ -141,7 +141,7 @@ export type ObjectListItem = {
     sha256: string;
     tags: Tag[];
     type: "file";
-    upload_time: string | Date;
+    upload_time: string;
 };
 
 export type ConfigListItem = {
@@ -150,7 +150,7 @@ export type ConfigListItem = {
     id: string;
     tags: Tag[];
     type: "static_config";
-    upload_time: string | Date;
+    upload_time: string;
 };
 
 export type BlobListItem = {
@@ -158,7 +158,7 @@ export type BlobListItem = {
     blob_size: number;
     blob_type: string;
     id: string;
-    last_seen: string | Date;
+    last_seen: string;
     type: "text_blob";
     tags: Tag[];
 };
@@ -167,12 +167,12 @@ export type Comment = {
     author: string;
     comment: string;
     id: number;
-    timestamp: string | Date;
+    timestamp: string;
 };
 
 export type Share = {
     access_reason: string;
-    access_time: string | Date;
+    access_time: string;
     group_name: string;
     reason_type: string;
     related_object_dhash: string;
@@ -189,7 +189,7 @@ export type Query = {
 
 export type ApiKey = {
     id: string;
-    issued_on: string | Date;
+    issued_on: string;
     issuer_login: string;
     name: string;
     token?: string;
@@ -212,7 +212,7 @@ export type KartonAnalyse = {
         }
     >;
     arguments: Record<`additionalProp${number}`, string>;
-    last_update: string | Date;
+    last_update: string;
 };
 
 export type AxiosServerErrors = AxiosError<{
@@ -251,4 +251,26 @@ export type Provider = {
     userinfo_endpoint: string;
     jwks_endpoint: string;
     logout_endpoint: string;
+};
+
+export type ActivePlugin = {
+    active: boolean;
+    version: string;
+    description: string;
+};
+
+export type ServerAdminInfo = {
+    active_plugins: Record<string, ActivePlugin>;
+    plugins_enabled: boolean;
+    rate_limit_enabled: boolean;
+};
+
+export type FeedQuality = "low" | "high";
+
+export type CreateUser = {
+    login: string;
+    email: string;
+    additional_info: string;
+    feed_quality: FeedQuality;
+    send_email: boolean;
 };

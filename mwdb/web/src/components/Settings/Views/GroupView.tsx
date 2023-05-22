@@ -15,6 +15,8 @@ export function GroupView() {
         Capabality | ""
     >("");
 
+    console.log({ gr: group });
+
     async function changeCapabilities(
         capability: Capabality | "",
         callback: () => void
@@ -38,6 +40,7 @@ export function GroupView() {
     async function getGroup() {
         try {
             const response = await api.getGroup(name ?? "");
+            console.log(response.data);
             setGroup(response.data);
         } catch (error) {
             setAlert({ error });

@@ -4,39 +4,16 @@ import { isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { PluginItems } from "../common/PluginItem";
+import { FlagBadge } from "../common/FlagBadge";
+import { ServerAdminInfo } from "@mwdb-web/types/types";
 
-function PluginItems(props) {
-    const { name, info } = props;
-    const { active, version, description } = info;
-
-    return (
-        <tr>
-            <td>
-                {name}{" "}
-                {active ? (
-                    <span className="badge badge-success">Active</span>
-                ) : (
-                    <span className="badge badge-danger">Inactive</span>
-                )}
-            </td>
-            <td>{description}</td>
-            <td>{version}</td>
-        </tr>
-    );
-}
-
-function FlagBadge({ enabled }) {
-    return enabled ? (
-        <span className="badge badge-success">enabled</span>
-    ) : (
-        <span className="badge badge-danger">disabled</span>
-    );
-}
-
-export default function SettingsOverview() {
+export function SettingsOverviewView() {
     const config = useContext(ConfigContext);
     const { setAlert } = useViewAlert();
-    const [extendedInfo, setExtendedInfo] = useState({});
+    const [extendedInfo, setExtendedInfo] = useState<ServerAdminInfo>(
+        {} as ServerAdminInfo
+    );
 
     useEffect(() => {
         getExtendedInfo();
@@ -53,7 +30,7 @@ export default function SettingsOverview() {
 
     if (isEmpty(extendedInfo)) return <></>;
 
-    const plugins = Object.entries(extendedInfo["active_plugins"])
+    const plugins = Object.entries(extendedInfo.active_plugins)
         .sort()
         .map(([key, value]) => <PluginItems name={key} info={value} />);
 
@@ -72,7 +49,7 @@ export default function SettingsOverview() {
                         <th className="col-2">Server version</th>
                         <td>
                             <span className="badge badge-primary">
-                                {config.config["server_version"]}
+                                {config.config.server_version}
                             </span>
                         </td>
                     </tr>
@@ -80,9 +57,7 @@ export default function SettingsOverview() {
                         <th>User registration</th>
                         <td>
                             <FlagBadge
-                                enabled={
-                                    config.config["is_registration_enabled"]
-                                }
+                                enabled={config.config.is_registration_enabled}
                             />
                         </td>
                     </tr>
@@ -90,7 +65,7 @@ export default function SettingsOverview() {
                         <th>Rate limits</th>
                         <td>
                             <FlagBadge
-                                enabled={extendedInfo["rate_limit_enabled"]}
+                                enabled={extendedInfo.rate_limit_enabled}
                             />
                         </td>
                     </tr>
@@ -98,7 +73,7 @@ export default function SettingsOverview() {
                         <th>Karton integration</th>
                         <td>
                             <FlagBadge
-                                enabled={config.config["is_karton_enabled"]}
+                                enabled={config.config.is_karton_enabled}
                             />
                         </td>
                     </tr>
@@ -106,16 +81,14 @@ export default function SettingsOverview() {
                         <th>Maintenance mode</th>
                         <td>
                             <FlagBadge
-                                enabled={config.config["is_maintenance_set"]}
+                                enabled={config.config.is_maintenance_set}
                             />
                         </td>
                     </tr>
                     <tr>
                         <th>Plugins</th>
                         <td>
-                            <FlagBadge
-                                enabled={extendedInfo["plugins_enabled"]}
-                            />
+                            <FlagBadge enabled={extendedInfo.plugins_enabled} />
                         </td>
                     </tr>
                 </tbody>

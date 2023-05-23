@@ -109,6 +109,7 @@ export default function RecentViewList(props: Props) {
         if (!pendingLoad)
             // Already synchronized: nothing to load
             return;
+
         const pivot = listState.elements.slice(-1)[0];
         api.getObjectList(props.type, pivot && pivot.id, props.query)
             .then((response) => {

@@ -5,10 +5,12 @@ import checker from "vite-plugin-checker";
 import fs from "fs";
 import { join, resolve } from "path";
 
-function findInstalledPlugins(namespace) {
-    const modulesDir = join(__dirname, "node_modules", namespace);
+function findInstalledPlugins() {
+    const modulesDir = join(__dirname, "node_modules", "@mwdb-web");
+    const packageDirPattern = /^plugin-[a-zA-Z0-9\-_]+$/g;
+
     if (!fs.existsSync(modulesDir)) return [];
-    return fs.readdirSync(modulesDir);
+    return fs.readdirSync(modulesDir).filter(dir => dir.match(packageDirPattern));
 }
 
 function pluginLoader() {
@@ -34,7 +36,7 @@ function pluginLoader() {
         },
         load(id) {
             if (id === resolvedVirtualModuleId) {
-                const plugins = findInstalledPlugins("@mwdb-web");
+                const plugins = findInstalledPlugins();
                 const exports = plugins
                     .map(
                         (pluginName, index) =>

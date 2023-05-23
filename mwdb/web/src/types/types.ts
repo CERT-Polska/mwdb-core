@@ -30,7 +30,7 @@ export type User = {
     login: string;
     name?: string;
     groups: Group[];
-    capabilities: Capabality[];
+    capabilities: Capability[];
     additional_info?: string;
     api_keys?: ApiKey[];
     disabled?: boolean;

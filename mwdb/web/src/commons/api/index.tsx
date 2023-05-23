@@ -93,7 +93,7 @@ import {
     UploadFileResponse,
     UserRequestPasswordChangeResponse,
 } from "@mwdb-web/types/api";
-import { Attribute, Capabality, ObjectType } from "@mwdb-web/types/types";
+import { Attribute, Capability, ObjectType } from "@mwdb-web/types/types";
 import { APIProviderProps } from "@mwdb-web/types/props";
 
 function getApiForEnvironment() {
@@ -401,7 +401,7 @@ function registerGroup(name: string): RegisterGroupResponse {
 
 function updateGroup(
     name: string,
-    value: { capabilities: Capabality[] }
+    value: { capabilities: Capability[] }
 ): UpdateGroupResponse {
     return axios.put(`/group/${name}`, value);
 }
@@ -886,10 +886,6 @@ export const api = {
     resubmitKartonAnalysis,
     removeKartonAnalysisFromObject,
     enableSharing3rdParty,
-};
-
-type APIProviderProps = {
-    children: React.ReactNode;
 };
 
 export const APIContext = React.createContext({});

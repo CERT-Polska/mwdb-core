@@ -1,5 +1,5 @@
 import { api } from "@mwdb-web/commons/api";
-import { Capabality, ObjectType, ServerInfo, User } from "./types";
+import { Capability, ObjectType, ServerInfo, User } from "./types";
 import {
     GetRemoteObjectCountResponse,
     GetRemoteObjectListResponse,
@@ -26,7 +26,7 @@ export type AuthContextValues = {
     user: User;
     isAuthenticated: boolean;
     isAdmin: boolean;
-    hasCapability: (cap: Capabality) => boolean;
+    hasCapability: (cap: Capability) => boolean;
     refreshSession: () => Promise<void>;
     updateSession: (newSession: User) => void;
     logout: (error?: string) => void;
@@ -51,6 +51,6 @@ export type RemoteApiContextValues = ApiContextValues & {
 
 export type ProfileOutletContext = {
     getUser: () => Promise<void>;
-    setCapabilitiesToDelete: (cap: Capabality) => void;
+    setCapabilitiesToDelete: (cap: Capability) => void;
     profile: User;
 };

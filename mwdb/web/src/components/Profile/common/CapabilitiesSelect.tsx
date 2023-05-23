@@ -6,11 +6,11 @@ import { api } from "@mwdb-web/commons/api";
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { ConfirmationModal, Select } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
-import { Capabality, User } from "@mwdb-web/types/types";
+import { Capability, User } from "@mwdb-web/types/types";
 
 type SelectOptionType = {
     label: string;
-    value: Capabality;
+    value: Capability;
 };
 
 type Props = {
@@ -21,19 +21,19 @@ type Props = {
 export function CapabilitiesSelect({ profile, getData }: Props) {
     const { setAlert } = useViewAlert();
 
-    const [chosenCapabilities, setChosenCapabilities] = useState<Capabality[]>(
+    const [chosenCapabilities, setChosenCapabilities] = useState<Capability[]>(
         []
     );
     const [correctCapabilities, setCorrectCapabilities] = useState<
-        Capabality[]
+        Capability[]
     >([]);
     const [isOpen, setIsOpen] = useState(false);
 
     const isAccount = !isNil(profile.groups);
     const group = isAccount ? profile.login : profile.name;
-    const capabilities = Object.keys(capabilitiesList) as Capabality[];
+    const capabilities = Object.keys(capabilitiesList) as Capability[];
     const changedCaps = capabilities.filter(
-        (cap: Capabality) =>
+        (cap: Capability) =>
             chosenCapabilities.includes(cap) !==
             correctCapabilities.includes(cap)
     );
@@ -55,7 +55,7 @@ export function CapabilitiesSelect({ profile, getData }: Props) {
         setChosenCapabilities(newValue.map((x) => x.value));
     }
 
-    function renderSelectLabel(cap: Capabality) {
+    function renderSelectLabel(cap: Capability) {
         const changed = changedCaps.includes(cap);
         return changed ? `* ${cap}` : cap;
     }

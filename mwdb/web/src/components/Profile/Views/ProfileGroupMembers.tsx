@@ -3,7 +3,7 @@ import { Navigate, useParams, useOutletContext } from "react-router-dom";
 import { isEmpty, isNil } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { ProfileGroupItems } from "../common/ProfileGroupItems";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
@@ -52,7 +52,7 @@ export default function ProfileGroupMembers() {
     if (
         !(
             workspace.admins.includes(auth.user.login) ||
-            auth.hasCapability(Capability.manageUsers)
+            auth.hasCapability(Capabilities.manageUsers)
         )
     )
         return (

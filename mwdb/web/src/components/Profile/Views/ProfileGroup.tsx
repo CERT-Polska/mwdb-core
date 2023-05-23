@@ -6,7 +6,7 @@ import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { GroupBadge, ShowIf } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
@@ -133,7 +133,7 @@ export default function ProfileGroup() {
                         <ShowIf
                             condition={
                                 workspace.admins.includes(auth.user.login) ||
-                                auth.hasCapability(Capability.manageUsers)
+                                auth.hasCapability(Capabilities.manageUsers)
                             }
                         >
                             <Link
@@ -147,7 +147,7 @@ export default function ProfileGroup() {
                     )}
 
                     <ShowIf
-                        condition={auth.hasCapability(Capability.manageUsers)}
+                        condition={auth.hasCapability(Capabilities.manageUsers)}
                     >
                         <Link
                             className="nav-link"

@@ -10,7 +10,7 @@ import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import DeleteCapabilityModal from "../Settings/Views/DeleteCapabilityModal";
-import { Capabality, User } from "@mwdb-web/types/types";
+import { Capability, User } from "@mwdb-web/types/types";
 
 function ProfileNav() {
     const config = useContext(ConfigContext);
@@ -56,7 +56,7 @@ export default function ProfileView() {
     }, [userLogin]);
 
     async function changeCapabilities(
-        capability: Capabality,
+        capability: Capability,
         callback: Function
     ) {
         try {

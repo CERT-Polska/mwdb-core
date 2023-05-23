@@ -64,6 +64,9 @@ class ServerInfoResource(Resource):
                 "is_registration_enabled": app_config.mwdb.enable_registration,
                 "is_karton_enabled": app_config.mwdb.enable_karton,
                 "is_oidc_enabled": app_config.mwdb.enable_oidc,
+                "is_3rd_party_sharing_consent_enabled": (
+                    app_config.mwdb.enable_3rd_party_sharing_consent
+                ),
                 "recaptcha_site_key": app_config.mwdb.recaptcha_site_key,
                 "request_timeout": app_config.mwdb.request_timeout,
                 "file_upload_timeout": app_config.mwdb.file_upload_timeout,

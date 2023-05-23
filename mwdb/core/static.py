@@ -1,6 +1,7 @@
 import os
 
-from flask import Blueprint, jsonify, safe_join, send_from_directory
+from flask import Blueprint, jsonify, send_from_directory
+from werkzeug.utils import safe_join
 
 from mwdb.paths import web_bundle_dir
 

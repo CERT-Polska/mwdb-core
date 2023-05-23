@@ -5,20 +5,20 @@ import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { DeleteCapabilityModal } from "../common/DeleteCapabilityModal";
-import { Capabality, Group } from "@mwdb-web/types/types";
+import { Capability, Group } from "@mwdb-web/types/types";
 
 export function GroupView() {
     const { setAlert } = useViewAlert();
     const { name } = useParams();
     const [group, setGroup] = useState<Group>({} as Group);
     const [capabilitiesToDelete, setCapabilitiesToDelete] = useState<
-        Capabality | ""
+        Capability | ""
     >("");
 
     console.log({ gr: group });
 
     async function changeCapabilities(
-        capability: Capabality | "",
+        capability: Capability | "",
         callback: () => void
     ) {
         try {

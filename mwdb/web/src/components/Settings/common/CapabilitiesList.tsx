@@ -4,17 +4,17 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { capabilitiesList } from "@mwdb-web/commons/auth";
-import { Capabality } from "@mwdb-web/types/types";
+import { Capability } from "@mwdb-web/types/types";
 
 type Props = {
-    onDelete: (cap: Capabality) => void;
-    capabilities: Capabality[];
+    onDelete: (cap: Capability) => void;
+    capabilities: Capability[];
 };
 
 export function CapabilitiesList({ capabilities, onDelete }: Props) {
     return (
         <>
-            {capabilities.map((cap: Capabality) => (
+            {capabilities.map((cap: Capability) => (
                 <tr key={cap}>
                     <td className="col-auto">
                         <Link

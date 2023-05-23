@@ -5,11 +5,11 @@ import { isEmpty, find } from "lodash";
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { DeleteCapabilityModal } from "../common/DeleteCapabilityModal";
-import { Capabality, User } from "@mwdb-web/types/types";
+import { Capability, User } from "@mwdb-web/types/types";
 
 export function UserView() {
     const [capabilitiesToDelete, setCapabilitiesToDelete] = useState<
-        Capabality | ""
+        Capability | ""
     >("");
     const { setAlert } = useViewAlert();
     const { login } = useParams();
@@ -29,7 +29,7 @@ export function UserView() {
     }
 
     async function changeCapabilities(
-        capability: Capabality | "",
+        capability: Capability | "",
         callback: () => void
     ) {
         try {

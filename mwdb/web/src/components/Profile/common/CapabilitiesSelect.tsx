@@ -12,7 +12,7 @@ import { Capability, Group, User } from "@mwdb-web/types/types";
 type SelectOptionsType = MultiValue<{
     label: string;
     value: Capability;
-};
+}>;
 
 type Props = {
     profile: User | Group;

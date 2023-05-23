@@ -1,15 +1,15 @@
 import { isEmpty } from "lodash";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
-import { Capabality } from "@mwdb-web/types/types";
+import { Capability } from "@mwdb-web/types/types";
 
 type Props = {
-    capabilitiesToDelete: Capabality | "";
+    capabilitiesToDelete: Capability | "";
     changeCapabilities: (
-        capability: Capabality | "",
+        capability: Capability | "",
         callback: () => void
     ) => Promise<void>;
-    setCapabilitiesToDelete: (cap: Capabality | "") => void;
+    setCapabilitiesToDelete: (cap: Capability | "") => void;
     successMessage: string;
 };
 

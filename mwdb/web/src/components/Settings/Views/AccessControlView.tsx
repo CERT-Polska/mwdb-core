@@ -5,11 +5,11 @@ import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { CapabilitiesHeader } from "../common/CapabilitiesHeader";
 import { CapabilitiesList } from "../common/CapabilitiesList";
 import { CapabilityChangeCard } from "../common/CapabilityChangeCard";
-import { Capabality, Group } from "@mwdb-web/types/types";
+import { Capability, Group } from "@mwdb-web/types/types";
 
 type ChangeCapabilitiesValues = {
     groupName: string;
-    capabilities: Capabality[];
+    capabilities: Capability[];
 };
 
 export function AccessControlView() {

@@ -50,7 +50,7 @@ export default function ProfileView() {
     const userLogin = useParams().user || auth.user.login;
     const [profile, setProfile] = useState<User>({} as User);
     const [capabilitiesToDelete, setCapabilitiesToDelete] = useState<
-        Capabality | ""
+        Capability | ""
     >("");
 
     useEffect(() => {

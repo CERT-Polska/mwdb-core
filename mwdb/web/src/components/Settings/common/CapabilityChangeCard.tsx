@@ -6,29 +6,29 @@ import { MultiValue } from "react-select";
 
 import { capabilitiesList } from "@mwdb-web/commons/auth";
 import { Autocomplete, GroupBadge, Select } from "@mwdb-web/commons/ui";
-import { Capabality, Group } from "@mwdb-web/types/types";
+import { Capability, Group } from "@mwdb-web/types/types";
 
 type SelectOptionsType = MultiValue<{
     label: string;
-    value: Capabality;
+    value: Capability;
 }>;
 
 type Props = {
     groups: Group[];
-    onSubmit: (groupName: string, chosenCapabilities: Capabality[]) => void;
+    onSubmit: (groupName: string, chosenCapabilities: Capability[]) => void;
 };
 
 export function CapabilityChangeCard({ groups, onSubmit }: Props) {
     const [groupName, setGroupName] = useState<string>("");
     const [chosenGroup, setChosenGroup] = useState<Group>({} as Group);
-    const [chosenCapabilities, setChosenCapabilities] = useState<Capabality[]>(
+    const [chosenCapabilities, setChosenCapabilities] = useState<Capability[]>(
         []
     );
 
-    const capabilities = Object.keys(capabilitiesList) as Capabality[];
+    const capabilities = Object.keys(capabilitiesList) as Capability[];
     const originalCaps = chosenGroup.capabilities || [];
     const changedCaps = capabilities.filter(
-        (cap: Capabality) =>
+        (cap: Capability) =>
             chosenCapabilities.includes(cap) !== originalCaps.includes(cap)
     );
 
@@ -39,7 +39,7 @@ export function CapabilityChangeCard({ groups, onSubmit }: Props) {
         setChosenCapabilities(chosenGroup.capabilities);
     }
 
-    function renderSelectLabel(cap: Capabality) {
+    function renderSelectLabel(cap: Capability) {
         const changed = changedCaps.includes(cap);
         return changed ? `* ${cap}` : cap;
     }

@@ -6,7 +6,8 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "test": "jest"
+        "test": "jest",
+        "lint": "tsc --watch"
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^6.1.1",

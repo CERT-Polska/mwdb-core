@@ -67,7 +67,7 @@ import UserCapabilities from "./components/Settings/Views/UserCapabilities";
 import UserAPIKeys from "./components/Settings/Views/UserAPIKeys";
 import { AttributeEditTemplate } from "./components/Settings/Views/AttributeEditTemplate";
 
-import { Capability } from "./commons/auth";
+import { Capabilities } from "./commons/auth";
 import { ConfigContext } from "./commons/config";
 import { fromPlugins, Extendable } from "./commons/plugins";
 import { ErrorBoundary, RequiresAuth, RequiresCapability } from "./commons/ui";
@@ -111,7 +111,9 @@ function AppRoutes() {
                 <Route
                     path="upload"
                     element={
-                        <RequiresCapability capability={Capability.addingFiles}>
+                        <RequiresCapability
+                            capability={Capabilities.addingFiles}
+                        >
                             <Upload />
                         </RequiresCapability>
                     }
@@ -164,7 +166,9 @@ function AppRoutes() {
                 <Route
                     path="settings"
                     element={
-                        <RequiresCapability capability={Capability.manageUsers}>
+                        <RequiresCapability
+                            capability={Capabilities.manageUsers}
+                        >
                             <SettingsView />
                         </RequiresCapability>
                     }

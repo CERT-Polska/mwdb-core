@@ -9,7 +9,7 @@ import {
     ConfigListItem,
     Family,
     Group,
-    KartonAnalyse,
+    KartonAnalysis,
     ObjectData,
     ObjectListItem,
     Query,
@@ -20,7 +20,7 @@ import {
     User,
 } from "./types";
 
-export type Response<T, C = any> = Promise<AxiosResponse<T, C>>;
+export type Response<T> = Promise<AxiosResponse<T>>;
 
 export type ServerInfoResponse = Response<ServerInfo>;
 
@@ -64,7 +64,7 @@ export type AuthRecoverPasswordResponse = Response<{
     login: string;
 }>;
 
-export type AuthGrupsResponse = Response<{ groups: Group[] }>;
+export type AuthGroupsResponse = Response<{ groups: Group[] }>;
 
 export type ApiKeyAddResponse = Response<ApiKey>;
 
@@ -236,7 +236,7 @@ export type PushObjectRemoteResponse = Response<null>;
 
 export type PullObjectRemoteResponse = Response<null>;
 
-export type GetConigStatsResponse = Response<{
+export type GetConfigStatsResponse = Response<{
     families: Family[];
 }>;
 
@@ -271,18 +271,20 @@ export type GetRemoteObjectAttributesResponse = Response<Attribute[]>;
 export type DownloadRemoteFileResponse = Response<{ token: string }>;
 
 export type GetKartonAnalysesListResponse = Response<{
-    analyses: KartonAnalyse[];
+    analyses: KartonAnalysis[];
     status: string;
 }>;
 
-export type GetKartonAnalysisStatusResponse = Response<KartonAnalyse>;
+export type GetKartonAnalysisStatusResponse = Response<KartonAnalysis>;
 
 export type ResubmitKartonAnalysisResponse = Response<{
-    analyses: KartonAnalyse[];
+    analyses: KartonAnalysis[];
     status: string;
 }>;
 
 export type RemoveKartonAnalysisFromObjectResponse = Response<null>;
+
+export type EnableSharing3rdPartyResponse = Response<null>;
 
 export type OauthGetProvidersResponse = Response<{
     providers: string[];

@@ -13,7 +13,7 @@ import {
     AddQuickQueryResponse,
     ApiKeyAddResponse,
     ApiKeyRemoveResponse,
-    AuthGrupsResponse,
+    AuthGroupsResponse,
     AuthLoginResponse,
     AuthRecoverPasswordResponse,
     AuthRefreshResponse,
@@ -23,10 +23,11 @@ import {
     DeleteQuickQueryResponse,
     DownloadFileResponse,
     DownloadRemoteFileResponse,
+    EnableSharing3rdPartyResponse,
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
-    GetConigStatsResponse,
+    GetConfigStatsResponse,
     GetGroupResponse,
     GetGroupsResponse,
     GetKartonAnalysesListResponse,
@@ -164,7 +165,7 @@ function authRecoverPassword(
     return axios.post("/auth/recover_password", { login, email, recaptcha });
 }
 
-function authGroups(): AuthGrupsResponse {
+function authGroups(): AuthGroupsResponse {
     return axios.get("/auth/groups");
 }
 
@@ -652,7 +653,7 @@ function pullObjectRemote(
     });
 }
 
-function getConfigStats(fromTime: number | string): GetConigStatsResponse {
+function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,
@@ -778,7 +779,9 @@ function removeKartonAnalysisFromObject(
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
-function enableSharing3rdParty(identifier: string) {
+function enableSharing3rdParty(
+    identifier: string
+): EnableSharing3rdPartyResponse {
     return axios.put(`/object/${identifier}/share_3rd_party`);
 }
 
@@ -885,7 +888,10 @@ export const api = {
     enableSharing3rdParty,
 };
 
-// TODO: api context is not needed, remove it when all components will rewrite to TypeScript
+type APIProviderProps = {
+    children: React.ReactNode;
+};
+
 export const APIContext = React.createContext({});
 export function APIProvider(props: APIProviderProps) {
     return (

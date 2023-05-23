@@ -12,7 +12,7 @@ import {
 import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     ObjectLink,
@@ -140,7 +140,7 @@ function RelationsBox(props) {
                         tooltipMessage="Copy sha256 to clipboard"
                     />
                 </span>
-                {auth.hasCapability(Capability.removingParents) && (
+                {auth.hasCapability(Capabilities.removingParents) && (
                     <span
                         className="ml-2"
                         data-toggle="tooltip"
@@ -192,7 +192,7 @@ function RelationsBox(props) {
                         tooltipMessage="Copy sha256 to clipboard"
                     />
                 </span>
-                {auth.hasCapability(Capability.removingParents) && (
+                {auth.hasCapability(Capabilities.removingParents) && (
                     <span
                         className="ml-2"
                         data-toggle="tooltip"

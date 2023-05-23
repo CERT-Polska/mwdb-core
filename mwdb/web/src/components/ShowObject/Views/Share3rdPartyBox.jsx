@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 
@@ -23,7 +23,7 @@ export default function Sharing3rdParties(props) {
         }
     }
 
-    if (!auth.hasCapability(Capability.modify3rdPartySharing)) {
+    if (!auth.hasCapability(Capabilities.modify3rdPartySharing)) {
         return;
     }
 

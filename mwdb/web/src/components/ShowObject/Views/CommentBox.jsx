@@ -5,7 +5,7 @@ import Pagination from "react-js-pagination";
 import _ from "lodash";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
 
@@ -158,9 +158,9 @@ function CommentBox() {
     const context = useContext(ObjectContext);
 
     const canRemoveComments =
-        auth.hasCapability(Capability.removingComments) && !api.remote;
+        auth.hasCapability(Capabilities.removingComments) && !api.remote;
     const canAddComments =
-        auth.hasCapability(Capability.addingComments) && !api.remote;
+        auth.hasCapability(Capabilities.addingComments) && !api.remote;
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [commentToRemove, setCommentToRemove] = useState("");

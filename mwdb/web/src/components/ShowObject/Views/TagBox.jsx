@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { Autocomplete, TagList, Tag } from "@mwdb-web/commons/ui";
@@ -128,14 +128,16 @@ export default function TagBox() {
                     <TagList
                         tags={tags}
                         tagRemove={handleTagRemove}
-                        deletable={auth.hasCapability(Capability.removingTags)}
+                        deletable={auth.hasCapability(
+                            Capabilities.removingTags
+                        )}
                         searchEndpoint={context.searchEndpoint}
                     />
                 ) : (
                     <div className="text-muted">No tags to display</div>
                 )}
             </div>
-            {auth.hasCapability(Capability.addingTags) && !api.remote && (
+            {auth.hasCapability(Capabilities.addingTags) && !api.remote && (
                 <TagForm onTagSubmit={handleTagSubmit} />
             )}
         </div>

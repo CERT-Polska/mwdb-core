@@ -221,9 +221,11 @@ api.add_resource(APIKeyResource, "/api_key/<api_key_id>")
 api.add_resource(ObjectResource, "/object")
 api.add_resource(ObjectItemResource, "/object/<hash64:identifier>")
 api.add_resource(ObjectFavoriteResource, "/object/<hash64:identifier>/favorite")
-api.add_resource(
-    ObjectShare3rdPartyResource, "/object/<hash64:identifier>/share_3rd_party"
-)
+
+if app_config.mwdb.enable_3rd_party_sharing_consent:
+    api.add_resource(
+        ObjectShare3rdPartyResource, "/object/<hash64:identifier>/share_3rd_party"
+    )
 
 # Count endpoint
 api.add_resource(ObjectCountResource, "/<any(file, config, blob, object):type>/count")

@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
@@ -137,7 +137,9 @@ export default function AttributesBox() {
                         attributeDefinitions={attributeDefinitions}
                         onUpdateAttributes={getAttributes}
                         onRemoveAttribute={
-                            auth.hasCapability(Capability.removingAttributes) &&
+                            auth.hasCapability(
+                                Capabilities.removingAttributes
+                            ) &&
                             ((attributeId) =>
                                 setAttributeIdToRemove(attributeId))
                         }

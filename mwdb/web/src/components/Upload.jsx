@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState, useEffect } from "react";
+import { useCallback, useContext, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
 import { toast } from "react-toastify";
@@ -8,9 +8,9 @@ import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import AttributesAddModal from "./AttributesAddModal";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { Autocomplete, DataTable, View } from "@mwdb-web/commons/ui";
+import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
+import { Autocomplete, DataTable, ShowIf, View } from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { Extendable } from "@mwdb-web/commons/plugins";
 
@@ -175,7 +175,7 @@ export default function Upload() {
                         onDrop={(data) => setFile(data)}
                     />
                     <div className="form-group">
-                        {auth.hasCapability(Capability.addingParents) && (
+                        {auth.hasCapability(Capabilities.addingParents) && (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label className="input-group-text">
@@ -299,24 +299,32 @@ export default function Upload() {
                         ) : (
                             []
                         )}
-                        <div className="form-group">
-                            <div className="material-switch make-horizontal">
-                                <input
-                                    type="checkbox"
-                                    name="share_3rd"
-                                    id="share_3rd_party"
-                                    checked={share3rdParty}
-                                    onChange={() =>
-                                        setShare3rdParty(!share3rdParty)
-                                    }
-                                />
-                                <label
-                                    htmlFor="share_3rd_party"
-                                    className="bg-primary"
-                                />
+                        <ShowIf
+                            condition={
+                                config.config[
+                                    "is_3rd_party_sharing_consent_enabled"
+                                ]
+                            }
+                        >
+                            <div className="form-group">
+                                <div className="material-switch make-horizontal">
+                                    <input
+                                        type="checkbox"
+                                        name="share_3rd"
+                                        id="share_3rd_party"
+                                        checked={share3rdParty}
+                                        onChange={() =>
+                                            setShare3rdParty(!share3rdParty)
+                                        }
+                                    />
+                                    <label
+                                        htmlFor="share_3rd_party"
+                                        className="bg-primary"
+                                    />
+                                </div>
+                                <label>&nbsp; Share with third parties</label>
                             </div>
-                            <label>&nbsp; Share with third parties</label>
-                        </div>
+                        </ShowIf>
                         <input
                             value="Upload File"
                             className="btn btn-success"

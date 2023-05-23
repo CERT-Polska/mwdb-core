@@ -13,7 +13,7 @@ import {
     AddQuickQueryResponse,
     ApiKeyAddResponse,
     ApiKeyRemoveResponse,
-    AuthGrupsResponse,
+    AuthGroupsResponse,
     AuthLoginResponse,
     AuthRecoverPasswordResponse,
     AuthRefreshResponse,
@@ -23,10 +23,11 @@ import {
     DeleteQuickQueryResponse,
     DownloadFileResponse,
     DownloadRemoteFileResponse,
+    EnableSharing3rdPartyResponse,
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
-    GetConigStatsResponse,
+    GetConfigStatsResponse,
     GetGroupResponse,
     GetGroupsResponse,
     GetKartonAnalysesListResponse,
@@ -92,7 +93,7 @@ import {
     UploadFileResponse,
     UserRequestPasswordChangeResponse,
 } from "@mwdb-web/types/api";
-import { Attribute, Capabality, ObjectType } from "@mwdb-web/types/types";
+import { Attribute, Capability, ObjectType } from "@mwdb-web/types/types";
 import { APIProviderProps } from "@mwdb-web/types/props";
 import { ApiContextValues } from "@mwdb-web/types/context";
 
@@ -165,7 +166,7 @@ function authRecoverPassword(
     return axios.post("/auth/recover_password", { login, email, recaptcha });
 }
 
-function authGroups(): AuthGrupsResponse {
+function authGroups(): AuthGroupsResponse {
     return axios.get("/auth/groups");
 }
 
@@ -401,7 +402,7 @@ function registerGroup(name: string): RegisterGroupResponse {
 
 function updateGroup(
     name: string,
-    value: { capabilities: Capabality[] }
+    value: { capabilities: Capability[] }
 ): UpdateGroupResponse {
     return axios.put(`/group/${name}`, value);
 }
@@ -653,7 +654,7 @@ function pullObjectRemote(
     });
 }
 
-function getConfigStats(fromTime: number | string): GetConigStatsResponse {
+function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,
@@ -779,7 +780,9 @@ function removeKartonAnalysisFromObject(
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
-function enableSharing3rdParty(identifier: string) {
+function enableSharing3rdParty(
+    identifier: string
+): EnableSharing3rdPartyResponse {
     return axios.put(`/object/${identifier}/share_3rd_party`);
 }
 

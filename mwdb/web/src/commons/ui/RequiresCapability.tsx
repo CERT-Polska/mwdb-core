@@ -3,11 +3,11 @@ import { AuthContext } from "../auth";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import { Capabality } from "@mwdb-web/types/types";
+import { Capability } from "@mwdb-web/types/types";
 
 type Props = {
     children: JSX.Element;
-    capability: Capabality;
+    capability: Capability;
 };
 
 export function RequiresCapability({ capability, children }: Props) {

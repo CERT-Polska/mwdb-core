@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router-dom";
-import { Capability } from "@mwdb-web/commons/auth";
+import { Capabilities } from "@mwdb-web/commons/auth";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 import { CapabilitiesTable } from "../common/CapabilitiesTable";
 import { CapabilitiesSelect } from "../common/CapabilitiesSelect";
@@ -27,7 +27,7 @@ export default function ProfileCapabilities({ profile, getData }: Props) {
                 Here is the list of {profile.groups ? "account" : "group"}{" "}
                 superpowers:
             </p>
-            {userHasCapabilities(Capability.manageUsers) && (
+            {userHasCapabilities(Capabilities.manageUsers) && (
                 <CapabilitiesSelect profile={profile} getData={getData} />
             )}
             <CapabilitiesTable profile={profile} />

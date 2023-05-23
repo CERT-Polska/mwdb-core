@@ -1,5 +1,5 @@
 import { api } from "@mwdb-web/commons/api";
-import { Capabality, ServerInfo, User } from "./types";
+import { Capability, ServerInfo, User } from "./types";
 
 export type TabContextValues = {
     tab?: string;
@@ -22,7 +22,7 @@ export type AuthContextValues = {
     user: User;
     isAuthenticated: boolean;
     isAdmin: boolean;
-    hasCapability: (cap: Capabality) => boolean;
+    hasCapability: (cap: Capability) => boolean;
     refreshSession: () => Promise<void>;
     updateSession: (newSession: User) => void;
     logout: (error?: string) => void;
@@ -35,6 +35,6 @@ export type ApiContextValues = typeof api & {
 
 export type ProfileOutletContext = {
     getUser: () => Promise<void>;
-    setCapabilitiesToDelete: (cap: Capabality) => void;
+    setCapabilitiesToDelete: (cap: Capability) => void;
     profile: User;
 };

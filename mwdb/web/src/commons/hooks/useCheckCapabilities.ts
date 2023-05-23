@@ -1,11 +1,11 @@
 import { useContext } from "react";
 import { AuthContext } from "@mwdb-web/commons/auth";
-import { Capabality } from "@mwdb-web/types/types";
+import { Capability } from "@mwdb-web/types/types";
 
 export function useCheckCapabilities() {
     const { user } = useContext(AuthContext);
 
-    function userHasCapabilities(cap: Capabality) {
+    function userHasCapabilities(cap: Capability) {
         return user.capabilities.includes(cap);
     }
 

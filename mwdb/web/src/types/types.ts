@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 
-export type Capabality =
+export type Capability =
     | "personalize"
     | "share_queried_objects"
     | "adding_comments"
@@ -31,7 +31,7 @@ export type User = {
     login: string;
     name?: string;
     groups: Group[];
-    capabilities: Capabality[];
+    capabilities: Capability[];
     additional_info?: string;
     api_keys?: ApiKey[];
     disabled?: boolean;
@@ -48,12 +48,12 @@ export type User = {
 };
 
 export type Group = {
-    name: string;
-    private: boolean;
     admins: string[];
-    capabilities: Capabality[];
+    capabilities: Capability[];
     default: boolean;
     immutable: boolean;
+    name: string;
+    private: boolean;
     users: string[];
     workspace: boolean;
 };
@@ -201,7 +201,7 @@ export type Family = {
     last_upload: string;
 };
 
-export type KartonAnalyse = {
+export type KartonAnalysis = {
     status: string;
     id: string;
     processing_in: Record<

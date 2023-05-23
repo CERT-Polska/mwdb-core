@@ -6,12 +6,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { find, isNil } from "lodash";
 import {
     capabilitiesList,
-    Capability,
+    Capabilities,
     AuthContext,
 } from "@mwdb-web/commons/auth";
 import { GroupBadge } from "@mwdb-web/commons/ui";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
-import { Capabality, Group, User } from "@mwdb-web/types/types";
+import { Capability, Group, User } from "@mwdb-web/types/types";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 
 type Props = {
@@ -26,7 +26,7 @@ export function CapabilitiesTable({ profile }: Props) {
 
     const isAccount = "login" in profile;
 
-    function isUserDeleteButtonRender(cap: Capabality) {
+    function isUserDeleteButtonRender(cap: Capability) {
         if ("groups" in profile) {
             const userCap = find(profile.groups, {
                 name: profile.login,
@@ -39,12 +39,12 @@ export function CapabilitiesTable({ profile }: Props) {
         return false;
     }
 
-    function isDeleteButtonRender(cap: Capabality) {
+    function isDeleteButtonRender(cap: Capability) {
         let userOrGroupName = profile.name;
         if ("groups" in profile && !userOrGroupName) {
             userOrGroupName = profile.login;
         }
-        const isManageUsersCapability = cap === Capability.manageUsers;
+        const isManageUsersCapability = cap === Capabilities.manageUsers;
         if (isManageUsersCapability && userOrGroupName === user.login) {
             return false;
         }
@@ -57,7 +57,7 @@ export function CapabilitiesTable({ profile }: Props) {
             <tbody>
                 {profile.capabilities.sort().map((cap) => (
                     <tr key={cap}>
-                        {userHasCapabilities(Capability.manageUsers) && (
+                        {userHasCapabilities(Capabilities.manageUsers) && (
                             <td className="col-auto">
                                 {isDeleteButtonRender(cap) && (
                                     <Link

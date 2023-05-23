@@ -9,11 +9,11 @@ import { api } from "@mwdb-web/commons/api";
 import { ConfirmationModal, DateString, ShowIf } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { KeyNameModal } from "../common/KeyNameModal";
-import { ApiKey, Capabality, User } from "@mwdb-web/types/types";
+import { ApiKey, Capability, User } from "@mwdb-web/types/types";
 
 type OutletContext = {
     getUser: () => Promise<void>;
-    setCapabilitiesToDelete: (cap: Capabality) => void;
+    setCapabilitiesToDelete: (cap: Capability) => void;
     profile: User;
 };
 

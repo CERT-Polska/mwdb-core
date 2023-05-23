@@ -13,7 +13,7 @@ import {
     AddQuickQueryResponse,
     ApiKeyAddResponse,
     ApiKeyRemoveResponse,
-    AuthGrupsResponse,
+    AuthGroupsResponse,
     AuthLoginResponse,
     AuthRecoverPasswordResponse,
     AuthRefreshResponse,
@@ -23,11 +23,12 @@ import {
     DeleteQuickQueryResponse,
     DownloadFileResponse,
     DownloadRemoteFileResponse,
+    EnableSharing3rdPartyResponse,
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
+    GetConfigStatsResponse,
     GetAttributePermissionsResponse,
-    GetConigStatsResponse,
     GetGroupResponse,
     GetGroupsResponse,
     GetKartonAnalysesListResponse,
@@ -95,7 +96,7 @@ import {
 } from "@mwdb-web/types/api";
 import {
     Attribute,
-    Capabality,
+    Capability,
     CreateUser,
     ObjectType,
     Provider,
@@ -172,7 +173,7 @@ function authRecoverPassword(
     return axios.post("/auth/recover_password", { login, email, recaptcha });
 }
 
-function authGroups(): AuthGrupsResponse {
+function authGroups(): AuthGroupsResponse {
     return axios.get("/auth/groups");
 }
 
@@ -390,7 +391,7 @@ function registerGroup(name: string): RegisterGroupResponse {
 
 function updateGroup(
     name: string,
-    value: { capabilities?: Capabality[]; name?: string }
+    value: { capabilities?: Capability[]; name?: string }
 ): UpdateGroupResponse {
     return axios.put(`/group/${name}`, value);
 }
@@ -632,7 +633,7 @@ function pullObjectRemote(
     });
 }
 
-function getConfigStats(fromTime: number | string): GetConigStatsResponse {
+function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,
@@ -758,7 +759,9 @@ function removeKartonAnalysisFromObject(
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
-function enableSharing3rdParty(identifier: string) {
+function enableSharing3rdParty(
+    identifier: string
+): EnableSharing3rdPartyResponse {
     return axios.put(`/object/${identifier}/share_3rd_party`);
 }
 

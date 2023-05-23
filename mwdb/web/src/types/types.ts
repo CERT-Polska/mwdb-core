@@ -58,7 +58,7 @@ export type Group = {
     workspace: boolean;
 };
 
-export type ObjectType = "file" | "text_blob" | "static_config";
+export type ObjectType = "file" | "blob" | "config";
 
 export type Attribute = {
     key: string;

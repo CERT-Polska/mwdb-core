@@ -24,7 +24,7 @@ export default function Sharing3rdParties(props) {
     }
 
     if (!auth.hasCapability(Capabilities.modify3rdPartySharing)) {
-        return;
+        return <></>;
     }
 
     return (

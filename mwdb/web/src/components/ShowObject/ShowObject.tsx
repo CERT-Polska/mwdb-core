@@ -1,9 +1,10 @@
-import React, {
+import {
     useCallback,
     useEffect,
     useReducer,
     useContext,
     useMemo,
+    Reducer,
 } from "react";
 import { toast } from "react-toastify";
 
@@ -24,17 +25,31 @@ import { Extendable } from "@mwdb-web/commons/plugins";
 import { View } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import KartonAnalysisBox from "./Views/KartonAnalysisBox";
-
-const initialObjectState = {
-    object: null,
-    objectError: null,
-};
+import {
+    BlobData,
+    ConfigData,
+    ObjectData,
+    ObjectOrConfigOrBlobData,
+    ObjectType,
+} from "@mwdb-web/types/types";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { ObjectContextValues } from "@mwdb-web/types/context";
 
 const objectLoad = Symbol("objectLoad");
 const objectUpdate = Symbol("objectUpdate");
 const objectError = Symbol("objectError");
 
-function objectStateReducer(state, action) {
+type ObjectStateReducer = {
+    object?: Partial<ObjectOrConfigOrBlobData>;
+    objectError?: unknown;
+};
+
+type ObjectActionReducer = ObjectStateReducer & {
+    type: typeof objectLoad | typeof objectUpdate | typeof objectError;
+    error?: unknown;
+};
+
+function objectReducer(state: ObjectStateReducer, action: ObjectActionReducer) {
     switch (action.type) {
         case objectLoad:
             // Reload object and wipe lazy-loaded updates
@@ -52,24 +67,35 @@ function objectStateReducer(state, action) {
     }
 }
 
-export default function ShowObject({
-    ident,
-    objectType,
-    objectId,
-    headerIcon,
-    headerCaption,
-    defaultTab,
-    children,
-    searchEndpoint,
-}) {
+type Props = {
+    ident: string;
+    children: JSX.Element[];
+    objectType: ObjectType;
+    headerIcon: IconDefinition;
+    objectId: string;
+    headerCaption: string;
+    defaultTab?: string;
+    searchEndpoint: string;
+};
+
+export default function ShowObject(props: Props) {
+    const {
+        ident,
+        objectType,
+        objectId,
+        headerIcon,
+        headerCaption,
+        defaultTab,
+        children,
+        searchEndpoint,
+    } = props;
     const api = useContext(APIContext);
     const config = useContext(ConfigContext);
-    const [objectState, setObjectState] = useReducer(
-        objectStateReducer,
-        initialObjectState
-    );
+    const [objectState, setObjectState] = useReducer<
+        Reducer<ObjectStateReducer, ObjectActionReducer>
+    >(objectReducer, {});
 
-    const setObjectError = useCallback((error) => {
+    const setObjectError = useCallback((error: unknown) => {
         toast(getErrorMessage(error), {
             type: "error",
         });
@@ -80,7 +106,7 @@ export default function ShowObject({
     }, []);
 
     const updateObject = useCallback(
-        async (doLoad) => {
+        async (doLoad?: boolean) => {
             try {
                 let response = await api.getObject(objectType, objectId);
                 setObjectState({
@@ -94,12 +120,15 @@ export default function ShowObject({
         [api, objectType, objectId, setObjectError]
     );
 
-    const updateObjectData = useCallback((objectData) => {
-        setObjectState({
-            type: objectUpdate,
-            object: objectData,
-        });
-    }, []);
+    const updateObjectData = useCallback(
+        (objectData: Partial<ObjectData | ConfigData | BlobData>) => {
+            setObjectState({
+                type: objectUpdate,
+                object: objectData,
+            });
+        },
+        []
+    );
 
     useEffect(() => {
         updateObject(true);
@@ -127,17 +156,14 @@ export default function ShowObject({
                                 </Extendable>
                             </div>
                             <AttributesBox />
-                            {config.config[
-                                "is_3rd_party_sharing_consent_enabled"
-                            ] ? (
+                            {config.config
+                                .is_3rd_party_sharing_consent_enabled && (
                                 <Share3rdPartyBox
                                     isEnabled={
                                         objectState.object.share_3rd_party
                                     }
                                     objectId={objectState.object.id}
                                 />
-                            ) : (
-                                []
                             )}
                         </Extendable>
                     </div>
@@ -161,7 +187,7 @@ export default function ShowObject({
         []
     );
 
-    const context = useMemo(
+    const context: ObjectContextValues = useMemo(
         () => ({
             object: objectState.object,
             objectError: objectState.objectError,

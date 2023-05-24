@@ -22,7 +22,7 @@ import {
 } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
-import RelationsAddModal from "../Actions/RelationsAddModal";
+import { RelationsAddModal } from "../Actions/RelationsAddModal";
 import { updateActivePage } from "@mwdb-web/commons/helpers";
 
 function paginateParentChildren(

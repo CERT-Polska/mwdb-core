@@ -1,4 +1,3 @@
-import { useState } from "react";
 import * as Yup from "yup";
 
 import { api } from "@mwdb-web/commons/api";

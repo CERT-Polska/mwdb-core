@@ -93,11 +93,13 @@ export type ConfigType = "static" | "dynamic";
 type ObjectCommonData = {
     attributes: Attribute[];
     children: RelatedObject[];
+    shares: Share[];
     favorite: boolean;
     id: string;
     parents: RelatedObject[];
     tags: Tag[];
     upload_time: string;
+    share_3rd_party: boolean;
 };
 
 export type ObjectData = ObjectCommonData & {
@@ -236,6 +238,7 @@ export type ServerInfo = {
     is_registration_enabled: boolean;
     instance_name: string;
     remotes: string[];
+    is_3rd_party_sharing_consent_enabled: boolean;
 };
 
 export type Permission = {
@@ -275,3 +278,5 @@ export type CreateUser = {
     feed_quality: FeedQuality;
     send_email: boolean;
 };
+
+export type ObjectOrConfigOrBlobData = ObjectData | ConfigData | BlobData;

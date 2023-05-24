@@ -9,40 +9,44 @@ import { ObjectAction } from "@mwdb-web/commons/ui";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { mapObjectType } from "@mwdb-web/commons/helpers";
 
-export default function PushAction() {
+export function PushAction() {
     const api = useContext(APIContext);
     const config = useContext(ConfigContext);
     const context = useContext(ObjectContext);
     const navigate = useNavigate();
-    const [isPushModalDisabled, setPushModalDisabled] = useState(false);
-    const [isPushModalOpen, setPushModalOpen] = useState(false);
-    const [remoteName, setRemoteName] = useState("");
-    const [shareMode, setShareMode] = useState("*");
+    const [isPushModalDisabled, setPushModalDisabled] =
+        useState<boolean>(false);
+    const [isPushModalOpen, setPushModalOpen] = useState<boolean>(false);
+    const [remoteName, setRemoteName] = useState<string>("");
+    const [shareMode, setShareMode] = useState<string>("*");
 
     const remotes = config.config.remotes;
 
     if (!remotes || !remotes.length || api.remote) return [];
 
     async function pushRemote() {
-        let type = mapObjectType(context.object.type);
         try {
+            let type = mapObjectType(context.object!.type!) as
+                | "file"
+                | "static_config"
+                | "text_blob";
             setPushModalDisabled(true);
             await api.pushObjectRemote(
                 remoteName,
                 type,
-                context.object.id,
+                context.object!.id!,
                 shareMode
             );
-            navigate(`/remote/${remoteName}/${type}/${context.object.id}`);
+            navigate(`/remote/${remoteName}/${type}/${context.object!.id}`);
         } catch (error) {
             context.setObjectError(error);
             setPushModalOpen(false);
         }
     }
 
-    const remoteForm = React.createRef();
+    const remoteForm = React.createRef<HTMLFormElement>();
 
-    function handleSubmit(event) {
+    function handleSubmit(event: React.MouseEvent) {
         event.preventDefault();
         if (!remoteForm.current || !remoteForm.current.reportValidity()) return;
         pushRemote();

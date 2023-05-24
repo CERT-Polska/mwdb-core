@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { FormEvent, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
@@ -9,39 +9,43 @@ import { ObjectAction } from "@mwdb-web/commons/ui";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { mapObjectType } from "@mwdb-web/commons/helpers";
 
-export default function PullAction() {
+export function PullAction() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const navigate = useNavigate();
-    const [shareMode, setShareMode] = useState("*");
-    const [group, setGroup] = useState("");
-    const [isPullModalOpen, setPullModalOpen] = useState(false);
-    const [isPullModalDisabled, setPullModalDisabled] = useState(false);
+    const [shareMode, setShareMode] = useState<string>("*");
+    const [group, setGroup] = useState<string>("");
+    const [isPullModalOpen, setPullModalOpen] = useState<boolean>(false);
+    const [isPullModalDisabled, setPullModalDisabled] =
+        useState<boolean>(false);
 
-    if (!api.remote) return [];
+    if (!api.remote) return <></>;
 
     async function pullRemote() {
-        let type = mapObjectType(context.object.type);
-        let upload_as = shareMode === "single" ? group : shareMode;
+        const type = mapObjectType(context.object!.type!) as
+            | "file"
+            | "static_config"
+            | "text_blob";
+        const upload_as = shareMode === "single" ? group : shareMode;
         try {
             setPullModalDisabled(true);
             await api.pullObjectRemote(
-                api.remote,
+                api.remote!,
                 type,
-                context.object.id,
+                context.object!.id!,
                 upload_as
             );
-            navigate(`/${type}/${context.object.id}`);
+            navigate(`/${type}/${context.object!.id!}`);
         } catch (error) {
             context.setObjectError(error);
             setPullModalOpen(false);
         }
     }
 
-    const remoteForm = React.createRef();
+    const remoteForm = React.createRef<HTMLFormElement>();
 
-    function handleSubmit(event) {
+    function handleSubmit(event: React.MouseEvent) {
         event.preventDefault();
         if (!remoteForm.current || !remoteForm.current.reportValidity()) return;
         pullRemote();

@@ -239,7 +239,7 @@ function apiKeyRemove(key_id: number | string): ApiKeyRemoveResponse {
     return axios.delete(`/api_key/${key_id}`);
 }
 
-function getObject(type: ObjectType, id: number): GetObjectResponse {
+function getObject(type: ObjectType, id: string): GetObjectResponse {
     return axios.get(`/${type}/${id}`);
 }
 
@@ -306,7 +306,7 @@ function getObjectAttributes(id: number): GetObjectAttributesResponse {
     return axios.get(`/object/${id}/attribute`);
 }
 
-function removeObject(id: number): RemoveObjectResponse {
+function removeObject(id: string): RemoveObjectResponse {
     return axios.delete(`/object/${id}`);
 }
 
@@ -349,11 +349,11 @@ function removeObjectAttribute(
     return axios.delete(`/object/${object_id}/attribute/${attribute_id}`);
 }
 
-function addObjectFavorite(id: number): AddObjectFavoriteResponse {
+function addObjectFavorite(id: string): AddObjectFavoriteResponse {
     return axios.put(`/object/${id}/favorite`);
 }
 
-function removeObjectFavorite(id: number): RemoveObjectFavoriteResponse {
+function removeObjectFavorite(id: string): RemoveObjectFavoriteResponse {
     return axios.delete(`/object/${id}/favorite`);
 }
 
@@ -613,7 +613,7 @@ function getRemoteNames(): GetRemoteNamesResponse {
 
 function pushObjectRemote(
     remote: string,
-    type: ObjectType,
+    type: "file" | "static_config" | "text_blob",
     identifier: string,
     upload_as: string
 ): PushObjectRemoteResponse {
@@ -624,7 +624,7 @@ function pushObjectRemote(
 
 function pullObjectRemote(
     remote: string,
-    type: ObjectType,
+    type: "file" | "static_config" | "text_blob",
     identifier: string,
     upload_as: string
 ): PullObjectRemoteResponse {
@@ -644,7 +644,7 @@ function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
 function getRemoteObject(
     remote: string,
     type: ObjectType,
-    id: number
+    id: string
 ): GetRemoteObjectResponse {
     return axios.get(`/remote/${remote}/api/${type}/${id}`);
 }

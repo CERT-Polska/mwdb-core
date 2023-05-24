@@ -13,6 +13,7 @@ import {
     KartonAnalysis,
     ObjectData,
     ObjectListItem,
+    ObjectOrConfigOrBlobData,
     Provider,
     Query,
     RelatedObject,
@@ -251,9 +252,7 @@ export type GetConfigStatsResponse = Response<{
     families: Family[];
 }>;
 
-export type GetRemoteObjectResponse = Response<
-    ObjectData | ConfigData | BlobData
->;
+export type GetRemoteObjectResponse = Response<ObjectOrConfigOrBlobData>;
 
 export type GetRemoteObjectListResponse = Response<
     ObjectData[] | ConfigData[] | BlobData[]

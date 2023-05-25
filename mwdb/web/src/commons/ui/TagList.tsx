@@ -7,7 +7,13 @@ type Props = TagProps & {
 };
 
 export function TagList({ tags, ...props }: Props) {
-    return tags
-        .sort((a: TagType, b: TagType) => a.tag.localeCompare(b.tag))
-        .map((tag: TagType) => <Tag {...props} tag={tag.tag} key={tag.tag} />);
+    return (
+        <>
+            {tags
+                .sort((a: TagType, b: TagType) => a.tag.localeCompare(b.tag))
+                .map((tag: TagType) => (
+                    <Tag {...props} tag={tag.tag} key={tag.tag} />
+                ))}
+        </>
+    );
 }

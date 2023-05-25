@@ -5,12 +5,18 @@ import { APIContext } from "@mwdb-web/commons/api";
 import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 
-export default function Sharing3rdParties(props) {
+type Props = {
+    isEnabled: boolean;
+    objectId: string;
+};
+
+export function Share3rdPartyBox(props: Props) {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
-    const [isEnabled, setIsEnabled] = useState(props.isEnabled);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEnabled, setIsEnabled] = useState<boolean>(props.isEnabled);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     async function markObjectAsShareable() {
         try {
@@ -45,7 +51,7 @@ export default function Sharing3rdParties(props) {
             <div className="card card-default">
                 <div className="card-header">Third party sharing</div>
                 <div className="card-body text">
-                    {isEnabled === true ? (
+                    {isEnabled ? (
                         "Sharing with third parties is enabled for this object"
                     ) : (
                         <>

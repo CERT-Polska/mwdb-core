@@ -99,6 +99,11 @@ type ObjectCommonData = {
     tags: Tag[];
     upload_time: string;
     share_3rd_party: boolean;
+    analyses?: KartonAnalysis[];
+    latest_config: {
+        id: number;
+        family: string;
+    };
 };
 
 export type ObjectData = ObjectCommonData & {
@@ -107,7 +112,6 @@ export type ObjectData = ObjectCommonData & {
     file_name: string;
     file_size: number;
     file_type: string;
-    latest_config: null;
     md5: string;
     sha1: string;
     sha256: string;
@@ -129,7 +133,6 @@ export type BlobData = ObjectCommonData & {
     blob_type: string;
     content: string;
     last_seen: string;
-    latest_config: unknown;
     type: "text_blob";
 };
 
@@ -169,7 +172,7 @@ export type Comment = {
     author: string;
     comment: string;
     id: number;
-    timestamp: string;
+    timestamp: number;
 };
 
 export type Share = {
@@ -205,15 +208,15 @@ export type Family = {
 
 export type KartonAnalysis = {
     status: string;
-    id: string;
+    id: number;
     processing_in: Record<
-        `additionalProp${number}`,
+        string,
         {
             status: string[];
             received_from: string[];
         }
     >;
-    arguments: Record<`additionalProp${number}`, string>;
+    arguments: Record<string, string>;
     last_update: string;
 };
 
@@ -279,3 +282,17 @@ export type CreateUser = {
 };
 
 export type ObjectOrConfigOrBlobData = ObjectData | ConfigData | BlobData;
+
+export type RepationItem = {
+    id: string;
+    tags: Tag[];
+    type: "file" | "static_config" | "text_blob";
+    upload_time: string;
+};
+
+export type Reason = {
+    reasonType: string;
+    relatedObjectDHash: string;
+    relatedObjectType: ObjectType;
+    relatedUserLogin: string;
+};

@@ -94,5 +94,5 @@ export type ObjectContextValues = {
     searchEndpoint: string;
     setObjectError: (error: unknown) => void;
     updateObject: (doLoad?: boolean) => void;
-    updateObjectData: (object: ObjectOrConfigOrBlobData) => void;
+    updateObjectData: (object: Partial<ObjectOrConfigOrBlobData>) => void;
 };

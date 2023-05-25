@@ -10,13 +10,13 @@ import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import ObjectBox from "./Views/ObjectBox";
-import MultiRelationsBox from "./Views/RelationsBox";
-import CommentBox from "./Views/CommentBox";
-import ShareBox from "./Views/SharesBox";
+import ObjectBox from "./common/ObjectBox";
+import { MultiRelationsBox } from "./common/MultiRelationsBox";
+import { CommentBox } from "./common/CommentBox";
+import { SharesBox } from "./Views/SharesBox";
 import TagBox from "./Views/TagBox";
-import AttributesBox from "./Views/AttributesBox";
-import Share3rdPartyBox from "./Views/Share3rdPartyBox";
+import { AttributesBox } from "./common/AttributesBox";
+import { Share3rdPartyBox } from "./common/Share3rdPartyBox";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
@@ -24,7 +24,7 @@ import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { View } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
-import KartonAnalysisBox from "./Views/KartonAnalysisBox";
+import { KartonAnalysisBox } from "./common/KartonAnalysisBox";
 import {
     BlobData,
     ConfigData,
@@ -160,9 +160,10 @@ export default function ShowObject(props: Props) {
                                 .is_3rd_party_sharing_consent_enabled && (
                                 <Share3rdPartyBox
                                     isEnabled={
-                                        objectState.object.share_3rd_party
+                                        objectState.object.share_3rd_party ??
+                                        false
                                     }
-                                    objectId={objectState.object.id}
+                                    objectId={objectState.object.id ?? ""}
                                 />
                             )}
                         </Extendable>
@@ -176,7 +177,7 @@ export default function ShowObject(props: Props) {
                             ) : (
                                 []
                             )}
-                            <ShareBox />
+                            <SharesBox />
                             <CommentBox />
                         </Extendable>
                     </div>

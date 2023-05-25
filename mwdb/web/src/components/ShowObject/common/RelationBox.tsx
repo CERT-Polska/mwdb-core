@@ -1,11 +1,8 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import Pagination from "react-js-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faFile,
-    faTable,
-    faScroll,
+    IconDefinition,
     faPlus,
     faTrash,
 } from "@fortawesome/free-solid-svg-icons";
@@ -23,64 +20,50 @@ import {
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { RelationsAddModal } from "../Actions/RelationsAddModal";
-import { updateActivePage } from "@mwdb-web/commons/helpers";
-import { Capability } from "@mwdb-web/types/types";
+import { Capability, RepationItem } from "@mwdb-web/types/types";
 
-function paginateParentChildren(
-    parents,
-    children,
-    activePage,
-    itemsCountPerPage
-) {
-    const elementFrom = (activePage - 1) * itemsCountPerPage;
-    const elementTo = activePage * itemsCountPerPage;
-    const parentsFrom = elementFrom;
-    const parentsTo = elementTo;
-    let childrenFrom;
-    let childrenTo;
+type RelationToRemove = {
+    relation: "parent" | "child";
+    id: string;
+};
 
-    if (parents.length < elementTo) {
-        childrenFrom = elementFrom - parents.length;
-        if (childrenFrom < 0) {
-            childrenFrom = 0;
-        }
-        childrenTo = elementTo - parents.length;
-    } else {
-        childrenFrom = 0;
-        childrenTo = 0;
-    }
+type Props = {
+    children: RepationItem[];
+    parents: RepationItem[];
+    header: string;
+    icon: IconDefinition;
+    updateRelationsActivePage: () => void;
+};
 
-    const selectedParents = parents.slice(parentsFrom, parentsTo);
-    const selectedChildren = children.slice(childrenFrom, childrenTo);
-
-    return [selectedParents, selectedChildren];
-}
-
-function RelationsBox(props) {
+export function RelationsBox(props: Props) {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const remotePath = useRemotePath();
-    const [isAttributeAddModalOpen, setAttributeAddModalOpen] = useState(false);
+    const [isAttributeAddModalOpen, setAttributeAddModalOpen] =
+        useState<boolean>(false);
     const [isAttributeDeleteModalOpen, setAttributeDeleteModalOpen] =
-        useState(false);
-    const [disabledModalButton, setDisabledModalButton] = useState(false);
-    const [relationToRemove, setRelationToRemove] = useState({});
+        useState<boolean>(false);
+    const [disabledModalButton, setDisabledModalButton] =
+        useState<boolean>(false);
+    const [relationToRemove, setRelationToRemove] = useState<RelationToRemove>(
+        {} as RelationToRemove
+    );
     const updateRelationsActivePage = props.updateRelationsActivePage;
 
-    async function addObjectRelations(relation, value) {
+    async function addObjectRelations(relation: string, value: string) {
         try {
             if (relation === "child") {
-                await api.addObjectRelation(context.object.id, value);
+                await api.addObjectRelation(context.object!.id!, value);
             }
 
             if (relation === "parent") {
-                await api.addObjectRelation(value, context.object.id);
+                await api.addObjectRelation(value, context.object!.id!);
             }
 
             context.updateObject();
             setAttributeAddModalOpen(false);
-        } catch (error) {
+        } catch (error: any) {
             if (error.response && error.response.status === 404) {
                 toast("Object not found or incorrect SHA256 hash.", {
                     type: "error",
@@ -93,21 +76,21 @@ function RelationsBox(props) {
         }
     }
 
-    async function removeObjectRelations(relation, value) {
+    async function removeObjectRelations(relation: string, value: string) {
         try {
             setDisabledModalButton(true);
             if (relation === "child") {
-                await api.removeObjectRelation(context.object.id, value);
+                await api.removeObjectRelation(context.object!.id!, value);
             }
 
             if (relation === "parent") {
-                await api.removeObjectRelation(value, context.object.id);
+                await api.removeObjectRelation(value, context.object!.id!);
             }
 
             context.updateObject();
             setAttributeDeleteModalOpen(false);
             setDisabledModalButton(false);
-        } catch (error) {
+        } catch (error: any) {
             if (error.response && error.response.status === 404) {
                 toast("Object not found or incorrect SHA256 hash.", {
                     type: "error",
@@ -126,14 +109,7 @@ function RelationsBox(props) {
             <th>parent</th>
             <td>
                 <span>
-                    <ObjectLink
-                        {...parent}
-                        diffWith={
-                            parent.type === "text_blob" &&
-                            (array[index + 1] || {}).id
-                        }
-                        inline
-                    />
+                    <ObjectLink {...parent} inline />
                 </span>
                 <span className="ml-2">
                     <ActionCopyToClipboard
@@ -166,6 +142,7 @@ function RelationsBox(props) {
             </td>
             <td>
                 <TagList
+                    tag=""
                     tags={parent.tags}
                     searchEndpoint={`${remotePath}/search`}
                 />
@@ -178,14 +155,7 @@ function RelationsBox(props) {
             <th>child</th>
             <td>
                 <span>
-                    <ObjectLink
-                        {...child}
-                        diffWith={
-                            child.type === "text_blob" &&
-                            (array[index + 1] || {}).id
-                        }
-                        inline
-                    />
+                    <ObjectLink {...child} inline />
                 </span>
                 <span className="ml-2">
                     <ActionCopyToClipboard
@@ -217,7 +187,7 @@ function RelationsBox(props) {
                 )}
             </td>
             <td>
-                <TagList tags={child.tags} />
+                <TagList tag="" tags={child.tags} />
             </td>
         </tr>
     ));
@@ -279,90 +249,5 @@ function RelationsBox(props) {
                 cancelText="no"
             />
         </div>
-    );
-}
-
-function TypedRelationsBox(props) {
-    const parentsFiltered = props.parents.filter((e) => e.type === props.type);
-    const childrenFiltered = props.children.filter(
-        (e) => e.type === props.type
-    );
-
-    const itemsCountPerPage = props.itemsCountPerPage;
-    const [activePage, setActivePage] = useState(1);
-
-    let [parents, children] = paginateParentChildren(
-        parentsFiltered,
-        childrenFiltered,
-        activePage,
-        itemsCountPerPage
-    );
-
-    let typedRelationsCount = parentsFiltered.length + childrenFiltered.length;
-
-    if (typedRelationsCount > 0)
-        return (
-            <div>
-                <RelationsBox
-                    header={`${props.header}: ${typedRelationsCount}`}
-                    icon={props.icon}
-                    updateRelationsActivePage={() =>
-                        updateActivePage(
-                            activePage,
-                            typedRelationsCount,
-                            itemsCountPerPage,
-                            setActivePage
-                        )
-                    }
-                    {...{ parents, children }}
-                />
-                {typedRelationsCount > itemsCountPerPage && (
-                    <Pagination
-                        activePage={activePage}
-                        itemsCountPerPage={itemsCountPerPage}
-                        totalItemsCount={typedRelationsCount}
-                        pageRangeDisplayed={5}
-                        onChange={setActivePage}
-                        itemClass="page-item"
-                        linkClass="page-link"
-                    />
-                )}
-            </div>
-        );
-    else return <div />;
-}
-
-export default function MultiRelationsBox() {
-    const context = useContext(ObjectContext);
-    let parents = context.object.parents;
-    let children = context.object.children;
-    const itemsCountPerPage = 5;
-
-    return parents && children && parents.length + children.length > 0 ? (
-        <div>
-            <TypedRelationsBox
-                header="Related samples"
-                type="file"
-                icon={faFile}
-                itemsCountPerPage={itemsCountPerPage}
-                {...{ parents, children }}
-            />
-            <TypedRelationsBox
-                header="Related configs"
-                type="static_config"
-                icon={faTable}
-                itemsCountPerPage={itemsCountPerPage}
-                {...{ parents, children }}
-            />
-            <TypedRelationsBox
-                header="Related blobs"
-                type="text_blob"
-                icon={faScroll}
-                itemsCountPerPage={itemsCountPerPage}
-                {...{ parents, children }}
-            />
-        </div>
-    ) : (
-        <RelationsBox />
     );
 }

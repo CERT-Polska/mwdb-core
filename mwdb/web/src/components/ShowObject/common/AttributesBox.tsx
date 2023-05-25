@@ -1,4 +1,4 @@
-import React, { useContext, useCallback, useEffect, useState } from "react";
+import { useContext, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -10,30 +10,35 @@ import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { Capability } from "@mwdb-web/types/types";
 
-import Attributes from "./Attributes";
+import { Attributes } from "./Attributes";
 import AttributesAddModal from "../../AttributesAddModal";
+import { Attribute, AttributeDefinition } from "@mwdb-web/types/types";
 
-export default function AttributesBox() {
+export function AttributesBox() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
 
-    const [isAttributeAddModalOpen, setAttributeAddModalOpen] = useState(false);
+    const [isAttributeAddModalOpen, setAttributeAddModalOpen] =
+        useState<boolean>(false);
     // If null then remove modal is closed
-    const [attributeIdToRemove, setAttributeIdToRemove] = useState(null);
+    const [attributeIdToRemove, setAttributeIdToRemove] = useState<
+        number | null
+    >(null);
 
-    const [attributeDefinitions, setAttributeDefinitions] = useState(null);
-    const objectId = context.object.id;
+    const [attributeDefinitions, setAttributeDefinitions] = useState<Record<
+        string,
+        AttributeDefinition
+    > | null>(null);
+    const objectId = context.object!.id!;
     const { setObjectError, updateObjectData } = context;
-    const attributes = context.object.attributes;
+    const attributes = context.object!.attributes ?? [];
     const dataLoaded = attributeDefinitions && attributes;
 
     async function updateAttributeDefinitions() {
         try {
             const response = await api.getAttributeDefinitions("read");
-            const keyDefinitions = response.data[
-                "attribute_definitions"
-            ].reduce(
+            const keyDefinitions = response.data.attribute_definitions.reduce(
                 (agg, definition) => ({
                     ...agg,
                     [definition.key]: definition,
@@ -56,7 +61,7 @@ export default function AttributesBox() {
         }
     }
 
-    async function addAttribute(key, value) {
+    async function addAttribute(key: string, value: string) {
         try {
             await api.addObjectAttribute(objectId, key, value);
             await updateAttributes();
@@ -68,9 +73,11 @@ export default function AttributesBox() {
 
     async function deleteAttribute() {
         try {
-            await api.removeObjectAttribute(objectId, attributeIdToRemove);
-            await updateAttributes();
-            setAttributeIdToRemove(null);
+            if (attributeIdToRemove) {
+                await api.removeObjectAttribute(objectId, attributeIdToRemove);
+                await updateAttributes();
+                setAttributeIdToRemove(null);
+            }
         } catch (error) {
             setObjectError(error);
         }
@@ -92,17 +99,20 @@ export default function AttributesBox() {
         updateObjectData,
     ]);
 
-    const aggregatedAttributes = attributes.reduce(
-        (agg, attribute) => ({
-            ...agg,
-            [attribute.key]: [
-                {
-                    id: attribute.id,
-                    value: attribute.value,
-                },
-            ].concat(agg[attribute.key] || []),
-        }),
-        {}
+    const aggregatedAttributes: Record<string, Attribute[]> = attributes.reduce(
+        (agg, attribute) => {
+            const key = attribute.key;
+            const newAttribute: Attribute = {
+                key,
+                id: attribute.id,
+                value: attribute.value,
+            };
+            return {
+                ...agg,
+                [key]: [newAttribute, ...(agg[key] || [])],
+            };
+        },
+        {} as Record<string, Attribute[]>
     );
 
     return (
@@ -138,9 +148,10 @@ export default function AttributesBox() {
                         attributeDefinitions={attributeDefinitions}
                         onUpdateAttributes={getAttributes}
                         onRemoveAttribute={
-                            auth.hasCapability(Capability.removingAttributes) &&
-                            ((attributeId) =>
-                                setAttributeIdToRemove(attributeId))
+                            auth.hasCapability(Capability.removingAttributes)
+                                ? (attributeId) =>
+                                      setAttributeIdToRemove(attributeId)
+                                : () => {}
                         }
                     />
                 )}

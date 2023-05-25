@@ -12,11 +12,11 @@ export const TabContext = React.createContext<TabContextValues>(
 export const useTabContext = () => useContext(TabContext);
 
 type Props = {
-    actions: JSX.Element[];
+    actions?: JSX.Element[];
     component: React.ComponentType;
-    icon: IconProp;
+    icon?: IconProp;
     tab: string;
-    label?: string;
+    label?: string | JSX.Element;
 };
 
 export function ObjectTab(props: Props) {

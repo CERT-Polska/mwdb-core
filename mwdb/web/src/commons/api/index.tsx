@@ -298,11 +298,11 @@ function removeObjectRelation(
     return axios.delete(`/object/${parent}/child/${child}`);
 }
 
-function getObjectShares(id: number): GetObjectSharesResponse {
+function getObjectShares(id: string): GetObjectSharesResponse {
     return axios.get(`/object/${id}/share`);
 }
 
-function getObjectAttributes(id: number): GetObjectAttributesResponse {
+function getObjectAttributes(id: string): GetObjectAttributesResponse {
     return axios.get(`/object/${id}/attribute`);
 }
 
@@ -335,7 +335,7 @@ function removeObjectComment(
 }
 
 function addObjectAttribute(
-    object_id: number,
+    object_id: string,
     key: string,
     value: string
 ): AddObjectAttributeResponse {
@@ -343,7 +343,7 @@ function addObjectAttribute(
 }
 
 function removeObjectAttribute(
-    object_id: number,
+    object_id: string,
     attribute_id: number
 ): RemoveObjectAttributeResponse {
     return axios.delete(`/object/${object_id}/attribute/${attribute_id}`);
@@ -693,14 +693,14 @@ function getRemoteObjectRelations(
 
 function getRemoteObjectShares(
     remote: string,
-    id: number
+    id: string
 ): GetRemoteObjectSharesResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/share`);
 }
 
 function getRemoteObjectAttributes(
     remote: string,
-    id: number
+    id: string
 ): GetRemoteObjectAttributesResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/attribute`);
 }
@@ -737,7 +737,7 @@ async function requestRemoteZipFileDownloadLink(
     return `${baseURL}/remote/${remote}/api/file/${id}/download/zip?token=${response.data.token}`;
 }
 
-function getKartonAnalysesList(id: number): GetKartonAnalysesListResponse {
+function getKartonAnalysesList(id: string): GetKartonAnalysesListResponse {
     return axios.get(`/object/${id}/karton`);
 }
 
@@ -748,12 +748,12 @@ function getKartonAnalysisStatus(
     return axios.get(`/object/${id}/karton/${analysis_id}`);
 }
 
-function resubmitKartonAnalysis(id: number): ResubmitKartonAnalysisResponse {
+function resubmitKartonAnalysis(id: string): ResubmitKartonAnalysisResponse {
     return axios.post(`/object/${id}/karton`);
 }
 
 function removeKartonAnalysisFromObject(
-    id: number,
+    id: string,
     analysis_id: number
 ): RemoveKartonAnalysisFromObjectResponse {
     return axios.delete(`/object/${id}/karton/${analysis_id}`);

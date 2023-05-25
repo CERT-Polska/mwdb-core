@@ -104,7 +104,7 @@ export type GetObjectSharesResponse = Response<{
     shares: Share[];
 }>;
 
-export type GetObjectAttributesResponse = Response<Attribute[]>;
+export type GetObjectAttributesResponse = Response<{ attributes: Attribute[] }>;
 
 export type RemoveObjectResponse = Response<null>;
 
@@ -276,7 +276,9 @@ export type GetRemoteObjectSharesResponse = Response<{
     shares: Share[];
 }>;
 
-export type GetRemoteObjectAttributesResponse = Response<Attribute[]>;
+export type GetRemoteObjectAttributesResponse = Response<{
+    attributes: Attribute[];
+}>;
 
 export type DownloadRemoteFileResponse = Response<{ token: string }>;
 

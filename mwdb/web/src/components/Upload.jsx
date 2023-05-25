@@ -8,11 +8,12 @@ import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import AttributesAddModal from "./AttributesAddModal";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { Autocomplete, DataTable, ShowIf, View } from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { Extendable } from "@mwdb-web/commons/plugins";
+import { Capability } from "@mwdb-web/types/types";
 
 function UploadDropzone(props) {
     const onDrop = props.onDrop;
@@ -175,7 +176,7 @@ export default function Upload() {
                         onDrop={(data) => setFile(data)}
                     />
                     <div className="form-group">
-                        {auth.hasCapability(Capabilities.addingParents) && (
+                        {auth.hasCapability(Capability.addingParents) && (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label className="input-group-text">

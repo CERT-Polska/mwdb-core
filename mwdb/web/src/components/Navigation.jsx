@@ -11,11 +11,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugins, Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal, NavDropdown } from "@mwdb-web/commons/ui";
 import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
+import { Capability } from "@mwdb-web/types/types";
 
 import logo from "../assets/logo.png";
 
@@ -65,7 +66,7 @@ function RemoteDropdown() {
 
 function UploadButton() {
     const auth = useContext(AuthContext);
-    const buttonLink = auth.hasCapability(Capabilities.addingFiles) ? (
+    const buttonLink = auth.hasCapability(Capability.addingFiles) ? (
         <Link className="nav-link" to={"/upload"}>
             <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
             Upload

@@ -3,19 +3,26 @@ import logging
 from flask import g
 from karton.core import Config as KartonConfig
 from karton.core import Producer, Resource, Task
-from karton.core.backend import KartonBackend
 from karton.core.inspect import KartonState
 from karton.core.task import TaskPriority
 
+from ..version import app_version
 from .config import app_config
 
 logger = logging.getLogger("mwdb.karton")
 
 
+class KartonProducer(Producer):
+    identity = "karton.mwdb"
+    version = app_version
+    with_service_info = True
+
+
+karton_producer = KartonProducer(config=KartonConfig(app_config.karton.config_path))
+
+
 def get_karton_producer() -> Producer:
-    return Producer(
-        identity="karton.mwdb", config=KartonConfig(app_config.karton.config_path)
-    )
+    return karton_producer
 
 
 def send_file_to_karton(file) -> str:
@@ -91,7 +98,5 @@ def send_blob_to_karton(blob) -> str:
 
 
 def get_karton_state():
-    karton_config = KartonConfig(app_config.karton.config_path)
-    karton_backend = KartonBackend(karton_config)
-    karton_state = KartonState(karton_backend)
+    karton_state = KartonState(karton_producer.backend)
     return karton_state

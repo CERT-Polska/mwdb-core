@@ -21,7 +21,7 @@ PyYAML==5.4
 redis==4.5.4
 boto3==1.24.38
 typed-config==1.1.0
-karton-core==5.0.0
+karton-core==5.1.0
 Authlib==0.15.4
 prance==0.21.8.0  # apispec unpinned dependency
 pyJWT==2.4.0

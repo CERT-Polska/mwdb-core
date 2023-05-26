@@ -9,7 +9,7 @@ import { capabilitiesList, AuthContext } from "@mwdb-web/commons/auth";
 import { GroupBadge, ConfirmationModal, Select } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
-import { Capability } from "@mwdb-web/commons/types";
+import { Capability } from "@mwdb-web/types/types";
 
 function CapabilitiesTable({ profile }) {
     const { user } = useContext(AuthContext);

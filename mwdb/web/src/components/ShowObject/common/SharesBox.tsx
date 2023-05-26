@@ -3,24 +3,24 @@ import { useState, useEffect, useCallback, useContext } from "react";
 import { APIContext } from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
-import { SharesList } from "../common/SharesList";
-import { SharingStatusIcon } from "../common/SharingStatusIcon";
+import { SharesList } from "./SharesList";
+import { SharingStatusIcon } from "./SharingStatusIcon";
 
 export function SharesBox() {
     const api = useContext(APIContext);
     const context = useContext(ObjectContext);
 
-    const [groups, setGroups] = useState([]);
-    const [shareReceiver, setShareReceiver] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [groups, setGroups] = useState<string[]>([]);
+    const [shareReceiver, setShareReceiver] = useState<string>("");
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-    const objectId = context.object.id;
-    const shares = context.object.shares;
+    const objectId = context.object!.id;
+    const shares = context.object!.shares ?? [];
     const { setObjectError, updateObjectData } = context;
 
     async function updateShares() {
         try {
-            let response = await api.getObjectShares(objectId);
+            let response = await api.getObjectShares(objectId!);
             setGroups(response.data.groups);
             updateObjectData({
                 shares: response.data.shares,
@@ -30,17 +30,17 @@ export function SharesBox() {
         }
     }
 
-    async function doShare(group) {
+    async function doShare(group: string) {
         try {
             setIsModalOpen(false);
-            await api.shareObjectWith(objectId, group);
+            await api.shareObjectWith(objectId!, group);
             updateShares();
         } catch (error) {
             setObjectError(error);
         }
     }
 
-    function handleShare(group) {
+    function handleShare(group: string) {
         setIsModalOpen(true);
         setShareReceiver(group);
     }
@@ -55,6 +55,10 @@ export function SharesBox() {
     useEffect(() => {
         getShares();
     }, [getShares]);
+
+    if (!context.object?.id) {
+        return <></>;
+    }
 
     return (
         <div>
@@ -79,7 +83,7 @@ export function SharesBox() {
                 <SharesList
                     shares={shares}
                     groups={groups}
-                    handleShare={!api.remote ? handleShare : null}
+                    handleShare={!api.remote ? handleShare : undefined}
                     currentFile={context.object.id}
                     direct
                 />

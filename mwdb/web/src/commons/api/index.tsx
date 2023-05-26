@@ -272,7 +272,7 @@ function getShareInfo(): GetShareInfoResponse {
     return axios.get("/share");
 }
 
-function getObjectTags(id: number): GetObjectTagsResponse {
+function getObjectTags(id: string): GetObjectTagsResponse {
     return axios.get(`/object/${id}/tag`);
 }
 
@@ -310,7 +310,7 @@ function removeObject(id: string): RemoveObjectResponse {
     return axios.delete(`/object/${id}`);
 }
 
-function addObjectTag(id: number, tag: string): AddObjectTagResponse {
+function addObjectTag(id: string, tag: string): AddObjectTagResponse {
     return axios.put(`/object/${id}/tag`, { tag });
 }
 
@@ -357,7 +357,7 @@ function removeObjectFavorite(id: string): RemoveObjectFavoriteResponse {
     return axios.delete(`/object/${id}/favorite`);
 }
 
-function shareObjectWith(id: number, group: string): ShareObjectWithResponse {
+function shareObjectWith(id: string, group: string): ShareObjectWithResponse {
     return axios.put(`/object/${id}/share`, { group });
 }
 
@@ -672,7 +672,7 @@ function getRemoteObjectCount(
 
 function getRemoteObjectTags(
     remote: string,
-    id: number
+    id: string
 ): GetRemoteObjectTagsResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/tag`);
 }

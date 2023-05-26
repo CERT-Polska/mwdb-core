@@ -10,13 +10,13 @@ import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import ObjectBox from "./common/ObjectBox";
-import { MultiRelationsBox } from "./common/MultiRelationsBox";
-import { CommentBox } from "./common/CommentBox";
-import { SharesBox } from "./Views/SharesBox";
-import TagBox from "./Views/TagBox";
-import { AttributesBox } from "./common/AttributesBox";
-import { Share3rdPartyBox } from "./common/Share3rdPartyBox";
+import ObjectBox from "./ObjectBox";
+import { MultiRelationsBox } from "./MultiRelationsBox";
+import { CommentBox } from "./CommentBox";
+import { SharesBox } from "./SharesBox";
+import { TagBox } from "./TagBox";
+import { AttributesBox } from "./AttributesBox";
+import { Share3rdPartyBox } from "./Share3rdPartyBox";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
@@ -24,7 +24,7 @@ import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { View } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
-import { KartonAnalysisBox } from "./common/KartonAnalysisBox";
+import { KartonAnalysisBox } from "./KartonAnalysisBox";
 import {
     BlobData,
     ConfigData,
@@ -78,7 +78,7 @@ type Props = {
     searchEndpoint: string;
 };
 
-export default function ShowObject(props: Props) {
+export function ShowObject(props: Props) {
     const {
         ident,
         objectType,

@@ -76,7 +76,7 @@ type Props = {
     groups: string[];
     handleShare?: (group: string) => void;
     currentFile: string;
-    direct: boolean;
+    direct?: boolean;
 };
 
 export function SharesList({

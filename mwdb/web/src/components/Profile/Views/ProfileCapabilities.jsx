@@ -5,14 +5,11 @@ import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { find, isNil, isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
-import {
-    capabilitiesList,
-    Capabilities,
-    AuthContext,
-} from "@mwdb-web/commons/auth";
+import { capabilitiesList, AuthContext } from "@mwdb-web/commons/auth";
 import { GroupBadge, ConfirmationModal, Select } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
+import { Capability } from "@mwdb-web/commons/types";
 
 function CapabilitiesTable({ profile }) {
     const { user } = useContext(AuthContext);
@@ -29,7 +26,7 @@ function CapabilitiesTable({ profile }) {
 
     function isDeleteButtonRender(cap) {
         const userOrGroupName = profile.name || profile.login;
-        const isManageUsersCapability = cap === Capabilities.manageUsers;
+        const isManageUsersCapability = cap === Capability.manageUsers;
         if (isManageUsersCapability && userOrGroupName === user.login) {
             return false;
         }
@@ -42,7 +39,7 @@ function CapabilitiesTable({ profile }) {
             <tbody>
                 {profile.capabilities.sort().map((cap) => (
                     <tr key={cap}>
-                        {userHasCapabilities(Capabilities.manageUsers) && (
+                        {userHasCapabilities(Capability.manageUsers) && (
                             <td className="col-auto">
                                 {isDeleteButtonRender(cap) && (
                                     <Link
@@ -227,7 +224,7 @@ export default function ProfileCapabilities({ profile, getData }) {
                 Here is the list of {profile.groups ? "account" : "group"}{" "}
                 superpowers:
             </p>
-            {userHasCapabilities(Capabilities.manageUsers) && (
+            {userHasCapabilities(Capability.manageUsers) && (
                 <CapabilitiesSelect profile={profile} getData={getData} />
             )}
             <CapabilitiesTable profile={profile} />

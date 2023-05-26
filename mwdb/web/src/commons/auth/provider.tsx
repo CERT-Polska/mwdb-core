@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api";
 
 import { omit, isEqual, isNil } from "lodash";
-import { Capabilities } from "./capabilities";
 import { AuthContext } from "./context";
 import { AuthContextValues, Capability, User } from "@mwdb-web/types/types";
 import { AuthProviderProps } from "@mwdb-web/types/props";
@@ -234,7 +233,7 @@ export function AuthProvider(props: AuthProviderProps) {
     const values: AuthContextValues = {
         user: session,
         isAuthenticated: !!session,
-        isAdmin: hasCapability(Capabilities.manageUsers),
+        isAdmin: hasCapability(Capability.manageUsers),
         hasCapability,
         refreshSession,
         updateSession,

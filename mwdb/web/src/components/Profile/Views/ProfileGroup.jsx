@@ -6,10 +6,11 @@ import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { GroupBadge, ShowIf } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { Capability } from "@mwdb-web/types/types";
 
 function ProfileItem(props) {
     if (!props.value) return [];
@@ -136,7 +137,7 @@ export default function ProfileGroup() {
                         <ShowIf
                             condition={
                                 workspace.admins.includes(auth.user.login) ||
-                                auth.hasCapability(Capabilities.manageUsers)
+                                auth.hasCapability(Capability.manageUsers)
                             }
                         >
                             <Link
@@ -150,7 +151,7 @@ export default function ProfileGroup() {
                     )}
 
                     <ShowIf
-                        condition={auth.hasCapability(Capabilities.manageUsers)}
+                        condition={auth.hasCapability(Capability.manageUsers)}
                     >
                         <Link
                             className="nav-link"

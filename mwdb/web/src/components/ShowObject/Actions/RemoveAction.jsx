@@ -3,10 +3,11 @@ import React, { useContext, useState } from "react";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ConfirmationModal } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { Capability } from "@mwdb-web/types/types";
 
 export default function RemoveAction() {
     const api = useContext(APIContext);
@@ -33,7 +34,7 @@ export default function RemoveAction() {
     }
 
     // If user can't remove objects: don't show the action
-    if (!auth.hasCapability(Capabilities.removingObjects) || api.remote)
+    if (!auth.hasCapability(Capability.removingObjects) || api.remote)
         return [];
 
     return (

@@ -4,8 +4,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { Capability } from "@mwdb-web/types/types";
 
 import QuickQueryAddModal from "./QuickQueryAddModal";
 import { toast } from "react-toastify";
@@ -121,7 +122,7 @@ export default function QuickQuery(props) {
                 props.addToQuery("NOT shared", "public");
             }}
         />,
-        !api.remote && auth.hasCapability(Capabilities.personalize) && (
+        !api.remote && auth.hasCapability(Capability.personalize) && (
             <QuickQueryItem
                 key="favorites"
                 label="Favorites"
@@ -163,7 +164,7 @@ export default function QuickQuery(props) {
                     props.submitQuery(v.query);
                 }}
                 onDelete={
-                    auth.hasCapability(Capabilities.personalize) &&
+                    auth.hasCapability(Capability.personalize) &&
                     ((ev) => {
                         ev.preventDefault();
                         setIdToRemove(v.id);
@@ -197,7 +198,7 @@ export default function QuickQuery(props) {
     const userQuickQueryBadges = !api.remote ? (
         <React.Fragment>
             {queryBadges}
-            {auth.hasCapability(Capabilities.personalize)
+            {auth.hasCapability(Capability.personalize)
                 ? newQuickQueryButton
                 : []}
             <ConfirmationModal

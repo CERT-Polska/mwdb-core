@@ -13,12 +13,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { Capability } from "@mwdb-web/types/types";
 
 function KartonAnalysisRow({ analysis, removeAnalysis }) {
     const auth = useContext(AuthContext);
@@ -129,7 +130,7 @@ function KartonAnalysisRow({ analysis, removeAnalysis }) {
                     />
                 </span>
 
-                {auth.hasCapability(Capabilities.removingKarton) && (
+                {auth.hasCapability(Capability.removingKarton) && (
                     <span
                         className="ml-2"
                         data-toggle="tooltip"
@@ -215,7 +216,7 @@ export default function KartonAnalysisBox() {
     const objectId = object.id;
     const analyses = object.analyses;
     const isReanalysisAvailable = auth.hasCapability(
-        Capabilities.kartonReanalyze
+        Capability.kartonReanalyze
     );
 
     async function updateAnalyses() {

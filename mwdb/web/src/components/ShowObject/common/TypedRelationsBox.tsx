@@ -38,7 +38,7 @@ function paginateParentChildren(
 type Props = {
     parents: RepationItem[];
     children: RepationItem[];
-    type: string;
+    type: "file" | "static_config" | "text_blob";
     itemsCountPerPage: number;
     header: string;
     icon: IconDefinition;

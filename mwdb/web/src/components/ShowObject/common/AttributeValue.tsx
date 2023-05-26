@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { RichAttributeValue } from "../common/RichAttributeValue";
 
 type Props = {
-    value: any;
+    value: string;
     attributeId: number;
     attributeDefinition: {
         url_template: string;

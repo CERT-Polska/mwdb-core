@@ -64,7 +64,7 @@ export type ObjectType = "file" | "blob" | "config";
 export type Attribute = {
     key: string;
     id: number;
-    value: unknown;
+    value: string;
 };
 
 export type AttributeDefinition = {
@@ -84,7 +84,7 @@ export type Tag = {
 export type RelatedObject = {
     id: string;
     tags: Tag[];
-    type: ObjectType;
+    type: "file" | "static_config" | "text_blob";
     upload_time: string;
 };
 

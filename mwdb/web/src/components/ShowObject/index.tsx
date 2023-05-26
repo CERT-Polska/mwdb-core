@@ -1,4 +1,4 @@
-export { default as ShowObject } from "./ShowObject";
+export { ShowObject } from "./common/ShowObject";
 
 export { RelationsTab } from "./common/RelationsTab";
 export { LatestConfigTab } from "./common/LatestConfigTab";

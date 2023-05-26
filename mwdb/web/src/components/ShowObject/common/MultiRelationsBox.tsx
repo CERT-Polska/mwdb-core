@@ -6,8 +6,8 @@ import { TypedRelationsBox } from "./TypedRelationsBox";
 
 export function MultiRelationsBox() {
     const context = useContext(ObjectContext);
-    let parents = context.object.parents;
-    let children = context.object.children;
+    const parents = context.object!.parents;
+    const children = context.object!.children;
     const itemsCountPerPage = 5;
 
     return parents && children && parents.length + children.length > 0 ? (

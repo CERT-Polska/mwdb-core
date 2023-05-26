@@ -28,11 +28,11 @@ type RelationToRemove = {
 };
 
 type Props = {
-    children: RepationItem[];
-    parents: RepationItem[];
-    header: string;
-    icon: IconDefinition;
-    updateRelationsActivePage: () => void;
+    children?: RepationItem[];
+    parents?: RepationItem[];
+    header?: string;
+    icon?: IconDefinition;
+    updateRelationsActivePage?: () => void;
 };
 
 export function RelationsBox(props: Props) {
@@ -241,7 +241,7 @@ export function RelationsBox(props: Props) {
                         relationToRemove.relation,
                         relationToRemove.id
                     );
-                    updateRelationsActivePage();
+                    updateRelationsActivePage && updateRelationsActivePage();
                 }}
                 message="Are you sure you want to delete this relation?"
                 buttonStyle="btn btn-danger"

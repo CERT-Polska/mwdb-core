@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
-import { AuthContextValues } from "@mwdb-web/types/types";
+import { AuthContextValues, Capability } from "@mwdb-web/types/types";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { AuthProviderProps } from "@mwdb-web/types/props";
 
@@ -8,9 +8,9 @@ describe("useCheckCapabilities", () => {
     const authContextValue = {
         user: {
             capabilities: [
-                "access_all_objects",
-                "access_all_objects",
-                "adding_tags",
+                Capability.accessAllObjects,
+                Capability.accessAllObjects,
+                Capability.addingTags,
             ],
         },
     } as AuthContextValues;
@@ -30,7 +30,7 @@ describe("useCheckCapabilities", () => {
         });
         const { userHasCapabilities } = result.current;
 
-        expect(userHasCapabilities("access_all_objects")).toBe(true);
+        expect(userHasCapabilities(Capability.accessAllObjects)).toBe(true);
     });
 
     it("should return false if user doesn't have the capability", () => {
@@ -40,6 +40,6 @@ describe("useCheckCapabilities", () => {
         });
         const { userHasCapabilities } = result.current;
 
-        expect(userHasCapabilities("karton_unassign")).toBe(false);
+        expect(userHasCapabilities(Capability.removingKarton)).toBe(false);
     });
 });

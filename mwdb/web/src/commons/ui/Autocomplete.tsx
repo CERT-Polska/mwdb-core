@@ -4,7 +4,7 @@ type AutocompleteItem<T> = {
     item: T;
 };
 
-type Props<T> = {
+type Props<T> = React.HTMLProps<HTMLInputElement> & {
     items: T[];
     getItemValue?: (item: T) => T;
     renderItem?: (props: AutocompleteItem<T>) => JSX.Element;

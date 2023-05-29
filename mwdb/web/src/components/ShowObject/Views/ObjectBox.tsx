@@ -8,7 +8,7 @@ import { TabContextValues } from "@mwdb-web/types/types";
 
 type Props = {
     defaultTab: string;
-    children: JSX.Element;
+    children: React.ReactNode;
 };
 
 export default function ObjectBox({ defaultTab, children }: Props) {

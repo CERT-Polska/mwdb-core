@@ -1,8 +1,8 @@
-import { GrpupBadgeProps } from "@mwdb-web/types/props";
+import { GroupBadgeProps } from "@mwdb-web/types/props";
 import { User } from "@mwdb-web/types/types";
 import GroupBadge from "./GroupBadge";
 
-type Props = GrpupBadgeProps & {
+type Props = GroupBadgeProps & {
     user: User;
 };
 

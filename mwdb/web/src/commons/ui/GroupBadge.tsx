@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 
 import { faUser, faUsers, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { GrpupBadgeProps } from "@mwdb-web/types/props";
+import { GroupBadgeProps } from "@mwdb-web/types/props";
 
-export default function GroupBadge(props: GrpupBadgeProps) {
+export default function GroupBadge(props: GroupBadgeProps) {
     const { group, clickable, basePath } = props;
     const icon = group.private
         ? faUser

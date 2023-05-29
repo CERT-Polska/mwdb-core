@@ -1,37 +1,13 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
-import { DateString, SortedList, View } from "@mwdb-web/commons/ui";
-import { makeSearchLink, getErrorMessage } from "@mwdb-web/commons/helpers";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
+import { SortedList, View } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { Family } from "@mwdb-web/types/types";
+import { ConfigStatsItem } from "../common/ConfigStatsItem";
 
-function ConfigStatsItem(props: Family) {
-    const remotePath = useRemotePath();
-    return (
-        <tr>
-            <td>
-                <Link
-                    to={makeSearchLink({
-                        field: "family",
-                        value: props.family,
-                        pathname: `${remotePath}/configs`,
-                    })}
-                >
-                    {props.family}
-                </Link>
-            </td>
-            <td>
-                <DateString date={props.last_upload} />
-            </td>
-            <td>{props.count}</td>
-        </tr>
-    );
-}
-
-export default function ConfigStats() {
+export function ConfigStatsView() {
     const [families, setFamilies] = useState<Family[]>([]);
     const [sortOrder, setSortOrder] = useState<number[]>([0, 1]);
     const [filterValue, setFilterValue] = useState<string>("*");

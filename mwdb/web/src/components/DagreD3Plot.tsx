@@ -5,32 +5,63 @@ import * as dagreD3 from "dagre-d3";
 import * as d3 from "d3";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 
-function DagreD3Plot(props) {
+type NodeProp = {
+    id: string;
+    expanded: boolean;
+    object: {
+        tags: string[];
+        type: string;
+        upload_time: string;
+    };
+};
+
+type Edge = {
+    child: string;
+    parent: string;
+};
+
+type RenderContext = {
+    refCounter: number;
+    slaveContainer: HTMLElement | null;
+    svgClone: Node | null;
+    transform: any;
+};
+
+type Props = {
+    height: number;
+    width: number;
+    nodeComponent: JSX.Element;
+    edges: Edge[];
+    nodes: NodeProp[];
+    onNodeClick: (id: unknown) => void;
+};
+
+function DagreD3Plot(props: Props) {
     const remotePath = useRemotePath();
 
     const graph = new dagreD3.graphlib.Graph().setGraph({ compound: true });
     const renderer = new dagreD3.render();
 
-    const masterContainer = useRef(null);
-    const renderContext = useRef({
+    const masterContainer = useRef<HTMLDivElement | null>(null);
+    const renderContext = useRef<RenderContext>({
         refCounter: 0,
         slaveContainer: null,
         svgClone: null,
         transform: null,
     });
 
-    const nodeSvg = useRef(null);
+    const nodeSvg = useRef<SVGSVGElement>(null);
 
     graph.graph().transition = (selection) =>
         selection.transition().duration(500);
 
     const zoomIdentity = () =>
         d3.zoomIdentity.translate(
-            masterContainer.current.clientWidth / 2 - 200,
+            masterContainer!.current!.clientWidth / 2 - 200,
             props.height / 3 - 100
         );
 
-    const renderNodeElement = async (node) => {
+    const renderNodeElement = async (node: NodeProp) => {
         // This method renders React element into HTML to meet DagreD3 requirements
         // Create container node and make React root
         const parentNode = document.createElement("div");
@@ -41,9 +72,9 @@ function DagreD3Plot(props) {
         // Unfortunately we can't use flushSync for that.
         await new Promise((resolve) => {
             function NodeComponent() {
-                const Node = props.nodeComponent;
+                const Node = props.nodeComponent as any;
                 useEffect(() => {
-                    resolve();
+                    resolve(undefined);
                 }, []);
                 return <Node node={node} remotePath={remotePath} />;
             }
@@ -59,22 +90,23 @@ function DagreD3Plot(props) {
     const enterRenderContext = () => {
         const context = renderContext.current;
         // Get <g> element of current svg node
-        const svgGroup = d3.select(nodeSvg.current.firstChild);
+        //@ts-ignore
+        const svgGroup = d3.select(nodeSvg?.current?.firstChild);
         if (!context.refCounter++) {
             // Render context initialization (for first subsequent render)
             // Create hidden slave container as masterContainer sibling
             context.slaveContainer = document.createElement("div");
             context.slaveContainer.style.visibility = "hidden";
-            masterContainer.current.parentNode.appendChild(
+            masterContainer!.current!.parentNode!.appendChild(
                 context.slaveContainer
             );
             // Clone <svg> element and show cloned version in master at time of render
-            context.svgClone = nodeSvg.current.cloneNode(true);
-            masterContainer.current.replaceChild(
-                context.svgClone,
-                nodeSvg.current
+            context.svgClone = nodeSvg!.current!.cloneNode(true);
+            masterContainer?.current?.replaceChild(
+                context.svgClone!,
+                nodeSvg.current!
             );
-            context.slaveContainer.appendChild(nodeSvg.current);
+            context.slaveContainer.appendChild(nodeSvg.current!);
             // Now, we're operating on hidden node in slave container
             // Store and reset transform for time of rendering
             context.transform = svgGroup.attr("transform");
@@ -87,13 +119,13 @@ function DagreD3Plot(props) {
                 // After render: recover stored transform attribute value
                 svgGroup.attr("transform", context.transform);
                 // Swap cloned node with rendered node in master container
-                masterContainer.current.replaceChild(
-                    nodeSvg.current,
-                    context.svgClone
+                masterContainer?.current?.replaceChild(
+                    nodeSvg.current!,
+                    context.svgClone!
                 );
                 // Detach and remove reference to slaveContainer
-                masterContainer.current.parentNode.removeChild(
-                    context.slaveContainer
+                masterContainer?.current?.parentNode?.removeChild(
+                    context!.slaveContainer!
                 );
             }
         };
@@ -104,14 +136,15 @@ function DagreD3Plot(props) {
 
         // Acquire d3 nodes
         const svg = d3.select(nodeSvg.current);
-        const svgGroup = d3.select(nodeSvg.current.firstChild);
+        //@ts-ignore
+        const svgGroup = d3.select(nodeSvg?.current?.firstChild);
 
         // Render all node components
         let renderedNodes = await Promise.all(
-            props.nodes.map(async (node) => [
-                node,
-                await renderNodeElement(node),
-            ])
+            props.nodes.map(
+                async (node) =>
+                    [node, await renderNodeElement(node)] as [NodeProp, string]
+            )
         );
 
         for (let [node, element] of renderedNodes) {
@@ -128,27 +161,31 @@ function DagreD3Plot(props) {
                 lineInterpolate: "basis",
             });
 
-        graph.nodes().forEach((v) => {
+        graph.nodes().forEach((v: any) => {
             let node = graph.node(v);
 
             node.rx = node.ry = 5;
             node.padding = 0;
         });
 
+        //@ts-ignore
         graph.graph().rankDir = "LR";
 
-        graph.edges().forEach((e) => graph.edge(e));
+        graph.edges().forEach((e: any) => graph.edge(e));
 
         const zoom = d3
             .zoom()
             .on("zoom", () =>
                 svgGroup.attr("transform", d3.event.transform + zoomIdentity())
             );
+        //@ts-ignore
         svg.call(zoom);
 
         // TODO:
         // This method may cause the browser to become unresponsive when dealing with large amounts of data,
         // so it should be improved in the future.
+
+        //@ts-ignore
         renderer(svgGroup, graph);
 
         svg.selectAll(".dagre-d3 .node").on("click", (id) =>
@@ -173,7 +210,6 @@ function DagreD3Plot(props) {
                 ref={nodeSvg}
                 width={props.width}
                 height={props.height}
-                remote={props.remote}
             >
                 <g />
             </svg>

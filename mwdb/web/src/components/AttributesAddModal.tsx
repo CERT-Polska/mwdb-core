@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect, createRef } from "react";
 import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
 
@@ -12,30 +12,39 @@ import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
+import { AttributeDefinition } from "@mwdb-web/types/types";
 
-export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
-    const [attributeDefinitions, setAttributeDefinitions] = useState({});
-    const [attributeKey, setAttributeKey] = useState("");
-    const [richTemplate, setRichTemplate] = useState("");
-    const [attributeValue, setAttributeValue] = useState("");
-    const [attributeType, setAttributeType] = useState("string");
-    const [invalid, setInvalid] = useState(false);
-    const [error, setError] = useState(null);
-    const attributeForm = useRef(null);
+type Props = {
+    isOpen: boolean;
+    onAdd: (attributeKey: string, value: string) => void;
+    onRequestClose: (e: React.MouseEvent) => void;
+};
+
+export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
+    const [attributeDefinitions, setAttributeDefinitions] = useState<
+        Record<string, AttributeDefinition>
+    >({});
+    const [attributeKey, setAttributeKey] = useState<string>("");
+    const [richTemplate, setRichTemplate] = useState<string>("");
+    const [attributeValue, setAttributeValue] = useState<string>("");
+    const [attributeType, setAttributeType] = useState<string>("string");
+    const [invalid, setInvalid] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const attributeForm = createRef<HTMLFormElement>();
     const attributesAvailable = !isEmpty(attributeDefinitions);
 
     useEffect(() => {
         getAttributeDefinitions();
     }, []);
 
-    function handleSubmit(ev) {
+    function handleSubmit(ev: React.MouseEvent<HTMLFormElement>) {
         if (ev) ev.preventDefault();
-        if (!attributeForm.current.reportValidity()) return;
+        if (!attributeForm.current?.reportValidity()) return;
         let value = attributeValue;
         if (attributeType === "object") {
             try {
                 value = JSON.parse(attributeValue);
-            } catch (e) {
+            } catch (e: any) {
                 setError(e.toString());
                 return;
             }
@@ -43,7 +52,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
         onAdd(attributeKey, value);
     }
 
-    function handleKeyChange(ev) {
+    function handleKeyChange(ev: React.ChangeEvent<HTMLSelectElement>) {
         setAttributeKey(ev.target.value);
         if (!ev.target.value.length) setRichTemplate("");
         else {
@@ -59,12 +68,12 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
         setError(null);
     }
 
-    function handleValueChange(ev) {
+    function handleValueChange(ev: React.ChangeEvent<HTMLInputElement>) {
         setAttributeValue(ev.target.value);
         setError(null);
     }
 
-    function handleTypeChange(ev) {
+    function handleTypeChange(ev: React.ChangeEvent<HTMLInputElement>) {
         setAttributeType(ev.target.value);
         setError(null);
     }
@@ -82,7 +91,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                 {}
             );
             setAttributeDefinitions(keyDefinitions);
-        } catch (error) {
+        } catch (error: any) {
             toast(error.toString(), { type: "error" });
         }
     }
@@ -95,7 +104,9 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
             isOpen={isOpen}
             onRequestClose={onRequestClose}
             onConfirm={handleSubmit}
-            confirmDisabled={!attributesAvailable || (invalid && richTemplate)}
+            confirmDisabled={
+                !attributesAvailable || (invalid && !isEmpty(richTemplate))
+            }
         >
             {!attributesAvailable ? (
                 <div>
@@ -107,7 +118,7 @@ export default function AttributesAddModal({ isOpen, onAdd, onRequestClose }) {
                         <label>Attribute</label>
                         <select
                             className="form-control"
-                            onChange={handleKeyChange}
+                            onChange={(e) => handleKeyChange}
                             value={attributeKey}
                             required
                         >

@@ -8,7 +8,9 @@ import { api } from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/plugins";
 import { View, ShowIf, ConfirmationModal } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
-import { ProviderButton, ProvidersSelectList, authenticate } from "./OAuth";
+import { authenticate } from "@mwdb-web/commons/helpers/authenticate";
+import { ProviderButton } from "./ProviderButton";
+import { ProvidersSelectList } from "./ProvidersSelectList";
 
 export default function UserLogin() {
     const auth = useContext(AuthContext);

@@ -10,7 +10,6 @@ import { useSearchParams } from "react-router-dom";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { capitalize } from "@mwdb-web/commons/helpers";
-
 import { Tag } from "@mwdb-web/commons/ui";
 
 const DagreD3Plot = React.lazy(() => import("./DagreD3Plot"));
@@ -91,7 +90,7 @@ function RelationToManyNode({ setNodesStatus, nodesLength }) {
                 elements, displaying such a quantity of connections may affect
                 the application's performance.
             </div>
-            <div class="text-center mb-2">
+            <div className="text-center mb-2">
                 <button
                     className="btn btn-warning"
                     onClick={() => setNodesStatus(nodeStatuses.showGraph)}

@@ -7,7 +7,7 @@ import { ObjectAction } from "@mwdb-web/commons/ui";
 import { ObjectOrConfigOrBlobData } from "@mwdb-web/types/types";
 
 type Props = {
-    download: (object?: Partial<ObjectOrConfigOrBlobData>) => void;
+    download: (object?: Partial<ObjectOrConfigOrBlobData>) => Promise<void>;
 };
 
 export function DownloadAction(props: Props) {

@@ -7,16 +7,16 @@ import {
     useParams,
 } from "react-router-dom";
 
-import About from "./components/About";
-import Navigation from "./components/Navigation";
+import { AboutView } from "./components/Views/AboutView";
+import { Navigation } from "./components/Navigation";
 import RecentConfigs from "./components/RecentConfigs";
 import RecentSamples from "./components/RecentSamples";
-import ConfigStats from "./components/ConfigStats";
+import { ConfigStatsView } from "./components/Config/Views/ConfigStatsView";
 import RecentBlobs from "./components/RecentBlobs";
 import ShowSample from "./components/ShowSample";
-import ShowConfig from "./components/ShowConfig";
+import { ShowConfigView } from "./components/Config/Views/ShowConfigView";
 import ShowTextBlob from "./components/ShowTextBlob";
-import DiffTextBlob from "./components/DiffTextBlob";
+import { DiffTextBlobView } from "./components/Views/DiffTextBlobView";
 import Upload from "./components/Upload";
 import UserLogin from "./components/UserLogin";
 import UserRegister from "./components/UserRegister";
@@ -24,7 +24,7 @@ import UserSetPassword from "./components/UserSetPassword";
 import Search from "./components/Search";
 import RelationsPlot from "./components/RelationsPlot";
 import UserPasswordRecover from "./components/UserPasswordRecover";
-import Docs from "./components/Docs";
+import { DocsView } from "./components/Views/DocsView";
 import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
 import { SettingsView } from "./components/Settings/Views/SettingsView";
@@ -37,7 +37,7 @@ import ProfileAPIKeys from "./components/Profile/Views/ProfileAPIKeys";
 import ProfileResetPassword from "./components/Profile/Views/ProfileResetPassword";
 import ProfileOAuth from "./components/Profile/Views/ProfileOAuth";
 
-import { OAuthAuthorize } from "./components/OAuth";
+import { OAuthAuthorizeView } from "./components/Views/OAuthAuthorizeView";
 
 import { SettingsOverviewView } from "./components/Settings/Views/SettingsOverviewView";
 import { UsersPendingListView } from "./components/Settings/Views/UsersPendingListView";
@@ -101,7 +101,7 @@ function AppRoutes() {
             <Route path="register" element={<UserRegister />} />
             <Route path="recover_password" element={<UserPasswordRecover />} />
             <Route path="setpasswd" element={<UserSetPassword />} />
-            <Route path="oauth/callback" element={<OAuthAuthorize />} />
+            <Route path="oauth/callback" element={<OAuthAuthorizeView />} />
             <Route element={<RequiresAuth />}>
                 <Route path="/" element={<RecentSamples />} />
                 <Route path="configs" element={<RecentConfigs />} />
@@ -117,15 +117,15 @@ function AppRoutes() {
                         </RequiresCapability>
                     }
                 />
-                <Route path="configs/stats" element={<ConfigStats />} />
-                <Route path="about" element={<About />} />
-                <Route path="docs" element={<Docs />} />
+                <Route path="configs/stats" element={<ConfigStatsView />} />
+                <Route path="about" element={<AboutView />} />
+                <Route path="docs" element={<DocsView />} />
                 <Route
                     path="sample/:hash/*"
                     element={<SampleRouteFallback />}
                 />
                 <Route path="file/:hash/*" element={<ShowSample />} />
-                <Route path="config/:hash/*" element={<ShowConfig />} />
+                <Route path="config/:hash/*" element={<ShowConfigView />} />
                 <Route path="blob/:hash/*" element={<ShowTextBlob />} />
                 <Route path="profile" element={<ProfileView />}>
                     <Route index element={<ProfileDetails />} />
@@ -149,7 +149,7 @@ function AppRoutes() {
                 </Route>
                 <Route
                     path="diff/:current/:previous"
-                    element={<DiffTextBlob />}
+                    element={<DiffTextBlobView />}
                 />
                 <Route path="relations" element={<RelationsPlot />} />
                 <Route path="remote/:remote" element={<RemoteViews />}>
@@ -158,11 +158,11 @@ function AppRoutes() {
                     <Route path="blobs" element={<RecentBlobs />} />
                     <Route path="search" element={<Search />} />
                     <Route path="file/:hash/*" element={<ShowSample />} />
-                    <Route path="config/:hash/*" element={<ShowConfig />} />
+                    <Route path="config/:hash/*" element={<ShowConfigView />} />
                     <Route path="blob/:hash/*" element={<ShowTextBlob />} />
                     <Route
                         path="diff/:current/:previous"
-                        element={<DiffTextBlob />}
+                        element={<DiffTextBlobView />}
                     />
                 </Route>
                 <Route

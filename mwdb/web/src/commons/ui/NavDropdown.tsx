@@ -2,8 +2,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 type Props = {
-    title: string;
-    icon: IconProp;
+    title?: string;
+    icon?: IconProp;
     elements: JSX.Element[];
     badge?: string;
 };

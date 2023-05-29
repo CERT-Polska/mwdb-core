@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
-import AttributesAddModal from "./AttributesAddModal";
+import { AttributesAddModal } from "./AttributesAddModal";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";

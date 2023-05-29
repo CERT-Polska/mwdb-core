@@ -70,7 +70,7 @@ export type ApiKeyAddResponse = Response<ApiKey>;
 
 export type ApiKeyRemoveResponse = Response<null>;
 
-export type GetObjectResponse = Response<ObjectData | ConfigData | BlobData>;
+export type GetObjectResponse = Response<ObjectOrConfigOrBlobData>;
 
 export type GetObjectListResponse = Response<{
     blobs?: BlobListItem[];

@@ -1,11 +1,11 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 
-import logo from "../assets/logo.png";
+import logo from "../../assets/logo.png";
 
-export default function About() {
+export function AboutView() {
     const config = useContext(ConfigContext);
 
     return (
@@ -28,10 +28,10 @@ export default function About() {
                                 <a
                                     href={
                                         "https://github.com/CERT-Polska/mwdb-core/releases/tag/v" +
-                                        config.config["server_version"]
+                                        config.config.server_version
                                     }
                                 >
-                                    {config.config["server_version"]}
+                                    {config.config.server_version}
                                 </a>
                                 <br />
                                 Try out our{" "}

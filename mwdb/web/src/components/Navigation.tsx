@@ -5,92 +5,28 @@ import {
     faFile,
     faTable,
     faScroll,
-    faUpload,
-    faGlobe,
     faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugins, Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal, NavDropdown } from "@mwdb-web/commons/ui";
 import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
 
 import logo from "../assets/logo.png";
+import { AdminNav } from "./AdminNav";
+import { RemoteDropdown } from "./RemoteDropdown";
+import { UploadButton } from "./UploadButton";
 
-function AdminNav() {
-    const auth = useContext(AuthContext);
-    const config = useContext(ConfigContext);
-
-    if (!auth.isAdmin) return [];
-    return (
-        <li className="nav-item">
-            <Link className="nav-link" to={"/settings"}>
-                Settings
-                {config.pendingUsers.length ? (
-                    <span
-                        className="badge badge-pill badge-warning"
-                        style={{ marginLeft: "8px" }}
-                    >
-                        {config.pendingUsers.length}
-                    </span>
-                ) : (
-                    []
-                )}
-            </Link>
-        </li>
-    );
-}
-
-function RemoteDropdown() {
-    const config = useContext(ConfigContext);
-    if (!config.isReady) return [];
-
-    const remotes = config.config.remotes || [];
-    const remoteItems = remotes.map((remote) => (
-        <Link key="remote" className="dropdown-item" to={`/remote/${remote}`}>
-            {remote}
-        </Link>
-    ));
-
-    return (
-        <NavDropdown
-            title="Switch to remote..."
-            elements={[...remoteItems]}
-            icon={faGlobe}
-        />
-    );
-}
-
-function UploadButton() {
-    const auth = useContext(AuthContext);
-    const buttonLink = auth.hasCapability(Capabilities.addingFiles) ? (
-        <Link className="nav-link" to={"/upload"}>
-            <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
-            Upload
-        </Link>
-    ) : (
-        <div className="nav-link text-muted">
-            <span
-                data-toggle="tooltip"
-                title="File upload is disabled for your account"
-            >
-                <FontAwesomeIcon className="navbar-icon" icon={faUpload} />
-                Upload
-            </span>
-        </div>
-    );
-    return buttonLink;
-}
-
-export default function Navigation() {
+export function Navigation() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
 
     const remote = useRemote();
     const remotePath = useRemotePath();
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const navItems = config.isReady ? (
         <Extendable ident="navbar">
             {auth.isAuthenticated ? (

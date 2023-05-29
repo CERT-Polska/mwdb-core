@@ -30,7 +30,8 @@ export enum Capability {
 
 export type User = {
     login: string;
-    groups: string[] | Group[];
+    name?: string;
+    groups: Group[];
     capabilities: Capability[];
     additional_info?: string;
     api_keys?: ApiKey[];
@@ -192,6 +193,7 @@ export type ApiKey = {
     issued_on: string | Date;
     issuer_login: string;
     name: string;
+    token?: string;
 };
 
 export type Family = {
@@ -218,34 +220,6 @@ export type AxiosServerErrors = AxiosError<{
     message?: string;
     errors?: Record<string, string>;
 }>;
-
-export type TabContextValues = {
-    tab?: string;
-    subTab?: string;
-    getTabLink: (tab: string, subtab?: string) => string;
-    setComponent: (newComponent: React.ComponentType) => void;
-    setActions: (actions: JSX.Element[]) => void;
-};
-
-export type ConfigContextValues = {
-    config: Partial<ServerInfo>;
-    configError: unknown;
-    isReady: boolean;
-    update: () => Promise<void>;
-    pendingUsers: User[];
-    getPendingUsers: () => Promise<void>;
-};
-
-export type AuthContextValues = {
-    user: User;
-    isAuthenticated: boolean;
-    isAdmin: boolean;
-    hasCapability: (cap: Capability) => boolean;
-    refreshSession: () => Promise<void>;
-    updateSession: (newSession: User) => void;
-    logout: (error?: string) => void;
-    oAuthLogout: () => Promise<any>;
-};
 
 export type GenericOrJSX<T> = T | JSX.Element;
 

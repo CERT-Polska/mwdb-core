@@ -4,11 +4,13 @@ import { useOutletContext } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
 import { GroupBadge } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { ProfileOutletContext } from "@mwdb-web/types/context";
+import { Group } from "@mwdb-web/types/types";
 
 export default function ProfileGroups() {
     const { redirectToAlert } = useViewAlert();
-    const { profile } = useOutletContext();
-    const [workspaces, setWorkspaces] = useState([]);
+    const { profile }: ProfileOutletContext = useOutletContext();
+    const [workspaces, setWorkspaces] = useState<Group[]>([]);
 
     useEffect(() => {
         getWorkspaces();
@@ -17,7 +19,7 @@ export default function ProfileGroups() {
     async function getWorkspaces() {
         try {
             const response = await api.authGroups();
-            setWorkspaces(response.data["groups"]);
+            setWorkspaces(response.data.groups);
         } catch (error) {
             redirectToAlert({
                 target: "/profile",

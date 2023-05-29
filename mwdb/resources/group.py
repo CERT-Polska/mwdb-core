@@ -2,9 +2,11 @@ from flask import g, request
 from flask_restful import Resource
 from sqlalchemy import exists
 from sqlalchemy.orm import joinedload
-from werkzeug.exceptions import Conflict, Forbidden, NotFound
+from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.config import app_config
+from mwdb.core.mail import MailError, send_email_notification
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, Member, User, db
@@ -583,3 +585,145 @@ class GroupMemberResource(Resource):
         )
         schema = GroupSuccessResponseSchema()
         return schema.dump({"name": name})
+
+
+@rate_limited_resource
+class RequestGroupInviteLinkResource(Resource):
+    @requires_authorization
+    def post(self, name, invited_user):
+        """
+        ---
+        summary: Request invitation link
+        description: |
+            Creates invitation link and sends an email to the invited user.
+
+            Invitation link works only for secified group and specified user
+
+            Requires `manage_users` capability or group_admin membership.
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        parameters:
+            - in: path
+              name: name
+              schema:
+                type: string
+              description: Group name
+            - in: path
+              name: invited_user
+              schema:
+                type: string
+              description: Invited user login
+        responses:
+            200:
+                description: When link was created successfully
+            400:
+                description: When request body is invalid
+            403:
+                description: |
+                    When user doesn't have enough permissions,
+                    group is immutable or invited user is pending
+            404:
+                description: When invited user or group doesn't exist
+            409:
+                description: When user is already a member of this group
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        group_obj = (db.session.query(Group).filter(Group.name == name)).first()
+
+        if group_obj is None:
+            raise NotFound("Group does not exist or you are not it's member")
+
+        member_obj = (
+            db.session.query(Member)
+            .filter(Member.group_id == group_obj.id)
+            .filter(Member.user_id == g.auth_user.id)
+        ).first()
+
+        if member_obj is None:
+            raise NotFound("Group does not exist or you are not it's member")
+
+        if not member_obj.group_admin:
+            raise Forbidden("You do not have group_admin role")
+
+        if group_obj.private or group_obj.immutable:  # should it be more strict?
+            raise Forbidden("You cannot invite users to this group")
+
+        invited_user_obj = (
+            db.session.query(User).filter(User.login == invited_user)
+        ).first()
+
+        if invited_user_obj is None:
+            raise NotFound("Inveted user does not exist")
+
+        if invited_user_obj.pending:
+            raise Forbidden("Invited user is pending")
+
+        test_obj = (
+            db.session.query(Member)
+            .filter(Member.group_id == group_obj.id)
+            .filter(Member.user_id == invited_user_obj.id)
+        ).first()
+        if test_obj is not None:
+            raise Conflict("Invited user is already a member of this group")
+
+        token = invited_user_obj.generate_group_invite_token(
+            group_obj.id, g.auth_user.login
+        )
+
+        try:
+            send_email_notification(
+                "invitation",
+                "MWDB: You have been invited to a new group",
+                invited_user_obj.email,
+                base_url=app_config.mwdb.base_url,
+                login=invited_user_obj.login,
+                group_invite_token=token,
+            )
+        except MailError:
+            logger.exception("Can't send e-mail notification")
+            raise InternalServerError(
+                "SMTP server needed to fulfill this request is"
+                " not configured or unavailable."
+            )
+
+
+@rate_limited_resource
+class JoinGroupInviteLinkResource(Resource):
+    @requires_authorization
+    def post(selt):
+        """
+        ---
+        summary: Join group using invitation link
+        description: |
+            Join group using link
+
+        security:
+            - bearerAuth: []
+        tags:
+            - group
+        responses:
+            200:
+                description: When user joined group successfully
+            400:
+                description: When request body is invalid
+            403:
+                description: When there was a problem with the token
+            409:
+                description: When user is already a member of this group
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        token = request.args.get("token")
+
+        if token is None:
+            raise Forbidden("Token not found")
+
+        invite_data = User.verify_group_invite_token(token)
+
+        if invite_data is None:
+            raise Forbidden("There was a problem while decoding your token")

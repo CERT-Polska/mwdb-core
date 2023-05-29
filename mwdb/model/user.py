@@ -200,6 +200,24 @@ class User(db.Model):
             expiration=14 * 24 * 3600,
         )
 
+    def generate_group_invite_token(self, group_id, inviter):
+        return self._generate_token(
+            user_fields=[],
+            scope=AuthScope.group_invite,
+            expiration=7 * 24 * 3600,  # valid for 1 week
+            group_id=group_id,
+            inviter=inviter,
+        )
+
+    @staticmethod
+    def verify_group_invite_token(token):
+        result = User._verify_token(
+            token=token,
+            fields=[],
+            scope=AuthScope.group_invite,
+        )
+        return None if result is None else result[0]
+
     @staticmethod
     def verify_session_token(token) -> Optional[Tuple["User", Optional[str]]]:
         return User._verify_token(

@@ -2,7 +2,7 @@ import { Extendable } from "../plugins";
 
 type Props = {
     ident: string;
-    children: JSX.Element | JSX.Element[];
+    children: React.ReactNode;
     fluid?: boolean;
     style?: React.CSSProperties;
     showIf?: boolean;

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { EditButton } from "./EditButton";
 
 type Props = {
-    children: JSX.Element | JSX.Element[];
+    children: React.ReactNode;
     editLocation: string;
 };
 

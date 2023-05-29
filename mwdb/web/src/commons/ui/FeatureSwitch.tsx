@@ -4,7 +4,7 @@ import ConfirmationModal from "./ConfirmationModal";
 type Props = {
     name: string;
     value: boolean;
-    children: JSX.Element | JSX.Element[];
+    children: React.ReactNode;
     disabled?: boolean;
     onUpdate: (value: Record<string, boolean>) => Promise<void>;
 };

@@ -15,7 +15,7 @@ type Props = SelectOrInput & {
     selective?: boolean;
     badge?: boolean;
     masked?: boolean;
-    children?: JSX.Element | JSX.Element[];
+    children?: React.ReactNode;
     onSubmit: (value: Record<string, string>) => void;
 };
 

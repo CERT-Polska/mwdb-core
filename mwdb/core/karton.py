@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from flask import g
 from karton.core import Config as KartonConfig
@@ -18,17 +19,26 @@ class KartonProducer(Producer):
     with_service_info = True
 
 
-karton_producer = KartonProducer(config=KartonConfig(app_config.karton.config_path))
+if app_config.mwdb.enable_karton:
+    karton_producer = KartonProducer(config=KartonConfig(app_config.karton.config_path))
+else:
+    karton_producer = None
 
 
-def get_karton_producer() -> Producer:
+def get_karton_producer() -> Optional[Producer]:
     return karton_producer
 
 
 def send_file_to_karton(file) -> str:
+    producer = get_karton_producer()
+
+    if producer is None:
+        raise RuntimeError(
+            "This method should not be called when Karton is not enabled"
+        )
+
     file_stream = file.open()
     try:
-        producer = get_karton_producer()
         feed_quality = g.auth_user.feed_quality
         task_priority = (
             TaskPriority.NORMAL if feed_quality == "high" else TaskPriority.LOW
@@ -58,6 +68,12 @@ def send_file_to_karton(file) -> str:
 
 def send_config_to_karton(config) -> str:
     producer = get_karton_producer()
+
+    if producer is None:
+        raise RuntimeError(
+            "This method should not be called when Karton is not enabled"
+        )
+
     task = Task(
         headers={
             "type": "config",
@@ -79,6 +95,12 @@ def send_config_to_karton(config) -> str:
 
 def send_blob_to_karton(blob) -> str:
     producer = get_karton_producer()
+
+    if producer is None:
+        raise RuntimeError(
+            "This method should not be called when Karton is not enabled"
+        )
+
     task = Task(
         headers={
             "type": "blob",
@@ -98,5 +120,12 @@ def send_blob_to_karton(blob) -> str:
 
 
 def get_karton_state():
-    karton_state = KartonState(karton_producer.backend)
+    producer = get_karton_producer()
+
+    if producer is None:
+        raise RuntimeError(
+            "This method should not be called when Karton is not enabled"
+        )
+
+    karton_state = KartonState(producer.backend)
     return karton_state

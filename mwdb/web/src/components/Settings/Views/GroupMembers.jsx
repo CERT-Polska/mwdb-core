@@ -8,11 +8,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { api } from "@mwdb-web/commons/api";
 import {
-    useViewAlert,
     Autocomplete,
     ConfirmationModal,
     UserBadge,
 } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 function AddMemberForm({ newMemberItems, addMember }) {
     const [newMember, setNewMember] = useState("");

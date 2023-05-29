@@ -4,9 +4,10 @@ import { Link, useOutletContext } from "react-router-dom";
 import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { DateString, ShowIf } from "@mwdb-web/commons/ui";
+import { Capability } from "@mwdb-web/types/types";
 
 function ProfileItem(props) {
     if (!props.value) return [];

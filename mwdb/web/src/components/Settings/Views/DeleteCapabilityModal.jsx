@@ -1,6 +1,6 @@
-import React from "react";
 import { isEmpty } from "lodash";
-import { ConfirmationModal, useViewAlert } from "@mwdb-web/commons/ui";
+import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 function DeleteCapabilityModal(props) {
     const {

@@ -6,9 +6,11 @@ import { faUsersCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { GroupBadge, ShowIf, useViewAlert } from "@mwdb-web/commons/ui";
+import { GroupBadge, ShowIf } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { Capability } from "@mwdb-web/types/types";
 
 function ProfileItem(props) {
     if (!props.value) return [];

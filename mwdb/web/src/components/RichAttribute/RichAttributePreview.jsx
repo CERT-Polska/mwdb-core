@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect } from "react";
+import { useReducer, useState, useEffect } from "react";
 import AceEditor from "react-ace";
 import RichAttributeRenderer from "./RichAttributeRenderer";
 

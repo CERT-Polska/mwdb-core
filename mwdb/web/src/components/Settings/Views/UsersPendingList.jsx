@@ -1,14 +1,10 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import {
-    PagedList,
-    DateString,
-    ConfirmationModal,
-    useViewAlert,
-} from "@mwdb-web/commons/ui";
+import { PagedList, DateString, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 export default function UsersPendingList() {
     const viewAlert = useViewAlert();

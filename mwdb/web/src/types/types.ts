@@ -1,28 +1,32 @@
-export type Capability =
-    | "personalize"
-    | "share_queried_objects"
-    | "adding_comments"
-    | "manage_profile"
-    | "removing_parents"
-    | "adding_blobs"
-    | "removing_tags"
-    | "access_uploader_info"
-    | "removing_comments"
-    | "removing_objects"
-    | "adding_all_attributes"
-    | "unlimited_requests"
-    | "karton_assign"
-    | "karton_unassign"
-    | "reading_all_attributes"
-    | "adding_configs"
-    | "adding_files"
-    | "adding_tags"
-    | "sharing_with_all"
-    | "manage_users"
-    | "karton_reanalyze"
-    | "access_all_objects"
-    | "removing_attributes"
-    | "adding_parents";
+import { AxiosError } from "axios";
+
+export enum Capability {
+    manageUsers = "manage_users",
+    shareQueriedObjects = "share_queried_objects",
+    accessAllObjects = "access_all_objects",
+    sharingWithAll = "sharing_with_all",
+    accessUploaderInfo = "access_uploader_info",
+    addingTags = "adding_tags",
+    removingTags = "removing_tags",
+    addingComments = "adding_comments",
+    removingComments = "removing_comments",
+    addingParents = "adding_parents",
+    removingParents = "removing_parents",
+    readingAllAttributes = "reading_all_attributes",
+    addingAllAttributes = "adding_all_attributes",
+    removingAttributes = "removing_attributes",
+    addingFiles = "adding_files",
+    addingConfigs = "adding_configs",
+    addingBlobs = "adding_blobs",
+    unlimitedRequests = "unlimited_requests",
+    removingObjects = "removing_objects",
+    manageProfile = "manage_profile",
+    personalize = "personalize",
+    kartonAssign = "karton_assign",
+    kartonReanalyze = "karton_reanalyze",
+    removingKarton = "karton_unassign",
+    modify3rdPartySharing = "modify_3rd_party_sharing",
+}
 
 export type User = {
     login: string;
@@ -208,4 +212,54 @@ export type KartonAnalysis = {
     >;
     arguments: Record<`additionalProp${number}`, string>;
     last_update: string | Date;
+};
+
+export type AxiosServerErrors = AxiosError<{
+    message?: string;
+    errors?: Record<string, string>;
+}>;
+
+export type TabContextValues = {
+    tab?: string;
+    subTab?: string;
+    getTabLink: (tab: string, subtab?: string) => string;
+    setComponent: (newComponent: React.ComponentType) => void;
+    setActions: (actions: JSX.Element[]) => void;
+};
+
+export type ConfigContextValues = {
+    config: Partial<ServerInfo>;
+    configError: unknown;
+    isReady: boolean;
+    update: () => Promise<void>;
+    pendingUsers: User[];
+    getPendingUsers: () => Promise<void>;
+};
+
+export type AuthContextValues = {
+    user: User;
+    isAuthenticated: boolean;
+    isAdmin: boolean;
+    hasCapability: (cap: Capability) => boolean;
+    refreshSession: () => Promise<void>;
+    updateSession: (newSession: User) => void;
+    logout: (error?: string) => void;
+    oAuthLogout: () => Promise<any>;
+};
+
+export type GenericOrJSX<T> = T | JSX.Element;
+
+export type ServerInfo = {
+    request_timeout: number;
+    is_karton_enabled: boolean;
+    statement_timeout: number;
+    is_oidc_enabled: boolean;
+    is_authenticated: boolean;
+    is_maintenance_set: boolean;
+    recaptcha_site_key: string;
+    file_upload_timeout: number;
+    server_version: string;
+    is_registration_enabled: boolean;
+    instance_name: string;
+    remotes: string[];
 };

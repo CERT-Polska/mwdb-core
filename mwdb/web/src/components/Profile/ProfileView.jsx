@@ -7,7 +7,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
-import { View, useViewAlert } from "@mwdb-web/commons/ui";
+import { View } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 import DeleteCapabilityModal from "../Settings/Views/DeleteCapabilityModal";
 
 function ProfileNav() {

@@ -67,10 +67,11 @@ import UserCapabilities from "./components/Settings/Views/UserCapabilities";
 import UserAPIKeys from "./components/Settings/Views/UserAPIKeys";
 import { AttributeEditTemplate } from "./components/Settings/Views/AttributeEditTemplate";
 
-import { Capability } from "./commons/auth";
 import { ConfigContext } from "./commons/config";
 import { fromPlugins, Extendable } from "./commons/plugins";
 import { ErrorBoundary, RequiresAuth, RequiresCapability } from "./commons/ui";
+
+import { Capability } from "@mwdb-web/types/types";
 
 function NavigateFor404() {
     /**

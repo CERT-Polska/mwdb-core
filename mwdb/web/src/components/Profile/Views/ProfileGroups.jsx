@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { isEmpty } from "lodash";
+import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
 import { api } from "@mwdb-web/commons/api";
-import { GroupBadge, useViewAlert } from "@mwdb-web/commons/ui";
+import { GroupBadge } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 export default function ProfileGroups() {
     const { redirectToAlert } = useViewAlert();

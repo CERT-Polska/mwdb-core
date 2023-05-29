@@ -13,6 +13,7 @@ import {
     ObjectListItem,
     Query,
     RelatedObject,
+    ServerInfo,
     Share,
     Tag,
     User,
@@ -20,20 +21,7 @@ import {
 
 export type Response<T> = Promise<AxiosResponse<T>>;
 
-export type ServerInfoResponse = Response<{
-    server_version: string;
-    is_authenticated: boolean;
-    instance_name: string;
-    is_maintenance_set: boolean;
-    is_registration_enabled: boolean;
-    is_karton_enabled: boolean;
-    is_oidc_enabled: boolean;
-    is_3rd_party_sharing_consent_enabled: boolean;
-    recaptcha_site_key: boolean;
-    request_timeout: number;
-    file_upload_timeout: number;
-    statement_timeout: number;
-}>;
+export type ServerInfoResponse = Response<ServerInfo>;
 
 type ServerDocsInfo = {
     description: string;
@@ -176,7 +164,7 @@ export type SetGroupAdminResponse = Response<{
 
 export type GetUsersResponse = Response<User[]>;
 
-export type GetPendingUsersResponse = Response<User[]>;
+export type GetPendingUsersResponse = Response<{ users: User[] }>;
 
 export type AcceptPendingUserResponse = Response<{
     login: string;

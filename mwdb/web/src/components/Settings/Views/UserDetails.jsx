@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { isEmpty } from "lodash";
 import { Link, useOutletContext } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
@@ -8,8 +8,8 @@ import {
     EditableItem,
     PseudoEditableItem,
     GroupBadge,
-    useViewAlert,
 } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faTrash } from "@fortawesome/free-solid-svg-icons";

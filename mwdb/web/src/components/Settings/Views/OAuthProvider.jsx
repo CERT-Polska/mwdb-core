@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
-import {
-    ConfirmationModal,
-    EditableItem,
-    useViewAlert,
-} from "@mwdb-web/commons/ui";
+import { ConfirmationModal, EditableItem } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useParams } from "react-router-dom";

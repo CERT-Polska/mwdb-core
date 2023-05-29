@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { isEmpty } from "lodash";
 import { Link, useOutletContext } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
@@ -8,8 +8,8 @@ import {
     PseudoEditableItem,
     FeatureSwitch,
     UserBadge,
-    useViewAlert,
 } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -104,7 +104,7 @@ export default function GroupDetails() {
                 {group["workspace"] ? (
                     <span className="badge badge-success">Enabled</span>
                 ) : (
-                    []
+                    <></>
                 )}
                 <div>
                     Converts group to the workgroup, so users will see each
@@ -121,7 +121,7 @@ export default function GroupDetails() {
                 {group["default"] ? (
                     <span className="badge badge-success">Enabled</span>
                 ) : (
-                    []
+                    <></>
                 )}
                 <div>Automatically adds new users to this group.</div>
             </FeatureSwitch>

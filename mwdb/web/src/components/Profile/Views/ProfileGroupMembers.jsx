@@ -3,12 +3,10 @@ import { Navigate, useParams, useOutletContext } from "react-router-dom";
 import { isEmpty, isNil } from "lodash";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import {
-    GroupBadge,
-    useViewAlert,
-    ConfirmationModal,
-} from "@mwdb-web/commons/ui";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { GroupBadge, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { Capability } from "@mwdb-web/types/types";
 
 function ProfileGroupItems({ workspace, updateWorkspace }) {
     const { setAlert } = useViewAlert();

@@ -5,9 +5,10 @@ import Pagination from "react-js-pagination";
 import _ from "lodash";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Identicon, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { Capability } from "@mwdb-web/types/types";
 
 function Comment(props) {
     return (
@@ -113,7 +114,7 @@ function CommentList({ comments, removeComment }) {
             itemsCountPerPage * activePage
         )
         .map((comment, index) => (
-            <React.Fragment>
+            <React.Fragment key={index}>
                 <Comment
                     id={comment.id}
                     comment={comment.comment}

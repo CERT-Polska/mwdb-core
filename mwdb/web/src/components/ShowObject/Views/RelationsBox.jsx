@@ -12,18 +12,20 @@ import {
 import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     ObjectLink,
     ActionCopyToClipboard,
     ConfirmationModal,
     TagList,
-    getErrorMessage,
 } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
-import RelationsAddModal from "../Actions/RelationsAddModal";
 import { updateActivePage } from "@mwdb-web/commons/helpers";
+import { Capability } from "@mwdb-web/types/types";
+
+import RelationsAddModal from "../Actions/RelationsAddModal";
 
 function paginateParentChildren(
     parents,

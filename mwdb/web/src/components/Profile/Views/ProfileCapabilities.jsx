@@ -1,22 +1,15 @@
-import { useState, useCallback, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { find, isNil, isEmpty } from "lodash";
 import { api } from "@mwdb-web/commons/api";
-import {
-    capabilitiesList,
-    Capability,
-    AuthContext,
-} from "@mwdb-web/commons/auth";
-import {
-    GroupBadge,
-    ConfirmationModal,
-    useViewAlert,
-    Select,
-} from "@mwdb-web/commons/ui";
+import { capabilitiesList, AuthContext } from "@mwdb-web/commons/auth";
+import { GroupBadge, ConfirmationModal, Select } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
+import { Capability } from "@mwdb-web/types/types";
 
 function CapabilitiesTable({ profile }) {
     const { user } = useContext(AuthContext);

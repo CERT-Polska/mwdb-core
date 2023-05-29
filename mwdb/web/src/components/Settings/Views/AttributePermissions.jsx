@@ -5,11 +5,8 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { api } from "@mwdb-web/commons/api";
-import {
-    Autocomplete,
-    ConfirmationModal,
-    useViewAlert,
-} from "@mwdb-web/commons/ui";
+import { Autocomplete, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
 
 const permissionKeys = ["read", "set"];
 

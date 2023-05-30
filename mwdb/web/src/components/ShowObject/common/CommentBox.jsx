@@ -1,11 +1,12 @@
 import { useState, useContext, useEffect, useCallback } from "react";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { CommentList } from "./CommentList";
 import { CommentForm } from "./CommentForm";
+import { Capability } from "@mwdb-web/types/types";
 
 export function CommentBox() {
     const api = useContext(APIContext);
@@ -13,9 +14,9 @@ export function CommentBox() {
     const context = useContext(ObjectContext);
 
     const canRemoveComments =
-        auth.hasCapability(Capabilities.removingComments) && !api.remote;
+        auth.hasCapability(Capability.removingComments) && !api.remote;
     const canAddComments =
-        auth.hasCapability(Capabilities.addingComments) && !api.remote;
+        auth.hasCapability(Capability.addingComments) && !api.remote;
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [commentToRemove, setCommentToRemove] = useState("");

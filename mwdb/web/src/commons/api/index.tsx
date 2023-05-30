@@ -412,8 +412,8 @@ function setGroupAdmin(
     return axios.put(`/group/${name}/member/${member}`, { group_admin });
 }
 
-function requestGroupInviteLink(name: string, invited_user: string){
-    return axios.post(`/group/${name}/invite/${invited_user}`)
+function requestGroupInviteLink(name: string, invited_user: string) {
+    return axios.post(`/group/${name}/invite/${invited_user}`);
 }
 
 function getUsers(): GetUsersResponse {

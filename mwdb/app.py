@@ -49,6 +49,7 @@ from mwdb.resources.group import (
     GroupListResource,
     GroupMemberResource,
     GroupResource,
+    JoinGroupInviteLinkResource,
     RequestGroupInviteLinkResource,
 )
 from mwdb.resources.karton import KartonAnalysisResource, KartonObjectResource
@@ -346,6 +347,7 @@ api.add_resource(GroupListResource, "/group")
 api.add_resource(GroupResource, "/group/<name>")
 api.add_resource(GroupMemberResource, "/group/<name>/member/<login>")
 api.add_resource(RequestGroupInviteLinkResource, "/group/<name>/invite/<invited_user>")
+api.add_resource(JoinGroupInviteLinkResource, "/group/join")
 
 # OAuth endpoints
 if app_config.mwdb.enable_oidc:

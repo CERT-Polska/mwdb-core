@@ -209,14 +209,19 @@ class User(db.Model):
             inviter=inviter,
         )
 
-    @staticmethod
-    def verify_group_invite_token(token):
-        result = User._verify_token(
-            token=token,
-            fields=[],
-            scope=AuthScope.group_invite,
-        )
-        return None if result is None else result[0]
+    def join_group_with_token(self, token):
+        data = verify_token(token, AuthScope.group_invite)
+
+        if data is None:
+            return False
+
+        group_id = data.get("group_id")
+        if group_id is None:
+            return False
+
+        group_obj = db.session.query(Group).filter(Group.id == group_id).first()
+
+        return group_obj.add_member(self)
 
     @staticmethod
     def verify_session_token(token) -> Optional[Tuple["User", Optional[str]]]:

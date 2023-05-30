@@ -690,6 +690,8 @@ class RequestGroupInviteLinkResource(Resource):
                 " not configured or unavailable."
             )
 
+        return token
+
 
 @rate_limited_resource
 class JoinGroupInviteLinkResource(Resource):
@@ -703,17 +705,24 @@ class JoinGroupInviteLinkResource(Resource):
 
         security:
             - bearerAuth: []
+        parameters:
+            - in: query
+              name: token
+              schema:
+                type: string
+              description: token
         tags:
             - group
         responses:
             200:
                 description: When user joined group successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
             400:
                 description: When request body is invalid
             403:
                 description: When there was a problem with the token
-            409:
-                description: When user is already a member of this group
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -723,7 +732,8 @@ class JoinGroupInviteLinkResource(Resource):
         if token is None:
             raise Forbidden("Token not found")
 
-        invite_data = User.verify_group_invite_token(token)
+        success = g.auth_user.join_group_with_token(token)
 
-        if invite_data is None:
-            raise Forbidden("There was a problem while decoding your token")
+        if not success:
+            raise Forbidden("There was a problem while processing your request")
+        db.session.commit()

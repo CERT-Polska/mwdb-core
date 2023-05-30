@@ -2,4 +2,4 @@ Hi {login}
 
 You have been invited to join new group.
 
-To view the invitation click this link: {base_url}/.../?token={group_invite_token}
+To view the invitation click this link: {base_url}/group/join/?token={group_invite_token}

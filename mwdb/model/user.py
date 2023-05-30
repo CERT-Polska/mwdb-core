@@ -200,13 +200,12 @@ class User(db.Model):
             expiration=14 * 24 * 3600,
         )
 
-    def generate_group_invite_token(self, group_id, inviter):
+    def generate_group_invite_token(self, group_id, expiration):
         return self._generate_token(
             user_fields=["identity_ver"],
             scope=AuthScope.group_invite,
-            expiration=7 * 24 * 3600,  # valid for 1 week
+            expiration=expiration,
             group_id=group_id,
-            inviter=inviter,
         )
 
     @staticmethod

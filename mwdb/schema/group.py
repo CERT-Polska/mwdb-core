@@ -67,3 +67,7 @@ class GroupListResponseSchema(Schema):
 
 class GroupSuccessResponseSchema(GroupNameSchemaBase):
     pass
+
+
+class GroupInvitationLinkResponseSchema(Schema):
+    token = fields.Str(required=True, allow_none=False)

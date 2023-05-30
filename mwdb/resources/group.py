@@ -18,6 +18,7 @@ from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.group import (
     GroupCreateRequestSchema,
+    GroupInvitationLinkResponseSchema,
     GroupItemResponseSchema,
     GroupListResponseSchema,
     GroupMemberUpdateRequestSchema,
@@ -655,7 +656,7 @@ class RequestGroupInviteLinkResource(Resource):
         if not member_obj.group_admin:
             raise Forbidden("You do not have group_admin role")
 
-        if group_obj.private or group_obj.immutable:  # should it be more strict?
+        if group_obj.private or group_obj.immutable:
             raise Forbidden("You cannot invite users to this group")
 
         invited_user_obj = (
@@ -663,21 +664,20 @@ class RequestGroupInviteLinkResource(Resource):
         ).first()
 
         if invited_user_obj is None:
-            raise NotFound("Inveted user does not exist")
+            raise NotFound("Invited user does not exist")
 
         if invited_user_obj.pending:
             raise Forbidden("Invited user is pending")
 
-        test_obj = (
+        if (
             db.session.query(Member)
             .filter(Member.group_id == group_obj.id)
             .filter(Member.user_id == invited_user_obj.id)
-        ).first()
-        if test_obj is not None:
+        ).first() is not None:
             raise Conflict("Invited user is already a member of this group")
 
         token = invited_user_obj.generate_group_invite_token(
-            group_obj.id, g.auth_user.login
+            group_obj.id, app_config.mwdb.group_invite_expiration_time
         )
 
         try:
@@ -696,7 +696,8 @@ class RequestGroupInviteLinkResource(Resource):
                 " not configured or unavailable."
             )
 
-        return token
+        schema = GroupInvitationLinkResponseSchema()
+        return schema.dump({"token": token})
 
 
 @rate_limited_resource

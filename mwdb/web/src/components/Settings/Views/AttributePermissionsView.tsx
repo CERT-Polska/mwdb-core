@@ -30,7 +30,6 @@ export function AttributesPermissionsView() {
 
     const updateAttributePermissions = useCallback(async () => {
         const response = await api.getAttributePermissions(attributeKey);
-        console.log(response);
         const attributePermissions = response.data.attribute_permissions.reduce(
             (prev, next) => {
                 return {

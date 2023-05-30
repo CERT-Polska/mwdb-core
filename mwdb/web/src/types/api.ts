@@ -72,9 +72,11 @@ export type ApiKeyRemoveResponse = Response<null>;
 
 export type GetObjectResponse = Response<ObjectData | ConfigData | BlobData>;
 
-export type GetObjectListResponse = Response<
-    ObjectListItem[] | ConfigListItem[] | BlobListItem[]
->;
+export type GetObjectListResponse = Response<{
+    blobs?: BlobListItem[];
+    files?: ObjectListItem[];
+    configs?: ConfigListItem[];
+}>;
 
 export type GetObjectCountResponse = Response<{
     count: number;

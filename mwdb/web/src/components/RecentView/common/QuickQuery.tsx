@@ -1,63 +1,34 @@
-import React, { useState, useEffect, useContext } from "react";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { useState, useEffect, useContext } from "react";
+import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { Capability } from "@mwdb-web/types/types";
 
-import QuickQueryAddModal from "./QuickQueryAddModal";
-import { toast } from "react-toastify";
+import { QuickQueryAddModal } from "./QuickQueryAddModal";
+import { QuickQueryItem } from "./QuickQueryItem";
+import { ObjectType, Query } from "@mwdb-web/types/types";
+import { isNil } from "lodash";
 
-function QuickQueryItem(props) {
-    return (
-        <span
-            className={`badge badge-${props.color}`}
-            style={{ cursor: "pointer" }}
-        >
-            <span
-                data-toggle="tooltip"
-                title="Add the Quick query to your search or click on x to delete it"
-                onClick={props.onClick}
-            >
-                {props.label}{" "}
-            </span>
-            {props.onDelete ? (
-                <span
-                    data-toggle="tooltip"
-                    title="Delete Quick query."
-                    onClick={props.onDelete}
-                >
-                    <FontAwesomeIcon icon={faTimes} pull="right" size="1x" />
-                </span>
-            ) : (
-                []
-            )}
-        </span>
-    );
-}
+type Props = {
+    type: ObjectType;
+    query: string;
+    canAddQuickQuery: boolean;
+    addToQuery: (query: string, login: string) => void;
+    submitQuery: (query: string) => void;
+    setQueryError: (error: any) => void;
+};
 
-function UploaderQueryItem(props) {
-    return (
-        <QuickQueryItem
-            label="Only uploaded by me"
-            color="secondary"
-            {...props}
-        />
-    );
-}
-
-export default function QuickQuery(props) {
+export default function QuickQuery(props: Props) {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
 
-    const [addModalOpen, setAddModalOpen] = useState(false);
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [idToRemove, setIdToRemove] = useState(null);
-    const [queries, setQueries] = useState([]);
-    const [modalError, setModalError] = useState(null);
+    const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const [idToRemove, setIdToRemove] = useState<number | null>(null);
+    const [queries, setQueries] = useState<Query[]>([]);
+    const [modalError, setModalError] = useState<string>();
 
     const updateQueries = async () => {
         try {
@@ -68,25 +39,28 @@ export default function QuickQuery(props) {
         }
     };
 
-    const addQuery = async (name) => {
+    const addQuery = async (name: string) => {
         try {
             await api.addQuickQuery(props.type, name, props.query);
             updateQueries();
             setAddModalOpen(false);
-            setModalError(null);
+            setModalError(undefined);
         } catch (error) {
-            setModalError(error);
+            setModalError(error as string);
         }
     };
 
-    const deleteQuery = async (id) => {
+    const deleteQuery = async (id: number | null) => {
+        if (isNil(id)) {
+            return;
+        }
         try {
             await api.deleteQuickQuery(id);
             setIdToRemove(null);
             setDeleteModalOpen(false);
             updateQueries();
         } catch (error) {
-            setModalError(error);
+            setModalError(error as string);
         }
     };
 
@@ -105,8 +79,10 @@ export default function QuickQuery(props) {
 
     const predefinedQueryBadges = [
         !api.remote && (
-            <UploaderQueryItem
+            <QuickQueryItem
                 key="uploaded-by-me"
+                label="Only uploaded by me"
+                color="secondary"
                 onClick={(ev) => {
                     ev.preventDefault();
                     props.addToQuery("uploader", auth.user.login);
@@ -164,12 +140,13 @@ export default function QuickQuery(props) {
                     props.submitQuery(v.query);
                 }}
                 onDelete={
-                    auth.hasCapability(Capability.personalize) &&
-                    ((ev) => {
-                        ev.preventDefault();
-                        setIdToRemove(v.id);
-                        setDeleteModalOpen(true);
-                    })
+                    auth.hasCapability(Capability.personalize)
+                        ? (ev) => {
+                              ev.preventDefault();
+                              setIdToRemove(v.id);
+                              setDeleteModalOpen(true);
+                          }
+                        : undefined
                 }
             />
         ));
@@ -195,8 +172,8 @@ export default function QuickQuery(props) {
         </span>
     );
 
-    const userQuickQueryBadges = !api.remote ? (
-        <React.Fragment>
+    const userQuickQueryBadges = !api.remote && (
+        <>
             {queryBadges}
             {auth.hasCapability(Capability.personalize)
                 ? newQuickQueryButton
@@ -219,13 +196,11 @@ export default function QuickQuery(props) {
                 onSubmit={addQuery}
                 queries={queries}
                 onRequestModalClose={() => {
-                    setModalError(null);
+                    setModalError(undefined);
                     setAddModalOpen(false);
                 }}
             />
-        </React.Fragment>
-    ) : (
-        []
+        </>
     );
 
     // Fetch queries on mount

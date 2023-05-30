@@ -5,7 +5,7 @@ import { SizeProp } from "@fortawesome/fontawesome-svg-core";
 
 type Props = {
     text: string;
-    size: SizeProp;
+    size?: SizeProp;
     tooltipMessage?: string;
 };
 

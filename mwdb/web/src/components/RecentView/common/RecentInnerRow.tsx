@@ -1,7 +1,18 @@
-import React from "react";
 import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 
-export default function RecentInnerRow(props) {
+type Props = {
+    narrowOnly?: boolean;
+    wideOnly?: boolean;
+    copyable: boolean;
+    label?: string;
+    labelWidth?: number;
+    icon: JSX.Element;
+    noEllipsis: boolean;
+    value: string;
+    children?: JSX.Element;
+};
+
+export function RecentInnerRow(props: Props) {
     const classNames = (
         props.narrowOnly
             ? ["d-lg-none", "d-flex"]
@@ -11,10 +22,8 @@ export default function RecentInnerRow(props) {
     ).concat(props.copyable ? ["flickerable"] : []);
     return (
         <div className={classNames.join(" ")}>
-            {props.label ? (
+            {props.label && (
                 <b style={{ minWidth: props.labelWidth }}>{props.label}: </b>
-            ) : (
-                []
             )}
             {props.icon}
             <div
@@ -24,15 +33,13 @@ export default function RecentInnerRow(props) {
             >
                 {props.children || props.value}
             </div>
-            {props.copyable ? (
+            {props.copyable && (
                 <span className="ml-2">
                     <ActionCopyToClipboard
                         text={props.value}
                         tooltipMessage="Copy to clipboard"
                     />
                 </span>
-            ) : (
-                []
             )}
         </div>
     );

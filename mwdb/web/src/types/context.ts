@@ -1,5 +1,9 @@
 import { api } from "@mwdb-web/commons/api";
-import { Capability, ServerInfo, User } from "./types";
+import { Capability, ObjectType, ServerInfo, User } from "./types";
+import {
+    GetRemoteObjectCountResponse,
+    GetRemoteObjectListResponse,
+} from "./api";
 
 export type TabContextValues = {
     tab?: string;
@@ -31,6 +35,18 @@ export type AuthContextValues = {
 
 export type ApiContextValues = typeof api & {
     remote?: string;
+};
+
+export type RemoteApiContextValues = ApiContextValues & {
+    getObjectCount: (
+        type: ObjectType,
+        query: string
+    ) => GetRemoteObjectCountResponse;
+    getObjectList: (
+        type: ObjectType,
+        older_than: string,
+        query: string
+    ) => GetRemoteObjectListResponse;
 };
 
 export type ProfileOutletContext = {

@@ -2,7 +2,13 @@ from flask import g, request
 from flask_restful import Resource
 from sqlalchemy import exists
 from sqlalchemy.orm import joinedload
-from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFound
+from werkzeug.exceptions import (
+    BadRequest,
+    Conflict,
+    Forbidden,
+    InternalServerError,
+    NotFound,
+)
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -730,10 +736,91 @@ class JoinGroupInviteLinkResource(Resource):
         token = request.args.get("token")
 
         if token is None:
-            raise Forbidden("Token not found")
+            raise BadRequest("Token not found")
 
-        success = g.auth_user.join_group_with_token(token)
+        token_data = User.verify_group_invite_token(token)
+        if not token_data:
+            raise BadRequest("There was a problem while processing your token")
 
-        if not success:
-            raise Forbidden("There was a problem while processing your request")
+        invited_user_login = token_data.get("login")
+        if not g.auth_user.login == invited_user_login:
+            raise Forbidden("This invitation is not for you")
+
+        group_id = token_data.get("group_id")
+        if group_id is None:
+            raise BadRequest("Invalid token")
+
+        member = (
+            db.session.query(Member)
+            .filter(Member.group_id == group_id)
+            .filter(Member.user_id == g.auth_user.id)
+        ).first()
+
+        if member is not None:
+            raise Conflict("You are already member of this group")
+
+        group_obj = db.session.query(Group).filter(Group.id == group_id).first()
+        if group_obj is None:
+            raise NotFound("This group does not exist")
+
+        group_obj.add_member(g.auth_user)
         db.session.commit()
+
+        schema = GroupSuccessResponseSchema()
+        return schema.dump({"name": group_obj.name})
+
+    @requires_authorization
+    def put(self):
+        """
+        ---
+        summary: Get information about group from invitation token
+        description: |
+            Get information about group from invitation token
+
+        security:
+            - bearerAuth: []
+        parameters:
+            - in: query
+              name: token
+              schema:
+                type: string
+              description: token
+        tags:
+            - group
+        responses:
+            200:
+                description: When data was read successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
+            400:
+                description: When request body is invalid
+            403:
+                description: When there was a problem with the token
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        token = request.args.get("token")
+
+        if token is None:
+            raise BadRequest("Token not found")
+
+        token_data = User.verify_group_invite_token(token)
+        if not token_data:
+            raise BadRequest("There was a problem while processing your token")
+
+        invited_user_login = token_data.get("login")
+        if not g.auth_user.login == invited_user_login:
+            raise Forbidden("This invitation is not for you")
+
+        group_id = token_data.get("group_id")
+        if group_id is None:
+            raise BadRequest("Invalid token")
+
+        group_obj = db.session.query(Group).filter(Group.id == group_id).first()
+        if group_obj is None:
+            raise NotFound("This group does not exist")
+
+        schema = GroupSuccessResponseSchema()
+        return schema.dump({"name": group_obj.name})

@@ -12,6 +12,7 @@ import Navigation from "./components/Navigation";
 import RecentConfigs from "./components/RecentConfigs";
 import RecentSamples from "./components/RecentSamples";
 import ConfigStats from "./components/ConfigStats";
+import GroupJoin from "./components/GroupJoin";
 import RecentBlobs from "./components/RecentBlobs";
 import ShowSample from "./components/ShowSample";
 import ShowConfig from "./components/ShowConfig";
@@ -104,6 +105,7 @@ function AppRoutes() {
             <Route path="setpasswd" element={<UserSetPassword />} />
             <Route path="oauth/callback" element={<OAuthAuthorize />} />
             <Route element={<RequiresAuth />}>
+                <Route path="group/invite" element={<GroupJoin />} />
                 <Route path="/" element={<RecentSamples />} />
                 <Route path="configs" element={<RecentConfigs />} />
                 <Route path="blobs" element={<RecentBlobs />} />

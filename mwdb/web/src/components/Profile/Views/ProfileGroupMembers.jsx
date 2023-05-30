@@ -8,7 +8,11 @@ import {
     GroupBadge,
     useViewAlert,
     ConfirmationModal,
+    getErrorMessage,
 } from "@mwdb-web/commons/ui";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 
 function ProfileGroupItems({ workspace, updateWorkspace }) {
     const { setAlert } = useViewAlert();
@@ -70,6 +74,44 @@ function ProfileGroupItems({ workspace, updateWorkspace }) {
                 message={`Are you sure to delete ${removeUser} user from group?`}
             />
         </React.Fragment>
+    );
+}
+
+function InviteMemberForm({ group_name }) {
+    const [newMember, setNewMember] = useState("");
+
+    async function inviteMember(invitedUserLogin) {
+        try {
+            await api.requestGroupInviteLink(group_name, invitedUserLogin);
+            toast("Invitation sent", { type: "success" });
+        } catch (error) {
+            toast(getErrorMessage(error), { type: "error" });
+        }
+    }
+
+    return (
+        <div className="card">
+            <div className="card-body">
+                <input
+                    className="form-control"
+                    placeholder="User login"
+                    value={newMember}
+                    onChange={(event) => {
+                        setNewMember(event.target.value);
+                    }}
+                />
+                <button
+                    className="btn btn-outline-success mt-2 mr-1"
+                    disabled={newMember.length === 0}
+                    onClick={() => {
+                        inviteMember(newMember);
+                        setNewMember("");
+                    }}
+                >
+                    <FontAwesomeIcon icon={faPlus} /> Invite member
+                </button>
+            </div>
+        </div>
     );
 }
 
@@ -135,6 +177,7 @@ export default function ProfileGroupMembers() {
                 Group <span className="text-monospace">{groupName}</span>{" "}
                 members
             </h4>
+            <InviteMemberForm group_name={groupName} />
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
                     <tr className="d-flex">

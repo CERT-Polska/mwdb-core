@@ -3,7 +3,7 @@ import { User } from "@mwdb-web/types/types";
 import GroupBadge from "./GroupBadge";
 
 type Props = GroupBadgeProps & {
-    user: User;
+    user: Partial<User>;
 };
 
 export default function UserBadge({ user, ...props }: Props) {

@@ -1,5 +1,6 @@
 import { AxiosResponse } from "axios";
 import {
+    ActivePlugin,
     ApiKey,
     Attribute,
     AttributeDefinition,
@@ -12,8 +13,10 @@ import {
     KartonAnalysis,
     ObjectData,
     ObjectListItem,
+    Provider,
     Query,
     RelatedObject,
+    ServerAdminInfo,
     ServerInfo,
     Share,
     Tag,
@@ -42,11 +45,7 @@ export type ServerDocsResponse = Response<{
     servers: ServerDocsServer[];
 }>;
 
-export type ServerAdminInfoResponse = Response<{
-    active_plugins: object;
-    plugins_enabled: boolean;
-    rate_limit_enabled: boolean;
-}>;
+export type ServerAdminInfoResponse = Response<ServerAdminInfo>;
 
 export type AuthLoginResponse = Response<User>;
 
@@ -132,7 +131,7 @@ export type GetQuickQueriesResponse = Response<Query[]>;
 
 export type DeleteQuickQueryResponse = Response<null>;
 
-export type GetGroupsResponse = Response<Group[]>;
+export type GetGroupsResponse = Response<{ groups: Group[] }>;
 
 export type GetGroupResponse = Response<Group>;
 
@@ -159,7 +158,7 @@ export type SetGroupAdminResponse = Response<{
     name: string;
 }>;
 
-export type GetUsersResponse = Response<User[]>;
+export type GetUsersResponse = Response<{ users: User[] }>;
 
 export type GetPendingUsersResponse = Response<{ users: User[] }>;
 
@@ -207,24 +206,34 @@ export type UpdateUserResponse = Response<User>;
 
 export type RemoveUserResponse = Response<null>;
 
-export type GetAttributeDefinitionsResponse = Response<AttributeDefinition[]>;
+export type GetAttributeDefinitionsResponse = Response<{
+    attribute_definitions: AttributeDefinition[];
+}>;
 
 export type GetAttributeDefinitionResponse = Response<AttributeDefinition>;
 
 export type AddAttributeDefinitionReguest = {
     key: string;
-    label: string;
-    description: string;
-    hidden: boolean;
+    label?: string;
+    description?: string;
+    hidden?: boolean;
 };
 
 export type AddAttributeDefinitionResponse = Response<AttributeDefinition>;
 
-export type UpdateAttributeDefinitionRequest = AttributeDefinition;
+export type UpdateAttributeDefinitionRequest = Partial<AttributeDefinition>;
 
 export type UpdateAttributeDefinitionResponse = Response<AttributeDefinition>;
 
 export type RemoveAttributeDefinitionResponse = Response<null>;
+
+export type GetAttributePermissionsResponse = Response<{
+    attribute_permissions: {
+        can_read: boolean;
+        can_set: boolean;
+        group_name: string;
+    }[];
+}>;
 
 export type DownloadFileResponse = Response<{ token: string }>;
 
@@ -296,7 +305,7 @@ export type OauthGetIdentitiesResponse = Response<{
     providers: string[];
 }>;
 
-export type OauthGetSingleProviderResponse = Response<string>;
+export type OauthGetSingleProviderResponse = Response<Provider>;
 
 export type OauthUpdateSingleProviderResponse = Response<string>;
 

@@ -9,7 +9,7 @@ import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
-import DeleteCapabilityModal from "../Settings/Views/DeleteCapabilityModal";
+import { DeleteCapabilityModal } from "../Settings/common/DeleteCapabilityModal";
 import { Capability, User } from "@mwdb-web/types/types";
 
 function ProfileNav() {
@@ -49,14 +49,16 @@ export default function ProfileView() {
     const { redirectToAlert, setAlert } = useViewAlert();
     const userLogin = useParams().user || auth.user.login;
     const [profile, setProfile] = useState<User>({} as User);
-    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState("");
+    const [capabilitiesToDelete, setCapabilitiesToDelete] = useState<
+        Capability | ""
+    >("");
 
     useEffect(() => {
         getProfile();
     }, [userLogin]);
 
     async function changeCapabilities(
-        capability: Capability,
+        capability: Capability | "",
         callback: Function
     ) {
         try {

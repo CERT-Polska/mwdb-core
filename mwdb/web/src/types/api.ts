@@ -1,5 +1,7 @@
 import { AxiosResponse } from "axios";
 import {
+    ActivePlugin,
+    ApiKey,
     Attribute,
     AttributeDefinition,
     BlobData,
@@ -11,8 +13,11 @@ import {
     KartonAnalysis,
     ObjectData,
     ObjectListItem,
+    Provider,
     Query,
     RelatedObject,
+    ServerAdminInfo,
+    ServerInfo,
     Share,
     Tag,
     User,
@@ -20,20 +25,7 @@ import {
 
 export type Response<T> = Promise<AxiosResponse<T>>;
 
-export type ServerInfoResponse = Response<{
-    server_version: string;
-    is_authenticated: boolean;
-    instance_name: string;
-    is_maintenance_set: boolean;
-    is_registration_enabled: boolean;
-    is_karton_enabled: boolean;
-    is_oidc_enabled: boolean;
-    is_3rd_party_sharing_consent_enabled: boolean;
-    recaptcha_site_key: boolean;
-    request_timeout: number;
-    file_upload_timeout: number;
-    statement_timeout: number;
-}>;
+export type ServerInfoResponse = Response<ServerInfo>;
 
 type ServerDocsInfo = {
     description: string;
@@ -53,11 +45,7 @@ export type ServerDocsResponse = Response<{
     servers: ServerDocsServer[];
 }>;
 
-export type ServerAdminInfoResponse = Response<{
-    active_plugins: object;
-    plugins_enabled: boolean;
-    rate_limit_enabled: boolean;
-}>;
+export type ServerAdminInfoResponse = Response<ServerAdminInfo>;
 
 export type AuthLoginResponse = Response<User>;
 
@@ -75,23 +63,19 @@ export type AuthRecoverPasswordResponse = Response<{
     login: string;
 }>;
 
-export type AuthGroupsResponse = Response<Group>;
+export type AuthGroupsResponse = Response<{ groups: Group[] }>;
 
-export type ApiKeyAddResponse = Response<{
-    issuer_login: string;
-    name: string;
-    id: string;
-    token: string;
-    issued_on: string | Date;
-}>;
+export type ApiKeyAddResponse = Response<ApiKey>;
 
 export type ApiKeyRemoveResponse = Response<null>;
 
 export type GetObjectResponse = Response<ObjectData | ConfigData | BlobData>;
 
-export type GetObjectListResponse = Response<
-    ObjectListItem[] | ConfigListItem[] | BlobListItem[]
->;
+export type GetObjectListResponse = Response<{
+    blobs?: BlobListItem[];
+    files?: ObjectListItem[];
+    configs?: ConfigListItem[];
+}>;
 
 export type GetObjectCountResponse = Response<{
     count: number;
@@ -147,7 +131,7 @@ export type GetQuickQueriesResponse = Response<Query[]>;
 
 export type DeleteQuickQueryResponse = Response<null>;
 
-export type GetGroupsResponse = Response<Group[]>;
+export type GetGroupsResponse = Response<{ groups: Group[] }>;
 
 export type GetGroupResponse = Response<Group>;
 
@@ -174,9 +158,9 @@ export type SetGroupAdminResponse = Response<{
     name: string;
 }>;
 
-export type GetUsersResponse = Response<User[]>;
+export type GetUsersResponse = Response<{ users: User[] }>;
 
-export type GetPendingUsersResponse = Response<User[]>;
+export type GetPendingUsersResponse = Response<{ users: User[] }>;
 
 export type AcceptPendingUserResponse = Response<{
     login: string;
@@ -222,24 +206,34 @@ export type UpdateUserResponse = Response<User>;
 
 export type RemoveUserResponse = Response<null>;
 
-export type GetAttributeDefinitionsResponse = Response<AttributeDefinition[]>;
+export type GetAttributeDefinitionsResponse = Response<{
+    attribute_definitions: AttributeDefinition[];
+}>;
 
 export type GetAttributeDefinitionResponse = Response<AttributeDefinition>;
 
 export type AddAttributeDefinitionReguest = {
     key: string;
-    label: string;
-    description: string;
-    hidden: boolean;
+    label?: string;
+    description?: string;
+    hidden?: boolean;
 };
 
 export type AddAttributeDefinitionResponse = Response<AttributeDefinition>;
 
-export type UpdateAttributeDefinitionRequest = AttributeDefinition;
+export type UpdateAttributeDefinitionRequest = Partial<AttributeDefinition>;
 
 export type UpdateAttributeDefinitionResponse = Response<AttributeDefinition>;
 
 export type RemoveAttributeDefinitionResponse = Response<null>;
+
+export type GetAttributePermissionsResponse = Response<{
+    attribute_permissions: {
+        can_read: boolean;
+        can_set: boolean;
+        group_name: string;
+    }[];
+}>;
 
 export type DownloadFileResponse = Response<{ token: string }>;
 
@@ -302,3 +296,21 @@ export type ResubmitKartonAnalysisResponse = Response<{
 export type RemoveKartonAnalysisFromObjectResponse = Response<null>;
 
 export type EnableSharing3rdPartyResponse = Response<null>;
+
+export type OauthGetProvidersResponse = Response<{
+    providers: string[];
+}>;
+
+export type OauthGetIdentitiesResponse = Response<{
+    providers: string[];
+}>;
+
+export type OauthGetSingleProviderResponse = Response<Provider>;
+
+export type OauthUpdateSingleProviderResponse = Response<string>;
+
+export type OauthRemoveSingleProviderResponse = Response<null>;
+
+export type OauthGetLogoutLinkResponse = Response<{
+    url: string;
+}>;

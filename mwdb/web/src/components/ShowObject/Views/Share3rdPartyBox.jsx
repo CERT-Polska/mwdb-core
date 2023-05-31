@@ -2,9 +2,10 @@ import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { Capability } from "@mwdb-web/types/types";
 
 export default function Sharing3rdParties(props) {
     const api = useContext(APIContext);

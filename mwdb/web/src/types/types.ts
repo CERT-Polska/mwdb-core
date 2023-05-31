@@ -1,46 +1,51 @@
-export type Capability =
-    | "personalize"
-    | "share_queried_objects"
-    | "adding_comments"
-    | "manage_profile"
-    | "removing_parents"
-    | "adding_blobs"
-    | "removing_tags"
-    | "access_uploader_info"
-    | "removing_comments"
-    | "removing_objects"
-    | "adding_all_attributes"
-    | "unlimited_requests"
-    | "karton_assign"
-    | "karton_unassign"
-    | "reading_all_attributes"
-    | "adding_configs"
-    | "adding_files"
-    | "adding_tags"
-    | "sharing_with_all"
-    | "manage_users"
-    | "karton_reanalyze"
-    | "access_all_objects"
-    | "removing_attributes"
-    | "adding_parents";
+import { AxiosError } from "axios";
+
+export enum Capability {
+    manageUsers = "manage_users",
+    shareQueriedObjects = "share_queried_objects",
+    accessAllObjects = "access_all_objects",
+    sharingWithAll = "sharing_with_all",
+    accessUploaderInfo = "access_uploader_info",
+    addingTags = "adding_tags",
+    removingTags = "removing_tags",
+    addingComments = "adding_comments",
+    removingComments = "removing_comments",
+    addingParents = "adding_parents",
+    removingParents = "removing_parents",
+    readingAllAttributes = "reading_all_attributes",
+    addingAllAttributes = "adding_all_attributes",
+    removingAttributes = "removing_attributes",
+    addingFiles = "adding_files",
+    addingConfigs = "adding_configs",
+    addingBlobs = "adding_blobs",
+    unlimitedRequests = "unlimited_requests",
+    removingObjects = "removing_objects",
+    manageProfile = "manage_profile",
+    personalize = "personalize",
+    kartonAssign = "karton_assign",
+    kartonReanalyze = "karton_reanalyze",
+    removingKarton = "karton_unassign",
+    modify3rdPartySharing = "modify_3rd_party_sharing",
+}
 
 export type User = {
     login: string;
-    groups: string[] | Group[];
+    name?: string;
+    groups: Group[];
     capabilities: Capability[];
     additional_info?: string;
     api_keys?: ApiKey[];
     disabled?: boolean;
     email?: string;
-    feed_quality?: string;
+    feed_quality?: FeedQuality;
     pending?: boolean;
-    requested_on?: string | Date;
+    requested_on?: string;
     provider?: null | string;
     token?: string;
-    logged_on?: string | Date;
-    registered_on?: string | Date;
-    registrar_login?: string | Date;
-    set_password_on?: string | Date;
+    logged_on?: string;
+    registered_on?: string;
+    registrar_login?: string;
+    set_password_on?: string;
 };
 
 export type Group = {
@@ -54,7 +59,7 @@ export type Group = {
     workspace: boolean;
 };
 
-export type ObjectType = "file" | "text_blob" | "static_config";
+export type ObjectType = "file" | "blob" | "config";
 
 export type Attribute = {
     key: string;
@@ -80,7 +85,7 @@ export type RelatedObject = {
     id: string;
     tags: Tag[];
     type: ObjectType;
-    upload_time: string | Date;
+    upload_time: string;
 };
 
 export type ConfigType = "static" | "dynamic";
@@ -92,7 +97,7 @@ type ObjectCommonData = {
     id: string;
     parents: RelatedObject[];
     tags: Tag[];
-    upload_time: string | Date;
+    upload_time: string;
 };
 
 export type ObjectData = ObjectCommonData & {
@@ -122,7 +127,7 @@ export type BlobData = ObjectCommonData & {
     blob_size: number;
     blob_type: string;
     content: string;
-    last_seen: string | Date;
+    last_seen: string;
     latest_config: unknown;
     type: "text_blob";
 };
@@ -137,7 +142,7 @@ export type ObjectListItem = {
     sha256: string;
     tags: Tag[];
     type: "file";
-    upload_time: string | Date;
+    upload_time: string;
 };
 
 export type ConfigListItem = {
@@ -146,7 +151,7 @@ export type ConfigListItem = {
     id: string;
     tags: Tag[];
     type: "static_config";
-    upload_time: string | Date;
+    upload_time: string;
 };
 
 export type BlobListItem = {
@@ -154,7 +159,7 @@ export type BlobListItem = {
     blob_size: number;
     blob_type: string;
     id: string;
-    last_seen: string | Date;
+    last_seen: string;
     type: "text_blob";
     tags: Tag[];
 };
@@ -163,12 +168,12 @@ export type Comment = {
     author: string;
     comment: string;
     id: number;
-    timestamp: string | Date;
+    timestamp: string;
 };
 
 export type Share = {
     access_reason: string;
-    access_time: string | Date;
+    access_time: string;
     group_name: string;
     reason_type: string;
     related_object_dhash: string;
@@ -185,9 +190,10 @@ export type Query = {
 
 export type ApiKey = {
     id: string;
-    issued_on: string | Date;
+    issued_on: string;
     issuer_login: string;
     name: string;
+    token?: string;
 };
 
 export type Family = {
@@ -207,5 +213,65 @@ export type KartonAnalysis = {
         }
     >;
     arguments: Record<`additionalProp${number}`, string>;
-    last_update: string | Date;
+    last_update: string;
+};
+
+export type AxiosServerErrors = AxiosError<{
+    message?: string;
+    errors?: Record<string, string>;
+}>;
+
+export type GenericOrJSX<T> = T | JSX.Element;
+
+export type ServerInfo = {
+    request_timeout: number;
+    is_karton_enabled: boolean;
+    statement_timeout: number;
+    is_oidc_enabled: boolean;
+    is_authenticated: boolean;
+    is_maintenance_set: boolean;
+    recaptcha_site_key: string;
+    file_upload_timeout: number;
+    server_version: string;
+    is_registration_enabled: boolean;
+    instance_name: string;
+    remotes: string[];
+};
+
+export type Permission = {
+    read: boolean;
+    set: boolean;
+};
+
+export type Provider = {
+    name: string;
+    client_id: string;
+    client_secret: string;
+    authorization_endpoint: string;
+    token_endpoint: string;
+    userinfo_endpoint: string;
+    jwks_endpoint: string;
+    logout_endpoint: string;
+};
+
+export type ActivePlugin = {
+    active: boolean;
+    version: string;
+    description: string;
+};
+
+export type ServerAdminInfo = {
+    active_plugins: Record<string, ActivePlugin>;
+    plugins_enabled: boolean;
+    rate_limit_enabled: boolean;
+};
+
+export type FeedQuality = "low" | "high";
+
+export type CreateUser = {
+    login: string;
+    email: string;
+    additional_info: string;
+    feed_quality: FeedQuality;
+    send_email: boolean;
 };

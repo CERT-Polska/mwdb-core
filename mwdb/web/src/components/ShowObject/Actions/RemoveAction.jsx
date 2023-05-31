@@ -1,16 +1,13 @@
 import React, { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
-import {
-    ObjectAction,
-    ConfirmationModal,
-    useViewAlert,
-} from "@mwdb-web/commons/ui";
+import { ObjectAction, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { useViewAlert } from "@mwdb-web/commons/hooks";
+import { Capability } from "@mwdb-web/types/types";
 
 export default function RemoveAction() {
     const api = useContext(APIContext);

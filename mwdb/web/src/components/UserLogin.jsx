@@ -6,12 +6,8 @@ import { AuthContext } from "@mwdb-web/commons/auth";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { api } from "@mwdb-web/commons/api";
 import { Extension } from "@mwdb-web/commons/plugins";
-import {
-    View,
-    ShowIf,
-    ConfirmationModal,
-    getErrorMessage,
-} from "@mwdb-web/commons/ui";
+import { View, ShowIf, ConfirmationModal } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { ProviderButton, ProvidersSelectList, authenticate } from "./OAuth";
 
 export default function UserLogin() {

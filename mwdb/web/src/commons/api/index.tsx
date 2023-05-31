@@ -27,6 +27,7 @@ import {
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
+    GetAttributePermissionsResponse,
     GetConfigStatsResponse,
     GetGroupResponse,
     GetGroupsResponse,
@@ -56,6 +57,12 @@ import {
     GetUserProfileResponse,
     GetUserResponse,
     GetUsersResponse,
+    OauthGetIdentitiesResponse,
+    OauthGetLogoutLinkResponse,
+    OauthGetProvidersResponse,
+    OauthGetSingleProviderResponse,
+    OauthRemoveSingleProviderResponse,
+    OauthUpdateSingleProviderResponse,
     PullObjectRemoteResponse,
     PushObjectRemoteResponse,
     RegisterGroupResponse,
@@ -87,7 +94,15 @@ import {
     UploadFileResponse,
     UserRequestPasswordChangeResponse,
 } from "@mwdb-web/types/api";
-import { Attribute, ObjectType } from "@mwdb-web/types/types";
+import {
+    Attribute,
+    Capability,
+    CreateUser,
+    ObjectType,
+    Provider,
+} from "@mwdb-web/types/types";
+import { APIProviderProps } from "@mwdb-web/types/props";
+import { ApiContextValues } from "@mwdb-web/types/context";
 
 function getApiForEnvironment() {
     // Default API endpoint
@@ -181,49 +196,38 @@ function oauthCallback(
     });
 }
 
-function oauthRegisterProvider(
-    name: string,
-    client_id: number,
-    client_secret: string,
-    authorization_endpoint: string,
-    token_endpoint: string,
-    userinfo_endpoint: string,
-    jwks_endpoint: string,
-    logout_endpoint: string
-) {
-    return axios.post(`/oauth`, {
-        name,
-        client_id,
-        client_secret,
-        authorization_endpoint,
-        token_endpoint,
-        userinfo_endpoint,
-        jwks_endpoint,
-        logout_endpoint,
-    });
+function oauthRegisterProvider(values: Provider) {
+    return axios.post(`/oauth`, values);
 }
 
-function oauthGetProviders() {
+function oauthGetProviders(): OauthGetProvidersResponse {
     return axios.get("/oauth");
 }
 
-function oauthGetSingleProvider(provider_name: string) {
+function oauthGetSingleProvider(
+    provider_name: string
+): OauthGetSingleProviderResponse {
     return axios.get(`/oauth/${provider_name}`);
 }
 
-function oauthUpdateSingleProvider(name: string, value: string) {
+function oauthUpdateSingleProvider(
+    name: string,
+    value: Partial<Provider>
+): OauthUpdateSingleProviderResponse {
     return axios.put(`/oauth/${name}`, value);
 }
 
-function oauthRemoveSingleProvider(name: string) {
+function oauthRemoveSingleProvider(
+    name: string
+): OauthRemoveSingleProviderResponse {
     return axios.delete(`/oauth/${name}`);
 }
 
-function oauthGetIdentities() {
+function oauthGetIdentities(): OauthGetIdentitiesResponse {
     return axios.get("/oauth/identities");
 }
 
-function oauthGetLogoutLink(provider: string) {
+function oauthGetLogoutLink(provider: string): OauthGetLogoutLinkResponse {
     return axios.get(`/oauth/${provider}/logout`);
 }
 
@@ -231,7 +235,7 @@ function apiKeyAdd(login: string, name: string): ApiKeyAddResponse {
     return axios.post(`/user/${login}/api_key`, { name });
 }
 
-function apiKeyRemove(key_id: number): ApiKeyRemoveResponse {
+function apiKeyRemove(key_id: number | string): ApiKeyRemoveResponse {
     return axios.delete(`/api_key/${key_id}`);
 }
 
@@ -385,7 +389,10 @@ function registerGroup(name: string): RegisterGroupResponse {
     return axios.post(`/group/${name}`, { name });
 }
 
-function updateGroup(name: string, value: string): UpdateGroupResponse {
+function updateGroup(
+    name: string,
+    value: { capabilities?: Capability[]; name?: string }
+): UpdateGroupResponse {
     return axios.put(`/group/${name}`, value);
 }
 
@@ -441,7 +448,7 @@ function acceptPendingUser(login: string): AcceptPendingUserResponse {
 
 function rejectPendingUser(
     login: string,
-    send_email: string
+    send_email: boolean
 ): RejectPendingUserResponse {
     return axios.delete(`/user/${login}/pending`, { params: { send_email } });
 }
@@ -471,20 +478,8 @@ function setUserDisabled(
     return axios.put(`/user/${login}`, { disabled });
 }
 
-function createUser(
-    login: string,
-    email: string,
-    additional_info: string,
-    feed_quality: string,
-    send_email: string
-): CreateUserResponse {
-    return axios.post(`/user/${login}`, {
-        login,
-        email,
-        additional_info,
-        feed_quality,
-        send_email,
-    });
+function createUser(values: CreateUser): CreateUserResponse {
+    return axios.post(`/user/${values.login}`, values);
 }
 
 function registerUser(
@@ -522,7 +517,7 @@ function getAttributeDefinitions(
     });
 }
 
-function getAttributeDefinition(key: string): GetAttributeDefinitionResponse {
+function getAttributeDefinition(key?: string): GetAttributeDefinitionResponse {
     return axios.get(`/attribute/${key}`);
 }
 
@@ -555,15 +550,17 @@ function removeAttributeDefinition(key: string) {
     return axios.delete(`/attribute/${key}`);
 }
 
-function getAttributePermissions(key: string) {
+function getAttributePermissions(
+    key?: string
+): GetAttributePermissionsResponse {
     return axios.get(`/attribute/${key}/permissions`);
 }
 
 function setAttributePermission(
     key: string,
     group_name: string,
-    can_read: string,
-    can_set: string
+    can_read: boolean,
+    can_set: boolean
 ) {
     return axios.put(`/attribute/${key}/permissions`, {
         group_name,
@@ -594,7 +591,7 @@ async function requestFileDownloadLink(id: number): Promise<string> {
     return `${baseURL}/file/${id}/download?token=${response.data.token}`;
 }
 
-async function requestZipFileDownloadLink(id: number): Promise<string> {
+async function requestZipFileDownloadLink(id: string): Promise<string> {
     const response = await axios.post(`/file/${id}/download/zip`);
     const baseURL = getApiForEnvironment();
     return `${baseURL}/file/${id}/download/zip?token=${response.data.token}`;
@@ -886,11 +883,7 @@ export const api = {
     enableSharing3rdParty,
 };
 
-type APIProviderProps = {
-    children: React.ReactNode;
-};
-
-export const APIContext = React.createContext({});
+export const APIContext = React.createContext({} as ApiContextValues);
 export function APIProvider(props: APIProviderProps) {
     return (
         <APIContext.Provider value={api}>{props.children}</APIContext.Provider>

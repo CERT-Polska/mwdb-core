@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ConfirmationModal, getErrorMessage } from "@mwdb-web/commons/ui";
-import { api } from "@mwdb-web/commons/api";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { api } from "@mwdb-web/commons/api";
+import { ConfirmationModal, getErrorMessage } from "@mwdb-web/commons/ui";
+import { toast } from "react-toastify";
 
 export default function GroupJoin() {
     const token = new URLSearchParams(window.location.search).get("token");

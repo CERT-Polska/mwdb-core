@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
-import { ConfirmationModal, getErrorMessage } from "@mwdb-web/commons/ui";
+import { ConfirmationModal } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { toast } from "react-toastify";
 
 export default function GroupJoin() {

@@ -215,7 +215,10 @@ class User(db.Model):
             ["identity_ver"],
             scope=AuthScope.group_invite,
         )
-        return None if result is None else result[1]
+        if result is None:
+            return None
+        else:
+            return result[1]
 
     @staticmethod
     def verify_session_token(token: str) -> Optional[Tuple["User", Optional[str]]]:
@@ -224,7 +227,10 @@ class User(db.Model):
             ["password_ver", "identity_ver"],
             scope=AuthScope.session,
         )
-        return None if result is None else result[0], result[1].get("provider")
+        if result is None:
+            return None
+        else:
+            return result[0], result[1].get("provider")
 
     @staticmethod
     def verify_set_password_token(token: str) -> Optional["User"]:
@@ -233,7 +239,10 @@ class User(db.Model):
             ["password_ver"],
             scope=AuthScope.set_password,
         )
-        return None if result is None else result[0]
+        if result is None:
+            return None
+        else:
+            return result[0]
 
     @staticmethod
     def verify_legacy_token(token):

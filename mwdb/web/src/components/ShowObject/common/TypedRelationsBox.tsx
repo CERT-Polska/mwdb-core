@@ -2,12 +2,12 @@ import { useState } from "react";
 import Pagination from "react-js-pagination";
 import { updateActivePage } from "@mwdb-web/commons/helpers";
 import { RelationsBox } from "../common/RelationBox";
-import { RepationItem } from "@mwdb-web/types/types";
+import { ObjectLegacyType, RelationItem } from "@mwdb-web/types/types";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 function paginateParentChildren(
-    parents: RepationItem[],
-    children: RepationItem[],
+    parents: RelationItem[],
+    children: RelationItem[],
     activePage: number,
     itemsCountPerPage: number
 ) {
@@ -36,9 +36,9 @@ function paginateParentChildren(
 }
 
 type Props = {
-    parents: RepationItem[];
-    children: RepationItem[];
-    type: "file" | "static_config" | "text_blob";
+    parents: RelationItem[];
+    children: RelationItem[];
+    type: ObjectLegacyType;
     itemsCountPerPage: number;
     header: string;
     icon: IconDefinition;

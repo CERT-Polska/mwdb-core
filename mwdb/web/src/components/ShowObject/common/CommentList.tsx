@@ -6,7 +6,7 @@ import { Comment } from "@mwdb-web/types/types";
 
 type Props = {
     comments: Comment[];
-    removeComment: (id: number) => void;
+    removeComment: ((id: number) => void) | null;
 };
 
 export function CommentList({ comments, removeComment }: Props) {
@@ -49,7 +49,7 @@ export function CommentList({ comments, removeComment }: Props) {
                     comment={comment.comment}
                     author={comment.author}
                     timestamp={comment.timestamp}
-                    removeComment={removeComment}
+                    removeComment={removeComment ? removeComment : undefined}
                     key={index}
                 />
                 {index < comments.length - 1 ? (
@@ -57,7 +57,7 @@ export function CommentList({ comments, removeComment }: Props) {
                         style={{ borderTop: "1px solid #bbb", width: "100%" }}
                     />
                 ) : (
-                    []
+                    <></>
                 )}
             </React.Fragment>
         ));

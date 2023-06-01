@@ -20,7 +20,7 @@ import {
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { RelationsAddModal } from "../Actions/RelationsAddModal";
-import { Capability, RepationItem } from "@mwdb-web/types/types";
+import { Capability, RelationItem } from "@mwdb-web/types/types";
 
 type RelationToRemove = {
     relation: "parent" | "child";
@@ -28,8 +28,8 @@ type RelationToRemove = {
 };
 
 type Props = {
-    children?: RepationItem[];
-    parents?: RepationItem[];
+    children?: RelationItem[];
+    parents?: RelationItem[];
     header?: string;
     icon?: IconDefinition;
     updateRelationsActivePage?: () => void;

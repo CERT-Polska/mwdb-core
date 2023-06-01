@@ -61,6 +61,8 @@ export type Group = {
 
 export type ObjectType = "file" | "blob" | "config";
 
+export type ObjectLegacyType = "file" | "static_config" | "text_blob";
+
 export type Attribute = {
     key: string;
     id: number;
@@ -84,7 +86,7 @@ export type Tag = {
 export type RelatedObject = {
     id: string;
     tags: Tag[];
-    type: "file" | "static_config" | "text_blob";
+    type: ObjectLegacyType;
     upload_time: string;
 };
 
@@ -105,6 +107,7 @@ type ObjectCommonData = {
         id: number;
         family: string;
     };
+    comments: Comment[];
 };
 
 export type ObjectData = ObjectCommonData & {
@@ -284,10 +287,10 @@ export type CreateUser = {
 
 export type ObjectOrConfigOrBlobData = ObjectData | ConfigData | BlobData;
 
-export type RepationItem = {
+export type RelationItem = {
     id: string;
     tags: Tag[];
-    type: "file" | "static_config" | "text_blob";
+    type: ObjectLegacyType;
     upload_time: string;
 };
 

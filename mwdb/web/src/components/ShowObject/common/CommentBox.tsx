@@ -18,11 +18,11 @@ export function CommentBox() {
     const canAddComments =
         auth.hasCapability(Capability.addingComments) && !api.remote;
 
-    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [commentToRemove, setCommentToRemove] = useState("");
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const [commentToRemove, setCommentToRemove] = useState<number>(0);
 
-    const objectId = context.object.id;
-    const comments = context.object.comments;
+    const objectId = context!.object!.id!;
+    const comments = context!.object!.comments;
     const { setObjectError, updateObjectData } = context;
 
     async function updateComments() {
@@ -36,7 +36,7 @@ export function CommentBox() {
         }
     }
 
-    async function submitComment(comment) {
+    async function submitComment(comment: string) {
         if (comment) {
             try {
                 await api.addObjectComment(objectId, comment);
@@ -47,7 +47,7 @@ export function CommentBox() {
         }
     }
 
-    async function removeComment(comment_id) {
+    async function removeComment(comment_id: number) {
         try {
             await api.removeObjectComment(objectId, comment_id);
             await updateComments();
@@ -58,7 +58,7 @@ export function CommentBox() {
         }
     }
 
-    function handleRemoveComment(comment_id) {
+    function handleRemoveComment(comment_id: number) {
         setDeleteModalOpen(true);
         setCommentToRemove(comment_id);
     }
@@ -87,7 +87,7 @@ export function CommentBox() {
             />
             <div className="card-header">Comments</div>
             <CommentList
-                comments={comments}
+                comments={comments ?? []}
                 removeComment={canRemoveComments ? handleRemoveComment : null}
             />
             {canAddComments && <CommentForm submitComment={submitComment} />}

@@ -1,4 +1,4 @@
-import { useState, useContext, FormEventHandler } from "react";
+import { useState, useContext } from "react";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
@@ -31,7 +31,6 @@ export function TagForm(props: Props) {
         }
         try {
             const response = await api.getTags(value);
-            console.log(response);
             setTags(response.data.map((t) => t.tag));
         } catch (error) {
             context.setObjectError(error);

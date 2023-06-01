@@ -12,7 +12,7 @@ import { APIContext } from "@mwdb-web/commons/api";
 import { View } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useRemote } from "@mwdb-web/commons/remotes";
-import { DiffTextBlobContentPresenter } from "../DiffTextBlobContentPresenter";
+import { DiffTextBlobContentPresenter } from "../../DiffTextBlobContentPresenter";
 import { BlobData } from "@mwdb-web/types/types";
 
 export function DiffTextBlobView() {

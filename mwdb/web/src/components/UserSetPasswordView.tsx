@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -8,12 +8,17 @@ import { View } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { api } from "@mwdb-web/commons/api";
 
-export default function UserSetPassword() {
-    const [success, setSuccess] = useState(false);
+type FormValues = {
+    password: string;
+    confirmPassword: string;
+};
+
+export function UserSetPasswordView() {
+    const [success, setSuccess] = useState<boolean>(false);
     const token =
         new URLSearchParams(window.location.search).get("token") || "";
 
-    const validationSchema = Yup.object().shape({
+    const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
         password: Yup.string()
             .required("Password is required")
             .min(8, "Password must be at least 8 characters"),
@@ -26,10 +31,13 @@ export default function UserSetPassword() {
     });
     const formOptions = { resolver: yupResolver(validationSchema) };
 
-    const { register, handleSubmit, formState } = useForm(formOptions);
-    const { errors } = formState;
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<FormValues>(formOptions);
 
-    async function onSubmit(form) {
+    async function onSubmit(form: FormValues) {
         try {
             let response = await api.authSetPassword(token, form.password);
             setSuccess(true);
@@ -45,17 +53,15 @@ export default function UserSetPassword() {
 
     return (
         <View ident="userSetPassword">
-            <form onSubmit={(e) => e.preventDefault()}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <h2>Set password</h2>
                 <div className="form-group">
                     <label>New password</label>
                     <input
                         type="password"
-                        name="password"
                         className={`form-control ${
                             errors.password ? "is-invalid" : ""
                         }`}
-                        required
                         {...register("password")}
                         disabled={success}
                     />
@@ -69,11 +75,9 @@ export default function UserSetPassword() {
                     <label>Confirm password</label>
                     <input
                         type="password"
-                        name="confirmPassword"
                         className={`form-control ${
                             errors.confirmPassword ? "is-invalid" : ""
                         }`}
-                        required
                         {...register("confirmPassword")}
                         disabled={success}
                     />
@@ -86,7 +90,6 @@ export default function UserSetPassword() {
                 <input
                     type="submit"
                     value="Submit"
-                    onClick={handleSubmit(onSubmit)}
                     className="btn btn-primary"
                 />
             </form>

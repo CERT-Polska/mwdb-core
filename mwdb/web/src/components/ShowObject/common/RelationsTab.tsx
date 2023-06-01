@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { faProjectDiagram, faSearch } from "@fortawesome/free-solid-svg-icons";
 
-import RelationsPlot from "../../RelationsPlot";
+import { RelationsPlotView } from "../../Views/RelationsPlotView";
 
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
@@ -24,7 +24,10 @@ export function RelationsTab() {
                 <ObjectAction label="Zoom" icon={faSearch} link={zoomLink} />,
             ]}
             component={() => (
-                <RelationsPlot hash={context.object!.id} height="600" />
+                <RelationsPlotView
+                    hash={context.object!.id ?? ""}
+                    height="600"
+                />
             )}
         />
     );

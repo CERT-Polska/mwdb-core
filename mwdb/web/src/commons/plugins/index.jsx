@@ -1,7 +1,8 @@
-import React from "react";
 import _ from "lodash";
-
 import pluginLoaders from "@mwdb-web/plugins";
+
+export { Extension } from "./Extension";
+export { Extendable } from "./Extendable";
 
 let loadedPlugins = {};
 let pluginsLoadedCallbacks = [];
@@ -33,33 +34,5 @@ export function fromPlugins(element) {
         Object.keys(loadedPlugins).map(
             (name) => loadedPlugins[name][element] || []
         )
-    );
-}
-
-export function Extension({ ident, fallback, ...props }) {
-    const components = fromPlugins(ident);
-    if (components.length === 0) return fallback || [];
-    return (
-        <>
-            {components.map((ExtElement) => (
-                <ExtElement {...props} />
-            ))}
-        </>
-    );
-}
-
-export function Extendable({ ident, children, ...props }) {
-    return (
-        <React.Fragment>
-            {<Extension {...props} ident={`${ident}Before`} />}
-            {
-                <Extension
-                    {...props}
-                    ident={`${ident}Replace`}
-                    fallback={children}
-                />
-            }
-            {<Extension {...props} ident={`${ident}After`} />}
-        </React.Fragment>
     );
 }

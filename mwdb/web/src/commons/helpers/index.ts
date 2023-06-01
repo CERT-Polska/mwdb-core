@@ -48,3 +48,10 @@ export function mapObjectType(objectType: string): string {
         }[objectType] || objectType
     );
 }
+
+// negate the buffer contents (xor with key equal 0xff)
+export function negateBuffer(buffer: ArrayBuffer) {
+    const uint8View = new Uint8Array(buffer);
+    const xored = uint8View.map((item) => item ^ 0xff);
+    return xored.buffer;
+}

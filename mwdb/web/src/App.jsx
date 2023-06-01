@@ -9,21 +9,21 @@ import {
 
 import { AboutView } from "./components/Views/AboutView";
 import { Navigation } from "./components/Navigation";
-import RecentConfigs from "./components/RecentConfigs";
-import RecentSamples from "./components/RecentSamples";
+import { RecentSamplesView } from "./components/File/Views/RecentSamplesView";
 import { ConfigStatsView } from "./components/Config/Views/ConfigStatsView";
-import RecentBlobs from "./components/RecentBlobs";
-import ShowSample from "./components/ShowSample";
+import { RecentConfigsView } from "./components/Config/Views/RecentConfigsView";
+import { RecentBlobsView } from "./components/Blob/Views/RecentBlobsView";
+import { ShowSampleView } from "./components/Views/ShowSampleView";
 import { ShowConfigView } from "./components/Config/Views/ShowConfigView";
-import ShowTextBlob from "./components/ShowTextBlob";
-import { DiffTextBlobView } from "./components/Views/DiffTextBlobView";
-import Upload from "./components/Upload";
-import UserLogin from "./components/UserLogin";
-import UserRegister from "./components/UserRegister";
-import UserSetPassword from "./components/UserSetPassword";
-import Search from "./components/Search";
-import RelationsPlot from "./components/RelationsPlot";
-import UserPasswordRecover from "./components/UserPasswordRecover";
+import { ShowTextBlobView } from "./components/Blob/Views/ShowTextBlobView";
+import { DiffTextBlobView } from "./components/Blob/Views/DiffTextBlobView";
+import { UploadView } from "./components/Views/UploadView";
+import { UserLoginView } from "./components/Views/UserLoginView";
+import { UserRegisterView } from "./components/Views/UserRegisterView";
+import { UserSetPasswordView } from "./components/UserSetPasswordView";
+import { SearchView } from "./components/Views/SearchView";
+import { RelationsPlotView } from "./components/Views/RelationsPlotView";
+import { UserPasswordRecoverView } from "./components/Views/UserPasswordRecoverView";
 import { DocsView } from "./components/Views/DocsView";
 import RemoteViews from "./components/Remote/RemoteViews";
 import ProfileView from "./components/Profile/ProfileView";
@@ -97,26 +97,30 @@ function SampleRouteFallback() {
 function AppRoutes() {
     return (
         <Routes>
-            <Route path="login" element={<UserLogin />} />
-            <Route path="register" element={<UserRegister />} />
-            <Route path="recover_password" element={<UserPasswordRecover />} />
-            <Route path="setpasswd" element={<UserSetPassword />} />
+            <Route path="login" element={<UserLoginView />} />
+            <Route path="register" element={<UserRegisterView />} />
+            <Route
+                path="recover_password"
+                element={<UserPasswordRecoverView />}
+            />
+            <Route path="setpasswd" element={<UserSetPasswordView />} />
             <Route path="oauth/callback" element={<OAuthAuthorizeView />} />
             <Route element={<RequiresAuth />}>
-                <Route path="/" element={<RecentSamples />} />
-                <Route path="configs" element={<RecentConfigs />} />
-                <Route path="blobs" element={<RecentBlobs />} />
-                <Route path="search" element={<Search />} />
+                <Route path="/" element={<RecentSamplesView />} />
+                <Route path="configs" element={<RecentConfigsView />} />
+                <Route path="blobs" element={<RecentBlobsView />} />
+                <Route path="search" element={<SearchView />} />
                 <Route
                     path="upload"
                     element={
                         <RequiresCapability
                             capability={Capabilities.addingFiles}
                         >
-                            <Upload />
+                            <UploadView />
                         </RequiresCapability>
                     }
                 />
+                S
                 <Route path="configs/stats" element={<ConfigStatsView />} />
                 <Route path="about" element={<AboutView />} />
                 <Route path="docs" element={<DocsView />} />
@@ -124,9 +128,9 @@ function AppRoutes() {
                     path="sample/:hash/*"
                     element={<SampleRouteFallback />}
                 />
-                <Route path="file/:hash/*" element={<ShowSample />} />
+                <Route path="file/:hash/*" element={<ShowSampleView />} />
                 <Route path="config/:hash/*" element={<ShowConfigView />} />
-                <Route path="blob/:hash/*" element={<ShowTextBlob />} />
+                <Route path="blob/:hash/*" element={<ShowTextBlobView />} />
                 <Route path="profile" element={<ProfileView />}>
                     <Route index element={<ProfileDetails />} />
                     <Route path="user/:user" element={<ProfileDetails />} />
@@ -151,15 +155,15 @@ function AppRoutes() {
                     path="diff/:current/:previous"
                     element={<DiffTextBlobView />}
                 />
-                <Route path="relations" element={<RelationsPlot />} />
+                <Route path="relations" element={<RelationsPlotView />} />
                 <Route path="remote/:remote" element={<RemoteViews />}>
-                    <Route index element={<RecentSamples />} />
-                    <Route path="configs" element={<RecentConfigs />} />
-                    <Route path="blobs" element={<RecentBlobs />} />
-                    <Route path="search" element={<Search />} />
-                    <Route path="file/:hash/*" element={<ShowSample />} />
+                    <Route index element={<RecentSamplesView />} />
+                    <Route path="configs" element={<RecentConfigsView />} />
+                    <Route path="blobs" element={<RecentBlobsView />} />
+                    <Route path="search" element={<SearchView />} />
+                    <Route path="file/:hash/*" element={<ShowSampleView />} />
                     <Route path="config/:hash/*" element={<ShowConfigView />} />
-                    <Route path="blob/:hash/*" element={<ShowTextBlob />} />
+                    <Route path="blob/:hash/*" element={<ShowTextBlobView />} />
                     <Route
                         path="diff/:current/:previous"
                         element={<DiffTextBlobView />}

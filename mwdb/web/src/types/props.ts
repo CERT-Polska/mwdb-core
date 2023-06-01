@@ -1,4 +1,4 @@
-import { Group } from "./types";
+import { Group, ObjectOrConfigOrBlobData } from "./types";
 
 export type TagProps = {
     tag: string;
@@ -22,4 +22,8 @@ export type AuthProviderProps = {
 
 export type APIProviderProps = {
     children: JSX.Element;
+};
+
+export type RecentRowProps<T> = T & {
+    addToQuery: (field: string, value: string) => void;
 };

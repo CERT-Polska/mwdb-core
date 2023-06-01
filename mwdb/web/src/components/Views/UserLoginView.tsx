@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -9,19 +9,20 @@ import { Extension } from "@mwdb-web/commons/plugins";
 import { View, ShowIf, ConfirmationModal } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { authenticate } from "@mwdb-web/commons/helpers/authenticate";
-import { ProviderButton } from "./ProviderButton";
-import { ProvidersSelectList } from "./ProvidersSelectList";
+import { ProviderButton } from "../ProviderButton";
+import { ProvidersSelectList } from "../ProvidersSelectList";
 
-export default function UserLogin() {
+export function UserLoginView() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [login, setLogin] = useState("");
-    const [password, setPassword] = useState("");
-    const [providers, setProviders] = useState([]);
-    const [oAuthRegisterModalOpen, setOAuthRegisterModalOpen] = useState(false);
+    const [login, setLogin] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [providers, setProviders] = useState<string[]>([]);
+    const [oAuthRegisterModalOpen, setOAuthRegisterModalOpen] =
+        useState<boolean>(false);
 
     const colorsList = ["#3c5799", "#01a0f6", "#d03f30", "#b4878b", "#444444"];
     const isOIDCEnabled = config.config["is_oidc_enabled"];
@@ -92,8 +93,8 @@ export default function UserLogin() {
             </ConfirmationModal>
             <div className="background" />
             <View fluid ident="userLogin">
-                <h2 align="center">Welcome to MWDB</h2>
-                <h6 align="center">Log in using mwdb credentials</h6>
+                <h2>Welcome to MWDB</h2>
+                <h6>Log in using mwdb credentials</h6>
                 <form
                     onSubmit={(ev) => {
                         ev.preventDefault();
@@ -149,19 +150,25 @@ export default function UserLogin() {
                             </div>
                         </div>
                     </nav>
-                    <ShowIf condition={providers.length}>
-                        <hr />
-                        <h6 align="center">Log in using OAuth</h6>
-                        {providers.length <= 5 ? (
-                            providers.map((provider, i) => (
-                                <ProviderButton
-                                    provider={provider}
-                                    color={colorsList[i % colorsList.length]}
+                    <ShowIf condition={providers.length > 0}>
+                        <>
+                            <hr />
+                            <h6>Log in using OAuth</h6>
+                            {providers.length <= 5 ? (
+                                providers.map((provider, i) => (
+                                    <ProviderButton
+                                        provider={provider}
+                                        color={
+                                            colorsList[i % colorsList.length]
+                                        }
+                                    />
+                                ))
+                            ) : (
+                                <ProvidersSelectList
+                                    providersList={providers}
                                 />
-                            ))
-                        ) : (
-                            <ProvidersSelectList providersList={providers} />
-                        )}
+                            )}
+                        </>
                     </ShowIf>
                 </form>
             </View>

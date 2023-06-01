@@ -1,30 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useContext } from "react";
+import { Link } from "react-router-dom";
 
-import {
-    ShowObject,
-    ObjectTab,
-    ObjectContext,
-    useTabContext,
-    LatestConfigTab,
-    RelationsTab,
-    DownloadAction,
-    ZipAction,
-    FavoriteAction,
-    PushAction,
-    PullAction,
-    UploadChildAction,
-    RemoveAction,
-    ObjectAction,
-} from "./ShowObject";
+import { ObjectContext } from "./ShowObject";
 
-import {
-    faFile,
-    faFingerprint,
-    faSearch,
-} from "@fortawesome/free-solid-svg-icons";
-
-import { APIContext } from "@mwdb-web/commons/api";
 import {
     makeSearchLink,
     makeSearchDateLink,
@@ -36,13 +14,20 @@ import {
     DataTable,
     DateString,
     Hash,
-    HexView,
 } from "@mwdb-web/commons/ui";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
+import { ObjectData } from "@mwdb-web/types/types";
 
-function SampleDetails() {
+export function SampleDetails() {
     const context = useContext(ObjectContext);
     const remotePath = useRemotePath();
+
+    if (!context) {
+        return <></>;
+    }
+
+    const object = context.object as ObjectData;
+
     return (
         <DataTable>
             <Extendable ident="showSampleDetails">
@@ -52,15 +37,15 @@ function SampleDetails() {
                         <Link
                             to={makeSearchLink({
                                 field: "name",
-                                value: context.object.file_name,
+                                value: object.file_name,
                                 pathname: `${remotePath}/`,
                             })}
                         >
-                            {context.object.file_name}
+                            {object.file_name}
                         </Link>
                         <span className="ml-2">
                             <ActionCopyToClipboard
-                                text={context.object.file_name}
+                                text={object.file_name}
                                 tooltipMessage="Copy file name to clipboard"
                             />
                         </span>
@@ -69,7 +54,7 @@ function SampleDetails() {
                 <tr className="flickerable">
                     <th>Variant file names</th>
                     <td id="variant_file_names">
-                        {context.object.alt_names.map((alt_name) => (
+                        {object.alt_names.map((alt_name) => (
                             <div>
                                 <Link
                                     to={makeSearchLink({
@@ -96,15 +81,15 @@ function SampleDetails() {
                         <Link
                             to={makeSearchLink({
                                 field: "size",
-                                value: context.object.file_size,
+                                value: object.file_size.toString(),
                                 pathname: `${remotePath}/`,
                             })}
                         >
-                            {humanFileSize(context.object.file_size)}
+                            {humanFileSize(object.file_size)}
                         </Link>
                         <span className="ml-2">
                             <ActionCopyToClipboard
-                                text={context.object.file_size}
+                                text={object.file_size.toString()}
                                 tooltipMessage="Copy file size to clipboard"
                             />
                         </span>
@@ -116,15 +101,15 @@ function SampleDetails() {
                         <Link
                             to={makeSearchLink({
                                 field: "type",
-                                value: context.object.file_type,
+                                value: object.file_type,
                                 pathname: `${remotePath}/`,
                             })}
                         >
-                            {context.object.file_type}
+                            {object.file_type}
                         </Link>
                         <span className="ml-2">
                             <ActionCopyToClipboard
-                                text={context.object.file_type}
+                                text={object.file_type}
                                 tooltipMessage="Copy file type to clipboard"
                             />
                         </span>
@@ -133,10 +118,10 @@ function SampleDetails() {
                 <tr className="flickerable">
                     <th>md5</th>
                     <td id="md5">
-                        <Hash hash={context.object.md5} inline />
+                        <Hash hash={object.md5} inline />
                         <span className="ml-2">
                             <ActionCopyToClipboard
-                                text={context.object.md5}
+                                text={object.md5}
                                 tooltipMessage="Copy md5 to clipboard"
                             />
                         </span>
@@ -145,10 +130,10 @@ function SampleDetails() {
                 <tr className="flickerable">
                     <th>sha1</th>
                     <td id="sha1">
-                        <Hash hash={context.object.sha1} inline />
+                        <Hash hash={object.sha1} inline />
                         <span className="ml-2">
                             <ActionCopyToClipboard
-                                text={context.object.sha1}
+                                text={object.sha1}
                                 tooltipMessage="Copy sha1 to clipboard"
                             />
                         </span>
@@ -157,10 +142,10 @@ function SampleDetails() {
                 <tr className="flickerable">
                     <th>sha256</th>
                     <td id="sha256">
-                        <Hash hash={context.object.sha256} inline />
+                        <Hash hash={object.sha256} inline />
                         <span className="ml-2">
                             <ActionCopyToClipboard
-                                text={context.object.sha256}
+                                text={object.sha256}
                                 tooltipMessage="Copy sha256 to clipboard"
                             />
                         </span>
@@ -169,10 +154,10 @@ function SampleDetails() {
                 <tr className="flickerable">
                     <th>sha512</th>
                     <td id="sha512">
-                        <Hash hash={context.object.sha512} inline />
+                        <Hash hash={object.sha512} inline />
                         <span className="ml-2">
                             <ActionCopyToClipboard
-                                text={context.object.sha512}
+                                text={object.sha512}
                                 tooltipMessage="Copy sha512 to clipboard"
                             />
                         </span>
@@ -181,10 +166,10 @@ function SampleDetails() {
                 <tr className="flickerable">
                     <th>crc32</th>
                     <td id="crc32" className="text-monospace">
-                        {context.object.crc32}
+                        {object.crc32}
                         <span className="ml-2">
                             <ActionCopyToClipboard
-                                text={context.object.crc32}
+                                text={object.crc32}
                                 tooltipMessage="Copy crc32 to clipboard"
                             />
                         </span>
@@ -196,15 +181,15 @@ function SampleDetails() {
                         <Link
                             to={makeSearchLink({
                                 field: "ssdeep",
-                                value: context.object.ssdeep,
+                                value: object.ssdeep,
                                 pathname: `${remotePath}/`,
                             })}
                         >
-                            {context.object.ssdeep}
+                            {object.ssdeep}
                         </Link>
                         <span className="ml-2">
                             <ActionCopyToClipboard
-                                text={context.object.ssdeep}
+                                text={object.ssdeep}
                                 tooltipMessage="Copy ssdeep to clipboard"
                             />
                         </span>
@@ -214,15 +199,15 @@ function SampleDetails() {
                     <th>Upload time</th>
                     <td id="upload_time">
                         {" "}
-                        {context.object.upload_time ? (
+                        {object.upload_time ? (
                             <Link
                                 to={makeSearchDateLink({
                                     field: "upload_time",
-                                    value: context.object.upload_time,
+                                    value: object.upload_time,
                                     pathname: `${remotePath}/`,
                                 })}
                             >
-                                <DateString date={context.object.upload_time} />
+                                <DateString date={object.upload_time} />
                             </Link>
                         ) : (
                             []
@@ -231,125 +216,5 @@ function SampleDetails() {
                 </tr>
             </Extendable>
         </DataTable>
-    );
-}
-
-// negate the buffer contents (xor with key equal 0xff)
-function negateBuffer(buffer) {
-    const uint8View = new Uint8Array(buffer);
-    const xored = uint8View.map((item) => item ^ 0xff);
-    return xored.buffer;
-}
-
-function SamplePreview() {
-    const [content, setContent] = useState("");
-    const api = useContext(APIContext);
-    const objectContext = useContext(ObjectContext);
-    const tabContext = useTabContext();
-
-    async function updateSample() {
-        try {
-            const fileId = objectContext.object.id;
-            const obfuscate = 1;
-            const fileContentResponse = await api.downloadFile(
-                fileId,
-                obfuscate
-            );
-            const fileContentResponseData = negateBuffer(
-                fileContentResponse.data
-            );
-            setContent(fileContentResponseData);
-        } catch (e) {
-            objectContext.setObjectError(e);
-        }
-    }
-
-    useEffect(() => {
-        updateSample();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [objectContext.object.id]);
-
-    return (
-        <HexView
-            content={content}
-            mode={tabContext.subTab || "raw"}
-            showInvisibles
-        />
-    );
-}
-
-function PreviewSwitchAction(props) {
-    const tabContext = useTabContext();
-    const mode = tabContext.subTab || "raw";
-
-    if (mode === "raw")
-        return (
-            <ObjectAction
-                label="Hex view"
-                link={tabContext.getTabLink(tabContext.tab, "hex")}
-            />
-        );
-    else
-        return (
-            <ObjectAction
-                label="Raw view"
-                link={tabContext.getTabLink(tabContext.tab, "raw")}
-            />
-        );
-}
-
-export default function ShowSample(props) {
-    const api = useContext(APIContext);
-    const params = useParams();
-    const remotePath = useRemotePath();
-
-    async function downloadSample(object) {
-        window.location.href = await api.requestFileDownloadLink(object.id);
-    }
-
-    async function zipSample(object) {
-        window.location.href = await api.requestZipFileDownloadLink(object.id);
-    }
-
-    return (
-        <ShowObject
-            ident="showSample"
-            objectType="file"
-            objectId={params.hash}
-            searchEndpoint={`${remotePath}/`}
-            headerIcon={faFile}
-            headerCaption="File details"
-        >
-            <ObjectTab
-                tab="details"
-                icon={faFingerprint}
-                component={SampleDetails}
-                actions={[
-                    <RemoveAction />,
-                    <PushAction />,
-                    <PullAction />,
-                    <UploadChildAction />,
-                    <FavoriteAction />,
-                    <ZipAction zip={zipSample} />,
-                    <DownloadAction download={downloadSample} />,
-                ]}
-            />
-            <RelationsTab />
-            <ObjectTab
-                tab="preview"
-                icon={faSearch}
-                component={SamplePreview}
-                actions={[
-                    <PreviewSwitchAction />,
-                    <RemoveAction />,
-                    <PushAction />,
-                    <PullAction />,
-                    <UploadChildAction />,
-                    <FavoriteAction />,
-                    <DownloadAction download={downloadSample} />,
-                ]}
-            />
-            <LatestConfigTab label="Static config" />
-        </ShowObject>
     );
 }

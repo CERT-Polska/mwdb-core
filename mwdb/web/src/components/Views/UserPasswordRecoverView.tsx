@@ -1,7 +1,7 @@
-import React, { useState, useContext, useRef } from "react";
+import { useState, useContext, useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { toast } from "react-toastify";
-import { useForm } from "react-hook-form";
+import { UseFormProps, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 
@@ -11,30 +11,28 @@ import { View, Label, FormError, LoadingSpinner } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useNavRedirect } from "@mwdb-web/commons/hooks";
 
-const formFields = {
-    login: "login",
-    email: "email",
-    recaptcha: "recaptcha",
+type FormValues = {
+    login: string;
+    email: string;
+    recaptcha: string | null;
 };
 
-const validationSchema = Yup.object().shape({
-    [formFields.login]: Yup.string().required("Login is required"),
-    [formFields.email]: Yup.string()
+const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+    login: Yup.string().required("Login is required"),
+    email: Yup.string()
         .required("Email is required")
         .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, "Value is not email"),
-    [formFields.recaptcha]: Yup.string()
-        .nullable()
-        .required("Recaptcha is required"),
+    recaptcha: Yup.string().nullable().required("Recaptcha is required"),
 });
 
-const formOptions = {
+const formOptions: UseFormProps<FormValues> = {
     resolver: yupResolver(validationSchema),
     mode: "onSubmit",
     reValidateMode: "onSubmit",
     shouldFocusError: true,
 };
 
-export default function UserPasswordRecover() {
+export function UserPasswordRecoverView() {
     const config = useContext(ConfigContext);
     const { redirectTo } = useNavRedirect();
     const {
@@ -43,18 +41,18 @@ export default function UserPasswordRecover() {
         formState: { errors },
         reset,
         setValue,
-    } = useForm(formOptions);
+    } = useForm<FormValues>(formOptions);
 
-    const [loading, setLoading] = useState(false);
-    const captchaRef = useRef(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const captchaRef = useRef<ReCAPTCHA>(null);
 
-    async function recoverPassword(values) {
+    async function recoverPassword(values: FormValues) {
         try {
             setLoading(true);
             await api.authRecoverPassword(
                 values.login,
                 values.email,
-                values.recaptcha
+                values.recaptcha!
             );
 
             toast("Password reset link has been sent to the e-mail address", {
@@ -70,7 +68,7 @@ export default function UserPasswordRecover() {
             reset();
         } finally {
             captchaRef.current?.reset();
-            setValue(formFields.recaptcha, null);
+            setValue("recaptcha", null);
         }
     }
 
@@ -85,11 +83,11 @@ export default function UserPasswordRecover() {
                             <Label
                                 label="Login"
                                 required
-                                htmlFor={formFields.login}
+                                htmlFor={"login" as keyof FormValues}
                             />
                             <input
-                                {...register(formFields.login)}
-                                id={formFields.login}
+                                {...register("login" as keyof FormValues)}
+                                id={"login" as keyof FormValues}
                                 className={`form-control ${
                                     errors.login ? "is-invalid" : ""
                                 }`}
@@ -100,11 +98,11 @@ export default function UserPasswordRecover() {
                             <Label
                                 label="Email"
                                 required
-                                htmlFor={formFields.email}
+                                htmlFor={"email" as keyof FormValues}
                             />
                             <input
-                                {...register(formFields.email)}
-                                id={formFields.email}
+                                {...register("email" as keyof FormValues)}
+                                id={"email" as keyof FormValues}
                                 className={`form-control ${
                                     errors.email ? "is-invalid" : ""
                                 }`}
@@ -117,7 +115,7 @@ export default function UserPasswordRecover() {
                                 your password.
                             </p>
                         </div>
-                        {config.config["recaptcha_site_key"] && (
+                        {config.config.recaptcha_site_key && (
                             <>
                                 <ReCAPTCHA
                                     ref={captchaRef}
@@ -126,11 +124,9 @@ export default function UserPasswordRecover() {
                                         justifyContent: "center",
                                         marginBottom: 12,
                                     }}
-                                    sitekey={
-                                        config.config["recaptcha_site_key"]
-                                    }
+                                    sitekey={config.config.recaptcha_site_key}
                                     onChange={(val) =>
-                                        setValue(formFields.recaptcha, val)
+                                        setValue("recaptcha", val)
                                     }
                                 />
                                 <div className="text-center">

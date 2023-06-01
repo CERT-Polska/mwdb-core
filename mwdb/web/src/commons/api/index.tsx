@@ -566,14 +566,17 @@ function removeAttributePermission(
     });
 }
 
-function downloadFile(id: number, obfuscate: number = 0): DownloadFileResponse {
+function downloadFile(
+    id: number | string,
+    obfuscate: number = 0
+): DownloadFileResponse {
     return axios.get(`/file/${id}/download?obfuscate=${obfuscate}`, {
         responseType: "arraybuffer",
         responseEncoding: "binary",
     });
 }
 
-async function requestFileDownloadLink(id: number): Promise<string> {
+async function requestFileDownloadLink(id: string): Promise<string> {
     const response = await axios.post(`/file/${id}/download`);
     const baseURL = getApiForEnvironment();
     return `${baseURL}/file/${id}/download?token=${response.data.token}`;
@@ -707,7 +710,7 @@ function getRemoteObjectAttributes(
 
 function downloadRemoteFile(
     remote: string,
-    id: number
+    id: number | string
 ): DownloadRemoteFileResponse {
     return axios.get(`/remote/${remote}/api/file/${id}/download`, {
         responseType: "arraybuffer",
@@ -717,7 +720,7 @@ function downloadRemoteFile(
 
 async function requestRemoteFileDownloadLink(
     remote: string,
-    id: number
+    id: string
 ): Promise<string> {
     const response = await axios.post(
         `/remote/${remote}/api/file/${id}/download`

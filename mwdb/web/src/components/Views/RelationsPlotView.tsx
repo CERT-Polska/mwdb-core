@@ -9,10 +9,11 @@ import { isEmpty } from "lodash";
 import { useSearchParams } from "react-router-dom";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { capitalize } from "@mwdb-web/commons/helpers";
-import { Tag } from "@mwdb-web/commons/ui";
+import { RelationsNode } from "../RelationsNode";
+import { RelationToManyNode } from "../RelationToManyNode";
+import { Edge, NodeProp, RelatedObject } from "@mwdb-web/types/types";
 
-const DagreD3Plot = React.lazy(() => import("./DagreD3Plot"));
+const DagreD3Plot = React.lazy(() => import("../DagreD3Plot"));
 
 const nodeStatuses = {
     initial: "initial",
@@ -20,106 +21,36 @@ const nodeStatuses = {
     showWarning: "showWarning",
 };
 
-function RelationsNode(props) {
-    const typeMapping = {
-        file: "file",
-        config: "config",
-        static_config: "config",
-        text_blob: "blob",
-    };
+type UpdateObjectType = "children" | "parent" | null;
 
-    const styleMapping = {
-        file: "bg-danger",
-        config: "bg-success",
-        blob: "bg-info",
-    };
+type Nodes = {
+    nodes: NodeProp[];
+    edges: Edge[];
+};
 
-    const nodeType = typeMapping[props.node.object.type];
-    const nodeStyle = styleMapping[nodeType];
-    const nodeHeaderStyle = props.node.expanded
-        ? "node-header-expanded"
-        : "node-header-active";
+type Props = {
+    hash: string;
+    height: string;
+};
 
-    return (
-        <div className="mainNode">
-            <div className="card" style={{ width: "13rem", cursor: "pointer" }}>
-                <div
-                    className={`card-header ${nodeHeaderStyle} ${nodeStyle}`}
-                    style={{ paddingTop: "11px", paddingBottom: "11px" }}
-                >
-                    {capitalize(nodeType)}{" "}
-                    <span className="date">
-                        {new Date(
-                            props.node.object.upload_time
-                        ).toLocaleDateString()}
-                    </span>
-                </div>
-                <div className="card-body">
-                    <p className="card-text">
-                        <small className="text-muted">
-                            <a
-                                href={`${props.remotePath}/${nodeType}/${props.node.id}`}
-                            >
-                                {props.node.id.substr(0, 16)}
-                            </a>
-                        </small>
-                    </p>
-                </div>
-                <div
-                    className="card-footer bg-transparent tags"
-                    style={{ maxWidth: "13rem", whiteSpace: "pre-wrap" }}
-                >
-                    {props.node.object.tags.map((tag) => (
-                        <Tag key={tag} tag={tag.tag} searchable={false} />
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function RelationToManyNode({ setNodesStatus, nodesLength }) {
-    return (
-        <>
-            <div
-                className="alert alert-warning"
-                style={{ margin: "10px 20px", fontSize: 18 }}
-            >
-                The relationships for a given object will amount to{" "}
-                <span className="font-weight-bold">{nodesLength}</span>{" "}
-                elements, displaying such a quantity of connections may affect
-                the application's performance.
-            </div>
-            <div className="text-center mb-2">
-                <button
-                    className="btn btn-warning"
-                    onClick={() => setNodesStatus(nodeStatuses.showGraph)}
-                >
-                    Show relations anyway
-                </button>
-            </div>
-        </>
-    );
-}
-
-function RelationsPlot(props) {
+export function RelationsPlotView(props: Props) {
     const api = useContext(APIContext);
     const [searchParams, setSearchParams] = useSearchParams();
     const { hash, height } = props;
     const defaultProps = {
-        height: "900",
+        height: 900,
         width: "100%",
     };
 
     const [nodesStatus, setNodesStatus] = useState("initial");
 
-    const [nodes, setNodes] = useState({
+    const [nodes, setNodes] = useState<Nodes>({
         nodes: [],
         edges: [],
     });
 
-    const convertObject = (obj, expanded) => {
-        let node = {
+    const convertObject = (obj: RelatedObject, expanded: boolean) => {
+        const node: NodeProp = {
             id: obj.id,
             object: {
                 type: obj.type,
@@ -131,36 +62,44 @@ function RelationsPlot(props) {
         return node;
     };
 
-    const isNodeExpanded = (hash) => {
+    const isNodeExpanded = (hash: string) => {
         let node = nodes.nodes.find((n) => n.id === hash);
         return node && node.expanded;
     };
 
-    const addNodes = (prevNodesState, newNode, newEdge = false) => {
-        const getNode = (hash) => {
+    const addNodes = (
+        prevNodesState: Nodes,
+        newNode: RelatedObject,
+        newEdge?: Edge
+    ) => {
+        const getNode = (hash: string) => {
             return prevNodesState.nodes.find((n) => n.id === hash);
         };
 
-        const getEdge = (edge) => {
+        const getEdge = (edge: Edge) => {
             return prevNodesState.edges.find(
                 (e) => e.parent === edge.parent && e.child === edge.child
             );
         };
 
-        let newNodesState = {};
+        const newNodesState = {} as Nodes;
         let existingNode = getNode(newNode.id);
         if (!existingNode) {
             // Append new node and mark node as expanded if no edge is added.
-            newNode = convertObject(newNode, !newEdge);
-            newNodesState.nodes = [...prevNodesState.nodes, newNode];
+            newNodesState.nodes = [
+                ...prevNodesState.nodes,
+                convertObject(newNode, !newEdge),
+            ];
         } else {
             // Update node in the same place
+            let newConvertNode = {} as NodeProp;
             if ((!existingNode.expanded && !newEdge) || existingNode.expanded)
-                newNode = convertObject(newNode, true);
-            else newNode = convertObject(newNode, false);
+                newConvertNode = convertObject(newNode, true);
+            else newConvertNode = convertObject(newNode, false);
             newNodesState.nodes = prevNodesState.nodes.reduce(
-                (nodesList, node) => {
-                    if (node.id === newNode.id) return [...nodesList, newNode];
+                (nodesList: NodeProp[], node: NodeProp) => {
+                    if (node.id === newNode.id)
+                        return [...nodesList, newConvertNode];
                     else return [...nodesList, node];
                 },
                 []
@@ -174,7 +113,11 @@ function RelationsPlot(props) {
         return newNodesState;
     };
 
-    const updateObject = (obj, type = null, edgeId = null) => {
+    const updateObject = (
+        obj: RelatedObject,
+        type: UpdateObjectType = null,
+        edgeId: string | null = null
+    ) => {
         if (type === "parent") {
             setNodes((prevNodes) =>
                 addNodes(prevNodes, obj, { parent: obj.id, child: edgeId })
@@ -188,9 +131,9 @@ function RelationsPlot(props) {
         }
     };
 
-    const expandNode = async (hash, expanded = false) => {
-        let objectInfo = await api.getObject("object", hash);
-        let obj = objectInfo.data;
+    const expandNode = async (hash: string) => {
+        const objectInfo = await api.getObject("object", hash);
+        const obj = objectInfo.data;
         updateObject(obj);
         if (obj.parents.length > 0) {
             obj.parents.forEach((o) => {
@@ -204,7 +147,7 @@ function RelationsPlot(props) {
         }
     };
 
-    const onNodeClick = (node) => {
+    const onNodeClick = (node: string) => {
         let nodes = searchParams.getAll("node");
         if (isNodeExpanded(node)) return;
         nodes = [...(nodes || []), node];
@@ -216,8 +159,8 @@ function RelationsPlot(props) {
     };
 
     useLayoutEffect(() => {
-        let nodes = searchParams.getAll("node");
-        let expandedNodes = nodes || [];
+        const nodes = searchParams.getAll("node");
+        const expandedNodes = nodes || [];
         if (hash && !expandedNodes.includes(hash)) {
             expandedNodes.push(hash);
         }
@@ -245,7 +188,7 @@ function RelationsPlot(props) {
             {nodesStatus === nodeStatuses.showGraph && (
                 <DagreD3Plot
                     width={defaultProps.width}
-                    height={height ? height : defaultProps.height}
+                    height={height ? +height : defaultProps.height}
                     nodes={nodes.nodes}
                     edges={nodes.edges}
                     onNodeClick={onNodeClick}
@@ -264,5 +207,3 @@ function RelationsPlot(props) {
         </Suspense>
     );
 }
-
-export default RelationsPlot;

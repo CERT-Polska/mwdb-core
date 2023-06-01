@@ -3,12 +3,12 @@ import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 type Props = {
     narrowOnly?: boolean;
     wideOnly?: boolean;
-    copyable: boolean;
+    copyable?: boolean;
     label?: string;
-    labelWidth?: number;
-    icon: JSX.Element;
-    noEllipsis: boolean;
-    value: string;
+    labelWidth?: string;
+    icon?: JSX.Element;
+    noEllipsis?: boolean;
+    value?: string;
     children?: JSX.Element;
 };
 
@@ -36,7 +36,7 @@ export function RecentInnerRow(props: Props) {
             {props.copyable && (
                 <span className="ml-2">
                     <ActionCopyToClipboard
-                        text={props.value}
+                        text={props.value ?? ""}
                         tooltipMessage="Copy to clipboard"
                     />
                 </span>

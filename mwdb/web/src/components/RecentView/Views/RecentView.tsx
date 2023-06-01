@@ -13,9 +13,9 @@ import { isEmpty } from "lodash";
 
 type Props = {
     type: ObjectType;
-    rowComponent: JSX.Element;
-    headerComponent: JSX.Element;
-    disallowEmpty: boolean;
+    rowComponent: React.ComponentType<any>;
+    headerComponent: React.ComponentType<any>;
+    disallowEmpty?: boolean;
 };
 
 export function RecentView(props: Props) {
@@ -270,7 +270,7 @@ export function RecentView(props: Props) {
                     rowComponent={props.rowComponent}
                     headerComponent={props.headerComponent}
                     locked={isLocked}
-                    disallowEmpty={props.disallowEmpty}
+                    disallowEmpty={props.disallowEmpty ?? false}
                     setQueryError={setQueryError}
                     addToQuery={addToQuery}
                 />

@@ -4,21 +4,7 @@ import { createRoot } from "react-dom/client";
 import * as dagreD3 from "dagre-d3";
 import * as d3 from "d3";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
-
-type NodeProp = {
-    id: string;
-    expanded: boolean;
-    object: {
-        tags: string[];
-        type: string;
-        upload_time: string;
-    };
-};
-
-type Edge = {
-    child: string;
-    parent: string;
-};
+import { Edge, NodeProp } from "@mwdb-web/types/types";
 
 type RenderContext = {
     refCounter: number;
@@ -29,11 +15,11 @@ type RenderContext = {
 
 type Props = {
     height: number;
-    width: number;
-    nodeComponent: JSX.Element;
+    width: number | string;
+    nodeComponent: React.ComponentType<any>;
     edges: Edge[];
     nodes: NodeProp[];
-    onNodeClick: (id: unknown) => void;
+    onNodeClick: (id: string) => void;
 };
 
 function DagreD3Plot(props: Props) {
@@ -156,7 +142,7 @@ function DagreD3Plot(props: Props) {
         }
 
         for (let edge of props.edges)
-            graph.setEdge(edge.parent, edge.child, {
+            graph.setEdge(edge.parent!, edge.child!, {
                 label: "",
                 lineInterpolate: "basis",
             });
@@ -189,7 +175,7 @@ function DagreD3Plot(props: Props) {
         renderer(svgGroup, graph);
 
         svg.selectAll(".dagre-d3 .node").on("click", (id) =>
-            props.onNodeClick(id)
+            props.onNodeClick(id as string)
         );
 
         svg.attr("height", props.height);

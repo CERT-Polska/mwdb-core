@@ -1,5 +1,10 @@
 import { GenericOrJSX } from "@mwdb-web/types/types";
-import { capitalize, intersperse, mapObjectType } from "../../commons/helpers";
+import {
+    capitalize,
+    intersperse,
+    mapObjectType,
+    negateBuffer,
+} from "../../commons/helpers";
 
 describe("capitalize", () => {
     test("should return empty string when param is not typeof string", () => {
@@ -80,5 +85,32 @@ describe("mapObjectType", () => {
     it("should return the input string if it does not match any of the predefined values", () => {
         const result = mapObjectType("unknown");
         expect(result).toBe("unknown");
+    });
+});
+
+describe("negateBuffer", () => {
+    it("should negate the buffer contents correctly", () => {
+        const buffer = new ArrayBuffer(4);
+        const view = new Uint8Array(buffer);
+        view[0] = 0x11;
+        view[1] = 0x22;
+        view[2] = 0x33;
+        view[3] = 0x44;
+
+        const result = negateBuffer(buffer);
+        const resultView = new Uint8Array(result);
+
+        expect(resultView[0]).toBe(0xee);
+        expect(resultView[1]).toBe(0xdd);
+        expect(resultView[2]).toBe(0xcc);
+        expect(resultView[3]).toBe(0xbb);
+    });
+
+    it("should return a new buffer", () => {
+        const buffer = new ArrayBuffer(4);
+        const result = negateBuffer(buffer);
+
+        expect(result).not.toBe(buffer);
+        expect(result).toBeInstanceOf(ArrayBuffer);
     });
 });

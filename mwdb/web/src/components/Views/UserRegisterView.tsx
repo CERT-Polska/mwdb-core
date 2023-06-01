@@ -1,5 +1,5 @@
-import React, { useContext, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useContext, useRef, useState } from "react";
+import { UseFormProps, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -11,48 +11,44 @@ import { View, Label, FormError, LoadingSpinner } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useNavRedirect } from "@mwdb-web/commons/hooks";
 
-const formFields = {
-    login: "login",
-    email: "email",
-    affiliation: "affiliation",
-    job_title: "job_title",
-    job_responsibilities: "job_responsibilities",
-    other_info: "other_info",
-    recaptcha: "recaptcha",
+type FormValues = {
+    login: string;
+    email: string;
+    affiliation: string;
+    job_title: string;
+    job_responsibilities: string;
+    other_info: string;
+    recaptcha: string | null;
 };
 
-const validationSchema = Yup.object().shape({
-    [formFields.login]: Yup.string()
+const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+    login: Yup.string()
         .required("Login is required")
         .matches(
             /[A-Za-z0-9_-]{1,32}/,
             "Login must contain only letters, digits, '_'and '-' characters, max 32 characters allowed."
         ),
-    [formFields.email]: Yup.string()
+    email: Yup.string()
         .required("Email is required")
         .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, "Value is not email"),
-    [formFields.affiliation]: Yup.string().required("Affiliation is required"),
-    [formFields.job_title]: Yup.string().required("Job title is required"),
+    affiliation: Yup.string().required("Affiliation is required"),
+    job_title: Yup.string().required("Job title is required"),
 
-    [formFields.job_responsibilities]: Yup.string().required(
+    job_responsibilities: Yup.string().required(
         "Job responsibilities is required"
     ),
-    [formFields.other_info]: Yup.string().required(
-        "Other information is required"
-    ),
-    [formFields.recaptcha]: Yup.string()
-        .nullable()
-        .required("Recaptcha is required"),
+    other_info: Yup.string().required("Other information is required"),
+    recaptcha: Yup.string().nullable().required("Recaptcha is required"),
 });
 
-const formOptions = {
+const formOptions: UseFormProps<FormValues> = {
     resolver: yupResolver(validationSchema),
     mode: "onSubmit",
     reValidateMode: "onSubmit",
     shouldFocusError: true,
 };
 
-export default function UserRegister() {
+export function UserRegisterView() {
     const config = useContext(ConfigContext);
     const { redirectTo } = useNavRedirect();
     const {
@@ -60,12 +56,12 @@ export default function UserRegister() {
         handleSubmit,
         setValue,
         formState: { errors },
-    } = useForm(formOptions);
+    } = useForm<FormValues>(formOptions);
 
-    const [loading, setLoading] = useState(false);
-    const captchaRef = useRef(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const captchaRef = useRef<ReCAPTCHA>(null);
 
-    async function registerUser(values) {
+    async function registerUser(values: FormValues) {
         try {
             setLoading(true);
             const additional_info = `Affiliation: ${values.affiliation}, Job title: ${values.job_title}, ${values.job_responsibilities} ${values.other_info}`;
@@ -73,7 +69,7 @@ export default function UserRegister() {
                 values.login,
                 values.email,
                 additional_info,
-                values.recaptcha
+                values.recaptcha!
             );
             toast(
                 `User ${response.data.login} registration requested. Account is
@@ -89,7 +85,7 @@ export default function UserRegister() {
             setLoading(false);
         } finally {
             captchaRef.current?.reset();
-            setValue(formFields.recaptcha, null);
+            setValue("recaptcha", null);
         }
     }
 
@@ -110,11 +106,11 @@ export default function UserRegister() {
                                 <Label
                                     label="Login"
                                     required
-                                    htmlFor={formFields.login}
+                                    htmlFor={"login" as keyof FormValues}
                                 />
                                 <input
-                                    {...register(formFields.login)}
-                                    id={formFields.login}
+                                    {...register("login" as keyof FormValues)}
+                                    id={"login" as keyof FormValues}
                                     className={`form-control ${
                                         errors.login ? "is-invalid" : ""
                                     }`}
@@ -126,11 +122,11 @@ export default function UserRegister() {
                                 <Label
                                     label="Business e-mail"
                                     required
-                                    htmlFor={formFields.email}
+                                    htmlFor={"email" as keyof FormValues}
                                 />
                                 <input
-                                    {...register(formFields.email)}
-                                    id={formFields.email}
+                                    {...register("email" as keyof FormValues)}
+                                    id={"email" as keyof FormValues}
                                     className={`form-control ${
                                         errors.email ? "is-invalid" : ""
                                     }`}
@@ -144,11 +140,13 @@ export default function UserRegister() {
                                 <Label
                                     label="Affiliation"
                                     required
-                                    htmlFor={formFields.affiliation}
+                                    htmlFor={"affiliation" as keyof FormValues}
                                 />
                                 <input
-                                    {...register(formFields.affiliation)}
-                                    id={formFields.affiliation}
+                                    {...register(
+                                        "affiliation" as keyof FormValues
+                                    )}
+                                    id={"affiliation" as keyof FormValues}
                                     className={`form-control ${
                                         errors.affiliation ? "is-invalid" : ""
                                     }`}
@@ -162,11 +160,13 @@ export default function UserRegister() {
                                 <Label
                                     label="Job Title"
                                     required
-                                    htmlFor={formFields.job_title}
+                                    htmlFor={"job_title" as keyof FormValues}
                                 />
                                 <input
-                                    {...register(formFields.job_title)}
-                                    id={formFields.job_title}
+                                    {...register(
+                                        "job_title" as keyof FormValues
+                                    )}
+                                    id={"job_title" as keyof FormValues}
                                     className={`form-control ${
                                         errors.job_title ? "is-invalid" : ""
                                     }`}
@@ -181,11 +181,15 @@ export default function UserRegister() {
                             <Label
                                 label="Job Responsibilities"
                                 required
-                                htmlFor={formFields.job_responsibilities}
+                                htmlFor={
+                                    "job_responsibilities" as keyof FormValues
+                                }
                             />
                             <input
-                                {...register(formFields.job_responsibilities)}
-                                id={formFields.job_responsibilities}
+                                {...register(
+                                    "job_responsibilities" as keyof FormValues
+                                )}
+                                id={"job_responsibilities" as keyof FormValues}
                                 className={`form-control ${
                                     errors.job_responsibilities
                                         ? "is-invalid"
@@ -204,11 +208,11 @@ export default function UserRegister() {
                             <Label
                                 label="Other information"
                                 required
-                                htmlFor={formFields.other_info}
+                                htmlFor={"other_info" as keyof FormValues}
                             />
                             <textarea
-                                {...register(formFields.other_info)}
-                                id={formFields.other_info}
+                                {...register("other_info" as keyof FormValues)}
+                                id={"other_info" as keyof FormValues}
                                 className={`form-control ${
                                     errors.other_info ? "is-invalid" : ""
                                 }`}
@@ -232,7 +236,7 @@ export default function UserRegister() {
                                         config.config["recaptcha_site_key"]
                                     }
                                     onChange={(val) =>
-                                        setValue(formFields.recaptcha, val)
+                                        setValue("recaptcha", val)
                                     }
                                 />
                                 <div className="text-center">

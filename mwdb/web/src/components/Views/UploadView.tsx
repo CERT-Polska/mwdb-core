@@ -1,11 +1,8 @@
-import { useCallback, useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useDropzone } from "react-dropzone";
 import { toast } from "react-toastify";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUpload } from "@fortawesome/free-solid-svg-icons";
-import { AttributesAddModal } from "./AttributesAddModal";
+import { AttributesAddModal } from "../AttributesAddModal";
 
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
@@ -13,67 +10,28 @@ import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { Autocomplete, DataTable, ShowIf, View } from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { Extendable } from "@mwdb-web/commons/plugins";
+import { UploadDropzone } from "../UploadDropzone";
+import { Attribute } from "@mwdb-web/types/types";
+import { isEmpty } from "lodash";
 
-function UploadDropzone(props) {
-    const onDrop = props.onDrop;
-    const { getRootProps, getInputProps, isDragActive, isDragReject } =
-        useDropzone({
-            multiple: false,
-            onDrop: useCallback(
-                (acceptedFiles) => onDrop(acceptedFiles[0]),
-                [onDrop]
-            ),
-        });
-
-    const dropzoneClassName = isDragActive
-        ? "dropzone-active"
-        : isDragReject
-        ? "dropzone-reject"
-        : "";
-
-    return (
-        <div
-            {...getRootProps({
-                className: `dropzone-ready dropzone ${dropzoneClassName}`,
-            })}
-        >
-            <input {...getInputProps()} />
-            <div className="card">
-                <div className="card-body">
-                    <h5 className="card-title">
-                        <FontAwesomeIcon icon={faUpload} />
-                        &nbsp;
-                        {props.file ? (
-                            <span>
-                                {props.file.name} - {props.file.size} bytes
-                            </span>
-                        ) : (
-                            <span>Click here to upload</span>
-                        )}
-                    </h5>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-export default function Upload() {
+export function UploadView() {
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
     const fileUploadTimeout = config.config["file_upload_timeout"];
     const navigate = useNavigate();
     const searchParams = useSearchParams()[0];
 
-    const [file, setFile] = useState(null);
-    const [shareWith, setShareWith] = useState("default");
-    const [group, setGroup] = useState("");
-    const [groups, setGroups] = useState([]);
-    const [parent, setParent] = useState("");
-    const [attributes, setAttributes] = useState([]);
-    const [attributeModalOpen, setAttributeModalOpen] = useState(false);
-    const [share3rdParty, setShare3rdParty] = useState(true);
+    const [file, setFile] = useState<File | null>(null);
+    const [shareWith, setShareWith] = useState<string>("default");
+    const [group, setGroup] = useState<string>("");
+    const [groups, setGroups] = useState<string[]>([]);
+    const [parent, setParent] = useState<string>("");
+    const [attributes, setAttributes] = useState<Attribute[]>([]);
+    const [attributeModalOpen, setAttributeModalOpen] =
+        useState<boolean>(false);
+    const [share3rdParty, setShare3rdParty] = useState<boolean>(true);
 
-    const handleParentChange = (ev) => {
+    const handleParentChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
         ev.preventDefault();
         setParent(ev.target.value);
     };
@@ -83,7 +41,7 @@ export default function Upload() {
         setParent("");
     };
 
-    const updateSharingMode = (ev) => {
+    const updateSharingMode = (ev: React.ChangeEvent<HTMLSelectElement>) => {
         setShareWith(ev.target.value);
         setGroup("");
     };
@@ -109,11 +67,11 @@ export default function Upload() {
     const handleSubmit = async () => {
         try {
             let response = await api.uploadFile(
-                file,
+                file!,
                 searchParams.get("parent") || parent,
-                sharingModeToUploadParam(),
+                sharingModeToUploadParam()!,
                 attributes,
-                fileUploadTimeout,
+                fileUploadTimeout!,
                 share3rdParty
             );
             navigate("/file/" + response.data.sha256, {
@@ -129,18 +87,18 @@ export default function Upload() {
         }
     };
 
-    const onAttributeAdd = (key, value) => {
+    const onAttributeAdd = (key: string, value: string) => {
         for (let attr of attributes)
             if (attr.key === key && attr.value === value) {
                 // that key, value was added yet
                 setAttributeModalOpen(false);
                 return;
             }
-        setAttributes([...attributes, { key, value }]);
+        setAttributes([...attributes, { key, value }] as Attribute[]);
         setAttributeModalOpen(false);
     };
 
-    const onAttributeRemove = (idx) => {
+    const onAttributeRemove = (idx: number) => {
         setAttributes([
             ...attributes.slice(0, idx),
             ...attributes.slice(idx + 1),
@@ -188,8 +146,10 @@ export default function Upload() {
                                     style={{ fontSize: "medium" }}
                                     placeholder="(Optional) Type parent identifier..."
                                     value={searchParams.get("parent") || parent}
-                                    onChange={handleParentChange}
-                                    disabled={searchParams.get("parent")}
+                                    onChange={(e) => handleParentChange}
+                                    disabled={
+                                        !isEmpty(searchParams.get("parent"))
+                                    }
                                 />
                                 <div className="input-group-append">
                                     <input

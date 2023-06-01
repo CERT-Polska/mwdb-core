@@ -1,11 +1,8 @@
 import { api } from "@mwdb-web/commons/api";
 import {
     AttributeDefinition,
-    BlobData,
     Capability,
-    ConfigData,
     Group,
-    ObjectData,
     ObjectOrConfigOrBlobData,
     ObjectType,
     ServerInfo,
@@ -15,7 +12,6 @@ import {
     GetRemoteObjectCountResponse,
     GetRemoteObjectListResponse,
 } from "./api";
-import { Provider } from "react";
 
 export type TabContextValues = {
     tab?: string;

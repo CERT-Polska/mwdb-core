@@ -1,5 +1,10 @@
 import { GenericOrJSX } from "@mwdb-web/types/types";
-import { capitalize, intersperse, mapObjectType, negateBuffer} from "../../commons/helpers";
+import {
+    capitalize,
+    intersperse,
+    mapObjectType,
+    negateBuffer,
+} from "../../commons/helpers";
 
 describe("capitalize", () => {
     test("should return empty string when param is not typeof string", () => {
@@ -94,7 +99,6 @@ describe("negateBuffer", () => {
 
         const result = negateBuffer(buffer);
         const resultView = new Uint8Array(result);
-
         expect(resultView[0]).toBe(0xee);
         expect(resultView[1]).toBe(0xdd);
         expect(resultView[2]).toBe(0xcc);

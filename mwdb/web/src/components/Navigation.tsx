@@ -14,6 +14,7 @@ import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugins, Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal, NavDropdown } from "@mwdb-web/commons/ui";
 import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
+import { Capability } from "@mwdb-web/types/types";
 
 import logo from "../assets/logo.png";
 import { AdminNav } from "./AdminNav";

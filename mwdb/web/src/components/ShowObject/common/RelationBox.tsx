@@ -9,7 +9,7 @@ import {
 import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import {
     ObjectLink,
@@ -20,7 +20,7 @@ import {
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { RelationsAddModal } from "../Actions/RelationsAddModal";
-import { RepationItem } from "@mwdb-web/types/types";
+import { Capability, RelationItem } from "@mwdb-web/types/types";
 
 type RelationToRemove = {
     relation: "parent" | "child";
@@ -28,8 +28,8 @@ type RelationToRemove = {
 };
 
 type Props = {
-    children?: RepationItem[];
-    parents?: RepationItem[];
+    children?: RelationItem[];
+    parents?: RelationItem[];
     header?: string;
     icon?: IconDefinition;
     updateRelationsActivePage?: () => void;
@@ -117,7 +117,7 @@ export function RelationsBox(props: Props) {
                         tooltipMessage="Copy sha256 to clipboard"
                     />
                 </span>
-                {auth.hasCapability(Capabilities.removingParents) && (
+                {auth.hasCapability(Capability.removingParents) && (
                     <span
                         className="ml-2"
                         data-toggle="tooltip"
@@ -163,7 +163,7 @@ export function RelationsBox(props: Props) {
                         tooltipMessage="Copy sha256 to clipboard"
                     />
                 </span>
-                {auth.hasCapability(Capabilities.removingParents) && (
+                {auth.hasCapability(Capability.removingParents) && (
                     <span
                         className="ml-2"
                         data-toggle="tooltip"

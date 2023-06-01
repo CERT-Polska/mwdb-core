@@ -66,10 +66,11 @@ import { UserCapabilitiesView } from "./components/Settings/Views/UserCapabiliti
 import { UserAPIKeysView } from "./components/Settings/Views/UserAPIKeysView";
 import { AttributeEditTemplateView } from "./components/Settings/Views/AttributeEditTemplateView";
 
-import { Capabilities } from "./commons/auth";
 import { ConfigContext } from "./commons/config";
 import { fromPlugins, Extendable } from "./commons/plugins";
 import { ErrorBoundary, RequiresAuth, RequiresCapability } from "./commons/ui";
+
+import { Capability } from "@mwdb-web/types/types";
 
 function NavigateFor404() {
     /**
@@ -113,9 +114,7 @@ function AppRoutes() {
                 <Route
                     path="upload"
                     element={
-                        <RequiresCapability
-                            capability={Capabilities.addingFiles}
-                        >
+                        <RequiresCapability capability={Capability.addingFiles}>
                             <UploadView />
                         </RequiresCapability>
                     }
@@ -172,9 +171,7 @@ function AppRoutes() {
                 <Route
                     path="settings"
                     element={
-                        <RequiresCapability
-                            capability={Capabilities.manageUsers}
-                        >
+                        <RequiresCapability capability={Capability.manageUsers}>
                             <SettingsView />
                         </RequiresCapability>
                     }

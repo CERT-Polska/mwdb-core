@@ -8,10 +8,10 @@ import { TabContextValues } from "@mwdb-web/types/context";
 
 type Props = {
     defaultTab: string;
-    children: JSX.Element;
+    children: React.ReactNode;
 };
 
-export default function ObjectBox({ defaultTab, children }: Props) {
+export function ObjectBox({ defaultTab, children }: Props) {
     const remotePath = useRemotePath();
     const location = useLocation();
     const { Component, setComponent } = useComponentState();

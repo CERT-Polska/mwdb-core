@@ -1,6 +1,6 @@
 type Props = {
     indent?: number;
-    children: JSX.Element | JSX.Element[];
+    children: React.ReactNode;
 };
 
 export default function DataTable(props: Props) {

@@ -1,4 +1,4 @@
-import { Group, ObjectOrConfigOrBlobData } from "./types";
+import { Group } from "./types";
 
 export type TagProps = {
     tag: string;

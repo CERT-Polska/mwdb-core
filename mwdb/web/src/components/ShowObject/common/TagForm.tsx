@@ -31,7 +31,6 @@ export function TagForm(props: Props) {
         }
         try {
             const response = await api.getTags(value);
-            console.log(response);
             setTags(response.data.map((t) => t.tag));
         } catch (error) {
             context.setObjectError(error);

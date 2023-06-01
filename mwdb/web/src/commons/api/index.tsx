@@ -97,7 +97,9 @@ import {
 import {
     Attribute,
     Capability,
+    Comment,
     CreateUser,
+    ObjectLegacyType,
     ObjectType,
     Provider,
 } from "@mwdb-web/types/types";
@@ -276,7 +278,7 @@ function getObjectTags(id: string): GetObjectTagsResponse {
     return axios.get(`/object/${id}/tag`);
 }
 
-function getObjectComments(id: number): GetObjectCommentsResponse {
+function getObjectComments(id: string): GetObjectCommentsResponse {
     return axios.get(`/object/${id}/comment`);
 }
 
@@ -321,14 +323,14 @@ function removeObjectTag(id: string, tag: string): RemoveObjectTagResponse {
 }
 
 function addObjectComment(
-    id: number,
+    id: string,
     comment: string
 ): AddObjectCommentResponse {
     return axios.post(`/object/${id}/comment`, { comment });
 }
 
 function removeObjectComment(
-    id: number,
+    id: string,
     comment_id: number
 ): RemoveObjectCommentResponse {
     return axios.delete(`/object/${id}/comment/${comment_id}`);
@@ -616,7 +618,7 @@ function getRemoteNames(): GetRemoteNamesResponse {
 
 function pushObjectRemote(
     remote: string,
-    type: "file" | "static_config" | "text_blob",
+    type: ObjectLegacyType,
     identifier: string,
     upload_as: string
 ): PushObjectRemoteResponse {
@@ -627,7 +629,7 @@ function pushObjectRemote(
 
 function pullObjectRemote(
     remote: string,
-    type: "file" | "static_config" | "text_blob",
+    type: ObjectLegacyType,
     identifier: string,
     upload_as: string
 ): PullObjectRemoteResponse {
@@ -682,7 +684,7 @@ function getRemoteObjectTags(
 
 function getRemoteObjectComments(
     remote: string,
-    id: number
+    id: string
 ): GetRemoteObjectCommentsResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/comment`);
 }

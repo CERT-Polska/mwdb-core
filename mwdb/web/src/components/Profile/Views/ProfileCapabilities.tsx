@@ -1,9 +1,8 @@
 import { useOutletContext } from "react-router-dom";
-import { Capabilities } from "@mwdb-web/commons/auth";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 import { CapabilitiesTable } from "../common/CapabilitiesTable";
 import { CapabilitiesSelect } from "../common/CapabilitiesSelect";
-import { Group, User } from "@mwdb-web/types/types";
+import { Capability, Group, User } from "@mwdb-web/types/types";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 
 type Props = {
@@ -27,7 +26,7 @@ export default function ProfileCapabilities({ profile, getData }: Props) {
                 Here is the list of {"groups" in profile ? "account" : "group"}{" "}
                 superpowers:
             </p>
-            {userHasCapabilities(Capabilities.manageUsers) && (
+            {userHasCapabilities(Capability.manageUsers) && (
                 <CapabilitiesSelect profile={profile} getData={getData} />
             )}
             <CapabilitiesTable profile={profile} />

@@ -11,11 +11,12 @@ import {
     faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
 import { KartonAnalysis } from "@mwdb-web/types/types";
+import { Capability } from "@mwdb-web/types/types";
 
 type Props = {
     analysis: KartonAnalysis;
@@ -144,7 +145,7 @@ export function KartonAnalysisRow({ analysis, removeAnalysis }: Props) {
                     />
                 </span>
 
-                {auth.hasCapability(Capabilities.removingKarton) && (
+                {auth.hasCapability(Capability.removingKarton) && (
                     <span
                         className="ml-2"
                         data-toggle="tooltip"

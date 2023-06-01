@@ -1,8 +1,10 @@
 import { api } from "@mwdb-web/commons/api";
 import {
     AttributeDefinition,
+    BlobData,
     Capability,
     Group,
+    ObjectData,
     ObjectOrConfigOrBlobData,
     ObjectType,
     ServerInfo,

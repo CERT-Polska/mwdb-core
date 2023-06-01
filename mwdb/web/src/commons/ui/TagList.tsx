@@ -11,8 +11,8 @@ export function TagList({ tags, ...props }: Props) {
         <>
             {tags
                 .sort((a: TagType, b: TagType) => a.tag.localeCompare(b.tag))
-                .map((tag: TagType, index: number) => (
-                    <Tag {...props} tag={tag.tag} key={index} />
+                .map((tag: TagType) => (
+                    <Tag {...props} tag={tag.tag} key={tag.tag} />
                 ))}
         </>
     );

@@ -1,11 +1,12 @@
 import { useState, useContext } from "react";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { TagList } from "@mwdb-web/commons/ui";
 import { TagForm } from "./TagForm";
+import { Capability } from "@mwdb-web/types/types";
 
 export function TagBox() {
     const api = useContext(APIContext);
@@ -70,16 +71,14 @@ export function TagBox() {
                         tag={""}
                         tags={tags}
                         tagRemove={(e, tag) => handleTagRemove(tag)}
-                        deletable={auth.hasCapability(
-                            Capabilities.removingTags
-                        )}
+                        deletable={auth.hasCapability(Capability.removingTags)}
                         searchEndpoint={context.searchEndpoint}
                     />
                 ) : (
                     <div className="text-muted">No tags to display</div>
                 )}
             </div>
-            {auth.hasCapability(Capabilities.addingTags) && !api.remote && (
+            {auth.hasCapability(Capability.addingTags) && !api.remote && (
                 <TagForm onTagSubmit={handleTagSubmit} />
             )}
         </div>

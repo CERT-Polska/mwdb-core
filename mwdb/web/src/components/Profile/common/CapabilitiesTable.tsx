@@ -4,11 +4,7 @@ import { Link } from "react-router-dom";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { find, isNil } from "lodash";
-import {
-    capabilitiesList,
-    Capabilities,
-    AuthContext,
-} from "@mwdb-web/commons/auth";
+import { capabilitiesList, AuthContext } from "@mwdb-web/commons/auth";
 import { GroupBadge } from "@mwdb-web/commons/ui";
 import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 import { Capability, Group, User } from "@mwdb-web/types/types";
@@ -44,7 +40,7 @@ export function CapabilitiesTable({ profile }: Props) {
         if ("groups" in profile && !userOrGroupName) {
             userOrGroupName = profile.login;
         }
-        const isManageUsersCapability = cap === Capabilities.manageUsers;
+        const isManageUsersCapability = cap === Capability.manageUsers;
         if (isManageUsersCapability && userOrGroupName === user.login) {
             return false;
         }
@@ -57,7 +53,7 @@ export function CapabilitiesTable({ profile }: Props) {
             <tbody>
                 {profile.capabilities.sort().map((cap) => (
                     <tr key={cap}>
-                        {userHasCapabilities(Capabilities.manageUsers) && (
+                        {userHasCapabilities(Capability.manageUsers) && (
                             <td className="col-auto">
                                 {isDeleteButtonRender(cap) && (
                                     <Link

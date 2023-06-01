@@ -21,12 +21,15 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-      - name: Install dev dependencies
+      - name: Install dependencies
         working-directory: mwdb/web
-        run: npm install --only dev
+        run: npm install
       - name: Check if code was prettified
         working-directory: mwdb/web
         run: npx prettier --check src
+      - name: Check types
+        working-directory: mwdb/web
+        run: npx tsc
   build_core:
     needs: [lint_core]
     name: Build mwdb-core core image

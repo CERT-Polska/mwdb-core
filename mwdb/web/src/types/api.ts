@@ -6,6 +6,7 @@ import {
     AttributeDefinition,
     BlobData,
     BlobListItem,
+    Comment,
     ConfigData,
     ConfigListItem,
     Family,

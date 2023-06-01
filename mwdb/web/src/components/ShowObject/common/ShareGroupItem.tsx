@@ -39,6 +39,7 @@ export function ShareGroupItem({ reason, shares, showDhash }: Props) {
                 </tr>
             </thead>
             <tbody>
+                {/* @ts-ignore */}
                 {shares.map((share, index) => {
                     return (
                         <tr key={index} className="d-flex">

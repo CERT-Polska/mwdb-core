@@ -5,11 +5,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { KartonAnalysisList } from "./KartonAnalysisList";
+import { Capability } from "@mwdb-web/types/types";
 
 export function KartonAnalysisBox() {
     const [isResubmitPending, setResubmitPending] = useState<boolean>(false);
@@ -25,7 +26,7 @@ export function KartonAnalysisBox() {
     const objectId = object!.id;
     const analyses = object!.analyses;
     const isReanalysisAvailable = auth.hasCapability(
-        Capabilities.kartonReanalyze
+        Capability.kartonReanalyze
     );
 
     async function updateAnalyses() {

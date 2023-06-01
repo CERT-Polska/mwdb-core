@@ -75,8 +75,8 @@ type Props = {
             message: string;
         }> | null
     ) => void;
-    rowComponent: React.ComponentType;
-    headerComponent: React.ComponentType;
+    rowComponent:React.ComponentType;
+    headerComponent:React.ComponentType;
     locked: boolean;
     addToQuery: AddToQuery;
 };

@@ -1,11 +1,11 @@
-import { useContext, useState, useEffect } from "react";
+import { useCallback, useContext, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { AttributesAddModal } from "../AttributesAddModal";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { Autocomplete, DataTable, ShowIf, View } from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
@@ -13,6 +13,7 @@ import { Extendable } from "@mwdb-web/commons/plugins";
 import { UploadDropzone } from "../UploadDropzone";
 import { Attribute } from "@mwdb-web/types/types";
 import { isEmpty } from "lodash";
+import { Capability } from "@mwdb-web/types/types";
 
 export function UploadView() {
     const auth = useContext(AuthContext);
@@ -133,7 +134,7 @@ export function UploadView() {
                         onDrop={(data) => setFile(data)}
                     />
                     <div className="form-group">
-                        {auth.hasCapability(Capabilities.addingParents) && (
+                        {auth.hasCapability(Capability.addingParents) && (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label className="input-group-text">

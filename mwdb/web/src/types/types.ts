@@ -1,31 +1,32 @@
 import { AxiosError } from "axios";
 
-export type Capability =
-    | "personalize"
-    | "share_queried_objects"
-    | "adding_comments"
-    | "manage_profile"
-    | "removing_parents"
-    | "adding_blobs"
-    | "removing_tags"
-    | "access_uploader_info"
-    | "removing_comments"
-    | "removing_objects"
-    | "adding_all_attributes"
-    | "unlimited_requests"
-    | "karton_assign"
-    | "karton_unassign"
-    | "reading_all_attributes"
-    | "adding_configs"
-    | "adding_files"
-    | "adding_tags"
-    | "sharing_with_all"
-    | "manage_users"
-    | "karton_reanalyze"
-    | "access_all_objects"
-    | "removing_attributes"
-    | "adding_parents"
-    | "modify_3rd_party_sharing";
+export enum Capability {
+    manageUsers = "manage_users",
+    shareQueriedObjects = "share_queried_objects",
+    accessAllObjects = "access_all_objects",
+    sharingWithAll = "sharing_with_all",
+    accessUploaderInfo = "access_uploader_info",
+    addingTags = "adding_tags",
+    removingTags = "removing_tags",
+    addingComments = "adding_comments",
+    removingComments = "removing_comments",
+    addingParents = "adding_parents",
+    removingParents = "removing_parents",
+    readingAllAttributes = "reading_all_attributes",
+    addingAllAttributes = "adding_all_attributes",
+    removingAttributes = "removing_attributes",
+    addingFiles = "adding_files",
+    addingConfigs = "adding_configs",
+    addingBlobs = "adding_blobs",
+    unlimitedRequests = "unlimited_requests",
+    removingObjects = "removing_objects",
+    manageProfile = "manage_profile",
+    personalize = "personalize",
+    kartonAssign = "karton_assign",
+    kartonReanalyze = "karton_reanalyze",
+    removingKarton = "karton_unassign",
+    modify3rdPartySharing = "modify_3rd_party_sharing",
+}
 
 export type User = {
     login: string;
@@ -60,6 +61,8 @@ export type Group = {
 
 export type ObjectType = "file" | "blob" | "config" | "object";
 
+export type ObjectLegacyType = "file" | "static_config" | "text_blob";
+
 export type Attribute = {
     key: string;
     id: number;
@@ -83,7 +86,7 @@ export type Tag = {
 export type RelatedObject = {
     id: string;
     tags: Tag[];
-    type: "file" | "static_config" | "text_blob";
+    type: ObjectLegacyType;
     upload_time: string;
 };
 
@@ -104,6 +107,7 @@ type ObjectCommonData = {
         id: number;
         family: string;
     };
+    comments: Comment[];
 };
 
 export type ObjectData = ObjectCommonData & {
@@ -283,10 +287,10 @@ export type CreateUser = {
 
 export type ObjectOrConfigOrBlobData = ObjectData | ConfigData | BlobData;
 
-export type RepationItem = {
+export type RelationItem = {
     id: string;
     tags: Tag[];
-    type: "file" | "static_config" | "text_blob";
+    type: ObjectLegacyType;
     upload_time: string;
 };
 

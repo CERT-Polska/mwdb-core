@@ -2,10 +2,11 @@ import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { AuthContext, Capabilities } from "@mwdb-web/commons/auth";
+import { AuthContext } from "@mwdb-web/commons/auth";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
+import { Capability } from "@mwdb-web/types/types";
 
 type Props = {
     isEnabled: boolean;
@@ -29,7 +30,7 @@ export function Share3rdPartyBox(props: Props) {
         }
     }
 
-    if (!auth.hasCapability(Capabilities.modify3rdPartySharing)) {
+    if (!auth.hasCapability(Capability.modify3rdPartySharing)) {
         return <></>;
     }
 

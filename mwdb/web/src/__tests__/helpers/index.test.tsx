@@ -1,10 +1,5 @@
 import { GenericOrJSX } from "@mwdb-web/types/types";
-import {
-    capitalize,
-    intersperse,
-    mapObjectType,
-    negateBuffer,
-} from "../../commons/helpers";
+import { capitalize, intersperse, mapObjectType, negateBuffer} from "../../commons/helpers";
 
 describe("capitalize", () => {
     test("should return empty string when param is not typeof string", () => {

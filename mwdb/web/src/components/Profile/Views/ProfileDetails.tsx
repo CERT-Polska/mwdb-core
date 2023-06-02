@@ -11,7 +11,7 @@ import { Capability } from "@mwdb-web/types/types";
 import { ProfileItem } from "../common/ProfileItem";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 
-export default function ProfileDetails() {
+export function ProfileDetails() {
     const auth = useContext(AuthContext);
     const { profile }: ProfileOutletContext = useOutletContext();
     const isCurrentUser = profile.login === auth.user.login;

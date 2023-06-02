@@ -14,7 +14,7 @@ type Props<T> = {
     columnNames: string[];
 };
 
-export default function SortedList<T>(props: Props<T>) {
+export function SortedList<T>(props: Props<T>) {
     const ListItem = props.listItem;
     const columnNames = props.columnNames;
 

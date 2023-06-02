@@ -9,7 +9,7 @@ type Props = {
     tooltipMessage?: string;
 };
 
-const ActionCopyToClipboard = (props: Props) => {
+export const ActionCopyToClipboard = (props: Props) => {
     const { text, tooltipMessage = "", size = "sm" } = props;
     return (
         <span style={{ cursor: "pointer" }}>
@@ -23,5 +23,3 @@ const ActionCopyToClipboard = (props: Props) => {
         </span>
     );
 };
-
-export default ActionCopyToClipboard;

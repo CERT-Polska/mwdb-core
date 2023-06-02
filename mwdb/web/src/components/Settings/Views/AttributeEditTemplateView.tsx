@@ -3,7 +3,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 
-import RichAttributePreview from "../../RichAttribute/RichAttributePreview";
+import { RichAttributePreview } from "../../RichAttribute/RichAttributePreview";
 import { AttributeOutletContext } from "@mwdb-web/types/context";
 
 export function AttributeEditTemplateView() {

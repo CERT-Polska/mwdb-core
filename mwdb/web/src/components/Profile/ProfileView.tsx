@@ -1,50 +1,14 @@
 import { useContext, useEffect, useState } from "react";
-import { NavLink, useParams, Outlet } from "react-router-dom";
-
-import { faUserCog } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import { useParams, Outlet } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
-import { ConfigContext } from "@mwdb-web/commons/config";
 import { View } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { DeleteCapabilityModal } from "../Settings/common/DeleteCapabilityModal";
 import { Capability, User } from "@mwdb-web/types/types";
+import { ProfileNav } from "./common/ProfileNav";
 
-function ProfileNav() {
-    const config = useContext(ConfigContext);
-
-    return (
-        <div>
-            <strong>
-                <FontAwesomeIcon icon={faUserCog} /> Profile
-            </strong>
-            <div className="nav sidenav flex-column">
-                <NavLink end to="/profile" className="nav-link">
-                    Profile details
-                </NavLink>
-                <NavLink end to="/profile/capabilities" className="nav-link">
-                    Capabilities
-                </NavLink>
-                <NavLink end to="/profile/groups" className="nav-link">
-                    Groups
-                </NavLink>
-                <NavLink end to="/profile/api-keys" className="nav-link">
-                    API keys
-                </NavLink>
-                {config.config["is_oidc_enabled"] && (
-                    <NavLink end to="/profile/oauth" className="nav-link">
-                        OpenID Connect
-                    </NavLink>
-                )}
-            </div>
-            <hr />
-        </div>
-    );
-}
-
-export default function ProfileView() {
+export function ProfileView() {
     const auth = useContext(AuthContext);
     const { redirectToAlert, setAlert } = useViewAlert();
     const userLogin = useParams().user || auth.user.login;

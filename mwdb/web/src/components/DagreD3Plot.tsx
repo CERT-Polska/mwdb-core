@@ -22,7 +22,7 @@ type Props = {
     onNodeClick: (id: string) => void;
 };
 
-function DagreD3Plot(props: Props) {
+export function DagreD3Plot(props: Props) {
     const remotePath = useRemotePath();
 
     const graph = new dagreD3.graphlib.Graph().setGraph({ compound: true });
@@ -202,5 +202,3 @@ function DagreD3Plot(props: Props) {
         </div>
     );
 }
-
-export default DagreD3Plot;

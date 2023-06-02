@@ -5,8 +5,8 @@ import { APIContext } from "@mwdb-web/commons/api";
 import { addFieldToQuery, multiFromHashes } from "@mwdb-web/commons/helpers";
 import { View } from "@mwdb-web/commons/ui";
 
-import RecentViewList from "./RecentViewList";
-import QuickQuery from "../common/QuickQuery";
+import { RecentViewList } from "./RecentViewList";
+import { QuickQuery } from "../common/QuickQuery";
 import { ObjectType } from "@mwdb-web/types/types";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";

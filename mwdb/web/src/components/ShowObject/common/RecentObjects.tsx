@@ -2,7 +2,7 @@ import { RecentView } from "../../RecentView";
 import { RecentObjectHeader } from "./RecentObjectHeader";
 import { RecentObjectRow } from "./RecentObjectRow";
 
-export default function RecentObjects() {
+export function RecentObjects() {
     return (
         <RecentView
             type="object"

@@ -5,8 +5,6 @@ import DiffMatchPatch from "diff-match-patch";
 
 import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/theme-chrome";
-import SplitComponent from "react-ace/lib/split";
-import { LegacyRef } from "react";
 
 type Props = {
     current: string;

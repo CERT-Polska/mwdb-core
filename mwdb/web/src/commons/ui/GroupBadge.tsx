@@ -4,7 +4,7 @@ import { faUser, faUsers, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { GroupBadgeProps } from "@mwdb-web/types/props";
 
-export default function GroupBadge(props: GroupBadgeProps) {
+export function GroupBadge(props: GroupBadgeProps) {
     const { group, clickable, basePath } = props;
     const icon = group.private
         ? faUser

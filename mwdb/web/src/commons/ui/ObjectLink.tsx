@@ -5,7 +5,7 @@ import { AuthContext } from "../auth";
 import { mapObjectType } from "../helpers";
 import { useRemotePath } from "../remotes";
 
-import Hash from "./Hash";
+import { Hash } from "./Hash";
 
 type Props = {
     type: string;
@@ -14,7 +14,7 @@ type Props = {
     inline?: boolean;
 };
 
-export default function ObjectLink(props: Props) {
+export function ObjectLink(props: Props) {
     const { type, id, className, inline } = props;
     const auth = useContext(AuthContext);
     const objectType = mapObjectType(props.type);

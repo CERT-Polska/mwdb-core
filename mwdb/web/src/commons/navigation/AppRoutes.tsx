@@ -1,101 +1,67 @@
-import { useContext } from "react";
-import {
-    Routes,
-    Route,
-    Navigate,
-    useLocation,
-    useParams,
-} from "react-router-dom";
-
-import { AboutView } from "./components/Views/AboutView";
-import { Navigation } from "./components/Navigation";
-import { RecentSamplesView } from "./components/File/Views/RecentSamplesView";
-import { ConfigStatsView } from "./components/Config/Views/ConfigStatsView";
-import { RecentConfigsView } from "./components/Config/Views/RecentConfigsView";
-import { RecentBlobsView } from "./components/Blob/Views/RecentBlobsView";
-import { ShowSampleView } from "./components/Views/ShowSampleView";
-import { ShowConfigView } from "./components/Config/Views/ShowConfigView";
-import { ShowTextBlobView } from "./components/Blob/Views/ShowTextBlobView";
-import { DiffTextBlobView } from "./components/Blob/Views/DiffTextBlobView";
-import { UploadView } from "./components/Views/UploadView";
-import { UserLoginView } from "./components/Views/UserLoginView";
-import { UserRegisterView } from "./components/Views/UserRegisterView";
-import { UserSetPasswordView } from "./components/UserSetPasswordView";
-import { SearchView } from "./components/Views/SearchView";
-import { RelationsPlotView } from "./components/Views/RelationsPlotView";
-import { UserPasswordRecoverView } from "./components/Views/UserPasswordRecoverView";
-import { DocsView } from "./components/Views/DocsView";
-import RemoteViews from "./components/Remote/RemoteViews";
-import ProfileView from "./components/Profile/ProfileView";
-import { SettingsView } from "./components/Settings/Views/SettingsView";
-
-import ProfileDetails from "./components/Profile/Views/ProfileDetails";
-import ProfileGroup from "./components/Profile/Views/ProfileGroup";
-import ProfileGroupMembers from "./components/Profile/Views/ProfileGroupMembers";
-import ProfileGroups from "./components/Profile/Views/ProfileGroups";
-import ProfileAPIKeys from "./components/Profile/Views/ProfileAPIKeys";
-import ProfileResetPassword from "./components/Profile/Views/ProfileResetPassword";
-import ProfileOAuth from "./components/Profile/Views/ProfileOAuth";
-
-import { OAuthAuthorizeView } from "./components/Views/OAuthAuthorizeView";
-
-import { SettingsOverviewView } from "./components/Settings/Views/SettingsOverviewView";
-import { UsersPendingListView } from "./components/Settings/Views/UsersPendingListView";
-import { UsersListView } from "./components/Settings/Views/UsersListView";
-import { UserCreateView } from "./components/Settings/Views/UserCreateView";
-import { UserView } from "./components/Settings/Views/UserView";
-import { GroupCreateView } from "./components/Settings/Views/GroupCreateView";
-import { GroupView } from "./components/Settings/Views/GroupView";
-import { GroupsListView } from "./components/Settings/Views/GroupsListView";
-import { AccessControlView } from "./components/Settings/Views/AccessControlView";
-import { OAuthListProvidersView } from "./components/Settings/Views/OAuthListProvidersView";
-import { OAuthRegisterView } from "./components/Settings/Views/OAuthRegisterView";
-import { OAuthProviderView } from "./components/Settings/Views/OAuthProviderView";
-import { AttributesListView } from "./components/Settings/Views/AttributesListView";
-import { AttributeCreateView } from "./components/Settings/Views/AttributeCreateView";
-import { AttributeView } from "./components/Settings/Views/AttributeView";
-import { AttributeDetailsView } from "./components/Settings/Views/AttributeDetailsView";
-import { AttributesPermissionsView } from "./components/Settings/Views/AttributePermissionsView";
-import { GroupDetailsView } from "./components/Settings/Views/GroupDetailsView";
-import { GroupCapabilitiesView } from "./components/Settings/Views/GroupCapabilitiesView";
-import { GroupMembersView } from "./components/Settings/Views/GroupMembersView";
-import { UserDetailsView } from "./components/Settings/Views/UserDetailsView";
-import { UserResetPasswordView } from "./components/Settings/Views/UserResetPasswordView";
-import { UserSingleGroupsView } from "./components/Settings/Views/UserSingleGroupsView";
-import { UserCapabilitiesView } from "./components/Settings/Views/UserCapabilitiesView";
-import { UserAPIKeysView } from "./components/Settings/Views/UserAPIKeysView";
-import { AttributeEditTemplateView } from "./components/Settings/Views/AttributeEditTemplateView";
-
-import { ConfigContext } from "./commons/config";
-import { fromPlugins, Extendable } from "./commons/plugins";
-import { ErrorBoundary, RequiresAuth, RequiresCapability } from "./commons/ui";
+import { Routes, Route } from "react-router-dom";
 
 import { Capability } from "@mwdb-web/types/types";
+import { SampleRouteFallback } from "./SampleRouteFallback";
+import { NavigateFor404 } from "./NavigateFor404";
+import { fromPlugins } from "../plugins";
 
-function NavigateFor404() {
-    /**
-     * Fallback route for unknown routes
-     */
-    const location = useLocation();
-    return (
-        <Navigate
-            to="/"
-            state={{
-                error: `Location '${location.pathname}' doesn't exist`,
-            }}
-        />
-    );
-}
+import { AboutView } from "@mwdb-web/components/Views/AboutView";
+import { UserLoginView } from "@mwdb-web/components/Views/UserLoginView";
+import { UserRegisterView } from "@mwdb-web/components/Views/UserRegisterView";
+import { UserPasswordRecoverView } from "@mwdb-web/components/Views/UserPasswordRecoverView";
+import { UserSetPasswordView } from "@mwdb-web/components/UserSetPasswordView";
+import { OAuthAuthorizeView } from "@mwdb-web/components/Views/OAuthAuthorizeView";
+import { RequiresAuth, RequiresCapability } from "../ui";
+import { RecentSamplesView } from "@mwdb-web/components/File/Views/RecentSamplesView";
+import { RecentConfigsView } from "@mwdb-web/components/Config/Views/RecentConfigsView";
+import { RecentBlobsView } from "@mwdb-web/components/Blob/Views/RecentBlobsView";
+import { SearchView } from "@mwdb-web/components/Views/SearchView";
+import { UploadView } from "@mwdb-web/components/Views/UploadView";
+import { ConfigStatsView } from "@mwdb-web/components/Config/Views/ConfigStatsView";
+import { DocsView } from "@mwdb-web/components/Views/DocsView";
+import { ShowSampleView } from "@mwdb-web/components/Views/ShowSampleView";
+import { ShowConfigView } from "@mwdb-web/components/Config/Views/ShowConfigView";
+import { ShowTextBlobView } from "@mwdb-web/components/Blob/Views/ShowTextBlobView";
+import { ProfileView } from "@mwdb-web/components/Profile/ProfileView";
+import { ProfileGroup } from "@mwdb-web/components/Profile/Views/ProfileGroup";
+import { ProfileDetails } from "@mwdb-web/components/Profile/Views/ProfileDetails";
+import { ProfileGroupMembers } from "@mwdb-web/components/Profile/Views/ProfileGroupMembers";
+import { ProfileGroups } from "@mwdb-web/components/Profile/Views/ProfileGroups";
+import { UserCapabilitiesView } from "@mwdb-web/components/Settings/Views/UserCapabilitiesView";
+import { ProfileAPIKeys } from "@mwdb-web/components/Profile/Views/ProfileAPIKeys";
+import { ProfileResetPassword } from "@mwdb-web/components/Profile/Views/ProfileResetPassword";
+import { ProfileOAuth } from "@mwdb-web/components/Profile/Views/ProfileOAuth";
+import { DiffTextBlobView } from "@mwdb-web/components/Blob/Views/DiffTextBlobView";
+import { RelationsPlotView } from "@mwdb-web/components/Views/RelationsPlotView";
+import { RemoteViews } from "@mwdb-web/components/Remote/RemoteViews";
+import { SettingsView } from "@mwdb-web/components/Settings/Views/SettingsView";
+import { SettingsOverviewView } from "@mwdb-web/components/Settings/Views/SettingsOverviewView";
+import { UsersPendingListView } from "@mwdb-web/components/Settings/Views/UsersPendingListView";
+import { UsersListView } from "@mwdb-web/components/Settings/Views/UsersListView";
+import { UserCreateView } from "@mwdb-web/components/Settings/Views/UserCreateView";
+import { UserView } from "@mwdb-web/components/Settings/Views/UserView";
+import { UserDetailsView } from "@mwdb-web/components/Settings/Views/UserDetailsView";
+import { UserAPIKeysView } from "@mwdb-web/components/Settings/Views/UserAPIKeysView";
+import { UserResetPasswordView } from "@mwdb-web/components/Settings/Views/UserResetPasswordView";
+import { UserSingleGroupsView } from "@mwdb-web/components/Settings/Views/UserSingleGroupsView";
+import { GroupsListView } from "@mwdb-web/components/Settings/Views/GroupsListView";
+import { GroupCreateView } from "@mwdb-web/components/Settings/Views/GroupCreateView";
+import { GroupView } from "@mwdb-web/components/Settings/Views/GroupView";
+import { GroupDetailsView } from "@mwdb-web/components/Settings/Views/GroupDetailsView";
+import { GroupCapabilitiesView } from "@mwdb-web/components/Settings/Views/GroupCapabilitiesView";
+import { GroupMembersView } from "@mwdb-web/components/Settings/Views/GroupMembersView";
+import { AccessControlView } from "@mwdb-web/components/Settings/Views/AccessControlView";
+import { OAuthListProvidersView } from "@mwdb-web/components/Settings/Views/OAuthListProvidersView";
+import { OAuthRegisterView } from "@mwdb-web/components/Settings/Views/OAuthRegisterView";
+import { OAuthProviderView } from "@mwdb-web/components/Settings/Views/OAuthProviderView";
+import { AttributesListView } from "@mwdb-web/components/Settings/Views/AttributesListView";
+import { AttributeCreateView } from "@mwdb-web/components/Settings/Views/AttributeCreateView";
+import { AttributeView } from "@mwdb-web/components/Settings/Views/AttributeView";
+import { AttributeDetailsView } from "@mwdb-web/components/Settings/Views/AttributeDetailsView";
+import { AttributesPermissionsView } from "@mwdb-web/components/Settings/Views/AttributePermissionsView";
+import { AttributeEditTemplateView } from "@mwdb-web/components/Settings/Views/AttributeEditTemplateView";
 
-function SampleRouteFallback() {
-    /**
-     * Fallback route for legacy /sample/:hash route
-     */
-    const { hash } = useParams();
-    return <Navigate to={`/file/${hash}`} />;
-}
-
-function AppRoutes() {
+export function AppRoutes() {
     return (
         <Routes>
             <Route path="login" element={<UserLoginView />} />
@@ -240,21 +206,5 @@ function AppRoutes() {
             {fromPlugins("routes")}
             <Route path="*" element={<NavigateFor404 />} />
         </Routes>
-    );
-}
-
-export default function App() {
-    const config = useContext(ConfigContext);
-    return (
-        <div className="App">
-            <Navigation />
-            <div className="content">
-                <ErrorBoundary error={config.error}>
-                    <Extendable ident="main">
-                        {config.isReady ? <AppRoutes /> : []}
-                    </Extendable>
-                </ErrorBoundary>
-            </div>
-        </div>
     );
 }

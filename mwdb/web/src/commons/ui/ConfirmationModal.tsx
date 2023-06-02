@@ -13,7 +13,7 @@ type Props = ReactModal.Props & {
     confirmText?: string;
 };
 
-export default function ConfirmationModal(props: Props) {
+export function ConfirmationModal(props: Props) {
     const modalStyle = {
         content: {
             top: "50%",

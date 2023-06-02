@@ -1,6 +1,6 @@
 import { useReducer, useState, useEffect } from "react";
 import AceEditor from "react-ace";
-import RichAttributeRenderer from "./RichAttributeRenderer";
+import { RichAttributeRenderer } from "./RichAttributeRenderer";
 
 import "ace-builds/src-noconflict/mode-markdown";
 import "ace-builds/src-noconflict/mode-json";
@@ -75,7 +75,7 @@ type Props = {
     onDelete: () => void;
 };
 
-export default function RichAttributePreview({
+export function RichAttributePreview({
     storedRichTemplate,
     storedExampleValue,
     onStore,

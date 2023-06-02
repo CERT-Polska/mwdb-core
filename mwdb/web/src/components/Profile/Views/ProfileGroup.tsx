@@ -15,7 +15,7 @@ import { ProfileItem } from "../common/ProfileItem";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 import { Group } from "@mwdb-web/types/types";
 
-export default function ProfileGroup() {
+export function ProfileGroup() {
     const auth = useContext(AuthContext);
     const { profile }: ProfileOutletContext = useOutletContext();
     const { redirectToAlert } = useViewAlert();

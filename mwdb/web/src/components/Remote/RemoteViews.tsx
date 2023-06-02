@@ -3,9 +3,9 @@ import { Outlet } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { useRemote } from "@mwdb-web/commons/remotes";
-import RemoteAPI from "./RemoteAPI";
+import { RemoteAPI } from "./RemoteAPI";
 
-export default function RemoteViews() {
+export function RemoteViews() {
     const remote = useRemote();
     const message = `Remote view of ${remote}`;
 

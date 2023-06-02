@@ -1,6 +1,5 @@
 import { AxiosResponse } from "axios";
 import {
-    ActivePlugin,
     ApiKey,
     Attribute,
     AttributeDefinition,

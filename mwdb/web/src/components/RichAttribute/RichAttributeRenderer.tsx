@@ -9,11 +9,7 @@ type Props = {
     setInvalid: (valid: boolean) => void;
 };
 
-export default function RichAttributeRenderer({
-    template,
-    value,
-    setInvalid,
-}: Props) {
+export function RichAttributeRenderer({ template, value, setInvalid }: Props) {
     const [renderResult, setRenderResult] = useState(<></>);
 
     useEffect(() => {

@@ -13,7 +13,9 @@ import { RelationsNode } from "../RelationsNode";
 import { RelationToManyNode } from "../RelationToManyNode";
 import { Edge, NodeProp, RelatedObject } from "@mwdb-web/types/types";
 
-const DagreD3Plot = React.lazy(() => import("../DagreD3Plot"));
+const DagreD3Plot = React.lazy(() =>
+    import("../DagreD3Plot").then((module) => ({ default: module.DagreD3Plot }))
+);
 
 const nodeStatuses = {
     initial: "initial",
@@ -29,8 +31,8 @@ type Nodes = {
 };
 
 type Props = {
-    hash: string;
-    height: string;
+    hash?: string;
+    height?: string;
 };
 
 export function RelationsPlotView(props: Props) {

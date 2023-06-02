@@ -1,4 +1,4 @@
-import { useState, useContext, FormEventHandler } from "react";
+import { useState, useContext } from "react";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";

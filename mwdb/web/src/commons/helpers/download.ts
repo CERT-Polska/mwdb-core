@@ -6,7 +6,11 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
-function downloadData(data: string, filename: string, mime?: string): void {
+export function downloadData(
+    data: string,
+    filename: string,
+    mime?: string
+): void {
     const blob = new Blob([data], { type: mime || "application/octet-stream" });
     // @ts-ignore for legacy IE
     if (typeof window.navigator.msSaveBlob !== "undefined") {
@@ -37,5 +41,3 @@ function downloadData(data: string, filename: string, mime?: string): void {
         window.URL.revokeObjectURL(blobURL);
     }
 }
-
-export default downloadData;

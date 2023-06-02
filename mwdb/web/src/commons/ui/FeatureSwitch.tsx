@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ConfirmationModal from "./ConfirmationModal";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 type Props = {
     name: string;
@@ -9,7 +9,7 @@ type Props = {
     onUpdate: (value: Record<string, boolean | string>) => Promise<void>;
 };
 
-export default function FeatureSwitch(props: Props) {
+export function FeatureSwitch(props: Props) {
     const { name, value, disabled = false, onUpdate, children } = props;
     const [isModalOpen, setModalOpen] = useState(false);
     const button = value ? (

@@ -11,7 +11,7 @@ type Props = {
     style?: CSSProperties;
 };
 
-export default function Identicon({ data, hash, size, style }: Props) {
+export function Identicon({ data, hash, size, style }: Props) {
     if (isNil(data) && isNil(hash)) {
         return <></>;
     }

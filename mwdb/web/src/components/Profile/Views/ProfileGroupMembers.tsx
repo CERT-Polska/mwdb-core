@@ -10,7 +10,7 @@ import { ProfileGroupItems } from "../common/ProfileGroupItems";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 import { Group } from "@mwdb-web/types/types";
 
-export default function ProfileGroupMembers() {
+export function ProfileGroupMembers() {
     const auth = useContext(AuthContext);
     const { redirectToAlert } = useViewAlert();
     const { profile }: ProfileOutletContext = useOutletContext();

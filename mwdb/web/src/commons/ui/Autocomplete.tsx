@@ -17,7 +17,7 @@ type Props<T> = Omit<
     prependChildren?: boolean;
 };
 
-export default function Autocomplete<T>({
+export function Autocomplete<T>({
     items,
     getItemValue,
     renderItem,

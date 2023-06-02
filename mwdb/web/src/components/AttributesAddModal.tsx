@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
-import RichAttributeRenderer from "./RichAttribute/RichAttributeRenderer";
+import { RichAttributeRenderer } from "./RichAttribute/RichAttributeRenderer";
 
 import AceEditor from "react-ace";
 

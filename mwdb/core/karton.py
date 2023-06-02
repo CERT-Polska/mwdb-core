@@ -1,33 +1,55 @@
 import logging
+from typing import Optional
 
 from flask import g
 from karton.core import Config as KartonConfig
 from karton.core import Producer, Resource, Task
-from karton.core.backend import KartonBackend
 from karton.core.inspect import KartonState
 from karton.core.task import TaskPriority
 
+from ..version import app_version
 from .config import app_config
 
 logger = logging.getLogger("mwdb.karton")
 
 
-def get_karton_producer() -> Producer:
-    return Producer(
-        identity="karton.mwdb", config=KartonConfig(app_config.karton.config_path)
-    )
+class KartonProducer(Producer):
+    identity = "karton.mwdb"
+    version = app_version
+    with_service_info = True
+
+
+if app_config.mwdb.enable_karton:
+    karton_producer = KartonProducer(config=KartonConfig(app_config.karton.config_path))
+else:
+    karton_producer = None
+
+
+def get_karton_producer() -> Optional[Producer]:
+    return karton_producer
 
 
 def send_file_to_karton(file) -> str:
+    producer = get_karton_producer()
+
+    if producer is None:
+        raise RuntimeError(
+            "This method should not be called when Karton is not enabled"
+        )
+
     file_stream = file.open()
     try:
-        producer = get_karton_producer()
         feed_quality = g.auth_user.feed_quality
         task_priority = (
             TaskPriority.NORMAL if feed_quality == "high" else TaskPriority.LOW
         )
         task = Task(
-            headers={"type": "sample", "kind": "raw", "quality": feed_quality},
+            headers={
+                "type": "sample",
+                "kind": "raw",
+                "quality": feed_quality,
+                "share_3rd_party": file.share_3rd_party,
+            },
             payload={
                 "sample": Resource(file.file_name, fd=file_stream, sha256=file.sha256),
                 "attributes": file.get_attributes(
@@ -46,8 +68,19 @@ def send_file_to_karton(file) -> str:
 
 def send_config_to_karton(config) -> str:
     producer = get_karton_producer()
+
+    if producer is None:
+        raise RuntimeError(
+            "This method should not be called when Karton is not enabled"
+        )
+
     task = Task(
-        headers={"type": "config", "kind": config.config_type, "family": config.family},
+        headers={
+            "type": "config",
+            "kind": config.config_type,
+            "family": config.family,
+            "share_3rd_party": config.share_3rd_party,
+        },
         payload={
             "config": config.cfg,
             "dhash": config.dhash,
@@ -62,8 +95,18 @@ def send_config_to_karton(config) -> str:
 
 def send_blob_to_karton(blob) -> str:
     producer = get_karton_producer()
+
+    if producer is None:
+        raise RuntimeError(
+            "This method should not be called when Karton is not enabled"
+        )
+
     task = Task(
-        headers={"type": "blob", "kind": blob.blob_type},
+        headers={
+            "type": "blob",
+            "kind": blob.blob_type,
+            "share_3rd_party": blob.share_3rd_party,
+        },
         payload={
             "content": blob.content,
             "dhash": blob.dhash,
@@ -77,7 +120,12 @@ def send_blob_to_karton(blob) -> str:
 
 
 def get_karton_state():
-    karton_config = KartonConfig(app_config.karton.config_path)
-    karton_backend = KartonBackend(karton_config)
-    karton_state = KartonState(karton_backend)
+    producer = get_karton_producer()
+
+    if producer is None:
+        raise RuntimeError(
+            "This method should not be called when Karton is not enabled"
+        )
+
+    karton_state = KartonState(producer.backend)
     return karton_state

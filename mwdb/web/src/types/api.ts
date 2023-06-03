@@ -6,6 +6,7 @@ import {
     AttributeDefinition,
     BlobData,
     BlobListItem,
+    Comment,
     ConfigData,
     ConfigListItem,
     Family,
@@ -13,6 +14,7 @@ import {
     KartonAnalysis,
     ObjectData,
     ObjectListItem,
+    ObjectOrConfigOrBlobData,
     Provider,
     Query,
     RelatedObject,
@@ -103,7 +105,7 @@ export type GetObjectSharesResponse = Response<{
     shares: Share[];
 }>;
 
-export type GetObjectAttributesResponse = Response<Attribute[]>;
+export type GetObjectAttributesResponse = Response<{ attributes: Attribute[] }>;
 
 export type RemoveObjectResponse = Response<null>;
 
@@ -251,9 +253,7 @@ export type GetConfigStatsResponse = Response<{
     families: Family[];
 }>;
 
-export type GetRemoteObjectResponse = Response<
-    ObjectData | ConfigData | BlobData
->;
+export type GetRemoteObjectResponse = Response<ObjectOrConfigOrBlobData>;
 
 export type GetRemoteObjectListResponse = Response<
     ObjectData[] | ConfigData[] | BlobData[]
@@ -277,7 +277,9 @@ export type GetRemoteObjectSharesResponse = Response<{
     shares: Share[];
 }>;
 
-export type GetRemoteObjectAttributesResponse = Response<Attribute[]>;
+export type GetRemoteObjectAttributesResponse = Response<{
+    attributes: Attribute[];
+}>;
 
 export type DownloadRemoteFileResponse = Response<{ token: string }>;
 

@@ -61,10 +61,12 @@ export type Group = {
 
 export type ObjectType = "file" | "blob" | "config";
 
+export type ObjectLegacyType = "file" | "static_config" | "text_blob";
+
 export type Attribute = {
     key: string;
     id: number;
-    value: unknown;
+    value: string;
 };
 
 export type AttributeDefinition = {
@@ -84,7 +86,7 @@ export type Tag = {
 export type RelatedObject = {
     id: string;
     tags: Tag[];
-    type: ObjectType;
+    type: ObjectLegacyType;
     upload_time: string;
 };
 
@@ -93,11 +95,19 @@ export type ConfigType = "static" | "dynamic";
 type ObjectCommonData = {
     attributes: Attribute[];
     children: RelatedObject[];
+    shares: Share[];
     favorite: boolean;
     id: string;
     parents: RelatedObject[];
     tags: Tag[];
     upload_time: string;
+    share_3rd_party: boolean;
+    analyses?: KartonAnalysis[];
+    latest_config: {
+        id: number;
+        family: string;
+    };
+    comments: Comment[];
 };
 
 export type ObjectData = ObjectCommonData & {
@@ -106,7 +116,6 @@ export type ObjectData = ObjectCommonData & {
     file_name: string;
     file_size: number;
     file_type: string;
-    latest_config: null;
     md5: string;
     sha1: string;
     sha256: string;
@@ -128,7 +137,6 @@ export type BlobData = ObjectCommonData & {
     blob_type: string;
     content: string;
     last_seen: string;
-    latest_config: unknown;
     type: "text_blob";
 };
 
@@ -168,7 +176,7 @@ export type Comment = {
     author: string;
     comment: string;
     id: number;
-    timestamp: string;
+    timestamp: number;
 };
 
 export type Share = {
@@ -204,15 +212,15 @@ export type Family = {
 
 export type KartonAnalysis = {
     status: string;
-    id: string;
+    id: number;
     processing_in: Record<
-        `additionalProp${number}`,
+        string,
         {
             status: string[];
             received_from: string[];
         }
     >;
-    arguments: Record<`additionalProp${number}`, string>;
+    arguments: Record<string, string>;
     last_update: string;
 };
 
@@ -236,6 +244,7 @@ export type ServerInfo = {
     is_registration_enabled: boolean;
     instance_name: string;
     remotes: string[];
+    is_3rd_party_sharing_consent_enabled: boolean;
 };
 
 export type Permission = {
@@ -274,4 +283,20 @@ export type CreateUser = {
     additional_info: string;
     feed_quality: FeedQuality;
     send_email: boolean;
+};
+
+export type ObjectOrConfigOrBlobData = ObjectData | ConfigData | BlobData;
+
+export type RelationItem = {
+    id: string;
+    tags: Tag[];
+    type: ObjectLegacyType;
+    upload_time: string;
+};
+
+export type Reason = {
+    reasonType: string;
+    relatedObjectDHash: string;
+    relatedObjectType: ObjectType;
+    relatedUserLogin: string;
 };

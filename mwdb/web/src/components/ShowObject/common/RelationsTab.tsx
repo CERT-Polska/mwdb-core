@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 
 import { useSearchParams } from "react-router-dom";
 
@@ -9,12 +9,12 @@ import RelationsPlot from "../../RelationsPlot";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
 
-export default function RelationsTab() {
+export function RelationsTab() {
     const context = useContext(ObjectContext);
     const searchParams = useSearchParams()[0];
     const nodes = searchParams.getAll("node") || [];
     const zoomLink =
-        "/relations?node=" + [context.object.id, ...nodes].join("&node=");
+        "/relations?node=" + [context.object!.id, ...nodes].join("&node=");
 
     return (
         <ObjectTab
@@ -24,7 +24,7 @@ export default function RelationsTab() {
                 <ObjectAction label="Zoom" icon={faSearch} link={zoomLink} />,
             ]}
             component={() => (
-                <RelationsPlot hash={context.object.id} height="600" />
+                <RelationsPlot hash={context.object!.id} height="600" />
             )}
         />
     );

@@ -1,8 +1,12 @@
 import { api } from "@mwdb-web/commons/api";
 import {
     AttributeDefinition,
+    BlobData,
     Capability,
+    ConfigData,
     Group,
+    ObjectData,
+    ObjectOrConfigOrBlobData,
     ObjectType,
     ServerInfo,
     User,
@@ -11,6 +15,7 @@ import {
     GetRemoteObjectCountResponse,
     GetRemoteObjectListResponse,
 } from "./api";
+import { Provider } from "react";
 
 export type TabContextValues = {
     tab?: string;
@@ -30,7 +35,12 @@ export type ConfigContextValues = {
 };
 
 export type AuthContextValues = {
-    user: User;
+    user: {
+        capabilities: Capability[];
+        groups: string[];
+        login: string;
+        provider: unknown | null;
+    };
     isAuthenticated: boolean;
     isAdmin: boolean;
     hasCapability: (cap: Capability) => boolean;
@@ -75,4 +85,14 @@ export type UserOutletContext = {
 export type GroupOutletContext = {
     group: Group;
     getGroup: () => Promise<void>;
+};
+
+export type ObjectContextValues = {
+    object?: Partial<ObjectOrConfigOrBlobData>;
+    objectError: unknown;
+    objectType: ObjectType;
+    searchEndpoint: string;
+    setObjectError: (error: unknown) => void;
+    updateObject: (doLoad?: boolean) => void;
+    updateObjectData: (object: Partial<ObjectOrConfigOrBlobData>) => void;
 };

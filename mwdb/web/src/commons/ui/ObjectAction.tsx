@@ -6,7 +6,7 @@ import { capitalize } from "../helpers";
 
 type Props = {
     label: string;
-    icon: IconProp;
+    icon?: IconProp;
     action?: () => void;
     link?: string;
 };

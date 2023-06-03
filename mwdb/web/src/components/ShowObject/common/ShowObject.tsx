@@ -1,21 +1,22 @@
-import React, {
+import {
     useCallback,
     useEffect,
     useReducer,
     useContext,
     useMemo,
+    Reducer,
 } from "react";
 import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import ObjectBox from "./Views/ObjectBox";
-import MultiRelationsBox from "./Views/RelationsBox";
-import CommentBox from "./Views/CommentBox";
-import ShareBox from "./Views/SharesBox";
-import TagBox from "./Views/TagBox";
-import AttributesBox from "./Views/AttributesBox";
-import Share3rdPartyBox from "./Views/Share3rdPartyBox";
+import ObjectBox from "./ObjectBox";
+import { MultiRelationsBox } from "./MultiRelationsBox";
+import { CommentBox } from "./CommentBox";
+import { SharesBox } from "./SharesBox";
+import { TagBox } from "./TagBox";
+import { AttributesBox } from "./AttributesBox";
+import { Share3rdPartyBox } from "./Share3rdPartyBox";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { ConfigContext } from "@mwdb-web/commons/config";
@@ -23,18 +24,32 @@ import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { View } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
-import KartonAnalysisBox from "./Views/KartonAnalysisBox";
-
-const initialObjectState = {
-    object: null,
-    objectError: null,
-};
+import { KartonAnalysisBox } from "./KartonAnalysisBox";
+import {
+    BlobData,
+    ConfigData,
+    ObjectData,
+    ObjectOrConfigOrBlobData,
+    ObjectType,
+} from "@mwdb-web/types/types";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { ObjectContextValues } from "@mwdb-web/types/context";
 
 const objectLoad = Symbol("objectLoad");
 const objectUpdate = Symbol("objectUpdate");
 const objectError = Symbol("objectError");
 
-function objectStateReducer(state, action) {
+type ObjectStateReducer = {
+    object?: Partial<ObjectOrConfigOrBlobData>;
+    objectError?: unknown;
+};
+
+type ObjectActionReducer = ObjectStateReducer & {
+    type: typeof objectLoad | typeof objectUpdate | typeof objectError;
+    error?: unknown;
+};
+
+function objectReducer(state: ObjectStateReducer, action: ObjectActionReducer) {
     switch (action.type) {
         case objectLoad:
             // Reload object and wipe lazy-loaded updates
@@ -52,24 +67,35 @@ function objectStateReducer(state, action) {
     }
 }
 
-export default function ShowObject({
-    ident,
-    objectType,
-    objectId,
-    headerIcon,
-    headerCaption,
-    defaultTab,
-    children,
-    searchEndpoint,
-}) {
+type Props = {
+    ident: string;
+    children: JSX.Element[];
+    objectType: ObjectType;
+    headerIcon: IconDefinition;
+    objectId: string;
+    headerCaption: string;
+    defaultTab?: string;
+    searchEndpoint: string;
+};
+
+export function ShowObject(props: Props) {
+    const {
+        ident,
+        objectType,
+        objectId,
+        headerIcon,
+        headerCaption,
+        defaultTab,
+        children,
+        searchEndpoint,
+    } = props;
     const api = useContext(APIContext);
     const config = useContext(ConfigContext);
-    const [objectState, setObjectState] = useReducer(
-        objectStateReducer,
-        initialObjectState
-    );
+    const [objectState, setObjectState] = useReducer<
+        Reducer<ObjectStateReducer, ObjectActionReducer>
+    >(objectReducer, {});
 
-    const setObjectError = useCallback((error) => {
+    const setObjectError = useCallback((error: unknown) => {
         toast(getErrorMessage(error), {
             type: "error",
         });
@@ -80,7 +106,7 @@ export default function ShowObject({
     }, []);
 
     const updateObject = useCallback(
-        async (doLoad) => {
+        async (doLoad?: boolean) => {
             try {
                 let response = await api.getObject(objectType, objectId);
                 setObjectState({
@@ -94,12 +120,15 @@ export default function ShowObject({
         [api, objectType, objectId, setObjectError]
     );
 
-    const updateObjectData = useCallback((objectData) => {
-        setObjectState({
-            type: objectUpdate,
-            object: objectData,
-        });
-    }, []);
+    const updateObjectData = useCallback(
+        (objectData: Partial<ObjectData | ConfigData | BlobData>) => {
+            setObjectState({
+                type: objectUpdate,
+                object: objectData,
+            });
+        },
+        []
+    );
 
     useEffect(() => {
         updateObject(true);
@@ -127,17 +156,15 @@ export default function ShowObject({
                                 </Extendable>
                             </div>
                             <AttributesBox />
-                            {config.config[
-                                "is_3rd_party_sharing_consent_enabled"
-                            ] ? (
+                            {config.config
+                                .is_3rd_party_sharing_consent_enabled && (
                                 <Share3rdPartyBox
                                     isEnabled={
-                                        objectState.object.share_3rd_party
+                                        objectState.object.share_3rd_party ??
+                                        false
                                     }
-                                    objectId={objectState.object.id}
+                                    objectId={objectState.object.id ?? ""}
                                 />
-                            ) : (
-                                []
                             )}
                         </Extendable>
                     </div>
@@ -150,7 +177,7 @@ export default function ShowObject({
                             ) : (
                                 []
                             )}
-                            <ShareBox />
+                            <SharesBox />
                             <CommentBox />
                         </Extendable>
                     </div>
@@ -161,7 +188,7 @@ export default function ShowObject({
         []
     );
 
-    const context = useMemo(
+    const context: ObjectContextValues = useMemo(
         () => ({
             object: objectState.object,
             objectError: objectState.objectError,

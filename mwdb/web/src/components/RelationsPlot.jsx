@@ -71,7 +71,7 @@ function RelationsNode(props) {
                     style={{ maxWidth: "13rem", whiteSpace: "pre-wrap" }}
                 >
                     {props.node.object.tags.map((tag) => (
-                        <Tag tag={tag.tag} searchable={false} />
+                        <Tag key={tag} tag={tag.tag} searchable={false} />
                     ))}
                 </div>
             </div>

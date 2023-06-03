@@ -4,11 +4,11 @@ Modal.setAppElement("#root");
 
 type Props = ReactModal.Props & {
     message?: string;
-    onCancel?: React.MouseEventHandler<HTMLButtonElement>;
+    onCancel?: React.MouseEventHandler;
     cancelText?: string;
     disabled?: boolean;
     buttonStyle?: string;
-    onConfirm?: React.MouseEventHandler<HTMLButtonElement>;
+    onConfirm?: React.MouseEventHandler;
     confirmDisabled?: boolean;
     confirmText?: string;
 };

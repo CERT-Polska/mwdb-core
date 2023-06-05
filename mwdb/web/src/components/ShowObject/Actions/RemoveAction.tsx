@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
@@ -9,19 +9,20 @@ import { ObjectAction, ConfirmationModal } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { Capability } from "@mwdb-web/types/types";
 
-export default function RemoveAction() {
+export function RemoveAction() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
     const { redirectToAlert } = useViewAlert();
 
-    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [disabledModalButton, setDisabledModalButton] = useState(false);
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const [disabledModalButton, setDisabledModalButton] =
+        useState<boolean>(false);
 
     async function deleteObject() {
         setDisabledModalButton(true);
         try {
-            await api.removeObject(context.object.id);
+            await api.removeObject(context.object!.id!);
             redirectToAlert({
                 target: context.searchEndpoint,
                 success: "Object was successfully removed",
@@ -35,10 +36,10 @@ export default function RemoveAction() {
 
     // If user can't remove objects: don't show the action
     if (!auth.hasCapability(Capability.removingObjects) || api.remote)
-        return [];
+        return <></>;
 
     return (
-        <React.Fragment>
+        <>
             <ObjectAction
                 label="Remove"
                 icon={faTrash}
@@ -56,6 +57,6 @@ export default function RemoveAction() {
                     deleteObject();
                 }}
             />
-        </React.Fragment>
+        </>
     );
 }

@@ -97,7 +97,9 @@ import {
 import {
     Attribute,
     Capability,
+    Comment,
     CreateUser,
+    ObjectLegacyType,
     ObjectType,
     Provider,
 } from "@mwdb-web/types/types";
@@ -239,7 +241,7 @@ function apiKeyRemove(key_id: number | string): ApiKeyRemoveResponse {
     return axios.delete(`/api_key/${key_id}`);
 }
 
-function getObject(type: ObjectType, id: number): GetObjectResponse {
+function getObject(type: ObjectType, id: string): GetObjectResponse {
     return axios.get(`/${type}/${id}`);
 }
 
@@ -272,11 +274,11 @@ function getShareInfo(): GetShareInfoResponse {
     return axios.get("/share");
 }
 
-function getObjectTags(id: number): GetObjectTagsResponse {
+function getObjectTags(id: string): GetObjectTagsResponse {
     return axios.get(`/object/${id}/tag`);
 }
 
-function getObjectComments(id: number): GetObjectCommentsResponse {
+function getObjectComments(id: string): GetObjectCommentsResponse {
     return axios.get(`/object/${id}/comment`);
 }
 
@@ -298,19 +300,19 @@ function removeObjectRelation(
     return axios.delete(`/object/${parent}/child/${child}`);
 }
 
-function getObjectShares(id: number): GetObjectSharesResponse {
+function getObjectShares(id: string): GetObjectSharesResponse {
     return axios.get(`/object/${id}/share`);
 }
 
-function getObjectAttributes(id: number): GetObjectAttributesResponse {
+function getObjectAttributes(id: string): GetObjectAttributesResponse {
     return axios.get(`/object/${id}/attribute`);
 }
 
-function removeObject(id: number): RemoveObjectResponse {
+function removeObject(id: string): RemoveObjectResponse {
     return axios.delete(`/object/${id}`);
 }
 
-function addObjectTag(id: number, tag: string): AddObjectTagResponse {
+function addObjectTag(id: string, tag: string): AddObjectTagResponse {
     return axios.put(`/object/${id}/tag`, { tag });
 }
 
@@ -321,21 +323,21 @@ function removeObjectTag(id: string, tag: string): RemoveObjectTagResponse {
 }
 
 function addObjectComment(
-    id: number,
+    id: string,
     comment: string
 ): AddObjectCommentResponse {
     return axios.post(`/object/${id}/comment`, { comment });
 }
 
 function removeObjectComment(
-    id: number,
+    id: string,
     comment_id: number
 ): RemoveObjectCommentResponse {
     return axios.delete(`/object/${id}/comment/${comment_id}`);
 }
 
 function addObjectAttribute(
-    object_id: number,
+    object_id: string,
     key: string,
     value: string
 ): AddObjectAttributeResponse {
@@ -343,21 +345,21 @@ function addObjectAttribute(
 }
 
 function removeObjectAttribute(
-    object_id: number,
+    object_id: string,
     attribute_id: number
 ): RemoveObjectAttributeResponse {
     return axios.delete(`/object/${object_id}/attribute/${attribute_id}`);
 }
 
-function addObjectFavorite(id: number): AddObjectFavoriteResponse {
+function addObjectFavorite(id: string): AddObjectFavoriteResponse {
     return axios.put(`/object/${id}/favorite`);
 }
 
-function removeObjectFavorite(id: number): RemoveObjectFavoriteResponse {
+function removeObjectFavorite(id: string): RemoveObjectFavoriteResponse {
     return axios.delete(`/object/${id}/favorite`);
 }
 
-function shareObjectWith(id: number, group: string): ShareObjectWithResponse {
+function shareObjectWith(id: string, group: string): ShareObjectWithResponse {
     return axios.put(`/object/${id}/share`, { group });
 }
 
@@ -625,7 +627,7 @@ function getRemoteNames(): GetRemoteNamesResponse {
 
 function pushObjectRemote(
     remote: string,
-    type: ObjectType,
+    type: ObjectLegacyType,
     identifier: string,
     upload_as: string
 ): PushObjectRemoteResponse {
@@ -636,7 +638,7 @@ function pushObjectRemote(
 
 function pullObjectRemote(
     remote: string,
-    type: ObjectType,
+    type: ObjectLegacyType,
     identifier: string,
     upload_as: string
 ): PullObjectRemoteResponse {
@@ -656,7 +658,7 @@ function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
 function getRemoteObject(
     remote: string,
     type: ObjectType,
-    id: number
+    id: string
 ): GetRemoteObjectResponse {
     return axios.get(`/remote/${remote}/api/${type}/${id}`);
 }
@@ -684,14 +686,14 @@ function getRemoteObjectCount(
 
 function getRemoteObjectTags(
     remote: string,
-    id: number
+    id: string
 ): GetRemoteObjectTagsResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/tag`);
 }
 
 function getRemoteObjectComments(
     remote: string,
-    id: number
+    id: string
 ): GetRemoteObjectCommentsResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/comment`);
 }
@@ -705,14 +707,14 @@ function getRemoteObjectRelations(
 
 function getRemoteObjectShares(
     remote: string,
-    id: number
+    id: string
 ): GetRemoteObjectSharesResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/share`);
 }
 
 function getRemoteObjectAttributes(
     remote: string,
-    id: number
+    id: string
 ): GetRemoteObjectAttributesResponse {
     return axios.get(`/remote/${remote}/api/object/${id}/attribute`);
 }
@@ -749,7 +751,7 @@ async function requestRemoteZipFileDownloadLink(
     return `${baseURL}/remote/${remote}/api/file/${id}/download/zip?token=${response.data.token}`;
 }
 
-function getKartonAnalysesList(id: number): GetKartonAnalysesListResponse {
+function getKartonAnalysesList(id: string): GetKartonAnalysesListResponse {
     return axios.get(`/object/${id}/karton`);
 }
 
@@ -760,12 +762,12 @@ function getKartonAnalysisStatus(
     return axios.get(`/object/${id}/karton/${analysis_id}`);
 }
 
-function resubmitKartonAnalysis(id: number): ResubmitKartonAnalysisResponse {
+function resubmitKartonAnalysis(id: string): ResubmitKartonAnalysisResponse {
     return axios.post(`/object/${id}/karton`);
 }
 
 function removeKartonAnalysisFromObject(
-    id: number,
+    id: string,
     analysis_id: number
 ): RemoveKartonAnalysisFromObjectResponse {
     return axios.delete(`/object/${id}/karton/${analysis_id}`);

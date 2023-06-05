@@ -183,9 +183,11 @@ def test_invalid_jwt(admin_session):
 def test_group_invite(admin_session):
     alice_username = random_name()
     bob_username = random_name()
+    charlie_username = random_name()
     group_name = random_name()
     admin_session.register_user(alice_username, "AliceAlice")
     admin_session.register_user(bob_username, "BobBobBob")
+    admin_session.register_user(charlie_username, "CharlieCharlie")
     admin_session.create_group(group_name)
     admin_session.add_member(group_name, alice_username)
     # set Alice as group_admin
@@ -193,12 +195,18 @@ def test_group_invite(admin_session):
 
     alice_session = MwdbTest()
     bob_session = MwdbTest()
+    charlie_session = MwdbTest()
     alice_session.login_as(alice_username, "AliceAlice")
     bob_session.login_as(bob_username, "BobBobBob")
+    charlie_session.login_as(charlie_username, "CharlieCharlie")
 
     data = alice_session.request_group_invite_link(group_name, bob_username)
-    res = bob_session.session.post(data["link"])
-    res.raise_for_status()
+    token = data["link"].split("=")[-1]
+
+    with ShouldRaise(403):
+        charlie_session.join_group_with_invitation_link(token)
+
+    bob_session.join_group_with_invitation_link(token)
 
     members = admin_session.get_group(group_name)["users"]
     assert bob_username in members

@@ -167,6 +167,13 @@ class MwdbTest(object):
         )
         res.raise_for_status()
         return res.json()
+    
+    def join_group_with_invitation_link(self, token):
+        res = self.session.post(
+            self.mwdb_url + "/group/join?token=" + token
+        )
+        res.raise_for_status()
+        return res.json()
 
     def register_user(self, username, password, capabilities=None):
         capabilities = capabilities or []

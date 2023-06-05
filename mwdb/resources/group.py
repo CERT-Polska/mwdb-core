@@ -735,6 +735,8 @@ class JoinGroupInviteLinkResource(Resource):
                 description: When request body is invalid
             403:
                 description: When there was a problem with the token
+            409:
+                description: When user is already a member of this group
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -814,7 +816,7 @@ class JoinGroupInviteLinkResource(Resource):
 
         token_data = User.verify_group_invite_token(token)
         if not token_data:
-            raise BadRequest("There was a problem while processing your token")
+            raise Forbidden("There was a problem while processing your token")
 
         invited_user_login = token_data.get("login")
         if not g.auth_user.login == invited_user_login:
@@ -822,7 +824,7 @@ class JoinGroupInviteLinkResource(Resource):
 
         group_id = token_data.get("group_id")
         if group_id is None:
-            raise BadRequest("Invalid token")
+            raise Forbidden("Invalid token")
 
         group_obj = db.session.query(Group).filter(Group.id == group_id).first()
         if group_obj is None:

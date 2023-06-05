@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, UseFormProps } from "react-hook-form";
 import { toast } from "react-toastify";
 import { isEmpty } from "lodash";
 import AceEditor from "react-ace";
@@ -8,21 +8,18 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import { View, getErrorMessage, FormError } from "@mwdb-web/commons/ui";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { View, FormError, Label } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { Attributes } from "./common/Attributes";
+import { Capability } from "@mwdb-web/types/types";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
+import { UploadConfigRequest } from "@mwdb-web/types/api";
+import { Attributes } from "../common/Attributes";
 
-const formFields = {
-    cfg: "cfg",
-    family: "family",
-    parent: "parent",
-    config_type: "config_type",
-    attributes: "attributes",
-};
+type FormValues = UploadConfigRequest;
 
-const validationSchema = Yup.object().shape({
-    [formFields.cfg]: Yup.string().test({
+const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+    cfg: Yup.string().test({
         message: ({ value }) => {
             if (!value) {
                 return "";
@@ -30,35 +27,39 @@ const validationSchema = Yup.object().shape({
             try {
                 JSON.parse(value);
                 return "";
-            } catch (err) {
+            } catch (err: any) {
                 return err.toString();
             }
         },
         test: (value) => {
             try {
-                JSON.parse(value);
+                JSON.parse(value!);
                 return true;
             } catch (err) {
                 return false;
             }
         },
     }),
-    [formFields.family]: Yup.string().required("Family is required."),
+    family: Yup.string().required("Family is required."),
+    config_type: Yup.string(),
+    parent: Yup.string(),
+    attributes: Yup.array(),
 });
 
-export default function UploadConfigView() {
+export function UploadConfigView() {
     const auth = useContext(AuthContext);
     const navigate = useNavigate();
     const searchParams = useSearchParams()[0];
 
-    const formOptions = {
+    const formOptions: UseFormProps<FormValues> = {
         resolver: yupResolver(validationSchema),
         mode: "onSubmit",
         reValidateMode: "onSubmit",
         defaultValues: {
-            [formFields.cfg]: "{}",
-            [formFields.parent]: searchParams.get("parent") || "",
-            [formFields.attributes]: [],
+            cfg: "{}",
+            parent: searchParams.get("parent") || "",
+            config_type: "static",
+            attributes: [],
         },
     };
 
@@ -68,23 +69,21 @@ export default function UploadConfigView() {
         handleSubmit,
         formState: { errors },
         control,
-    } = useForm(formOptions);
+    } = useForm<FormValues>(formOptions);
 
     const handleParentClear = () => {
         if (searchParams.get("parent")) navigate("/config_upload");
-        setValue(formFields.parent, "");
+        setValue("parent", "");
     };
 
-    const onSubmit = async (values) => {
+    const onSubmit = async (values: FormValues) => {
         try {
-            const body = {
+            const body: FormValues = {
                 ...values,
-                [formFields.cfg]: JSON.parse(values[formFields.cfg]),
-                [formFields.parent]: !isEmpty(values[formFields.parent])
-                    ? values[formFields.parent]
-                    : undefined,
+                cfg: JSON.parse(values.cfg!),
+                parent: !isEmpty(values.parent) ? values.parent : undefined,
             };
-            let response = await api.uploadConfig(body);
+            const response = await api.uploadConfig(body);
             navigate("/config/" + response.data.id, {
                 replace: true,
             });
@@ -104,38 +103,34 @@ export default function UploadConfigView() {
                 <h2>Config upload</h2>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="mb-3">
-                        <label className="input-group-text">
-                            Config
+                        <Label className="input-group-text" label="Config">
                             <AceEditor
-                                {...register(formFields.cfg)}
+                                {...register("cfg" as keyof FormValues)}
                                 defaultValue="{}"
                                 mode="json"
                                 theme="github"
                                 wrapEnabled
-                                onChange={(input) =>
-                                    setValue(formFields.cfg, input)
-                                }
+                                onChange={(input) => setValue("cfg", input)}
                                 height="260px"
                                 width="100%"
                                 setOptions={{
                                     useWorker: false,
                                 }}
                             />
-                        </label>
+                        </Label>
                     </div>
-                    <FormError errorField={errors[formFields.cfg]} />
+                    <FormError errorField={errors.cfg} />
                     <div className="input-group mb-3 mt-3">
                         <div className="input-group-prepend">
-                            <label
-                                htmlFor={formFields.family}
+                            <Label
+                                htmlFor={"family" as keyof FormValues}
                                 className="input-group-text"
-                            >
-                                Family
-                            </label>
+                                label="Family"
+                            />
                         </div>
                         <input
-                            {...register(formFields.family)}
-                            id={formFields.family}
+                            {...register("family" as keyof FormValues)}
+                            id={"family" as keyof FormValues}
                             className="form-control"
                             type="text"
                             style={{ fontSize: "medium" }}
@@ -146,30 +141,29 @@ export default function UploadConfigView() {
                                 className="btn btn-outline-danger"
                                 type="button"
                                 value="Clear"
-                                onClick={() => setValue(formFields.family, "")}
+                                onClick={() => setValue("family", "")}
                             />
                         </div>
-                        <FormError errorField={errors[formFields.family]} />
+                        <FormError errorField={errors.family} />
                     </div>
 
                     {auth.hasCapability(Capability.addingParents) && (
                         <div className="input-group mb-3">
                             <div className="input-group-prepend">
-                                <label
-                                    htmlFor={formFields.parent}
+                                <Label
+                                    htmlFor={"parent" as keyof FormValues}
                                     className="input-group-text"
-                                >
-                                    Parent
-                                </label>
+                                    label="Parent"
+                                />
                             </div>
                             <input
-                                {...register(formFields.parent)}
-                                id={formFields.parent}
+                                {...register("parent" as keyof FormValues)}
+                                id={"parent" as keyof FormValues}
                                 className="form-control"
                                 type="text"
                                 style={{ fontSize: "medium" }}
                                 placeholder="(Optional) Type parent identifier..."
-                                disabled={searchParams.get("parent")}
+                                disabled={!isEmpty(searchParams.get("parent"))}
                             />
                             <div className="input-group-append">
                                 <input
@@ -183,16 +177,15 @@ export default function UploadConfigView() {
                     )}
                     <div className="input-group mb-3">
                         <div className="input-group-prepend">
-                            <label
-                                htmlFor={formFields.config_type}
+                            <Label
+                                htmlFor={"config_type" as keyof FormValues}
                                 className="input-group-text"
-                            >
-                                Config type
-                            </label>
+                                label="Config type"
+                            />
                         </div>
                         <select
-                            {...register(formFields.config_type)}
-                            id={formFields.config_type}
+                            {...register("config_type" as keyof FormValues)}
+                            id={"config_type" as keyof FormValues}
                             className="custom-select"
                         >
                             <option value="static">Static</option>
@@ -202,7 +195,7 @@ export default function UploadConfigView() {
                     <Attributes
                         {...useFieldArray({
                             control,
-                            name: formFields.attributes,
+                            name: "attributes",
                         })}
                     />
                     <div className="d-flex justify-content-end">

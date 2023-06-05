@@ -1,12 +1,11 @@
-export const sharingModeToUploadParam = (shareWith, group) => {
-    console.log(shareWith);
+export const sharingModeToUploadParam = (shareWith: string, group: string) => {
     if (shareWith === "default") return "*";
     else if (shareWith === "public") return "public";
     else if (shareWith === "private") return "private";
     else if (shareWith === "single") return group;
 };
 
-export const getSharingModeHint = (shareWith, type) => {
+export const getSharingModeHint = (shareWith: string, type: string) => {
     const hintType = type === "blob" ? "blob" : "sample";
     if (shareWith === "default")
         return `The ${hintType} and all related artifacts will be shared with all your workgroups`;

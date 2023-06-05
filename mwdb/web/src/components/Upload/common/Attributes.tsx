@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { DataTable } from "@mwdb-web/commons/ui";
-import AttributesAddModal from "../../AttributesAddModal";
+import { AttributesAddModal } from "@mwdb-web/components/AttributesAddModal";
+import { Attribute } from "@mwdb-web/types/types";
 
-export function Attributes({ fields, append, remove }) {
-    const [attributeModalOpen, setAttributeModalOpen] = useState(false);
+export function Attributes({ fields, append, remove }: any) {
+    const [attributeModalOpen, setAttributeModalOpen] =
+        useState<boolean>(false);
 
-    const onAttributeAdd = (key, value) => {
+    const onAttributeAdd = (key: string, value: string) => {
         for (let attr of fields)
             if (attr.key === key && attr.value === value) {
                 // that key, value was added yet
@@ -13,6 +15,7 @@ export function Attributes({ fields, append, remove }) {
                 return;
             }
         append({ key, value });
+
         setAttributeModalOpen(false);
     };
 
@@ -28,7 +31,7 @@ export function Attributes({ fields, append, remove }) {
                 />
             </div>
             <DataTable>
-                {fields.map((attr, idx) => (
+                {fields.map((attr: Attribute, idx: number) => (
                     <tr key={idx} className="centered">
                         <th>{attr.key}</th>
                         <td>

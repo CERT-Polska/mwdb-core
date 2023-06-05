@@ -2,11 +2,15 @@ import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { api } from "@mwdb-web/commons/api";
 import { toast } from "react-toastify";
-import { getErrorMessage } from "@mwdb-web/commons/ui";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
+import { FieldPath, FieldValues, PathValue } from "react-hook-form";
 
-export function useGroup(setValue, fieldName) {
+export function useGroup<T extends FieldValues>(
+    setValue: (fieldName: PathValue<T, FieldPath<T>>, value: string) => void,
+    fieldName: PathValue<T, FieldPath<T>>
+) {
     const auth = useContext(AuthContext);
-    const [groups, setGroups] = useState([]);
+    const [groups, setGroups] = useState<string[]>([]);
 
     useEffect(() => {
         getGroups();

@@ -1,50 +1,50 @@
 import React, { useContext } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, UseFormProps } from "react-hook-form";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-
-import { Attributes } from "./common/Attributes";
-
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import {
-    Autocomplete,
-    View,
-    getErrorMessage,
-    FormError,
-} from "@mwdb-web/commons/ui";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { Autocomplete, View, FormError } from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { UploadDropzone } from "./common/UploadDropzone";
-import { useGroup } from "./common/hooks/useGroup";
-import { getSharingModeHint, sharingModeToUploadParam } from "./common/helpers";
+import { Attribute, Capability } from "@mwdb-web/types/types";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
+import { UploadFileRequest } from "@mwdb-web/types/api";
+import { isEmpty } from "lodash";
+import { useGroup } from "../common/hooks/useGroup";
+import { UploadDropzone } from "../common/UploadDropzone";
+import {
+    getSharingModeHint,
+    sharingModeToUploadParam,
+} from "../common/helpers";
+import { Attributes } from "../common/Attributes";
 
-const formFields = {
-    file: "file",
-    parent: "parent",
-    shareWith: "shareWith",
-    group: "group",
-    attributes: "attributes",
+type FormValues = {
+    file: File | null;
+    parent?: string;
+    shareWith: string;
+    group: string;
+    attributes: Attribute[];
 };
 
 const validationSchema = Yup.object().shape({
-    [formFields.file]: Yup.mixed().required("File is required"),
+    file: Yup.mixed().required("File is required"),
 });
 
-export default function UploadFileView() {
+export function UploadFileView() {
     const searchParams = useSearchParams()[0];
-    const formOptions = {
+    const formOptions: UseFormProps<FormValues> = {
         resolver: yupResolver(validationSchema),
         mode: "onSubmit",
         reValidateMode: "onSubmit",
         defaultValues: {
-            [formFields.file]: null,
-            [formFields.shareWith]: "",
-            [formFields.group]: "",
-            [formFields.parent]: searchParams.get("parent") || "",
-            [formFields.attributes]: [],
+            file: null,
+            shareWith: "",
+            group: "",
+            parent: searchParams.get("parent") || "",
+            attributes: [],
         },
     };
 
@@ -55,36 +55,37 @@ export default function UploadFileView() {
         watch,
         formState: { errors },
         control,
-    } = useForm(formOptions);
+    } = useForm<FormValues>(formOptions);
 
     const auth = useContext(AuthContext);
     const config = useContext(ConfigContext);
-    const fileUploadTimeout = config.config["file_upload_timeout"];
+    const fileUploadTimeout = config.config.file_upload_timeout;
     const navigate = useNavigate();
 
-    const { groups } = useGroup(setValue, formFields.shareWith);
+    const { groups } = useGroup(setValue, "shareWith");
 
     const { file, shareWith, group } = watch();
 
     const handleParentClear = () => {
         if (searchParams.get("parent")) navigate("/file_upload");
-        setValue(formFields.parent, "");
+        setValue("parent", "");
     };
 
-    const updateSharingMode = (ev) => {
-        setValue(formFields.shareWith, ev.target.value);
-        setValue(formFields.group, "");
+    const updateSharingMode = (ev: React.ChangeEvent<HTMLSelectElement>) => {
+        setValue("shareWith", ev.target.value);
+        setValue("group", "");
     };
 
-    const onSubmit = async (values) => {
+    const onSubmit = async (values: FormValues) => {
         try {
-            const body = {
+            const body: UploadFileRequest = {
                 ...values,
-                parent: searchParams.get("parent") || values[formFields.parent],
+                file: values.file!,
+                parent: searchParams.get("parent") || values.parent,
                 shareWith: sharingModeToUploadParam(
-                    values[formFields.shareWith],
-                    values[formFields.group]
-                ),
+                    values.shareWith,
+                    values.group
+                )!,
                 fileUploadTimeout,
             };
             const response = await api.uploadFile(body);
@@ -109,29 +110,31 @@ export default function UploadFileView() {
                     <UploadDropzone
                         file={file}
                         onDrop={(data) => {
-                            setValue(formFields.file, data);
+                            setValue("file", data);
                         }}
                     />
-                    <FormError errorField={errors[formFields.file]} />
+                    <FormError errorField={errors.file} />
                     <div className="form-group">
                         {auth.hasCapability(Capability.addingParents) && (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
                                     <label
-                                        htmlFor={formFields.parent}
+                                        htmlFor={"parent" as keyof FormValues}
                                         className="input-group-text"
                                     >
                                         Parent
                                     </label>
                                 </div>
                                 <input
-                                    {...register(formFields.parent)}
-                                    id={formFields.parent}
+                                    {...register("parent" as keyof FormValues)}
+                                    id={"parent" as keyof FormValues}
                                     className="form-control"
                                     type="text"
                                     style={{ fontSize: "medium" }}
                                     placeholder="(Optional) Type parent identifier..."
-                                    disabled={searchParams.get("parent")}
+                                    disabled={
+                                        !isEmpty(searchParams.get("parent"))
+                                    }
                                 />
                                 <div className="input-group-append">
                                     <input
@@ -146,15 +149,15 @@ export default function UploadFileView() {
                         <div className="input-group mb-3">
                             <div className="input-group-prepend">
                                 <label
-                                    htmlFor={formFields.shareWith}
+                                    htmlFor={"shareWith" as keyof FormValues}
                                     className="input-group-text"
                                 >
                                     Share with
                                 </label>
                             </div>
                             <select
-                                {...register(formFields.shareWith)}
-                                id={formFields.shareWith}
+                                {...register("shareWith" as keyof FormValues)}
+                                id={"shareWith" as keyof FormValues}
                                 className="custom-select"
                                 onChange={updateSharingMode}
                             >
@@ -178,17 +181,17 @@ export default function UploadFileView() {
                         {shareWith === "single" && (
                             <div className="mb-3">
                                 <Autocomplete
-                                    value={group}
+                                    value={group!}
                                     items={groups.filter(
                                         (item) =>
                                             item
                                                 .toLowerCase()
                                                 .indexOf(
-                                                    group.toLowerCase()
+                                                    group!.toLowerCase()
                                                 ) !== -1
                                     )}
                                     onChange={(value) =>
-                                        setValue(formFields.group, value)
+                                        setValue("group", value)
                                     }
                                     className="form-control"
                                     style={{ fontSize: "medium" }}
@@ -206,7 +209,7 @@ export default function UploadFileView() {
                         <Attributes
                             {...useFieldArray({
                                 control,
-                                name: formFields.attributes,
+                                name: "attributes",
                             })}
                         />
 

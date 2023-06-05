@@ -15,8 +15,6 @@ import { RequiresAuth, RequiresCapability } from "../ui";
 import { RecentSamplesView } from "@mwdb-web/components/File/Views/RecentSamplesView";
 import { RecentConfigsView } from "@mwdb-web/components/Config/Views/RecentConfigsView";
 import { RecentBlobsView } from "@mwdb-web/components/Blob/Views/RecentBlobsView";
-import { SearchView } from "@mwdb-web/components/Views/SearchView";
-import { UploadView } from "@mwdb-web/components/Views/UploadView";
 import { ConfigStatsView } from "@mwdb-web/components/Config/Views/ConfigStatsView";
 import { DocsView } from "@mwdb-web/components/Views/DocsView";
 import { ShowSampleView } from "@mwdb-web/components/Views/ShowSampleView";
@@ -60,6 +58,10 @@ import { AttributeView } from "@mwdb-web/components/Settings/Views/AttributeView
 import { AttributeDetailsView } from "@mwdb-web/components/Settings/Views/AttributeDetailsView";
 import { AttributesPermissionsView } from "@mwdb-web/components/Settings/Views/AttributePermissionsView";
 import { AttributeEditTemplateView } from "@mwdb-web/components/Settings/Views/AttributeEditTemplateView";
+import { UploadConfigView } from "@mwdb-web/components/Upload/Views/UploadConfigView";
+import { UploadBlobView } from "@mwdb-web/components/Upload/Views/UploadBlobView";
+import { UploadFileView } from "@mwdb-web/components/Upload/Views/UploadFileView";
+import { SearchView } from "@mwdb-web/components/Views/SearchView";
 
 export function AppRoutes() {
     return (
@@ -78,14 +80,31 @@ export function AppRoutes() {
                 <Route path="blobs" element={<RecentBlobsView />} />
                 <Route path="search" element={<SearchView />} />
                 <Route
-                    path="upload"
+                    path="file_upload"
                     element={
                         <RequiresCapability capability={Capability.addingFiles}>
-                            <UploadView />
+                            <UploadFileView />
                         </RequiresCapability>
                     }
                 />
-                S
+                <Route
+                    path="blob_upload"
+                    element={
+                        <RequiresCapability capability={Capability.addingBlobs}>
+                            <UploadBlobView />
+                        </RequiresCapability>
+                    }
+                />
+                <Route
+                    path="config_upload"
+                    element={
+                        <RequiresCapability
+                            capability={Capability.addingConfigs}
+                        >
+                            <UploadConfigView />
+                        </RequiresCapability>
+                    }
+                />
                 <Route path="configs/stats" element={<ConfigStatsView />} />
                 <Route path="about" element={<AboutView />} />
                 <Route path="docs" element={<DocsView />} />

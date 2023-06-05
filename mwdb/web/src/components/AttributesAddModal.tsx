@@ -118,7 +118,7 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                         <label>Attribute</label>
                         <select
                             className="form-control"
-                            onChange={(e) => handleKeyChange}
+                            onChange={handleKeyChange}
                             value={attributeKey}
                             required
                         >

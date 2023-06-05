@@ -240,6 +240,16 @@ export type DownloadFileResponse = Response<ArrayBuffer>;
 
 export type UploadFileResponse = Response<ObjectData>;
 
+export type UploadFileRequest = {
+    file: File;
+    parent?: string;
+    upload_as?: string;
+    shareWith: string;
+    attributes: Attribute[];
+    fileUploadTimeout?: number;
+    share3rdParty?: boolean;
+};
+
 export type GetRemoteNamesResponse = Response<{
     remotes: string[];
 }>;
@@ -315,3 +325,25 @@ export type OauthRemoveSingleProviderResponse = Response<null>;
 export type OauthGetLogoutLinkResponse = Response<{
     url: string;
 }>;
+
+export type UploadConfigRequest = {
+    cfg?: string;
+    family: string;
+    parent?: string;
+    config_type?: string;
+    attributes?: Attribute[];
+};
+
+export type UploadConfigResponse = Response<ConfigData>;
+
+export type UploadBlobRequest = {
+    content: string;
+    type: string;
+    name: string;
+    parent?: string;
+    shareWith: string;
+    group: string;
+    attributes: Attribute[];
+};
+
+export type UploadBlobReponse = Response<BlobData>;

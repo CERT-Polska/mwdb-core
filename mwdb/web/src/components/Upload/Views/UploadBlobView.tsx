@@ -1,53 +1,51 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, UseFormProps } from "react-hook-form";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { Attributes } from "./common/Attributes";
+import { Attributes } from "../common/Attributes";
 
 import { api } from "@mwdb-web/commons/api";
-import { AuthContext, Capability } from "@mwdb-web/commons/auth";
-import {
-    Autocomplete,
-    View,
-    getErrorMessage,
-    FormError,
-} from "@mwdb-web/commons/ui";
-import { ConfigContext } from "@mwdb-web/commons/config";
+import { AuthContext } from "@mwdb-web/commons/auth";
+import { Autocomplete, View, FormError, Label } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { useGroup } from "./common/hooks/useGroup";
-import { getSharingModeHint, sharingModeToUploadParam } from "./common/helpers";
+import { useGroup } from "../common/hooks/useGroup";
+import {
+    getSharingModeHint,
+    sharingModeToUploadParam,
+} from "../common/helpers";
+import { Capability } from "@mwdb-web/types/types";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
+import { isEmpty } from "lodash";
+import { UploadBlobRequest } from "@mwdb-web/types/api";
 
-const formFields = {
-    content: "content",
-    type: "type",
-    name: "name",
-    parent: "parent",
-    shareWith: "shareWith",
-    group: "group",
-    attributes: "attributes",
-};
+type FormValues = UploadBlobRequest;
 
-const validationSchema = Yup.object().shape({
-    [formFields.content]: Yup.string().required("Content is required"),
-    [formFields.type]: Yup.string().required("Type is required"),
-    [formFields.name]: Yup.string().required("Name is required"),
+const validationSchema: Yup.SchemaOf<Partial<FormValues>> = Yup.object().shape({
+    content: Yup.string().required("Content is required"),
+    type: Yup.string().required("Type is required"),
+    name: Yup.string().required("Name is required"),
+    parent: Yup.string(),
+    shareWith: Yup.string(),
+    group: Yup.string(),
+    attributes: Yup.array(),
 });
 
-export default function UploadBlobView() {
+export function UploadBlobView() {
     const searchParams = useSearchParams()[0];
-    const formOptions = {
+    const formOptions: UseFormProps<FormValues> = {
         resolver: yupResolver(validationSchema),
         mode: "onSubmit",
         reValidateMode: "onSubmit",
         defaultValues: {
-            [formFields.content]: "",
-            [formFields.shareWith]: "",
-            [formFields.group]: "",
-            [formFields.parent]: searchParams.get("parent") || "",
-            [formFields.attributes]: [],
+            content: "",
+            shareWith: "",
+            type: "",
+            group: "",
+            parent: searchParams.get("parent") || "",
+            attributes: [],
         },
     };
 
@@ -58,35 +56,34 @@ export default function UploadBlobView() {
         watch,
         formState: { errors },
         control,
-    } = useForm(formOptions);
+    } = useForm<FormValues>(formOptions);
 
     const auth = useContext(AuthContext);
-    const config = useContext(ConfigContext);
     const navigate = useNavigate();
 
-    const { groups } = useGroup(setValue, formFields.shareWith);
+    const { groups } = useGroup(setValue, "shareWith");
 
     const { shareWith, group } = watch();
 
     const handleParentClear = () => {
         if (searchParams.get("parent")) navigate("/blob_upload");
-        setValue(formFields.parent, "");
+        setValue("parent", "");
     };
 
-    const updateSharingMode = (ev) => {
-        setValue(formFields.shareWith, ev.target.value);
-        setValue(formFields.group, "");
+    const updateSharingMode = (ev: React.ChangeEvent<HTMLSelectElement>) => {
+        setValue("shareWith", ev.target.value);
+        setValue("group", "");
     };
 
-    const onSubmit = async (values) => {
+    const onSubmit = async (values: FormValues) => {
         try {
-            const body = {
+            const body: FormValues = {
                 ...values,
-                parent: searchParams.get("parent") || values[formFields.parent],
+                parent: searchParams.get("parent") || values.parent,
                 shareWith: sharingModeToUploadParam(
-                    values[formFields.shareWith],
-                    values[formFields.group]
-                ),
+                    values.shareWith,
+                    values.group
+                )!,
             };
             const response = await api.uploadBlob(body);
             navigate("/blob/" + response.data.id, {
@@ -109,77 +106,75 @@ export default function UploadBlobView() {
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="input-group mb-3">
                         <div className="input-group-prepend">
-                            <label
+                            <Label
+                                label="Content"
                                 className="input-group-text"
-                                htmlFor={formFields.content}
-                            >
-                                Content
-                            </label>
+                                htmlFor={"content" as keyof FormValues}
+                            />
                         </div>
                         <textarea
-                            {...register(formFields.content)}
+                            {...register("content" as keyof FormValues)}
                             placeholder="Blob content"
                             className="form-control"
                         />
-                        <FormError errorField={errors[formFields.content]} />
+                        <FormError errorField={errors.content} />
                     </div>
                     <div className="input-group mb-3">
                         <div className="input-group-prepend">
-                            <label
+                            <Label
+                                label="Name"
                                 className="input-group-text"
-                                htmlFor={formFields.name}
-                            >
-                                Name
-                            </label>
+                                htmlFor={"name" as keyof FormValues}
+                            />
                         </div>
                         <div style={{ flex: 1 }}>
                             <input
-                                {...register(formFields.name)}
+                                {...register("name" as keyof FormValues)}
                                 placeholder="Blob name"
                                 className="form-control"
                                 style={{ height: "100%" }}
                             />
                         </div>
-                        <FormError errorField={errors[formFields.name]} />
+                        <FormError errorField={errors.name} />
                     </div>
                     <div className="input-group mb-3">
                         <div className="input-group-prepend">
-                            <label
+                            <Label
+                                label="Type"
                                 className="input-group-text"
-                                htmlFor={formFields.type}
-                            >
-                                Type
-                            </label>
+                                htmlFor={"type" as keyof FormValues}
+                            />
                         </div>
                         <div style={{ flex: 1 }}>
                             <input
-                                {...register(formFields.type)}
+                                {...register("type" as keyof FormValues)}
                                 className="form-control"
                                 placeholder="Blob type"
                                 style={{ height: "100%" }}
                             />
                         </div>
-                        <FormError errorField={errors[formFields.type]} />
+                        <FormError errorField={errors.type} />
                     </div>
                     <div className="form-group">
                         {auth.hasCapability(Capability.addingParents) && (
                             <div className="input-group mb-3">
                                 <div className="input-group-prepend">
-                                    <label
-                                        htmlFor={formFields.parent}
+                                    <Label
+                                        label="Parent"
                                         className="input-group-text"
-                                    >
-                                        Parent
-                                    </label>
+                                        htmlFor={"parent" as keyof FormValues}
+                                    />
                                 </div>
                                 <input
-                                    {...register(formFields.parent)}
-                                    id={formFields.parent}
+                                    {...register("parent" as keyof FormValues)}
+                                    id={"parent" as keyof FormValues}
                                     className="form-control"
                                     type="text"
                                     style={{ fontSize: "medium" }}
                                     placeholder="(Optional) Type parent identifier..."
-                                    disabled={searchParams.get("parent")}
+                                    disabled={
+                                        !isEmpty(searchParams.get("parent"))
+                                    }
                                 />
                                 <div className="input-group-append">
                                     <input
@@ -193,16 +188,15 @@ export default function UploadBlobView() {
                         )}
                         <div className="input-group mb-3">
                             <div className="input-group-prepend">
-                                <label
-                                    htmlFor={formFields.shareWith}
+                                <Label
+                                    label="Share with"
                                     className="input-group-text"
-                                >
-                                    Share with
-                                </label>
+                                    htmlFor={"shareWith" as keyof FormValues}
+                                />
                             </div>
                             <select
-                                {...register(formFields.shareWith)}
-                                id={formFields.shareWith}
+                                {...register("shareWith" as keyof FormValues)}
+                                id={"shareWith" as keyof FormValues}
                                 className="custom-select"
                                 onChange={updateSharingMode}
                             >
@@ -226,17 +220,17 @@ export default function UploadBlobView() {
                         {shareWith === "single" && (
                             <div className="mb-3">
                                 <Autocomplete
-                                    value={group}
+                                    value={group ?? ""}
                                     items={groups.filter(
                                         (item) =>
                                             item
                                                 .toLowerCase()
                                                 .indexOf(
-                                                    group.toLowerCase()
+                                                    group!.toLowerCase()
                                                 ) !== -1
                                     )}
                                     onChange={(value) =>
-                                        setValue(formFields.group, value)
+                                        setValue("group", value)
                                     }
                                     className="form-control"
                                     style={{ fontSize: "medium" }}
@@ -244,9 +238,10 @@ export default function UploadBlobView() {
                                     prependChildren
                                 >
                                     <div className="input-group-prepend">
-                                        <label className="input-group-text">
-                                            Group name
-                                        </label>
+                                        <Label
+                                            label="Group name"
+                                            className="input-group-text"
+                                        />
                                     </div>
                                 </Autocomplete>
                             </div>
@@ -254,7 +249,7 @@ export default function UploadBlobView() {
                         <Attributes
                             {...useFieldArray({
                                 control,
-                                name: formFields.attributes,
+                                name: "attributes",
                             })}
                         />
 

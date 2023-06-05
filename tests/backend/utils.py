@@ -152,6 +152,22 @@ class MwdbTest(object):
         )
         res.raise_for_status()
 
+    def update_group_admin(self, name: str, username: str, is_admin: bool):
+        res = self.session.put(
+            self.mwdb_url + "/group/" + name + "/member/" + username,
+            json={
+                "group_admin": is_admin
+            }
+        )
+        res.raise_for_status()
+
+    def request_group_invite_link(self, groupname, username):
+        res = self.session.post(
+            self.mwdb_url + "/group/" + groupname + "/invite/" + username
+        )
+        res.raise_for_status()
+        return res.json()
+
     def register_user(self, username, password, capabilities=None):
         capabilities = capabilities or []
         self.login()

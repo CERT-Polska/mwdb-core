@@ -625,6 +625,9 @@ class RequestGroupInviteLinkResource(Resource):
         responses:
             200:
                 description: When link was created successfully
+                content:
+                  application/json:
+                    schema: GroupInvitationLinkResponseSchema
             400:
                 description: When request body is invalid
             403:
@@ -697,7 +700,9 @@ class RequestGroupInviteLinkResource(Resource):
             )
 
         schema = GroupInvitationLinkResponseSchema()
-        return schema.dump({"token": token})
+        return schema.dump(
+            {"link": app_config.mwdb.base_url + "/group/invite?token=" + token}
+        )
 
 
 @rate_limited_resource

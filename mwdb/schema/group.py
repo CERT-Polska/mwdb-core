@@ -70,4 +70,4 @@ class GroupSuccessResponseSchema(GroupNameSchemaBase):
 
 
 class GroupInvitationLinkResponseSchema(Schema):
-    token = fields.Str(required=True, allow_none=False)
+    link = fields.Str(required=True, allow_none=False)

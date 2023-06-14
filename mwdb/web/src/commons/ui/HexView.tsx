@@ -34,7 +34,7 @@ type Props = {
     json?: boolean;
 };
 
-export default function HexView(props: Props) {
+export function HexView(props: Props) {
     const [originalContent, setOriginalContent] = useState<Content>();
     const [hexlifiedContent, setHexlifiedContent] = useState<string>();
     const [editor, setEditor] = useState<IEditorProps | null>(null);

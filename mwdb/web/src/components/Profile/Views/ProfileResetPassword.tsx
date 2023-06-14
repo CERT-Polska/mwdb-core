@@ -6,7 +6,7 @@ import { ShowIf } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 
-export default function ProfileResetPassword() {
+export function ProfileResetPassword() {
     const { profile }: ProfileOutletContext = useOutletContext();
     const viewAlert = useViewAlert();
     const [pending, setPending] = useState<boolean>(false);

@@ -8,7 +8,7 @@ type Props = {
     badge?: string;
 };
 
-export default function NavDropdown(props: Props) {
+export function NavDropdown(props: Props) {
     if (!props.elements.length) return <div />;
     return (
         <li className="nav-item dropdown">

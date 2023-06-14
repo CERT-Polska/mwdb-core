@@ -81,7 +81,7 @@ type Props = {
     addToQuery: AddToQuery;
 };
 
-export default function RecentViewList(props: Props) {
+export function RecentViewList(props: Props) {
     const api = useContext(APIContext);
     const [listState, listDispatch] = useReducer(listStateReducer, {
         pageToLoad: 0,

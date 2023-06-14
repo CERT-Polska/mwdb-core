@@ -1,6 +1,6 @@
 import { GenericOrJSX } from "@mwdb-web/types/types";
 
-export { default as downloadData } from "./download";
+export { downloadData } from "./download";
 export * from "./search";
 export * from "./filesize";
 export * from "./paginate";

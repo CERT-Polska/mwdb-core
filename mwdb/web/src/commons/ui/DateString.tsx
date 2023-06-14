@@ -2,7 +2,7 @@ type Props = {
     date?: string | Date;
 };
 
-export default function DateString(props: Props) {
+export function DateString(props: Props) {
     if (!props.date) {
         return <></>;
     }

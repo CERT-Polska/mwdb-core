@@ -15,7 +15,7 @@ type Props<T> = {
     tableStyle?: React.CSSProperties;
 };
 
-export default function PagedList<T>(props: Props<T>) {
+export function PagedList<T>(props: Props<T>) {
     const ListItem = props.listItem;
     const columnNames = props.columnNames;
     return (

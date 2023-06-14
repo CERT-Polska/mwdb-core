@@ -8,13 +8,7 @@ type Props = {
     showIf?: boolean;
 };
 
-export default function View({
-    ident,
-    children,
-    fluid,
-    style,
-    showIf = true,
-}: Props) {
+export function View({ ident, children, fluid, style, showIf = true }: Props) {
     /**
      * View component for all main views. Views shouldn't be nested.
      * Properties spec:

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 type Props = {
-    type:
+    type?:
         | "primary"
         | "secondary"
         | "success"

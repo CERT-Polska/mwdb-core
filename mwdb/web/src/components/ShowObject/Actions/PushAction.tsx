@@ -22,7 +22,7 @@ export function PushAction() {
 
     const remotes = config.config.remotes;
 
-    if (!remotes || !remotes.length || api.remote) return [];
+    if (!remotes || !remotes.length || api.remote) return <></>;
 
     async function pushRemote() {
         try {

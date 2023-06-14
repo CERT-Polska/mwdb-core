@@ -1,6 +1,5 @@
 import { AxiosResponse } from "axios";
 import {
-    ActivePlugin,
     ApiKey,
     Attribute,
     AttributeDefinition,
@@ -71,7 +70,7 @@ export type ApiKeyAddResponse = Response<ApiKey>;
 
 export type ApiKeyRemoveResponse = Response<null>;
 
-export type GetObjectResponse = Response<ObjectData | ConfigData | BlobData>;
+export type GetObjectResponse = Response<ObjectOrConfigOrBlobData>;
 
 export type GetObjectListResponse = Response<{
     blobs?: BlobListItem[];
@@ -85,7 +84,7 @@ export type GetObjectCountResponse = Response<{
 
 export type GetTagsResponse = Response<Tag[]>;
 
-export type GetShareInfoResponse = Response<string[]>;
+export type GetShareInfoResponse = Response<{ groups: string[] }>;
 
 export type GetObjectTagsResponse = Response<Tag[]>;
 
@@ -237,7 +236,7 @@ export type GetAttributePermissionsResponse = Response<{
     }[];
 }>;
 
-export type DownloadFileResponse = Response<{ token: string }>;
+export type DownloadFileResponse = Response<ArrayBuffer>;
 
 export type UploadFileResponse = Response<ObjectData>;
 
@@ -281,7 +280,7 @@ export type GetRemoteObjectAttributesResponse = Response<{
     attributes: Attribute[];
 }>;
 
-export type DownloadRemoteFileResponse = Response<{ token: string }>;
+export type DownloadRemoteFileResponse = Response<ArrayBuffer>;
 
 export type GetKartonAnalysesListResponse = Response<{
     analyses: KartonAnalysis[];

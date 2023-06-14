@@ -27,8 +27,8 @@ import {
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
-    GetAttributePermissionsResponse,
     GetConfigStatsResponse,
+    GetAttributePermissionsResponse,
     GetGroupResponse,
     GetGroupsResponse,
     GetKartonAnalysesListResponse,
@@ -237,7 +237,7 @@ function apiKeyAdd(login: string, name: string): ApiKeyAddResponse {
     return axios.post(`/user/${login}/api_key`, { name });
 }
 
-function apiKeyRemove(key_id: number | string): ApiKeyRemoveResponse {
+function apiKeyRemove(key_id: string): ApiKeyRemoveResponse {
     return axios.delete(`/api_key/${key_id}`);
 }
 
@@ -568,14 +568,14 @@ function removeAttributePermission(
     });
 }
 
-function downloadFile(id: number, obfuscate: number = 0): DownloadFileResponse {
+function downloadFile(id: string, obfuscate: number = 0): DownloadFileResponse {
     return axios.get(`/file/${id}/download?obfuscate=${obfuscate}`, {
         responseType: "arraybuffer",
         responseEncoding: "binary",
     });
 }
 
-async function requestFileDownloadLink(id: number): Promise<string> {
+async function requestFileDownloadLink(id: string): Promise<string> {
     const response = await axios.post(`/file/${id}/download`);
     const baseURL = getApiForEnvironment();
     return `${baseURL}/file/${id}/download?token=${response.data.token}`;
@@ -635,7 +635,7 @@ function pullObjectRemote(
     });
 }
 
-function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
+function getConfigStats(fromTime: string): GetConfigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,
@@ -709,7 +709,7 @@ function getRemoteObjectAttributes(
 
 function downloadRemoteFile(
     remote: string,
-    id: number
+    id: string
 ): DownloadRemoteFileResponse {
     return axios.get(`/remote/${remote}/api/file/${id}/download`, {
         responseType: "arraybuffer",
@@ -719,7 +719,7 @@ function downloadRemoteFile(
 
 async function requestRemoteFileDownloadLink(
     remote: string,
-    id: number
+    id: string
 ): Promise<string> {
     const response = await axios.post(
         `/remote/${remote}/api/file/${id}/download`

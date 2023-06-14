@@ -59,7 +59,7 @@ export type Group = {
     workspace: boolean;
 };
 
-export type ObjectType = "file" | "blob" | "config";
+export type ObjectType = "file" | "blob" | "config" | "object";
 
 export type ObjectLegacyType = "file" | "static_config" | "text_blob";
 
@@ -299,4 +299,19 @@ export type Reason = {
     relatedObjectDHash: string;
     relatedObjectType: ObjectType;
     relatedUserLogin: string;
+};
+
+export type NodeProp = {
+    id: string;
+    expanded: boolean;
+    object: {
+        tags: Tag[];
+        type: string;
+        upload_time: string;
+    };
+};
+
+export type Edge = {
+    child: string | null;
+    parent: string | null;
 };

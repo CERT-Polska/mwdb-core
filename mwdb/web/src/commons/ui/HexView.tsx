@@ -29,7 +29,7 @@ type Content = string | ArrayBuffer;
 
 type Props = {
     content: Content;
-    mode: "raw" | "hex";
+    mode: string;
     showInvisibles: boolean;
     json?: boolean;
 };

@@ -75,8 +75,8 @@ type Props = {
             message: string;
         }> | null
     ) => void;
-    rowComponent: JSX.Element;
-    headerComponent: JSX.Element;
+    rowComponent: React.ComponentType;
+    headerComponent: React.ComponentType;
     locked: boolean;
     addToQuery: AddToQuery;
 };
@@ -143,10 +143,10 @@ export default function RecentViewList(props: Props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [listState.pageToLoad, listState.loadedPages]);
 
-    const Row = props.rowComponent as unknown as React.ComponentType<{
+    const Row = props.rowComponent as React.ComponentType<{
         addToQuery: AddToQuery;
     }>;
-    const Header = props.headerComponent as unknown as React.ComponentType;
+    const Header = props.headerComponent as React.ComponentType;
     const tableStyle: React.CSSProperties = {
         tableLayout: "fixed",
         ...(props.locked ? { pointerEvents: "none", filter: "blur(4px)" } : {}),

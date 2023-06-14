@@ -11,7 +11,7 @@ import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { Capability } from "@mwdb-web/types/types";
 
 import { Attributes } from "./Attributes";
-import AttributesAddModal from "../../AttributesAddModal";
+import { AttributesAddModal } from "../../AttributesAddModal";
 import { Attribute, AttributeDefinition } from "@mwdb-web/types/types";
 
 export function AttributesBox() {

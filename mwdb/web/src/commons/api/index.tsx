@@ -237,7 +237,7 @@ function apiKeyAdd(login: string, name: string): ApiKeyAddResponse {
     return axios.post(`/user/${login}/api_key`, { name });
 }
 
-function apiKeyRemove(key_id: number | string): ApiKeyRemoveResponse {
+function apiKeyRemove(key_id: string): ApiKeyRemoveResponse {
     return axios.delete(`/api_key/${key_id}`);
 }
 
@@ -635,7 +635,7 @@ function pullObjectRemote(
     });
 }
 
-function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
+function getConfigStats(fromTime: string): GetConfigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,

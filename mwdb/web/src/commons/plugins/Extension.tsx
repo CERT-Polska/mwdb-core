@@ -1,7 +1,7 @@
 import { fromPlugins } from ".";
 
 type Props = {
-    [x: string]: any;
+    [extensionProp: string]: any;
     ident: string;
     fallback?: JSX.Element;
 };

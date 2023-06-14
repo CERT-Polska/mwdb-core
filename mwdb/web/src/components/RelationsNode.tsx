@@ -1,8 +1,8 @@
 import { capitalize } from "@mwdb-web/commons/helpers";
 import { Tag } from "@mwdb-web/commons/ui";
-import { ObjectType } from "@mwdb-web/types/types";
+import { ObjectLegacyType, ObjectType } from "@mwdb-web/types/types";
 
-function nodeTypeMapping(type: string): ObjectType {
+function nodeTypeMapping(type: ObjectLegacyType): ObjectType {
     switch (type) {
         case "file": {
             return "file";
@@ -39,14 +39,16 @@ type Props = {
             tags: {
                 tag: string;
             }[];
-            type: string;
+            type: ObjectLegacyType;
             upload_time: string;
         };
     };
 };
 
 export function RelationsNode(props: Props) {
-    const nodeType = nodeTypeMapping(props.node.object.type);
+    const nodeType = nodeTypeMapping(
+        props.node.object.type as ObjectLegacyType
+    );
     const nodeStyle = styleMapping(nodeType);
     const nodeHeaderStyle = props.node.expanded
         ? "node-header-expanded"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
 
@@ -30,7 +30,7 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
     const [attributeType, setAttributeType] = useState<string>("string");
     const [invalid, setInvalid] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const attributeForm = createRef<HTMLFormElement>();
+    const attributeForm = useRef<HTMLFormElement>(null);
     const attributesAvailable = !isEmpty(attributeDefinitions);
 
     useEffect(() => {

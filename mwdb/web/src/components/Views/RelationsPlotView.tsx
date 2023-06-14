@@ -21,7 +21,7 @@ const nodeStatuses = {
     showWarning: "showWarning",
 };
 
-type UpdateObjectType = "children" | "parent" | null;
+type RelationUpdateType = "children" | "parent" | null;
 
 type Nodes = {
     nodes: NodeProp[];
@@ -115,7 +115,7 @@ export function RelationsPlotView(props: Props) {
 
     const updateObject = (
         obj: RelatedObject,
-        type: UpdateObjectType = null,
+        type: RelationUpdateType = null,
         edgeId: string | null = null
     ) => {
         if (type === "parent") {

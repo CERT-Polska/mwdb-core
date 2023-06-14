@@ -568,10 +568,7 @@ function removeAttributePermission(
     });
 }
 
-function downloadFile(
-    id: number | string,
-    obfuscate: number = 0
-): DownloadFileResponse {
+function downloadFile(id: string, obfuscate: number = 0): DownloadFileResponse {
     return axios.get(`/file/${id}/download?obfuscate=${obfuscate}`, {
         responseType: "arraybuffer",
         responseEncoding: "binary",
@@ -712,7 +709,7 @@ function getRemoteObjectAttributes(
 
 function downloadRemoteFile(
     remote: string,
-    id: number | string
+    id: string
 ): DownloadRemoteFileResponse {
     return axios.get(`/remote/${remote}/api/file/${id}/download`, {
         responseType: "arraybuffer",

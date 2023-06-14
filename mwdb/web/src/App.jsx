@@ -119,7 +119,6 @@ function AppRoutes() {
                         </RequiresCapability>
                     }
                 />
-                S
                 <Route path="configs/stats" element={<ConfigStatsView />} />
                 <Route path="about" element={<AboutView />} />
                 <Route path="docs" element={<DocsView />} />

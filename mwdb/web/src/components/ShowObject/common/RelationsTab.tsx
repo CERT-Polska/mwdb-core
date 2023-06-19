@@ -3,9 +3,6 @@ import { useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { faProjectDiagram, faSearch } from "@fortawesome/free-solid-svg-icons";
-
-import { RelationsPlotView } from "../../Views/RelationsPlotView";
-
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
 import { RelationsPlotView } from "@mwdb-web/components/Views/RelationsPlotView";

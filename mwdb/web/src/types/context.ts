@@ -3,6 +3,7 @@ import {
     AttributeDefinition,
     BlobData,
     Capability,
+    ConfigData,
     Group,
     ObjectData,
     ObjectOrConfigOrBlobData,
@@ -14,6 +15,7 @@ import {
     GetRemoteObjectCountResponse,
     GetRemoteObjectListResponse,
 } from "./api";
+import { Provider } from "react";
 
 export type TabContextValues = {
     tab?: string;

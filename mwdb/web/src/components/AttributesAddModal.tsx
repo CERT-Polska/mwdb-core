@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
 
@@ -118,7 +118,7 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                         <label>Attribute</label>
                         <select
                             className="form-control"
-                            onChange={handleKeyChange}
+                            onChange={(e) => handleKeyChange(e)}
                             value={attributeKey}
                             required
                         >

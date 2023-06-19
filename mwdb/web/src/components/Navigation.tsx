@@ -19,7 +19,7 @@ import { Capability } from "@mwdb-web/types/types";
 import logo from "../assets/logo.png";
 import { AdminNav } from "./AdminNav";
 import { RemoteDropdown } from "./RemoteDropdown";
-import { UploadDropdown } from "./Upload/common/UploadDropdown";
+import { UploadDropdown } from "./Upload/common/UploadDropdown"
 
 export function Navigation() {
     const auth = useContext(AuthContext);

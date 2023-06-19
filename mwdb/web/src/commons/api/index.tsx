@@ -102,6 +102,7 @@ import {
 import {
     Attribute,
     Capability,
+    Comment,
     CreateUser,
     ObjectLegacyType,
     ObjectType,
@@ -241,7 +242,7 @@ function apiKeyAdd(login: string, name: string): ApiKeyAddResponse {
     return axios.post(`/user/${login}/api_key`, { name });
 }
 
-function apiKeyRemove(key_id: number | string): ApiKeyRemoveResponse {
+function apiKeyRemove(key_id: string): ApiKeyRemoveResponse {
     return axios.delete(`/api_key/${key_id}`);
 }
 
@@ -572,10 +573,7 @@ function removeAttributePermission(
     });
 }
 
-function downloadFile(
-    id: number | string,
-    obfuscate: number = 0
-): DownloadFileResponse {
+function downloadFile(id: string, obfuscate: number = 0): DownloadFileResponse {
     return axios.get(`/file/${id}/download?obfuscate=${obfuscate}`, {
         responseType: "arraybuffer",
         responseEncoding: "binary",
@@ -658,7 +656,7 @@ function pullObjectRemote(
     });
 }
 
-function getConfigStats(fromTime: number | string): GetConfigStatsResponse {
+function getConfigStats(fromTime: string): GetConfigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,
@@ -732,7 +730,7 @@ function getRemoteObjectAttributes(
 
 function downloadRemoteFile(
     remote: string,
-    id: number | string
+    id: string
 ): DownloadRemoteFileResponse {
     return axios.get(`/remote/${remote}/api/file/${id}/download`, {
         responseType: "arraybuffer",

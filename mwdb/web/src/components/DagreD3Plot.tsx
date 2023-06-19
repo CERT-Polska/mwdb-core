@@ -56,7 +56,7 @@ export function DagreD3Plot(props: Props) {
         // render() doesn't provide any callback to notify when rendering is done
         // So we need to make wrapper with useEffect.
         // Unfortunately we can't use flushSync for that.
-        await new Promise((resolve) => {
+        await new Promise<void>((resolve) => {
             function NodeComponent() {
                 const Node = props.nodeComponent as any;
                 useEffect(() => {

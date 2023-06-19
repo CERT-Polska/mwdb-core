@@ -1,3 +1,5 @@
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { Capability } from "@mwdb-web/types/types";
 import { useContext } from "react";

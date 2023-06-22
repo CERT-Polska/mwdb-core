@@ -139,6 +139,9 @@ def test_blob_search_upload_count(admin_session):
         blob = users_session.add_blob(None, blobname=blob_name, blobtype="inject", content=blob_content)
         users_session.add_tag(blob["id"], tag)
 
+    found_configs = admin_session.search(f'tag:{tag}')
+    assert len(found_configs) == 1
+
     found_configs = admin_session.search(f'tag:{tag} AND blob.upload_count:{len(test_users)}')
     assert len(found_configs) == 1
 

@@ -228,8 +228,6 @@ class GroupResource(Resource):
             db.session.query(Group).filter(Group.name == group_name_obj["name"]).first()
         )
 
-        user = g.auth_user
-
         if group is None:
             raise NotFound("No such group")
 
@@ -243,13 +241,6 @@ class GroupResource(Resource):
             group.name = obj["name"]
 
         if obj["capabilities"] is not None:
-            if (
-                user.login == group.name
-                and Capabilities.manage_users not in obj["capabilities"]
-            ):
-                raise Forbidden(
-                    f"Can't remove '{Capabilities.manage_users }', yourself"
-                )
             group.capabilities = obj["capabilities"]
 
         if obj["default"] is not None:

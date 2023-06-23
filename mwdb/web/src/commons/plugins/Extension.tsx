@@ -1,4 +1,4 @@
-import { fromPlugins } from ".";
+import { fromPlugins } from "./loader";
 
 type Props = {
     [extensionProp: string]: any;

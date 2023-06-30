@@ -33,7 +33,7 @@ As an user, you need to choose which groups you represent uploading the sample. 
 * **Everybody** - in that case, object is shared with ``public`` group, which means that everybody will have access to the uploaded object and all its descendants.
 * **Only me** - your object will be shared only with your group.
 
-Note that all options share the uploaded object with your private group. In addition, your object will be **always** shared with special ``everything`` group described later.
+Note that all options share the uploaded object with your private group.
 
 .. image:: ../_static/upload-share-with.png
    :target: ../_static/upload-share-with.png
@@ -74,18 +74,6 @@ But there are few exclusions for that, when your login may be visible for all us
 
 * when you are the first one sharing an object with ``public`` group
 * when you add a comment (login of author)
-
-Group with ``everything``
------------------------------
-
-There is special group called ``everything`` that has access to all objects ever added. This group can be used by instance owner organisation for administration purposes and to manage whole repository.
-
-Even if you upload sample to mwdb.cert.pl with ``Only me`` option, you are sharing it with our internal "everything" group for automated processing purposes. It's important to upload only these samples that can be shared with CERT.pl (\ ``tlp:amber``\ ).
-
-.. note::
-
-    ``everything`` group can be renamed. To make the ``everything`` group more friendly for other people in your organization, you can use your organization name instead.
-
 
 How to add new user/group?
 --------------------------
@@ -166,9 +154,9 @@ Each capability has its own name and scope:
   That one is a bit tricky and will be possibly deprecated. MWDB will automatically share object and all descendants with group if member directly accessed it via identifier (knows the hash e.g. have direct link to the object). It can be used for bot accounts, so they have access only to these objects that are intended to be processed by them. Internally, we abandoned that idea, so that capability may not be stable.
 
 * 
-  **access_all_objects - Has access to all new uploaded objects into system**
+  **access_all_objects - Has access to all uploaded objects into system**
 
-  Capability used by ``everything`` group, useful when you want to make additional "everything" that is separate from the original one. Keep in mind that it applies only to the **uploads made during the capability was enabled**\ , so if you want the new group to be truly "everything", you may need to share the old objects manually.
+  Grants access to all uploaded objects in MWDB.
 
 * 
   **sharing_with_all - Can share objects with all groups in system**

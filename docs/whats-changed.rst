@@ -43,6 +43,16 @@ other explicit shares. To make it even more visible: uploaders, groups and inher
 
 All objects are migrated to the new scheme automatically after upgrade.
 
+[Important change] Changed behavior of ``access_all_objects`` capability
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Since v2.9.0, MWDB doesn't check permission table for users with ``access_all_objects`` and additional permission entries are not created.
+
+Before that change, MWDB was adding explicit access permission for every new object and every group with enabled ``access_all_objects``.
+Extra entries for groups with ``access_all_objects`` are removed during migration.
+
+Initial ``everything`` group is no longer created on first configuration.
+
 [Important change] Changes in web plugins engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -61,7 +71,7 @@ Rollup instead of Webpack.
 2. ``@mwdb-web/commons`` is virtual package that is injected by plugin, so it's no longer installed into ``node_modules`` and
    should be removed from ``peerDependency`` section in ``package.json``
 
-3. Don't use subpaths of ``@mwdb-web/commons/<module>``, all required things should be imported from main package.
+3. If possible, don't use subpaths of ``@mwdb-web/commons/<module>``, all required things should be imported from main package.
 
    .. code-block:: diff
 

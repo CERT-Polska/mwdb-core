@@ -329,7 +329,7 @@ by references to few methods and wrappers from ``common/plugins`` :
 * ``fromPlugins`` collects specific type of extension from all loaded plugins and returns a list of them. For example: new ``routes``
   to be added.
 * ``Extension`` does the same but treats all collected objects as components and renders them.
-* ``Extendable`` wraps object with ``nameBefore``, ``nameReplace`` and ``nameAfter`` extensions, so we can add extra things
+* ``Extendable`` wraps object with ``<name>Before``, ``<name>Replace`` and ``<name>After`` extensions, so we can add extra things
   within main views.
 
 So ``navbar`` is one of ``Extendable`` wrappers that can be found within application and that's why we can add extra navbar item.
@@ -377,8 +377,72 @@ as ``@mwdb-web/*`` aliases:
 * ``@mwdb-web/components`` contains implementation of all application views and there is higher chance that something will
   break across the versions if you use them directly.
 
+Building customized images
+--------------------------
+
+If you want to extend MWDB with new features using plugin system, it's always useful to be able to build your own customized Docker images.
+
+There are two ways to do that:
+
+1. Simple way: clone https://github.com/CERT-Polska/mwdb-core repository. Then place your plugins
+   in ``docker/plugins`` and use Dockerfiles from ``deploy/docker`` to build everything from scratch.
+2. More extensible way: use ``certpl/mwdb`` and ``certpl/mwdb-web-source`` as base images and make your own Dockerfiles. This method
+   enables you to install additional dependencies and provide custom plugin-specific overrides.
+
+Building custom backend image is simple as in `Dockerfile` below:
+
+.. code-block:: Dockerfile
+
+    # It's recommended to pin to specific version
+    ARG MWDB_VERSION=v2.9.0
+    FROM certpl/mwdb:$MWDB_VERSION
+
+    # Install any Alpine dependencies you need
+    RUN apk add p7zip
+    # Install any Python dependencies you need (certpl/mwdb image uses venv internally)
+    RUN /app/venv/bin/pip install malduck
+
+    # Copy arbitrary backend plugins and mail templates
+    COPY mail_templates /app/mail_templates
+    COPY plugins /app/plugins
+
+Backend plugins are linked in runtime, so that part is pretty easy to extend. A bit more complicated thing is frontend part:
+
+.. code-block:: Dockerfile
+    ARG MWDB_VERSION=v2.9.0
+    FROM certpl/mwdb-web-source:$MWDB_VERSION AS build
+
+    # Copy web plugins code
+    COPY plugins /app/plugins
+
+    # Set workdir to /app, install plugins to ``/app/node_modules`` and rebuild everything
+    WORKDIR /app
+    RUN npm install --unsafe-perm $(find /app/plugins -name 'package.json' -exec dirname {} \; | sort -u) \
+        && CI=true npm run build
+
+    # Then next stage is copied from https://github.com/CERT-Polska/mwdb-core/blob/master/deploy/docker/Dockerfile-web
+    # You need to copy start-web.sh and ngnix.conf.template as well, or adapt them according to your needs
+    FROM nginx:stable
+
+    LABEL maintainer="admin@example.org"
+
+    ENV PROXY_BACKEND_URL http://mwdb.:8080
+
+    COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
+    COPY start-web.sh /start-web.sh
+    COPY --from=build /app/dist /usr/share/nginx/html
+
+    # Give +r to everything in /usr/share/nginx/html and +x for directories
+    RUN chmod u=rX,go= -R /usr/share/nginx/html
+
+    # By default everything is owned by root - change owner to nginx
+    RUN chown nginx:nginx -R /usr/share/nginx/html
+
+    CMD ["/bin/sh", "/start-web.sh"]
+
+
 Room for improvement
-~~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 Plugin system was created mainly for mwdb.cert.pl, so not everything may fit your needs. Also things may break from time to time,
 but as we maintain our internal plugins ourselves, most important changes will be noted in changelog. You can also find broader explanation and

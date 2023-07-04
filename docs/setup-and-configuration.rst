@@ -410,7 +410,7 @@ Here are examples of YAML specifications for k8s deployments:
                             name: secret-mwdb-admin-password
                         - name: MWDB_BASE_URL
                           value: https://mwdb.cert.pl
-                      image: dr.cert.pl/mwdb/mwdb:v2.9.0
+                      image: certpl/mwdb:v2.9.0
                       imagePullPolicy: Always
                       name: mwdb-migration-container
                       command: [ 'sh', '-c', '/app/venv/bin/mwdb-core configure -q' ]
@@ -432,9 +432,9 @@ Here are examples of YAML specifications for k8s deployments:
                         - name: MWDB_ENABLE_KARTON
                           value: '1'
                         - name: MWDB_S3_STORAGE_ENDPOINT
-                          value: minio.cert.pl
+                          value: s3.cert.pl
                           # ... more configuration
-                      image: dr.cert.pl/mwdb/mwdb:v2.9.0
+                      image: certpl/mwdb:v2.9.0
                       imagePullPolicy: Always
                       livenessProbe:
                         httpGet:

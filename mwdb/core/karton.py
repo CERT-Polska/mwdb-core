@@ -20,7 +20,13 @@ class KartonProducer(Producer):
 
 
 if app_config.mwdb.enable_karton:
-    karton_producer = KartonProducer(config=KartonConfig(app_config.karton.config_path))
+    try:
+        karton_producer = KartonProducer(
+            config=KartonConfig(app_config.karton.config_path)
+        )
+    except Exception:
+        logger.exception("Failed to load Karton producer")
+        karton_producer = None
 else:
     karton_producer = None
 
@@ -33,9 +39,7 @@ def send_file_to_karton(file) -> str:
     producer = get_karton_producer()
 
     if producer is None:
-        raise RuntimeError(
-            "This method should not be called when Karton is not enabled"
-        )
+        raise RuntimeError("Karton is not enabled or failed to load properly")
 
     file_stream = file.open()
     try:
@@ -70,9 +74,7 @@ def send_config_to_karton(config) -> str:
     producer = get_karton_producer()
 
     if producer is None:
-        raise RuntimeError(
-            "This method should not be called when Karton is not enabled"
-        )
+        raise RuntimeError("Karton is not enabled or failed to load properly")
 
     task = Task(
         headers={
@@ -97,9 +99,7 @@ def send_blob_to_karton(blob) -> str:
     producer = get_karton_producer()
 
     if producer is None:
-        raise RuntimeError(
-            "This method should not be called when Karton is not enabled"
-        )
+        raise RuntimeError("Karton is not enabled or failed to load properly")
 
     task = Task(
         headers={
@@ -123,9 +123,7 @@ def get_karton_state():
     producer = get_karton_producer()
 
     if producer is None:
-        raise RuntimeError(
-            "This method should not be called when Karton is not enabled"
-        )
+        raise RuntimeError("Karton is not enabled or failed to load properly")
 
     karton_state = KartonState(producer.backend)
     return karton_state

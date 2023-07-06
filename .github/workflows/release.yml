@@ -1,8 +1,12 @@
 name: Release new mwdb-core version
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
 
 jobs:
   release_pypi:
@@ -27,72 +31,4 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
-  release_docker:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push mwdb-core image
-        uses: docker/build-push-action@v4
-        with:
-          file: ./deploy/docker/Dockerfile
-          tags: |
-            certpl/mwdb:${{ github.event.release.tag_name }}
-            certpl/mwdb:latest
-          cache-from: |
-            type=registry,ref=certpl/mwdb:buildcache
-          push: true
-          context: .
-      - name: Build and push mwdb-core web image
-        uses: docker/build-push-action@v4
-        with:
-          file: ./deploy/docker/Dockerfile-web
-          tags: |
-            certpl/mwdb-web:${{ github.event.release.tag_name }}
-            certpl/mwdb-web:latest
-          cache-from: |
-            type=registry,ref=certpl/mwdb-web:buildcache
-          push: true
-          context: .
-      - name: Build and push mwdb-core web-source image
-        uses: docker/build-push-action@v4
-        with:
-          file: ./deploy/docker/Dockerfile-web
-          target: build
-          tags: |
-            certpl/mwdb-web-source:${{ github.event.release.tag_name }}
-            certpl/mwdb-web-source:latest
-          cache-from: |
-            type=registry,ref=certpl/mwdb-web-source:buildcache
-          push: true
-          context: .
-      - name: Build and push mwdb-tests image
-        uses: docker/build-push-action@v4
-        with:
-          file: ./tests/backend/Dockerfile
-          context: tests/backend
-          tags: |
-            certpl/mwdb-tests:${{ github.event.release.tag_name }}
-            certpl/mwdb-tests:latest
-          cache-from: |
-            type=registry,ref=certpl/mwdb-tests:buildcache
-          push: true
-      - name: Build and push mwdb-web-tests image
-        uses: docker/build-push-action@v4
-        with:
-          file: ./tests/frontend/Dockerfile
-          context: tests/frontend
-          tags: |
-            certpl/mwdb-web-tests:${{ github.event.release.tag_name }}
-            certpl/mwdb-web-tests:latest
-          cache-from: |
-            type=registry,ref=certpl/mwdb-web-tests:buildcache
-          push: true
+

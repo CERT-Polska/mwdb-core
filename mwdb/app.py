@@ -154,6 +154,7 @@ def log_request(response):
             "status": response.status_code,
             "response_time": response_time,
             "response_size": response_size,
+            "remote_addr": request.remote_addr,
         },
     )
 

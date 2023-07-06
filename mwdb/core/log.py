@@ -56,7 +56,7 @@ def setup_logger():
             " - %(message)s"
         )
     handler.setFormatter(formatter)
-    logger.addFilter(ContextFilter())
+    handler.addFilter(ContextFilter())
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 

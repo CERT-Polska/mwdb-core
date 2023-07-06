@@ -278,6 +278,7 @@ Web application settings:
 * ``flask_config_file`` (string) - additional file containing Flask configuration (.py)
 * ``admin_login`` (string) - administrator account name
 * ``admin_password`` (string) - initial password for administrator account
+* ``use_x_forwarded_for`` (0 or 1) - Set this to 1 if MWDB backend is behind reverse proxy, so X-Forwarded-For header is correctly translated to ``request.remote_addr`` value. Set by default to 1 in ``certpl/mwdb`` Docker image.
 
 
 Plugin settings:
@@ -366,3 +367,6 @@ Other endpoints are limited by default limits.
 .. note::
 
    Complete list of possible rate-limit parameters is placed in ``mwdb-core\mwdb\core\templates\mwdb.ini.tmpl`` file - section ``mwdb_limiter``.
+
+   If your MWDB instance uses standalone installation and MWDB backend is behind reverse proxy, make sure that use_x_forwarded_for is set to 1
+   and your reverse proxy correctly sets X-Forwarded-For header with real remote IP.

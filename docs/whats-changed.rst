@@ -7,6 +7,119 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrade mwdb-core to latest version`.
 
+v2.9.0
+------
+
+This release contains changes in sharing mechanism and uses slightly different web build engine, which breaks web plugin
+compatibility.
+
+Complete changelog can be found here: `v2.9.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.9.0>`_.
+
+[Important change] Opt-in counting of search results
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In previous versions, click on "Search" button was counting all the results at once before showing the first part of them,
+which was time-consuming and heavy task for database. The actual count of results is usually not that useful for users to
+wait that much, unless they're checking it on purpose.
+
+In v2.9.0 there is extra "Count" button on search bar which switches between counting and non-counting search mode.
+We decided to make it non-counting by default for better search experience.
+
+[Important change] Changes in sharing model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When user uploads sample, they can use ``Share with`` field to choose with whom this sample should be shared. This action
+is noted with ``Added`` reason type which is set both for uploader and all groups that have got permission to see the sample.
+
+On the other hand, explicit shares are noted by different reason type: ``Shared``. That difference between ``Added`` and
+``Shared`` was not very clear, especially when inheritance comes into play so we decided to unify it.
+
+v2.9.0 sets ``Added`` reason type only for uploader. All groups being part of ``Share with`` are noted with ``Shared`` just like
+other explicit shares. To make it even more visible: uploaders, groups and inherited shares are shown in separate sections.
+
+.. image:: ../_static/sharing-v290.png
+   :target: ../_static/sharing-v290.png
+   :alt: Shares box in v2.9.0
+
+All objects are migrated to the new scheme automatically after upgrade.
+
+[Important change] Changed behavior of ``access_all_objects`` capability
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Since v2.9.0, MWDB doesn't check permission table for users with ``access_all_objects`` and additional permission entries are not created.
+
+Before that change, MWDB was adding explicit access permission for every new object and every group with enabled ``access_all_objects``.
+Extra entries for groups with ``access_all_objects`` are removed during migration.
+
+Initial ``everything`` group is no longer created on first configuration.
+
+[Important change] Changes in web plugins engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MWDB Core switched from `Create React App <https://create-react-app.dev/>`_ to `Vite <https://vitejs.dev/>`_ which uses
+Rollup instead of Webpack.
+
+1. First change you need to apply in plugin code is to rename all ``.js`` files to ``.jsx`` extension.
+
+   Remember to change all references in ``package.json`` as well.
+
+   .. code-block:: diff
+
+      - "main": "frontend/index.js",
+      + "main": "frontend/index.jsx",
+
+2. ``@mwdb-web/commons`` is virtual package that is injected by plugin, so it's no longer installed into ``node_modules`` and
+   should be removed from ``peerDependency`` section in ``package.json``
+
+3. If possible, don't use subpaths of ``@mwdb-web/commons/<module>``, all required things should be imported from main package.
+
+   .. code-block:: diff
+
+      - import { APIContext } from "@mwdb-web/commons/api/context";
+      + import { APIContext } from "@mwdb-web/commons/api";
+
+4. ``@mwdb-web/commons/api`` no longer serves ``api`` as default export. Use named import instead.
+
+    .. code-block:: diff
+
+       - import api from "@mwdb-web/commons/api";
+       + import { api } from "@mwdb-web/commons/api";
+
+5. Finally, your main plugin file (``index.jsx``) should export function that returns plugin specification instead of
+   exporting plugin specification directly.
+
+    .. code-block:: diff
+
+       - export default {
+       + export default () => ({
+          routes: [
+            <Route path='terms/:lang' element={<TermsOfUse />} />
+          ],
+          navdropdownAbout: [
+            <Link className="dropdown-item" to={'/terms/en'}>Terms of use</Link>
+          ],
+       - }
+       + })
+
+   That function is called at very early stage of web application initialization.
+   Plugins are imported before first render, so you don't have access to any useful context values though.
+
+Plugin modules are imported dynamically (using `import() <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import>`_ syntax).
+Check for any runtime errors in DevTools, especially noting messages like ``Plugin ${pluginName} failed to load``.
+
+[Important change] Replaced uWSGI with Gunicorn
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``certpl/mwdb`` Docker image uses `Gunicorn <https://docs.gunicorn.org/en/stable/index.html>`_ instead of `uWSGI <https://uwsgi-docs.readthedocs.io/en/latest/>`_
+for serving Python WSGI application. If you have uWSGI-dependent configuration customized via environment variables, you need to change it
+to Gunicorn equivalent.
+
+Docker image by default spawns 4 sync workers and that number can be set via ``GUNICORN_WORKERS`` environment variable.
+
+In addition, application code is no longer loaded lazily by default. If you want to keep that behavior, set ``PRELOAD_APP`` environment variable to ``1``.
+
+For more information about configuring Gunicorn, check `Settings page in Gunicorn documentation <https://docs.gunicorn.org/en/stable/settings.html#>`_.
+
 v2.8.0
 ------
 

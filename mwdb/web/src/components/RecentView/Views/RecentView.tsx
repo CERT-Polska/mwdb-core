@@ -154,7 +154,7 @@ export function RecentView(props: Props) {
 
     const queryErrorMessage = queryError ? (
         <div className="form-hint">
-            {queryError.response
+            {queryError.response && queryError.response.data
                 ? queryError.response.data["message"]
                 : queryError.toString()}
         </div>

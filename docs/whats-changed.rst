@@ -37,8 +37,8 @@ On the other hand, explicit shares are noted by different reason type: ``Shared`
 v2.9.0 sets ``Added`` reason type only for uploader. All groups being part of ``Share with`` are noted with ``Shared`` just like
 other explicit shares. To make it even more visible: uploaders, groups and inherited shares are shown in separate sections.
 
-.. image:: ../_static/sharing-v290.png
-   :target: ../_static/sharing-v290.png
+.. image:: _static/sharing-v290.png
+   :target: _static/sharing-v290.png
    :alt: Shares box in v2.9.0
 
 All objects are migrated to the new scheme automatically after upgrade.

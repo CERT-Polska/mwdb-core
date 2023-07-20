@@ -51,6 +51,8 @@ def send_file_to_karton(file) -> str:
             headers={
                 "type": "sample",
                 "kind": "raw",
+            },
+            headers_persistent={
                 "quality": feed_quality,
                 "share_3rd_party": file.share_3rd_party,
             },
@@ -81,6 +83,8 @@ def send_config_to_karton(config) -> str:
             "type": "config",
             "kind": config.config_type,
             "family": config.family,
+        },
+        headers_persistent={
             "share_3rd_party": config.share_3rd_party,
         },
         payload={
@@ -105,6 +109,8 @@ def send_blob_to_karton(blob) -> str:
         headers={
             "type": "blob",
             "kind": blob.blob_type,
+        },
+        headers_persistent={
             "share_3rd_party": blob.share_3rd_party,
         },
         payload={

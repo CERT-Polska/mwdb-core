@@ -114,12 +114,18 @@ export function renderTokens(tokens: Token[], options?: Option): any {
         list(token: Token) {
             return (
                 <ul key={uniqueId()} style={{ margin: "0" }}>
-                    {token.items?.map((item: Token) => renderTokens([item]))}
+                    {token.items?.map((item: Token) =>
+                        renderTokens([item], options)
+                    )}
                 </ul>
             );
         },
         list_item(token: Token) {
-            return <li key={uniqueId()}>{renderTokens(token.tokens ?? [])}</li>;
+            return (
+                <li key={uniqueId()}>
+                    {renderTokens(token.tokens ?? [], options)}
+                </li>
+            );
         },
         html(token: Token) {
             return token.text;

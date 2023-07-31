@@ -7,6 +7,16 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrade mwdb-core to latest version`.
 
+v2.10.1
+-------
+
+In v2.9.0 we switched from native ssdeep implementation to Python-based ppdeep library. Unfortunately, we have not taken
+into account the large impact on performance. This bugfix release goes one step backwards and requires **libfuzzy2**
+native library to be installed on server.
+
+Complete changelog can be found here: `v2.10.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.10.0>`_.
+
+
 v2.10.0
 -------
 

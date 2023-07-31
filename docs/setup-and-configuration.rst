@@ -43,6 +43,7 @@ For production environments, you need to install:
 
 
 * **PostgreSQL database** (minimum supported version: 12, https://www.postgresql.org/download/linux/debian/)
+* libfuzzy2 for ssdeep evaluation
 
 Optionally you can install:
 

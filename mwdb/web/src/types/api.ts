@@ -9,6 +9,7 @@ import {
     ConfigData,
     ConfigListItem,
     Family,
+    FileListItem,
     Group,
     KartonAnalysis,
     ObjectData,
@@ -73,9 +74,10 @@ export type ApiKeyRemoveResponse = Response<null>;
 export type GetObjectResponse = Response<ObjectOrConfigOrBlobData>;
 
 export type GetObjectListResponse = Response<{
-    blobs?: BlobListItem[];
-    files?: ObjectListItem[];
+    files?: FileListItem[];
     configs?: ConfigListItem[];
+    blobs?: BlobListItem[];
+    objects?: ObjectListItem[];
 }>;
 
 export type GetObjectCountResponse = Response<{

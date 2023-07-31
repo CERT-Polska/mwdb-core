@@ -141,6 +141,13 @@ export type BlobData = ObjectCommonData & {
 };
 
 export type ObjectListItem = {
+    id: string;
+    tags: Tag[];
+    type: ObjectLegacyType;
+    upload_time: string;
+};
+
+export type FileListItem = {
     file_name: string;
     file_size: number;
     file_type: string;

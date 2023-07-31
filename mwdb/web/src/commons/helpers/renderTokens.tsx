@@ -92,7 +92,10 @@ export function renderTokens(tokens: Token[], options?: Option): any {
             if (token.href && token.href.startsWith("search#")) {
                 const query = token.href.slice("search#".length);
                 const search =
-                    "?" + new URLSearchParams({ q: query }).toString();
+                    "?" +
+                    new URLSearchParams({
+                        q: decodeURIComponent(query),
+                    }).toString();
                 return (
                     <Link
                         key={uniqueId()}

@@ -64,7 +64,7 @@ class SearchReference {
 
     toMarkdown() {
         return `[${escapeMarkdown(this.value)}](search#${escapeMarkdown(
-            this.query
+            encodeURIComponent(this.query)
         )})`;
     }
 }

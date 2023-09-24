@@ -10,6 +10,7 @@ import {
     ObjectType,
 } from "@mwdb-web/types/types";
 import { AxiosError } from "axios";
+import { QueryContext } from "../common/QueryContext";
 
 type Elements = ObjectData[] | BlobData[] | ConfigData[];
 
@@ -83,6 +84,7 @@ type Props = {
 
 export function RecentViewList(props: Props) {
     const api = useContext(APIContext);
+    const { setItems } = useContext(QueryContext);
     const [listState, listDispatch] = useReducer(listStateReducer, {
         pageToLoad: 0,
         loadedPages: 0,
@@ -102,6 +104,10 @@ export function RecentViewList(props: Props) {
             listDispatch({ type: "reload" });
         }
     }, [props.query, props.disallowEmpty, api.remote]);
+
+    useEffect(() => {
+        setItems(listState.elements);
+    }, [listState.elements])
 
     // Load page on request (pageToLoad != loadedPages)
     useEffect(() => {

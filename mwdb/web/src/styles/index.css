@@ -151,6 +151,21 @@ div.quick-query-bar {
     margin-bottom: 6pt;
 }
 
+div.query-options {
+    margin-left: auto;
+    column-gap: 10px;
+    display: inline-flex;
+}
+
+ul.button-menu {
+    min-width: 0;
+    width: 100%;
+}
+
+ul.button-menu li {
+   text-align: center;
+}
+
 .sidenav .nav-link {
     border-left: #eee solid;
 }

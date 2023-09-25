@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 
-import { QueryContext } from "../common/QueryContext";
+import { QueryResultContext } from "../common/QueryResultContext";
 import { ResultOptionItem } from "../common/ResultOptionItem";
 
 
 export function QueryResultJsonAction() {
-    const { items } = useContext(QueryContext);
+    const { items } = useContext(QueryResultContext);
     const [url, setUrl] = useState<string>("");
 
     function generateName() {

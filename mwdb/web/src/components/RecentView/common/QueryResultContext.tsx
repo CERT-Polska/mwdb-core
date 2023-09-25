@@ -6,13 +6,13 @@ interface Props {
 }
 type Objects = ObjectData[] | ConfigData[] | BlobData[];
 
-export const QueryContext = createContext<any>(null);
-export function QueryContextProvider({ children }: Props) {
+export const QueryResultContext = createContext<any>(null);
+export function QueryResultContextProvider({ children }: Props) {
     const [items, setItems] = useState<Objects | null>(null);
 
     return (
-        <QueryContext.Provider value={{ items, setItems }}>
+        <QueryResultContext.Provider value={{ items, setItems }}>
             {children}
-        </QueryContext.Provider>
+        </QueryResultContext.Provider>
     );
 }

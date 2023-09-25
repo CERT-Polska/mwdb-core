@@ -10,7 +10,7 @@ import {
     ObjectType,
 } from "@mwdb-web/types/types";
 import { AxiosError } from "axios";
-import { QueryContext } from "../common/QueryContext";
+import { QueryResultContext } from "../common/QueryResultContext";
 
 type Elements = ObjectData[] | BlobData[] | ConfigData[];
 
@@ -84,7 +84,7 @@ type Props = {
 
 export function RecentViewList(props: Props) {
     const api = useContext(APIContext);
-    const { setItems } = useContext(QueryContext);
+    const { setItems } = useContext(QueryResultContext);
     const [listState, listDispatch] = useReducer(listStateReducer, {
         pageToLoad: 0,
         loadedPages: 0,
@@ -107,7 +107,7 @@ export function RecentViewList(props: Props) {
 
     useEffect(() => {
         setItems(listState.elements);
-    }, [listState.elements])
+    }, [listState.elements]);
 
     // Load page on request (pageToLoad != loadedPages)
     useEffect(() => {

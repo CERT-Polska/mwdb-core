@@ -27,15 +27,18 @@ export function ResultOptionItem({ children, ...props }: Props) {
     return (
         <li key={props.key}>
             {!isLimit ? (
-            <a
-                href={props.url ? props.url : undefined}
-                onClick={props.action ? props.action : undefined}
-                download={props.download ? resolveDownload(props.download) : undefined}
-                className={`btn btn-${props.size ? props.size : "sm"} nav-link dropdown-item`}
-            >
-                {props.title}
+            <>
+                <a
+                    style={{ cursor: "pointer" }}
+                    href={props.url ? props.url : undefined}
+                    onClick={props.action ? props.action : undefined}
+                    download={props.download ? resolveDownload(props.download) : undefined}
+                    className={`btn btn-${props.size ? props.size : "sm"} nav-link dropdown-item`}
+                >
+                    {props.title}
+                </a>
                 {children}
-            </a> ) : []
+            </> ) : []
             }
         </li>
     );

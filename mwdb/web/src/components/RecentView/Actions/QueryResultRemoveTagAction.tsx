@@ -1,10 +1,7 @@
 import { useContext, useState } from "react";
 
-import { faTag } from "@fortawesome/free-solid-svg-icons";
-
 import { Capability, ObjectData } from "@mwdb-web/types/types";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { QueryContext } from "../common/QueryContext";
+import { QueryResultContext } from "../common/QueryResultContext";
 import { APIContext } from "@mwdb-web/commons/api";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { AuthContext } from "@mwdb-web/commons/auth";
@@ -14,7 +11,7 @@ import { ResultOptionItem } from "../common/ResultOptionItem";
 export function RemoveTagAction() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
-    const { items } = useContext(QueryContext);
+    const { items } = useContext(QueryResultContext);
 
     const { setAlert } = useViewAlert();
 
@@ -35,7 +32,7 @@ export function RemoveTagAction() {
             {auth.hasCapability(Capability.removingTags) ? (
                 <ResultOptionItem
                     key={"removeTagOption"}
-                    title={"Remove Tag from Results"}
+                    title={"Remove Tag"}
                     action={() => setIsModalOpen(true)}
                 >
                     <ConfirmationModal
@@ -47,12 +44,10 @@ export function RemoveTagAction() {
                         onCancel={() => setIsModalOpen(false)}
                         onConfirm={addTag}
                     >
-                        <div className="input-group">
-                            <input
-                                className="form-control small"
-                                onChange={(e) => setTag(e.target.value)}
-                            />
-                        </div>
+                        <input
+                            className="form-control small"
+                            onChange={(e) => setTag(e.target.value)}
+                        />
                     </ConfirmationModal>
                 </ResultOptionItem>
             ) : []}

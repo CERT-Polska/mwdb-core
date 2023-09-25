@@ -12,7 +12,7 @@ import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { QueryResultOptions } from "./QueryResultOptions";
-import { QueryContextProvider } from "../common/QueryContext";
+import { QueryResultContextProvider } from "../common/QueryResultContext";
 
 type Props = {
     type: ObjectType;
@@ -180,99 +180,102 @@ export function RecentView(props: Props) {
     }
 
     return (
-        <QueryContextProvider>
-            <View fluid ident="recentObjects">
-                <div className="table-responsive">
-                    <form
-                        className="searchForm"
-                        onSubmit={(ev) => {
-                            ev.preventDefault();
-                            setCurrentQuery(queryInput);
-                        }}
-                    >
-                        <div className="input-group">
-                            <div className="input-group-prepend">
+        <View fluid ident="recentObjects">
+            <div className="table-responsive">
+                <form
+                    className="searchForm"
+                    onSubmit={(ev) => {
+                        ev.preventDefault();
+                        setCurrentQuery(queryInput);
+                    }}
+                >
+                    <div className="input-group">
+                        <div className="input-group-prepend">
+                            <input
+                                className="btn btn-outline-danger"
+                                type="button"
+                                value="X"
+                                onClick={(ev) => {
+                                    ev.preventDefault();
+                                    setCurrentQuery("");
+                                }}
+                            />
+                        </div>
+                        <input
+                            className="form-control small"
+                            type="text"
+                            placeholder="Search (Lucene query or hash)..."
+                            value={queryInput}
+                            disabled={isLocked}
+                            onChange={(evt) => setQueryInput(evt.target.value)}
+                        />
+                        <div className="input-group-append">
+                            <div className="btn-group">
                                 <input
-                                    className="btn btn-outline-danger"
+                                    className="btn btn-outline-success rounded-0"
+                                    type="submit"
+                                    value="Search"
+                                />
+                            </div>
+                            <div
+                                className="btn-group"
+                                data-toggle="tooltip"
+                                title={`Turn ${
+                                        countingEnabled ? "off" : "on"
+                                    } results counting`}
+                            >
+                                <input
                                     type="button"
-                                    value="X"
-                                    onClick={(ev) => {
-                                        ev.preventDefault();
-                                        setCurrentQuery("");
+                                    className={`btn btn-outline-info rounded-0 shadow-none ${
+                                        searchParams.get("count") === "1"
+                                            ? "active"
+                                            : ""
+                                    }`}
+                                    value="Count"
+                                    onClick={() => {
+                                        setSearchParams(
+                                            (prev) => {
+                                                return {
+                                                    q: prev.get("q") || "",
+                                                    count: countingEnabled
+                                                        ? "0"
+                                                        : "1",
+                                                };
+                                            },
+                                            { replace: true }
+                                        );
                                     }}
                                 />
                             </div>
-                            <input
-                                className="form-control small"
-                                type="text"
-                                placeholder="Search (Lucene query or hash)..."
-                                value={queryInput}
-                                disabled={isLocked}
-                                onChange={(evt) => setQueryInput(evt.target.value)}
-                            />
-                            <div className="input-group-append">
-                                <div className="btn-group">
-                                    <input
-                                        className="btn btn-outline-success rounded-0"
-                                        type="submit"
-                                        value="Search"
-                                    />
-                                </div>
-                                <div
-                                    className="btn-group"
-                                    data-toggle="tooltip"
-                                    title={`Turn ${
-                                            countingEnabled ? "off" : "on"
-                                        } results counting`}
-                                >
-                                    <input
-                                        type="button"
-                                        className={`btn btn-outline-info rounded-0 shadow-none ${
-                                            searchParams.get("count") === "1"
-                                                ? "active"
-                                                : ""
-                                        }`}
-                                        value="Count"
-                                        onClick={() => {
-                                            setSearchParams(
-                                                (prev) => {
-                                                    return {
-                                                        q: prev.get("q") || "",
-                                                        count: countingEnabled
-                                                            ? "0"
-                                                            : "1",
-                                                    };
-                                                },
-                                                { replace: true }
-                                            );
-                                        }}
-                                    />
-                                </div>
-                                <a
-                                    href="https://mwdb.readthedocs.io/en/latest/user-guide/7-Lucene-search.html"
-                                    className="btn btn-outline-primary"
-                                >
-                                    ?
-                                </a>
-                            </div>
+                            <a
+                                href="https://mwdb.readthedocs.io/en/latest/user-guide/7-Lucene-search.html"
+                                className="btn btn-outline-primary"
+                            >
+                                ?
+                            </a>
                         </div>
-                        <div className="input-group">
-                            {queryError ? queryErrorMessage : objectCountMessage}
-                            <QuickQuery
+                    </div>
+                    <div className="input-group">
+                        {queryError ? queryErrorMessage : objectCountMessage}
+                        <QuickQuery
+                            type={props.type}
+                            query={submittedQuery}
+                            canAddQuickQuery={canAddQuickQuery}
+                            submitQuery={(query) => setCurrentQuery(query)}
+                            addToQuery={addToQuery}
+                            setQueryError={setQueryError}
+                        />
+                    </div>
+                </form>
+                <QueryResultContextProvider>
+                    <div className="query-options">
+                        <Extendable ident="queryPostResult">
+                            <QueryResultOptions
+                                query={submittedQuery} 
                                 type={props.type}
-                                query={submittedQuery}
-                                canAddQuickQuery={canAddQuickQuery}
-                                submitQuery={(query) => setCurrentQuery(query)}
-                                addToQuery={addToQuery}
-                                setQueryError={setQueryError}
                             />
-                            <div className="query-options">
-                                <Extendable ident="queryResult">
-                                    <QueryResultOptions query={submittedQuery} type={props.type}/>
-                                </Extendable>
-                            </div>
-                        </div>
-                    </form>
+                        </Extendable>
+                    </div>
                     <RecentViewList
                         query={submittedQuery}
                         type={props.type}
@@ -283,8 +286,8 @@ export function RecentView(props: Props) {
                         setQueryError={setQueryError}
                         addToQuery={addToQuery}
                     />
-                </div>
-            </View>
-        </QueryContextProvider>
+                </QueryResultContextProvider>
+            </div>
+        </View>
     );
 }

@@ -152,7 +152,6 @@ div.quick-query-bar {
 }
 
 div.query-options {
-    margin-left: auto;
     column-gap: 10px;
     display: inline-flex;
 }

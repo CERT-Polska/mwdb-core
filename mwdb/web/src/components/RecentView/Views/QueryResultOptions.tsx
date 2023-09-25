@@ -3,7 +3,7 @@ import { ButtonDropdown } from "@mwdb-web/commons/ui/ButtonDropdown";
 import { ObjectType } from "@mwdb-web/types/types";
 import { QueryResultHashesAction } from "../Actions/QueryResultHashesAction";
 import { useContext } from "react";
-import { QueryContext } from "../common/QueryContext";
+import { QueryResultContext } from "../common/QueryResultContext";
 import { QueryResultJsonAction } from "../Actions/QueryResultJsonAction";
 import { AddTagAction } from "../Actions/QueryResultAddTagAction";
 import { RemoveTagAction } from "../Actions/QueryResultRemoveTagAction";
@@ -15,7 +15,7 @@ type Props = {
 };
 
 export function QueryResultOptions(props: Props) {
-    const { items } = useContext(QueryContext);
+    const { items } = useContext(QueryResultContext);
     return (
         <div>
             {props.query && items && items.length > 0 &&

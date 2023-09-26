@@ -8,48 +8,40 @@ import { AuthContext } from "@mwdb-web/commons/auth";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { ResultOptionItem } from "../common/ResultOptionItem";
 
-export function AddTagAction() {
+export function KartonReanalyzeAction() {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const { items } = useContext(QueryResultContext);
 
     const { setAlert } = useViewAlert();
 
-    const [tag, setTag] = useState<string>("");
     const [modalOpen, setIsModalOpen] = useState<boolean>(false);
 
 
-    function addTag() {
+    function kartonReanalyze() {
         items.forEach(async (e: ObjectData) => {
-            await api.addObjectTag(e.id, tag)
-                .catch((err) => setAlert({ 
-                    error: `Error adding tag to object ${e.id}: ${err}` 
-            }));
+            await api.resubmitKartonAnalysis(e.id)
+                .catch((err) => setAlert({
+                        error: `Error submitting reanalysis for object ${e.id}: ${err}` 
+                }));
         });
         setIsModalOpen(false);
     }
 
     return (
             <ResultOptionItem
-                key={"tagOption"}
-                title={"Add Tag"}
+                key={"kartonReanalyzeOption"}
+                title={"Karton Reanalysis"}
                 action={() => setIsModalOpen(true)}
-                authenticated={() => auth.hasCapability(Capability.addingTags)}
+                authenticated={() => auth.hasCapability(Capability.kartonReanalyze)}
             >
                 <ConfirmationModal
                     isOpen={modalOpen}
-                    confirmText="Ok"
-                    cancelText="Cancel"
-                    message="Please enter a tag to add"
+                    message="Are you sure you want to reanalyze?"
                     onRequestClose={() => setIsModalOpen(false)}
                     onCancel={() => setIsModalOpen(false)}
-                    onConfirm={addTag}
-                >
-                    <input
-                        className="form-control small"
-                        onChange={(e) => setTag(e.target.value)}
-                    />
-                </ConfirmationModal>
+                    onConfirm={kartonReanalyze}
+                />
             </ResultOptionItem>
-    );
+);
 }

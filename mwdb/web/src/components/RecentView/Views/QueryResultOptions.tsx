@@ -7,6 +7,7 @@ import { QueryResultContext } from "../common/QueryResultContext";
 import { QueryResultJsonAction } from "../Actions/QueryResultJsonAction";
 import { AddTagAction } from "../Actions/QueryResultAddTagAction";
 import { RemoveTagAction } from "../Actions/QueryResultRemoveTagAction";
+import { KartonReanalyzeAction } from "../Actions/QueryResultKartonReanalyzeAction";
 
 type Props = {
     type: ObjectType,
@@ -26,6 +27,7 @@ export function QueryResultOptions(props: Props) {
                     elements={[
                         <QueryResultHashesAction/>, 
                         <QueryResultJsonAction/>,
+                        <KartonReanalyzeAction/>,
                         <AddTagAction/>,
                         <RemoveTagAction/>,
                     ]}

@@ -8,6 +8,7 @@ type Props = {
     action?: () => void;
     children?: ReactNode;
     limit?: () => boolean;
+    authenticated?: () => boolean;
     download?: string | (() => string);
 };
 
@@ -24,9 +25,14 @@ export function ResultOptionItem({ children, ...props }: Props) {
         return false;
     }, [props.limit])
 
+    const isAuthenticated = useMemo(() => {
+        if (props.authenticated) return props.authenticated();
+        return true;
+    }, [props.authenticated])
+
     return (
         <li key={props.key}>
-            {!isLimit ? (
+            {!isLimit && isAuthenticated ? (
             <>
                 <a
                     style={{ cursor: "pointer" }}

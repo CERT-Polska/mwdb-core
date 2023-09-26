@@ -22,35 +22,34 @@ export function RemoveTagAction() {
     function addTag() {
         items.forEach(async (e: ObjectData) => {
             await api.removeObjectTag(e.id, tag)
-                .catch((err) => setAlert({ error: `Error removing tag from object ${e.id}: ${err}` }))
+                .catch((err) => setAlert({ 
+                    error: `Error removing tag from object ${e.id}: ${err}` 
+                }));
         });
         setIsModalOpen(false);
     }
 
     return (
-        <>
-            {auth.hasCapability(Capability.removingTags) ? (
-                <ResultOptionItem
-                    key={"removeTagOption"}
-                    title={"Remove Tag"}
-                    action={() => setIsModalOpen(true)}
+            <ResultOptionItem
+                key={"removeTagOption"}
+                title={"Remove Tag"}
+                action={() => setIsModalOpen(true)}
+                authenticated={() => auth.hasCapability(Capability.addingTags)}
+            >
+                <ConfirmationModal
+                    isOpen={modalOpen}
+                    confirmText="Ok"
+                    cancelText="Cancel"
+                    message="Please enter a tag to remove"
+                    onRequestClose={() => setIsModalOpen(false)}
+                    onCancel={() => setIsModalOpen(false)}
+                    onConfirm={addTag}
                 >
-                    <ConfirmationModal
-                        isOpen={modalOpen}
-                        confirmText="Ok"
-                        cancelText="Cancel"
-                        message="Please enter a tag to remove"
-                        onRequestClose={() => setIsModalOpen(false)}
-                        onCancel={() => setIsModalOpen(false)}
-                        onConfirm={addTag}
-                    >
-                        <input
-                            className="form-control small"
-                            onChange={(e) => setTag(e.target.value)}
-                        />
-                    </ConfirmationModal>
-                </ResultOptionItem>
-            ) : []}
-        </>
-    );
+                    <input
+                        className="form-control small"
+                        onChange={(e) => setTag(e.target.value)}
+                    />
+                </ConfirmationModal>
+            </ResultOptionItem>
+);
 }

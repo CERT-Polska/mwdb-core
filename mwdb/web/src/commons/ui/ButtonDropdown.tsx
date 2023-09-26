@@ -11,7 +11,7 @@ type Props = {
 export function ButtonDropdown(props: Props) {
     if (!props.elements.length) return <div />;
     return (
-        <div className="dropdown">
+        <div className="nav-item dropdown">
             <button
                 className={`btn btn-${props.color ? props.color : "info"} dropdown-toggle py-0`}
                 data-toggle="dropdown"

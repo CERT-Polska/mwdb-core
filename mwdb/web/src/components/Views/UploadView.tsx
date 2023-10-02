@@ -147,7 +147,7 @@ export function UploadView() {
                                     style={{ fontSize: "medium" }}
                                     placeholder="(Optional) Type parent identifier..."
                                     value={searchParams.get("parent") || parent}
-                                    onChange={(e) => handleParentChange}
+                                    onChange={handleParentChange}
                                     disabled={
                                         !isEmpty(searchParams.get("parent"))
                                     }

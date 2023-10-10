@@ -117,13 +117,13 @@ export function RecentViewList(props: Props) {
                 let elements: Elements = [];
                 if (props.type === "blob") {
                     elements = response.data.blobs as BlobData[];
-                }
-                if (props.type === "config") {
+                } else if (props.type === "config") {
                     elements = response.data.configs as ConfigData[];
-                }
-                if (props.type === "file") {
+                } else if (props.type === "file") {
                     elements = response.data.files as ObjectData[];
-                }
+                } else if (props.type === "object") {
+                    elements = response.data.objects as ObjectData[];
+                } else throw new Error("Unexpected object type");
                 listDispatch({
                     type: "pageLoaded",
                     elements,

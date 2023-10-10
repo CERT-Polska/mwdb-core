@@ -251,7 +251,7 @@ class ObjectPermission(db.Model):
         """
         if include_inherited_uploads:
             type_filter = or_(
-                ObjectPermission.reason_type != "added",
+                ObjectPermission.reason_type != AccessType.ADDED,
                 ObjectPermission.related_object_id != ObjectPermission.object_id,
             )
         else:
@@ -528,6 +528,9 @@ class Object(db.Model):
         Check whether user has access via explicit ObjectPermissions
         Used by Object.access
         """
+        if user.has_rights(Capabilities.access_all_objects):
+            return True
+
         return db.session.query(
             exists().where(
                 and_(
@@ -542,6 +545,9 @@ class Object(db.Model):
         Check whether group has access via explicit ObjectPermissions
         Used by Object.access
         """
+        if Capabilities.access_all_objects in group.capabilities:
+            return True
+
         return db.session.query(
             exists().where(
                 and_(
@@ -582,7 +588,6 @@ class Object(db.Model):
 
         We don't perform permission checks, all data needs to be validated by Resource.
         """
-        from .group import Group
 
         share_with = share_with or []
         attributes = attributes or []
@@ -642,16 +647,6 @@ class Object(db.Model):
                     g.auth_user,
                     commit=False,
                 )
-
-        # Share with all groups that access all objects
-        for all_access_group in Group.all_access_groups():
-            created_object.give_access(
-                all_access_group.id,
-                AccessType.SHARED,
-                created_object,
-                g.auth_user,
-                commit=False,
-            )
 
         # Add parent to object if specified
         # Inherited share entries must be added AFTER we add share entries

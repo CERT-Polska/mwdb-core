@@ -20,7 +20,13 @@ class KartonProducer(Producer):
 
 
 if app_config.mwdb.enable_karton:
-    karton_producer = KartonProducer(config=KartonConfig(app_config.karton.config_path))
+    try:
+        karton_producer = KartonProducer(
+            config=KartonConfig(app_config.karton.config_path)
+        )
+    except Exception:
+        logger.exception("Failed to load Karton producer")
+        karton_producer = None
 else:
     karton_producer = None
 
@@ -33,9 +39,7 @@ def send_file_to_karton(file) -> str:
     producer = get_karton_producer()
 
     if producer is None:
-        raise RuntimeError(
-            "This method should not be called when Karton is not enabled"
-        )
+        raise RuntimeError("Karton is not enabled or failed to load properly")
 
     file_stream = file.open()
     try:
@@ -47,6 +51,8 @@ def send_file_to_karton(file) -> str:
             headers={
                 "type": "sample",
                 "kind": "raw",
+            },
+            headers_persistent={
                 "quality": feed_quality,
                 "share_3rd_party": file.share_3rd_party,
             },
@@ -70,15 +76,15 @@ def send_config_to_karton(config) -> str:
     producer = get_karton_producer()
 
     if producer is None:
-        raise RuntimeError(
-            "This method should not be called when Karton is not enabled"
-        )
+        raise RuntimeError("Karton is not enabled or failed to load properly")
 
     task = Task(
         headers={
             "type": "config",
             "kind": config.config_type,
             "family": config.family,
+        },
+        headers_persistent={
             "share_3rd_party": config.share_3rd_party,
         },
         payload={
@@ -97,14 +103,14 @@ def send_blob_to_karton(blob) -> str:
     producer = get_karton_producer()
 
     if producer is None:
-        raise RuntimeError(
-            "This method should not be called when Karton is not enabled"
-        )
+        raise RuntimeError("Karton is not enabled or failed to load properly")
 
     task = Task(
         headers={
             "type": "blob",
             "kind": blob.blob_type,
+        },
+        headers_persistent={
             "share_3rd_party": blob.share_3rd_party,
         },
         payload={
@@ -123,9 +129,7 @@ def get_karton_state():
     producer = get_karton_producer()
 
     if producer is None:
-        raise RuntimeError(
-            "This method should not be called when Karton is not enabled"
-        )
+        raise RuntimeError("Karton is not enabled or failed to load properly")
 
     karton_state = KartonState(producer.backend)
     return karton_state

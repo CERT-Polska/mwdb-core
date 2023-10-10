@@ -43,6 +43,7 @@ For production environments, you need to install:
 
 
 * **PostgreSQL database** (minimum supported version: 12, https://www.postgresql.org/download/linux/debian/)
+* libfuzzy2 for ssdeep evaluation
 
 Optionally you can install:
 
@@ -278,6 +279,7 @@ Web application settings:
 * ``flask_config_file`` (string) - additional file containing Flask configuration (.py)
 * ``admin_login`` (string) - administrator account name
 * ``admin_password`` (string) - initial password for administrator account
+* ``use_x_forwarded_for`` (0 or 1) - Set this to 1 if MWDB backend is behind reverse proxy, so X-Forwarded-For header is correctly translated to ``request.remote_addr`` value. Set by default to 1 in ``certpl/mwdb`` Docker image.
 
 
 Plugin settings:
@@ -366,3 +368,131 @@ Other endpoints are limited by default limits.
 .. note::
 
    Complete list of possible rate-limit parameters is placed in ``mwdb-core\mwdb\core\templates\mwdb.ini.tmpl`` file - section ``mwdb_limiter``.
+   
+   If your MWDB instance uses standalone installation and MWDB backend is behind reverse proxy, make sure that use_x_forwarded_for is set to 1
+   and your reverse proxy correctly sets X-Forwarded-For header with real remote IP.
+
+Using MWDB in Kubernetes environment
+------------------------------------
+
+Here are examples of YAML specifications for k8s deployments:
+
+.. code-block:: yaml
+
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+        name: mwdb
+        namespace: mwdb-prod
+    spec:
+        replicas: 1
+        selector:
+            matchLabels:
+                app: mwdb
+        template:
+            metadata:
+                labels:
+                    app: mwdb
+            spec:
+                initContainers:
+                    # Init container that performs database migration on upgrade
+                    - env:
+                        # Provide secrets and first configuration admin password via environment vars
+                        - name: MWDB_SECRET_KEY
+                          valueFrom:
+                            secretKeyRef:
+                            key: key
+                            name: secret-mwdb-secret-key
+                        - name: MWDB_POSTGRES_URI
+                          valueFrom:
+                            secretKeyRef:
+                            key: uri
+                            name: secret-mwdb-database-uri
+                        - name: MWDB_ADMIN_PASSWORD
+                          valueFrom:
+                            secretKeyRef:
+                            key: password
+                            name: secret-mwdb-admin-password
+                        - name: MWDB_BASE_URL
+                          value: https://mwdb.cert.pl
+                      image: certpl/mwdb:v2.9.0
+                      imagePullPolicy: Always
+                      name: mwdb-migration-container
+                      command: [ 'sh', '-c', '/app/venv/bin/mwdb-core configure -q' ]
+                containers:
+                    - env:
+                        - name: GUNICORN_WORKERS
+                          - name: MWDB_SECRET_KEY
+                          valueFrom:
+                            secretKeyRef:
+                            key: key
+                            name: secret-mwdb-secret-key
+                        - name: MWDB_POSTGRES_URI
+                          valueFrom:
+                            secretKeyRef:
+                            key: uri
+                            name: secret-mwdb-database-uri-key
+                        - name: MWDB_BASE_URL
+                          value: https://mwdb.cert.pl
+                        - name: MWDB_ENABLE_KARTON
+                          value: '1'
+                        - name: MWDB_S3_STORAGE_ENDPOINT
+                          value: s3.cert.pl
+                          # ... more configuration
+                      image: certpl/mwdb:v2.9.0
+                      imagePullPolicy: Always
+                      livenessProbe:
+                        httpGet:
+                            path: /api/ping
+                            port: 8080
+                      readinessProbe:
+                        httpGet:
+                            path: /api/ping
+                            port: 8080
+                      name: mwdb-container
+                      volumeMounts:
+                        - mountPath: /etc/karton/karton.ini
+                          name: karton-config-volume
+                          subPath: config.ini
+                volumes:
+                  - name: karton-config-volume
+                    secret:
+                      defaultMode: 420
+                      items:
+                      - key: config-file
+                        path: config.ini
+                      secretName: karton-config
+
+
+.. code-block:: yaml
+
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+        name: mwdb-web
+        namespace: mwdb-prod
+    spec:
+        replicas: 1
+        selector:
+            matchLabels:
+                app: mwdb-web
+        template:
+            metadata:
+                labels:
+                    app: mwdb-web
+            spec:
+                containers:
+                - env:
+                    # Provide internal URI to backend service for nginx reverse proxy
+                    - name: PROXY_BACKEND_URL
+                    value: http://mwdb-service:8080/
+                  image: certpl/mwdb-web:v2.9.0
+                  livenessProbe:
+                      httpGet:
+                        path: /
+                        port: 80
+                  name: mwdb-web-container
+                  readinessProbe:
+                    httpGet:
+                        path: /
+                        port: 80

@@ -25,7 +25,7 @@ export function RecentView(props: Props) {
     const currentQuery = searchParams.get("q") || "";
     // Submitted query for which we know it's valid and
     // we can load next parts of results into UI
-    const [submittedQuery, setSubmittedQuery] = useState("");
+    const [submittedQuery, setSubmittedQuery] = useState(currentQuery);
 
     // Query input state
     const [queryInput, setQueryInput] = useState(currentQuery);
@@ -154,7 +154,7 @@ export function RecentView(props: Props) {
 
     const queryErrorMessage = queryError ? (
         <div className="form-hint">
-            {queryError.response
+            {queryError.response && queryError.response.data
                 ? queryError.response.data["message"]
                 : queryError.toString()}
         </div>

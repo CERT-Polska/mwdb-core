@@ -4,7 +4,6 @@
         "mwdb/version.py": "app_version = \"$VERSION\"",
         "mwdb/web/package.json": "\"name\": \"mwdb-web\",\\s+\"version\": \"$VERSION\"",
         "mwdb/web/package-lock.json": "\"name\": \"mwdb-web\",\\s+\"version\": \"$VERSION\"",
-        "mwdb/web/src/commons/package.json": "\"version\": \"$VERSION\"",
         "docs/conf.py": "release = '$VERSION'",
         "docker-compose.yml": "image: certpl/mwdb(?:-web)?\\:v$VERSION"
     },

@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from flask import g, request
@@ -135,6 +136,16 @@ if app_config.mwdb.serve_web:
 def assign_request_id():
     g.request_id = token_hex(16)
     g.request_start_time = datetime.utcnow()
+    getLogger().info(
+        "before_request",
+        extra={
+            "path": request.path,
+            "arguments": request.args,
+            "method": request.method,
+            "remote_addr": request.remote_addr,
+            "pid": os.getpid(),
+        },
+    )
 
 
 @app.after_request
@@ -154,6 +165,8 @@ def log_request(response):
             "status": response.status_code,
             "response_time": response_time,
             "response_size": response_size,
+            "remote_addr": request.remote_addr,
+            "pid": os.getpid(),
         },
     )
 

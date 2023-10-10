@@ -9,6 +9,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm.exc import NoResultFound
 
 from mwdb.core.auth import AuthScope, generate_token, verify_legacy_token, verify_token
+from mwdb.core.capabilities import Capabilities
 
 from . import db
 from .group import Group, Member
@@ -257,6 +258,9 @@ class User(db.Model):
         """
         Query filter for objects visible by this user
         """
+        if self.has_rights(Capabilities.access_all_objects):
+            return True
+
         return object_id.in_(
             db.session.query(ObjectPermission.object_id).filter(
                 self.is_member(ObjectPermission.group_id)

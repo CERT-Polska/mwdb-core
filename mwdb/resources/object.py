@@ -16,6 +16,8 @@ from mwdb.model.tag import Tag
 from mwdb.schema.object import (
     ObjectCountRequestSchema,
     ObjectCountResponseSchema,
+    ObjectItemAndRelationsResponseSchema,
+    ObjectItemRequestSchema,
     ObjectItemResponseSchema,
     ObjectListRequestSchema,
     ObjectListResponseSchema,
@@ -262,6 +264,7 @@ class ObjectResource(Resource):
 class ObjectItemResource(Resource, ObjectUploader):
     ObjectType = Object
     ItemResponseSchema = ObjectItemResponseSchema
+    ItemAndRelationsResponseSchema = ObjectItemAndRelationsResponseSchema
     CreateRequestSchema = None
 
     def call_specialised_remove_hook(self, obj):
@@ -284,6 +287,15 @@ class ObjectItemResource(Resource, ObjectUploader):
               schema:
                 type: string
               description: Object identifier
+            - in: query
+              name: exclude_relations
+              schema:
+                type: integer
+              description: |
+                If set, results doesn't include relations
+                which will be default behavior on next major release of MWDB
+              required: false
+              default: 0
         responses:
             200:
                 description: Information about object
@@ -298,10 +310,15 @@ class ObjectItemResource(Resource, ObjectUploader):
                 description: |
                     Request canceled due to database statement timeout.
         """
+        args = load_schema(request.args, ObjectItemRequestSchema())
         obj = self.ObjectType.access(identifier)
         if obj is None:
             raise NotFound("Object not found")
-        schema = self.ItemResponseSchema()
+        schema = (
+            self.ItemResponseSchema()
+            if args["exclude_relations"]
+            else self.ItemAndRelationsResponseSchema()
+        )
         return schema.dump(obj)
 
     def _get_upload_args(self, parent_identifier):

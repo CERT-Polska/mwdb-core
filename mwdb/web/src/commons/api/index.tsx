@@ -97,12 +97,10 @@ import {
     UploadConfigRequest,
     UploadConfigResponse,
     UploadBlobRequest,
-    UploadBlobReponse,
+    UploadBlobResponse,
 } from "@mwdb-web/types/api";
 import {
-    Attribute,
     Capability,
-    Comment,
     CreateUser,
     ObjectLegacyType,
     ObjectType,
@@ -602,7 +600,7 @@ function uploadFile(body: UploadFileRequest): UploadFileResponse {
         share3rdParty,
     } = body;
     let formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", file!);
     formData.append(
         "options",
         JSON.stringify({
@@ -615,7 +613,7 @@ function uploadFile(body: UploadFileRequest): UploadFileResponse {
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
 }
 
-function uploadBlob(body: UploadBlobRequest): UploadBlobReponse {
+function uploadBlob(body: UploadBlobRequest): UploadBlobResponse {
     const { name, shareWith, parent, type } = body;
     return axios.post(`/blob`, {
         ...body,

@@ -6,10 +6,10 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { api } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
-import { Autocomplete, View, FormError } from "@mwdb-web/commons/ui";
+import { Autocomplete, View, FormError, ShowIf } from "@mwdb-web/commons/ui";
 import { ConfigContext } from "@mwdb-web/commons/config";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { Attribute, Capability } from "@mwdb-web/types/types";
+import { Capability } from "@mwdb-web/types/types";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { UploadFileRequest } from "@mwdb-web/types/api";
 import { isEmpty } from "lodash";
@@ -20,14 +20,9 @@ import {
     sharingModeToUploadParam,
 } from "../common/helpers";
 import { Attributes } from "../common/Attributes";
+import { Sharing } from "../common/Sharing";
 
-type FormValues = {
-    file: File | null;
-    parent?: string;
-    shareWith: string;
-    group: string;
-    attributes: Attribute[];
-};
+type FormValues = UploadFileRequest;
 
 const validationSchema = Yup.object().shape({
     file: Yup.mixed().required("File is required"),
@@ -35,13 +30,14 @@ const validationSchema = Yup.object().shape({
 
 export function UploadFileView() {
     const searchParams = useSearchParams()[0];
-    const formOptions: UseFormProps<FormValues> = {
+    const formOptions: UseFormProps<UploadFileRequest> = {
         resolver: yupResolver(validationSchema),
         mode: "onSubmit",
         reValidateMode: "onSubmit",
         defaultValues: {
             file: null,
             shareWith: "",
+            share3rdParty: false,
             group: "",
             parent: searchParams.get("parent") || "",
             attributes: [],
@@ -67,7 +63,7 @@ export function UploadFileView() {
     const { file, shareWith, group } = watch();
 
     const handleParentClear = () => {
-        if (searchParams.get("parent")) navigate("/file_upload");
+        if (searchParams.get("parent")) navigate("/upload");
         setValue("parent", "");
     };
 
@@ -206,6 +202,10 @@ export function UploadFileView() {
                                 </Autocomplete>
                             </div>
                         )}
+                        <Sharing
+                            sharingKey="share3rdParty"
+                            register={register}
+                        />
                         <Attributes
                             {...useFieldArray({
                                 control,

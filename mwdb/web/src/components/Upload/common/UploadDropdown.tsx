@@ -1,14 +1,14 @@
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { NavDropdown } from "@mwdb-web/commons/ui";
 import { Capability } from "@mwdb-web/types/types";
-import { UploadButton } from "../../UploadButton";
+import { UploadDropdownOption } from "@mwdb-web/components/UploadDropdownOption";
 
 export function UploadDropdown() {
     const uploadElement = [
         {
             capability: Capability.addingFiles,
             type: "File",
-            link: "/file_upload",
+            link: "/upload",
         },
         {
             capability: Capability.addingBlobs,
@@ -27,7 +27,7 @@ export function UploadDropdown() {
             title="Upload"
             elements={uploadElement.map((ele) => {
                 return (
-                    <UploadButton
+                    <UploadDropdownOption
                         key={ele.type}
                         capability={ele.capability}
                         type={ele.type}

@@ -20,6 +20,7 @@ import { Capability } from "@mwdb-web/types/types";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { isEmpty } from "lodash";
 import { UploadBlobRequest } from "@mwdb-web/types/api";
+import { Sharing } from "../common/Sharing";
 
 type FormValues = UploadBlobRequest;
 
@@ -29,6 +30,7 @@ const validationSchema: Yup.SchemaOf<Partial<FormValues>> = Yup.object().shape({
     name: Yup.string().required("Name is required"),
     parent: Yup.string(),
     shareWith: Yup.string(),
+    share3rdParty: Yup.bool(),
     group: Yup.string(),
     attributes: Yup.array(),
 });
@@ -246,6 +248,10 @@ export function UploadBlobView() {
                                 </Autocomplete>
                             </div>
                         )}
+                        <Sharing
+                            sharingKey="share3rdParty"
+                            register={register}
+                        />
                         <Attributes
                             {...useFieldArray({
                                 control,

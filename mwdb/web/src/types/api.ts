@@ -242,15 +242,35 @@ export type DownloadFileResponse = Response<ArrayBuffer>;
 
 export type UploadFileResponse = Response<ObjectData>;
 
-export type UploadFileRequest = {
-    file: File;
+export type UploadCommons = {
     parent?: string;
-    upload_as?: string;
     shareWith: string;
     attributes: Attribute[];
-    fileUploadTimeout?: number;
     share3rdParty?: boolean;
 };
+
+export type UploadFileRequest = {
+    file: File | null;
+    group: string;
+    fileUploadTimeout?: number;
+} & UploadCommons;
+
+export type UploadConfigRequest = {
+    cfg?: string;
+    family: string;
+    config_type?: string;
+} & UploadCommons;
+
+export type UploadConfigResponse = Response<ConfigData>;
+
+export type UploadBlobRequest = {
+    content: string;
+    type: string;
+    name: string;
+    group: string;
+} & UploadCommons;
+
+export type UploadBlobResponse = Response<BlobData>;
 
 export type GetRemoteNamesResponse = Response<{
     remotes: string[];
@@ -327,25 +347,3 @@ export type OauthRemoveSingleProviderResponse = Response<null>;
 export type OauthGetLogoutLinkResponse = Response<{
     url: string;
 }>;
-
-export type UploadConfigRequest = {
-    cfg?: string;
-    family: string;
-    parent?: string;
-    config_type?: string;
-    attributes?: Attribute[];
-};
-
-export type UploadConfigResponse = Response<ConfigData>;
-
-export type UploadBlobRequest = {
-    content: string;
-    type: string;
-    name: string;
-    parent?: string;
-    shareWith: string;
-    group: string;
-    attributes: Attribute[];
-};
-
-export type UploadBlobReponse = Response<BlobData>;

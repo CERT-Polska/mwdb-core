@@ -18,7 +18,7 @@ import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
 import logo from "../assets/logo.png";
 import { AdminNav } from "./AdminNav";
 import { RemoteDropdown } from "./RemoteDropdown";
-import { UploadDropdown } from "./Upload/common/UploadDropdown";
+import { Upload } from "./Upload/common/Upload";
 
 export function Navigation() {
     const auth = useContext(AuthContext);
@@ -59,7 +59,7 @@ export function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <UploadDropdown />
+                        <Upload />
                     </li>
                 </Extendable>
             ) : (

@@ -11,7 +11,7 @@ type Props = {
     link: string;
 };
 
-export function UploadButton({ capability, type, link }: Props) {
+export function UploadDropdownOption({ capability, type, link }: Props) {
     const auth = useContext(AuthContext);
 
     return auth.hasCapability(capability) ? (

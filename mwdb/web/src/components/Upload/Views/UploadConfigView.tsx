@@ -15,10 +15,11 @@ import { Capability } from "@mwdb-web/types/types";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { UploadConfigRequest } from "@mwdb-web/types/api";
 import { Attributes } from "../common/Attributes";
+import { Sharing } from "../common/Sharing";
 
 type FormValues = UploadConfigRequest;
 
-const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+const validationSchema: Yup.SchemaOf<Partial<FormValues>> = Yup.object().shape({
     cfg: Yup.string().test({
         message: ({ value }) => {
             if (!value) {
@@ -41,6 +42,8 @@ const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
         },
     }),
     family: Yup.string().required("Family is required."),
+    share3rdParty: Yup.bool(),
+    shareWith: Yup.string(),
     config_type: Yup.string(),
     parent: Yup.string(),
     attributes: Yup.array(),
@@ -60,6 +63,7 @@ export function UploadConfigView() {
             parent: searchParams.get("parent") || "",
             config_type: "static",
             attributes: [],
+            shareWith: "",
         },
     };
 
@@ -192,6 +196,7 @@ export function UploadConfigView() {
                             <option value="dynamic">Dynamic</option>
                         </select>
                     </div>
+                    <Sharing sharingKey="share3rdParty" register={register} />
                     <Attributes
                         {...useFieldArray({
                             control,

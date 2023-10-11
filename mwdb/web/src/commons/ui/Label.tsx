@@ -25,7 +25,7 @@ export function Label(props: Props) {
     return (
         <label className={setClassName()} htmlFor={htmlFor}>
             {label}
-            {children ?? children}
+            {children}
         </label>
     );
 }

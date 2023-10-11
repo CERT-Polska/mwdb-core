@@ -80,7 +80,7 @@ export function AppRoutes() {
                 <Route path="blobs" element={<RecentBlobsView />} />
                 <Route path="search" element={<SearchView />} />
                 <Route
-                    path="file_upload"
+                    path="upload"
                     element={
                         <RequiresCapability capability={Capability.addingFiles}>
                             <UploadFileView />

@@ -251,6 +251,7 @@ Let's go to the ``docker/plugins`` directory within ``mwdb-core`` repository and
 First is ``package.json`` that contains short specification of our plugin. Name must contain ``@mwdb-web/plugin-`` prefix.
 
 .. code-block:: json
+
    {
        "name": "@mwdb-web/plugin-hello-world",
        "version": "0.0.1",
@@ -269,7 +270,7 @@ Finally we can write simple plugin that adds new ``Hello world`` page. Let's che
 
     // Import from MWDB Core commons and components
     import { View } from "@mwdb-web/commons/ui";
-    import About from "@mwdb-web/components/About";
+    import { AboutView } from "@mwdb-web/components/Views/AboutView";
 
     function HelloWorld() {
         return (

@@ -338,10 +338,10 @@ So ``navbar`` is one of ``Extendable`` wrappers that can be found within applica
 Web plugins: how it works internally?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are two requirements to be fulfilled by plugin engine:
+There are two requirements to be fulfilled by the plugin engine:
 
-* Plugin code needs to be loaded and executed along with core application
-* Plugin must be allowed to reuse and extend core application parts
+* Plugin code needs to be loaded and executed along with the core application
+* Plugin must be allowed to reuse and extend the core application parts
 
 MWDB uses Rollup import aliases and Vite virtual modules to make a link between plugin code and the core.
 
@@ -381,7 +381,7 @@ as ``@mwdb-web/*`` aliases:
 Building customized images
 --------------------------
 
-If you want to extend MWDB with new features using plugin system, it's always useful to be able to build your own customized Docker images.
+If you want to extend MWDB with new features using the plugin system, it's always useful to be able to build your own customized Docker images.
 
 There are two ways to do that:
 
@@ -410,6 +410,7 @@ Building custom backend image is simple as in `Dockerfile` below:
 Backend plugins are linked in runtime, so that part is pretty easy to extend. A bit more complicated thing is frontend part:
 
 .. code-block:: Dockerfile
+
     ARG MWDB_VERSION=v2.9.0
     FROM certpl/mwdb-web-source:$MWDB_VERSION AS build
 

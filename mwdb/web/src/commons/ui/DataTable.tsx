@@ -3,7 +3,7 @@ type Props = {
     children: React.ReactNode;
 };
 
-export default function DataTable(props: Props) {
+export function DataTable(props: Props) {
     const indentLevel = props.indent || 0;
     const indentWidth = `${indentLevel * 8}pt`;
 

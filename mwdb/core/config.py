@@ -133,6 +133,7 @@ class MWDBConfig(Config):
     enable_json_logger = key(cast=intbool, required=False, default=False)
     enable_sql_profiler = key(cast=intbool, required=False, default=False)
     log_only_slow_sql = key(cast=intbool, required=False, default=False)
+    use_x_forwarded_for = key(cast=intbool, required=False, default=False)
 
     group_invite_expiration_time = key(
         cast=int, required=False, default=7 * 24 * 3600

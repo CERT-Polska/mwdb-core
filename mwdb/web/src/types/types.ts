@@ -59,7 +59,7 @@ export type Group = {
     workspace: boolean;
 };
 
-export type ObjectType = "file" | "blob" | "config";
+export type ObjectType = "file" | "blob" | "config" | "object";
 
 export type ObjectLegacyType = "file" | "static_config" | "text_blob";
 
@@ -141,6 +141,13 @@ export type BlobData = ObjectCommonData & {
 };
 
 export type ObjectListItem = {
+    id: string;
+    tags: Tag[];
+    type: ObjectLegacyType;
+    upload_time: string;
+};
+
+export type FileListItem = {
     file_name: string;
     file_size: number;
     file_type: string;
@@ -299,4 +306,19 @@ export type Reason = {
     relatedObjectDHash: string;
     relatedObjectType: ObjectType;
     relatedUserLogin: string;
+};
+
+export type NodeProp = {
+    id: string;
+    expanded: boolean;
+    object: {
+        tags: Tag[];
+        type: string;
+        upload_time: string;
+    };
+};
+
+export type Edge = {
+    child: string | null;
+    parent: string | null;
 };

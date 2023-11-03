@@ -75,13 +75,13 @@ type Props = {
             message: string;
         }> | null
     ) => void;
-    rowComponent: JSX.Element;
-    headerComponent: JSX.Element;
+    rowComponent: React.ComponentType;
+    headerComponent: React.ComponentType;
     locked: boolean;
     addToQuery: AddToQuery;
 };
 
-export default function RecentViewList(props: Props) {
+export function RecentViewList(props: Props) {
     const api = useContext(APIContext);
     const [listState, listDispatch] = useReducer(listStateReducer, {
         pageToLoad: 0,
@@ -117,13 +117,13 @@ export default function RecentViewList(props: Props) {
                 let elements: Elements = [];
                 if (props.type === "blob") {
                     elements = response.data.blobs as BlobData[];
-                }
-                if (props.type === "config") {
+                } else if (props.type === "config") {
                     elements = response.data.configs as ConfigData[];
-                }
-                if (props.type === "file") {
+                } else if (props.type === "file") {
                     elements = response.data.files as ObjectData[];
-                }
+                } else if (props.type === "object") {
+                    elements = response.data.objects as ObjectData[];
+                } else throw new Error("Unexpected object type");
                 listDispatch({
                     type: "pageLoaded",
                     elements,
@@ -143,10 +143,10 @@ export default function RecentViewList(props: Props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [listState.pageToLoad, listState.loadedPages]);
 
-    const Row = props.rowComponent as unknown as React.ComponentType<{
+    const Row = props.rowComponent as React.ComponentType<{
         addToQuery: AddToQuery;
     }>;
-    const Header = props.headerComponent as unknown as React.ComponentType;
+    const Header = props.headerComponent as React.ComponentType;
     const tableStyle: React.CSSProperties = {
         tableLayout: "fixed",
         ...(props.locked ? { pointerEvents: "none", filter: "blur(4px)" } : {}),

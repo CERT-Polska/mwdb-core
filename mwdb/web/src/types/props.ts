@@ -23,3 +23,7 @@ export type AuthProviderProps = {
 export type APIProviderProps = {
     children: JSX.Element;
 };
+
+export type RecentRowProps<T> = T & {
+    addToQuery: (field: string, value: string) => void;
+};

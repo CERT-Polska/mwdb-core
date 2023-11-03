@@ -7,7 +7,7 @@ type Props = {
     children: JSX.Element;
 };
 
-export default function RemoteAPI({ children }: Props) {
+export function RemoteAPI({ children }: Props) {
     const remote = useRemote() ?? "";
     const remoteApi: RemoteApiContextValues = useMemo(
         () => ({

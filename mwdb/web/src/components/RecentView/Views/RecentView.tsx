@@ -5,17 +5,17 @@ import { APIContext } from "@mwdb-web/commons/api";
 import { addFieldToQuery, multiFromHashes } from "@mwdb-web/commons/helpers";
 import { View } from "@mwdb-web/commons/ui";
 
-import RecentViewList from "./RecentViewList";
-import QuickQuery from "../common/QuickQuery";
+import { RecentViewList } from "./RecentViewList";
+import { QuickQuery } from "../common/QuickQuery";
 import { ObjectType } from "@mwdb-web/types/types";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
 
 type Props = {
     type: ObjectType;
-    rowComponent: JSX.Element;
-    headerComponent: JSX.Element;
-    disallowEmpty: boolean;
+    rowComponent: React.ComponentType<any>;
+    headerComponent: React.ComponentType<any>;
+    disallowEmpty?: boolean;
 };
 
 export function RecentView(props: Props) {
@@ -25,7 +25,7 @@ export function RecentView(props: Props) {
     const currentQuery = searchParams.get("q") || "";
     // Submitted query for which we know it's valid and
     // we can load next parts of results into UI
-    const [submittedQuery, setSubmittedQuery] = useState("");
+    const [submittedQuery, setSubmittedQuery] = useState(currentQuery);
 
     // Query input state
     const [queryInput, setQueryInput] = useState(currentQuery);
@@ -154,7 +154,7 @@ export function RecentView(props: Props) {
 
     const queryErrorMessage = queryError ? (
         <div className="form-hint">
-            {queryError.response
+            {queryError.response && queryError.response.data
                 ? queryError.response.data["message"]
                 : queryError.toString()}
         </div>
@@ -270,7 +270,7 @@ export function RecentView(props: Props) {
                     rowComponent={props.rowComponent}
                     headerComponent={props.headerComponent}
                     locked={isLocked}
-                    disallowEmpty={props.disallowEmpty}
+                    disallowEmpty={props.disallowEmpty ?? false}
                     setQueryError={setQueryError}
                     addToQuery={addToQuery}
                 />

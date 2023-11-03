@@ -10,7 +10,7 @@ type Props = {
     getData: () => Promise<void>;
 };
 
-export default function ProfileCapabilities({ profile, getData }: Props) {
+export function ProfileCapabilities({ profile, getData }: Props) {
     // Component is reused by Settings
     const outletContext: ProfileOutletContext = useOutletContext();
     const { userHasCapabilities } = useCheckCapabilities();

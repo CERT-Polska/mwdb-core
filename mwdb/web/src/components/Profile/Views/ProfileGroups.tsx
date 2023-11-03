@@ -7,7 +7,7 @@ import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { ProfileOutletContext } from "@mwdb-web/types/context";
 import { Group } from "@mwdb-web/types/types";
 
-export default function ProfileGroups() {
+export function ProfileGroups() {
     const { redirectToAlert } = useViewAlert();
     const { profile }: ProfileOutletContext = useOutletContext();
     const [workspaces, setWorkspaces] = useState<Group[]>([]);

@@ -1,4 +1,4 @@
-import { HTMLAttributes, useState } from "react";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
 import { EditButton } from "./EditButton";
@@ -17,7 +17,7 @@ type Props = SelectOrInput & {
     selective?: boolean;
     badge?: boolean;
     masked?: boolean;
-    children?: React.ReactNode;
+    children?: JSX.Element | JSX.Element[];
     onSubmit: (value: Record<string, string>) => void;
 };
 

@@ -4,7 +4,7 @@ WORKDIR /app
 RUN python3 -m venv /app/venv
 RUN /app/venv/bin/pip --no-cache-dir install wheel
 
-RUN apk add --no-cache libffi libffi-dev py3-cffi build-base python3-dev automake m4 autoconf libtool gcc g++ musl-dev openssl-dev cargo postgresql-dev
+RUN apk add --no-cache libffi libffi-dev py3-cffi build-base python3-dev automake m4 autoconf libtool gcc g++ musl-dev openssl-dev cargo postgresql-dev libfuzzy2-dev
 
 COPY requirements.txt /app
 RUN /app/venv/bin/pip --no-cache-dir install -r /app/requirements.txt
@@ -18,7 +18,7 @@ FROM python:3.8-alpine
 
 LABEL maintainer="info@cert.pl"
 
-RUN apk add --no-cache postgresql-client postgresql-dev libmagic
+RUN apk add --no-cache postgresql-client postgresql-dev libmagic libfuzzy2-dev
 
 # Copy backend files
 COPY --from=build /app/venv /app/venv

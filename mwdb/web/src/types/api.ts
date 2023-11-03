@@ -1,6 +1,5 @@
 import { AxiosResponse } from "axios";
 import {
-    ActivePlugin,
     ApiKey,
     Attribute,
     AttributeDefinition,
@@ -10,6 +9,7 @@ import {
     ConfigData,
     ConfigListItem,
     Family,
+    FileListItem,
     Group,
     KartonAnalysis,
     ObjectData,
@@ -71,12 +71,13 @@ export type ApiKeyAddResponse = Response<ApiKey>;
 
 export type ApiKeyRemoveResponse = Response<null>;
 
-export type GetObjectResponse = Response<ObjectData | ConfigData | BlobData>;
+export type GetObjectResponse = Response<ObjectOrConfigOrBlobData>;
 
 export type GetObjectListResponse = Response<{
-    blobs?: BlobListItem[];
-    files?: ObjectListItem[];
+    files?: FileListItem[];
     configs?: ConfigListItem[];
+    blobs?: BlobListItem[];
+    objects?: ObjectListItem[];
 }>;
 
 export type GetObjectCountResponse = Response<{
@@ -85,7 +86,7 @@ export type GetObjectCountResponse = Response<{
 
 export type GetTagsResponse = Response<Tag[]>;
 
-export type GetShareInfoResponse = Response<string[]>;
+export type GetShareInfoResponse = Response<{ groups: string[] }>;
 
 export type GetObjectTagsResponse = Response<Tag[]>;
 
@@ -237,9 +238,39 @@ export type GetAttributePermissionsResponse = Response<{
     }[];
 }>;
 
-export type DownloadFileResponse = Response<{ token: string }>;
+export type DownloadFileResponse = Response<ArrayBuffer>;
 
 export type UploadFileResponse = Response<ObjectData>;
+
+export type UploadCommons = {
+    parent?: string;
+    shareWith: string;
+    attributes: Attribute[];
+    share3rdParty?: boolean;
+};
+
+export type UploadFileRequest = {
+    file: File | null;
+    group: string;
+    fileUploadTimeout?: number;
+} & UploadCommons;
+
+export type UploadConfigRequest = {
+    cfg?: string;
+    family: string;
+    config_type?: string;
+} & UploadCommons;
+
+export type UploadConfigResponse = Response<ConfigData>;
+
+export type UploadBlobRequest = {
+    content: string;
+    type: string;
+    name: string;
+    group: string;
+} & UploadCommons;
+
+export type UploadBlobResponse = Response<BlobData>;
 
 export type GetRemoteNamesResponse = Response<{
     remotes: string[];
@@ -281,7 +312,7 @@ export type GetRemoteObjectAttributesResponse = Response<{
     attributes: Attribute[];
 }>;
 
-export type DownloadRemoteFileResponse = Response<{ token: string }>;
+export type DownloadRemoteFileResponse = Response<ArrayBuffer>;
 
 export type GetKartonAnalysesListResponse = Response<{
     analyses: KartonAnalysis[];

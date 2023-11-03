@@ -52,7 +52,7 @@ function InviteMemberForm({ groupName }: { groupName: string }) {
     );
 }
 
-export default function ProfileGroupMembers() {
+export function ProfileGroupMembers() {
     const auth = useContext(AuthContext);
     const { redirectToAlert } = useViewAlert();
     const { profile }: ProfileOutletContext = useOutletContext();

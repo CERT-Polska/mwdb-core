@@ -4,7 +4,7 @@ import { AxiosServerErrors, GenericOrJSX } from "@mwdb-web/types/types";
 export function getErrorMessage(
     error: AxiosServerErrors | any
 ): GenericOrJSX<string>[] | string {
-    if (error.response) {
+    if (error.response && error.response.data) {
         if (error.response.data.message) {
             return error.response.data.message;
         }

@@ -19,10 +19,10 @@ type OutletContext = {
 
 type Props = {
     profile?: User;
-    getProfile: () => Promise<void>;
+    getProfile?: () => Promise<void>;
 };
 
-export default function ProfileAPIKeys({ profile, getProfile }: Props) {
+export function ProfileAPIKeys({ profile, getProfile }: Props) {
     const location = useLocation();
     const viewAlert = useViewAlert();
     const outletContext: OutletContext = useOutletContext();
@@ -46,7 +46,9 @@ export default function ProfileAPIKeys({ profile, getProfile }: Props) {
         try {
             const response = await api.apiKeyAdd(profile!.login, name);
             setCurrentApiToken(response.data);
-            getProfile();
+            if (getProfile) {
+                getProfile();
+            }
             viewAlert.setAlert({
                 success: "New API key successfully added",
                 state: {
@@ -63,7 +65,9 @@ export default function ProfileAPIKeys({ profile, getProfile }: Props) {
             await api.apiKeyRemove(apiKeyId);
             setCurrentApiToken({});
             setApiKeyToRemove({});
-            getProfile();
+            if (getProfile) {
+                getProfile();
+            }
             setRemoveModalOpened(false);
             viewAlert.setAlert({
                 success: "API key successfully removed",

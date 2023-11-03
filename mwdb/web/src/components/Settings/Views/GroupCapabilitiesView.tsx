@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router-dom";
-import ProfileCapabilities from "../../Profile/Views/ProfileCapabilities";
+import { ProfileCapabilities } from "../../Profile/Views/ProfileCapabilities";
 import { GroupOutletContext } from "@mwdb-web/types/context";
 
 export function GroupCapabilitiesView() {

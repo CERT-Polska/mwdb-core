@@ -3,7 +3,7 @@ type Props = {
     inline?: boolean;
 };
 
-export default function Hash(props: Props) {
+export function Hash(props: Props) {
     if (!props.hash) return <></>;
     if (props.inline) {
         return <span className="text-monospace">{props.hash}</span>;

@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import ObjectBox from "./ObjectBox";
+import { ObjectBox } from "./ObjectBox";
 import { MultiRelationsBox } from "./MultiRelationsBox";
 import { CommentBox } from "./CommentBox";
 import { SharesBox } from "./SharesBox";

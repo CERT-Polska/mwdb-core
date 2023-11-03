@@ -6,7 +6,6 @@ import { UseFormProps, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormError, Label } from "@mwdb-web/commons/ui";
 import { CreateUser, FeedQuality } from "@mwdb-web/types/types";
-import { Maybe } from "yup/lib/types";
 
 type FormValues = CreateUser;
 

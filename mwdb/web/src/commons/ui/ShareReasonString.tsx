@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import ObjectLink from "./ObjectLink";
+import { ObjectLink } from "./ObjectLink";
 import { useRemotePath } from "../remotes";
 import { makeSearchLink } from "../helpers";
 import { ObjectType } from "@mwdb-web/types/types";
@@ -13,7 +13,7 @@ type Props = {
     showDhash: boolean;
 };
 
-export default function ShareReasonString({
+export function ShareReasonString({
     reasonType,
     relatedObjectDHash,
     relatedObjectType,

@@ -47,7 +47,6 @@ class Group(db.Model):
 
     PUBLIC_GROUP_NAME = "public"
     # These groups are just pre-created for convenience by 'mwdb-core configure'
-    DEFAULT_EVERYTHING_GROUP_NAME = "everything"
     DEFAULT_REGISTERED_GROUP_NAME = "registered"
 
     @property

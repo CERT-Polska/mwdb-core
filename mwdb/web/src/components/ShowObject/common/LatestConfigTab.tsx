@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import ConfigTable from "../../ConfigTable";
+import { ConfigTable } from "../../Config/common/ConfigTable";
 
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";

@@ -1,6 +1,6 @@
 import { GenericOrJSX } from "@mwdb-web/types/types";
 
-export { default as downloadData } from "./download";
+export { downloadData } from "./download";
 export * from "./search";
 export * from "./filesize";
 export * from "./paginate";
@@ -47,4 +47,11 @@ export function mapObjectType(objectType: string): string {
             text_blob: "blob",
         }[objectType] || objectType
     );
+}
+
+// negate the buffer contents (xor with key equal 0xff)
+export function negateBuffer(buffer: ArrayBuffer) {
+    const uint8View = new Uint8Array(buffer);
+    const xored = uint8View.map((item) => item ^ 0xff);
+    return xored.buffer;
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import AceEditor, { IEditorProps } from "react-ace";
 
 import "ace-builds/src-noconflict/mode-text";
@@ -7,8 +7,27 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-searchbox";
 
 class HexViewNumberRenderer {
+    getText(session: any, row: number) {
+        return (row << 4).toString(16).padStart(8, "0");
+    }
+
+    getWidth(
+        session: any,
+        lastLineNumber: number,
+        config: { lastRow: number; characterWidth: number }
+    ) {
+        return (
+            Math.max(
+                this.getText(session, lastLineNumber).length,
+                this.getText(session, config.lastRow + 1).length,
+                2
+            ) * config.characterWidth
+        );
+    }
+
     update(editor: IEditorProps) {
-        editor.renderer.$loop.schedule(editor.renderer.CHANGE_GUTTER);
+        if (editor)
+            editor.renderer.$loop.schedule(editor.renderer.CHANGE_GUTTER);
     }
 
     attach(editor: IEditorProps) {
@@ -29,14 +48,12 @@ type Content = string | ArrayBuffer;
 
 type Props = {
     content: Content;
-    mode: "raw" | "hex";
+    mode: string;
     showInvisibles: boolean;
     json?: boolean;
 };
 
-export default function HexView(props: Props) {
-    const [originalContent, setOriginalContent] = useState<Content>();
-    const [hexlifiedContent, setHexlifiedContent] = useState<string>();
+export function HexView(props: Props) {
     const [editor, setEditor] = useState<IEditorProps | null>(null);
 
     const setEditorRef = useCallback((node: AceEditor) => {
@@ -58,15 +75,14 @@ export default function HexView(props: Props) {
         }
     }, [editor, props.mode]);
 
-    const getContent = () => {
+    const value = useMemo(() => {
         const rows = [];
         if (!props.content) return "";
         if (props.mode === "raw") {
             if (props.content instanceof ArrayBuffer)
                 return new TextDecoder().decode(props.content);
             else return props.content;
-        }
-        if (!hexlifiedContent || originalContent !== props.content) {
+        } else {
             let content;
             if (props.content instanceof ArrayBuffer) {
                 content = new Uint8Array(props.content);
@@ -94,11 +110,9 @@ export default function HexView(props: Props) {
                 rows.push(
                     byteRow.join(" ").padEnd(50, " ") + asciiRow.join("")
                 );
-            setOriginalContent(props.content);
-            setHexlifiedContent(rows.join("\n"));
+            return rows.join("\n");
         }
-        return hexlifiedContent;
-    };
+    }, [props.content, props.mode]);
 
     return (
         <AceEditor
@@ -106,7 +120,7 @@ export default function HexView(props: Props) {
             mode={props.json ? "json" : "text"}
             theme="github"
             name="blob-content"
-            value={getContent()}
+            value={value}
             readOnly
             wrapEnabled
             width="100%"

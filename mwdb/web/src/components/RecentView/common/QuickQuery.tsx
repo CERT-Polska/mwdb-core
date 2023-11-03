@@ -20,7 +20,7 @@ type Props = {
     setQueryError: (error: any) => void;
 };
 
-export default function QuickQuery(props: Props) {
+export function QuickQuery(props: Props) {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
 

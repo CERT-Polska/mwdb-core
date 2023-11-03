@@ -24,6 +24,11 @@ function appendToLastElement(array: string[], value: string) {
     return [...array.slice(0, -1), array[array.length - 1] + value];
 }
 
+const filters: { [key: string]: (arg: string) => string } = {
+    "upper": (arg: string) => arg.toUpperCase(),
+    "lower": (arg: string) => arg.toLowerCase(),
+};
+
 function splitName(name: string) {
     if (name === ".")
         // Special case for "this"
@@ -103,7 +108,7 @@ class MustacheContext extends Mustache.Context {
         return parentPath;
     }
 
-    lookup(name: string) {
+    _lookup(name: string) {
         let searchable = false;
         // Check for searchable mark at the beginning
         if (name[0] === "@") {
@@ -136,6 +141,32 @@ class MustacheContext extends Mustache.Context {
             return new SearchReference(query, currentObject);
         }
         return currentObject;
+    }
+
+    lookup(name: string) {
+        const filter_expr = name.split("|");
+        const variable = filter_expr.shift()!.trim();
+        var original: string | string[] | undefined = this._lookup(variable);
+        if (!original) {
+            return undefined;
+        }
+
+        for (let filter of filter_expr) {
+            if (!(filter in filters)) {
+                continue;
+            }
+
+            const func = filters[filter];
+            if (Array.isArray(original)) {
+                original = original.map((value: string) => {
+                    return func(value);
+                })
+            } else {
+                original = func(original);
+            }
+        }
+
+        return original;
     }
 }
 

@@ -62,7 +62,7 @@ import { UploadConfigView } from "@mwdb-web/components/Upload/Views/UploadConfig
 import { UploadBlobView } from "@mwdb-web/components/Upload/Views/UploadBlobView";
 import { UploadFileView } from "@mwdb-web/components/Upload/Views/UploadFileView";
 import { SearchView } from "@mwdb-web/components/Views/SearchView";
-import { GroupJoinView } from "@mwdb-web/components/GroupJoinView";
+import { GroupJoinView } from "@mwdb-web/components/Views/GroupJoinView";
 
 export function AppRoutes() {
     return (

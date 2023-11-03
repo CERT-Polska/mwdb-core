@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "@mwdb-web/commons/api";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
 import { toast } from "react-toastify";
 
 export function GroupJoinView() {
-    const token = new URLSearchParams(window.location.search).get("token");
-    const [groupName, setGroupName] = useState("");
+    const params = useSearchParams()[0];
+    const token = params.get("token") ?? "";
+    const [groupName, setGroupName] = useState<string>("");
     const navigate = useNavigate();
 
     async function getInvitationDetails() {
@@ -29,7 +30,6 @@ export function GroupJoinView() {
             });
             navigate("/");
         } catch (error) {
-            console.log(error);
             toast(getErrorMessage(error), {
                 type: "error",
             });

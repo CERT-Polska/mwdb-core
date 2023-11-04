@@ -6,6 +6,7 @@ import {
     renderTokens,
     Token,
 } from "@mwdb-web/commons/helpers";
+import { JSONValue, filter, filters } from "./filters";
 
 /**
  * Markdown with Mustache templates for React
@@ -24,10 +25,7 @@ function appendToLastElement(array: string[], value: string) {
     return [...array.slice(0, -1), array[array.length - 1] + value];
 }
 
-const filters: { [key: string]: (arg: string) => string } = {
-    "upper": (arg: string) => arg.toUpperCase(),
-    "lower": (arg: string) => arg.toLowerCase(),
-};
+const availableFilters: string[] = filters.map((f: filter) => f.name);
 
 function splitName(name: string) {
     if (name === ".")
@@ -146,24 +144,17 @@ class MustacheContext extends Mustache.Context {
     lookup(name: string) {
         const filter_expr = name.split("|");
         const variable = filter_expr.shift()!.trim();
-        var original: string | string[] | undefined = this._lookup(variable);
+        var original: JSONValue = this._lookup(variable);
         if (!original) {
             return undefined;
         }
 
         for (let filter of filter_expr) {
-            if (!(filter in filters)) {
+            if (!(filter in availableFilters)) {
                 continue;
             }
-
-            const func = filters[filter];
-            if (Array.isArray(original)) {
-                original = original.map((value: string) => {
-                    return func(value);
-                })
-            } else {
-                original = func(original);
-            }
+            const action = filters.filter((f: filter) => f.name == filter)[0].action;
+            original = action(original);
         }
 
         return original;

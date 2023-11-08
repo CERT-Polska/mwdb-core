@@ -210,7 +210,7 @@ class User(db.Model):
         )
 
     @staticmethod
-    def verify_group_invite_token(token: str) -> Optional[dict]:
+    def verify_group_invite_token(token: str) -> Optional[Tuple["User", str]]:
         result = User._verify_token(
             token,
             ["identity_ver"],
@@ -219,7 +219,8 @@ class User(db.Model):
         if result is None:
             return None
         else:
-            return result[1]
+            user, data = result
+            return user, data["group_id"]
 
     @staticmethod
     def verify_session_token(token: str) -> Optional[Tuple["User", Optional[str]]]:
@@ -231,7 +232,8 @@ class User(db.Model):
         if result is None:
             return None
         else:
-            return result[0], result[1].get("provider")
+            user, data = result
+            return user, data.get("provider")
 
     @staticmethod
     def verify_set_password_token(token: str) -> Optional["User"]:
@@ -243,7 +245,8 @@ class User(db.Model):
         if result is None:
             return None
         else:
-            return result[0]
+            user, _ = result
+            return user
 
     @staticmethod
     def verify_legacy_token(token):

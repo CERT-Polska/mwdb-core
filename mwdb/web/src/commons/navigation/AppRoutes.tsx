@@ -120,6 +120,7 @@ export function AppRoutes() {
                     <Route index element={<ProfileDetails />} />
                     <Route path="user/:user" element={<ProfileDetails />} />
                     <Route path="group/:group" element={<ProfileGroup />} />
+                    <Route path="group/join" element={<GroupJoinView />} />
                     <Route
                         path="group/:group/members"
                         element={<ProfileGroupMembers />}
@@ -184,7 +185,6 @@ export function AppRoutes() {
                     </Route>
                     <Route path="groups" element={<GroupsListView />} />
                     <Route path="group/new" element={<GroupCreateView />} />
-                    <Route path="group/invite" element={<GroupJoinView />} />
                     <Route path="group/:name/*" element={<GroupView />}>
                         <Route index element={<GroupDetailsView />} />
                         <Route

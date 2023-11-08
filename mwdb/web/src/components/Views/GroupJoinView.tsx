@@ -19,7 +19,7 @@ export function GroupJoinView() {
             toast(getErrorMessage(error), {
                 type: "error",
             });
-            navigate("/");
+            navigate("/profile/groups");
         }
     }
     async function acceptInvitation() {
@@ -28,7 +28,7 @@ export function GroupJoinView() {
             toast("You are now a member", {
                 type: "success",
             });
-            navigate("/");
+            navigate("/profile/groups");
         } catch (error) {
             toast(getErrorMessage(error), {
                 type: "error",
@@ -45,11 +45,11 @@ export function GroupJoinView() {
             <div className="background" />
             <ConfirmationModal
                 isOpen={true}
-                message={`Do you want to accept the invitation to ${groupName} group?`}
+                message={`Do you want to accept the invitation to '${groupName}' group?`}
                 buttonStyle="btn-success"
                 cancelText="No"
                 onRequestClose={() => {
-                    navigate("/");
+                    navigate("/profile/groups");
                 }}
                 onConfirm={acceptInvitation}
             ></ConfirmationModal>

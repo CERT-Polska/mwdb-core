@@ -2,13 +2,7 @@ from flask import g, request
 from flask_restful import Resource
 from sqlalchemy import exists
 from sqlalchemy.orm import joinedload
-from werkzeug.exceptions import (
-    BadRequest,
-    Conflict,
-    Forbidden,
-    InternalServerError,
-    NotFound,
-)
+from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -19,6 +13,7 @@ from mwdb.model import Group, Member, User, db
 from mwdb.schema.group import (
     GroupCreateRequestSchema,
     GroupInvitationLinkResponseSchema,
+    GroupInviteTokenRequestSchema,
     GroupItemResponseSchema,
     GroupListResponseSchema,
     GroupMemberUpdateRequestSchema,
@@ -586,7 +581,7 @@ class GroupMemberResource(Resource):
 
 
 @rate_limited_resource
-class RequestGroupInviteLinkResource(Resource):
+class GroupInviteResource(Resource):
     @requires_authorization
     def post(self, name, invited_user):
         """
@@ -636,7 +631,7 @@ class RequestGroupInviteLinkResource(Resource):
         group_obj = (db.session.query(Group).filter(Group.name == name)).first()
 
         if group_obj is None:
-            raise NotFound("Group does not exist or you are not it's member")
+            raise NotFound("Group does not exist or you are not its member")
 
         member_obj = (
             db.session.query(Member)
@@ -645,7 +640,7 @@ class RequestGroupInviteLinkResource(Resource):
         ).first()
 
         if member_obj is None:
-            raise NotFound("Group does not exist or you are not it's member")
+            raise NotFound("Group does not exist or you are not its member")
 
         if not member_obj.group_admin:
             raise Forbidden("You do not have group_admin role")
@@ -676,8 +671,8 @@ class RequestGroupInviteLinkResource(Resource):
 
         try:
             send_email_notification(
-                "invitation",
-                "MWDB: You have been invited to a new group",
+                "group_invitation",
+                "You have been invited to a new group in MWDB",
                 invited_user_obj.email,
                 base_url=app_config.mwdb.base_url,
                 login=invited_user_obj.login,
@@ -697,7 +692,57 @@ class RequestGroupInviteLinkResource(Resource):
 
 
 @rate_limited_resource
-class JoinGroupInviteLinkResource(Resource):
+class GroupJoinResource(Resource):
+    @requires_authorization
+    def get(self):
+        """
+        ---
+        summary: Get information about group from invitation token
+        description: |
+            Get information about group from invitation token
+
+        security:
+            - bearerAuth: []
+        parameters:
+            - in: query
+              name: token
+              schema:
+                type: string
+              description: token
+        tags:
+            - group
+        responses:
+            200:
+                description: When data was read successfully
+                content:
+                  application/json:
+                    schema: GroupSuccessResponseSchema
+            400:
+                description: When request body is invalid
+            403:
+                description: When there was a problem with the token
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        args = load_schema(request.args, GroupInviteTokenRequestSchema())
+        token_data = User.verify_group_invite_token(args["token"])
+        if not token_data:
+            raise Forbidden(
+                "Token expired, please re-request invitation to the group administrator"
+            )
+
+        invited_user, group_id = token_data
+        if g.auth_user.id != invited_user.id:
+            raise Forbidden("This invitation is not for you")
+
+        group_obj = db.session.query(Group).filter(Group.id == group_id).first()
+        if group_obj is None:
+            raise NotFound("Group does not exist")
+
+        schema = GroupSuccessResponseSchema()
+        return schema.dump({"name": group_obj.name})
+
     @requires_authorization
     def post(selt):
         """
@@ -732,22 +777,16 @@ class JoinGroupInviteLinkResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        token = request.args.get("token")
-
-        if token is None:
-            raise BadRequest("Token not found")
-
-        token_data = User.verify_group_invite_token(token)
+        args = load_schema(request.args, GroupInviteTokenRequestSchema())
+        token_data = User.verify_group_invite_token(args["token"])
         if not token_data:
-            raise BadRequest("There was a problem while processing your token")
+            raise Forbidden(
+                "Token expired, please re-request invitation to the group administrator"
+            )
 
-        invited_user_login = token_data.get("login")
-        if not g.auth_user.login == invited_user_login:
+        invited_user, group_id = token_data
+        if g.auth_user.id != invited_user.id:
             raise Forbidden("This invitation is not for you")
-
-        group_id = token_data.get("group_id")
-        if group_id is None:
-            raise BadRequest("Invalid token")
 
         member = (
             db.session.query(Member)
@@ -764,62 +803,6 @@ class JoinGroupInviteLinkResource(Resource):
 
         group_obj.add_member(g.auth_user)
         db.session.commit()
-
-        schema = GroupSuccessResponseSchema()
-        return schema.dump({"name": group_obj.name})
-
-    @requires_authorization
-    def put(self):
-        """
-        ---
-        summary: Get information about group from invitation token
-        description: |
-            Get information about group from invitation token
-
-        security:
-            - bearerAuth: []
-        parameters:
-            - in: query
-              name: token
-              schema:
-                type: string
-              description: token
-        tags:
-            - group
-        responses:
-            200:
-                description: When data was read successfully
-                content:
-                  application/json:
-                    schema: GroupSuccessResponseSchema
-            400:
-                description: When request body is invalid
-            403:
-                description: When there was a problem with the token
-            503:
-                description: |
-                    Request canceled due to database statement timeout.
-        """
-        token = request.args.get("token")
-
-        if token is None:
-            raise BadRequest("Token not found")
-
-        token_data = User.verify_group_invite_token(token)
-        if not token_data:
-            raise Forbidden("There was a problem while processing your token")
-
-        invited_user_login = token_data.get("login")
-        if not g.auth_user.login == invited_user_login:
-            raise Forbidden("This invitation is not for you")
-
-        group_id = token_data.get("group_id")
-        if group_id is None:
-            raise Forbidden("Invalid token")
-
-        group_obj = db.session.query(Group).filter(Group.id == group_id).first()
-        if group_obj is None:
-            raise NotFound("This group does not exist")
 
         schema = GroupSuccessResponseSchema()
         return schema.dump({"name": group_obj.name})

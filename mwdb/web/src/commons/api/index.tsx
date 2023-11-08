@@ -429,7 +429,7 @@ function requestGroupInviteLink(name: string, invited_user: string) {
 }
 
 function getInvitationData(token: string) {
-    return axios.put(`/group/join?token=${token}`);
+    return axios.get(`/group/join?token=${token}`);
 }
 
 function acceptGroupInvitation(token: string) {

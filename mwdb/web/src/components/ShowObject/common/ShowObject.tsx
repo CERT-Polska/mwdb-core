@@ -69,7 +69,7 @@ function objectReducer(state: ObjectStateReducer, action: ObjectActionReducer) {
 
 type Props = {
     ident: string;
-    children: JSX.Element[];
+    children: JSX.Element | JSX.Element[];
     objectType: ObjectType;
     headerIcon: IconDefinition;
     objectId: string;

@@ -22,6 +22,7 @@ import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { ConfigDetails } from "../common/ConfigDetails";
 import { ConfigPreview } from "../common/ConfigPreview";
 import { ObjectOrConfigOrBlobData } from "@mwdb-web/types/types";
+import { Extendable } from "@mwdb-web/commons/plugins";
 
 export function ShowConfigView() {
     const params = useParams();
@@ -47,31 +48,33 @@ export function ShowConfigView() {
             headerIcon={faTable}
             headerCaption="Config details"
         >
-            <ObjectTab
-                tab="details"
-                icon={faFingerprint}
-                component={ConfigDetails}
-                actions={[
-                    <RemoveAction />,
-                    <PushAction />,
-                    <PullAction />,
-                    <FavoriteAction />,
-                    <DownloadAction download={downloadTextBlob} />,
-                ]}
-            />
-            <RelationsTab />
-            <ObjectTab
-                tab="preview"
-                icon={faSearch}
-                component={ConfigPreview}
-                actions={[
-                    <RemoveAction />,
-                    <PushAction />,
-                    <PullAction />,
-                    <FavoriteAction />,
-                    <DownloadAction download={downloadTextBlob} />,
-                ]}
-            />
+            <Extendable ident="configTabs">
+                <ObjectTab
+                    tab="details"
+                    icon={faFingerprint}
+                    component={ConfigDetails}
+                    actions={[
+                        <RemoveAction />,
+                        <PushAction />,
+                        <PullAction />,
+                        <FavoriteAction />,
+                        <DownloadAction download={downloadTextBlob} />,
+                    ]}
+                />
+                <RelationsTab />
+                <ObjectTab
+                    tab="preview"
+                    icon={faSearch}
+                    component={ConfigPreview}
+                    actions={[
+                        <RemoveAction />,
+                        <PushAction />,
+                        <PullAction />,
+                        <FavoriteAction />,
+                        <DownloadAction download={downloadTextBlob} />,
+                    ]}
+                />
+            </Extendable>
         </ShowObject>
     );
 }

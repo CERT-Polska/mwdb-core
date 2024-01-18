@@ -17,6 +17,7 @@ from .exceptions import UnsupportedGrammarException
 Condition = Any
 SQLQueryBuilderContext = Dict
 
+
 class QueryTreeVisitor(TreeVisitor):
     """
     Original TreeVisitor returns generators and lists.
@@ -51,8 +52,6 @@ class QueryConditionVisitor(QueryTreeVisitor):
     ) -> Condition:
         ...
 
-    # Visitor methods for operators
-
     def visit_and_operation(
         self, node: AndOperation, context: SQLQueryBuilderContext
     ) -> Condition:
@@ -82,8 +81,6 @@ class QueryConditionVisitor(QueryTreeVisitor):
         self, node: Prohibit, context: SQLQueryBuilderContext
     ) -> Condition:
         return not_(self.visit(node.a, context))
-
-    # Visitor methods for other elements
 
     def visit_group(
         self, node: BaseGroup, context: SQLQueryBuilderContext

@@ -131,8 +131,8 @@ class SQLQueryBuilder(LuceneTreeVisitorV2):
     ) -> Condition:
         field_mapper, name_remainder = get_field_mapper(context.queried_type, node.name)
 
-        if field_mapper.field_type is not Object:
-            context.queried_type = field_mapper.field_type
+        if field_mapper.column_type is not Object:
+            context.queried_type = field_mapper.column_type
 
         context.field_mapper = field_mapper
         condition = field_mapper.get_condition(

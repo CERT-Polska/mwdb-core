@@ -17,17 +17,17 @@ from .fields import (
     AttributeField,
     BaseField,
     CommentAuthorField,
+    ConfigField,
     DatetimeField,
     FavoritesField,
     FileNameField,
-    JSONField,
-    ListField,
     MultiField,
     RelationField,
     ShareField,
     SharerField,
     SizeField,
     StringField,
+    StringListField,
     UploadCountField,
     UploaderField,
     UUIDField,
@@ -44,8 +44,8 @@ object_mapping: Dict[str, Type[Object]] = {
 field_mapping: Dict[str, Dict[str, BaseField]] = {
     Object.__name__: {
         "dhash": StringField(Object.dhash),
-        "tag": ListField(Object.tags, Tag.tag),
-        "comment": ListField(Object.comments, Comment.comment),
+        "tag": StringListField(Object.tags, Tag.tag),
+        "comment": StringListField(Object.comments, Comment.comment),
         "meta": AttributeField(Object.attributes),  # legacy
         "attribute": AttributeField(Object.attributes),
         "shared": ShareField(Object.shares),
@@ -74,7 +74,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
     Config.__name__: {
         "type": StringField(Config.config_type),
         "family": StringField(Config.family),
-        "cfg": JSONField(Config.cfg),
+        "cfg": ConfigField(Config.cfg),
         "multi": MultiField(Config.id),
     },
     TextBlob.__name__: {

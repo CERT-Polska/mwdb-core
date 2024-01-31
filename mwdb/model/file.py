@@ -3,7 +3,7 @@ import io
 import os
 import shutil
 import tempfile
-from typing import Dict, Any
+from typing import Any, Dict
 
 import pyzipper
 from Cryptodome.Util.strxor import strxor_c

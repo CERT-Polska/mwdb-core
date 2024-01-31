@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from flask import g
 from karton.core import Config as KartonConfig
@@ -7,12 +7,12 @@ from karton.core import Producer, Resource, Task
 from karton.core.inspect import KartonState
 from karton.core.task import TaskPriority
 
+from ..model.blob import TextBlob
+from ..model.config import Config
+from ..model.file import File
+from ..model.object import Object
 from ..version import app_version
 from .config import app_config
-from ..model.file import File
-from ..model.config import Config
-from ..model.blob import TextBlob
-from ..model.object import Object
 
 logger = logging.getLogger("mwdb.karton")
 

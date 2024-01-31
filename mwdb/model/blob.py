@@ -5,7 +5,6 @@ from typing import Any, Dict
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from mwdb.core.karton import send_blob_to_karton
-from mwdb.model import attribute
 
 from . import db
 from .object import Object

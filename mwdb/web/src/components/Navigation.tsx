@@ -14,12 +14,11 @@ import { ConfigContext } from "@mwdb-web/commons/config";
 import { fromPlugins, Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal, NavDropdown } from "@mwdb-web/commons/ui";
 import { useRemote, useRemotePath } from "@mwdb-web/commons/remotes";
-import { Capability } from "@mwdb-web/types/types";
 
 import logo from "../assets/logo.png";
 import { AdminNav } from "./AdminNav";
 import { RemoteDropdown } from "./RemoteDropdown";
-import { UploadButton } from "./UploadButton";
+import { Upload } from "./Upload/common/Upload";
 
 export function Navigation() {
     const auth = useContext(AuthContext);
@@ -60,7 +59,7 @@ export function Navigation() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <UploadButton />
+                        <Upload />
                     </li>
                 </Extendable>
             ) : (

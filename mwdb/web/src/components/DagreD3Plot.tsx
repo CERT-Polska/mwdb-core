@@ -60,7 +60,7 @@ export function DagreD3Plot(props: Props) {
             function NodeComponent() {
                 const Node = props.nodeComponent as any;
                 useEffect(() => {
-                    resolve();
+                    resolve(undefined);
                 }, []);
                 return <Node node={node} remotePath={remotePath} />;
             }

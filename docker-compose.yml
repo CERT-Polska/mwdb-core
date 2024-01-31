@@ -9,7 +9,7 @@ services:
     depends_on:
       - postgres
       - redis
-    image: certpl/mwdb:v2.10.1
+    image: certpl/mwdb:v2.11.0
     restart: on-failure
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/Dockerfile-web
-    image: certpl/mwdb-web:v2.10.1
+    image: certpl/mwdb-web:v2.11.0
     ports:
       - "80:80"
     restart: on-failure

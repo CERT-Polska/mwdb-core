@@ -24,6 +24,7 @@ import { TextBlobDetails } from "../common/TextBlobDetails";
 import { TextBlobPreview } from "../common/TextBlobPreview";
 import { BlobDiffAction } from "../common/BlobDiffAction";
 import { ObjectOrConfigOrBlobData } from "@mwdb-web/types/types";
+import { Extendable } from "@mwdb-web/commons/plugins";
 
 export function ShowTextBlobView() {
     const params = useParams();
@@ -46,33 +47,35 @@ export function ShowTextBlobView() {
             headerCaption="Blob details"
             defaultTab="preview"
         >
-            <ObjectTab
-                tab="details"
-                icon={faFingerprint}
-                component={TextBlobDetails}
-                actions={[
-                    <RemoveAction />,
-                    <PushAction />,
-                    <PullAction />,
-                    <BlobDiffAction />,
-                    <FavoriteAction />,
-                    <DownloadAction download={downloadTextBlob} />,
-                ]}
-            />
-            <RelationsTab />
-            <ObjectTab
-                tab="preview"
-                icon={faSearch}
-                component={TextBlobPreview}
-                actions={[
-                    <RemoveAction />,
-                    <PushAction />,
-                    <PullAction />,
-                    <BlobDiffAction />,
-                    <FavoriteAction />,
-                    <DownloadAction download={downloadTextBlob} />,
-                ]}
-            />
+            <Extendable ident="blobTabs">
+                <ObjectTab
+                    tab="details"
+                    icon={faFingerprint}
+                    component={TextBlobDetails}
+                    actions={[
+                        <RemoveAction />,
+                        <PushAction />,
+                        <PullAction />,
+                        <BlobDiffAction />,
+                        <FavoriteAction />,
+                        <DownloadAction download={downloadTextBlob} />,
+                    ]}
+                />
+                <RelationsTab />
+                <ObjectTab
+                    tab="preview"
+                    icon={faSearch}
+                    component={TextBlobPreview}
+                    actions={[
+                        <RemoveAction />,
+                        <PushAction />,
+                        <PullAction />,
+                        <BlobDiffAction />,
+                        <FavoriteAction />,
+                        <DownloadAction download={downloadTextBlob} />,
+                    ]}
+                />
+            </Extendable>
             <LatestConfigTab label="Parsed blob" />
         </ShowObject>
     );

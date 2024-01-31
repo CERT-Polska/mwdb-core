@@ -27,6 +27,7 @@ import { SampleDetails } from "../SampleDetails";
 import { SamplePreview } from "../SamplePreview";
 import { PreviewSwitchAction } from "../PreviewSwitchAction";
 import { ObjectOrConfigOrBlobData } from "@mwdb-web/types/types";
+import { Extendable } from "@mwdb-web/commons/plugins";
 
 export function ShowSampleView() {
     const api = useContext(APIContext);
@@ -56,35 +57,37 @@ export function ShowSampleView() {
             headerIcon={faFile}
             headerCaption="File details"
         >
-            <ObjectTab
-                tab="details"
-                icon={faFingerprint}
-                component={SampleDetails}
-                actions={[
-                    <RemoveAction />,
-                    <PushAction />,
-                    <PullAction />,
-                    <UploadChildAction />,
-                    <FavoriteAction />,
-                    <ZipAction zip={zipSample} />,
-                    <DownloadAction download={downloadSample} />,
-                ]}
-            />
-            <RelationsTab />
-            <ObjectTab
-                tab="preview"
-                icon={faSearch}
-                component={SamplePreview}
-                actions={[
-                    <PreviewSwitchAction />,
-                    <RemoveAction />,
-                    <PushAction />,
-                    <PullAction />,
-                    <UploadChildAction />,
-                    <FavoriteAction />,
-                    <DownloadAction download={downloadSample} />,
-                ]}
-            />
+            <Extendable ident="sampleTabs">
+                <ObjectTab
+                    tab="details"
+                    icon={faFingerprint}
+                    component={SampleDetails}
+                    actions={[
+                        <RemoveAction />,
+                        <PushAction />,
+                        <PullAction />,
+                        <UploadChildAction />,
+                        <FavoriteAction />,
+                        <ZipAction zip={zipSample} />,
+                        <DownloadAction download={downloadSample} />,
+                    ]}
+                />
+                <RelationsTab />
+                <ObjectTab
+                    tab="preview"
+                    icon={faSearch}
+                    component={SamplePreview}
+                    actions={[
+                        <PreviewSwitchAction />,
+                        <RemoveAction />,
+                        <PushAction />,
+                        <PullAction />,
+                        <UploadChildAction />,
+                        <FavoriteAction />,
+                        <DownloadAction download={downloadSample} />,
+                    ]}
+                />
+            </Extendable>
             <LatestConfigTab label="Static config" />
         </ShowObject>
     );

@@ -5,10 +5,11 @@ type Props = {
     required?: boolean;
     htmlFor?: string;
     className?: string;
+    children?: React.ReactNode;
 };
 
 export function Label(props: Props) {
-    const { label, required, htmlFor, className } = props;
+    const { label, required, htmlFor, className, children } = props;
 
     const setClassName = useCallback(() => {
         let result = "";
@@ -24,6 +25,7 @@ export function Label(props: Props) {
     return (
         <label className={setClassName()} htmlFor={htmlFor}>
             {label}
+            {children}
         </label>
     );
 }

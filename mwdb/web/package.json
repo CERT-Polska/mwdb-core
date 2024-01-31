@@ -1,6 +1,6 @@
 {
     "name": "mwdb-web",
-    "version": "2.10.1",
+    "version": "2.11.0",
     "private": true,
     "scripts": {
         "dev": "vite",
@@ -16,7 +16,7 @@
         "@fortawesome/free-solid-svg-icons": "^6.1.1",
         "@fortawesome/react-fontawesome": "0.1.18",
         "@hookform/resolvers": "2.9.1",
-        "axios": "^0.27.2",
+        "axios": "^1.6.0",
         "bootstrap": "4.3.1",
         "d3": "^5.10.0",
         "dagre-d3": "^0.6.3",
@@ -73,7 +73,7 @@
         "react-test-renderer": "^18.2.0",
         "ts-jest": "^29.1.0",
         "ts-node": "^10.9.1",
-        "vite": "^4.0.5",
+        "vite": "^4.5.2",
         "vite-plugin-checker": "^0.5.6"
     },
     "browserslist": {

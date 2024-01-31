@@ -93,11 +93,14 @@ import {
     UpdateUserResponse,
     UploadFileResponse,
     UserRequestPasswordChangeResponse,
+    UploadFileRequest,
+    UploadConfigRequest,
+    UploadConfigResponse,
+    UploadBlobRequest,
+    UploadBlobResponse,
 } from "@mwdb-web/types/api";
 import {
-    Attribute,
     Capability,
-    Comment,
     CreateUser,
     ObjectLegacyType,
     ObjectType,
@@ -587,26 +590,42 @@ async function requestZipFileDownloadLink(id: string): Promise<string> {
     return `${baseURL}/file/${id}/download/zip?token=${response.data.token}`;
 }
 
-function uploadFile(
-    file: File,
-    parent: string,
-    upload_as: string,
-    attributes: Attribute[],
-    fileUploadTimeout: number,
-    share3rdParty: boolean
-): UploadFileResponse {
+function uploadFile(body: UploadFileRequest): UploadFileResponse {
+    const {
+        file,
+        parent,
+        shareWith,
+        attributes,
+        fileUploadTimeout,
+        share3rdParty,
+    } = body;
     let formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", file!);
     formData.append(
         "options",
         JSON.stringify({
             parent: parent || null,
-            upload_as: upload_as,
+            upload_as: shareWith,
             attributes: attributes,
             share_3rd_party: share3rdParty,
         })
     );
     return axios.post(`/file`, formData, { timeout: fileUploadTimeout });
+}
+
+function uploadBlob(body: UploadBlobRequest): UploadBlobResponse {
+    const { name, shareWith, parent, type } = body;
+    return axios.post(`/blob`, {
+        ...body,
+        blob_name: name,
+        blob_type: type,
+        upload_as: shareWith,
+        parent: parent || null,
+    });
+}
+
+function uploadConfig(body: UploadConfigRequest): UploadConfigResponse {
+    return axios.post("/config", body);
 }
 
 function getRemoteNames(): GetRemoteNamesResponse {
@@ -845,6 +864,8 @@ export const api = {
     requestFileDownloadLink,
     requestZipFileDownloadLink,
     uploadFile,
+    uploadBlob,
+    uploadConfig,
     getRemoteNames,
     pushObjectRemote,
     pullObjectRemote,

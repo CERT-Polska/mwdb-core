@@ -242,6 +242,36 @@ export type DownloadFileResponse = Response<ArrayBuffer>;
 
 export type UploadFileResponse = Response<ObjectData>;
 
+export type UploadCommons = {
+    parent?: string;
+    shareWith: string;
+    attributes: Attribute[];
+    share3rdParty?: boolean;
+};
+
+export type UploadFileRequest = {
+    file: File | null;
+    group: string;
+    fileUploadTimeout?: number;
+} & UploadCommons;
+
+export type UploadConfigRequest = {
+    cfg?: string;
+    family: string;
+    config_type?: string;
+} & UploadCommons;
+
+export type UploadConfigResponse = Response<ConfigData>;
+
+export type UploadBlobRequest = {
+    content: string;
+    type: string;
+    name: string;
+    group: string;
+} & UploadCommons;
+
+export type UploadBlobResponse = Response<BlobData>;
+
 export type GetRemoteNamesResponse = Response<{
     remotes: string[];
 }>;

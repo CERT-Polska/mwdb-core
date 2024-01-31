@@ -44,7 +44,7 @@ def prepare_headers(obj: Object, arguments: Dict[str, Any]) -> Dict[str, Any]:
     Takes into account object arguments to this analysis, some attributes,
     and share_3rd_party field (in this order of precedence).
     """
-    headers={
+    headers = {
         "share_3rd_party": obj.share_3rd_party,
     }
 
@@ -66,7 +66,7 @@ def send_file_to_karton(file: File, arguments: Dict[str, Any]) -> str:
         raise RuntimeError("Karton is not enabled or failed to load properly")
 
     feed_quality = g.auth_user.feed_quality
-    headers_persistent=prepare_headers(file, arguments)
+    headers_persistent = prepare_headers(file, arguments)
     headers_persistent["quality"] = feed_quality
     task_priority = TaskPriority.NORMAL if feed_quality == "high" else TaskPriority.LOW
 

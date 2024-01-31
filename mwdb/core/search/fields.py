@@ -6,7 +6,7 @@ from typing import Any, List, Optional, Tuple, Type
 from dateutil.relativedelta import relativedelta
 from flask import g
 from luqum.tree import Item, Phrase, Range, Term, Word
-from sqlalchemy import String, Text, and_, cast, column, exists, func, or_, select
+from sqlalchemy import String, and_, cast, func, or_
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
@@ -363,14 +363,12 @@ class DatetimeField(BaseField):
         border_time = datetime.now(tz=timezone.utc) - relativedelta(**delta_dict)
         return border_time
 
-    def _get_date_range(self, date_node):
+    def _get_date_range(self, date_string):
         formats = [
             ("%Y-%m-%d %H:%M", timedelta(minutes=1)),
             ("%Y-%m-%d %H:%M:%S", timedelta(seconds=1)),
             ("%Y-%m-%d", timedelta(days=1)),
         ]
-        date_string = date_node.value
-
         for fmt, range_offs in formats:
             try:
                 timestamp = datetime.strptime(date_string, fmt)
@@ -382,44 +380,32 @@ class DatetimeField(BaseField):
                 f"Unsupported date-time format ({date_string})"
             )
 
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        if isinstance(expression, Range):
-            if expression.high.value != "*" and not expression.include_high:
-                raise UnsupportedGrammarException(
-                    "Exclusive range is not allowed for date-time field"
-                )
-            if expression.low.value != "*" and not expression.include_low:
-                raise UnsupportedGrammarException(
-                    "Exclusive range is not allowed for date-time field"
-                )
-            if expression.low.value == "*" and expression.high.value == "*":
-                return True
-            if expression.low.value == "*":
-                if self._is_relative_time(expression.high.value):
-                    high = self._get_border_time(expression.high.value)
+    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
+        if isinstance(value, Range):
+            low, high, _, _ = range_from_node(value)
+            # Exclusive ranges are handled as inclusive
+            include_high = True
+            include_low = True
+            if low is not None:
+                if self._is_relative_time(low):
+                    low_datetime = self._get_border_time(low)
                 else:
-                    high = self._get_date_range(expression.high)[1]
-                return self.column < high
-            if expression.high.value == "*":
-                if self._is_relative_time(expression.low.value):
-                    low = self._get_border_time(expression.low.value)
+                    low_datetime = self._get_date_range(low)[0]
+            else:
+                low_datetime = None
+            if high is not None:
+                if self._is_relative_time(low):
+                    high_datetime = self._get_border_time(high)
                 else:
-                    low = self._get_date_range(expression.low)[0]
-                return self.column >= low
-            if self._is_relative_time(expression.low.value):
-                low = self._get_border_time(expression.low.value)
+                    high_datetime = self._get_date_range(high)[1]
             else:
-                low = self._get_date_range(expression.low)[0]
-            if self._is_relative_time(expression.high.value):
-                high = self._get_border_time(expression.high.value)
-            else:
-                high = self._get_date_range(expression.high)[1]
+                high_datetime = None
         else:
-            low, high = self._get_date_range(expression)
-
-        return and_(self.column >= low, self.column < high)
+            string_value = string_from_node(value)
+            low_datetime, high_datetime = self._get_date_range(string_value)
+            include_low = include_high = True
+        return range_equals(self.column, low_datetime, high_datetime, include_low,
+                            include_high)
 
 
 class RelationField(BaseField):

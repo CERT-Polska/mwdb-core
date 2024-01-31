@@ -1,5 +1,7 @@
 import datetime
 import hashlib
+from typing import Dict, Any
+from mwdb.model import attribute
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -63,5 +65,5 @@ class TextBlob(Object):
 
         return blob_obj, is_new
 
-    def _send_to_karton(self):
-        return send_blob_to_karton(self)
+    def _send_to_karton(self, arguments: Dict[str, Any]):
+        return send_blob_to_karton(self, arguments)

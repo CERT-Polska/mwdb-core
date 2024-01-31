@@ -1,5 +1,6 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
+from typing import Dict, Any
 
 from mwdb.core.karton import send_config_to_karton
 from mwdb.core.util import config_decode, config_dhash, config_encode
@@ -57,8 +58,8 @@ class Config(Object):
             tags=tags,
         )
 
-    def _send_to_karton(self):
-        return send_config_to_karton(self)
+    def _send_to_karton(self, arguments: Dict[str, Any]):
+        return send_config_to_karton(self, arguments)
 
 
 # Compatibility reasons

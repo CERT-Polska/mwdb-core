@@ -28,7 +28,7 @@ class AttributeValueSchema(Schema):
     @validates("value")
     def validate_value(self, value):
         # Currently only truthy values and False are allowed as values
-        if bool(value) or value is False:
+        if not value and value is not False:
             raise ValidationError("Value shouldn't be empty")
 
 

@@ -41,7 +41,7 @@ def get_karton_producer() -> Optional[Producer]:
     return karton_producer
 
 
-def prepare_headers(obj: Object, arguments: Dict[str, Any]) -> Dict[str, Any]:
+def prepare_headers(obj: "Object", arguments: Dict[str, Any]) -> Dict[str, Any]:
     """Prepare headers to use when submitting this object to Karton.
     Takes into account object arguments to this analysis, some attributes,
     and share_3rd_party field (in this order of precedence).
@@ -61,7 +61,7 @@ def prepare_headers(obj: Object, arguments: Dict[str, Any]) -> Dict[str, Any]:
     return headers
 
 
-def send_file_to_karton(file: File, arguments: Dict[str, Any]) -> str:
+def send_file_to_karton(file: "File", arguments: Dict[str, Any]) -> str:
     producer = get_karton_producer()
 
     if producer is None:
@@ -96,7 +96,7 @@ def send_file_to_karton(file: File, arguments: Dict[str, Any]) -> str:
     return task.root_uid
 
 
-def send_config_to_karton(config: Config, arguments: Dict[str, Any]) -> str:
+def send_config_to_karton(config: "Config", arguments: Dict[str, Any]) -> str:
     producer = get_karton_producer()
 
     if producer is None:
@@ -121,7 +121,7 @@ def send_config_to_karton(config: Config, arguments: Dict[str, Any]) -> str:
     return task.root_uid
 
 
-def send_blob_to_karton(blob: TextBlob, arguments: Dict[str, Any]) -> str:
+def send_blob_to_karton(blob: "TextBlob", arguments: Dict[str, Any]) -> str:
     producer = get_karton_producer()
 
     if producer is None:

@@ -60,9 +60,12 @@ export function ConfigProvider(props: Props) {
     async function updateServerInfo() {
         try {
             const response = await api.getServerInfo();
+            const serverConfig = response.data;
+            // Update default axios timeout before marking config as ready
+            api.axios.defaults.timeout = serverConfig["request_timeout"];
             setServerConfig({
                 type: configUpdate,
-                config: response.data,
+                config: serverConfig,
             });
         } catch (error) {
             setServerConfig({
@@ -116,15 +119,6 @@ export function ConfigProvider(props: Props) {
     useEffect(() => {
         if (auth.isAuthenticated) updateRemoteInfo();
     }, [auth.isAuthenticated]);
-
-    useEffect(() => {
-        if (
-            serverConfig.config &&
-            Number.isInteger(serverConfig.config.request_timeout)
-        ) {
-            api.axios.defaults.timeout = serverConfig.config["request_timeout"];
-        }
-    }, [serverConfig]);
 
     useEffect(() => {
         if (

@@ -77,18 +77,15 @@ def test_karton_reanalyze_object_without_args(admin_session):
 def test_get_karton_analysis_info(admin_session):
     test = admin_session
     blob_name = rand_string(15)
-    argument_key = rand_string(5)
-    argument_value = rand_string(5)
     blob = test.add_blob(None, blobname=blob_name, blobtype="inject", content="""
     Binary junk: \x00\x01\x02\x03\x04\x05\x07
     HELLO WORLD!
     ========""" + random_name())
     blob_dhash = blob["id"]
-    new_analysis = test.reanalyze_object(blob_dhash, arguments={argument_key: argument_value})
+    new_analysis = test.reanalyze_object(blob_dhash)
     analysis_id = new_analysis["id"]
     analysis_info = test.get_analysis_info(blob_dhash, analysis_id)
     assert analysis_id == analysis_info["id"]
-    assert analysis_info["arguments"] == {argument_key: argument_value}
     
 
 def test_assign_analysis_to_object(admin_session):

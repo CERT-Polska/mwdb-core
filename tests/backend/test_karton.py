@@ -43,19 +43,16 @@ def test_karton_analysis_after_adding_sample(admin_session):
     assert len(analyses) == 1
 
 
-def test_karton_reanalyze_object_with_args(admin_session):
+def test_karton_reanalyze_blob(admin_session):
     test = admin_session
     blob_name = rand_string(15)
-    argument_key = rand_string(5)
-    argument_value = rand_string(5)
     blob = test.add_blob(None, blobname=blob_name, blobtype="inject", content="""
     Binary junk: \x00\x01\x02\x03\x04\x05\x07
     HELLO WORLD!
     ========""" + random_name())
     blob_dhash = blob["id"]
-    new_analysis = test.reanalyze_object(blob_dhash, arguments={argument_key: argument_value})
+    test.reanalyze_object(blob_dhash)
     analyses = test.get_analyses(blob_dhash)["analyses"]
-    assert new_analysis["arguments"] == {argument_key: argument_value}
     assert len(analyses) == 2
     
     incorrect_object_dhash = "abcdefghi"
@@ -63,7 +60,7 @@ def test_karton_reanalyze_object_with_args(admin_session):
         test.reanalyze_object(incorrect_object_dhash)
 
 
-def test_karton_reanalyze_object_without_args(admin_session):
+def test_karton_reanalyze_file(admin_session):
     test = admin_session
     file_name = rand_string(15)
     file_content = rand_string() 

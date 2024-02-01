@@ -161,7 +161,7 @@ def has_wildcard(value):
 def string_equals(column: ColumnElement, value: str):
     if has_wildcard(value):
         escaped_value = escape_for_like_statement(value)
-        return column.like(escaped_value, escape="\\")
+        return column.like(escaped_value)
     else:
         unescaped_value = unescape_string(value)
         return column == unescaped_value
@@ -195,12 +195,12 @@ def range_equals(
     if low is not None and high is not None and low > high:
         low, high = high, low
         include_low, include_high = include_high, include_low
-
-    low_condition = column >= low if include_low else column > low
-    high_condition = column <= high if include_high else column < high
-
     if high is None and low is None:
         return true()
+    if low is not None:
+        low_condition = column >= low if include_low else column > low
+    if high is not None:
+        high_condition = column <= high if include_high else column < high
     if high is None:
         return low_condition
     if low is None:

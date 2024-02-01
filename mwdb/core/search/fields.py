@@ -6,7 +6,7 @@ from typing import Any, Optional, Tuple, Type
 from dateutil.relativedelta import relativedelta
 from flask import g
 from luqum.tree import FieldGroup, Item, Phrase, Range, Term, Word
-from sqlalchemy import and_, any_, or_
+from sqlalchemy import and_, any_, column, func, or_
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
@@ -32,11 +32,13 @@ from .exceptions import (
 )
 from .parse_helpers import (
     PathSelector,
+    escape_for_like_statement,
     has_wildcard,
     jsonpath_range_equals,
     jsonpath_string_equals,
     range_equals,
     string_equals,
+    unescape_string,
 )
 
 
@@ -411,15 +413,19 @@ class DatetimeField(ColumnField):
 
 
 class RelationField(ColumnField):
-    accepts_subquery = True
-
     def _get_condition(self, subquery: Item, path_selector: PathSelector) -> Any:
         from .query_builder import QueryConditionVisitor
 
         if not isinstance(subquery, FieldGroup):
             raise UnsupportedNodeTypeException(subquery)
-        condition = QueryConditionVisitor(Object).visit(subquery)
-        return self.column.any(Object.id.in_(condition))
+        condition = QueryConditionVisitor(Object).visit(subquery.expr)
+        return self.column.any(
+            Object.id.in_(
+                db.session.query(Object.id)
+                .filter(condition)
+                .filter(g.auth_user.has_access_to_object(Object.id))
+            )
+        )
 
 
 class CommentAuthorField(ColumnField):
@@ -507,5 +513,25 @@ class FileNameField(BaseField):
     def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
         string_value = string_from_node(value, escaped=True)
         name_condition = string_equals(File.file_name, string_value)
-        alt_names_condition = string_equals(any_(File.alt_names), string_value)
+        if has_wildcard(string_value):
+            """
+            Should translate to:
+
+            EXISTS (
+                SELECT 1
+                FROM unnest(object.alt_names) AS alt_name
+                WHERE alt_name LIKE <pattern>
+            )
+            """
+            escaped_value = escape_for_like_statement(string_value)
+            alt_name = func.unnest(File.alt_names).alias("alt_name")
+            alt_names_condition = (
+                db.session.query(alt_name)
+                .select_from(alt_name)
+                .filter(column(alt_name.name).like(escaped_value))
+                .exists()
+            )
+        else:
+            unescaped_value = unescape_string(string_value)
+            alt_names_condition = any_(File.alt_names) == unescaped_value
         return or_(name_condition, alt_names_condition)

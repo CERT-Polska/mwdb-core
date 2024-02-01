@@ -1,6 +1,6 @@
 import datetime
 from collections import namedtuple
-from typing import Optional
+from typing import Any, Dict, Optional
 from uuid import UUID
 
 from flask import g
@@ -988,14 +988,14 @@ class Object(db.Model):
             .order_by(ObjectPermission.access_time.asc())
         ).all()
 
-    def _send_to_karton(self):
+    def _send_to_karton(self, arguments: Dict[str, Any]):
         raise NotImplementedError
 
-    def spawn_analysis(self, arguments, commit=True):
+    def spawn_analysis(self, arguments: Dict[str, Any], commit=True):
         """
         Spawns new KartonAnalysis for this object
         """
-        analysis_id = self._send_to_karton()
+        analysis_id = self._send_to_karton(arguments)
         analysis = KartonAnalysis.create(
             analysis_id=UUID(analysis_id),
             initial_object=self,

@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -57,8 +59,8 @@ class Config(Object):
             tags=tags,
         )
 
-    def _send_to_karton(self):
-        return send_config_to_karton(self)
+    def _send_to_karton(self, arguments: Dict[str, Any]):
+        return send_config_to_karton(self, arguments)
 
 
 # Compatibility reasons

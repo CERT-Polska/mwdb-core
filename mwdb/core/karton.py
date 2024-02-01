@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from flask import g
 from karton.core import Config as KartonConfig
@@ -9,6 +9,12 @@ from karton.core.task import TaskPriority
 
 from ..version import app_version
 from .config import app_config
+
+if TYPE_CHECKING:
+    from ..model.blob import TextBlob
+    from ..model.config import Config
+    from ..model.file import File
+    from ..model.object import Object
 
 logger = logging.getLogger("mwdb.karton")
 
@@ -35,27 +41,47 @@ def get_karton_producer() -> Optional[Producer]:
     return karton_producer
 
 
-def send_file_to_karton(file) -> str:
+def prepare_headers(obj: "Object", arguments: Dict[str, Any]) -> Dict[str, Any]:
+    """Prepare headers to use when submitting this object to Karton.
+    Takes into account object arguments to this analysis, some attributes,
+    and share_3rd_party field (in this order of precedence).
+    """
+    headers = {
+        "share_3rd_party": obj.share_3rd_party,
+    }
+
+    ALLOWED_HEADERS = ["execute"]
+    for attribute in obj.attributes:
+        if attribute.key in ALLOWED_HEADERS:
+            headers[attribute.key] = attribute.value
+
+    for argument, value in arguments.items():
+        if argument not in ALLOWED_HEADERS:
+            raise RuntimeError(f"Argument {argument} is not allowed")
+        headers[argument] = value
+
+    return headers
+
+
+def send_file_to_karton(file: "File", arguments: Dict[str, Any]) -> str:
     producer = get_karton_producer()
 
     if producer is None:
         raise RuntimeError("Karton is not enabled or failed to load properly")
 
+    feed_quality = g.auth_user.feed_quality
+    headers_persistent = prepare_headers(file, arguments)
+    headers_persistent["quality"] = feed_quality
+    task_priority = TaskPriority.NORMAL if feed_quality == "high" else TaskPriority.LOW
+
     file_stream = file.open()
     try:
-        feed_quality = g.auth_user.feed_quality
-        task_priority = (
-            TaskPriority.NORMAL if feed_quality == "high" else TaskPriority.LOW
-        )
         task = Task(
             headers={
                 "type": "sample",
                 "kind": "raw",
             },
-            headers_persistent={
-                "quality": feed_quality,
-                "share_3rd_party": file.share_3rd_party,
-            },
+            headers_persistent=headers_persistent,
             payload={
                 "sample": Resource(file.file_name, fd=file_stream, sha256=file.sha256),
                 "attributes": file.get_attributes(
@@ -72,7 +98,7 @@ def send_file_to_karton(file) -> str:
     return task.root_uid
 
 
-def send_config_to_karton(config) -> str:
+def send_config_to_karton(config: "Config", arguments: Dict[str, Any]) -> str:
     producer = get_karton_producer()
 
     if producer is None:
@@ -84,9 +110,7 @@ def send_config_to_karton(config) -> str:
             "kind": config.config_type,
             "family": config.family,
         },
-        headers_persistent={
-            "share_3rd_party": config.share_3rd_party,
-        },
+        headers_persistent=prepare_headers(config, arguments),
         payload={
             "config": config.cfg,
             "dhash": config.dhash,
@@ -99,7 +123,7 @@ def send_config_to_karton(config) -> str:
     return task.root_uid
 
 
-def send_blob_to_karton(blob) -> str:
+def send_blob_to_karton(blob: "TextBlob", arguments: Dict[str, Any]) -> str:
     producer = get_karton_producer()
 
     if producer is None:
@@ -110,9 +134,7 @@ def send_blob_to_karton(blob) -> str:
             "type": "blob",
             "kind": blob.blob_type,
         },
-        headers_persistent={
-            "share_3rd_party": blob.share_3rd_party,
-        },
+        headers_persistent=prepare_headers(blob, arguments),
         payload={
             "content": blob.content,
             "dhash": blob.dhash,

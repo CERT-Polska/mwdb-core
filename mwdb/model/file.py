@@ -3,6 +3,7 @@ import io
 import os
 import shutil
 import tempfile
+from typing import Any, Dict
 
 import pyzipper
 from Cryptodome.Util.strxor import strxor_c
@@ -356,5 +357,5 @@ class File(Object):
             return None
         return File.get(download_req["identifier"]).first()
 
-    def _send_to_karton(self):
-        return send_file_to_karton(self)
+    def _send_to_karton(self, arguments: Dict[str, Any]):
+        return send_file_to_karton(self, arguments)

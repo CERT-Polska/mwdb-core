@@ -40,7 +40,7 @@ class ObjectCreateRequestSchemaBase(Schema):
     attributes = fields.Nested(AttributeItemRequestSchema, many=True, missing=[])
     upload_as = fields.Str(missing="*", allow_none=False)
     karton_id = fields.UUID(missing=None)
-    karton_arguments = fields.Dict(missing={}, keys=fields.Str(), values=fields.Str())
+    karton_arguments = fields.Dict(missing={}, keys=fields.Str())
     tags = fields.Nested(TagRequestSchema, many=True, missing=[])
     share_3rd_party = fields.Boolean(missing=True)
 

@@ -55,8 +55,8 @@ def prepare_headers(obj: "Object", arguments: Dict[str, Any]) -> Dict[str, Any]:
         if attribute.key in passthrough_attributes:
             headers[attribute.key] = attribute.value
 
-    for attribute, value in arguments.items():
-        headers[attribute] = value
+    for argument, value in arguments.items():
+        headers[argument] = value
 
     return headers
 

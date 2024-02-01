@@ -50,12 +50,14 @@ def prepare_headers(obj: "Object", arguments: Dict[str, Any]) -> Dict[str, Any]:
         "share_3rd_party": obj.share_3rd_party,
     }
 
-    passthrough_attributes = ["execute"]
+    ALLOWED_HEADERS = ["execute"]
     for attribute in obj.attributes:
-        if attribute.key in passthrough_attributes:
+        if attribute.key in ALLOWED_HEADERS:
             headers[attribute.key] = attribute.value
 
     for argument, value in arguments.items():
+        if argument not in ALLOWED_HEADERS:
+            raise RuntimeError(f"Argument {argument} is not allowed")
         headers[argument] = value
 
     return headers

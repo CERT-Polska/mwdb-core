@@ -1,5 +1,7 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Type
 
+from luqum.exceptions import ParseError
+from luqum.parser import parser
 from luqum.tree import (
     AndOperation,
     BaseGroup,
@@ -12,7 +14,10 @@ from luqum.tree import (
 from luqum.visitor import TreeVisitor
 from sqlalchemy import and_, not_, or_
 
-from .exceptions import UnsupportedGrammarException
+from mwdb.model import Object, db
+
+from .exceptions import QueryParseException, UnsupportedNodeTypeException
+from .mappings import get_field_mapper
 
 # SQLAlchemy doesn't provide typings
 Condition = Any
@@ -37,10 +42,7 @@ class QueryTreeVisitor(TreeVisitor):
         return self.visit_iter(tree, context=context)
 
     def visit_unsupported(self, node: Item, context: SQLQueryBuilderContext):
-        raise UnsupportedGrammarException(
-            f"Lucene grammar element {node.__class__.__name__} "
-            f"is not supported here"
-        )
+        raise UnsupportedNodeTypeException(node)
 
 
 class QueryConditionVisitor(QueryTreeVisitor):
@@ -48,10 +50,16 @@ class QueryConditionVisitor(QueryTreeVisitor):
     Builds sqlalchemy condition from parsed Lucene query
     """
 
+    def __init__(self, queried_type):
+        super().__init__()
+        self.queried_type = queried_type
+
     def visit_search_field(
-        self, node: SearchField, context: SQLQueryBuilderContext
+        self, node: SearchField, _: SQLQueryBuilderContext
     ) -> Condition:
-        ...
+        field_mapper, path_selector = get_field_mapper(self.queried_type, node.name)
+        condition = field_mapper.get_condition(node.expr, path_selector)
+        return condition
 
     def visit_and_operation(
         self, node: AndOperation, context: SQLQueryBuilderContext
@@ -75,3 +83,14 @@ class QueryConditionVisitor(QueryTreeVisitor):
         self, node: BaseGroup, context: SQLQueryBuilderContext
     ) -> Condition:
         return self.visit(node.expr, context)
+
+
+def build_query(query: str, queried_type: Optional[Type[Object]] = None):
+    try:
+        tree = parser.parse(query)
+    except ParseError as e:
+        raise QueryParseException(str(e)) from e
+    queried_type = queried_type or Object
+    condition_visitor = QueryConditionVisitor(queried_type)
+    condition = condition_visitor.visit(tree)
+    return db.session.query(queried_type).filter(condition)

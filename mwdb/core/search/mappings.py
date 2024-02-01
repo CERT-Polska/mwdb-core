@@ -1,5 +1,4 @@
-import re
-from typing import Dict, List, Tuple, Type
+from typing import Dict, Tuple, Type
 
 from mwdb.model import (
     Comment,
@@ -12,7 +11,7 @@ from mwdb.model import (
     User,
 )
 
-from .exceptions import FieldNotQueryableException, MultipleObjectsQueryException
+from .exceptions import FieldNotQueryableException
 from .fields import (
     AttributeField,
     BaseField,
@@ -32,6 +31,7 @@ from .fields import (
     UploaderField,
     UUIDField,
 )
+from .parse_helpers import PathSelector, parse_field_path
 
 object_mapping: Dict[str, Type[Object]] = {
     "file": File,
@@ -46,21 +46,21 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "dhash": StringField(Object.dhash),
         "tag": StringListField(Object.tags, Tag.tag),
         "comment": StringListField(Object.comments, Comment.comment),
-        "meta": AttributeField(Object.attributes),  # legacy
-        "attribute": AttributeField(Object.attributes),
-        "shared": ShareField(Object.shares),
-        "sharer": SharerField(Object.shares),
-        "uploader": UploaderField(Object.shares),
+        "meta": AttributeField(),  # legacy
+        "attribute": AttributeField(),
+        "shared": ShareField(),
+        "sharer": SharerField(),
+        "uploader": UploaderField(),
         "upload_time": DatetimeField(Object.upload_time),
         "parent": RelationField(Object.parents),
         "child": RelationField(Object.children),
-        "favorites": FavoritesField(Object.followers),
+        "favorites": FavoritesField(),
         "karton": UUIDField(Object.analyses, KartonAnalysis.id),
         "comment_author": CommentAuthorField(Object.comment_authors, User.login),
-        "upload_count": UploadCountField(Object.upload_count),
+        "upload_count": UploadCountField(),
     },
     File.__name__: {
-        "name": FileNameField(File.file_name),
+        "name": FileNameField(),
         "size": SizeField(File.file_size),
         "type": StringField(File.file_type),
         "md5": StringField(File.md5),
@@ -74,7 +74,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
     Config.__name__: {
         "type": StringField(Config.config_type),
         "family": StringField(Config.family),
-        "cfg": ConfigField(Config.cfg),
+        "cfg": ConfigField(),
         "multi": MultiField(Config.id),
     },
     TextBlob.__name__: {
@@ -89,60 +89,14 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
 }
 
 
-def parse_field_path(field_path):
-    """
-    Extract subfields from fields path with proper control character handling:
-
-    - \\x - escaped character
-    - * - array element reference e.g. (array*:2)
-    - . - field separator
-    - " - quote for control character escaping
-    """
-    fields = [""]
-    last_pos = 0
-
-    for match in re.finditer(r"\\.|[.]|[*]+(?:[.]|$)", field_path):
-        control_char = match.group(0)
-        control_char_pos, next_pos = match.span(0)
-        # Append remaining characters to the last field
-        fields[-1] = fields[-1] + field_path[last_pos:control_char_pos]
-        last_pos = next_pos
-        # Check control character
-        if control_char[0] == "\\":
-            # Escaped character
-            fields[-1] = fields[-1] + control_char[1]
-        elif control_char == ".":
-            # End of field
-            fields.append("")
-        elif control_char[0] == "*":
-            # Terminate field as a tuple with count of trailing asterisks
-            fields[-1] = (fields[-1], control_char.count("*"))
-            # End of field with trailing asterisks
-            if control_char[-1] == ".":
-                fields.append("")
-
-    if len(field_path) > last_pos:
-        # Last field should not be a tuple at this point. If it is: something went wrong
-        assert type(fields[-1]) is str
-        fields[-1] = fields[-1] + field_path[last_pos:]
-    return [field if type(field) is tuple else (field, 0) for field in fields]
-
-
 def get_field_mapper(
-    queried_type: Type[Object], field_selector: str
-) -> Tuple[BaseField, List[str]]:
+    queried_type: str, field_selector: str
+) -> Tuple[BaseField, PathSelector]:
     field_path = parse_field_path(field_selector)
     field_name, asterisks = field_path[0]
     # Map object type selector
     if field_name in object_mapping:
         selected_type = object_mapping[field_name]
-        # Because object type selector determines queried type, we can't use specialized
-        # fields from different types in the same query
-        if not issubclass(selected_type, queried_type):
-            raise MultipleObjectsQueryException(
-                f"Can't search for objects with type '{selected_type.__name__}' "
-                f"and '{queried_type.__name__}' in the same query"
-            )
         field_path = field_path[1:]
     else:
         selected_type = queried_type
@@ -154,6 +108,6 @@ def get_field_mapper(
     elif field_name in field_mapping[Object.__name__]:
         field = field_mapping[Object.__name__][field_name]
     else:
-        raise FieldNotQueryableException(f"No such field: {field_name}")
+        raise FieldNotQueryableException(f"No such field {field_name}")
 
     return field, field_path

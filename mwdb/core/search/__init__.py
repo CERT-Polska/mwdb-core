@@ -1,7 +1,7 @@
-from .exceptions import SQLQueryBuilderBaseException
-from .search import SQLQueryBuilder
+from .exceptions import QueryBaseException
+from .query_builder import build_query
 
 __all__ = [
-    "SQLQueryBuilderBaseException",
-    "SQLQueryBuilder",
+    "QueryBaseException",
+    "build_query",
 ]

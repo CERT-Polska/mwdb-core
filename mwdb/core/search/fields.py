@@ -5,8 +5,8 @@ from typing import Any, Optional, Tuple, Type
 
 from dateutil.relativedelta import relativedelta
 from flask import g
-from luqum.tree import FieldGroup, Item, Phrase, Range, Term, Word
-from sqlalchemy import and_, any_, column, func, or_
+from luqum.tree import FieldGroup, Item, Phrase, Range, Term, Word, OpenRange, From, To
+from sqlalchemy import and_, any_, column, func, or_, cast, Text
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
@@ -33,6 +33,7 @@ from .exceptions import (
 from .parse_helpers import (
     PathSelector,
     escape_for_like_statement,
+    escaped_unicode_escape,
     has_wildcard,
     jsonpath_range_equals,
     jsonpath_string_equals,
@@ -51,11 +52,7 @@ def string_from_node(node: Item, escaped: bool = False) -> str:
     else:
         raise UnsupportedNodeTypeException(node)
 
-
-def range_from_node(node: Item) -> Tuple[Optional[str], Optional[str], bool, bool]:
-    if not isinstance(node, Range):
-        raise UnsupportedNodeTypeException(node)
-
+def range_from_range_node(node: Range) -> Tuple[Optional[str], Optional[str], bool, bool]:
     low_value = string_from_node(node.low)
     if low_value == "*":
         low_value = None
@@ -69,6 +66,32 @@ def range_from_node(node: Item) -> Tuple[Optional[str], Optional[str], bool, boo
         raise UnsupportedLikeStatement(node.high)
 
     return low_value, high_value, node.include_low, node.include_high
+
+def range_from_openrange_node(node: OpenRange) -> Tuple[Optional[str], Optional[str], bool, bool]:
+    value = string_from_node(node.a)
+    if value == "*":
+        value = None
+    elif has_wildcard(value):
+        raise UnsupportedLikeStatement(node.a)
+
+    if isinstance(node, From):
+        return value, None, node.include, False
+    elif isinstance(node, To):
+        return None, value, False, node.include
+    else:
+        raise UnsupportedNodeTypeException(node)
+
+
+def range_from_node(node: Item) -> Tuple[Optional[str], Optional[str], bool, bool]:
+    if isinstance(node, Range):
+        return range_from_range_node(node)
+    elif isinstance(node, OpenRange):
+        return range_from_openrange_node(node)
+    else:
+        raise UnsupportedNodeTypeException(node)
+
+def node_is_range(node: Item) -> bool:
+    return isinstance(node, (Range, OpenRange))
 
 
 class BaseField:
@@ -112,7 +135,7 @@ class SizeField(ColumnField):
                 number, unit = size_match.groups()
                 return int(float(number) * units[unit])
 
-        if isinstance(value, Range):
+        if node_is_range(value):
             low, high, include_low, include_high = range_from_node(value)
             if low is not None:
                 low = parse_size(low)
@@ -190,19 +213,19 @@ class AttributeField(BaseField):
         if attribute_definition is None:
             raise ObjectNotFoundException(f"No such attribute: {attribute_key}")
 
-        if not isinstance(value, (Range, Term)):
+        if not isinstance(value, (OpenRange, Range, Term)):
             raise UnsupportedNodeTypeException(value)
 
         if (
             attribute_definition.hidden
-            and (isinstance(value, Range) or value.has_wildcard())
+            and (node_is_range(value) or value.has_wildcard())
             and not g.auth_user.has_rights(Capabilities.reading_all_attributes)
         ):
             raise FieldNotQueryableException(
                 "Wildcards and ranges are not allowed for hidden attributes"
             )
 
-        if isinstance(value, Range):
+        if node_is_range(value):
             low, high, include_low, include_high = range_from_node(value)
             jsonpath_condition = jsonpath_range_equals(
                 path_selector[1:], low, high, include_low, include_high
@@ -222,7 +245,14 @@ class ConfigField(BaseField):
     accepts_subpath = True
 
     def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        if isinstance(value, Range):
+        if len(path_selector) == 1:
+            # cfg:<value> offers full-text search over configurations
+            string_value = string_from_node(value, escaped=True)
+            # Cfg values in database are escaped, so we need to escape search phrase too
+            string_value = escaped_unicode_escape(string_value)
+            return string_equals(cast(Config.cfg, Text), string_value)
+        # If there is subpath: we're querying value of specific field
+        if node_is_range(value):
             low, high, include_low, include_high = range_from_node(value)
             jsonpath_condition = jsonpath_range_equals(
                 path_selector, low, high, include_low, include_high
@@ -230,7 +260,7 @@ class ConfigField(BaseField):
         else:
             string_value = string_from_node(value, escaped=True)
             # Cfg values in database are escaped, so we need to escape search phrase too
-            string_value = string_value.encode("unicode_escape").decode("utf-8")
+            string_value = escaped_unicode_escape(string_value)
             jsonpath_condition = jsonpath_string_equals(path_selector, string_value)
         return Config.cfg.op("@?")(jsonpath_condition)
 
@@ -384,7 +414,7 @@ class DatetimeField(ColumnField):
             raise InvalidValueException(date_string, "date-time")
 
     def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        if isinstance(value, Range):
+        if node_is_range(value):
             low, high, _, _ = range_from_node(value)
             # Exclusive ranges are handled as inclusive
             include_high = True
@@ -454,7 +484,7 @@ class UploadCountField(BaseField):
                 raise InvalidValueException(value, "positive integer value")
             return int_value
 
-        if isinstance(value, Range):
+        if node_is_range(value):
             low, high, include_low, include_high = range_from_node(value)
             if low is not None:
                 low = parse_upload_value(low)

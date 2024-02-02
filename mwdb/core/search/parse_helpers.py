@@ -117,7 +117,7 @@ def escape_for_jsonpath_regex_statement(value: str) -> str:
         lambda m: m.group(0)[:-1] + wildcard_map[m.group(0)[-1]], value
     )
     # Double all backslashes
-    return re.sub(r"\\", r"\\\\", value)
+    return value
 
 
 def jsonpath_quote(value: str) -> str:
@@ -125,7 +125,7 @@ def jsonpath_quote(value: str) -> str:
     Quotes field to be correctly represented in jsonpath
     """
     # Escape all double quotes and backslashes
-    value = re.sub(r'(["\\])', r"\\\1", value)
+    value = match_unescaped('"').sub(r"\\\1", value)
     return f'"{value}"'
 
 
@@ -178,6 +178,28 @@ def jsonpath_string_equals(path_selector: PathSelector, value: str) -> str:
 
     jsonpath_selector = make_jsonpath_selector(path_selector)
     return f"{jsonpath_selector} ? ({condition})"
+
+
+def escaped_unicode_escape(value: str) -> str:
+    """
+    Configurations are additionally escaped using unicode_escape,
+    so we have normalized representation of non-ASCII characters
+    that is independent from database representation.
+    As we don't unescape anything during escaping transformation,
+    we need to additionally escape slashes added by unicode_escape,
+    but leave the original slashes unchanged
+    """
+    def escape(char: str) -> str:
+        # unicode_escape encodes single slash as double slash
+        if char == "\\":
+            return "\\\\"
+        # Don't encode single slash
+        encoded = char.encode("unicode_escape").decode()
+        if encoded != char and encoded.startswith("\\"):
+            return "\\" + encoded
+        else:
+            return char
+    return ''.join([escape(c) for c in value])
 
 
 U = TypeVar("U")

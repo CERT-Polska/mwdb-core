@@ -5,8 +5,8 @@ from typing import Any, Optional, Tuple, Type
 
 from dateutil.relativedelta import relativedelta
 from flask import g
-from luqum.tree import FieldGroup, Item, Phrase, Range, Term, Word, OpenRange, From, To
-from sqlalchemy import and_, any_, column, func, or_, cast, Text
+from luqum.tree import FieldGroup, From, Item, OpenRange, Phrase, Range, Term, To, Word
+from sqlalchemy import Text, and_, any_, cast, column, func, or_
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
@@ -32,13 +32,14 @@ from .exceptions import (
 )
 from .parse_helpers import (
     PathSelector,
-    escape_for_like_statement,
-    escaped_unicode_escape,
+    config_string_equals,
     has_wildcard,
+    jsonpath_config_string_equals,
     jsonpath_range_equals,
     jsonpath_string_equals,
     range_equals,
     string_equals,
+    transform_for_like_statement,
     unescape_string,
 )
 
@@ -52,7 +53,10 @@ def string_from_node(node: Item, escaped: bool = False) -> str:
     else:
         raise UnsupportedNodeTypeException(node)
 
-def range_from_range_node(node: Range) -> Tuple[Optional[str], Optional[str], bool, bool]:
+
+def range_from_range_node(
+    node: Range,
+) -> Tuple[Optional[str], Optional[str], bool, bool]:
     low_value = string_from_node(node.low)
     if low_value == "*":
         low_value = None
@@ -67,7 +71,10 @@ def range_from_range_node(node: Range) -> Tuple[Optional[str], Optional[str], bo
 
     return low_value, high_value, node.include_low, node.include_high
 
-def range_from_openrange_node(node: OpenRange) -> Tuple[Optional[str], Optional[str], bool, bool]:
+
+def range_from_openrange_node(
+    node: OpenRange,
+) -> Tuple[Optional[str], Optional[str], bool, bool]:
     value = string_from_node(node.a)
     if value == "*":
         value = None
@@ -89,6 +96,7 @@ def range_from_node(node: Item) -> Tuple[Optional[str], Optional[str], bool, boo
         return range_from_openrange_node(node)
     else:
         raise UnsupportedNodeTypeException(node)
+
 
 def node_is_range(node: Item) -> bool:
     return isinstance(node, (Range, OpenRange))
@@ -248,9 +256,7 @@ class ConfigField(BaseField):
         if len(path_selector) == 1:
             # cfg:<value> offers full-text search over configurations
             string_value = string_from_node(value, escaped=True)
-            # Cfg values in database are escaped, so we need to escape search phrase too
-            string_value = escaped_unicode_escape(string_value)
-            return string_equals(cast(Config.cfg, Text), string_value)
+            return config_string_equals(cast(Config.cfg, Text), string_value)
         # If there is subpath: we're querying value of specific field
         if node_is_range(value):
             low, high, include_low, include_high = range_from_node(value)
@@ -259,9 +265,9 @@ class ConfigField(BaseField):
             )
         else:
             string_value = string_from_node(value, escaped=True)
-            # Cfg values in database are escaped, so we need to escape search phrase too
-            string_value = escaped_unicode_escape(string_value)
-            jsonpath_condition = jsonpath_string_equals(path_selector, string_value)
+            jsonpath_condition = jsonpath_config_string_equals(
+                path_selector, string_value
+            )
         return Config.cfg.op("@?")(jsonpath_condition)
 
 
@@ -444,7 +450,7 @@ class DatetimeField(ColumnField):
 
 class RelationField(ColumnField):
     def _get_condition(self, subquery: Item, path_selector: PathSelector) -> Any:
-        from .query_builder import QueryConditionVisitor
+        from .search import QueryConditionVisitor
 
         if not isinstance(subquery, FieldGroup):
             raise UnsupportedNodeTypeException(subquery)
@@ -553,7 +559,7 @@ class FileNameField(BaseField):
                 WHERE alt_name LIKE <pattern>
             )
             """
-            escaped_value = escape_for_like_statement(string_value)
+            escaped_value = transform_for_like_statement(string_value)
             alt_name = func.unnest(File.alt_names).alias("alt_name")
             alt_names_condition = (
                 db.session.query(alt_name)

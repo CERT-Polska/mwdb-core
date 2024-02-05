@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Iterable, Iterator, List, Optional, Pattern, Tuple, TypeVar
+from typing import Iterable, Iterator, List, Optional, Tuple, TypeVar
 
 from luqum.tree import Item, Term
 from sqlalchemy import and_, true
@@ -13,19 +13,21 @@ PathSelector = List[Tuple[str, int]]
 
 class TokenType(Enum):
     STRING = "string"
-    ESCAPE = "escape"
     CONTROL = "control"
 
 
 StringToken = Tuple[TokenType, str]
 
 
-def tokenize_string(value: str, control_chars: str) -> Iterator[StringToken]:
+def tokenize_string(
+    value: str, control_chars: str, control_escapes: str = ""
+) -> Iterator[StringToken]:
     """
     Parses backslash-escaped string value into list of tokens:
         - ("string", "...") for regular string part
-        - ("escape", "\\?") for backslash-escaped character
         - ("control", "?") for non-escaped control character for control_chars string
+        - ("control", "\\?") for escaped control characters for control_escapes string
+    "string" nodes are unescaped.
     """
     # Ensure that \ is not a control character because it makes things
     # more complicated. Lucene doesn't allow for unescaped \ anyway
@@ -37,18 +39,34 @@ def tokenize_string(value: str, control_chars: str) -> Iterator[StringToken]:
         pattern = rf"[{re_control_chars}]|\\."
     else:
         pattern = r"\\."
+
     current_pos = 0
+    current_string = ""
+
     for match in re.finditer(pattern, value):
         start, end = match.span(0)
         if current_pos < start:
-            yield TokenType.STRING, value[current_pos:start]
-        if value[match.pos] == "\\":
-            yield TokenType.ESCAPE, value[start:end]
+            current_string += value[current_pos:start]
+        if value[start] == "\\":
+            escaped_char = value[start + 1]
+            if escaped_char in control_escapes:
+                if current_string:
+                    yield TokenType.STRING, current_string
+                    current_string = ""
+                yield TokenType.CONTROL, value[start:end]
+            else:
+                current_string += value[start + 1 : end]
         else:
+            if current_string:
+                yield TokenType.STRING, current_string
+                current_string = ""
             yield TokenType.CONTROL, value[start:end]
         current_pos = end
+
     if current_pos < len(value):
-        yield TokenType.STRING, value[current_pos:]
+        current_string += value[current_pos:]
+    if current_string:
+        yield TokenType.STRING, current_string
 
 
 def join_tokenized_string(tokenized_string: Iterable[StringToken]) -> str:
@@ -63,18 +81,8 @@ def split_tokenized_string(
         idx for idx, token in enumerate(tokenized_string) if token == separator
     ]:
         yield tokenized_string[last_index:sep_index]
+        last_index = sep_index + 1
     yield tokenized_string[last_index : len(tokenized_string)]
-
-
-def unescape_tokenized_string(
-    tokenized_string: Iterable[StringToken],
-) -> Iterator[StringToken]:
-    return (
-        (TokenType.STRING, token[1:])
-        if token_type is TokenType.ESCAPE
-        else (token_type, token)
-        for token_type, token in tokenized_string
-    )
 
 
 def parse_field_path(field_path: str) -> PathSelector:
@@ -95,54 +103,49 @@ def parse_field_path(field_path: str) -> PathSelector:
         for asterisk_count, token in enumerate(reversed(path_element)):
             if token != (TokenType.CONTROL, "*"):
                 break
-        element_name = unescape_tokenized_string(path_element[:-asterisk_count])
+        element_name = (
+            path_element[:-asterisk_count] if asterisk_count > 0 else path_element
+        )
         path_selector.append((join_tokenized_string(element_name), asterisk_count))
     return path_selector
 
 
-def match_unescaped(control_chars: str) -> Pattern:
-    # Ensure that \ is not a control character because it makes things
-    # more complicated. Lucene doesn't allow for unescaped \ anyway
-    assert "\\" not in control_chars
-    # Escape regex control characters in set of control characters
-    # to be safely put in square brackets [...]
-    re_control_chars = re.sub(r"([\^\-\]])", r"\\\1", control_chars)
-    # Make pattern that finds all unescaped control characters
-    return re.compile(
-        rf"((?<=[^\\])[{re_control_chars}]|"  # Chars preceded not by \
-        rf"\\\\[{re_control_chars}]|"  # Chars preceded by escaped slash
-        rf"^[{re_control_chars}])"  # Chars at the beginning of string
-    )
+def unescape_string(value: str) -> str:
+    return re.sub(r"\\(.)", r"\1", value)
 
 
-def _encode_for_like_statement(escaped_value: str) -> Iterator[StringToken]:
+def transform_for_eq_statement(escaped_value: str) -> str:
+    return unescape_string(escaped_value)
+
+
+def transform_for_like_statement(escaped_value: str) -> str:
     """
-    Tokenization and token transform for LIKE (SQL) statement
+    Transforms Lucene value to pattern for LIKE condition
+    Gets escaped Lucene value, transforms wildcards into SQL wildcards and
+    transforms original SQL wildcards and backslashes into escaped characters
     """
 
     def transform_token(token: StringToken) -> StringToken:
+        token_type, token_value = token
         # Transform Lucene wildcards to SQL wildcards
         if token == (TokenType.CONTROL, "*"):
             return TokenType.CONTROL, "%"
         elif token == (TokenType.CONTROL, "?"):
             return TokenType.CONTROL, "_"
-        # Transform SQL unescaped wildcards to escaped SQL wildcards
-        elif token in [(TokenType.CONTROL, "%"), (TokenType.ESCAPE, "\\%")]:
-            # This escaped character is intentionally a control character
-            # as we should not mess with that escaping
-            return TokenType.CONTROL, "\\%"
-        elif token == [(TokenType.CONTROL, "_"), (TokenType.ESCAPE, "\\_")]:
-            return TokenType.CONTROL, "\\_"
-        return token
+        elif token_type is TokenType.STRING:
+            value = re.sub(r"([%_\\])", r"\\\1", token_value)
+            return TokenType.STRING, value
 
-    tokenized_string = tokenize_string(escaped_value, "*?%_")
-    return (transform_token(token) for token in tokenized_string)
+    tokenized_string = tokenize_string(escaped_value, "*?")
+    transformed_string = (transform_token(token) for token in tokenized_string)
+    return join_tokenized_string(transformed_string)
 
 
-def _encode_for_config_match(
-    tokenized_string: Iterable[StringToken],
-) -> Iterator[StringToken]:
-    r"""
+def transform_for_config_eq_statement(escaped_value: str) -> str:
+    """
+    Transforms Lucene value to value for == condition against
+    "unicode-escape"-escaped JSON value
+
     Configurations are encoded using .encode("unicode-escape") to represent non-ASCII
     characters in unified way that is not determined by database representation.
 
@@ -154,39 +157,18 @@ def _encode_for_config_match(
     must be doubled to represent backslashes in string.
     """
 
-    def transform_unicode_escape(token: StringToken) -> StringToken:
+    def transform_token(token: StringToken) -> StringToken:
         token_type, token_value = token
         if token_type is TokenType.STRING:
+            # C:\Users => "C:\\\\Users"
             return TokenType.STRING, token_value.encode("unicode-escape").decode()
-        elif token_type is TokenType.ESCAPE:
-            unicode_escape_control_chars = [
-                r"\\",
-                r"\t",
-                r"\n",
-                r"\r",
-                r"\x",
-                r"\u",
-                r"\U",
-            ]
-            if token_value in unicode_escape_control_chars:
-                # Take these escaped characters as literal backslash and letter
-                # Other characters can be unescaped
-                return TokenType.STRING, token_value
-        # CONTROL tokens and other ESCAPE tokens should be left unchanged
-        return token
+        elif token_type is TokenType.CONTROL:
+            # \n => "\\n"
+            return TokenType.STRING, token_value
 
-    return (transform_unicode_escape(token) for token in tokenized_string)
-
-
-def transform_for_like_statement(escaped_value: str) -> str:
-    """
-    Transforms Lucene value to pattern for LIKE condition
-    Gets escaped Lucene value, transforms wildcards into SQL wildcards,
-    transforms original SQL wildcards into escaped characters and unescapes
-    all the others
-    """
-    tokenized_string = _encode_for_like_statement(escaped_value)
-    return join_tokenized_string(unescape_tokenized_string(tokenized_string))
+    tokenized_string = tokenize_string(escaped_value, "", control_escapes="tnrxuU")
+    unicode_escaped_string = (transform_token(token) for token in tokenized_string)
+    return join_tokenized_string(unicode_escaped_string)
 
 
 def transform_for_config_like_statement(escaped_value: str) -> str:
@@ -194,24 +176,67 @@ def transform_for_config_like_statement(escaped_value: str) -> str:
     Transforms Lucene value to pattern for LIKE condition against
     "unicode-escape"-escaped JSON value
     """
-    tokenized_string = _encode_for_like_statement(escaped_value)
-    unicode_escaped_string = _encode_for_config_match(tokenized_string)
-    return join_tokenized_string(unescape_tokenized_string(unicode_escaped_string))
+
+    def transform_token(token: StringToken) -> StringToken:
+        token_type, token_value = token
+        # Transform Lucene wildcards to SQL wildcards
+        if token == (TokenType.CONTROL, "*"):
+            return TokenType.CONTROL, "%"
+        elif token == (TokenType.CONTROL, "?"):
+            return TokenType.CONTROL, "_"
+        elif token_type is TokenType.CONTROL:
+            # Additionally escape backslashes in control_escapes
+            return TokenType.STRING, token_value.replace("\\", "\\\\")
+        elif token_type is TokenType.STRING:
+            # Encode value using unicode-escape
+            value = token_value.encode("unicode-escape").decode()
+            # Escape all backslashes and SQL wildcards
+            value = re.sub(r"([%_\\])", r"\\\1", value)
+            return TokenType.STRING, value
+
+    tokenized_string = list(
+        tokenize_string(escaped_value, "*?", control_escapes="tnrxuU")
+    )
+    transformed_string = list(transform_token(token) for token in tokenized_string)
+    return join_tokenized_string(transformed_string)
 
 
-def transform_for_config_eq_statement(escaped_value: str) -> str:
+def transform_for_quoted_config_like_statement(escaped_value: str) -> str:
     """
-    Transforms Lucene value to value for == condition against
-    "unicode-escape"-escaped JSON value
+    Transforms Lucene value to pattern for LIKE condition against
+    "unicode-escape"-escaped stringified JSON value
     """
-    # No control characters for == statement
-    tokenized_string = tokenize_string(escaped_value, "")
-    unicode_escaped_string = _encode_for_config_match(tokenized_string)
-    return join_tokenized_string(unescape_tokenized_string(unicode_escaped_string))
 
+    def transform_token(token: StringToken) -> StringToken:
+        token_type, token_value = token
+        # Transform Lucene wildcards to SQL wildcards
+        if token == (TokenType.CONTROL, "*"):
+            return TokenType.CONTROL, "%"
+        elif token == (TokenType.CONTROL, "?"):
+            return TokenType.CONTROL, "_"
+        elif token_type is TokenType.CONTROL:
+            # Additionally escape backslashes in control_escapes
+            # We need four backslashes - first level for LIKE and
+            # second level for JSON string
+            return TokenType.STRING, token_value.replace("\\", "\\" * 4)
+        elif token_type is TokenType.STRING:
+            # Encode value using unicode-escape
+            value = token_value.encode("unicode-escape").decode()
+            # Additionally escape backslashes in control_escapes
+            # We need four backslashes - first level for LIKE
+            # and second level for JSON string
+            value = value.replace("\\", "\\" * 4)
+            # Escape inner quotes
+            value = value.replace('"', ("\\" * 2) + '"')
+            # Finally escape all SQL wildcards with only LIKE-level backslashes
+            value = re.sub(r"([%_])", r"\\\1", value)
+            return TokenType.STRING, value
 
-def unescape_string(value: str) -> str:
-    return re.sub(r"\\(.)", r"\1", value)
+    tokenized_string = list(
+        tokenize_string(escaped_value, "*?", control_escapes="tnrxuU")
+    )
+    transformed_string = list(transform_token(token) for token in tokenized_string)
+    return "{" + join_tokenized_string(transformed_string) + "}"
 
 
 def jsonpath_quote(value: str) -> str:
@@ -219,7 +244,7 @@ def jsonpath_quote(value: str) -> str:
     Quotes field to be correctly represented in jsonpath
     """
     # Escape all double quotes and backslashes
-    value = match_unescaped('\\"').sub(r"\\\1", value)
+    value = re.sub(r'([\\"])', r"\\\1", value)
     return f'"{value}"'
 
 
@@ -257,8 +282,8 @@ def string_equals(column: ColumnElement, escaped_value: str):
         pattern = transform_for_like_statement(escaped_value)
         return column.like(pattern)
     else:
-        unescaped_value = unescape_string(escaped_value)
-        return column == unescaped_value
+        value = transform_for_eq_statement(escaped_value)
+        return column == value
 
 
 def config_string_equals(column: ColumnElement, escaped_value: str):
@@ -281,15 +306,15 @@ def _jsonpath_string_equals(path_selector: PathSelector, value: str) -> str:
 
 
 def jsonpath_string_equals(path_selector: PathSelector, escaped_value: str) -> str:
-    # Wildcards are not supported, everything here is taken literally
-    value = unescape_string(escaped_value)
+    # Wildcards are not supported
+    value = transform_for_eq_statement(escaped_value)
     return _jsonpath_string_equals(path_selector, value)
 
 
 def jsonpath_config_string_equals(
     path_selector: PathSelector, escaped_value: str
 ) -> str:
-    # Wildcards are not supported, everything here is taken literally
+    # Wildcards are not supported
     value = transform_for_config_eq_statement(escaped_value)
     return _jsonpath_string_equals(path_selector, value)
 

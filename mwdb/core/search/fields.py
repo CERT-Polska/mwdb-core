@@ -6,7 +6,8 @@ from typing import Any, Optional, Tuple, Type
 from dateutil.relativedelta import relativedelta
 from flask import g
 from luqum.tree import FieldGroup, From, Item, OpenRange, Phrase, Range, Term, To, Word
-from sqlalchemy import Text, and_, any_, cast, column, func, or_
+from sqlalchemy import Text, and_, any_, column, exists, func, or_, select
+from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
@@ -32,14 +33,16 @@ from .exceptions import (
 )
 from .parse_helpers import (
     PathSelector,
-    config_string_equals,
     has_wildcard,
     jsonpath_config_string_equals,
     jsonpath_range_equals,
     jsonpath_string_equals,
+    make_jsonpath_selector,
     range_equals,
     string_equals,
+    transform_for_config_like_statement,
     transform_for_like_statement,
+    transform_for_quoted_config_like_statement,
     unescape_string,
 )
 
@@ -238,13 +241,32 @@ class AttributeField(BaseField):
             jsonpath_condition = jsonpath_range_equals(
                 path_selector[1:], low, high, include_low, include_high
             )
+            value_condition = Attribute.value.op("@?")(jsonpath_condition)
         else:
             string_value = string_from_node(value, escaped=True)
-            jsonpath_condition = jsonpath_string_equals(path_selector[1:], string_value)
+            if has_wildcard(string_value):
+                value = transform_for_like_statement(string_value)
+                jsonpath_selector = make_jsonpath_selector(path_selector[1:])
+                json_elements = func.jsonb_path_query(
+                    Attribute.value, jsonpath_selector
+                ).alias("json_element")
+                json_element = column(json_elements.name).operate(
+                    JSONPATH_ASTEXT, "{}", result_type=Text
+                )
+                value_condition = exists(
+                    select([1])
+                    .select_from(json_elements)
+                    .where(json_element.like(value))
+                )
+            else:
+                jsonpath_condition = jsonpath_string_equals(
+                    path_selector[1:], string_value
+                )
+                value_condition = Attribute.value.op("@?")(jsonpath_condition)
         return Object.attributes.any(
             and_(
                 Attribute.key == attribute_key,
-                Attribute.value.op("@?")(jsonpath_condition),
+                value_condition,
             )
         )
 
@@ -253,22 +275,43 @@ class ConfigField(BaseField):
     accepts_subpath = True
 
     def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        if len(path_selector) == 1:
-            # cfg:<value> offers full-text search over configurations
-            string_value = string_from_node(value, escaped=True)
-            return config_string_equals(cast(Config.cfg, Text), string_value)
         # If there is subpath: we're querying value of specific field
         if node_is_range(value):
             low, high, include_low, include_high = range_from_node(value)
             jsonpath_condition = jsonpath_range_equals(
                 path_selector, low, high, include_low, include_high
             )
+            return Config.cfg.op("@?")(jsonpath_condition)
         else:
             string_value = string_from_node(value, escaped=True)
-            jsonpath_condition = jsonpath_config_string_equals(
-                path_selector, string_value
-            )
-        return Config.cfg.op("@?")(jsonpath_condition)
+            if has_wildcard(string_value):
+                value = transform_for_config_like_statement(string_value)
+                if string_value.startswith("*") and string_value.endswith("*"):
+                    stringified_value = transform_for_quoted_config_like_statement(
+                        string_value
+                    )
+                    value = any_([value, stringified_value])
+                jsonpath_selector = make_jsonpath_selector(path_selector)
+                json_elements = func.jsonb_path_query(
+                    Config.cfg, jsonpath_selector
+                ).alias("json_element")
+                json_element = column(json_elements.name).operate(
+                    JSONPATH_ASTEXT, "{}", result_type=Text
+                )
+                return exists(
+                    select([1])
+                    .select_from(json_elements)
+                    .where(
+                        or_(
+                            json_element.like(value),
+                        )
+                    )
+                )
+            else:
+                jsonpath_condition = jsonpath_config_string_equals(
+                    path_selector, string_value
+                )
+                return Config.cfg.op("@?")(jsonpath_condition)
 
 
 class ShareField(BaseField):

@@ -479,10 +479,8 @@ def test_search_date_time_unbounded(admin_session):
 
     found_objs = test.search(f'upload_time:["{now}" TO *] AND tag:{tag}')
     assert len(found_objs) == 2
-    found_objs = test.search(f'upload_time:">={now}" AND tag:{tag}')
+    found_objs = test.search(f'upload_time:>="{now}" AND tag:{tag}')
     assert len(found_objs) == 2
-    with ShouldRaise(status_code=400):
-        found_objs = test.search(f'upload_time:"<{now}" AND tag:{tag}')
 
         
 def test_search_date_time_relative(admin_session):

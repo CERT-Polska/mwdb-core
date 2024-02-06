@@ -459,7 +459,7 @@ class UploaderField(BaseField):
 
 
 class DatetimeField(ColumnField):
-    def _is_relative_time(self, expression_value):
+    def _is_relative_time(self, expression_value: str):
         pattern = r"^(\d+[yYmWwDdHhMSs])+$"
         return re.search(pattern, expression_value)
 
@@ -524,7 +524,7 @@ class DatetimeField(ColumnField):
             else:
                 low_datetime = None
             if high is not None:
-                if self._is_relative_time(low):
+                if self._is_relative_time(high):
                     high_datetime = self._get_border_time(high)
                 else:
                     high_datetime = self._get_date_range(high)[1]

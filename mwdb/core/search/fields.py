@@ -6,10 +6,10 @@ from typing import Any, Optional, Tuple, Type
 from dateutil.relativedelta import relativedelta
 from flask import g
 from luqum.tree import FieldGroup, From, Item, OpenRange, Phrase, Range, Term, To, Word
-from sqlalchemy import Text, and_, any_, column, exists, func, or_, select, cast, String
-from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
-from sqlalchemy.dialects.postgresql import array, ARRAY
+from sqlalchemy import String, Text, and_, any_, cast, column, exists, func, or_, select
+from sqlalchemy.dialects.postgresql import ARRAY, array
 from sqlalchemy.dialects.postgresql.array import CONTAINS
+from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import (
@@ -662,7 +662,5 @@ class FileNameField(BaseField):
             # Use @> operator to utilize GIN index on ARRAY
             unescaped_value = unescape_string(string_value)
             value_array = cast(array([unescaped_value]), ARRAY(String))
-            alt_names_condition = File.alt_names.operate(
-                CONTAINS, value_array
-            )
+            alt_names_condition = File.alt_names.operate(CONTAINS, value_array)
         return or_(name_condition, alt_names_condition)

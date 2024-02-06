@@ -45,6 +45,7 @@ from .parse_helpers import (
     transform_for_config_like_statement,
     transform_for_like_statement,
     transform_for_quoted_config_like_statement,
+    transform_for_quoted_like_statement,
     unescape_string,
 )
 
@@ -229,8 +230,7 @@ class JSONBaseField(ColumnField):
         Transforms Lucene escaped value into quoted JSON pattern
         for LIKE condition (looking for strings encoded inside JSON objects)
         """
-        # todo
-        return transform_for_quoted_config_like_statement(value)
+        return transform_for_quoted_like_statement(value)
 
     def _get_jsonpath_for_range_equals(
         self,
@@ -596,42 +596,58 @@ class UploadCountField(BaseField):
             return Object.upload_count == upload_value
 
 
-class MultiField(ColumnField):
-    @staticmethod
-    def get_column(queried_type: Type[Object], value: str):
-        if queried_type is File:
-            if re.match(r"^[0-9a-fA-F]{8}$", value):
-                return File.crc32
-            elif re.match(r"^[0-9a-fA-F]{32}$", value):
-                return File.md5
-            elif re.match(r"^[0-9a-fA-F]{40}$", value):
-                return File.sha1
-            elif re.match(r"^[0-9a-fA-F]{64}$", value):
-                return File.sha256
-            elif re.match(r"^[0-9a-fA-F]{128}$", value):
-                return File.sha512
-            else:
-                raise ObjectNotFoundException(f"{value} is not valid hash value")
-        elif queried_type is TextBlob:
-            if re.match(r"^[0-9a-fA-F]{64}$", value):
-                return TextBlob.dhash
-            else:
-                return TextBlob._content
-        elif queried_type is Config:
-            if re.match(r"^[0-9a-fA-F]{64}$", value):
-                return Config.dhash
-            else:
-                return Config._cfg
-        else:
-            raise ObjectNotFoundException(
-                f"{queried_type.__name__} is not valid data type"
-            )
+class MultiBaseField(BaseField):
+    def _get_condition_for_value(self, escaped_value: str):
+        raise NotImplementedError
 
     def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        """
-        TODO I don't know how to reimplement it right now
-        """
-        raise NotImplementedError
+        string_value = string_from_node(value, escaped=True).strip()
+        values_list = re.split("\\s+", string_value)
+        condition = None
+        for value in values_list:
+            condition = or_(condition, self._get_condition_for_value(value))
+        return condition
+
+
+class MultiFileField(MultiBaseField):
+    def _get_condition_for_value(self, escaped_value: str):
+        value = unescape_string(escaped_value)
+        if re.match(r"^[0-9a-fA-F]{8}$", value):
+            return File.crc32 == value
+        elif re.match(r"^[0-9a-fA-F]{32}$", value):
+            return File.md5 == value
+        elif re.match(r"^[0-9a-fA-F]{40}$", value):
+            return File.sha1 == value
+        elif re.match(r"^[0-9a-fA-F]{64}$", value):
+            return File.sha256 == value
+        elif re.match(r"^[0-9a-fA-F]{128}$", value):
+            return File.sha512 == value
+        else:
+            raise ObjectNotFoundException(f"{value} is not valid hash value")
+
+
+class MultiConfigField(MultiBaseField):
+    def _get_condition_for_value(self, escaped_value: str):
+        value = unescape_string(escaped_value)
+        if re.match(r"^[0-9a-fA-F]{64}$", value):
+            return Config.dhash == value
+        else:
+            value = transform_for_quoted_config_like_statement(
+                "*" + escaped_value + "*"
+            )
+            json_element = Config._cfg.operate(JSONPATH_ASTEXT, "{}", result_type=Text)
+            return json_element.like(value)
+
+
+class MultiBlobField(MultiBaseField):
+    def _get_condition_for_value(self, escaped_value: str):
+        value = unescape_string(escaped_value)
+        if re.match(r"^[0-9a-fA-F]{64}$", value):
+            return TextBlob.dhash == value
+        else:
+            # Blobs are unicode-escaped too
+            value = transform_for_config_like_statement("*" + escaped_value + "*")
+            return TextBlob._content.like(value)
 
 
 class FileNameField(BaseField):

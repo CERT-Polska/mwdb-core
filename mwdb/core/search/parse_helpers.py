@@ -141,6 +141,33 @@ def transform_for_like_statement(escaped_value: str) -> str:
     return join_tokenized_string(transformed_string)
 
 
+def transform_for_quoted_like_statement(escaped_value: str) -> str:
+    """
+    Transforms Lucene value to pattern for LIKE condition
+    against stringified JSON
+    """
+
+    def transform_token(token: StringToken) -> StringToken:
+        token_type, token_value = token
+        # Transform Lucene wildcards to SQL wildcards
+        if token == (TokenType.CONTROL, "*"):
+            return TokenType.CONTROL, "%"
+        elif token == (TokenType.CONTROL, "?"):
+            return TokenType.CONTROL, "_"
+        elif token_type is TokenType.STRING:
+            # Escape all backslashes and quotes to correctly represent
+            # these characters in quoted string
+            value = re.sub(r'(["\\])', r"\\\1", token_value)
+            # Then escape SQL wildcards (for LIKE) and
+            # once again escape all backslashes
+            value = re.sub(r"([%_\\])", r"\\\1", value)
+            return TokenType.STRING, value
+
+    tokenized_string = tokenize_string(escaped_value, "*?")
+    transformed_string = (transform_token(token) for token in tokenized_string)
+    return join_tokenized_string(transformed_string)
+
+
 def transform_for_config_eq_statement(escaped_value: str) -> str:
     """
     Transforms Lucene value to value for == condition against

@@ -89,7 +89,7 @@ This syntax is still not very convenient, so we have introduced shorter syntax i
 .. code-block::
 
    size:>=500000
-   size:">=500000"
+   size:>="500000"
 
 MWDB-Core supports human-readable file size so instead of specifying the number of bytes, we can refer to larger units like kB, MB and GB.
 
@@ -141,7 +141,7 @@ If you want to search for objects uploaded after certain hour:
 
 .. code-block::
 
-   upload_time:">=2020-09-28 08:00"
+   upload_time:>="2020-09-28 08:00"
 
 If you want to search for objects uploaded at certain minute:
 

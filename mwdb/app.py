@@ -138,7 +138,7 @@ if app_config.mwdb.serve_web:
 def assign_request_id():
     g.request_id = token_hex(16)
     g.request_start_time = datetime.utcnow()
-    getLogger().info(
+    getLogger().debug(
         "before_request",
         extra={
             "path": request.path,
@@ -167,7 +167,7 @@ def log_request(response):
             status_code=str(response.status_code),
         )
 
-    getLogger().info(
+    getLogger().debug(
         "request",
         extra={
             "path": request.path,
@@ -206,7 +206,7 @@ def require_auth():
         if g.auth_user is None:
             g.auth_user = User.verify_legacy_token(token)
             if g.auth_user is not None:
-                getLogger().warning(
+                getLogger().debug(
                     "'%s' used legacy auth token for authentication", g.auth_user.login
                 )
 

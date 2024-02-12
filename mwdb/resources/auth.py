@@ -419,7 +419,7 @@ class RefreshTokenResource(Resource):
         user.logged_on = datetime.datetime.now()
         db.session.commit()
 
-        logger.info("Session token refreshed", extra={"user": user.login})
+        logger.debug("Session token refreshed", extra={"user": user.login})
         schema = AuthSuccessResponseSchema()
         return schema.dump(
             {
@@ -453,7 +453,7 @@ class ValidateTokenResource(Resource):
         """
         user = g.auth_user
 
-        logger.info("Token validated", extra={"user": user.login})
+        logger.debug("Token validated", extra={"user": user.login})
         schema = AuthValidateTokenResponseSchema()
         return schema.dump(
             {

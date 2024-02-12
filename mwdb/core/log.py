@@ -45,7 +45,7 @@ def setup_logger():
 
     if enable_json_logger:
         formatter = jsonlogger.JsonFormatter(
-            fmt="%(filename) %(funcName) %(levelname) %(message)",
+            fmt="%(funcName) %(levelname) %(message)",
             timestamp=True,
         )
     else:

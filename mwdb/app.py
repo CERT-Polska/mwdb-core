@@ -9,6 +9,7 @@ from werkzeug.routing import BaseConverter
 from mwdb.core.app import api, app
 from mwdb.core.config import app_config
 from mwdb.core.log import getLogger, setup_logger
+from mwdb.core.metrics import metric_api_requests, metrics_enabled
 from mwdb.core.plugins import PluginAppContext, load_plugins
 from mwdb.core.static import static_blueprint
 from mwdb.core.util import token_hex
@@ -55,6 +56,7 @@ from mwdb.resources.metakey import (
     MetakeyPermissionResource,
     MetakeyResource,
 )
+from mwdb.resources.metrics import MetricsResource
 from mwdb.resources.oauth import (
     OpenIDAccountIdentitiesResource,
     OpenIDAuthenticateResource,
@@ -155,6 +157,15 @@ def log_request(response):
     else:
         response_time = None
     response_size = response.calculate_content_length()
+
+    if metrics_enabled():
+        user = g.auth_user.login if g.auth_user else request.remote_addr
+        metric_api_requests.inc(
+            method=request.method,
+            endpoint=request.endpoint,
+            user=str(user),
+            status_code=str(response.status_code),
+        )
 
     getLogger().debug(
         "request",
@@ -386,6 +397,9 @@ api.add_resource(
 api.add_resource(
     RemoteTextBlobPushResource, "/remote/<remote_name>/push/blob/<hash64:identifier>"
 )
+
+if metrics_enabled():
+    api.add_resource(MetricsResource, "/varz")
 
 setup_logger()
 

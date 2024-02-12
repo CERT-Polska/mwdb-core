@@ -49,9 +49,7 @@ def setup_logger():
             timestamp=True,
         )
     else:
-        formatter = InlineFormatter(
-            fmt="[%(levelname)s] " "- %(funcName)s - %(message)s"
-        )
+        formatter = InlineFormatter(fmt="[%(levelname)s] - %(funcName)s - %(message)s")
     handler.setFormatter(formatter)
     handler.addFilter(ContextFilter())
     logger.addHandler(handler)

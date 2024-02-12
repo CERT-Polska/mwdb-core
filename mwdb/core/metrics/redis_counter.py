@@ -9,7 +9,7 @@ from mwdb.core.config import app_config
 from mwdb.core.log import getLogger
 
 METRIC_REGISTRY = CollectorRegistry()
-METRIC_EXPIRATION_TIME = 24 * 60 * 60
+METRIC_EXPIRATION_TIME = 1 * 60 * 60
 COUNTERS = []
 
 logger = getLogger()

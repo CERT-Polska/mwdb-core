@@ -45,12 +45,12 @@ def setup_logger():
 
     if enable_json_logger:
         formatter = jsonlogger.JsonFormatter(
-            fmt="%(filename) %(funcName) %(levelname) " "%(lineno) %(message)",
+            fmt="%(filename) %(funcName) %(levelname) %(message)",
             timestamp=True,
         )
     else:
         formatter = InlineFormatter(
-            fmt="[%(levelname)s] " "- %(funcName)s:%(lineno)s" " - %(message)s"
+            fmt="[%(levelname)s] " "- %(funcName)s - %(message)s"
         )
     handler.setFormatter(formatter)
     handler.addFilter(ContextFilter())

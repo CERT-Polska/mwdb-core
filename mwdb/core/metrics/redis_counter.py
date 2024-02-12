@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 from prometheus_client import CollectorRegistry
 from prometheus_client import Gauge as PrometheusGauge
@@ -20,13 +20,14 @@ if app_config.mwdb.enable_prometheus_metrics:
         logger.warning(
             "metrics: Prometheus metrics are disabled because redis_uri is not set"
         )
-    redis = Redis.from_url(app_config.mwdb.redis_uri, decode_responses=True)
+    else:
+        redis = Redis.from_url(app_config.mwdb.redis_uri, decode_responses=True)
 
 
 class RedisCounter:
     KEY_PREFIX = "METRICS"
 
-    def __init__(self, name, documentation, labelnames=()):
+    def __init__(self, name: str, documentation: str, labelnames: Tuple[str] = ()):
         self._gauge = PrometheusGauge(
             name, documentation, labelnames, registry=METRIC_REGISTRY
         )

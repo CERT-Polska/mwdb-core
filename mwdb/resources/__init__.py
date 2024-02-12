@@ -56,7 +56,7 @@ def deprecated(f):
 
     @wraps(f)
     def endpoint(*args, **kwargs):
-        logger.warning("Used deprecated endpoint: %s", request.path)
+        logger.debug("Used deprecated endpoint: %s", request.path)
         return f(*args, **kwargs)
 
     return endpoint

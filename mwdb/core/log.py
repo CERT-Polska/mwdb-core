@@ -45,20 +45,15 @@ def setup_logger():
 
     if enable_json_logger:
         formatter = jsonlogger.JsonFormatter(
-            fmt="%(filename) %(funcName) %(levelname) "
-            "%(lineno) %(module) %(threadName) %(message)",
+            fmt="%(funcName) %(levelname) %(message)",
             timestamp=True,
         )
     else:
-        formatter = InlineFormatter(
-            fmt="[%(levelname)s] %(threadName)s "
-            "- %(module)s.%(funcName)s:%(lineno)s"
-            " - %(message)s"
-        )
+        formatter = InlineFormatter(fmt="[%(levelname)s] - %(funcName)s - %(message)s")
     handler.setFormatter(formatter)
     handler.addFilter(ContextFilter())
     logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG if app_config.mwdb.enable_debug_log else logging.INFO)
 
 
 def getLogger():

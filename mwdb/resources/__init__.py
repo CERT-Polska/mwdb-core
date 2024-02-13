@@ -2,7 +2,7 @@ import uuid
 from functools import wraps
 from json import JSONDecodeError
 
-from flask import g, request
+from flask import g
 from marshmallow import EXCLUDE, ValidationError
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 
@@ -44,19 +44,6 @@ def requires_authorization(f):
     def endpoint(*args, **kwargs):
         if not g.auth_user:
             raise Unauthorized("Not authenticated.")
-        return f(*args, **kwargs)
-
-    return endpoint
-
-
-def deprecated(f):
-    """
-    Decorator for deprecated methods
-    """
-
-    @wraps(f)
-    def endpoint(*args, **kwargs):
-        logger.debug("Used deprecated endpoint: %s", request.path)
         return f(*args, **kwargs)
 
     return endpoint

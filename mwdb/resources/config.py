@@ -6,6 +6,7 @@ from sqlalchemy import func
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Config, TextBlob, db
@@ -349,6 +350,7 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
 
     @requires_authorization
     @requires_capabilities(Capabilities.adding_configs)
+    @deprecated_endpoint(DeprecatedFeature.legacy_object_upload)
     def put(self, identifier):
         """
         ---

@@ -2,6 +2,7 @@ from flask import request
 from werkzeug.exceptions import Conflict
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import TextBlob
@@ -226,6 +227,7 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
 
     @requires_authorization
     @requires_capabilities(Capabilities.adding_blobs)
+    @deprecated_endpoint(DeprecatedFeature.legacy_object_upload)
     def put(self, identifier):
         """
         ---

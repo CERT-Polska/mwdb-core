@@ -45,7 +45,9 @@ class RedisCounter:
         p.execute()
 
     def _key_from_labelkwargs(self, **labelkwargs):
-        elements = [str(labelkwargs[name]).replace(":", "_") for name in self._labelnames]
+        elements = [
+            str(labelkwargs[name]).replace(":", "_") for name in self._labelnames
+        ]
         return ":".join([self.KEY_PREFIX, self._name] + elements)
 
     def _labelkwargs_from_key(self, key):

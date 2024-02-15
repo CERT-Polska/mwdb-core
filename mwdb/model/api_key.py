@@ -38,7 +38,9 @@ class APIKey(db.Model):
                 return None
             else:
                 # Note a deprecated usage
-                uses_deprecated_api(DeprecatedFeature.legacy_api_key_v2)
+                uses_deprecated_api(
+                    DeprecatedFeature.legacy_api_key_v2, user=data.get("login")
+                )
 
         try:
             api_key_obj = APIKey.query.filter(

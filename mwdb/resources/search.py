@@ -3,18 +3,19 @@ from flask_restful import Resource
 from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest
 
+from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
 from mwdb.model import Object
 from mwdb.schema.object import ObjectListItemResponseSchema
 from mwdb.schema.search import SearchRequestSchema
 
-from . import deprecated, loads_schema, requires_authorization
+from . import loads_schema, requires_authorization
 
 
 @rate_limited_resource
 class SearchResource(Resource):
-    @deprecated
+    @deprecated_endpoint(DeprecatedFeature.legacy_search)
     @requires_authorization
     def post(self):
         """

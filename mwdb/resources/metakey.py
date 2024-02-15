@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.metakey import (
@@ -35,6 +36,7 @@ from . import (
 
 @rate_limited_resource
 class MetakeyResource(Resource):
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     def get(self, type, identifier):
         """
@@ -104,6 +106,7 @@ class MetakeyResource(Resource):
         schema = MetakeyListResponseSchema()
         return schema.dump({"metakeys": metakeys})
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     def post(self, type, identifier):
         """
@@ -183,6 +186,7 @@ class MetakeyResource(Resource):
         schema = MetakeyListResponseSchema()
         return schema.dump({"metakeys": metakeys})
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     @requires_capabilities("removing_attributes")
     def delete(self, type, identifier):
@@ -261,6 +265,7 @@ class MetakeyResource(Resource):
 
 @rate_limited_resource
 class MetakeyListDefinitionResource(Resource):
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     def get(self, access):
         """
@@ -309,6 +314,7 @@ class MetakeyListDefinitionResource(Resource):
 
 @rate_limited_resource
 class MetakeyListDefinitionManageResource(Resource):
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self):
@@ -349,6 +355,7 @@ class MetakeyListDefinitionManageResource(Resource):
 
 @rate_limited_resource
 class MetakeyDefinitionManageResource(Resource):
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def get(self, key):
@@ -396,6 +403,7 @@ class MetakeyDefinitionManageResource(Resource):
         schema = MetakeyDefinitionManageItemResponseSchema()
         return schema.dump(metakey)
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def post(self, key):
@@ -458,6 +466,7 @@ class MetakeyDefinitionManageResource(Resource):
         schema = MetakeyDefinitionItemResponseSchema()
         return schema.dump(metakey_definition)
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def put(self, key):
@@ -537,6 +546,7 @@ class MetakeyDefinitionManageResource(Resource):
         schema = MetakeyDefinitionItemResponseSchema()
         return schema.dump(metakey)
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def delete(self, key):
@@ -584,6 +594,7 @@ class MetakeyDefinitionManageResource(Resource):
 
 @rate_limited_resource
 class MetakeyPermissionResource(Resource):
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def put(self, key, group_name):
@@ -668,6 +679,7 @@ class MetakeyPermissionResource(Resource):
         schema = MetakeyDefinitionManageItemResponseSchema()
         return schema.dump(metakey_definition)
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
     def delete(self, key, group_name):

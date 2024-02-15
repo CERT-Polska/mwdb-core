@@ -8,6 +8,7 @@ from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFoun
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
+from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
@@ -79,6 +80,7 @@ class ObjectUploader:
         analysis_id = params.get("karton_id")
 
         if params["metakeys"]:
+            uses_deprecated_api(DeprecatedFeature.legacy_metakeys_upload_option)
             # If 'metakeys' are defined: keep legacy behavior
             if "attributes" in params and params["attributes"]:
                 raise BadRequest("'attributes' and 'metakeys' options can't be mixed")
@@ -218,7 +220,7 @@ class ObjectResource(Resource):
                     Request canceled due to database statement timeout.
         """
         if "page" in request.args:
-            logger.warning("'%s' used legacy 'page' parameter", g.auth_user.login)
+            uses_deprecated_api(DeprecatedFeature.legacy_page_parameter)
 
         obj = load_schema(request.args, ObjectListRequestSchema())
 

@@ -72,7 +72,7 @@ class RedisCounter:
         for key, value in counters.items():
             labelkwargs = self._labelkwargs_from_key(key)
             if labelkwargs is None:
-                return
+                continue
             self._gauge.labels(**labelkwargs).set(value)
 
 

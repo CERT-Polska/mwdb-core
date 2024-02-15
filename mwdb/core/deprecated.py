@@ -49,8 +49,10 @@ def uses_deprecated_api(
     feature: DeprecatedFeature,
     endpoint: Optional[str] = None,
     method: Optional[str] = None,
+    user: Optional[str] = None,
 ):
-    user = g.auth_user.login if g.auth_user is not None else None
+    if user is None:
+        user = g.auth_user.login if g.auth_user is not None else None
     metric_deprecated_usage.inc(
         feature=str(feature.value), endpoint=endpoint, method=method, user=user
     )

@@ -208,9 +208,6 @@ def require_auth():
             g.auth_user = User.verify_legacy_token(token)
             if g.auth_user is not None:
                 uses_deprecated_api(DeprecatedFeature.legacy_api_key_v1)
-                getLogger().debug(
-                    "'%s' used legacy auth token for authentication", g.auth_user.login
-                )
 
     if g.auth_user:
         if (

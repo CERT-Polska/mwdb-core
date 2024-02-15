@@ -348,9 +348,9 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
         """
         return super().get(identifier)
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_object_upload)
     @requires_authorization
     @requires_capabilities(Capabilities.adding_configs)
-    @deprecated_endpoint(DeprecatedFeature.legacy_object_upload)
     def put(self, identifier):
         """
         ---

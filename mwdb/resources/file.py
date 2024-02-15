@@ -242,9 +242,9 @@ class FileItemResource(ObjectItemResource, FileUploader):
         """
         return super().get(identifier)
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_object_upload)
     @requires_authorization
     @requires_capabilities(Capabilities.adding_files)
-    @deprecated_endpoint(DeprecatedFeature.legacy_object_upload)
     def post(self, identifier):
         """
         ---

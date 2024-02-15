@@ -225,9 +225,9 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
         """
         return super().get(identifier)
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_object_upload)
     @requires_authorization
     @requires_capabilities(Capabilities.adding_blobs)
-    @deprecated_endpoint(DeprecatedFeature.legacy_object_upload)
     def put(self, identifier):
         """
         ---

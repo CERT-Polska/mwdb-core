@@ -18,5 +18,5 @@ class CommentRequestSchema(CommentSchemaBase):
 
 class CommentItemResponseSchema(CommentSchemaBase):
     id = fields.Int(required=True, allow_none=False)
-    author = fields.Str(required=True, allow_none=False, attribute="author_login")
+    author = fields.Str(required=True, default=None, attribute="author_login")
     timestamp = UTCDateTime(required=True, allow_none=False)

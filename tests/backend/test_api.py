@@ -242,9 +242,9 @@ def test_user_delete(admin_session):
     # Then try to remove that user
     admin_session.remove_user(alice.identity)
     # Object should be still reachable
-    admin_session.get_sample(sample.identity)
+    admin_session.get_sample(sample.dhash)
     # And should still have one comment (with nulled author)
-    comments = admin_session.get_comments(sample.identity)
+    comments = admin_session.get_comments(sample.dhash)
     assert len(comments) == 1
     assert comments[0]["comment"] == "random comment"
     assert comments[0]["author"] is None

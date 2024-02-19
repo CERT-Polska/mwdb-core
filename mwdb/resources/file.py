@@ -3,6 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unauthorized
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import File
@@ -241,6 +242,7 @@ class FileItemResource(ObjectItemResource, FileUploader):
         """
         return super().get(identifier)
 
+    @deprecated_endpoint(DeprecatedFeature.legacy_object_upload)
     @requires_authorization
     @requires_capabilities(Capabilities.adding_files)
     def post(self, identifier):

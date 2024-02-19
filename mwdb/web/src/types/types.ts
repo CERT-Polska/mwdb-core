@@ -26,6 +26,7 @@ export enum Capability {
     kartonReanalyze = "karton_reanalyze",
     removingKarton = "karton_unassign",
     modify3rdPartySharing = "modify_3rd_party_sharing",
+    accessPrometheusMetrics = "access_prometheus_metrics",
 }
 
 export type User = {

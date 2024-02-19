@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm.exc import NoResultFound
 
 from mwdb.core.auth import AuthScope, generate_token, verify_legacy_token, verify_token
+from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
 
 from . import db
 
@@ -35,6 +36,11 @@ class APIKey(db.Model):
             data = verify_legacy_token(token, required_fields={"login", "api_key_id"})
             if data is None:
                 return None
+            else:
+                # Note a deprecated usage
+                uses_deprecated_api(
+                    DeprecatedFeature.legacy_api_key_v2, user=data.get("login")
+                )
 
         try:
             api_key_obj = APIKey.query.filter(

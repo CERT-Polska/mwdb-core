@@ -35,6 +35,8 @@ export let capabilitiesList: Record<Capability, string> = {
     [Capability.removingKarton]: "Can remove analysis from object",
     [Capability.modify3rdPartySharing]:
         "Can mark objects as shareable with 3rd parties",
+    [Capability.accessPrometheusMetrics]:
+        "Can access Prometheus metrics on /api/varz endpoint",
 };
 
 afterPluginsLoaded(() => {

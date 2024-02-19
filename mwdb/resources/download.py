@@ -3,16 +3,17 @@ from flask_restful import Resource
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.app import api
+from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import File
 from mwdb.schema.download import DownloadURLResponseSchema
 
-from . import deprecated, requires_authorization
+from . import requires_authorization
 
 
 @rate_limited_resource
 class DownloadResource(Resource):
-    @deprecated
+    @deprecated_endpoint(DeprecatedFeature.legacy_file_download)
     def get(self, access_token):
         """
         ---
@@ -58,7 +59,7 @@ class DownloadResource(Resource):
 
 @rate_limited_resource
 class RequestSampleDownloadResource(Resource):
-    @deprecated
+    @deprecated_endpoint(DeprecatedFeature.legacy_file_download)
     @requires_authorization
     def post(self, identifier):
         """

@@ -8,7 +8,9 @@ from werkzeug.routing import BaseConverter
 
 from mwdb.core.app import api, app
 from mwdb.core.config import app_config
+from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
 from mwdb.core.log import getLogger, setup_logger
+from mwdb.core.metrics import metric_api_requests, metrics_enabled
 from mwdb.core.plugins import PluginAppContext, load_plugins
 from mwdb.core.static import static_blueprint
 from mwdb.core.util import token_hex
@@ -55,6 +57,7 @@ from mwdb.resources.metakey import (
     MetakeyPermissionResource,
     MetakeyResource,
 )
+from mwdb.resources.metrics import MetricsResource
 from mwdb.resources.oauth import (
     OpenIDAccountIdentitiesResource,
     OpenIDAuthenticateResource,
@@ -136,7 +139,7 @@ if app_config.mwdb.serve_web:
 def assign_request_id():
     g.request_id = token_hex(16)
     g.request_start_time = datetime.utcnow()
-    getLogger().info(
+    getLogger().debug(
         "before_request",
         extra={
             "path": request.path,
@@ -156,7 +159,16 @@ def log_request(response):
         response_time = None
     response_size = response.calculate_content_length()
 
-    getLogger().info(
+    if metrics_enabled():
+        user = g.auth_user.login if g.auth_user else request.remote_addr
+        metric_api_requests.inc(
+            method=request.method,
+            endpoint=request.endpoint,
+            user=str(user),
+            status_code=str(response.status_code),
+        )
+
+    getLogger().debug(
         "request",
         extra={
             "path": request.path,
@@ -195,9 +207,7 @@ def require_auth():
         if g.auth_user is None:
             g.auth_user = User.verify_legacy_token(token)
             if g.auth_user is not None:
-                getLogger().warning(
-                    "'%s' used legacy auth token for authentication", g.auth_user.login
-                )
+                uses_deprecated_api(DeprecatedFeature.legacy_api_key_v1)
 
     if g.auth_user:
         if (
@@ -386,6 +396,9 @@ api.add_resource(
 api.add_resource(
     RemoteTextBlobPushResource, "/remote/<remote_name>/push/blob/<hash64:identifier>"
 )
+
+if metrics_enabled():
+    api.add_resource(MetricsResource, "/varz")
 
 setup_logger()
 

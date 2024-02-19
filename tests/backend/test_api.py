@@ -235,7 +235,7 @@ def test_zero_starting_crc32(admin_session):
 def test_user_delete(admin_session):
     # Make user and use it to comment new sample
     case = RelationTestCase(admin_session)
-    alice = case.new_user("Alice")
+    alice = case.new_user("Alice", capabilities=["adding_comments"])
     sample = case.new_sample("Sample")
     sample.create(alice)
     alice.session.add_comment(sample.dhash, "random comment")

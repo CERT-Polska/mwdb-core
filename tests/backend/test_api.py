@@ -2,6 +2,7 @@ import pytest
 import requests
 from dateutil.parser import parse
 
+from .relations import RelationTestCase
 from .utils import rand_string, ShouldRaise
 
 
@@ -229,3 +230,21 @@ def test_zero_starting_crc32(admin_session):
     content = b'\xf7\xb8\xb4\xab\x6b\x35\x31\x8a'
     sample = admin_session.add_sample(name, content)
     assert sample["crc32"] == "000d06ec"
+
+
+def test_user_delete(admin_session):
+    # Make user and use it to comment new sample
+    case = RelationTestCase(admin_session)
+    alice = case.new_user("Alice")
+    sample = case.new_sample("Sample")
+    sample.create(alice)
+    alice.session.add_comment(sample.dhash, "random comment")
+    # Then try to remove that user
+    admin_session.remove_user(alice.identity)
+    # Object should be still reachable
+    admin_session.get_sample(sample.identity)
+    # And should still have one comment (with nulled author)
+    comments = admin_session.get_comments(sample.identity)
+    assert len(comments) == 1
+    assert comments[0]["comment"] == "random comment"
+    assert comments[0]["author"] is None

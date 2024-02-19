@@ -65,7 +65,10 @@ class User(db.Model):
     )
 
     commented_objects = db.relationship(
-        "Object", secondary="comment", back_populates="comment_authors"
+        "Object",
+        secondary="comment",
+        back_populates="comment_authors",
+        passive_deletes=True,
     )
 
     comments = db.relationship(

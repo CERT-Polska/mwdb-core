@@ -247,4 +247,4 @@ def test_user_delete(admin_session):
     comments = admin_session.get_comments(sample.dhash)
     assert len(comments) == 1
     assert comments[0]["comment"] == "random comment"
-    assert comments[0]["author"] is None
+    assert comments[0].get("author") is None

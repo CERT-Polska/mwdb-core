@@ -32,9 +32,9 @@ class UnsupportedNodeTypeException(UnsupportedNodeException):
         super().__init__(message, node)
 
 
-class UnsupportedLikeStatement(UnsupportedNodeException):
+class UnsupportedPatternValue(UnsupportedNodeException):
     def __init__(self, node: Item) -> None:
-        super().__init__("Like statements are not supported here", node)
+        super().__init__("Pattern values are not supported here", node)
 
 
 class InvalidValueException(QueryBaseException):

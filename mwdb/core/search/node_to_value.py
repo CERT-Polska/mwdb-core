@@ -2,8 +2,8 @@ from typing import NamedTuple, Optional
 
 from luqum.tree import From, Item, OpenRange, Phrase, Range, To, Word
 
-from .exceptions import UnsupportedLikeStatement, UnsupportedNodeTypeException
-from .parse_helpers import has_wildcard
+from .exceptions import UnsupportedNodeTypeException, UnsupportedPatternValue
+from .parse_helpers import is_pattern_value
 
 
 class RangeValue(NamedTuple):
@@ -29,14 +29,14 @@ def range_from_range_node(
     low_value = string_from_node(node.low)
     if low_value == "*":
         low_value = None
-    elif has_wildcard(low_value):
-        raise UnsupportedLikeStatement(node.low)
+    elif is_pattern_value(low_value):
+        raise UnsupportedPatternValue(node.low)
 
     high_value = string_from_node(node.high)
     if high_value == "*":
         high_value = None
-    elif has_wildcard(high_value):
-        raise UnsupportedLikeStatement(node.high)
+    elif is_pattern_value(high_value):
+        raise UnsupportedPatternValue(node.high)
 
     return RangeValue(low_value, high_value, node.include_low, node.include_high)
 
@@ -47,8 +47,8 @@ def range_from_openrange_node(
     value = string_from_node(node.a)
     if value == "*":
         value = None
-    elif has_wildcard(value):
-        raise UnsupportedLikeStatement(node.a)
+    elif is_pattern_value(value):
+        raise UnsupportedPatternValue(node.a)
 
     if isinstance(node, From):
         return RangeValue(value, None, node.include, False)

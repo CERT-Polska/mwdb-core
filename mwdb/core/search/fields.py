@@ -35,7 +35,7 @@ from .exceptions import (
 from .node_to_value import node_is_range, range_from_node, string_from_node
 from .parse_helpers import (
     PathSelector,
-    has_wildcard,
+    is_pattern_value,
     jsonpath_config_string_equals,
     jsonpath_range_equals,
     jsonpath_string_equals,
@@ -220,7 +220,7 @@ class JSONBaseField(ColumnField):
             return self.column.op("@?")(jsonpath_condition)
         else:
             string_value = string_from_node(value, escaped=True)
-            if has_wildcard(string_value):
+            if is_pattern_value(string_value):
                 value = self._get_value_for_like_statement(string_value)
                 if string_value.startswith("*") and string_value.endswith("*"):
                     stringified_value = self._get_quoted_value_for_like_statement(
@@ -618,7 +618,7 @@ class FileNameField(BaseField):
     def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
         string_value = string_from_node(value, escaped=True)
         name_condition = string_equals(File.file_name, string_value)
-        if has_wildcard(string_value):
+        if is_pattern_value(string_value):
             """
             Should translate to:
 

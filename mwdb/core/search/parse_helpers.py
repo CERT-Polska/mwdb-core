@@ -300,12 +300,15 @@ def is_nonstring_object(value: str) -> bool:
     return bool(re.match(r"^(false|true|null|\d+([.]\d+)?)$", value))
 
 
-def has_wildcard(value):
+def is_pattern_value(value) -> bool:
+    """
+    Returns True if value contains wildcards
+    """
     return Term.WILDCARDS_PATTERN.search(value) is not None
 
 
 def string_equals(column: ColumnElement, escaped_value: str):
-    if has_wildcard(escaped_value):
+    if is_pattern_value(escaped_value):
         pattern = transform_for_like_statement(escaped_value)
         return column.like(pattern)
     else:
@@ -314,7 +317,7 @@ def string_equals(column: ColumnElement, escaped_value: str):
 
 
 def config_string_equals(column: ColumnElement, escaped_value: str):
-    if has_wildcard(escaped_value):
+    if is_pattern_value(escaped_value):
         pattern = transform_for_config_like_statement(escaped_value)
         return column.like(pattern)
     else:

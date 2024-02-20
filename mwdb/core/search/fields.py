@@ -81,7 +81,7 @@ class SizeField(ColumnField):
     def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
         units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
-        def parse_size(size) -> int:
+        def parse_size(size: str) -> int:
             if re.match(r"^\d+$", size) is not None:
                 return int(size)
             else:

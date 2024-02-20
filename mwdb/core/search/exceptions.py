@@ -5,7 +5,7 @@ from luqum.tree import Item
 
 class QueryBaseException(Exception):
     """
-    Base exception for SQLQueryBuilder
+    Base exception for search engine
     """
 
 
@@ -16,7 +16,7 @@ class QueryParseException(QueryBaseException):
 
 
 class UnsupportedNodeException(QueryBaseException):
-    def __init__(self, message: str, node: Item):
+    def __init__(self, message: str, node: Item) -> None:
         super().__init__(f"{message} ({node.pos}:{node.pos + node.size - 1})")
 
 
@@ -25,7 +25,7 @@ class UnsupportedNodeTypeException(UnsupportedNodeException):
     Raised when query visitor does not support given Lucene grammar
     """
 
-    def __init__(self, node: Item, expected: Optional[Tuple[Type, ...]] = None):
+    def __init__(self, node: Item, expected: Optional[Tuple[Type, ...]] = None) -> None:
         message = f"{node.__class__.__name__} is not supported here"
         if expected:
             message += f", expected {', '.join(typ.__name__ for typ in expected)}"
@@ -33,18 +33,18 @@ class UnsupportedNodeTypeException(UnsupportedNodeException):
 
 
 class UnsupportedLikeStatement(UnsupportedNodeException):
-    def __init__(self, node: Item):
+    def __init__(self, node: Item) -> None:
         super().__init__("Like statements are not supported here", node)
 
 
 class InvalidValueException(QueryBaseException):
-    def __init__(self, value: str, expected: str):
+    def __init__(self, value: str, expected: str) -> None:
         super().__init__(f"Invalid value format: {value}, expected {expected}")
 
 
 class FieldNotQueryableException(QueryBaseException):
     """
-    Raised when field does not exists, so it can't be queried, eg. file.unexistent_field
+    Raised when field does not exist, so it can't be queried, eg. file.unexistent_field
     """
 
 

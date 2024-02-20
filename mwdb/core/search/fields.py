@@ -1,11 +1,11 @@
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional, Tuple, Type
+from typing import Any, Optional, Type
 
 from dateutil.relativedelta import relativedelta
 from flask import g
-from luqum.tree import FieldGroup, From, Item, OpenRange, Phrase, Range, Term, To, Word
+from luqum.tree import FieldGroup, Item, OpenRange, Range, Term
 from sqlalchemy import String, Text, and_, any_, cast, column, exists, func, or_, select
 from sqlalchemy.dialects.postgresql import ARRAY, array
 from sqlalchemy.dialects.postgresql.array import CONTAINS
@@ -30,9 +30,9 @@ from .exceptions import (
     FieldNotQueryableException,
     InvalidValueException,
     ObjectNotFoundException,
-    UnsupportedLikeStatement,
     UnsupportedNodeTypeException,
 )
+from .node_to_value import node_is_range, range_from_node, string_from_node
 from .parse_helpers import (
     PathSelector,
     has_wildcard,
@@ -48,64 +48,6 @@ from .parse_helpers import (
     transform_for_quoted_like_statement,
     unescape_string,
 )
-
-
-def string_from_node(node: Item, escaped: bool = False) -> str:
-    if isinstance(node, Word):
-        return node.value if escaped else node.unescaped_value
-    elif isinstance(node, Phrase):
-        # Remove quotes from the beginning and the end of Phrase
-        return node.value[1:-1] if escaped else node.unescaped_value[1:-1]
-    else:
-        raise UnsupportedNodeTypeException(node)
-
-
-def range_from_range_node(
-    node: Range,
-) -> Tuple[Optional[str], Optional[str], bool, bool]:
-    low_value = string_from_node(node.low)
-    if low_value == "*":
-        low_value = None
-    elif has_wildcard(low_value):
-        raise UnsupportedLikeStatement(node.low)
-
-    high_value = string_from_node(node.high)
-    if high_value == "*":
-        high_value = None
-    elif has_wildcard(high_value):
-        raise UnsupportedLikeStatement(node.high)
-
-    return low_value, high_value, node.include_low, node.include_high
-
-
-def range_from_openrange_node(
-    node: OpenRange,
-) -> Tuple[Optional[str], Optional[str], bool, bool]:
-    value = string_from_node(node.a)
-    if value == "*":
-        value = None
-    elif has_wildcard(value):
-        raise UnsupportedLikeStatement(node.a)
-
-    if isinstance(node, From):
-        return value, None, node.include, False
-    elif isinstance(node, To):
-        return None, value, False, node.include
-    else:
-        raise UnsupportedNodeTypeException(node)
-
-
-def range_from_node(node: Item) -> Tuple[Optional[str], Optional[str], bool, bool]:
-    if isinstance(node, Range):
-        return range_from_range_node(node)
-    elif isinstance(node, OpenRange):
-        return range_from_openrange_node(node)
-    else:
-        raise UnsupportedNodeTypeException(node)
-
-
-def node_is_range(node: Item) -> bool:
-    return isinstance(node, (Range, OpenRange))
 
 
 class BaseField:
@@ -150,12 +92,22 @@ class SizeField(ColumnField):
                 return int(float(number) * units[unit])
 
         if node_is_range(value):
-            low, high, include_low, include_high = range_from_node(value)
-            if low is not None:
-                low = parse_size(low)
-            if high is not None:
-                high = parse_size(high)
-            return range_equals(self.column, low, high, include_low, include_high)
+            range_value = range_from_node(value)
+            if range_value.low is not None:
+                low = parse_size(range_value.low)
+            else:
+                low = None
+            if range_value.high is not None:
+                high = parse_size(range_value.high)
+            else:
+                high = None
+            return range_equals(
+                self.column,
+                low,
+                high,
+                range_value.include_low,
+                range_value.include_high,
+            )
         else:
             string_value = string_from_node(value)
             target_value = parse_size(string_value)
@@ -257,9 +209,13 @@ class JSONBaseField(ColumnField):
 
     def _get_json_condition(self, value: Item, path_selector: PathSelector) -> Any:
         if node_is_range(value):
-            low, high, include_low, include_high = range_from_node(value)
+            range_value = range_from_node(value)
             jsonpath_condition = self._get_jsonpath_for_range_equals(
-                path_selector, low, high, include_low, include_high
+                path_selector,
+                range_value.low,
+                range_value.high,
+                range_value.include_low,
+                range_value.include_high,
             )
             return self.column.op("@?")(jsonpath_condition)
         else:
@@ -281,11 +237,7 @@ class JSONBaseField(ColumnField):
                 return exists(
                     select([1])
                     .select_from(json_elements)
-                    .where(
-                        or_(
-                            json_element.like(value),
-                        )
-                    )
+                    .where(json_element.like(value))
                 )
             else:
                 jsonpath_condition = self._get_jsonpath_for_string_equals(
@@ -512,10 +464,12 @@ class DatetimeField(ColumnField):
 
     def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
         if node_is_range(value):
-            low, high, _, _ = range_from_node(value)
+            range_value = range_from_node(value)
             # Exclusive ranges are handled as inclusive
             include_high = True
             include_low = True
+            low = range_value.low
+            high = range_value.high
             if low is not None:
                 if self._is_relative_time(low):
                     low_datetime = self._get_border_time(low)
@@ -582,13 +536,21 @@ class UploadCountField(BaseField):
             return int_value
 
         if node_is_range(value):
-            low, high, include_low, include_high = range_from_node(value)
-            if low is not None:
-                low = parse_upload_value(low)
-            if high is not None:
-                high = parse_upload_value(high)
+            range_value = range_from_node(value)
+            if range_value.low is not None:
+                low = parse_upload_value(range_value.low)
+            else:
+                low = None
+            if range_value.high is not None:
+                high = parse_upload_value(range_value.high)
+            else:
+                high = None
             return range_equals(
-                Object.upload_count, low, high, include_low, include_high
+                Object.upload_count,
+                low,
+                high,
+                range_value.include_low,
+                range_value.include_high,
             )
         else:
             string_value = string_from_node(value)
@@ -668,11 +630,10 @@ class FileNameField(BaseField):
             """
             escaped_value = transform_for_like_statement(string_value)
             alt_name = func.unnest(File.alt_names).alias("alt_name")
-            alt_names_condition = (
-                db.session.query(alt_name)
+            alt_names_condition = exists(
+                select([1])
                 .select_from(alt_name)
                 .filter(column(alt_name.name).like(escaped_value))
-                .exists()
             )
         else:
             # Use @> operator to utilize GIN index on ARRAY

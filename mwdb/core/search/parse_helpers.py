@@ -75,7 +75,7 @@ def join_tokenized_string(tokenized_string: Iterable[StringToken]) -> str:
 
 def split_tokenized_string(
     tokenized_string: List[StringToken], separator: StringToken
-) -> List[List[StringToken]]:
+) -> Iterator[List[StringToken]]:
     last_index = 0
     for sep_index in [
         idx for idx, token in enumerate(tokenized_string) if token == separator

@@ -82,10 +82,12 @@ class SizeField(ColumnField):
         units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
         def parse_size(size: str) -> int:
-            if re.match(r"^\d+$", size) is not None:
+            if re.fullmatch(r"\d+", size) is not None:
                 return int(size)
             else:
-                size_match = re.match(r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)$", size.upper())
+                size_match = re.fullmatch(
+                    r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper()
+                )
                 if size_match is None:
                     raise InvalidValueException(size, expected="size")
                 number, unit = size_match.groups()
@@ -574,15 +576,15 @@ class MultiBaseField(BaseField):
 class MultiFileField(MultiBaseField):
     def _get_condition_for_value(self, escaped_value: str):
         value = unescape_string(escaped_value)
-        if re.match(r"^[0-9a-fA-F]{8}$", value):
+        if re.fullmatch(r"[0-9a-fA-F]{8}", value):
             return File.crc32 == value
-        elif re.match(r"^[0-9a-fA-F]{32}$", value):
+        elif re.fullmatch(r"[0-9a-fA-F]{32}", value):
             return File.md5 == value
-        elif re.match(r"^[0-9a-fA-F]{40}$", value):
+        elif re.fullmatch(r"[0-9a-fA-F]{40}", value):
             return File.sha1 == value
-        elif re.match(r"^[0-9a-fA-F]{64}$", value):
+        elif re.fullmatch(r"[0-9a-fA-F]{64}", value):
             return File.sha256 == value
-        elif re.match(r"^[0-9a-fA-F]{128}$", value):
+        elif re.fullmatch(r"[0-9a-fA-F]{128}", value):
             return File.sha512 == value
         else:
             raise ObjectNotFoundException(f"{value} is not valid hash value")
@@ -591,7 +593,7 @@ class MultiFileField(MultiBaseField):
 class MultiConfigField(MultiBaseField):
     def _get_condition_for_value(self, escaped_value: str):
         value = unescape_string(escaped_value)
-        if re.match(r"^[0-9a-fA-F]{64}$", value):
+        if re.fullmatch(r"[0-9a-fA-F]{64}", value):
             return Config.dhash == value
         else:
             value = transform_for_quoted_config_like_statement(
@@ -604,7 +606,7 @@ class MultiConfigField(MultiBaseField):
 class MultiBlobField(MultiBaseField):
     def _get_condition_for_value(self, escaped_value: str):
         value = unescape_string(escaped_value)
-        if re.match(r"^[0-9a-fA-F]{64}$", value):
+        if re.fullmatch(r"[0-9a-fA-F]{64}", value):
             return TextBlob.dhash == value
         else:
             # Blobs are unicode-escaped too

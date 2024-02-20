@@ -53,13 +53,13 @@ from .parse_helpers import (
 class BaseField:
     accepts_subpath = False
 
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
         raise NotImplementedError
 
-    def get_condition(self, value: Item, path_selector: PathSelector) -> Any:
+    def get_condition(self, node: Item, path_selector: PathSelector) -> Any:
         if not self.accepts_subpath and len(path_selector) > 1:
             raise FieldNotQueryableException("Subfields are not allowed for this field")
-        return self._get_condition(value, path_selector)
+        return self._get_condition(node, path_selector)
 
 
 class ColumnField(BaseField):
@@ -72,13 +72,13 @@ class ColumnField(BaseField):
 
 
 class StringField(ColumnField):
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value, escaped=True)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node, escaped=True)
         return string_equals(self.column, string_value)
 
 
 class SizeField(ColumnField):
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
         units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
         def parse_size(size: str) -> int:
@@ -93,8 +93,8 @@ class SizeField(ColumnField):
                 number, unit = size_match.groups()
                 return int(float(number) * units[unit])
 
-        if node_is_range(value):
-            range_value = range_from_node(value)
+        if node_is_range(node):
+            range_value = range_from_node(node)
             if range_value.low is not None:
                 low = parse_size(range_value.low)
             else:
@@ -111,7 +111,7 @@ class SizeField(ColumnField):
                 range_value.include_high,
             )
         else:
-            string_value = string_from_node(value)
+            string_value = string_from_node(node)
             target_value = parse_size(string_value)
             return self.column == target_value
 
@@ -121,8 +121,8 @@ class StringListField(ColumnField):
         super().__init__(column)
         self.value_column = value_column
 
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value, escaped=True)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node, escaped=True)
         return self.column.any(string_equals(self.value_column, string_value))
 
 
@@ -131,8 +131,8 @@ class UUIDField(ColumnField):
         super().__init__(column)
         self.value_column = value_column
 
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
         if string_value == "*":
             return self.column.any(self.value_column.is_not(None))
 
@@ -145,8 +145,8 @@ class UUIDField(ColumnField):
 
 
 class FavoritesField(BaseField):
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
         if (
             not g.auth_user.has_rights(Capabilities.manage_users)
             and g.auth_user.login != string_value
@@ -161,7 +161,7 @@ class FavoritesField(BaseField):
             user = db.session.query(User).filter(User.login == string_value).first()
 
         if user is None:
-            raise ObjectNotFoundException(f"No such user: {value}")
+            raise ObjectNotFoundException(f"No such user: {node}")
 
         return Object.followers.any(User.id == user.id)
 
@@ -209,9 +209,9 @@ class JSONBaseField(ColumnField):
         """
         return jsonpath_string_equals(path_selector, value)
 
-    def _get_json_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        if node_is_range(value):
-            range_value = range_from_node(value)
+    def _get_json_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        if node_is_range(node):
+            range_value = range_from_node(node)
             jsonpath_condition = self._get_jsonpath_for_range_equals(
                 path_selector,
                 range_value.low,
@@ -221,14 +221,14 @@ class JSONBaseField(ColumnField):
             )
             return self.column.op("@?")(jsonpath_condition)
         else:
-            string_value = string_from_node(value, escaped=True)
+            string_value = string_from_node(node, escaped=True)
             if is_pattern_value(string_value):
-                value = self._get_value_for_like_statement(string_value)
+                node = self._get_value_for_like_statement(string_value)
                 if string_value.startswith("*") and string_value.endswith("*"):
                     stringified_value = self._get_quoted_value_for_like_statement(
                         string_value
                     )
-                    value = any_([value, stringified_value])
+                    node = any_([node, stringified_value])
                 jsonpath_selector = make_jsonpath_selector(path_selector)
                 json_elements = func.jsonb_path_query(
                     self.column, jsonpath_selector
@@ -239,7 +239,7 @@ class JSONBaseField(ColumnField):
                 return exists(
                     select([1])
                     .select_from(json_elements)
-                    .where(json_element.like(value))
+                    .where(json_element.like(node))
                 )
             else:
                 jsonpath_condition = self._get_jsonpath_for_string_equals(
@@ -252,7 +252,7 @@ class AttributeField(JSONBaseField):
     def __init__(self):
         super().__init__(Attribute.value)
 
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
         if len(path_selector) <= 1:
             raise FieldNotQueryableException("Missing attribute key (attribute.<key>:)")
 
@@ -264,19 +264,19 @@ class AttributeField(JSONBaseField):
         if attribute_definition is None:
             raise ObjectNotFoundException(f"No such attribute: {attribute_key}")
 
-        if not isinstance(value, (OpenRange, Range, Term)):
-            raise UnsupportedNodeTypeException(value)
+        if not isinstance(node, (OpenRange, Range, Term)):
+            raise UnsupportedNodeTypeException(node)
 
         if (
             attribute_definition.hidden
-            and (node_is_range(value) or value.has_wildcard())
+            and (node_is_range(node) or node.has_wildcard())
             and not g.auth_user.has_rights(Capabilities.reading_all_attributes)
         ):
             raise FieldNotQueryableException(
                 "Wildcards and ranges are not allowed for hidden attributes"
             )
 
-        value_condition = self._get_json_condition(value, path_selector[1:])
+        value_condition = self._get_json_condition(node, path_selector[1:])
         return Object.attributes.any(
             and_(
                 Attribute.key == attribute_key,
@@ -312,13 +312,13 @@ class ConfigField(JSONBaseField):
     ) -> str:
         return jsonpath_config_string_equals(path_selector, value)
 
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        return self._get_json_condition(value, path_selector)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        return self._get_json_condition(node, path_selector)
 
 
 class ShareField(BaseField):
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
 
         group = db.session.query(Group).filter(Group.name == string_value).first()
         if group is None:
@@ -334,8 +334,8 @@ class ShareField(BaseField):
 
 
 class SharerField(BaseField):
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
 
         if (
             g.auth_user.has_rights(Capabilities.manage_users)
@@ -371,8 +371,8 @@ class SharerField(BaseField):
 
 
 class UploaderField(BaseField):
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
 
         if string_value == "public":
             raise ObjectNotFoundException(
@@ -464,9 +464,9 @@ class DatetimeField(ColumnField):
         else:
             raise InvalidValueException(date_string, "date-time")
 
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        if node_is_range(value):
-            range_value = range_from_node(value)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        if node_is_range(node):
+            range_value = range_from_node(node)
             # Exclusive ranges are handled as inclusive
             include_high = True
             include_low = True
@@ -487,7 +487,7 @@ class DatetimeField(ColumnField):
             else:
                 high_datetime = None
         else:
-            string_value = string_from_node(value)
+            string_value = string_from_node(node)
             low_datetime, high_datetime = self._get_date_range(string_value)
             include_low = include_high = True
         return range_equals(
@@ -496,12 +496,12 @@ class DatetimeField(ColumnField):
 
 
 class RelationField(ColumnField):
-    def _get_condition(self, subquery: Item, path_selector: PathSelector) -> Any:
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
         from .search import QueryConditionVisitor
 
-        if not isinstance(subquery, FieldGroup):
-            raise UnsupportedNodeTypeException(subquery)
-        condition = QueryConditionVisitor(Object).visit(subquery.expr)
+        if not isinstance(node, FieldGroup):
+            raise UnsupportedNodeTypeException(node)
+        condition = QueryConditionVisitor(Object).visit(node.expr)
         return self.column.any(
             Object.id.in_(
                 db.session.query(Object.id)
@@ -516,8 +516,8 @@ class CommentAuthorField(ColumnField):
         super().__init__(column)
         self.value_column = value_column
 
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
 
         user = db.session.query(User).filter(User.login == string_value).first()
         if user is None:
@@ -527,7 +527,7 @@ class CommentAuthorField(ColumnField):
 
 
 class UploadCountField(BaseField):
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
         def parse_upload_value(value):
             try:
                 int_value = int(value)
@@ -537,8 +537,8 @@ class UploadCountField(BaseField):
                 raise InvalidValueException(value, "positive integer value")
             return int_value
 
-        if node_is_range(value):
-            range_value = range_from_node(value)
+        if node_is_range(node):
+            range_value = range_from_node(node)
             if range_value.low is not None:
                 low = parse_upload_value(range_value.low)
             else:
@@ -555,7 +555,7 @@ class UploadCountField(BaseField):
                 range_value.include_high,
             )
         else:
-            string_value = string_from_node(value)
+            string_value = string_from_node(node)
             upload_value = parse_upload_value(string_value)
             return Object.upload_count == upload_value
 
@@ -564,8 +564,8 @@ class MultiBaseField(BaseField):
     def _get_condition_for_value(self, escaped_value: str):
         raise NotImplementedError
 
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value, escaped=True).strip()
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node, escaped=True).strip()
         values_list = re.split("\\s+", string_value)
         condition = None
         for value in values_list:
@@ -617,8 +617,8 @@ class MultiBlobField(MultiBaseField):
 class FileNameField(BaseField):
     accepts_wildcards = True
 
-    def _get_condition(self, value: Item, path_selector: PathSelector) -> Any:
-        string_value = string_from_node(value, escaped=True)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node, escaped=True)
         name_condition = string_equals(File.file_name, string_value)
         if is_pattern_value(string_value):
             """

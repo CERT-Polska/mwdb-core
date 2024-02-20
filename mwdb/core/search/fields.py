@@ -635,7 +635,7 @@ class FileNameField(BaseField):
             alt_names_condition = exists(
                 select([1])
                 .select_from(alt_name)
-                .filter(column(alt_name.name).like(escaped_value))
+                .where(column(alt_name.name).like(escaped_value))
             )
         else:
             # Use @> operator to utilize GIN index on ARRAY

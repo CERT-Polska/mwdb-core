@@ -85,7 +85,7 @@ class SizeField(ColumnField):
             if re.match(r"^\d+$", size) is not None:
                 return int(size)
             else:
-                size_match = re.match(r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper())
+                size_match = re.match(r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)$", size.upper())
                 if size_match is None:
                     raise InvalidValueException(size, expected="size")
                 number, unit = size_match.groups()

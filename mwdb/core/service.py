@@ -1,11 +1,12 @@
+import re
 import sys
 import textwrap
 
-from apispec import APISpec
+from apispec import APISpec, yaml_utils
 from apispec.ext.marshmallow import MarshmallowPlugin
-from apispec_webframeworks.flask import FlaskPlugin
 from flask import Blueprint, Flask, jsonify, request
 from flask.typing import ResponseReturnValue
+from flask.views import MethodView
 from sqlalchemy.exc import OperationalError
 from werkzeug.exceptions import (
     HTTPException,
@@ -19,72 +20,69 @@ from mwdb.version import app_version
 
 from .log import getLogger
 
-SUPPORTED_METHODS = ["head", "get", "post", "put", "delete", "patch"]
-
 logger = getLogger()
 
 
-class Resource:
-    def __init__(self):
-        self.available_methods = [
-            method.upper() for method in SUPPORTED_METHODS if hasattr(self, method)
-        ]
+def flaskpath2openapi(path: str) -> str:
+    """Convert a Flask URL rule to an OpenAPI-compliant path.
 
-    def __call__(self, *args, **kwargs):
-        """
-        Acts as view function, calling appropriate method and
-        jsonifying response
-        """
-        if request.method not in self.available_methods:
+    Got from https://github.com/marshmallow-code/apispec-webframeworks/
+
+    :param str path: Flask path template.
+    """
+    # from flask-restplus
+    re_url = re.compile(r"<(?:[^:<>]+:)?([^<>]+)>")
+    return re_url.sub(r"{\1}", path)
+
+
+class Resource(MethodView):
+    init_every_request = False
+
+    def dispatch_request(self, *args, **kwargs):
+        method = request.method.lower()
+        if not hasattr(self, method):
             raise MethodNotAllowed(
-                valid_methods=self.available_methods,
+                valid_methods=self.methods,
                 description="Method is not allowed for this endpoint",
             )
-        method = request.method.lower()
         response = getattr(self, method)(*args, **kwargs)
         if isinstance(response, Response):
             return response
         return jsonify(response)
 
-    def get_methods(self):
-        """
-        Returns available methods for this resource
-        """
-        return [getattr(self, method) for method in self.available_methods]
-
 
 class Service:
-    def __init__(self, app: Flask, blueprint: Blueprint) -> None:
+    description = textwrap.dedent(
+        """
+        MWDB API documentation.
+
+        If you want to automate things, we recommend using
+        <a href="http://github.com/CERT-Polska/mwdblib">
+            mwdblib library
+        </a>
+    """
+    )
+    servers = [
+        {
+            "url": "{scheme}://{host}",
+            "description": "MWDB API endpoint",
+            "variables": {
+                "scheme": {"enum": ["http", "https"], "default": "https"},
+                "host": {"default": "mwdb.cert.pl"},
+            },
+        }
+    ]
+
+    def __init__(self, app: Flask) -> None:
         self.app = app
-        self.blueprint = blueprint
-        self.blueprint.register_error_handler(Exception, self.error_handler)
+        self.blueprint = Blueprint("api", __name__, url_prefix="/api")
         self.spec = APISpec(
             title="MWDB Core",
             version=app_version,
             openapi_version="3.0.2",
-            plugins=[FlaskPlugin(), MarshmallowPlugin()],
-            info={
-                "description": textwrap.dedent(
-                    """
-                    MWDB API documentation.
-
-                    If you want to automate things, we recommend using
-                    <a href="http://github.com/CERT-Polska/mwdblib">
-                        mwdblib library
-                    </a>
-                    """
-                )
-            },
-            servers=[
-                {
-                    "url": "{scheme}://{host}",
-                    "description": "MWDB API endpoint",
-                    "variables": {
-                        "scheme": {"enum": ["http", "https"], "default": "https"},
-                        "host": {"default": "mwdb.cert.pl"},
-                    },
-                }
-            ],
+            plugins=[MarshmallowPlugin()],
+            info={"description": self.description},
+            servers=self.servers,
         )
         self.spec.components.security_scheme(
             "bearerAuth", {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
@@ -98,20 +96,52 @@ class Service:
             return self._make_error_response(exc)
         elif isinstance(exc, OperationalError):
             return self._make_error_response(
-                ServiceUnavailable("Request canceled due to statement timeout")
+                ServiceUnavailable(
+                    description="Request canceled due to statement timeout"
+                )
             )
         else:
             # Unknown exception, return ISE 500
             logger.exception("Internal server error", exc_info=sys.exc_info())
             return self._make_error_response(
-                InternalServerError("Internal server error")
+                InternalServerError(description="Internal server error")
             )
 
     def add_resource(
         self, resource: Resource, *urls: str, undocumented: bool = False
     ) -> None:
+        view = resource.as_view(resource.__name__)
+        endpoint = view.__name__.lower()
         for url in urls:
-            endpoint = f"{self.blueprint.name}.{resource.__name__.lower()}"
-            self.blueprint.add_url_rule(rule=url, endpoint=endpoint, view_func=resource)
+            self.blueprint.add_url_rule(rule=url, endpoint=endpoint, view_func=view)
         if not undocumented:
-            self.spec.path(view=resource, app=self.app)
+            resource_doc = resource.__doc__ or ""
+            operations = yaml_utils.load_operations_from_docstring(resource_doc)
+            for method in resource.methods:
+                method_name = method.lower()
+                method_doc = getattr(resource, method_name).__doc__
+                if method_doc:
+                    operations[method_name] = yaml_utils.load_yaml_from_docstring(
+                        method_doc
+                    )
+            for url in urls:
+                self.spec.path(path=flaskpath2openapi(url), operations=operations)
+
+    def register(self):
+        """
+        Registers service and its blueprint to the app.
+
+        This must be done after adding all resources.
+        """
+        # This handler is intentionally set on app and not blueprint
+        # to catch routing errors as well. The side effect is that
+        # it will return jsonified error messages for static endpoints
+        # but static files should be handled by separate server anyway...
+        self.app.register_error_handler(Exception, self.error_handler)
+        self.app.register_blueprint(self.blueprint)
+
+    def relative_url_for(self, resource, **values):
+        # TODO: Remove this along with legacy download endpoint
+        endpoint = self.blueprint.name + "." + resource.__name__.lower()
+        path = self.app.url_for(endpoint, **values)
+        return path[len(self.blueprint.url_prefix) :]

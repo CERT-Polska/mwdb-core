@@ -412,3 +412,6 @@ setup_logger()
 plugin_context = PluginAppContext()
 with app.app_context():
     load_plugins(plugin_context)
+
+# Register blueprint
+api.register()

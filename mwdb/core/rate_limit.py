@@ -50,7 +50,10 @@ def apply_rate_limit_for_request() -> bool:
     ):
         return False
     # Split blueprint name and resource name from endpoint
-    _, resource_name = request.endpoint.split(".", 2)
+    if request.endpoint:
+        _, resource_name = request.endpoint.split(".", 2)
+    else:
+        resource_name = "None"
     method = request.method.lower()
     user = g.auth_user.login if g.auth_user is not None else request.remote_addr
     # Limit keys from most specific to the least specific

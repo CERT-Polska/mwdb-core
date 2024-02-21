@@ -4,7 +4,6 @@ from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.metakey import (
     MetakeyDefinitionItemRequestArgsSchema,
@@ -34,7 +33,6 @@ from . import (
 )
 
 
-@rate_limited_resource
 class MetakeyResource(Resource):
     @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
@@ -263,7 +261,6 @@ class MetakeyResource(Resource):
         db.session.commit()
 
 
-@rate_limited_resource
 class MetakeyListDefinitionResource(Resource):
     @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
@@ -312,7 +309,6 @@ class MetakeyListDefinitionResource(Resource):
         return schema.dump({"metakeys": metakeys})
 
 
-@rate_limited_resource
 class MetakeyListDefinitionManageResource(Resource):
     @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
@@ -353,7 +349,6 @@ class MetakeyListDefinitionManageResource(Resource):
         return schema.dump({"metakeys": metakeys})
 
 
-@rate_limited_resource
 class MetakeyDefinitionManageResource(Resource):
     @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization
@@ -592,7 +587,6 @@ class MetakeyDefinitionManageResource(Resource):
         db.session.commit()
 
 
-@rate_limited_resource
 class MetakeyPermissionResource(Resource):
     @deprecated_endpoint(DeprecatedFeature.legacy_metakey_api)
     @requires_authorization

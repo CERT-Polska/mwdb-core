@@ -6,7 +6,6 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.group import (
     GroupCreateRequestSchema,
@@ -28,7 +27,6 @@ from . import (
 )
 
 
-@rate_limited_resource
 class GroupListResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -65,7 +63,6 @@ class GroupListResource(Resource):
         return schema.dump({"groups": objs})
 
 
-@rate_limited_resource
 class GroupResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -310,7 +307,6 @@ class GroupResource(Resource):
         return schema.dump({"name": name})
 
 
-@rate_limited_resource
 class GroupMemberResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)

@@ -9,7 +9,6 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.core.search import QueryBaseException, build_query
 from mwdb.model import AttributeDefinition, Object, db
 from mwdb.model.tag import Tag
@@ -154,7 +153,6 @@ class ObjectUploader:
         return schema.dump(item)
 
 
-@rate_limited_resource
 class ObjectResource(Resource):
     ObjectType = Object
     ListResponseSchema = ObjectListResponseSchema
@@ -255,7 +253,6 @@ class ObjectResource(Resource):
         return schema.dump(objects, many=True)
 
 
-@rate_limited_resource
 class ObjectItemResource(Resource, ObjectUploader):
     ObjectType = Object
     ItemResponseSchema = ObjectItemResponseSchema
@@ -381,7 +378,6 @@ class ObjectItemResource(Resource, ObjectUploader):
         hooks.on_removed_object(obj)
 
 
-@rate_limited_resource
 class ObjectCountResource(Resource):
     @requires_authorization
     def get(self, type):
@@ -441,7 +437,6 @@ class ObjectCountResource(Resource):
         return schema.dump({"count": result})
 
 
-@rate_limited_resource
 class ObjectFavoriteResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.personalize)
@@ -552,7 +547,6 @@ class ObjectFavoriteResource(Resource):
             )
 
 
-@rate_limited_resource
 class ObjectShare3rdPartyResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.modify_3rd_party_sharing)

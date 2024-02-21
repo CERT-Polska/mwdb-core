@@ -5,7 +5,6 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unaut
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import File
 from mwdb.model.file import EmptyFileError
 from mwdb.model.object import ObjectTypeConflictError
@@ -50,7 +49,6 @@ class FileUploader(ObjectUploader):
             raise BadRequest("File cannot be empty")
 
 
-@rate_limited_resource
 class FileResource(ObjectResource, FileUploader):
     ObjectType = File
     ListResponseSchema = FileListResponseSchema
@@ -200,7 +198,6 @@ class FileResource(ObjectResource, FileUploader):
         return self.create_object(obj["options"])
 
 
-@rate_limited_resource
 class FileItemResource(ObjectItemResource, FileUploader):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema
@@ -367,7 +364,6 @@ class FileItemResource(ObjectItemResource, FileUploader):
         return super().delete(identifier)
 
 
-@rate_limited_resource
 class FileDownloadResource(Resource):
     def get(self, identifier):
         """
@@ -503,7 +499,6 @@ class FileDownloadResource(Resource):
         return schema.dump({"token": download_token})
 
 
-@rate_limited_resource
 class FileDownloadZipResource(Resource):
     def get(self, identifier):
         """

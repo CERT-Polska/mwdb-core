@@ -12,6 +12,7 @@ from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
 from mwdb.core.log import getLogger, setup_logger
 from mwdb.core.metrics import metric_api_requests, metrics_enabled
 from mwdb.core.plugins import PluginAppContext, load_plugins
+from mwdb.core.rate_limit import apply_rate_limit_for_request
 from mwdb.core.static import static_blueprint
 from mwdb.core.util import token_hex
 from mwdb.model import APIKey, User, db
@@ -218,6 +219,11 @@ def require_auth():
 
         if g.auth_user.disabled:
             raise Forbidden("User has been disabled.")
+
+
+@app.before_request
+def apply_rate_limit():
+    apply_rate_limit_for_request()
 
 
 # Server health endpoints

@@ -4,7 +4,6 @@ from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Tag, db
 from mwdb.schema.tag import (
     TagItemResponseSchema,
@@ -22,7 +21,6 @@ from . import (
 )
 
 
-@rate_limited_resource
 class TagListResource(Resource):
     @requires_authorization
     def get(self):
@@ -74,7 +72,6 @@ class TagListResource(Resource):
         return schema.dump(tags)
 
 
-@rate_limited_resource
 class TagResource(Resource):
     @requires_authorization
     def get(self, type, identifier):

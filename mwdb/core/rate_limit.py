@@ -37,20 +37,31 @@ def get_limit_from_config(key) -> Optional[str]:
 
 
 def apply_rate_limit_for_request() -> bool:
+    """
+    Raises TooManyRequests if current user has exceeded the rate limit
+    for current request. Limits are hierarchical and the lookup is as follows:
+    - count a hit for resource and method (if limit is set)
+    - count a hit for resource (if limit is set)
+    - count a hit for method (if limit is not set then default is used)
+
+    Limits are login-based for authenticated users.
+    If user is not authenticated then limit is IP-based.
+    """
     if not limiter:
         return False
     if is_rate_limit_disabled():
         return False
-    # Split blueprint name from resource name
+    # Split blueprint name and resource name from endpoint
     _, resource_name = request.endpoint.split(".", 2)
     method = request.method.lower()
     user = g.auth_user.login if g.auth_user is not None else request.remote_addr
     # Limit keys from most specific to the least specific
     limit_keys = [[resource_name, method], [resource_name], [method]]
     for limit_key in limit_keys:
-        # Get limit for key
+        # Get limit values for key
         limit_values = get_limit_from_config("_".join(limit_key))
         if limit_values:
+            # limits has parse_many, but we're separating values using space
             for limit_value in limit_values.split(" "):
                 limit_item = parse(limit_value)
                 identifiers = [user, *limit_key]
@@ -58,8 +69,11 @@ def apply_rate_limit_for_request() -> bool:
                     reset_time = limiter.get_window_stats(
                         limit_item, *identifiers
                     ).reset_time
+                    # Limits' reset_time uses Redis TTL internally and
+                    # adds time.time to it, so we can safely subtract
+                    # the same value. There still should be a cutoff to
+                    # make clients wait at least few seconds.
                     retry_after = max(5, reset_time - int(time.time()))
-                    print(reset_time, time.time(), flush=True)
                     raise TooManyRequests(
                         retry_after=retry_after,
                         description=f"Request limit: {limit_value} for "

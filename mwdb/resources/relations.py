@@ -1,8 +1,8 @@
-from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.service import Resource
 from mwdb.model import Object, db
 from mwdb.schema.relations import RelationsResponseSchema
 

@@ -2,7 +2,6 @@ import datetime
 import hashlib
 
 from flask import g, request
-from flask_restful import Resource
 from marshmallow import ValidationError
 from sqlalchemy import and_, exists, or_
 from werkzeug.exceptions import Conflict, Forbidden, NotFound
@@ -10,6 +9,7 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
+from mwdb.core.service import Resource
 from mwdb.model import Group, OpenIDProvider, OpenIDUserIdentity, User, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.group import GroupNameSchemaBase

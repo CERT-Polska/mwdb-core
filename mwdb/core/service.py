@@ -1,97 +1,117 @@
+import sys
 import textwrap
-from functools import partial
 
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
-from flask_restful import Api
+from apispec_webframeworks.flask import FlaskPlugin
+from flask import Blueprint, Flask, jsonify, request
+from flask.typing import ResponseReturnValue
 from sqlalchemy.exc import OperationalError
-from werkzeug.exceptions import HTTPException, ServiceUnavailable
+from werkzeug.exceptions import (
+    HTTPException,
+    InternalServerError,
+    MethodNotAllowed,
+    ServiceUnavailable,
+)
+from werkzeug.wrappers import Response
 
 from mwdb.version import app_version
 
-from . import log
-from .apispec_utils import ApispecFlaskRestful
+from .log import getLogger
+
+SUPPORTED_METHODS = ["head", "get", "post", "put", "delete", "patch"]
+
+logger = getLogger()
 
 
-class Service(Api):
-    def __init__(self, flask_app, *args, **kwargs):
-        self.spec = self._create_spec()
-        self.flask_app = flask_app
-        super().__init__(*args, **kwargs)
+class Resource:
+    def __init__(self):
+        self.available_methods = [
+            method.upper() for method in SUPPORTED_METHODS if hasattr(self, method)
+        ]
 
-    def _init_app(self, app):
-        # I want to log exceptions on my own
-        def dont_log(*_, **__):
-            pass
+    def __call__(self, *args, **kwargs):
+        """
+        Acts as view function, calling appropriate method and
+        jsonifying response
+        """
+        if request.method not in self.available_methods:
+            raise MethodNotAllowed(
+                valid_methods=self.available_methods,
+                description="Method is not allowed for this endpoint",
+            )
+        method = request.method.lower()
+        response = getattr(self, method)(*args, **kwargs)
+        if isinstance(response, Response):
+            return response
+        return jsonify(response)
 
-        app.log_exception = dont_log
-        if (
-            isinstance(app.handle_exception, partial)
-            and app.handle_exception.func is self.error_router
-        ):
-            # Prevent double-initialization
-            return
-        super()._init_app(app)
+    def get_methods(self):
+        """
+        Returns available methods for this resource
+        """
+        return [getattr(self, method) for method in self.available_methods]
 
-    def _create_spec(self):
-        spec = APISpec(
-            title="MWDB",
+
+class Service:
+    def __init__(self, app: Flask, blueprint: Blueprint) -> None:
+        self.app = app
+        self.blueprint = blueprint
+        self.blueprint.register_error_handler(Exception, self.error_handler)
+        self.spec = APISpec(
+            title="MWDB Core",
             version=app_version,
             openapi_version="3.0.2",
-            plugins=[ApispecFlaskRestful(), MarshmallowPlugin()],
-        )
+            plugins=[FlaskPlugin(), MarshmallowPlugin()],
+            info={
+                "description": textwrap.dedent(
+                    """
+                    MWDB API documentation.
 
-        spec.components.security_scheme(
+                    If you want to automate things, we recommend using
+                    <a href="http://github.com/CERT-Polska/mwdblib">
+                        mwdblib library
+                    </a>
+                    """
+                )
+            },
+            servers=[
+                {
+                    "url": "{scheme}://{host}",
+                    "description": "MWDB API endpoint",
+                    "variables": {
+                        "scheme": {"enum": ["http", "https"], "default": "https"},
+                        "host": {"default": "mwdb.cert.pl"},
+                    },
+                }
+            ],
+        )
+        self.spec.components.security_scheme(
             "bearerAuth", {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
         )
-        spec.options["info"] = {
-            "description": textwrap.dedent(
-                """
-                MWDB API documentation.
 
-                If you want to automate things, we recommend using
-                <a href="http://github.com/CERT-Polska/mwdblib">mwdblib library</a>"""
+    def _make_error_response(self, exc: HTTPException) -> ResponseReturnValue:
+        return jsonify({"message": exc.description}), exc.code
+
+    def error_handler(self, exc: Exception) -> ResponseReturnValue:
+        if isinstance(exc, HTTPException):
+            return self._make_error_response(exc)
+        elif isinstance(exc, OperationalError):
+            return self._make_error_response(
+                ServiceUnavailable("Request canceled due to statement timeout")
             )
-        }
-        spec.options["servers"] = [
-            {
-                "url": "{scheme}://{host}",
-                "description": "MWDB API endpoint",
-                "variables": {
-                    "scheme": {"enum": ["http", "https"], "default": "https"},
-                    "host": {"default": "mwdb.cert.pl"},
-                },
-            }
-        ]
-        return spec
-
-    def error_router(self, original_handler, e):
-        logger = log.getLogger()
-        if isinstance(e, HTTPException):
-            logger.error(str(e))
-        elif isinstance(e, OperationalError):
-            logger.error(str(e))
-            raise ServiceUnavailable("Request canceled due to statement timeout")
         else:
-            logger.exception("Unhandled exception occurred")
+            # Unknown exception, return ISE 500
+            logger.exception("Internal server error", exc_info=sys.exc_info())
+            return self._make_error_response(
+                InternalServerError("Internal server error")
+            )
 
-        # Handle all exceptions using handle_error, not only for owned routes
-        try:
-            return self.handle_error(e)
-        except Exception:
-            logger.exception("Exception from handle_error occurred")
-            pass
-        # If something went wrong - fallback to original behavior
-        return super().error_router(original_handler, e)
-
-    def add_resource(self, resource, *urls, undocumented=False, **kwargs):
-        super().add_resource(resource, *urls, **kwargs)
+    def add_resource(
+        self, resource: Resource, *urls: str, undocumented: bool = False
+    ) -> None:
+        for url in urls:
+            endpoint = f"{self.blueprint.name}.{resource.__name__.lower()}"
+            self.blueprint.add_url_rule(rule=url, endpoint=endpoint, view_func=resource)
         if not undocumented:
-            self.spec.path(resource=resource, api=self, app=self.flask_app)
-
-    def relative_url_for(self, resource, **values):
-        path = self.url_for(resource, **values)
-        return path[len(self.blueprint.url_prefix) :]
-
-    def endpoint_for(self, resource):
-        return f"{self.blueprint.name}.{resource}"
+            self.spec.path(view=resource, app=self.app)

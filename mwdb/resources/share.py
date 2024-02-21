@@ -1,8 +1,8 @@
 from flask import g, request
-from flask_restful import Resource
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.service import Resource
 from mwdb.model import Group, User, db
 from mwdb.model.object import AccessType
 from mwdb.schema.share import (

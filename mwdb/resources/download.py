@@ -1,9 +1,9 @@
 from flask import Response
-from flask_restful import Resource
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.app import api
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
+from mwdb.core.service import Resource
 from mwdb.model import File
 from mwdb.schema.download import DownloadURLResponseSchema
 

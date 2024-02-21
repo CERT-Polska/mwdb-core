@@ -1,9 +1,10 @@
 from flask import g, request
-from flask_restful import Resource
+from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest
 
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.search import QueryBaseException, build_query
+from mwdb.core.service import Resource
 from mwdb.model import Object
 from mwdb.schema.object import ObjectListItemResponseSchema
 from mwdb.schema.search import SearchRequestSchema

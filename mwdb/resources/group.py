@@ -1,11 +1,11 @@
 from flask import g, request
-from flask_restful import Resource
 from sqlalchemy import exists
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.service import Resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.group import (
     GroupCreateRequestSchema,

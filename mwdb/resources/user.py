@@ -1,7 +1,6 @@
 import datetime
 
 from flask import g, request
-from flask_restful import Resource
 from sqlalchemy import exists
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import true
@@ -11,6 +10,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
 from mwdb.core.plugins import hooks
+from mwdb.core.service import Resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.user import (
     UserCreateRequestSchema,

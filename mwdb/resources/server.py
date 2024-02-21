@@ -1,10 +1,10 @@
 from flask import g
-from flask_restful import Resource
 
 from mwdb.core.app import api
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import get_plugin_info
+from mwdb.core.service import Resource
 from mwdb.schema.server import (
     ServerAdminInfoResponseSchema,
     ServerInfoResponseSchema,

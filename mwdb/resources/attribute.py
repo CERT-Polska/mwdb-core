@@ -1,9 +1,9 @@
 from flask import g, request
-from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.service import Resource
 from mwdb.model import Attribute, AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.attribute import (
     AttributeDefinitionCreateRequestSchema,

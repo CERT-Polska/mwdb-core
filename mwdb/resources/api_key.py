@@ -2,11 +2,11 @@ import uuid
 from datetime import datetime
 
 from flask import g, request
-from flask_restful import Resource
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.service import Resource
 from mwdb.model import APIKey, User, db
 from mwdb.schema.api_key import (
     APIKeyIdentifierBase,

@@ -1,8 +1,8 @@
 from flask import g, request
-from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.service import Resource
 from mwdb.model import QuickQuery, db
 from mwdb.schema.quick_query import QuickQueryResponseSchema, QuickQuerySchemaBase
 

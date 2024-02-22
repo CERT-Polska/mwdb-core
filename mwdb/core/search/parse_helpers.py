@@ -28,10 +28,15 @@ def tokenize_string(
         - ("control", "?") for non-escaped control character for control_chars string
         - ("control", "\\?") for escaped control characters for control_escapes string
     "string" nodes are unescaped.
+
+    control_chars are regular characters that are
+    treated as control characters when unescaped
+
+    control_escapes are special escape characters that are
+    marked as control characters when escaped
     """
-    # Ensure that \ is not a control character because it makes things
-    # more complicated. Lucene doesn't allow for unescaped \ anyway
-    assert "\\" not in control_chars
+    # WARNING: Ensure that \ is not passed as a control character.
+    # Lucene doesn't allow for unescaped \ anyway
     if control_chars:
         # Escape regex control characters in set of control characters
         # to be safely put in square brackets [...]
@@ -99,6 +104,9 @@ def parse_field_path(field_path: str) -> PathSelector:
         list(tokenized_string), (TokenType.CONTROL, ".")
     )
     for path_element in path_elements:
+        # Asterisks at the end of field are used for unnesting arrays
+        # in JSON fields. We need to count them and remove them from
+        # field name.
         asterisk_count = 0
         for asterisk_count, token in enumerate(reversed(path_element)):
             if token != (TokenType.CONTROL, "*"):

@@ -274,7 +274,8 @@ class AttributeField(JSONBaseField):
             and not g.auth_user.has_rights(Capabilities.reading_all_attributes)
         ):
             raise FieldNotQueryableException(
-                "Wildcards and ranges are not allowed for hidden attributes"
+                "Using wildcards and ranges for hidden attributes "
+                "requires 'reading_all_attributes' capability"
             )
 
         value_condition = self._get_json_condition(node, path_selector[1:])
@@ -418,35 +419,30 @@ class DatetimeField(ColumnField):
         pattern = r"^(\d+[yYmWwDdHhMSs])+$"
         return re.search(pattern, expression_value)
 
-    def _get_field_for_unit(self, unit):
-        if unit in ["y", "Y"]:
-            unit = "years"
-        elif unit in ["m"]:
-            unit = "months"
-        elif unit in ["W", "w"]:
-            unit = "weeks"
-        elif unit in ["D", "d"]:
-            unit = "days"
-        elif unit in ["H", "h"]:
-            unit = "hours"
-        elif unit in ["M"]:
-            unit = "minutes"
-        elif unit in ["S", "s"]:
-            unit = "seconds"
-        else:
-            return None
-        return unit
-
     def _get_border_time(self, expression_value):
-        pattern = r"(\d+)([yYmWwDdHhMSs])"
+        units = {
+            "y": "years",
+            "Y": "years",
+            "m": "months",
+            "W": "weeks",
+            "w": "weeks",
+            "D": "days",
+            "d": "days",
+            "H": "hours",
+            "h": "hours",
+            "M": "minutes",
+            "S": "seconds",
+            "s": "seconds",
+        }
+        pattern = rf"(\d+)([{''.join(units.keys())}])"
         conditions = re.findall(pattern, expression_value)
         delta_dict = {}
         for value, unit in conditions:
-            field = self._get_field_for_unit(unit)
-            if field is None:
+            unit_name = units.get(unit)
+            # If field is unknown or is repeated e.g. 5M5M
+            if unit_name is None or unit_name in delta_dict:
                 raise InvalidValueException(expression_value, "date-time")
-            if field not in delta_dict.keys():
-                delta_dict.update({field: int(value)})
+            delta_dict[unit_name] = int(value)
         border_time = datetime.now(tz=timezone.utc) - relativedelta(**delta_dict)
         return border_time
 

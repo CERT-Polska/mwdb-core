@@ -1,12 +1,14 @@
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, List, Tuple, Type, Union
+from typing import Any, Optional, Type
 
 from dateutil.relativedelta import relativedelta
 from flask import g
-from luqum.tree import Phrase, Range, Term, Word
-from sqlalchemy import String, Text, and_, cast, column, exists, func, or_, select
+from luqum.tree import FieldGroup, Item, OpenRange, Range, Term
+from sqlalchemy import String, Text, and_, any_, cast, column, exists, func, or_, select
+from sqlalchemy.dialects.postgresql import ARRAY, array
+from sqlalchemy.dialects.postgresql.array import CONTAINS
 from sqlalchemy.dialects.postgresql.json import JSONPATH_ASTEXT
 
 from mwdb.core.capabilities import Capabilities
@@ -26,279 +28,236 @@ from mwdb.model import (
 
 from .exceptions import (
     FieldNotQueryableException,
+    InvalidValueException,
     ObjectNotFoundException,
-    UnsupportedGrammarException,
+    UnsupportedNodeTypeException,
 )
-from .tree import Subquery
-
-Expression = Union[Range, Term]
-
-
-def get_term_value(node: Term) -> str:
-    """
-    Retrieves unescaped value from Term with transformed wildcards
-    to the SQL form
-    :param node: luqum.Term object
-    :return: Unescaped value
-    """
-    if node.has_wildcard():
-        wildcard_map = {"*": "%", "?": "_"}
-
-        # Escape already contained SQL wildcards
-        node_value = re.sub(r"([%_])", r"\\\1", node.value)
-        # Transform unescaped Lucene wildcards to SQL form
-        node_value = Term.WILDCARDS_PATTERN.sub(
-            lambda m: wildcard_map[m.group(0)], node_value
-        )
-        # Unescape Lucene escaped special characters
-        node_value = Term.WORD_ESCAPED_CHARS.sub(r"\1", node_value)
-        return node_value
-    else:
-        return node.unescaped_value
-
-
-def make_jsonpath(field_path: List[Tuple[str, int]]) -> str:
-    """
-    Makes jsonpath from field path
-    key.array*.child => $."key"."array"[*]."child"
-    """
-
-    def jsonpath_quote(field):
-        """Quotes field to be correctly represented in jsonpath"""
-        # Escape all double quotes and backslashes
-        field = re.sub(r'(["\\])', r"\\\1", field)
-        return f'"{field}"'
-
-    _, root_asterisks = field_path[0]
-    root = "$" + ("[*]" * root_asterisks)
-    return ".".join(
-        [root]
-        + [
-            jsonpath_quote(field) + ("[*]" * asterisks)
-            for field, asterisks in field_path[1:]
-        ]
-    )
-
-
-def make_jsonpath_range_query(jsonpath: str, expression: Range) -> str:
-    conditions = []
-
-    def ensure_number(value):
-        if value.isdigit():
-            return value
-        else:
-            match = re.match(r"\d+(?:[.]\d+)?", value)
-            if not match:
-                raise UnsupportedGrammarException("Invalid range value")
-            return value
-
-    if expression.low.value != "*":
-        operator = ">=" if expression.include_low else ">"
-        conditions.append(f"@ {operator} {ensure_number(expression.low.value)}")
-    if expression.high.value != "*":
-        operator = "<=" if expression.include_high else "<"
-        conditions.append(f"@ {operator} {ensure_number(expression.high.value)}")
-    if not conditions:
-        # Handle [* TO *]
-        return jsonpath
-    return f'{jsonpath} ? ({" && ".join(conditions)})'
-
-
-def add_escaping_for_like_statement(statement: str) -> str:
-    """
-    Formats query value to work properly with LIKE statements
-    LIKE statements use escaping (default symbol is '\')
-    Every escape should be doubled except '%' and '_'
-    """
-    statement = re.sub(r"\\(?![%_])", r"\\\\", statement)
-    return statement
+from .node_to_value import node_is_range, range_from_node, string_from_node
+from .parse_helpers import (
+    PathSelector,
+    is_pattern_value,
+    jsonpath_config_string_equals,
+    jsonpath_range_equals,
+    jsonpath_string_equals,
+    make_jsonpath_selector,
+    range_equals,
+    string_equals,
+    transform_for_config_like_statement,
+    transform_for_like_statement,
+    transform_for_quoted_config_like_statement,
+    transform_for_quoted_like_statement,
+    unescape_string,
+)
 
 
 class BaseField:
-    accepts_range = False
-    accepts_subquery = False
-    accepts_subfields = False
-    accepts_wildcards = False
+    accepts_subpath = False
 
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        raise NotImplementedError
+
+    def get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        if not self.accepts_subpath and len(path_selector) > 1:
+            raise FieldNotQueryableException("Subfields are not allowed for this field")
+        return self._get_condition(node, path_selector)
+
+
+class ColumnField(BaseField):
     def __init__(self, column):
         self.column = column
 
     @property
-    def field_type(self) -> Type[Object]:
+    def column_type(self) -> Type[Object]:
         return self.column.class_
 
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        raise NotImplementedError
 
-    def get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        if not self.accepts_subfields and len(subfields) > 1:
-            raise FieldNotQueryableException(
-                f"Field doesn't have subfields: "
-                f"{'.'.join([field for field, _ in subfields[1:]])}"
-            )
-        if (
-            not self.accepts_wildcards
-            and isinstance(expression, Term)
-            and expression.has_wildcard()
-        ):
-            raise UnsupportedGrammarException(
-                "Wildcards are not allowed for this field"
-            )
-        return self._get_condition(expression, subfields)
+class StringField(ColumnField):
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node, escaped=True)
+        return string_equals(self.column, string_value)
 
 
-class StringField(BaseField):
-    accepts_wildcards = True
-
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        value = get_term_value(expression)
-        if expression.has_wildcard():
-            value = add_escaping_for_like_statement(value)
-            return self.column.like(value)
-        else:
-            return self.column == value
-
-
-class SizeField(BaseField):
-    accepts_range = True
-    accepts_wildcards = True
-
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
+class SizeField(ColumnField):
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
         units = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
 
-        def parse_size(size):
-            if size.isdigit():
-                return size
+        def parse_size(size: str) -> int:
+            if re.fullmatch(r"\d+", size) is not None:
+                return int(size)
             else:
-                size = re.match(r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper())
-                if size is None:
-                    raise UnsupportedGrammarException("Invalid size value")
-                number, unit = size.groups()
+                size_match = re.fullmatch(
+                    r"(\d+(?:[.]\d+)?)[ ]?([KMGT]?B)", size.upper()
+                )
+                if size_match is None:
+                    raise InvalidValueException(size, expected="size")
+                number, unit = size_match.groups()
                 return int(float(number) * units[unit])
 
-        if isinstance(expression, Range):
-            low_value = expression.low.value
-            high_value = expression.high.value
-
-            if low_value != "*":
-                low_value = parse_size(low_value)
-            if high_value != "*":
-                high_value = parse_size(high_value)
-
-            low_condition = (
-                self.column >= low_value
-                if expression.include_low
-                else self.column > low_value
+        if node_is_range(node):
+            range_value = range_from_node(node)
+            if range_value.low is not None:
+                low = parse_size(range_value.low)
+            else:
+                low = None
+            if range_value.high is not None:
+                high = parse_size(range_value.high)
+            else:
+                high = None
+            return range_equals(
+                self.column,
+                low,
+                high,
+                range_value.include_low,
+                range_value.include_high,
             )
-            high_condition = (
-                self.column <= high_value
-                if expression.include_high
-                else self.column < high_value
-            )
-
-            if high_value == "*" and low_value == "*":
-                return True
-            if high_value == "*":
-                return low_condition
-            if low_value == "*":
-                return high_condition
-
-            return and_(low_condition, high_condition)
         else:
-            target_value = parse_size(expression.value)
+            string_value = string_from_node(node)
+            target_value = parse_size(string_value)
             return self.column == target_value
 
 
-class ListField(BaseField):
-    accepts_wildcards = True
-
+class StringListField(ColumnField):
     def __init__(self, column, value_column):
         super().__init__(column)
         self.value_column = value_column
 
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        value = get_term_value(expression)
-
-        if expression.has_wildcard():
-            value = add_escaping_for_like_statement(value)
-            return self.column.any(self.value_column.like(value))
-        else:
-            return self.column.any(self.value_column == value)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node, escaped=True)
+        return self.column.any(string_equals(self.value_column, string_value))
 
 
-class UUIDField(BaseField):
-    accepts_wildcards = True
-
+class UUIDField(ColumnField):
     def __init__(self, column, value_column):
         super().__init__(column)
         self.value_column = value_column
 
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        value = get_term_value(expression)
-
-        if expression.has_wildcard():
-            value = add_escaping_for_like_statement(value)
-            return self.column.any(cast(self.value_column, String).like(value))
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
+        if string_value == "*":
+            return self.column.any(self.value_column.is_not(None))
 
         try:
-            uuid_value = uuid.UUID(value)
+            uuid_value = uuid.UUID(string_value)
         except ValueError:
-            raise UnsupportedGrammarException("Field accepts only correct UUID values")
+            raise InvalidValueException(string_value, expected="UUID")
 
         return self.column.any(self.value_column == uuid_value)
 
 
 class FavoritesField(BaseField):
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        value = get_term_value(expression)
-
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
         if (
             not g.auth_user.has_rights(Capabilities.manage_users)
-            and g.auth_user.login != value
+            and g.auth_user.login != string_value
         ):
             raise ObjectNotFoundException(
-                "Only the mwdb admin can search for other users favorites"
+                'You need "manage_users" capability to search for favorites of '
+                "other users"
             )
 
-        if g.auth_user.login == value:
+        if g.auth_user.login == string_value:
             user = g.auth_user
         else:
-            user = db.session.query(User).filter(User.login == value).first()
+            user = db.session.query(User).filter(User.login == string_value).first()
 
         if user is None:
-            raise ObjectNotFoundException(f"No such user: {value}")
+            raise ObjectNotFoundException(f"No such user: {node}")
 
-        return self.column.any(User.id == user.id)
+        return Object.followers.any(User.id == user.id)
 
 
-class AttributeField(BaseField):
-    accepts_range = True
-    accepts_subfields = True
-    accepts_wildcards = True
+class JSONBaseField(ColumnField):
+    """
+    Helper base class to generalize querying JSON columns
+    """
 
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        if len(subfields) <= 1:
-            raise UnsupportedGrammarException(
-                "Missing attribute key (attribute.<key>:)"
+    accepts_subpath = True
+
+    def _get_value_for_like_statement(self, value: str) -> str:
+        """
+        Transforms Lucene escaped value into pattern for LIKE condition
+        """
+        return transform_for_like_statement(value)
+
+    def _get_quoted_value_for_like_statement(self, value: str) -> str:
+        """
+        Transforms Lucene escaped value into quoted JSON pattern
+        for LIKE condition (looking for strings encoded inside JSON objects)
+        """
+        return transform_for_quoted_like_statement(value)
+
+    def _get_jsonpath_for_range_equals(
+        self,
+        path_selector: PathSelector,
+        low: Optional[str],
+        high: Optional[str],
+        include_low: bool,
+        include_high: bool,
+    ) -> str:
+        """
+        Transforms Lucene escaped value into jsonpath within-range query
+        """
+        return jsonpath_range_equals(
+            path_selector, low, high, include_low, include_high
+        )
+
+    def _get_jsonpath_for_string_equals(
+        self, path_selector: PathSelector, value: str
+    ) -> str:
+        """
+        Transforms Lucene escaped value into jsonpath value-equals query
+        """
+        return jsonpath_string_equals(path_selector, value)
+
+    def _get_json_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        if node_is_range(node):
+            range_value = range_from_node(node)
+            jsonpath_condition = self._get_jsonpath_for_range_equals(
+                path_selector,
+                range_value.low,
+                range_value.high,
+                range_value.include_low,
+                range_value.include_high,
             )
+            return self.column.op("@?")(jsonpath_condition)
+        else:
+            string_value = string_from_node(node, escaped=True)
+            if is_pattern_value(string_value):
+                node = self._get_value_for_like_statement(string_value)
+                if string_value.startswith("*") and string_value.endswith("*"):
+                    stringified_value = self._get_quoted_value_for_like_statement(
+                        string_value
+                    )
+                    node = any_([node, stringified_value])
+                jsonpath_selector = make_jsonpath_selector(path_selector)
+                json_elements = func.jsonb_path_query(
+                    self.column, jsonpath_selector
+                ).alias("json_element")
+                json_element = column(json_elements.name).operate(
+                    JSONPATH_ASTEXT, "{}", result_type=Text
+                )
+                return exists(
+                    select([1])
+                    .select_from(json_elements)
+                    .where(json_element.like(node))
+                )
+            else:
+                jsonpath_condition = self._get_jsonpath_for_string_equals(
+                    path_selector, string_value
+                )
+                return self.column.op("@?")(jsonpath_condition)
 
-        attribute_key, _ = subfields[1]
+
+class AttributeField(JSONBaseField):
+    def __init__(self):
+        super().__init__(Attribute.value)
+
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        if len(path_selector) <= 1:
+            raise FieldNotQueryableException("Missing attribute key (attribute.<key>:)")
+
+        attribute_key, _ = path_selector[1]
         attribute_definition = AttributeDefinition.query_for_read(
             key=attribute_key, include_hidden=True
         ).first()
@@ -306,68 +265,79 @@ class AttributeField(BaseField):
         if attribute_definition is None:
             raise ObjectNotFoundException(f"No such attribute: {attribute_key}")
 
+        if not isinstance(node, (OpenRange, Range, Term)):
+            raise UnsupportedNodeTypeException(node)
+
         if (
             attribute_definition.hidden
-            and (type(expression) is Range or expression.has_wildcard())
+            and (node_is_range(node) or node.has_wildcard())
             and not g.auth_user.has_rights(Capabilities.reading_all_attributes)
         ):
             raise FieldNotQueryableException(
-                "Wildcards and ranges are not allowed for hidden attributes"
+                "Using wildcards and ranges for hidden attributes "
+                "requires 'reading_all_attributes' capability"
             )
 
-        json_path = make_jsonpath(subfields[1:])
-        if type(expression) is Range:
-            json_query_path = make_jsonpath_range_query(json_path, expression)
-            value_condition = exists(
-                select([1]).select_from(
-                    func.jsonb_path_query(Attribute.value, json_query_path)
-                )
+        value_condition = self._get_json_condition(node, path_selector[1:])
+        return Object.attributes.any(
+            and_(
+                Attribute.key == attribute_key,
+                value_condition,
             )
-        else:
-            value = get_term_value(expression)
-            # Make aliased function call
-            json_elements = func.jsonb_path_query(Attribute.value, json_path).alias(
-                "json_element"
-            )
-            # Use #>>'{}' to extract value as text
-            json_element = column("json_element").operate(
-                JSONPATH_ASTEXT, "{}", result_type=Text
-            )
-            if expression.has_wildcard():
-                value = add_escaping_for_like_statement(value)
-                condition = json_element.like(value)
-            else:
-                condition = json_element == value
-            value_condition = exists(
-                select([1]).select_from(json_elements).where(condition)
-            )
-        return self.column.any(and_(Attribute.key == attribute_key, value_condition))
+        )
+
+
+class ConfigField(JSONBaseField):
+    def __init__(self):
+        super().__init__(Config.cfg)
+
+    def _get_value_for_like_statement(self, value: str) -> str:
+        return transform_for_config_like_statement(value)
+
+    def _get_quoted_value_for_like_statement(self, value: str) -> str:
+        return transform_for_quoted_config_like_statement(value)
+
+    def _get_jsonpath_for_range_equals(
+        self,
+        path_selector: PathSelector,
+        low: Optional[str],
+        high: Optional[str],
+        include_low: bool,
+        include_high: bool,
+    ) -> str:
+        return jsonpath_range_equals(
+            path_selector, low, high, include_low, include_high
+        )
+
+    def _get_jsonpath_for_string_equals(
+        self, path_selector: PathSelector, value: str
+    ) -> str:
+        return jsonpath_config_string_equals(path_selector, value)
+
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        return self._get_json_condition(node, path_selector)
 
 
 class ShareField(BaseField):
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        value = expression.unescaped_value
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
 
-        group = db.session.query(Group).filter(Group.name == value).first()
+        group = db.session.query(Group).filter(Group.name == string_value).first()
         if group is None:
-            raise ObjectNotFoundException(f"No such group: {value}")
+            raise ObjectNotFoundException(f"No such group: {string_value}")
 
         group_id = group.id
         if not g.auth_user.has_rights(Capabilities.manage_users) and group_id not in [
             group.id for group in g.auth_user.groups
         ]:
-            raise ObjectNotFoundException(f"No such group: {value}")
+            raise ObjectNotFoundException(f"No such group: {string_value}")
 
-        return self.column.any(ObjectPermission.group_id == group_id)
+        return Object.shares.any(ObjectPermission.group_id == group_id)
 
 
 class SharerField(BaseField):
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        value = expression.unescaped_value
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
 
         if (
             g.auth_user.has_rights(Capabilities.manage_users)
@@ -378,7 +348,7 @@ class SharerField(BaseField):
                 db.session.query(User)
                 .join(User.memberships)
                 .join(Member.group)
-                .filter(Group.name == value)
+                .filter(Group.name == string_value)
             ).all()
         else:
             uploaders = (
@@ -388,13 +358,13 @@ class SharerField(BaseField):
                 .filter(
                     and_(g.auth_user.is_member(Group.id), Group.workspace.is_(True))
                 )
-                .filter(or_(Group.name == value, User.login == value))
+                .filter(or_(Group.name == string_value, User.login == string_value))
             ).all()
         if not uploaders:
-            raise ObjectNotFoundException(f"No such user or group: {value}")
+            raise ObjectNotFoundException(f"No such user or group: {string_value}")
 
         uploader_ids = [u.id for u in uploaders]
-        return self.column.any(
+        return Object.shares.any(
             and_(
                 ObjectPermission.get_shares_filter(include_inherited_uploads=False),
                 ObjectPermission.related_user_id.in_(uploader_ids),
@@ -403,11 +373,10 @@ class SharerField(BaseField):
 
 
 class UploaderField(BaseField):
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        value = expression.unescaped_value
-        if value == "public":
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
+
+        if string_value == "public":
             raise ObjectNotFoundException(
                 "uploader:public is no-op, all uploaders are in public group"
             )
@@ -421,7 +390,7 @@ class UploaderField(BaseField):
                 db.session.query(User)
                 .join(User.memberships)
                 .join(Member.group)
-                .filter(Group.name == value)
+                .filter(Group.name == string_value)
             ).all()
         else:
             uploaders = (
@@ -431,13 +400,13 @@ class UploaderField(BaseField):
                 .filter(
                     and_(g.auth_user.is_member(Group.id), Group.workspace.is_(True))
                 )
-                .filter(or_(Group.name == value, User.login == value))
+                .filter(or_(Group.name == string_value, User.login == string_value))
             ).all()
         if not uploaders:
-            raise ObjectNotFoundException(f"No such user or group: {value}")
+            raise ObjectNotFoundException(f"No such user or group: {string_value}")
 
         uploader_ids = [u.id for u in uploaders]
-        return self.column.any(
+        return Object.shares.any(
             and_(
                 ObjectPermission.get_uploaders_filter(),
                 ObjectPermission.related_user_id.in_(uploader_ids),
@@ -445,113 +414,44 @@ class UploaderField(BaseField):
         )
 
 
-class JSONField(BaseField):
-    accepts_range = True
-    accepts_subfields = True
-    accepts_wildcards = True
-
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        """
-        Target query:
-            select cfg from static_config
-            where ... exists(
-                select 1
-                from jsonb_path_query(cfg, '$."indirect"."strings"[*]."a"')
-                as json_element
-                where json_element  #>> '{}' like '2'
-            );
-        """
-
-        # Cfg values in DataBase are escaped, so we need to escape search phrase too
-        if isinstance(expression, (Phrase, Word)):
-            expression.value = expression.value.encode("unicode_escape").decode("utf-8")
-
-        json_path = make_jsonpath(subfields)
-        if type(expression) is Range:
-            json_query_path = make_jsonpath_range_query(json_path, expression)
-            return exists(
-                select([1]).select_from(
-                    func.jsonb_path_query(self.column, json_query_path)
-                )
-            )
-        else:
-            value = get_term_value(expression)
-            # Make aliased function call
-            json_elements = func.jsonb_path_query(self.column, json_path).alias(
-                "json_element"
-            )
-            # Use #>>'{}' to extract value as text
-            json_element = column("json_element").operate(
-                JSONPATH_ASTEXT, "{}", result_type=Text
-            )
-            if expression.has_wildcard():
-                value = add_escaping_for_like_statement(value)
-                # chars " are not double escaped by mwdb.core.util.config_encode()
-                # remove unnecessary escaping in query
-                value = value.replace('\\"', '"')
-                condition = json_element.like(value)
-
-                # if json_path doesn't contain exact path
-                # value extracted by #>> contains additional escaping and {} brackets
-                # add char escaping again and {} brackets to match the extracted value
-                value = add_escaping_for_like_statement(value)
-                value = "{" + value + "}"
-                condition = or_(condition, json_element.like(value))
-            else:
-                # remove unnecessary escaping in query
-                value = value.replace('\\"', '"')
-                condition = json_element == value
-
-            return exists(select([1]).select_from(json_elements).where(condition))
-
-
-class DatetimeField(BaseField):
-    accepts_range = True
-
-    def _is_relative_time(self, expression_value):
+class DatetimeField(ColumnField):
+    def _is_relative_time(self, expression_value: str):
         pattern = r"^(\d+[yYmWwDdHhMSs])+$"
         return re.search(pattern, expression_value)
 
-    def _get_field_for_unit(self, unit):
-        if unit in ["y", "Y"]:
-            unit = "years"
-        elif unit in ["m"]:
-            unit = "months"
-        elif unit in ["W", "w"]:
-            unit = "weeks"
-        elif unit in ["D", "d"]:
-            unit = "days"
-        elif unit in ["H", "h"]:
-            unit = "hours"
-        elif unit in ["M"]:
-            unit = "minutes"
-        elif unit in ["S", "s"]:
-            unit = "seconds"
-        else:
-            raise UnsupportedGrammarException("Invalid date-time format")
-        return unit
-
     def _get_border_time(self, expression_value):
-        pattern = r"(\d+)([yYmWwDdHhMSs])"
+        units = {
+            "y": "years",
+            "Y": "years",
+            "m": "months",
+            "W": "weeks",
+            "w": "weeks",
+            "D": "days",
+            "d": "days",
+            "H": "hours",
+            "h": "hours",
+            "M": "minutes",
+            "S": "seconds",
+            "s": "seconds",
+        }
+        pattern = rf"(\d+)([{''.join(units.keys())}])"
         conditions = re.findall(pattern, expression_value)
         delta_dict = {}
         for value, unit in conditions:
-            field = self._get_field_for_unit(unit)
-            if field not in delta_dict.keys():
-                delta_dict.update({field: int(value)})
+            unit_name = units.get(unit)
+            # If field is unknown or is repeated e.g. 5M5M
+            if unit_name is None or unit_name in delta_dict:
+                raise InvalidValueException(expression_value, "date-time")
+            delta_dict[unit_name] = int(value)
         border_time = datetime.now(tz=timezone.utc) - relativedelta(**delta_dict)
         return border_time
 
-    def _get_date_range(self, date_node):
+    def _get_date_range(self, date_string):
         formats = [
             ("%Y-%m-%d %H:%M", timedelta(minutes=1)),
             ("%Y-%m-%d %H:%M:%S", timedelta(seconds=1)),
             ("%Y-%m-%d", timedelta(days=1)),
         ]
-        date_string = date_node.value
-
         for fmt, range_offs in formats:
             try:
                 timestamp = datetime.strptime(date_string, fmt)
@@ -559,210 +459,184 @@ class DatetimeField(BaseField):
             except ValueError:
                 continue
         else:
-            raise FieldNotQueryableException(
-                f"Unsupported date-time format ({date_string})"
-            )
+            raise InvalidValueException(date_string, "date-time")
 
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        if isinstance(expression, Range):
-            if expression.high.value != "*" and not expression.include_high:
-                raise UnsupportedGrammarException(
-                    "Exclusive range is not allowed for date-time field"
-                )
-            if expression.low.value != "*" and not expression.include_low:
-                raise UnsupportedGrammarException(
-                    "Exclusive range is not allowed for date-time field"
-                )
-            if expression.low.value == "*" and expression.high.value == "*":
-                return True
-            if expression.low.value == "*":
-                if self._is_relative_time(expression.high.value):
-                    high = self._get_border_time(expression.high.value)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        if node_is_range(node):
+            range_value = range_from_node(node)
+            # Exclusive ranges are handled as inclusive
+            include_high = True
+            include_low = True
+            low = range_value.low
+            high = range_value.high
+            if low is not None:
+                if self._is_relative_time(low):
+                    low_datetime = self._get_border_time(low)
                 else:
-                    high = self._get_date_range(expression.high)[1]
-                return self.column < high
-            if expression.high.value == "*":
-                if self._is_relative_time(expression.low.value):
-                    low = self._get_border_time(expression.low.value)
+                    low_datetime = self._get_date_range(low)[0]
+            else:
+                low_datetime = None
+            if high is not None:
+                if self._is_relative_time(high):
+                    high_datetime = self._get_border_time(high)
                 else:
-                    low = self._get_date_range(expression.low)[0]
-                return self.column >= low
-            if self._is_relative_time(expression.low.value):
-                low = self._get_border_time(expression.low.value)
+                    high_datetime = self._get_date_range(high)[1]
             else:
-                low = self._get_date_range(expression.low)[0]
-            if self._is_relative_time(expression.high.value):
-                high = self._get_border_time(expression.high.value)
-            else:
-                high = self._get_date_range(expression.high)[1]
+                high_datetime = None
         else:
-            low, high = self._get_date_range(expression)
+            string_value = string_from_node(node)
+            low_datetime, high_datetime = self._get_date_range(string_value)
+            include_low = include_high = True
+        return range_equals(
+            self.column, low_datetime, high_datetime, include_low, include_high
+        )
 
-        return and_(self.column >= low, self.column < high)
 
+class RelationField(ColumnField):
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        from .search import QueryConditionVisitor
 
-class RelationField(BaseField):
-    accepts_subquery = True
-
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        if not isinstance(expression, Subquery):
-            raise UnsupportedGrammarException(
-                "Only subquery is allowed for relation field"
+        if not isinstance(node, FieldGroup):
+            raise UnsupportedNodeTypeException(node)
+        condition = QueryConditionVisitor(Object).visit(node.expr)
+        return self.column.any(
+            Object.id.in_(
+                db.session.query(Object.id)
+                .filter(condition)
+                .filter(g.auth_user.has_access_to_object(Object.id))
             )
-        return self.column.any(Object.id.in_(expression.subquery))
+        )
 
 
-class CommentAuthorField(BaseField):
+class CommentAuthorField(ColumnField):
     def __init__(self, column, value_column):
         super().__init__(column)
         self.value_column = value_column
 
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        value = get_term_value(expression)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node)
 
-        user = db.session.query(User).filter(User.login == value).first()
+        user = db.session.query(User).filter(User.login == string_value).first()
         if user is None:
-            raise ObjectNotFoundException(f"No such user: {value}")
+            raise ObjectNotFoundException(f"No such user: {string_value}")
 
-        return self.column.any(self.value_column == value)
+        return self.column.any(self.value_column == string_value)
 
 
 class UploadCountField(BaseField):
-    accepts_range = True
-
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
         def parse_upload_value(value):
             try:
-                value = int(value)
-                if value <= 0:
+                int_value = int(value)
+                if int_value <= 0:
                     raise ValueError
             except ValueError:
-                raise UnsupportedGrammarException(
-                    "Field upload_count accepts statements with "
-                    "only correct positive integer values"
-                )
-            return value
+                raise InvalidValueException(value, "positive integer value")
+            return int_value
 
-        if isinstance(expression, Range):
-            low_value = expression.low.value
-            high_value = expression.high.value
-
-            if low_value != "*":
-                low_value = parse_upload_value(low_value)
-            if high_value != "*":
-                high_value = parse_upload_value(high_value)
-
-            low_condition = (
-                self.column >= low_value
-                if expression.include_low
-                else self.column > low_value
+        if node_is_range(node):
+            range_value = range_from_node(node)
+            if range_value.low is not None:
+                low = parse_upload_value(range_value.low)
+            else:
+                low = None
+            if range_value.high is not None:
+                high = parse_upload_value(range_value.high)
+            else:
+                high = None
+            return range_equals(
+                Object.upload_count,
+                low,
+                high,
+                range_value.include_low,
+                range_value.include_high,
             )
-            high_condition = (
-                self.column <= high_value
-                if expression.include_high
-                else self.column < high_value
-            )
-
-            if high_value == "*" and low_value == "*":
-                return True
-            if high_value == "*":
-                return low_condition
-            if low_value == "*":
-                return high_condition
-
-            return and_(low_condition, high_condition)
         else:
-            upload_value = parse_upload_value(expression.value)
-            return self.column == upload_value
+            string_value = string_from_node(node)
+            upload_value = parse_upload_value(string_value)
+            return Object.upload_count == upload_value
 
 
-class MultiField(BaseField):
-    @staticmethod
-    def get_column(queried_type: Type[Object], value: str):
-        if queried_type is File:
-            if re.match(r"^[0-9a-fA-F]{8}$", value):
-                return File.crc32
-            elif re.match(r"^[0-9a-fA-F]{32}$", value):
-                return File.md5
-            elif re.match(r"^[0-9a-fA-F]{40}$", value):
-                return File.sha1
-            elif re.match(r"^[0-9a-fA-F]{64}$", value):
-                return File.sha256
-            elif re.match(r"^[0-9a-fA-F]{128}$", value):
-                return File.sha512
-            else:
-                raise ObjectNotFoundException(f"{value} is not valid hash value")
-        elif queried_type is TextBlob:
-            if re.match(r"^[0-9a-fA-F]{64}$", value):
-                return TextBlob.dhash
-            else:
-                return TextBlob._content
-        elif queried_type is Config:
-            if re.match(r"^[0-9a-fA-F]{64}$", value):
-                return Config.dhash
-            else:
-                return Config._cfg
-        else:
-            raise ObjectNotFoundException(
-                f"{queried_type.__name__} is not valid data type"
-            )
+class MultiBaseField(BaseField):
+    def _get_condition_for_value(self, escaped_value: str):
+        raise NotImplementedError
 
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        string_column = ["TextBlob._content"]
-        json_column = ["Config._cfg"]
-
-        value = get_term_value(expression).strip()
-        values_list = re.split("\\s+", value)
-
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node, escaped=True).strip()
+        values_list = re.split("\\s+", string_value)
         condition = None
         for value in values_list:
-            column = MultiField.get_column(self.field_type, value)
-
-            if str(column) in string_column:
-                value = f"%{value}%"
-                value = add_escaping_for_like_statement(value)
-                condition = or_(condition, (column.like(value)))
-            elif str(column) in json_column:
-                value = f"%{value}%"
-                value = add_escaping_for_like_statement(value)
-                condition = or_(condition, (cast(column, String).like(value)))
-            else:
-                # hashes values
-                condition = or_(condition, (column == value))
-
+            condition = or_(condition, self._get_condition_for_value(value))
         return condition
+
+
+class MultiFileField(MultiBaseField):
+    def _get_condition_for_value(self, escaped_value: str):
+        value = unescape_string(escaped_value)
+        if re.fullmatch(r"[0-9a-fA-F]{8}", value):
+            return File.crc32 == value
+        elif re.fullmatch(r"[0-9a-fA-F]{32}", value):
+            return File.md5 == value
+        elif re.fullmatch(r"[0-9a-fA-F]{40}", value):
+            return File.sha1 == value
+        elif re.fullmatch(r"[0-9a-fA-F]{64}", value):
+            return File.sha256 == value
+        elif re.fullmatch(r"[0-9a-fA-F]{128}", value):
+            return File.sha512 == value
+        else:
+            raise ObjectNotFoundException(f"{value} is not valid hash value")
+
+
+class MultiConfigField(MultiBaseField):
+    def _get_condition_for_value(self, escaped_value: str):
+        value = unescape_string(escaped_value)
+        if re.fullmatch(r"[0-9a-fA-F]{64}", value):
+            return Config.dhash == value
+        else:
+            value = transform_for_quoted_config_like_statement(
+                "*" + escaped_value + "*"
+            )
+            json_element = Config._cfg.operate(JSONPATH_ASTEXT, "{}", result_type=Text)
+            return json_element.like(value)
+
+
+class MultiBlobField(MultiBaseField):
+    def _get_condition_for_value(self, escaped_value: str):
+        value = unescape_string(escaped_value)
+        if re.fullmatch(r"[0-9a-fA-F]{64}", value):
+            return TextBlob.dhash == value
+        else:
+            # Blobs are unicode-escaped too
+            value = transform_for_config_like_statement("*" + escaped_value + "*")
+            return TextBlob._content.like(value)
 
 
 class FileNameField(BaseField):
     accepts_wildcards = True
 
-    def _get_condition(
-        self, expression: Expression, subfields: List[Tuple[str, int]]
-    ) -> Any:
-        value = get_term_value(expression)
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        string_value = string_from_node(node, escaped=True)
+        name_condition = string_equals(File.file_name, string_value)
+        if is_pattern_value(string_value):
+            """
+            Should translate to:
 
-        if expression.has_wildcard():
-            sub_query = db.session.query(
-                File.id.label("f_id"), func.unnest(File.alt_names).label("alt_name")
-            ).subquery()
-            value = add_escaping_for_like_statement(value)
-            file_id_matching = (
-                db.session.query(File.id)
-                .join(sub_query, sub_query.c.f_id == File.id)
-                .filter(sub_query.c.alt_name.like(value))
+            EXISTS (
+                SELECT 1
+                FROM unnest(object.alt_names) AS alt_name
+                WHERE alt_name LIKE <pattern>
             )
-
-            condition = or_(self.column.like(value), File.id.in_(file_id_matching))
+            """
+            escaped_value = transform_for_like_statement(string_value)
+            alt_name = func.unnest(File.alt_names).alias("alt_name")
+            alt_names_condition = exists(
+                select([1])
+                .select_from(alt_name)
+                .where(column(alt_name.name).like(escaped_value))
+            )
         else:
-            condition = or_((self.column == value), File.alt_names.any(value))
-        return condition
+            # Use @> operator to utilize GIN index on ARRAY
+            unescaped_value = unescape_string(string_value)
+            value_array = cast(array([unescaped_value]), ARRAY(String))
+            alt_names_condition = File.alt_names.operate(CONTAINS, value_array)
+        return or_(name_condition, alt_names_condition)

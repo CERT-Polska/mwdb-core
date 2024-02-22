@@ -63,5 +63,7 @@ class Config(Object):
         return send_config_to_karton(self, arguments)
 
 
+db.Index("ix_object_cfg", Config._cfg, postgresql_using="gin")
+
 # Compatibility reasons
 StaticConfig = Config

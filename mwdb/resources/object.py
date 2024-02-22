@@ -3,7 +3,6 @@ from uuid import UUID
 
 from flask import g, request
 from flask_restful import Resource
-from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFound
 
 from mwdb.core.capabilities import Capabilities
@@ -11,7 +10,7 @@ from mwdb.core.config import app_config
 from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
 from mwdb.core.plugins import hooks
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
+from mwdb.core.search import QueryBaseException, build_query
 from mwdb.model import AttributeDefinition, Object, db
 from mwdb.model.tag import Tag
 from mwdb.schema.object import (
@@ -233,12 +232,8 @@ class ObjectResource(Resource):
         query = obj["query"]
         if query:
             try:
-                db_query = SQLQueryBuilder().build_query(
-                    query, queried_type=self.ObjectType
-                )
-            except SQLQueryBuilderBaseException as e:
-                raise BadRequest(str(e))
-            except ParseError as e:
+                db_query = build_query(query, queried_type=self.ObjectType)
+            except QueryBaseException as e:
                 raise BadRequest(str(e))
         else:
             db_query = db.session.query(self.ObjectType)
@@ -432,12 +427,8 @@ class ObjectCountResource(Resource):
         query = obj["query"]
         if query:
             try:
-                db_query = SQLQueryBuilder().build_query(
-                    query, queried_type=get_type_from_str(type)
-                )
-            except SQLQueryBuilderBaseException as e:
-                raise BadRequest(str(e))
-            except ParseError as e:
+                db_query = build_query(query, queried_type=get_type_from_str(type))
+            except QueryBaseException as e:
                 raise BadRequest(str(e))
         else:
             db_query = db.session.query(get_type_from_str(type))

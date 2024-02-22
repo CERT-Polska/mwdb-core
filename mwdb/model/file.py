@@ -359,3 +359,6 @@ class File(Object):
 
     def _send_to_karton(self, arguments: Dict[str, Any]):
         return send_file_to_karton(self, arguments)
+
+
+db.Index("ix_object_alt_names", File.alt_names, postgresql_using="gin")

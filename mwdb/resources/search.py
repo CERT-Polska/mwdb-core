@@ -1,11 +1,10 @@
 from flask import g, request
 from flask_restful import Resource
-from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest
 
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.rate_limit import rate_limited_resource
-from mwdb.core.search import SQLQueryBuilder, SQLQueryBuilderBaseException
+from mwdb.core.search import QueryBaseException, build_query
 from mwdb.model import Object
 from mwdb.schema.object import ObjectListItemResponseSchema
 from mwdb.schema.search import SearchRequestSchema
@@ -59,15 +58,12 @@ class SearchResource(Resource):
         query = obj["query"]
         try:
             result = (
-                SQLQueryBuilder()
-                .build_query(query)
+                build_query(query)
                 .filter(g.auth_user.has_access_to_object(Object.id))
                 .order_by(Object.id.desc())
                 .limit(10000)
             ).all()
-        except SQLQueryBuilderBaseException as e:
-            raise BadRequest(str(e))
-        except ParseError as e:
+        except QueryBaseException as e:
             raise BadRequest(str(e))
 
         schema = ObjectListItemResponseSchema(many=True)

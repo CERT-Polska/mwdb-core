@@ -1,5 +1,4 @@
 from flask import g, request
-from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest
 
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint

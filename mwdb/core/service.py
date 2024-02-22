@@ -57,7 +57,7 @@ class Service:
         MWDB API documentation.
 
         If you want to automate things, we recommend using
-        <a href="http://github.com/CERT-Polska/mwdblib">
+        <a href="https://github.com/CERT-Polska/mwdblib">
             mwdblib library
         </a>
     """

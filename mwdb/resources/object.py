@@ -2,7 +2,6 @@ import json
 from uuid import UUID
 
 from flask import g, request
-from luqum.parser import ParseError
 from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFound
 
 from mwdb.core.capabilities import Capabilities

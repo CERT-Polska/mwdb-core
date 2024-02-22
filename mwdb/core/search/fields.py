@@ -152,7 +152,8 @@ class FavoritesField(BaseField):
             and g.auth_user.login != string_value
         ):
             raise ObjectNotFoundException(
-                "Only the mwdb admin can search for other users favorites"
+                'You need "manage_users" capability to search for favorites of '
+                "other users"
             )
 
         if g.auth_user.login == string_value:

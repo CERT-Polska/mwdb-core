@@ -40,8 +40,7 @@ def get_karton_producer() -> Optional[Producer]:
         except Exception:
             logger.exception("Failed to load Karton producer")
             _karton_producer = None
-        return _karton_producer
-    return None
+    return _karton_producer
 
 
 # Try to load as soon as possible, but don't give up

@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
-import { RichAttributeRenderer } from "./RichAttribute/RichAttributeRenderer";
+import { AttributeRenderer } from "@mwdb-web/components/ShowObject/common/AttributeRenderer";
 
 import AceEditor from "react-ace";
 
@@ -41,7 +41,7 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
         if (ev) ev.preventDefault();
         if (!attributeForm.current?.reportValidity()) return;
         let value = attributeValue;
-        if (attributeType === "object") {
+        if (attributeType === "json") {
             try {
                 value = JSON.parse(attributeValue);
             } catch (e: any) {
@@ -63,8 +63,6 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                 attributeDefinitions[ev.target.value].example_value || ""
             );
         }
-        setAttributeType("object");
-
         setError(null);
     }
 
@@ -167,17 +165,17 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                             <input
                                 className="form-check-input"
                                 type="radio"
-                                id="value-object"
+                                id="value-json"
                                 name="value-type"
-                                checked={attributeType === "object"}
-                                value="object"
+                                checked={attributeType === "json"}
+                                value="json"
                                 onChange={handleTypeChange}
                             />
                             <label
                                 className="form-check-label"
-                                htmlFor="value-object"
+                                htmlFor="value-json"
                             >
-                                Object
+                                JSON
                             </label>
                         </div>
                     </div>
@@ -206,9 +204,9 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                             />
                         )}
                     </div>
-                    {richTemplate ? (
+                    {attributeDefinitions[attributeKey] ? (
                         <div className="form-group">
-                            <label>Rich attribute preview</label>
+                            <label>Attribute preview</label>
                             <table
                                 className="table table-striped table-bordered table-hover data-table"
                                 style={{
@@ -216,22 +214,18 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                                 }}
                             >
                                 <tbody>
-                                    <tr>
-                                        <th>{"My attribute"}</th>
-                                        <td>
-                                            <RichAttributeRenderer
-                                                template={richTemplate}
-                                                value={
-                                                    attributeType === "string"
-                                                        ? JSON.stringify(
-                                                              attributeValue
-                                                          )
-                                                        : attributeValue
-                                                }
-                                                setInvalid={setInvalid}
-                                            />
-                                        </td>
-                                    </tr>
+                                    <AttributeRenderer
+                                        attributes={[
+                                            {
+                                                key: attributeKey,
+                                                id: 0,
+                                                value: attributeValue,
+                                            },
+                                        ]}
+                                        attributeDefinition={
+                                            attributeDefinitions[attributeKey]
+                                        }
+                                    />
                                 </tbody>
                             </table>
                         </div>

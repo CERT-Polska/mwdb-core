@@ -7,7 +7,7 @@ import { AttributeDefinition } from "@mwdb-web/types/types";
 type Props = {
     attributes: Attribute[];
     attributeDefinition: AttributeDefinition;
-    onRemoveAttribute: (id: number) => void;
+    onRemoveAttribute?: (id: number) => void;
 };
 
 export function AttributeRenderer({

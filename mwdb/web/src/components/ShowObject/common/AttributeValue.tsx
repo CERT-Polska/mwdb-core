@@ -14,7 +14,7 @@ type Props = {
         rich_template: string;
         key: string;
     };
-    onRemove: (id: number) => void;
+    onRemove?: (id: number) => void;
 };
 
 export function AttributeValue({

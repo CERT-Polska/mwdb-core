@@ -25,20 +25,28 @@ class KartonProducer(Producer):
     with_service_info = True
 
 
-if app_config.mwdb.enable_karton:
-    try:
-        karton_producer = KartonProducer(
-            config=KartonConfig(app_config.karton.config_path)
-        )
-    except Exception:
-        logger.exception("Failed to load Karton producer")
-        karton_producer = None
-else:
-    karton_producer = None
+_karton_producer = None
 
 
 def get_karton_producer() -> Optional[Producer]:
-    return karton_producer
+    global _karton_producer
+    if not app_config.mwdb.enable_karton:
+        return None
+    if _karton_producer is None:
+        try:
+            _karton_producer = KartonProducer(
+                config=KartonConfig(app_config.karton.config_path)
+            )
+        except Exception:
+            logger.exception("Failed to load Karton producer")
+            _karton_producer = None
+        return _karton_producer
+    return None
+
+
+# Try to load as soon as possible, but don't give up
+# if Karton is temporarily not available
+get_karton_producer()
 
 
 def prepare_headers(obj: "Object", arguments: Dict[str, Any]) -> Dict[str, Any]:

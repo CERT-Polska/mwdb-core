@@ -305,7 +305,7 @@ def is_nonstring_object(value: str) -> bool:
     Checks if string value may be also a number or boolean,
     so JSON must be queried using both types
     """
-    return bool(re.match(r"^(false|true|null|\d+([.]\d+)?)$", value))
+    return bool(re.fullmatch(r"(false|true|null|(0|[1-9]\d*)([.]\d+)?)", value))
 
 
 def is_pattern_value(value) -> bool:

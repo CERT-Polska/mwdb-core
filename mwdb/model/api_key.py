@@ -18,7 +18,9 @@ class APIKey(db.Model):
         db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     issued_on = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
-    issued_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    issued_by = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
     name = db.Column(db.String(length=100), nullable=False)
 
     issuer = db.relationship("User", foreign_keys=[issued_by], uselist=False)

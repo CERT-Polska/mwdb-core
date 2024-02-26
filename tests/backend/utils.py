@@ -154,7 +154,6 @@ class MwdbTest(object):
 
     def register_user(self, username, password, capabilities=None):
         capabilities = capabilities or []
-        self.login()
         res = self.session.post(
             self.mwdb_url + "/user/" + username,
             json={

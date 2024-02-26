@@ -136,7 +136,7 @@ if app_config.mwdb.serve_web:
     app.register_blueprint(static_blueprint)
 
 
-@app.before_request
+@api.blueprint.before_request
 def assign_request_id():
     g.request_id = token_hex(16)
     g.request_start_time = datetime.utcnow()
@@ -152,7 +152,7 @@ def assign_request_id():
     )
 
 
-@app.after_request
+@api.blueprint.after_request
 def log_request(response):
     if hasattr(g, "request_start_time"):
         response_time = datetime.utcnow() - g.request_start_time
@@ -186,7 +186,7 @@ def log_request(response):
     return response
 
 
-@app.before_request
+@api.blueprint.before_request
 def require_auth():
     if request.method == "OPTIONS":
         return
@@ -221,7 +221,7 @@ def require_auth():
             raise Forbidden("User has been disabled.")
 
 
-@app.before_request
+@api.blueprint.before_request
 def apply_rate_limit():
     apply_rate_limit_for_request()
 

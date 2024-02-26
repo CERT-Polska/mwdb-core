@@ -40,7 +40,7 @@ class User(db.Model):
 
     requested_on = db.Column(db.DateTime)
     registered_on = db.Column(db.DateTime)
-    registered_by = db.Column(db.Integer, db.ForeignKey("user.id"))
+    registered_by = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"))
     logged_on = db.Column(db.DateTime)
     set_password_on = db.Column(db.DateTime)
 
@@ -84,7 +84,10 @@ class User(db.Model):
         "APIKey", foreign_keys="APIKey.user_id", backref="user", cascade="all, delete"
     )
     registrar = db.relationship(
-        "User", foreign_keys="User.registered_by", remote_side=[id], uselist=False
+        "User",
+        foreign_keys="User.registered_by",
+        remote_side=[id],
+        uselist=False,
     )
 
     # used to load-balance the malware processing pipeline

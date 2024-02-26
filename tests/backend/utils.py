@@ -90,11 +90,6 @@ class MwdbTest(object):
         res.raise_for_status()
         return res
 
-    def api_key_get(self, api_key):
-        res = self.session.get(self.mwdb_url + "/api_key/" + api_key)
-        res.raise_for_status()
-        return res
-
     def api_key_delete(self, api_key):
         res = self.session.delete(self.mwdb_url + "/api_key/" + api_key)
         res.raise_for_status()
@@ -108,6 +103,11 @@ class MwdbTest(object):
 
     def get_group(self, name):
         res = self.session.get(self.mwdb_url + "/group/" + name)
+        res.raise_for_status()
+        return res.json()
+
+    def get_user(self, login):
+        res = self.session.get(self.mwdb_url + '/user/' + login)
         res.raise_for_status()
         return res.json()
 
@@ -154,7 +154,6 @@ class MwdbTest(object):
 
     def register_user(self, username, password, capabilities=None):
         capabilities = capabilities or []
-        self.login()
         res = self.session.post(
             self.mwdb_url + "/user/" + username,
             json={

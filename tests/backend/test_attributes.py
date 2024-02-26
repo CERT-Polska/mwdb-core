@@ -201,3 +201,19 @@ def test_json_attribute_uniqueness(admin_session, attr_session, random_attribute
         and attr["value"] == first_value == second_value
     ]
     assert len(stored_attributes) == 1
+
+
+def test_attribute_falsy_values(admin_session, random_attribute):
+    sample_id, attr_name = random_attribute
+    admin_session.add_attribute(sample_id, attr_name, 0)
+    admin_session.add_attribute(sample_id, attr_name, False)
+    with ShouldRaise(400):
+        admin_session.add_attribute(sample_id, attr_name, [])
+    with ShouldRaise(400):
+        admin_session.add_attribute(sample_id, attr_name, {})
+    with ShouldRaise(400):
+        admin_session.add_attribute(sample_id, attr_name, None)
+    with ShouldRaise(400):
+        admin_session.add_attribute(sample_id, attr_name, "")
+    admin_session.add_attribute(sample_id, attr_name, ["nonempty"])
+    admin_session.add_attribute(sample_id, attr_name, {"nonempty": None})

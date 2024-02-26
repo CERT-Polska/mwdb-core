@@ -235,12 +235,24 @@ def test_zero_starting_crc32(admin_session):
 def test_user_delete(admin_session):
     # Make user and use it to comment new sample
     case = RelationTestCase(admin_session)
-    alice = case.new_user("Alice", capabilities=["adding_comments"])
+    alice = case.new_user("Alice", capabilities=["adding_comments", "manage_users"])
+    # Upload sample
     sample = case.new_sample("Sample")
     sample.create(alice)
+    # Set comment for sample
     alice.session.add_comment(sample.dhash, "random comment")
+    # Register new user using Alice
+    bob_identity = rand_string(16)
+    alice.session.register_user(bob_identity, bob_identity)
+    # Issue new API key for bob
+    bob_api_key_resp = alice.session.api_key_create(bob_identity, "new api key")
+    bob_api_key_id = bob_api_key_resp["id"]
     # Then try to remove that user
     admin_session.remove_user(alice.identity)
+    # Bob should still exist
+    bob_data = admin_session.get_user(bob_identity)
+    assert bob_data["registrar_login"] is None
+    assert bob_data["api_keys"][0]["id"] == bob_api_key_id
     # Object should be still reachable
     admin_session.get_sample(sample.dhash)
     # And should still have one comment (with nulled author)

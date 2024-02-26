@@ -245,7 +245,7 @@ def test_user_delete(admin_session):
     bob_identity = rand_string(16)
     alice.session.register_user(bob_identity, bob_identity)
     # Issue new API key for bob
-    bob_api_key_resp = alice.session.api_key_create(bob_identity, "new api key")
+    bob_api_key_resp = alice.session.api_key_create(bob_identity, "new api key").json()
     bob_api_key_id = bob_api_key_resp["id"]
     # Then try to remove that user
     admin_session.remove_user(alice.identity)

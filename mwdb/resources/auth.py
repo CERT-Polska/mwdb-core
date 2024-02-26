@@ -13,7 +13,6 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.auth import (
     AuthLoginRequestSchema,
@@ -47,7 +46,6 @@ def verify_recaptcha(recaptcha_token):
             raise Forbidden("Wrong ReCAPTCHA, please try again.")
 
 
-@rate_limited_resource
 class LoginResource(Resource):
     def post(self):
         """
@@ -125,7 +123,6 @@ class LoginResource(Resource):
         )
 
 
-@rate_limited_resource
 class RegisterResource(Resource):
     def post(self):
         """
@@ -199,7 +196,6 @@ class RegisterResource(Resource):
         return schema.dump({"login": user.login})
 
 
-@rate_limited_resource
 class ChangePasswordResource(Resource):
     def post(self):
         """
@@ -249,7 +245,6 @@ class ChangePasswordResource(Resource):
         return schema.dump({"login": user.login})
 
 
-@rate_limited_resource
 class RequestPasswordChangeResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_profile)
@@ -308,7 +303,6 @@ class RequestPasswordChangeResource(Resource):
         return schema.dump({"login": login})
 
 
-@rate_limited_resource
 class RecoverPasswordResource(Resource):
     def post(self):
         """
@@ -390,7 +384,6 @@ class RecoverPasswordResource(Resource):
         return schema.dump({"login": user.login})
 
 
-@rate_limited_resource
 class RefreshTokenResource(Resource):
     @requires_authorization
     def post(self):
@@ -432,7 +425,6 @@ class RefreshTokenResource(Resource):
         )
 
 
-@rate_limited_resource
 class ValidateTokenResource(Resource):
     @requires_authorization
     def get(self):
@@ -464,7 +456,6 @@ class ValidateTokenResource(Resource):
         )
 
 
-@rate_limited_resource
 class AuthGroupListResource(Resource):
     @requires_authorization
     def get(self):

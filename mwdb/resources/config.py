@@ -8,7 +8,6 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Config, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobCreateSpecSchema
@@ -25,7 +24,6 @@ from . import load_schema, loads_schema, requires_authorization, requires_capabi
 from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
-@rate_limited_resource
 class ConfigStatsResource(Resource):
     @requires_authorization
     def get(self):
@@ -161,7 +159,6 @@ class ConfigUploader(ObjectUploader):
             raise Conflict("Object already exists and is not a config")
 
 
-@rate_limited_resource
 class ConfigResource(ObjectResource, ConfigUploader):
 
     ObjectType = Config
@@ -305,7 +302,6 @@ class ConfigResource(ObjectResource, ConfigUploader):
         return self.create_object(obj)
 
 
-@rate_limited_resource
 class ConfigItemResource(ObjectItemResource, ConfigUploader):
 
     ObjectType = Config

@@ -3,7 +3,6 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest
 
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.core.search import QueryBaseException, build_query
 from mwdb.model import Object
 from mwdb.schema.object import ObjectListItemResponseSchema
@@ -12,7 +11,6 @@ from mwdb.schema.search import SearchRequestSchema
 from . import loads_schema, requires_authorization
 
 
-@rate_limited_resource
 class SearchResource(Resource):
     @deprecated_endpoint(DeprecatedFeature.legacy_search)
     @requires_authorization

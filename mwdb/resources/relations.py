@@ -3,14 +3,12 @@ from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Object, db
 from mwdb.schema.relations import RelationsResponseSchema
 
 from . import access_object, logger, requires_authorization, requires_capabilities
 
 
-@rate_limited_resource
 class RelationsResource(Resource):
     @requires_authorization
     def get(self, type, identifier):
@@ -59,7 +57,6 @@ class RelationsResource(Resource):
         return relations.dump(db_object)
 
 
-@rate_limited_resource
 class ObjectChildResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.adding_parents)

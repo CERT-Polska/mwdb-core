@@ -11,7 +11,6 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.mail import MailError, send_email_notification
 from mwdb.core.plugins import hooks
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.user import (
     UserCreateRequestSchema,
@@ -35,7 +34,6 @@ from . import (
 )
 
 
-@rate_limited_resource
 class UserListResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -79,7 +77,6 @@ class UserListResource(Resource):
         return schema.dump({"users": objs})
 
 
-@rate_limited_resource
 class UserPendingResource(Resource):
     @requires_capabilities(Capabilities.manage_users)
     def post(self, login):
@@ -241,7 +238,6 @@ class UserPendingResource(Resource):
         return schema.dump({"login": user_login_obj["login"]})
 
 
-@rate_limited_resource
 class UserRequestPasswordChangeResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -317,7 +313,6 @@ class UserRequestPasswordChangeResource(Resource):
         return schema.dump({"login": login})
 
 
-@rate_limited_resource
 class UserGetPasswordChangeTokenResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -365,7 +360,6 @@ class UserGetPasswordChangeTokenResource(Resource):
         return schema.dump({"login": login, "token": token})
 
 
-@rate_limited_resource
 class UserResource(Resource):
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -645,7 +639,6 @@ class UserResource(Resource):
         return schema.dump({"login": login})
 
 
-@rate_limited_resource
 class UserProfileResource(Resource):
     @requires_authorization
     def get(self, login):

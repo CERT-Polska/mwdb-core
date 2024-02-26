@@ -3,7 +3,6 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.core.rate_limit import rate_limited_resource
 from mwdb.model import KartonAnalysis, Object
 from mwdb.schema.karton import (
     KartonItemResponseSchema,
@@ -21,7 +20,6 @@ from . import (
 )
 
 
-@rate_limited_resource
 class KartonObjectResource(Resource):
     @requires_authorization
     def get(self, type, identifier):
@@ -131,7 +129,6 @@ class KartonObjectResource(Resource):
         return schema.dump(analysis)
 
 
-@rate_limited_resource
 class KartonAnalysisResource(Resource):
     @requires_authorization
     def get(self, type, identifier, analysis_id):

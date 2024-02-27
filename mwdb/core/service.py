@@ -125,7 +125,10 @@ class Service:
                         method_doc
                     )
             for url in urls:
-                self.spec.path(path=flaskpath2openapi(url), operations=operations)
+                prefixed_url = self.blueprint.url_prefix + "/" + url.lstrip("/")
+                self.spec.path(
+                    path=flaskpath2openapi(prefixed_url), operations=operations
+                )
 
     def register(self):
         """

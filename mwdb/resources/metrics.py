@@ -1,8 +1,8 @@
 from flask import Response
-from flask_restful import Resource
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.metrics import collect
+from mwdb.core.service import Resource
 
 from . import requires_authorization, requires_capabilities
 

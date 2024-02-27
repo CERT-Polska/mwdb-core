@@ -1,8 +1,8 @@
 from flask import request
-from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.service import Resource
 from mwdb.model import KartonAnalysis, Object
 from mwdb.schema.karton import (
     KartonItemResponseSchema,

@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta
 
 from flask import g, request
-from flask_restful import Resource
 from sqlalchemy import func
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.plugins import hooks
+from mwdb.core.service import Resource
 from mwdb.model import Config, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import BlobCreateSpecSchema

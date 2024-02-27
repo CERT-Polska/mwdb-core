@@ -1,9 +1,9 @@
 from flask import g, request
-from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
+from mwdb.core.service import Resource
 from mwdb.model import AttributeDefinition, AttributePermission, Group, db
 from mwdb.schema.metakey import (
     MetakeyDefinitionItemRequestArgsSchema,

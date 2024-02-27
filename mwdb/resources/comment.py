@@ -1,9 +1,9 @@
 from flask import g, request
-from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.plugins import hooks
+from mwdb.core.service import Resource
 from mwdb.model import Comment, db
 from mwdb.schema.comment import CommentItemResponseSchema, CommentRequestSchema
 

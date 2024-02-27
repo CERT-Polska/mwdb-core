@@ -22,8 +22,6 @@ from botocore.credentials import (
     InstanceMetadataFetcher,
     InstanceMetadataProvider,
 )
-from flask_restful import abort
-from flask_sqlalchemy import Pagination
 
 
 def config_dhash(obj):
@@ -128,21 +126,6 @@ def calc_crc32(stream):
         csum = csum & 0xFFFFFFFF
 
     return "{:08x}".format(csum)
-
-
-def paginate_fast(q, page, per_page):
-    if page < 1:
-        abort(404)
-
-    if per_page < 0:
-        abort(404)
-
-    items = q.limit(per_page).offset((page - 1) * per_page).all()
-
-    if not items and page != 1:
-        abort(404)
-
-    return Pagination(q, page, per_page, 0, items)
 
 
 def is_true(flag):

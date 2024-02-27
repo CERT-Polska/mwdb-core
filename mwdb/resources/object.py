@@ -2,7 +2,6 @@ import json
 from uuid import UUID
 
 from flask import g, request
-from flask_restful import Resource
 from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFound
 
 from mwdb.core.capabilities import Capabilities
@@ -10,6 +9,7 @@ from mwdb.core.config import app_config
 from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
 from mwdb.core.plugins import hooks
 from mwdb.core.search import QueryBaseException, build_query
+from mwdb.core.service import Resource
 from mwdb.model import AttributeDefinition, Object, db
 from mwdb.model.tag import Tag
 from mwdb.schema.object import (

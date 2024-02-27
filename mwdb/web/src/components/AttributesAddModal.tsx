@@ -25,10 +25,9 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
         Record<string, AttributeDefinition>
     >({});
     const [attributeKey, setAttributeKey] = useState<string>("");
-    const [richTemplate, setRichTemplate] = useState<string>("");
     const [attributeValue, setAttributeValue] = useState<string>("");
     const [attributeType, setAttributeType] = useState<string>("string");
-    const [invalid, setInvalid] = useState<boolean>(false);
+    const [attributeJSONValue, setAttributeJSONValue] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const attributeForm = useRef<HTMLFormElement>(null);
     const attributesAvailable = !isEmpty(attributeDefinitions);
@@ -37,32 +36,34 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
         getAttributeDefinitions();
     }, []);
 
+    useEffect(() => {
+        if (attributeType === "json") {
+            try {
+                let value = JSON.parse(attributeValue);
+                setAttributeJSONValue(value);
+                setError(null);
+            } catch (e: any) {
+                setAttributeJSONValue(null);
+                setError(e.toString());
+            }
+        }
+    }, [attributeValue, attributeType]);
+
     function handleSubmit(ev: React.MouseEvent<HTMLFormElement>) {
         if (ev) ev.preventDefault();
         if (!attributeForm.current?.reportValidity()) return;
-        let value = attributeValue;
         if (attributeType === "json") {
-            try {
-                value = JSON.parse(attributeValue);
-            } catch (e: any) {
-                setError(e.toString());
-                return;
-            }
+            onAdd(attributeKey, attributeJSONValue);
+        } else {
+            onAdd(attributeKey, attributeValue);
         }
-        onAdd(attributeKey, value);
     }
 
     function handleKeyChange(ev: React.ChangeEvent<HTMLSelectElement>) {
         setAttributeKey(ev.target.value);
-        if (!ev.target.value.length) setRichTemplate("");
-        else {
-            setRichTemplate(
-                attributeDefinitions[ev.target.value].rich_template
-            );
-            setAttributeValue(
-                attributeDefinitions[ev.target.value].example_value || ""
-            );
-        }
+        setAttributeValue(
+            attributeDefinitions[ev.target.value].example_value || ""
+        );
         setError(null);
     }
 
@@ -103,7 +104,9 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
             onRequestClose={onRequestClose}
             onConfirm={handleSubmit}
             confirmDisabled={
-                !attributesAvailable || (invalid && !isEmpty(richTemplate))
+                !attributesAvailable ||
+                isEmpty(attributeValue) ||
+                error !== null
             }
         >
             {!attributesAvailable ? (
@@ -219,7 +222,10 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                                             {
                                                 key: attributeKey,
                                                 id: 0,
-                                                value: attributeValue,
+                                                value:
+                                                    attributeType === "string"
+                                                        ? attributeValue
+                                                        : attributeJSONValue,
                                             },
                                         ]}
                                         attributeDefinition={

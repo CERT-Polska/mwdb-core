@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 import { api } from "@mwdb-web/commons/api";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
-import { RichAttributeRenderer } from "./RichAttribute/RichAttributeRenderer";
+import { AttributeRenderer } from "@mwdb-web/components/ShowObject/common/AttributeRenderer";
 
 import AceEditor from "react-ace";
 
@@ -25,10 +25,9 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
         Record<string, AttributeDefinition>
     >({});
     const [attributeKey, setAttributeKey] = useState<string>("");
-    const [richTemplate, setRichTemplate] = useState<string>("");
     const [attributeValue, setAttributeValue] = useState<string>("");
     const [attributeType, setAttributeType] = useState<string>("string");
-    const [invalid, setInvalid] = useState<boolean>(false);
+    const [attributeJSONValue, setAttributeJSONValue] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const attributeForm = useRef<HTMLFormElement>(null);
     const attributesAvailable = !isEmpty(attributeDefinitions);
@@ -37,34 +36,34 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
         getAttributeDefinitions();
     }, []);
 
+    useEffect(() => {
+        if (attributeType === "json") {
+            try {
+                let value = JSON.parse(attributeValue);
+                setAttributeJSONValue(value);
+                setError(null);
+            } catch (e: any) {
+                setAttributeJSONValue(null);
+                setError(e.toString());
+            }
+        }
+    }, [attributeValue, attributeType]);
+
     function handleSubmit(ev: React.MouseEvent<HTMLFormElement>) {
         if (ev) ev.preventDefault();
         if (!attributeForm.current?.reportValidity()) return;
-        let value = attributeValue;
-        if (attributeType === "object") {
-            try {
-                value = JSON.parse(attributeValue);
-            } catch (e: any) {
-                setError(e.toString());
-                return;
-            }
+        if (attributeType === "json") {
+            onAdd(attributeKey, attributeJSONValue);
+        } else {
+            onAdd(attributeKey, attributeValue);
         }
-        onAdd(attributeKey, value);
     }
 
     function handleKeyChange(ev: React.ChangeEvent<HTMLSelectElement>) {
         setAttributeKey(ev.target.value);
-        if (!ev.target.value.length) setRichTemplate("");
-        else {
-            setRichTemplate(
-                attributeDefinitions[ev.target.value].rich_template
-            );
-            setAttributeValue(
-                attributeDefinitions[ev.target.value].example_value || ""
-            );
-        }
-        setAttributeType("object");
-
+        setAttributeValue(
+            attributeDefinitions[ev.target.value].example_value || ""
+        );
         setError(null);
     }
 
@@ -105,7 +104,9 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
             onRequestClose={onRequestClose}
             onConfirm={handleSubmit}
             confirmDisabled={
-                !attributesAvailable || (invalid && !isEmpty(richTemplate))
+                !attributesAvailable ||
+                isEmpty(attributeValue) ||
+                error !== null
             }
         >
             {!attributesAvailable ? (
@@ -167,17 +168,17 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                             <input
                                 className="form-check-input"
                                 type="radio"
-                                id="value-object"
+                                id="value-json"
                                 name="value-type"
-                                checked={attributeType === "object"}
-                                value="object"
+                                checked={attributeType === "json"}
+                                value="json"
                                 onChange={handleTypeChange}
                             />
                             <label
                                 className="form-check-label"
-                                htmlFor="value-object"
+                                htmlFor="value-json"
                             >
-                                Object
+                                JSON
                             </label>
                         </div>
                     </div>
@@ -206,9 +207,9 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                             />
                         )}
                     </div>
-                    {richTemplate ? (
+                    {attributeDefinitions[attributeKey] ? (
                         <div className="form-group">
-                            <label>Rich attribute preview</label>
+                            <label>Attribute preview</label>
                             <table
                                 className="table table-striped table-bordered table-hover data-table"
                                 style={{
@@ -216,22 +217,21 @@ export function AttributesAddModal({ isOpen, onAdd, onRequestClose }: Props) {
                                 }}
                             >
                                 <tbody>
-                                    <tr>
-                                        <th>{"My attribute"}</th>
-                                        <td>
-                                            <RichAttributeRenderer
-                                                template={richTemplate}
-                                                value={
+                                    <AttributeRenderer
+                                        attributes={[
+                                            {
+                                                key: attributeKey,
+                                                id: 0,
+                                                value:
                                                     attributeType === "string"
-                                                        ? JSON.stringify(
-                                                              attributeValue
-                                                          )
-                                                        : attributeValue
-                                                }
-                                                setInvalid={setInvalid}
-                                            />
-                                        </td>
-                                    </tr>
+                                                        ? attributeValue
+                                                        : attributeJSONValue,
+                                            },
+                                        ]}
+                                        attributeDefinition={
+                                            attributeDefinitions[attributeKey]
+                                        }
+                                    />
                                 </tbody>
                             </table>
                         </div>

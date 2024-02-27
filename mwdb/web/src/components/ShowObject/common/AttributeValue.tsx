@@ -7,14 +7,14 @@ import { useNavigate } from "react-router-dom";
 import { RichAttributeValue } from "../common/RichAttributeValue";
 
 type Props = {
-    value: string;
+    value: any;
     attributeId: number;
     attributeDefinition: {
         url_template: string;
         rich_template: string;
         key: string;
     };
-    onRemove: (id: number) => void;
+    onRemove?: (id: number) => void;
 };
 
 export function AttributeValue({

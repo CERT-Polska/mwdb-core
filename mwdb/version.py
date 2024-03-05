@@ -4,5 +4,5 @@ try:
 except IOError:
     git_revision = ""
 
-app_version = "2.11.0"
+app_version = "2.12.0"
 app_build_version = f"{app_version}+{git_revision}" if git_revision else app_version

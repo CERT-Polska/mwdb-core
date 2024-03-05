@@ -28,6 +28,7 @@ Features
    karton-guide
    oauth-guide
    rich-attributes-guide
+   prometheus-guide
 
 Indices and tables
 ==================

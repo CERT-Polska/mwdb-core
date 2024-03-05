@@ -1,5 +1,3 @@
-Sphinx==4.5.0
-sphinx-rtd-theme==0.5.2
-jsx-lexer==1.0.0
-# FIX: https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
-docutils==0.16
+Sphinx==7.2.6
+sphinx-rtd-theme==2.0.0
+jsx-lexer==2.0.1

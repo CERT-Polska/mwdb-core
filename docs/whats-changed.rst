@@ -5,7 +5,78 @@ This page describes the most significant changes in the following versions, that
 integration and plugin developers. We usually don't break API compatibility within major version, but plugins may
 have compatibility problems after minor mwdb-core upgrade.
 
-For upgrade instructions, see :ref:`Upgrade mwdb-core to latest version`.
+For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
+
+v2.12.0
+-------
+
+This release contains major changes in search mechanism and drops usage of Flask-RESTful, which might break plugin
+compatibility.
+
+Complete changelog can be found here: `v2.12.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.12.0>`_.
+
+[Important change] Refactor of search engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Search engine uses ``@>`` and ``@?`` PostgreSQL operators and can utilize GIN index on JSONB and ARRAY columns. It means that queries like:
+
+- ``file.name:"sample.exe"``
+- ``cfg.url:"https://example.com"``
+- ``attribute.url:"https://example.com"``
+
+will work much faster. In addition, new search engine comes with various improvements:
+
+- Both inclusive and exclusive ranges are allowed for detatime-columns
+- Range boundaries can be reversed and are automatically sorted
+- Escape parser is no longer regex-based and should be much more consistent
+
+As search engine uses a bit different approach, some things may work a bit different:
+
+- >=, >, <, <= are regular range operators, so they need to be put outside term
+
+  correct form: ``size:>="5kB"``
+
+  incorrect form: ``size:">=5kB"``
+
+Complete description of changes can be found here: https://github.com/CERT-Polska/mwdb-core/pull/906
+
+[Important change] Replaced Flask-RESTful with own lightweight implementation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Flask-RESTful is nice framework for creating REST API Flask services, but it's a bit abandoned which blocks us
+from further development and causes issues with newer Flask version. We switched to our own implementation of ``Resource`` classes.
+
+For API users this change is completely transparent, but if you develop your own plugins, you should change imports:
+
+.. code-block:: diff
+
+   - from flask_restful import Resource
+   + from mwdb.core.service import Resource
+
+Complete description of changes can be found here: https://github.com/CERT-Polska/mwdb-core/pull/916
+
+[Important change] Changes in logging, introduced Prometheus metrics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We're buried in tons of non-meaningful logs without any option to set the verbosity. Examples of non-meaningful logs:
+
+- information about usage of deprecated endpoints
+- 'before_request'/'request' logs which are useful for debugging hanging or slow endpoints, but only for debugging
+- threadName, moduleName, lineNo which doesn't carry any useful information that can't be read from the log itself
+
+That's why in v2.12.0 debug verbosity level was introduced and is turned off by default. If you want to turn on
+debug logs, you can enable it via ``enable_debug_log=1`` option in configuration.
+
+As a replacement for flooding our disk space with log files, we introduced Prometheus metrics that can be
+tracked using Grafana platform. Read more about setup in :ref:`Prometheus metrics`.
+
+v2.11.0
+-------
+
+Minor release with small QoL improvement: added forms to upload configs and blobs directly from eb UI.
+
+Complete changelog can be found here: `v2.11.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.11.0>`_.
+
 
 v2.10.1
 -------
@@ -125,7 +196,7 @@ Plugin modules are imported dynamically (using `import() <https://developer.mozi
 Check for any runtime errors in DevTools, especially noting messages like ``Plugin ${pluginName} failed to load``.
 
 [Important change] Replaced uWSGI with Gunicorn
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``certpl/mwdb`` Docker image uses `Gunicorn <https://docs.gunicorn.org/en/stable/index.html>`_ instead of `uWSGI <https://uwsgi-docs.readthedocs.io/en/latest/>`_
 for serving Python WSGI application. If you have uWSGI-dependent configuration customized via environment variables, you need to change it

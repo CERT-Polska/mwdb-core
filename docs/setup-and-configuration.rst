@@ -41,12 +41,15 @@ MWDB was tested on Debian-based systems, but should work as well on other Linux 
 
 For production environments, you need to install:
 
-
 * **PostgreSQL database** (minimum supported version: 12, https://www.postgresql.org/download/linux/debian/)
 * libfuzzy2 for ssdeep evaluation
+* other native dependencies listed below
+
+.. code-block:: console
+
+    $ apt install gcc libfuzzy-dev python3-dev python3-venv postgresql-client postgresql-common
 
 Optionally you can install:
-
 
 * **Docker engine and Docker-Compose** if you want to use the Docker-based setup (https://docs.docker.com/engine/install/)
 * **Redis database** needed by extra features like rate-limiting (https://redis.io/topics/quickstart)
@@ -311,6 +314,8 @@ Extra features:
 * ``enable_registration`` (0 or 1) - Turns on user registration features. Requires additional configuration. Default is ``0``.
 * ``enable_maintenance`` (0 or 1) - Turns on maintenance mode, making MWDB unavailable for users other than ``admin``. Default is ``0``.
 * ``enable_json_logger`` (0 or 1) - Enables JSON logging which may be more convenient for automated log processing. Default is ``0``.
+* ``enable_prometheus_metrics`` (0 or 1) - Enables Prometheus metrics (\ ``/api/varz`` endpoint\ )
+* ``enable_debug_log`` (0 or 1) - Enables debug logging
 * ``redis_uri`` (string) - Redis database connection string, required by rate limiter.
 * ``remotes`` (comma separated strings) - list of MWDB remotes (experimental)
 * ``enable_hooks`` (0 or 1) - enable plugin hooks

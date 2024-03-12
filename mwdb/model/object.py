@@ -540,18 +540,24 @@ class Object(db.Model):
             for tag in db.session.query(Tag).filter(Tag.object_id == self.id).all()
         ]
 
+    def get_tag(self, tag_name):
+        """
+        Gets Tag object or returns None if tag was not found
+        """
+        return (
+            db.session.query(Tag)
+            .filter(Tag.tag == tag_name, Tag.object_id == self.id)
+            .first()
+        )
+
     def add_tag(self, tag_name, commit=True):
         """
         Adds new tag to object.
         :param tag_name: tag string
         :param commit: Commit transaction after operation
-        :return: True if tag wasn't added yet
+        :return: True if tag was added
         """
-        db_tag = (
-            db.session.query(Tag)
-            .filter(Tag.tag == tag_name, Tag.object_id == self.id)
-            .first()
-        )
+        db_tag = self.get_tag(tag_name)
         if db_tag:
             return False
 
@@ -564,8 +570,7 @@ class Object(db.Model):
             is_new = True
         except IntegrityError:
             db.session.rollback()
-            db.session.refresh(self)
-            if db_tag not in self.tags:
+            if not self.get_tag(tag_name):
                 raise
 
         if commit:
@@ -578,11 +583,7 @@ class Object(db.Model):
         :param tag_name: tag string
         :return: True if tag wasn't removed yet
         """
-        db_tag = (
-            db.session.query(Tag)
-            .filter(Tag.tag == tag_name, Tag.object_id == self.id)
-            .first()
-        )
+        db_tag = self.get_tag(tag_name)
         if not db_tag:
             return False
 
@@ -594,8 +595,7 @@ class Object(db.Model):
             is_removed = True
         except IntegrityError:
             db.session.rollback()
-            db.session.refresh(self)
-            if db_tag in self.tags:
+            if self.get_tag(tag_name):
                 raise
 
         if commit:

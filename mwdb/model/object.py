@@ -570,6 +570,7 @@ class Object(db.Model):
             is_new = True
         except IntegrityError:
             db.session.rollback()
+            # If there is still no tag, something went wrong
             if not self.get_tag(tag_name):
                 raise
 
@@ -595,6 +596,7 @@ class Object(db.Model):
             is_removed = True
         except IntegrityError:
             db.session.rollback()
+            # If there is still a tag, something went wrong
             if self.get_tag(tag_name):
                 raise
 

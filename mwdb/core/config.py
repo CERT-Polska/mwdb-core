@@ -137,6 +137,10 @@ class MWDBConfig(Config):
     use_x_forwarded_for = key(cast=intbool, required=False, default=False)
     enable_debug_log = key(cast=intbool, required=False, default=False)
 
+    group_invite_expiration_time = key(
+        cast=int, required=False, default=7 * 24 * 3600
+    )  # one week
+
 
 @section("karton")
 class KartonConfig(Config):

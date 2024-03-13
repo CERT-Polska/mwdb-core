@@ -10,6 +10,9 @@ import { QuickQuery } from "../common/QuickQuery";
 import { ObjectType } from "@mwdb-web/types/types";
 import { AxiosError } from "axios";
 import { isEmpty } from "lodash";
+import { Extendable } from "@mwdb-web/commons/plugins";
+import { QueryResultOptions } from "./QueryResultOptions";
+import { QueryResultContextProvider } from "../common/QueryResultContext";
 
 type Props = {
     type: ObjectType;
@@ -218,8 +221,8 @@ export function RecentView(props: Props) {
                                 className="btn-group"
                                 data-toggle="tooltip"
                                 title={`Turn ${
-                                    countingEnabled ? "off" : "on"
-                                } results counting`}
+                                        countingEnabled ? "off" : "on"
+                                    } results counting`}
                             >
                                 <input
                                     type="button"
@@ -264,16 +267,26 @@ export function RecentView(props: Props) {
                         />
                     </div>
                 </form>
-                <RecentViewList
-                    query={submittedQuery}
-                    type={props.type}
-                    rowComponent={props.rowComponent}
-                    headerComponent={props.headerComponent}
-                    locked={isLocked}
-                    disallowEmpty={props.disallowEmpty ?? false}
-                    setQueryError={setQueryError}
-                    addToQuery={addToQuery}
-                />
+                <QueryResultContextProvider>
+                    <div className="query-options">
+                        <Extendable ident="queryPostResult">
+                            <QueryResultOptions
+                                query={submittedQuery} 
+                                type={props.type}
+                            />
+                        </Extendable>
+                    </div>
+                    <RecentViewList
+                        query={submittedQuery}
+                        type={props.type}
+                        rowComponent={props.rowComponent}
+                        headerComponent={props.headerComponent}
+                        locked={isLocked}
+                        disallowEmpty={props.disallowEmpty ?? false}
+                        setQueryError={setQueryError}
+                        addToQuery={addToQuery}
+                    />
+                </QueryResultContextProvider>
             </div>
         </View>
     );

@@ -6,6 +6,7 @@ import {
     renderTokens,
     Token,
 } from "@mwdb-web/commons/helpers";
+import { JSONValue, filter, filters } from "./filters";
 
 /**
  * Markdown with Mustache templates for React
@@ -23,6 +24,8 @@ function appendToLastElement(array: string[], value: string) {
     // (["a", "b", "c"], "d") => ["a", "b", "cd"]
     return [...array.slice(0, -1), array[array.length - 1] + value];
 }
+
+const availableFilters: string[] = filters.map((f: filter) => f.name);
 
 function splitName(name: string) {
     if (name === ".")
@@ -103,7 +106,7 @@ class MustacheContext extends Mustache.Context {
         return parentPath;
     }
 
-    lookup(name: string) {
+    _lookup(name: string) {
         let searchable = false;
         // Check for searchable mark at the beginning
         if (name[0] === "@") {
@@ -136,6 +139,25 @@ class MustacheContext extends Mustache.Context {
             return new SearchReference(query, currentObject);
         }
         return currentObject;
+    }
+
+    lookup(name: string) {
+        const filter_expr = name.split("|");
+        const variable = filter_expr.shift()!.trim();
+        var original: JSONValue = this._lookup(variable);
+        if (!original) {
+            return undefined;
+        }
+
+        for (let filter of filter_expr) {
+            if (!(filter in availableFilters)) {
+                continue;
+            }
+            const action = filters.filter((f: filter) => f.name == filter)[0].action;
+            original = action(original);
+        }
+
+        return original;
     }
 }
 

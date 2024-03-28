@@ -16,6 +16,7 @@ FROM nginx:stable
 LABEL maintainer="info@cert.pl"
 
 ENV PROXY_BACKEND_URL http://mwdb.:8080
+ENV NGINX_MAX_UPLOAD_SIZE 50M
 
 COPY docker/nginx.conf.template /etc/nginx/conf.d/default.conf.template
 COPY docker/start-web.sh /start-web.sh

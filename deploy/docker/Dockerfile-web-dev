@@ -12,6 +12,7 @@ RUN cd /app \
     && npm cache clean --force
 
 ENV PROXY_BACKEND_URL http://mwdb.:8080
+ENV NGINX_MAX_UPLOAD_SIZE 50M
 
 WORKDIR /app
 CMD ["npm", "run", "dev"]

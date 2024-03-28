@@ -246,6 +246,18 @@ If you use Docker-based setup, all the configuration can be set using environmen
    If you are using ``karton``, we highly recommend creating a separate bucket for it.
    Failing to do so might result in data loss caused by ``karton's`` garbage collector. 
 
+Setting higher upload size limit in Docker
+------------------------------------------
+
+mwdb-core allows to set maximum upload size via ``max_upload_size`` parameter in configuration (see also :ref:`Advanced configuration` section).
+
+mwdb-core package doesn't enforce any limitation by default, but if you use Docker images: nginx configuration in mwdb-web image have set 50M limit
+using `client_max_body_size <http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size>`_ option. If you want to set different
+limitation for Docker environment, use ``NGINX_MAX_UPLOAD_SIZE`` environment variable to set ``client_max_body_size`` option.
+
+If you want to customize other nginx settings (e.g. timeouts), you can also provide your own ``nginx.conf.template`` by building your own image
+based on ``certpl/mwdb-web``. More information can be found in `#927 issue discussion on Github <https://github.com/CERT-Polska/mwdb-core/issues/927>`_.
+
 Advanced configuration
 ----------------------
 

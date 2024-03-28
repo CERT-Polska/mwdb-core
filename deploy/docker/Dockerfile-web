@@ -16,9 +16,9 @@ FROM nginx:stable
 LABEL maintainer="info@cert.pl"
 
 ENV PROXY_BACKEND_URL http://mwdb.:8080
+ENV NGINX_MAX_UPLOAD_SIZE 50M
 
-COPY docker/nginx.conf.template /etc/nginx/conf.d/default.conf.template
-COPY docker/start-web.sh /start-web.sh
+COPY docker/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Give +r to everything in /usr/share/nginx/html and +x for directories
@@ -26,5 +26,3 @@ RUN chmod u=rX,go= -R /usr/share/nginx/html
 
 # By default everything is owned by root - change owner to nginx
 RUN chown nginx:nginx -R /usr/share/nginx/html
-
-CMD ["/bin/sh", "/start-web.sh"]

@@ -3,7 +3,7 @@ server {
     server_name  mwdb-web;
     root         /usr/share/nginx/html;
 
-    client_max_body_size "${NGINX_MAX_UPLOAD_SIZE}";
+    client_max_body_size ${NGINX_MAX_UPLOAD_SIZE};
 
     location /api/ {
         proxy_pass ${PROXY_BACKEND_URL}/api/;

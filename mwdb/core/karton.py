@@ -94,6 +94,7 @@ def send_file_to_karton(file: "File", arguments: Dict[str, Any]) -> str:
                 "attributes": file.get_attributes(
                     as_dict=True, check_permissions=False
                 ),
+                "tags": [x.tag for x in file.tags],
             },
             priority=task_priority,
         )

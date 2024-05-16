@@ -50,11 +50,10 @@ class KartonAnalysis(db.Model):
     @property
     def _analysis_state(self):
         analysis_id = str(self.id)
-        if analysis_id not in self._karton_state.analyses:
+        analysis = self._karton_state.get_analysis(analysis_id)
+        if analysis.is_done:
             return None
-        if self._karton_state.analyses[analysis_id].is_done:
-            return None
-        return self._karton_state.analyses[analysis_id]
+        return analysis
 
     @property
     def status(self):

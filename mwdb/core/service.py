@@ -44,7 +44,10 @@ class Resource(MethodView):
                 valid_methods=self.methods,
                 description="Method is not allowed for this endpoint",
             )
-        return getattr(self, method)(*args, **kwargs)
+        response = getattr(self, method)(*args, **kwargs)
+        if response is None:
+            return jsonify(None), 200
+        return response
 
 
 class Service:

@@ -14,7 +14,6 @@ from werkzeug.exceptions import (
     MethodNotAllowed,
     ServiceUnavailable,
 )
-from werkzeug.wrappers import Response
 
 from mwdb.version import app_version
 
@@ -46,9 +45,9 @@ class Resource(MethodView):
                 description="Method is not allowed for this endpoint",
             )
         response = getattr(self, method)(*args, **kwargs)
-        if isinstance(response, Response):
-            return response
-        return jsonify(response)
+        if response is None:
+            return jsonify(None), 200
+        return response
 
 
 class Service:

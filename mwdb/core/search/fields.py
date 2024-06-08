@@ -245,6 +245,8 @@ class JSONBaseField(ColumnField):
                 # less expensive. We hope that it will be used by
                 # query planner to pre-filter results before applying
                 # function scan.
+                # Ensure wildcards are at the beginning and the end to make query like:
+                # object.cfg::text LIKE '{*<pattern>*}'
                 inner_match_value = self._get_quoted_value_for_like_statement(
                     ensure_inner_match_pattern(string_value)
                 )

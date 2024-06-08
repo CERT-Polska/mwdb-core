@@ -225,10 +225,10 @@ class JSONBaseField(ColumnField):
             string_value = string_from_node(node, escaped=True)
             if is_pattern_value(string_value):
                 node = self._get_value_for_like_statement(string_value)
+                stringified_value = self._get_quoted_value_for_like_statement(
+                    string_value
+                )
                 if string_value.startswith("*") and string_value.endswith("*"):
-                    stringified_value = self._get_quoted_value_for_like_statement(
-                        string_value
-                    )
                     node = any_([node, stringified_value])
                 jsonpath_selector = make_jsonpath_selector(path_selector)
                 json_elements = func.jsonb_path_query(
@@ -237,10 +237,23 @@ class JSONBaseField(ColumnField):
                 json_element = column(json_elements.name).operate(
                     JSONPATH_ASTEXT, "{}", result_type=Text
                 )
-                return exists(
-                    select([1])
-                    .select_from(json_elements)
-                    .where(json_element.like(node))
+                # Hack: these queries perform very slow full table scan
+                # because we can't directly index JSONB for quick wildcard
+                # searches. That's why we combine query with another
+                # LIKE condition over object.cfg::text column that is
+                # less expensive. We hope that it will be used by
+                # query planner to pre-filter results before applying
+                # function scan.
+                string_in_json_condition = cast(self.column, Text).like(
+                    stringified_value
+                )
+                return and_(
+                    exists(
+                        select([1])
+                        .select_from(json_elements)
+                        .where(json_element.like(node))
+                    ),
+                    string_in_json_condition,
                 )
             else:
                 jsonpath_condition = self._get_jsonpath_for_string_equals(

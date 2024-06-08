@@ -41,6 +41,19 @@ class ConfigListResponseSchema(
     __envelope_key__ = "configs"
 
 
+class ConfigLatestItemResponseSchema(ObjectListItemResponseSchema):
+    """
+    Limited ConfigItemResponseSchema that doesn't fetch relationships
+    and other extra metadata.
+
+    Used by FileItemResponseSchema.latest_config field.
+    """
+
+    family = fields.Str(required=True, allow_none=False)
+    config_type = fields.Str(required=True, allow_none=False)
+    cfg = fields.Dict(required=True, allow_none=False)
+
+
 class ConfigItemResponseSchema(ObjectItemResponseSchema):
     family = fields.Str(required=True, allow_none=False)
     config_type = fields.Str(required=True, allow_none=False)

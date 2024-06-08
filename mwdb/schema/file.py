@@ -2,7 +2,7 @@ import json
 
 from marshmallow import Schema, fields, pre_load
 
-from .config import ConfigItemResponseSchema
+from .config import ConfigLatestItemResponseSchema
 from .object import (
     ObjectCreateRequestSchemaBase,
     ObjectItemResponseSchema,
@@ -67,7 +67,7 @@ class FileItemResponseSchema(ObjectItemResponseSchema):
     ssdeep = fields.Str(required=True, allow_none=True)
 
     latest_config = fields.Nested(
-        ConfigItemResponseSchema, required=True, allow_none=True
+        ConfigLatestItemResponseSchema, required=True, allow_none=True
     )
 
 

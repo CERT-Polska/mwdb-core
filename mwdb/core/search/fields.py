@@ -250,8 +250,18 @@ class JSONBaseField(ColumnField):
                 inner_match_value = self._get_quoted_value_for_like_statement(
                     ensure_inner_match_pattern(string_value)
                 )
+                # But if we are looking for part of JSON instead of string value,
+                # we shouldn't double escape backslashes. This feature is very obsolete
+                # and will be dropped in future versions of MWDB
+                inner_match_json_part = (
+                    "{"
+                    + self._get_value_for_like_statement(
+                        ensure_inner_match_pattern(string_value)
+                    )
+                    + "}"
+                )
                 string_in_json_condition = cast(self.column, Text).like(
-                    inner_match_value
+                    any_([inner_match_value, inner_match_json_part])
                 )
                 return and_(
                     exists(

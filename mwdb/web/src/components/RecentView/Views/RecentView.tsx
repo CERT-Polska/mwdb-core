@@ -67,6 +67,7 @@ export function RecentView(props: Props) {
                 if (query === prev.get("query"))
                     throw new Error("Tried to set the same query twice");
                 return {
+                    ...Object.fromEntries(prev.entries()),
                     q: query,
                     count: prev.get("count") === "1" ? "1" : "0",
                 };
@@ -233,6 +234,9 @@ export function RecentView(props: Props) {
                                         setSearchParams(
                                             (prev) => {
                                                 return {
+                                                    ...Object.fromEntries(
+                                                        prev.entries()
+                                                    ),
                                                     q: prev.get("q") || "",
                                                     count: countingEnabled
                                                         ? "0"

@@ -229,7 +229,11 @@ class JSONBaseField(ColumnField):
                 stringified_value = self._get_quoted_value_for_like_statement(
                     string_value
                 )
-                if string_value.startswith("*") and string_value.endswith("*"):
+                if (
+                    string_value.startswith("*")
+                    and string_value.endswith("*")
+                    and node != stringified_value
+                ):
                     node = any_([node, stringified_value])
                 jsonpath_selector = make_jsonpath_selector(path_selector)
                 json_elements = func.jsonb_path_query(
@@ -260,9 +264,14 @@ class JSONBaseField(ColumnField):
                     )
                     + "}"
                 )
-                string_in_json_condition = cast(self.column, Text).like(
-                    any_([inner_match_value, inner_match_json_part])
-                )
+                if inner_match_value == inner_match_json_part:
+                    string_in_json_condition = cast(self.column, Text).like(
+                        inner_match_value
+                    )
+                else:
+                    string_in_json_condition = cast(self.column, Text).like(
+                        any_([inner_match_value, inner_match_json_part])
+                    )
                 return and_(
                     exists(
                         select([1])

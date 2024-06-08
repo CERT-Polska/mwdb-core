@@ -188,6 +188,14 @@ class JSONBaseField(ColumnField):
         """
         return transform_for_quoted_like_statement(value)
 
+    def _get_nested_value_for_like_statement(self, value: str) -> str:
+        return self._get_value_for_like_statement(ensure_inner_match_pattern(value))
+
+    def _get_quoted_nested_value_for_like_statement(self, value: str) -> str:
+        return self._get_quoted_value_for_like_statement(
+            ensure_inner_match_pattern(value)
+        )
+
     def _get_jsonpath_for_range_equals(
         self,
         path_selector: PathSelector,
@@ -251,18 +259,14 @@ class JSONBaseField(ColumnField):
                 # function scan.
                 # Ensure wildcards are at the beginning and the end to make query like:
                 # object.cfg::text LIKE '{*<pattern>*}'
-                inner_match_value = self._get_quoted_value_for_like_statement(
-                    ensure_inner_match_pattern(string_value)
+                inner_match_value = self._get_quoted_nested_value_for_like_statement(
+                    string_value
                 )
                 # But if we are looking for part of JSON instead of string value,
                 # we shouldn't double escape backslashes. This feature is very obsolete
                 # and will be dropped in future versions of MWDB
-                inner_match_json_part = (
-                    "{"
-                    + self._get_value_for_like_statement(
-                        ensure_inner_match_pattern(string_value)
-                    )
-                    + "}"
+                inner_match_json_part = self._get_nested_value_for_like_statement(
+                    string_value
                 )
                 if inner_match_value == inner_match_json_part:
                     string_in_json_condition = cast(self.column, Text).like(
@@ -334,6 +338,15 @@ class ConfigField(JSONBaseField):
 
     def _get_quoted_value_for_like_statement(self, value: str) -> str:
         return transform_for_quoted_config_like_statement(value)
+
+    def _get_nested_value_for_like_statement(self, value: str) -> str:
+        # Configs are always dicts so we can't add additional brackets
+        # to deduplicate any(array['{*query*}', '*query*'])
+        return (
+            "{"
+            + self._get_value_for_like_statement(ensure_inner_match_pattern(value))
+            + "}"
+        )
 
     def _get_jsonpath_for_range_equals(
         self,

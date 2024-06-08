@@ -35,6 +35,7 @@ from .exceptions import (
 from .node_to_value import node_is_range, range_from_node, string_from_node
 from .parse_helpers import (
     PathSelector,
+    ensure_inner_match_pattern,
     is_pattern_value,
     jsonpath_config_string_equals,
     jsonpath_range_equals,
@@ -244,8 +245,11 @@ class JSONBaseField(ColumnField):
                 # less expensive. We hope that it will be used by
                 # query planner to pre-filter results before applying
                 # function scan.
+                inner_match_value = self._get_quoted_value_for_like_statement(
+                    ensure_inner_match_pattern(string_value)
+                )
                 string_in_json_condition = cast(self.column, Text).like(
-                    stringified_value
+                    inner_match_value
                 )
                 return and_(
                     exists(

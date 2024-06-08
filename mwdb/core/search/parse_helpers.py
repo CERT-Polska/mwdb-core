@@ -308,6 +308,19 @@ def is_nonstring_object(value: str) -> bool:
     return bool(re.fullmatch(r"(false|true|null|(0|[1-9]\d*)([.]\d+)?)", value))
 
 
+def ensure_inner_match_pattern(value: str) -> str:
+    """
+    Ensures that pattern starts and ends with unescaped wildcard '*'
+    """
+    wildcard_pattern = r"((?<=[^\\])[*]|\\\\[*]|^[*])"  # non escaped *
+    pattern = value
+    if not re.search("^" + wildcard_pattern, value):
+        pattern = "*" + pattern
+    if not re.search(wildcard_pattern + "$", value):
+        pattern = pattern + "*"
+    return pattern
+
+
 def is_pattern_value(value) -> bool:
     """
     Returns True if value contains wildcards

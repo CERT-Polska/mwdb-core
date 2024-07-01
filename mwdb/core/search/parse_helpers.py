@@ -152,7 +152,7 @@ def transform_for_like_statement(escaped_value: str) -> str:
 def transform_for_quoted_like_statement(escaped_value: str) -> str:
     """
     Transforms Lucene value to pattern for LIKE condition
-    against stringified JSON
+    against stringified JSON values
     """
 
     def transform_token(token: StringToken) -> StringToken:
@@ -271,7 +271,7 @@ def transform_for_quoted_config_like_statement(escaped_value: str) -> str:
         tokenize_string(escaped_value, "*?", control_escapes="tnrxuU")
     )
     transformed_string = list(transform_token(token) for token in tokenized_string)
-    return "{" + join_tokenized_string(transformed_string) + "}"
+    return join_tokenized_string(transformed_string)
 
 
 def jsonpath_quote(value: str) -> str:
@@ -306,6 +306,18 @@ def is_nonstring_object(value: str) -> bool:
     so JSON must be queried using both types
     """
     return bool(re.fullmatch(r"(false|true|null|(0|[1-9]\d*)([.]\d+)?)", value))
+
+
+def is_inner_match_pattern(value: str) -> bool:
+    """
+    Checks if pattern starts and ends with unescaped wildcard '*'
+    """
+    wildcard_pattern = r"((?<=[^\\])[*]|\\\\[*]|^[*])"  # non escaped *
+    if not re.search("^" + wildcard_pattern, value):
+        return False
+    if not re.search(wildcard_pattern + "$", value):
+        return False
+    return True
 
 
 def ensure_inner_match_pattern(value: str) -> str:

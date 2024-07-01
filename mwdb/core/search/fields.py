@@ -230,6 +230,9 @@ class JSONBaseField(ColumnField):
                 quoted_pattern_value = self._get_quoted_value_for_like_statement(
                     string_value
                 )
+                inner_match_pattern_value = self._get_quoted_value_for_like_statement(
+                    ensure_inner_match_pattern(string_value)
+                )
 
                 jsonpath_selector = make_jsonpath_selector(path_selector)
                 json_elements = func.jsonb_path_query(
@@ -265,7 +268,7 @@ class JSONBaseField(ColumnField):
                 # query planner to pre-filter results before applying
                 # function scan.
                 whole_config_match_condition = cast(self.column, Text).like(
-                    ensure_inner_match_pattern(quoted_pattern_value)
+                    inner_match_pattern_value
                 )
                 return and_(
                     value_condition,

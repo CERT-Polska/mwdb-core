@@ -99,9 +99,7 @@ class Object(db.Model):
         cascade="save-update, merge, delete",
     )
 
-    followers = db.relationship(
-        "User", secondary=favorites, back_populates="favorites", lazy="joined"
-    )
+    followers = db.relationship("User", secondary=favorites, back_populates="favorites")
 
     comment_authors = db.relationship(
         "User",

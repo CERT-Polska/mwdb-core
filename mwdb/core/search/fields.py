@@ -36,6 +36,7 @@ from .node_to_value import node_is_range, range_from_node, string_from_node
 from .parse_helpers import (
     PathSelector,
     ensure_inner_match_pattern,
+    is_inner_match_pattern,
     is_pattern_value,
     jsonpath_config_string_equals,
     jsonpath_range_equals,
@@ -181,20 +182,14 @@ class JSONBaseField(ColumnField):
         """
         return transform_for_like_statement(value)
 
-    def _get_quoted_value_for_like_statement(self, value: str) -> str:
+    def _get_quoted_value_for_like_statement(
+        self, value: str, escape_quotes: bool = True
+    ) -> str:
         """
         Transforms Lucene escaped value into quoted JSON pattern
         for LIKE condition (looking for strings encoded inside JSON objects)
         """
-        return transform_for_quoted_like_statement(value)
-
-    def _get_nested_value_for_like_statement(self, value: str) -> str:
-        return self._get_value_for_like_statement(ensure_inner_match_pattern(value))
-
-    def _get_quoted_nested_value_for_like_statement(self, value: str) -> str:
-        return self._get_quoted_value_for_like_statement(
-            ensure_inner_match_pattern(value)
-        )
+        return transform_for_quoted_like_statement(value, escape_quotes=escape_quotes)
 
     def _get_jsonpath_for_range_equals(
         self,
@@ -233,56 +228,71 @@ class JSONBaseField(ColumnField):
         else:
             string_value = string_from_node(node, escaped=True)
             if is_pattern_value(string_value):
-                node = self._get_value_for_like_statement(string_value)
-                stringified_value = self._get_quoted_value_for_like_statement(
-                    string_value
-                )
-                if (
-                    string_value.startswith("*")
-                    and string_value.endswith("*")
-                    and node != stringified_value
-                ):
-                    node = any_([node, stringified_value])
                 jsonpath_selector = make_jsonpath_selector(path_selector)
                 json_elements = func.jsonb_path_query(
                     self.column, jsonpath_selector
                 ).alias("json_element")
-                json_element = column(json_elements.name).operate(
-                    JSONPATH_ASTEXT, "{}", result_type=Text
-                )
-                # Hack: these queries perform very slow full table scan
+
+                if is_inner_match_pattern(string_value):
+                    # If pattern starts and ends with *, we are searching
+                    # inside quoted string values and nested objects
+                    # We use this kind of pattern because value we're looking for
+                    # may be nested inside some other object, so special characters
+                    # need additional escaping
+                    pattern_value = self._get_quoted_value_for_like_statement(
+                        string_value
+                    )
+                    # Unfortunately, MWDB full-text pattern allows searching not only
+                    # for values, but also parts of JSON. That's why cfg:"*.com\"*"
+                    # is unambiguous and may match two variants of JSON:
+                    # - {"url": "example.com\""}
+                    # - {"url": "example.com"}
+                    pattern_value_raw_quotes = (
+                        self._get_quoted_value_for_like_statement(
+                            string_value, escape_quotes=False
+                        )
+                    )
+                    json_element = cast(column(json_elements.name), Text)
+                    if pattern_value != pattern_value_raw_quotes:
+                        pattern_value = any_([pattern_value, pattern_value_raw_quotes])
+                    value_condition = exists(
+                        select([1])
+                        .select_from(json_elements)
+                        .where(json_element.like(pattern_value))
+                    )
+                    inner_match_pattern_value = pattern_value
+                else:
+                    # Pattern for literal value
+                    pattern_value = self._get_value_for_like_statement(string_value)
+                    # If not, we need to cast the element to unquoted value
+                    # using #>> '{}' operator and assume that we're looking
+                    # for literal value under specific key
+                    json_element = column(json_elements.name).operate(
+                        JSONPATH_ASTEXT, "{}", result_type=Text
+                    )
+                    value_condition = exists(
+                        select([1])
+                        .select_from(json_elements)
+                        .where(json_element.like(pattern_value))
+                    )
+                    inner_match_pattern_value = (
+                        self._get_quoted_value_for_like_statement(
+                            ensure_inner_match_pattern(string_value)
+                        )
+                    )
+                # Queries above perform very slow full table scan
                 # because we can't directly index JSONB for quick wildcard
                 # searches. That's why we combine query with another
                 # LIKE condition over object.cfg::text column that is
                 # less expensive. We hope that it will be used by
                 # query planner to pre-filter results before applying
                 # function scan.
-                # Ensure wildcards are at the beginning and the end to make query like:
-                # object.cfg::text LIKE '{*<pattern>*}'
-                inner_match_value = self._get_quoted_nested_value_for_like_statement(
-                    string_value
+                whole_config_match_condition = cast(self.column, Text).like(
+                    inner_match_pattern_value
                 )
-                # But if we are looking for part of JSON instead of string value,
-                # we shouldn't double escape backslashes. This feature is very obsolete
-                # and will be dropped in future versions of MWDB
-                inner_match_json_part = self._get_nested_value_for_like_statement(
-                    string_value
-                )
-                if inner_match_value == inner_match_json_part:
-                    string_in_json_condition = cast(self.column, Text).like(
-                        inner_match_value
-                    )
-                else:
-                    string_in_json_condition = cast(self.column, Text).like(
-                        any_([inner_match_value, inner_match_json_part])
-                    )
                 return and_(
-                    exists(
-                        select([1])
-                        .select_from(json_elements)
-                        .where(json_element.like(node))
-                    ),
-                    string_in_json_condition,
+                    value_condition,
+                    whole_config_match_condition,
                 )
             else:
                 jsonpath_condition = self._get_jsonpath_for_string_equals(
@@ -336,16 +346,11 @@ class ConfigField(JSONBaseField):
     def _get_value_for_like_statement(self, value: str) -> str:
         return transform_for_config_like_statement(value)
 
-    def _get_quoted_value_for_like_statement(self, value: str) -> str:
-        return transform_for_quoted_config_like_statement(value)
-
-    def _get_nested_value_for_like_statement(self, value: str) -> str:
-        # Configs are always dicts so we can't add additional brackets
-        # to deduplicate any(array['{*query*}', '*query*'])
-        return (
-            "{"
-            + self._get_value_for_like_statement(ensure_inner_match_pattern(value))
-            + "}"
+    def _get_quoted_value_for_like_statement(
+        self, value: str, escape_quotes: bool = True
+    ) -> str:
+        return transform_for_quoted_config_like_statement(
+            value, escape_quotes=escape_quotes
         )
 
     def _get_jsonpath_for_range_equals(

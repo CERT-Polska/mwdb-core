@@ -149,10 +149,12 @@ def transform_for_like_statement(escaped_value: str) -> str:
     return join_tokenized_string(transformed_string)
 
 
-def transform_for_quoted_like_statement(escaped_value: str) -> str:
+def transform_for_quoted_like_statement(
+    escaped_value: str, escape_quotes: bool = True
+) -> str:
     """
     Transforms Lucene value to pattern for LIKE condition
-    against stringified JSON
+    against stringified JSON values
     """
 
     def transform_token(token: StringToken) -> StringToken:
@@ -165,7 +167,9 @@ def transform_for_quoted_like_statement(escaped_value: str) -> str:
         elif token_type is TokenType.STRING:
             # Escape all backslashes and quotes to correctly represent
             # these characters in quoted string
-            value = re.sub(r'(["\\])', r"\\\1", token_value)
+            value = re.sub(
+                r'(["\\])' if escape_quotes else r"([\\])", r"\\\1", token_value
+            )
             # Then escape SQL wildcards (for LIKE) and
             # once again escape all backslashes
             value = re.sub(r"([%_\\])", r"\\\1", value)
@@ -236,7 +240,9 @@ def transform_for_config_like_statement(escaped_value: str) -> str:
     return join_tokenized_string(transformed_string)
 
 
-def transform_for_quoted_config_like_statement(escaped_value: str) -> str:
+def transform_for_quoted_config_like_statement(
+    escaped_value: str, escape_quotes: bool = True
+) -> str:
     """
     Transforms Lucene value to pattern for LIKE condition against
     "unicode-escape"-escaped stringified JSON value
@@ -262,7 +268,8 @@ def transform_for_quoted_config_like_statement(escaped_value: str) -> str:
             # and second level for JSON string
             value = value.replace("\\", "\\" * 4)
             # Escape inner quotes
-            value = value.replace('"', ("\\" * 2) + '"')
+            if escape_quotes:
+                value = value.replace('"', ("\\" * 2) + '"')
             # Finally escape all SQL wildcards with only LIKE-level backslashes
             value = re.sub(r"([%_])", r"\\\1", value)
             return TokenType.STRING, value
@@ -271,7 +278,7 @@ def transform_for_quoted_config_like_statement(escaped_value: str) -> str:
         tokenize_string(escaped_value, "*?", control_escapes="tnrxuU")
     )
     transformed_string = list(transform_token(token) for token in tokenized_string)
-    return "{" + join_tokenized_string(transformed_string) + "}"
+    return join_tokenized_string(transformed_string)
 
 
 def jsonpath_quote(value: str) -> str:
@@ -306,6 +313,18 @@ def is_nonstring_object(value: str) -> bool:
     so JSON must be queried using both types
     """
     return bool(re.fullmatch(r"(false|true|null|(0|[1-9]\d*)([.]\d+)?)", value))
+
+
+def is_inner_match_pattern(value: str) -> bool:
+    """
+    Checks if pattern starts and ends with unescaped wildcard '*'
+    """
+    wildcard_pattern = r"((?<=[^\\])[*]|\\\\[*]|^[*])"  # non escaped *
+    if not re.search("^" + wildcard_pattern, value):
+        return False
+    if not re.search(wildcard_pattern + "$", value):
+        return False
+    return True
 
 
 def ensure_inner_match_pattern(value: str) -> str:

@@ -17,11 +17,12 @@ type ListStateReducerState = {
     pageToLoad: number;
     loadedPages: number;
     hasMorePages: boolean;
+    error: boolean;
     elements: Elements;
 };
 
 type ListStateReducerAction = Partial<ListStateReducerState> & {
-    type: "unload" | "loadNextPage" | "reload" | "pageLoaded";
+    type: "unload" | "loadNextPage" | "reload" | "pageLoaded" | "error";
 };
 
 type AddToQuery = (field: string, value: string) => void;
@@ -36,6 +37,7 @@ function listStateReducer(
                 pageToLoad: 0,
                 loadedPages: 0,
                 hasMorePages: false,
+                error: false,
                 elements: [],
             };
         case "loadNextPage":
@@ -49,6 +51,7 @@ function listStateReducer(
                 pageToLoad: 1,
                 loadedPages: 0,
                 hasMorePages: false,
+                error: false,
                 elements: [],
             };
         case "pageLoaded":
@@ -60,6 +63,13 @@ function listStateReducer(
                     ...state.elements,
                     ...(action.elements ?? []),
                 ] as Elements,
+            };
+        case "error":
+            return {
+                ...state,
+                loadedPages: state.loadedPages + 1,
+                hasMorePages: false,
+                error: true,
             };
         default:
             throw new Error(`Incorrect action type: ${action.type}`);
@@ -77,7 +87,6 @@ type Props = {
     ) => void;
     rowComponent: React.ComponentType;
     headerComponent: React.ComponentType;
-    locked: boolean;
     addToQuery: AddToQuery;
 };
 
@@ -88,15 +97,17 @@ export function RecentViewList(props: Props) {
         loadedPages: 0,
         elements: [],
         hasMorePages: false,
+        error: false,
     });
     const pendingLoad = listState.pageToLoad > listState.loadedPages;
     const hasMore = listState.hasMorePages && !pendingLoad;
 
     // If query changes, reset state
     useEffect(() => {
-        // If there is no submitted query (after mount): do nothing
+        // If the submitted query is null (after mount): do nothing
         if (props.query === null) return;
         if (!props.query && props.disallowEmpty) {
+            // Unload the list and don't load pages
             listDispatch({ type: "unload" });
         } else {
             listDispatch({ type: "reload" });
@@ -133,8 +144,7 @@ export function RecentViewList(props: Props) {
                 if (cancelled) return;
                 props.setQueryError(error);
                 listDispatch({
-                    type: "pageLoaded",
-                    elements: [],
+                    type: "error",
                 });
             });
         return () => {
@@ -149,7 +159,6 @@ export function RecentViewList(props: Props) {
     const Header = props.headerComponent as React.ComponentType;
     const tableStyle: React.CSSProperties = {
         tableLayout: "fixed",
-        ...(props.locked ? { pointerEvents: "none", filter: "blur(4px)" } : {}),
     };
     return (
         <table
@@ -183,6 +192,13 @@ export function RecentViewList(props: Props) {
                             </td>
                         </tr>
                     )
+                )}
+                {listState.error && (
+                    <tr key="error" className="d-flex">
+                        <td className="col-12 text-center">
+                            Query failed with error.
+                        </td>
+                    </tr>
                 )}
             </InfiniteScroll>
         </table>

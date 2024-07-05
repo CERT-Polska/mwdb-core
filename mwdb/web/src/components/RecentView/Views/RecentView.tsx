@@ -9,7 +9,6 @@ import { RecentViewList } from "./RecentViewList";
 import { QuickQuery } from "../common/QuickQuery";
 import { ObjectType } from "@mwdb-web/types/types";
 import { AxiosError } from "axios";
-import { isEmpty } from "lodash";
 
 type Props = {
     type: ObjectType;
@@ -23,10 +22,6 @@ export function RecentView(props: Props) {
     const [searchParams, setSearchParams] = useSearchParams();
     // Current query set in URI path
     const currentQuery = searchParams.get("q") || "";
-    // Submitted query for which we know it's valid and
-    // we can load next parts of results into UI
-    const [submittedQuery, setSubmittedQuery] = useState(currentQuery);
-
     // Query input state
     const [queryInput, setQueryInput] = useState(currentQuery);
     // Query error shown under the query bar
@@ -34,28 +29,7 @@ export function RecentView(props: Props) {
         message: string;
     }> | null>(null);
     const [objectCount, setObjectCount] = useState<number | null>(null);
-    // const [countingEnabled, setCountingEnabled] = useState(true);
     const countingEnabled = searchParams.get("count") === "1" ? 1 : 0;
-    const isLocked = !queryError && submittedQuery !== currentQuery;
-
-    /**
-     * Here be dragons:
-     * - queryInput is what is currently in search input bar
-     * - currentQuery represents what is in &q= URL
-     * - submittedQuery is query that is currently used for listing
-     *
-     * When user goes directly into &q=... URL:
-     *     - currentQuery => queryInput (as initialState)
-     *     - currentQuery is submitted via submitQuery
-     * When user submits query in search input bar:
-     *     - queryInput => currentQuery (via setCurrentQuery)
-     *     - currentQuery is changed, so it is submitted via submitQuery (effect)
-     * When user clears search input bar:
-     *     - "" => queryInput => currentQuery => submittedQuery avoiding
-     *       submitQuery call
-     * When user switches counting:
-     *     - countingEnabled is changed, so it is submitted via submitQuery (effect)
-     */
 
     const setCurrentQuery = useCallback(
         (query: string) => {
@@ -78,35 +52,12 @@ export function RecentView(props: Props) {
 
     const addToQuery = useCallback(
         (field: string, value: string) => {
-            return setCurrentQuery(
-                addFieldToQuery(submittedQuery, field, value)
-            );
+            return setCurrentQuery(addFieldToQuery(currentQuery, field, value));
         },
-        [submittedQuery, setCurrentQuery]
+        [currentQuery, setCurrentQuery]
     );
 
-    const submitQueryWithoutCount = useCallback(
-        (query: string) => {
-            let cancelled = false;
-            // Only check if query is correct
-            api.getObjectList(props.type, "", query)
-                .then(() => {
-                    if (cancelled) return;
-                    // If ok: commit query
-                    setSubmittedQuery(query);
-                })
-                .catch((error) => {
-                    if (cancelled) return;
-                    setQueryError(error);
-                });
-            return () => {
-                cancelled = true;
-            };
-        },
-        [api, props.type]
-    );
-
-    const submitQueryWithCount = useCallback(
+    const makeCountForQuery = useCallback(
         (query: string) => {
             let cancelled = false;
             // Make preflight query to get count of results
@@ -116,8 +67,6 @@ export function RecentView(props: Props) {
             api.getObjectCount(props.type, query)
                 .then((response) => {
                     if (cancelled) return;
-                    // If ok: commit query
-                    setSubmittedQuery(query);
                     setObjectCount(response.data.count);
                 })
                 .catch((error) => {
@@ -129,29 +78,27 @@ export function RecentView(props: Props) {
                 cancelled = true;
             };
         },
-        [api, props.type]
+        [currentQuery, countingEnabled, api, props.type]
     );
 
     const submitQuery = useCallback(
         (query: string) => {
-            return countingEnabled
-                ? submitQueryWithCount(query)
-                : submitQueryWithoutCount(query);
+            setCurrentQuery(query);
+            if (countingEnabled) {
+                makeCountForQuery(query);
+            }
         },
-        [countingEnabled, submitQueryWithCount, submitQueryWithoutCount]
+        [countingEnabled, setCurrentQuery, makeCountForQuery]
     );
 
     useEffect(() => {
         setQueryInput(currentQuery);
         if (!currentQuery) {
-            setSubmittedQuery("");
+            return submitQuery("");
         } else {
             return submitQuery(currentQuery);
         }
     }, [currentQuery, submitQuery]);
-
-    const canAddQuickQuery =
-        !isEmpty(queryInput) && !isLocked && queryInput === submittedQuery;
 
     const queryErrorMessage = queryError ? (
         <div className="form-hint">
@@ -164,7 +111,7 @@ export function RecentView(props: Props) {
     );
 
     let objectCountMessage: JSX.Element = <></>;
-    if (submittedQuery && countingEnabled) {
+    if (countingEnabled) {
         if (objectCount === null) {
             objectCountMessage = <div className="form-hint">Counting...</div>;
         } else {
@@ -204,7 +151,6 @@ export function RecentView(props: Props) {
                             type="text"
                             placeholder="Search (Lucene query or hash)..."
                             value={queryInput}
-                            disabled={isLocked}
                             onChange={(evt) => setQueryInput(evt.target.value)}
                         />
                         <div className="input-group-append">
@@ -260,8 +206,8 @@ export function RecentView(props: Props) {
                         {queryError ? queryErrorMessage : objectCountMessage}
                         <QuickQuery
                             type={props.type}
-                            query={submittedQuery}
-                            canAddQuickQuery={canAddQuickQuery}
+                            query={currentQuery}
+                            canAddQuickQuery={true}
                             submitQuery={(query) => setCurrentQuery(query)}
                             addToQuery={addToQuery}
                             setQueryError={setQueryError}
@@ -269,11 +215,10 @@ export function RecentView(props: Props) {
                     </div>
                 </form>
                 <RecentViewList
-                    query={submittedQuery}
+                    query={currentQuery}
                     type={props.type}
                     rowComponent={props.rowComponent}
                     headerComponent={props.headerComponent}
-                    locked={isLocked}
                     disallowEmpty={props.disallowEmpty ?? false}
                     setQueryError={setQueryError}
                     addToQuery={addToQuery}

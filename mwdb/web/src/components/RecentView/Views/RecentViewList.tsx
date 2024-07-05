@@ -185,7 +185,8 @@ export function RecentViewList(props: Props) {
                     </tr>
                 ) : (
                     !listState.elements.length &&
-                    props.query !== null && (
+                    props.query !== null &&
+                    !listState.error && (
                         <tr key="empty" className="d-flex">
                             <td className="col-12 text-center">
                                 There are no elements to show.

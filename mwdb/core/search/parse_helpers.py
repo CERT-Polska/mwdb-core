@@ -122,7 +122,7 @@ def unescape_string(value: str) -> str:
     return re.sub(r"\\(.)", r"\1", value)
 
 
-def transform_for_eq_statement(escaped_value: str) -> str:
+def transform_for_regular_statement(escaped_value: str) -> str:
     return unescape_string(escaped_value)
 
 
@@ -180,7 +180,7 @@ def transform_for_quoted_like_statement(
     return join_tokenized_string(transformed_string)
 
 
-def transform_for_config_eq_statement(escaped_value: str) -> str:
+def transform_for_config_regular_statement(escaped_value: str) -> str:
     """
     Transforms Lucene value to value for == condition against
     "unicode-escape"-escaped JSON value
@@ -352,7 +352,7 @@ def string_equals(column: ColumnElement, escaped_value: str):
         pattern = transform_for_like_statement(escaped_value)
         return column.like(pattern)
     else:
-        value = transform_for_eq_statement(escaped_value)
+        value = transform_for_regular_statement(escaped_value)
         return column == value
 
 
@@ -361,7 +361,7 @@ def config_string_equals(column: ColumnElement, escaped_value: str):
         pattern = transform_for_config_like_statement(escaped_value)
         return column.like(pattern)
     else:
-        value = transform_for_config_eq_statement(escaped_value)
+        value = transform_for_config_regular_statement(escaped_value)
         return column == value
 
 
@@ -377,7 +377,7 @@ def _jsonpath_string_equals(path_selector: PathSelector, value: str) -> str:
 
 def jsonpath_string_equals(path_selector: PathSelector, escaped_value: str) -> str:
     # Wildcards are not supported
-    value = transform_for_eq_statement(escaped_value)
+    value = transform_for_regular_statement(escaped_value)
     return _jsonpath_string_equals(path_selector, value)
 
 
@@ -385,7 +385,7 @@ def jsonpath_config_string_equals(
     path_selector: PathSelector, escaped_value: str
 ) -> str:
     # Wildcards are not supported
-    value = transform_for_config_eq_statement(escaped_value)
+    value = transform_for_config_regular_statement(escaped_value)
     return _jsonpath_string_equals(path_selector, value)
 
 
@@ -428,6 +428,14 @@ def jsonpath_range_equals(
     if low is not None and high is not None and low > high:
         low, high = high, low
         include_low, include_high = include_high, include_low
+
+    if low is not None and not is_nonstring_object(low):
+        low = transform_for_regular_statement(low)
+        low = jsonpath_quote(low)
+
+    if high is not None and not is_nonstring_object(high):
+        high = transform_for_regular_statement(high)
+        high = jsonpath_quote(high)
 
     low_condition = f"@ >= {low}" if include_low else f"@ > {low}"
     high_condition = f"@ <= {high}" if include_high else f"@ < {high}"

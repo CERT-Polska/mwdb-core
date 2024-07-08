@@ -217,3 +217,12 @@ def test_attribute_falsy_values(admin_session, random_attribute):
         admin_session.add_attribute(sample_id, attr_name, "")
     admin_session.add_attribute(sample_id, attr_name, ["nonempty"])
     admin_session.add_attribute(sample_id, attr_name, {"nonempty": None})
+
+
+def test_attribute_json_string_range(admin_session, random_attribute):
+    sample_id, attr_name = random_attribute
+    admin_session.add_attribute(sample_id, attr_name, {"creation-time": "2024-06-01 12:00:00"})
+    assert len(admin_session.search(f'attribute.{attr_name}.creation-time:>="2024-05"')) == 1
+    assert len(admin_session.search(f'attribute.{attr_name}.creation-time:>="2024-07"')) == 0
+    assert len(admin_session.search(f'attribute.{attr_name}.creation-time:["2024-07" TO "2024-08"]')) == 0
+    assert len(admin_session.search(f'attribute.{attr_name}.creation-time:["2024-06" TO "2024-07"]')) == 1

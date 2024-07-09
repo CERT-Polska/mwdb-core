@@ -7,6 +7,15 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
 
+v2.13.0
+-------
+
+This release is focused on further improvements of search performance and bugfixes.
+
+It's recommended to upgrade your karton-system to v5.4.0 before applying this upgrade.
+
+Complete changelog can be found here: `v2.13.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.13.0>`_.
+
 v2.12.0
 -------
 

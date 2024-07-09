@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _, { uniqueId } from "lodash";
 import Mustache, { Context } from "mustache";
 import { marked, Tokenizer } from "marked";
 import {
@@ -86,13 +86,22 @@ class MustacheContext extends Mustache.Context {
     globalView: any;
     lastPath: string[] | null;
     lastValue: string | null;
-    constructor(view: Object, parent?: Context, globalView?: any) {
+    lambdaResults: { [id: string]: any };
+    lambdas: { [name: string]: Function };
+    constructor(
+        view: Object,
+        parent?: MustacheContext,
+        globalView?: any,
+        lambdas?: { [name: string]: Function }
+    ) {
         super(view, parent);
         this.globalView = globalView === undefined ? view : globalView;
         // Stored absolute path of last lookup
         this.lastPath = null;
         // Stored value from last lookup to determine the type
         this.lastValue = null;
+        this.lambdaResults = parent ? parent.lambdaResults : {};
+        this.lambdas = parent ? parent.lambdas : lambdas || {};
     }
 
     push(view: Object): Context {
@@ -117,13 +126,29 @@ class MustacheContext extends Mustache.Context {
             searchable = true;
         }
         if (!name) return undefined;
+
+        let currentObject = this.view;
+        if (this.lambdas[name]) {
+            const lambda = this.lambdas[name];
+            const currentContext = this;
+            return function lambdaFunction(
+                this: any,
+                text: string,
+                renderer: Function
+            ): string {
+                let lambdaResultId = uniqueId("lambda_result");
+                let result = lambda.call(this, text, renderer);
+                if (typeof result !== "string") {
+                    currentContext.lambdaResults[lambdaResultId] = result;
+                    // Emit reference in markdown
+                    return `[](lambda#${lambdaResultId})`;
+                } else {
+                    return result;
+                }
+            };
+        }
+
         const path = splitName(name);
-        // In case of lambdas, the subrenderer makes
-        // this.view be a MustacheContext so make sure
-        // we get the actual view
-        let currentObject = this.view instanceof MustacheContext
-                                ? this.view.view
-                                : this.view;
         for (let element of path) {
             if (!Object.prototype.hasOwnProperty.call(currentObject, element))
                 return undefined;
@@ -132,10 +157,7 @@ class MustacheContext extends Mustache.Context {
         this.lastPath = this.getParentPath()!.concat(path);
         this.lastValue = currentObject;
         if (searchable) {
-            if (
-                isFunction(currentObject) ||
-                typeof currentObject === "object"
-            )
+            if (isFunction(currentObject) || typeof currentObject === "object")
                 // Non-primitives are not directly searchable
                 return undefined;
             const query = makeQuery(
@@ -145,9 +167,6 @@ class MustacheContext extends Mustache.Context {
             );
             if (!query) return undefined;
             return new SearchReference(query, currentObject);
-        }
-        if (isFunction(currentObject)) {
-            currentObject = currentObject.call(this.view);
         }
         return currentObject;
     }
@@ -170,10 +189,6 @@ class MustacheWriter extends Mustache.Writer {
                 ? String(value)
                 : escapeMarkdown(value);
         return "";
-    }
-
-    render(template: string, view: Object) {
-        return super.render(template, new MustacheContext(view));
     }
 }
 
@@ -226,46 +241,32 @@ class MarkedTokenizer extends Tokenizer {
 const mustacheWriter = new MustacheWriter();
 const markedTokenizer = new MarkedTokenizer();
 
-type stringOpFunc = (I: string) => string;
-
-const lambda = (func: stringOpFunc = _.identity) => {
-    // A factory method for custom lambdas.
-    //
-    // The inner method receives the text inside the section
-    // and the subrenderer. It then renders the value, and passes
-    // it to a user defined function.
-    //
-    // E.g.: ("{{name}}", renderer) => "John Doe" 
-    // (func is toUpperCase)        => "JOHN DOE"
-    return () => function(text: string, renderer: any): string {
-        return func(renderer(text.trim()));
-    }
-};
-
-const lambdas = fromPlugins("mustacheExtensions").reduce(
-    (prev, curr) => {
-        return { 
-            ...prev, 
-            ..._.mapValues(curr, (func: stringOpFunc) => lambda(func)) 
-        }
-    },
-{});
-
 export function renderValue(template: string, value: Object, options: Option) {
-    const markdown = mustacheWriter.render(
-        template, 
-        { 
-            ...value, 
-            "value": 
-            { 
-                ...(value as any).value, 
-                ...lambdas 
-            } 
-        }
+    const lambdas = fromPlugins("mustacheExtensions").reduce((prev, curr) => {
+        return {
+            ...prev,
+            ...curr,
+        };
+    }, {});
+    const context = new MustacheContext(
+        {
+            ...value,
+        },
+        undefined,
+        undefined,
+        lambdas
     );
+    const markdown = mustacheWriter.render(template, context);
     const tokens = marked.lexer(markdown, {
         ...marked.defaults,
         tokenizer: markedTokenizer,
     }) as Token[];
-    return <div>{renderTokens(tokens, options)}</div>;
+    return (
+        <div>
+            {renderTokens(tokens, {
+                ...options,
+                lambdaResults: context.lambdaResults,
+            })}
+        </div>
+    );
 }

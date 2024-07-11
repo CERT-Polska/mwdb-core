@@ -1,27 +1,18 @@
-import ELK, {
-    ElkEdge,
-    ElkExtendedEdge,
-    ElkNode,
-} from "elkjs/lib/elk.bundled.js";
-import React, {
-    ComponentType,
-    FunctionComponent,
-    useCallback,
-    useLayoutEffect,
-} from "react";
+import ELK, { ElkNode } from "elkjs/lib/elk.bundled.js";
+import React, { useCallback, useLayoutEffect, useState } from "react";
 import {
     ReactFlow,
     ReactFlowProvider,
-    addEdge,
-    Panel,
-    useNodesState,
-    useEdgesState,
     useReactFlow,
     Node as XYFlowNode,
     Edge as XYFlowEdge,
     Handle,
     Position,
     MarkerType,
+    NodeChange,
+    applyNodeChanges,
+    applyEdgeChanges,
+    EdgeChange,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
@@ -140,23 +131,53 @@ function LayoutFlow({
     width,
     height,
 }: LayoutFlowProps) {
-    const [xyNodes, setXYNodes, onXYNodesChange] = useNodesState<XYFlowNode>(
-        []
+    const [xyGraph, setXYGraph] = useState<XYFlowGraph>({
+        nodes: [],
+        edges: [],
+    });
+    const onXYNodesChange = useCallback(
+        (changes: NodeChange[]) => {
+            setXYGraph((graph) => {
+                // BUG: Sometimes NaN value appears in position, we need to ignore these updates
+                if (
+                    changes.some(
+                        (change) =>
+                            change.type == "position" &&
+                            (!change.position || isNaN(change.position.x))
+                    )
+                )
+                    return graph;
+                return {
+                    nodes: applyNodeChanges(changes, graph.nodes),
+                    edges: graph.edges,
+                };
+            });
+        },
+        [setXYGraph]
     );
-    const [xyEdges, setXYEdges, onXYEdgesChange] = useEdgesState<XYFlowEdge>(
-        []
+    const onXYEdgesChange = useCallback(
+        (changes: EdgeChange[]) => {
+            setXYGraph((graph) => {
+                return {
+                    nodes: graph.nodes,
+                    edges: applyEdgeChanges(changes, graph.edges),
+                };
+            });
+        },
+        [setXYGraph]
     );
     const { fitView } = useReactFlow();
 
     const doLayout = useCallback(
         async (mwdbGraph: MWDBGraph) => {
-            console.log("relayouting");
             const getPosition = (node: MWDBPlotNode) => {
                 // Preserve position of nodes on update
-                const xynode = xyNodes.find((xynode) => xynode.id == node.id);
+                const xynode = xyGraph.nodes.find(
+                    (xynode) => xynode.id == node.id
+                );
                 return xynode ? xynode.position : { x: 0, y: 0 };
             };
-            const xyGraph = {
+            const graph = {
                 nodes: nodes.map((node) => ({
                     id: node.id,
                     type: "node",
@@ -177,12 +198,13 @@ function LayoutFlow({
                     },
                 })),
             };
-            console.log(xyGraph);
-            const layoutedGraph = await layoutElements(xyGraph);
-            setXYNodes(layoutedGraph.nodes);
-            setXYEdges(layoutedGraph.edges);
+            const layoutedGraph = await layoutElements(graph);
+            setXYGraph({
+                nodes: layoutedGraph.nodes,
+                edges: layoutedGraph.edges,
+            });
         },
-        [setXYNodes, setXYEdges, xyNodes, xyEdges, onNodeClick, nodeComponent]
+        [setXYGraph, xyGraph, onNodeClick, nodeComponent]
     );
 
     // Calculate the initial layout on mount.
@@ -190,13 +212,11 @@ function LayoutFlow({
         doLayout({ nodes, edges }).then(() => fitView());
     }, [nodes, edges, onNodeClick, nodeComponent]);
 
-    console.log(xyNodes[0]);
-
     return (
         <div style={{ width, height }}>
             <ReactFlow
-                nodes={xyNodes}
-                edges={xyEdges}
+                nodes={xyGraph.nodes}
+                edges={xyGraph.edges}
                 onNodesChange={onXYNodesChange}
                 onEdgesChange={onXYEdgesChange}
                 fitView

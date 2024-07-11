@@ -94,7 +94,10 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
 def get_field_mapper(
     queried_type: str, field_selector: str
 ) -> Tuple[BaseField, PathSelector]:
+    import logging
+    logging.warning("field %s", field_selector)
     field_path = parse_field_path(field_selector)
+    logging.warning("path %s", field_path)
     field_name, asterisks = field_path[0]
     # Map object type selector
     if field_name in object_mapping:
@@ -102,6 +105,12 @@ def get_field_mapper(
         field_path = field_path[1:]
     else:
         selected_type = queried_type
+
+    if not field_path:
+        # Malformed query like `blob:"*"`
+        fields = ", ".join(field_mapping[selected_type.__name__].keys())
+        error = f"Can't query {field_name} directly. Try one of fields: {fields}."
+        raise FieldNotQueryableException(error)
 
     # Map object field selector
     field_name, asterisks = field_path[0]

@@ -94,10 +94,7 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
 def get_field_mapper(
     queried_type: str, field_selector: str
 ) -> Tuple[BaseField, PathSelector]:
-    import logging
-    logging.warning("field %s", field_selector)
     field_path = parse_field_path(field_selector)
-    logging.warning("path %s", field_path)
     field_name, asterisks = field_path[0]
     # Map object type selector
     if field_name in object_mapping:

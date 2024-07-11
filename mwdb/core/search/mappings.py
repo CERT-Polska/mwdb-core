@@ -103,6 +103,12 @@ def get_field_mapper(
     else:
         selected_type = queried_type
 
+    if not field_path:
+        # Malformed query like `blob:"*"`
+        fields = ", ".join(field_mapping[selected_type.__name__].keys())
+        error = f"Can't query {field_name} directly. Try one of fields: {fields}."
+        raise FieldNotQueryableException(error)
+
     # Map object field selector
     field_name, asterisks = field_path[0]
     if field_name in field_mapping[selected_type.__name__]:

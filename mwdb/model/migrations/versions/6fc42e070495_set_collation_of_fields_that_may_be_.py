@@ -33,7 +33,7 @@ def alter_column(table, column, type_):
 
 
 def upgrade():
-    logger.info(f"Changing column collation, this may take a while...")
+    logger.info("Changing column collation, this may take a while...")
     alter_column("object", "blob_name", type_=sa.String(collation="C"))
     alter_column("object", "blob_type", type_=sa.String(32, collation="C"))
     alter_column("object", "family", type_=sa.String(32, collation="C"))
@@ -53,7 +53,7 @@ def upgrade():
 
 
 def downgrade():
-    logger.info(f"Changing column collation, this may take a while...")
+    logger.info("Changing column collation, this may take a while...")
     alter_column("object", "blob_name", type_=sa.String())
     alter_column("object", "blob_type", type_=sa.String(32))
     alter_column("object", "family", type_=sa.String(32))

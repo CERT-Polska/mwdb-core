@@ -33,17 +33,19 @@ class EmptyFileError(ValueError):
 
 
 class File(Object):
-    file_name = db.Column(db.String, index=True)
+    file_name = db.Column(db.String(collation="C"), index=True)
     file_size = db.Column(db.Integer, index=True)
     file_type = db.Column(db.Text, index=True)
-    md5 = db.Column(db.String(32), index=True)
-    crc32 = db.Column(db.String(8), index=True)
-    sha1 = db.Column(db.String(40), index=True)
-    sha256 = db.Column(db.String(64), index=True, unique=True)
-    sha512 = db.Column(db.String(128), index=True)
-    ssdeep = db.Column(db.String(255), index=True)
+    md5 = db.Column(db.String(32, collation="C"), index=True)
+    crc32 = db.Column(db.String(8, collation="C"), index=True)
+    sha1 = db.Column(db.String(40, collation="C"), index=True)
+    sha256 = db.Column(db.String(64, collation="C"), index=True, unique=True)
+    sha512 = db.Column(db.String(128, collation="C"), index=True)
+    ssdeep = db.Column(db.String(255, collation="C"), index=True)
     alt_names = db.Column(
-        MutableList.as_mutable(ARRAY(db.String)), nullable=False, server_default="{}"
+        MutableList.as_mutable(ARRAY(db.String(collation="C"))),
+        nullable=False,
+        server_default="{}",
     )
 
     __mapper_args__ = {

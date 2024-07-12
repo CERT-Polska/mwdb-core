@@ -11,9 +11,9 @@ from .object import Object
 
 
 class TextBlob(Object):
-    blob_name = db.Column(db.String, index=True)
+    blob_name = db.Column(db.String(collation="C"), index=True)
     blob_size = db.Column(db.Integer, index=True)
-    blob_type = db.Column(db.String(32), index=True)
+    blob_type = db.Column(db.String(32, collation="C"), index=True)
     _content = db.Column("content", db.String())
     last_seen = db.Column(db.DateTime, index=True)
 

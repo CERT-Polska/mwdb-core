@@ -42,6 +42,12 @@ class TagListResource(Resource):
                 type: string
               description: Tag prefix
               required: false
+            - in: query
+              name: count
+              schema:
+                type: integer
+              description: Number of objects to return
+              required: false
         responses:
             200:
                 description: List of tags
@@ -67,6 +73,11 @@ class TagListResource(Resource):
         tag_prefix = obj["query"]
         if tag_prefix:
             tags = tags.filter(Tag.tag.startswith(tag_prefix, autoescape=True))
+
+        tag_count = obj.get("count")
+        if tag_count:
+            tags = tags.limit(tag_count)
+
         tags = tags.all()
         schema = TagItemResponseSchema(many=True)
         return schema.dump(tags)

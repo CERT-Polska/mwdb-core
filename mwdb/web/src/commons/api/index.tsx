@@ -267,9 +267,9 @@ function getObjectCount(
     });
 }
 
-function getTags(query: string): GetTagsResponse {
+function getTags(query: string, count: number): GetTagsResponse {
     return axios.get(`/tag`, {
-        params: { query },
+        params: { query, count },
     });
 }
 

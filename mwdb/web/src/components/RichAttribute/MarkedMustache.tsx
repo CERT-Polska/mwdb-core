@@ -1,3 +1,4 @@
+import _ from "lodash";
 import Mustache, { Context } from "mustache";
 import { marked, Tokenizer } from "marked";
 import {
@@ -6,6 +7,7 @@ import {
     renderTokens,
     Token,
 } from "@mwdb-web/commons/helpers";
+import { fromPlugins } from "@mwdb-web/commons/plugins";
 
 /**
  * Markdown with Mustache templates for React
@@ -22,6 +24,10 @@ import {
 function appendToLastElement(array: string[], value: string) {
     // (["a", "b", "c"], "d") => ["a", "b", "cd"]
     return [...array.slice(0, -1), array[array.length - 1] + value];
+}
+
+function isFunction(obj: Object): boolean {
+    return typeof obj === "function";
 }
 
 function splitName(name: string) {
@@ -112,7 +118,12 @@ class MustacheContext extends Mustache.Context {
         }
         if (!name) return undefined;
         const path = splitName(name);
-        let currentObject = this.view;
+        // In case of lambdas, the subrenderer makes
+        // this.view be a MustacheContext so make sure
+        // we get the actual view
+        let currentObject = this.view instanceof MustacheContext
+                                ? this.view.view
+                                : this.view;
         for (let element of path) {
             if (!Object.prototype.hasOwnProperty.call(currentObject, element))
                 return undefined;
@@ -122,8 +133,8 @@ class MustacheContext extends Mustache.Context {
         this.lastValue = currentObject;
         if (searchable) {
             if (
-                typeof currentObject === "object" ||
-                typeof currentObject === "function"
+                isFunction(currentObject) ||
+                typeof currentObject === "object"
             )
                 // Non-primitives are not directly searchable
                 return undefined;
@@ -134,6 +145,9 @@ class MustacheContext extends Mustache.Context {
             );
             if (!query) return undefined;
             return new SearchReference(query, currentObject);
+        }
+        if (isFunction(currentObject)) {
+            currentObject = currentObject.call(this.view);
         }
         return currentObject;
     }
@@ -212,8 +226,43 @@ class MarkedTokenizer extends Tokenizer {
 const mustacheWriter = new MustacheWriter();
 const markedTokenizer = new MarkedTokenizer();
 
+type stringOpFunc = (I: string) => string;
+
+const lambda = (func: stringOpFunc = _.identity) => {
+    // A factory method for custom lambdas.
+    //
+    // The inner method receives the text inside the section
+    // and the subrenderer. It then renders the value, and passes
+    // it to a user defined function.
+    //
+    // E.g.: ("{{name}}", renderer) => "John Doe" 
+    // (func is toUpperCase)        => "JOHN DOE"
+    return () => function(text: string, renderer: any): string {
+        return func(renderer(text.trim()));
+    }
+};
+
+const lambdas = fromPlugins("mustacheExtensions").reduce(
+    (prev, curr) => {
+        return { 
+            ...prev, 
+            ..._.mapValues(curr, (func: stringOpFunc) => lambda(func)) 
+        }
+    },
+{});
+
 export function renderValue(template: string, value: Object, options: Option) {
-    const markdown = mustacheWriter.render(template, value);
+    const markdown = mustacheWriter.render(
+        template, 
+        { 
+            ...value, 
+            "value": 
+            { 
+                ...(value as any).value, 
+                ...lambdas 
+            } 
+        }
+    );
     const tokens = marked.lexer(markdown, {
         ...marked.defaults,
         tokenizer: markedTokenizer,

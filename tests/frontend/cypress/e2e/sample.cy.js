@@ -24,7 +24,7 @@ describe("Sample view test - mwdb-core", function () {
               body: formData,
           }).then((response) => {
             expect(response.status).to.eq(200);
-            resolve(response.body);
+            response.json().then((data) => resolve(data));
           });
         });
       });

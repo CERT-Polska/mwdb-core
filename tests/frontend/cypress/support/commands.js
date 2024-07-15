@@ -26,8 +26,7 @@
 
 Cypress.Commands.add("formRequest", (method, url, formData, token) => {
   return cy
-    .server()
-    .route(method, url)
+    .intercept(method, url)
     .as("formRequest")
     .window()
     .then((win) => {

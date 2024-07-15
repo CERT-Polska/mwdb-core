@@ -13,14 +13,13 @@ describe("Sample view test - mwdb-core", function () {
     const addedFile = new Cypress.Promise((resolve) => {
       cy.get("@token").then((token) => {
         cy.fixture(fileName).then((bin) => {
-          return Cypress.Blob.binaryStringToBlob(bin, fileType).then((blob) => {
-            const formData = new FormData();
-            formData.set("file", blob, fileName);
+          const blob = Cypress.Blob.binaryStringToBlob(bin, fileType);
+          const formData = new FormData();
+          formData.set("file", blob, fileName);
 
-            cy.formRequest(method, apiUrl, formData, token).then((response) => {
-              expect(response.status).to.eq(200);
-              resolve(response.response.body);
-            });
+          cy.formRequest(method, apiUrl, formData, token).then((response) => {
+            expect(response.status).to.eq(200);
+            resolve(response.response.body);
           });
         });
       });

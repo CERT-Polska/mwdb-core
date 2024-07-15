@@ -24,7 +24,8 @@ describe("Sample view test - mwdb-core", function () {
               body: formData,
           }).then((response) => {
             expect(response.status).to.eq(200);
-            response.json().then((data) => resolve(data));
+            const bodyString = Cypress.Blob.arrayBufferToBinaryString(response.body);
+            resolve(JSON.parse(bodyString));
           });
         });
       });

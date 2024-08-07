@@ -165,6 +165,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        with:
+          pattern: mwdb-*
       - name: Import images
         run: |
           docker load --input ./mwdb-image/mwdb-image
@@ -201,6 +203,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        with:
+          pattern: mwdb-*
       - name: Import images
         run: |
           docker load --input ./mwdb-image/mwdb-image
@@ -237,6 +241,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        with:
+          pattern: mwdb-*
       - name: Import images
         run: |
           docker load --input ./mwdb-web-unit-tests-image/mwdb-web-unit-tests-image

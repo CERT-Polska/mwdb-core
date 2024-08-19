@@ -372,14 +372,14 @@ class OpenIDAuthorizeResource(Resource):
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
         oidc_client = provider.get_oidc_client()
-        userinfo = oidc_client.fetch_id_token(
+        id_token_claims = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         # 'sub' bind should be used instead of 'name'
         identity = (
             db.session.query(OpenIDUserIdentity)
             .filter(
-                OpenIDUserIdentity.sub_id == userinfo["sub"],
+                OpenIDUserIdentity.sub_id == id_token_claims["sub"],
                 OpenIDUserIdentity.provider_id == provider.id,
             )
             .first()
@@ -435,7 +435,7 @@ class OpenIDRegisterUserResource(Resource):
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
         oidc_client = provider.get_oidc_client()
-        userinfo = oidc_client.fetch_id_token(
+        id_token_claims = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         # register user with information from provider
@@ -443,12 +443,13 @@ class OpenIDRegisterUserResource(Resource):
             exists().where(
                 and_(
                     OpenIDUserIdentity.provider_id == provider.id,
-                    OpenIDUserIdentity.sub_id == userinfo["sub"],
+                    OpenIDUserIdentity.sub_id == id_token_claims["sub"],
                 )
             )
         ).scalar():
             raise Conflict("User is already bound with selected provider.")
 
+        userinfo = oidc_client.userinfo()
         login_claims = ["preferred_username", "nickname", "name"]
 
         for claim in login_claims:
@@ -468,13 +469,15 @@ class OpenIDRegisterUserResource(Resource):
         # If no candidates in claims: try fallback login
         else:
             # If no candidates in claims: try fallback login
-            sub_md5 = hashlib.md5(userinfo["sub"].encode("utf-8")).hexdigest()[:8]
+            sub_md5 = hashlib.md5(id_token_claims["sub"].encode("utf-8")).hexdigest()[
+                :8
+            ]
             username = f"{provider_name}-{sub_md5}"
 
         if "email" in userinfo.keys():
             user_email = userinfo["email"]
         else:
-            user_email = f'{userinfo["sub"]}@mwdb.local'
+            user_email = f'{id_token_claims["sub"]}@mwdb.local'
 
         user = User.create(
             username,
@@ -483,7 +486,7 @@ class OpenIDRegisterUserResource(Resource):
         )
 
         identity = OpenIDUserIdentity(
-            sub_id=userinfo["sub"], provider_id=provider.id, user_id=user.id
+            sub_id=id_token_claims["sub"], provider_id=provider.id, user_id=user.id
         )
 
         if not group.add_member(user):
@@ -567,7 +570,7 @@ class OpenIDBindAccountResource(Resource):
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
         oidc_client = provider.get_oidc_client()
-        userinfo = oidc_client.fetch_id_token(
+        id_token_claims = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         if db.session.query(
@@ -576,7 +579,7 @@ class OpenIDBindAccountResource(Resource):
                     OpenIDUserIdentity.provider_id == provider.id,
                     or_(
                         OpenIDUserIdentity.user_id == g.auth_user.id,
-                        OpenIDUserIdentity.sub_id == userinfo["sub"],
+                        OpenIDUserIdentity.sub_id == id_token_claims["sub"],
                     ),
                 )
             )
@@ -584,7 +587,9 @@ class OpenIDBindAccountResource(Resource):
             raise Conflict("Provider identity is already bound with mwdb account.")
 
         identity = OpenIDUserIdentity(
-            sub_id=userinfo["sub"], provider_id=provider.id, user_id=g.auth_user.id
+            sub_id=id_token_claims["sub"],
+            provider_id=provider.id,
+            user_id=g.auth_user.id,
         )
 
         if not group.add_member(g.auth_user):

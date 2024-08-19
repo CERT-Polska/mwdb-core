@@ -85,5 +85,6 @@ services:
     environment:
       KEYCLOAK_DATABASE_HOST: keycloak_postgres
       KEYCLOAK_DATABASE_PASSWORD: bn_keycloak_password
+      KEYCLOAK_HOSTNAME: "http://127.0.0.1:8080"
     ports:
       - "127.0.0.1:8080:8080"

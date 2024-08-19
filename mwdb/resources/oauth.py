@@ -351,7 +351,8 @@ class OpenIDAuthenticateResource(Resource):
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
-        url, state, nonce = provider.create_authorization_url(redirect_uri)
+        oidc_client = provider.get_oidc_client()
+        url, state, nonce = oidc_client.create_authorization_url(redirect_uri)
 
         schema = OpenIDLoginResponseSchema()
         return schema.dump({"authorization_url": url, "state": state, "nonce": nonce})
@@ -370,7 +371,8 @@ class OpenIDAuthorizeResource(Resource):
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
-        userinfo = provider.fetch_id_token(
+        oidc_client = provider.get_oidc_client()
+        userinfo = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         # 'sub' bind should be used instead of 'name'
@@ -432,7 +434,8 @@ class OpenIDRegisterUserResource(Resource):
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
-        userinfo = provider.fetch_id_token(
+        oidc_client = provider.get_oidc_client()
+        userinfo = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         # register user with information from provider
@@ -563,7 +566,8 @@ class OpenIDBindAccountResource(Resource):
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
-        userinfo = provider.fetch_id_token(
+        oidc_client = provider.get_oidc_client()
+        userinfo = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
         if db.session.query(

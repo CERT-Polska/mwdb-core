@@ -1,6 +1,6 @@
 from werkzeug.exceptions import NotFound
 
-from mwdb.core.oauth import OpenIDSession
+from mwdb.core.oauth import OpenIDClient
 from mwdb.model import Group
 
 from . import db
@@ -25,8 +25,8 @@ class OpenIDProvider(db.Model):
         cascade="all, delete-orphan",
     )
 
-    def _get_client(self, state=None):
-        return OpenIDSession(
+    def get_oidc_client(self):
+        return OpenIDClient(
             client_id=self.client_id,
             client_secret=self.client_secret,
             scope="openid profile email",
@@ -34,24 +34,10 @@ class OpenIDProvider(db.Model):
             response_type="code",
             authorization_endpoint=self.authorization_endpoint,
             token_endpoint=self.token_endpoint,
+            userinfo_endpoint=self.userinfo_endpoint,
             jwks_uri=self.jwks_endpoint,
-            state=state,
+            state=None,
         )
-
-    def create_authorization_url(self, redirect_uri):
-        client = self._get_client()
-        nonce = client.generate_nonce()
-        return (
-            *client.create_authorization_url(
-                self.authorization_endpoint, nonce=nonce, redirect_uri=redirect_uri
-            ),
-            nonce,
-        )
-
-    def fetch_id_token(self, code, state, nonce, redirect_uri):
-        client = self._get_client()
-        token = client.fetch_token(code=code, state=state, redirect_uri=redirect_uri)
-        return client.parse_id_token(token, nonce)
 
     def get_group(self):
         group_name = ("OpenID_" + self.name)[:32]

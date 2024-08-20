@@ -121,20 +121,22 @@ class OpenIDProviderResource(Resource):
             logout_endpoint=logout_endpoint,
         )
 
-        group_name = ("OpenID_" + obj["name"])[:32]
-
-        group_name_obj = load_schema({"name": group_name}, GroupNameSchemaBase())
+        group_name_obj = load_schema(
+            {"name": provider.group_name}, GroupNameSchemaBase()
+        )
 
         if db.session.query(
             exists().where(Group.name == group_name_obj["name"])
         ).scalar():
             raise Conflict("Group exists yet, choose another provider name")
 
-        group = Group(name=group_name_obj["name"], immutable=True)
-
+        group = Group(name=group_name_obj["name"], immutable=True, workspace=False)
         db.session.add(group)
-        db.session.add(provider)
+        db.session.flush()
+        db.session.refresh(group)
 
+        provider.group_id = group.id
+        db.session.add(provider)
         db.session.commit()
         hooks.on_created_group(group)
 
@@ -301,15 +303,14 @@ class OpenIDSingleProviderResource(Resource):
             .filter(OpenIDProvider.name == provider_name)
             .first()
         )
+        provider_group_name = provider.group_name
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
-        group = provider.get_group()
 
         db.session.delete(provider)
-        db.session.delete(group)
         db.session.commit()
 
-        hooks.on_removed_group(("OpenID_" + provider_name)[:32])
+        hooks.on_removed_group(provider_group_name)
         logger.info("Provider was deleted", extra={"provider": provider_name})
         schema = OpenIDProviderSuccessResponseSchema()
         return schema.dump({"name": provider_name})
@@ -429,7 +430,7 @@ class OpenIDRegisterUserResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        group = provider.get_group()
+        group = provider.group
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -564,7 +565,7 @@ class OpenIDBindAccountResource(Resource):
         if not provider:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        group = provider.get_group()
+        group = provider.group
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)

@@ -1,7 +1,4 @@
-from werkzeug.exceptions import NotFound
-
 from mwdb.core.oauth import OpenIDClient
-from mwdb.model import Group
 
 from . import db
 
@@ -19,10 +16,16 @@ class OpenIDProvider(db.Model):
     jwks_endpoint = db.Column(db.Text, nullable=True)
     logout_endpoint = db.Column(db.Text, nullable=True)
 
+    group_id = db.Column(db.Integer, db.ForeignKey("group.id"), nullable=False)
+
     identities = db.relationship(
         "OpenIDUserIdentity",
         back_populates="provider",
         cascade="all, delete-orphan",
+    )
+    group = db.relationship(
+        "Group",
+        cascade="all, delete",
     )
 
     def get_oidc_client(self):
@@ -39,12 +42,9 @@ class OpenIDProvider(db.Model):
             state=None,
         )
 
-    def get_group(self):
-        group_name = ("OpenID_" + self.name)[:32]
-        group = db.session.query(Group).filter(Group.name == group_name).first()
-        if group is None:
-            raise NotFound("No such group")
-        return group
+    @property
+    def group_name(self):
+        return ("OpenID_" + self.name)[:32]
 
 
 class OpenIDUserIdentity(db.Model):

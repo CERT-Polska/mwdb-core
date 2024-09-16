@@ -17,7 +17,7 @@
         "@fortawesome/react-fontawesome": "0.1.18",
         "@hookform/resolvers": "2.9.1",
         "axios": "^1.6.0",
-        "bootstrap": "4.3.1",
+        "bootstrap": "5.0.0",
         "d3": "^5.10.0",
         "dagre-d3": "^0.6.3",
         "diff-match-patch": "^1.0.4",

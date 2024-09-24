@@ -1,14 +1,16 @@
 import hashlib
-from typing import Iterator
+from typing import TYPE_CHECKING, Iterator
 
 from authlib.oidc.core import UserInfo
 from marshmallow import ValidationError
 from sqlalchemy import exists
 
-from mwdb.model import Group, User, db
 from mwdb.schema.user import UserLoginSchemaBase
 
 from .client import OpenIDClient
+
+if TYPE_CHECKING:
+    from mwdb.model import Group, User
 
 
 class OpenIDProvider:
@@ -55,6 +57,8 @@ class OpenIDProvider:
         """
         Creates a Group model object for a new OpenID provider
         """
+        from mwdb.model import Group
+
         group_name = self.get_group_name()
         return Group(name=group_name, immutable=True, workspace=False)
 
@@ -94,6 +98,8 @@ class OpenIDProvider:
         """
         Creates a User model object for a new OpenID identity user
         """
+        from mwdb.model import Group, User, db
+
         for username in self.iter_user_name_variants(sub, userinfo):
             try:
                 UserLoginSchemaBase().load({"login": username})

@@ -1,9 +1,16 @@
-from mwdb.core.oauth import OpenIDClient
+from typing import Type
+
+from mwdb.core.oauth.provider import OpenIDProvider
+from mwdb.core.plugins import openid_provider_classes
 
 from . import db
 
 
-class OpenIDProvider(db.Model):
+def get_oidc_provider_class(provider_name: str) -> Type[OpenIDProvider]:
+    return openid_provider_classes.get(provider_name, OpenIDProvider)
+
+
+class OpenIDProviderSettings(db.Model):
     __tablename__ = "openid_provider"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -28,23 +35,17 @@ class OpenIDProvider(db.Model):
         cascade="all, delete",
     )
 
-    def get_oidc_client(self):
-        return OpenIDClient(
+    def get_oidc_provider(self):
+        openid_provider_class = get_oidc_provider_class(self.name)
+        return openid_provider_class(
+            name=self.name,
             client_id=self.client_id,
             client_secret=self.client_secret,
-            scope="openid profile email",
-            grant_type="authorization_code",
-            response_type="code",
             authorization_endpoint=self.authorization_endpoint,
             token_endpoint=self.token_endpoint,
             userinfo_endpoint=self.userinfo_endpoint,
             jwks_uri=self.jwks_endpoint,
-            state=None,
         )
-
-    @property
-    def group_name(self):
-        return ("OpenID_" + self.name)[:32]
 
 
 class OpenIDUserIdentity(db.Model):
@@ -63,5 +64,5 @@ class OpenIDUserIdentity(db.Model):
 
     user = db.relationship("User", back_populates="openid_identities")
     provider = db.relationship(
-        OpenIDProvider, back_populates="identities", lazy="selectin"
+        OpenIDProviderSettings, back_populates="identities", lazy="selectin"
     )

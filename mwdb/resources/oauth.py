@@ -1,8 +1,6 @@
 import datetime
-import hashlib
 
 from flask import g, request
-from marshmallow import ValidationError
 from sqlalchemy import and_, exists, or_
 from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
@@ -10,7 +8,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.plugins import hooks
 from mwdb.core.service import Resource
-from mwdb.model import Group, OpenIDProvider, OpenIDUserIdentity, User, db
+from mwdb.model import Group, OpenIDProviderSettings, OpenIDUserIdentity, db
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.group import GroupNameSchemaBase
 from mwdb.schema.oauth import (
@@ -23,7 +21,6 @@ from mwdb.schema.oauth import (
     OpenIDProviderSuccessResponseSchema,
     OpenIDProviderUpdateRequestSchema,
 )
-from mwdb.schema.user import UserLoginSchemaBase
 
 from . import (
     load_schema,
@@ -55,8 +52,8 @@ class OpenIDProviderResource(Resource):
         """
         providers = [
             name
-            for name, *_ in db.session.query(OpenIDProvider.name)
-            .order_by(OpenIDProvider.id.asc())
+            for name, *_ in db.session.query(OpenIDProviderSettings.name)
+            .order_by(OpenIDProviderSettings.id.asc())
             .all()
         ]
         return OpenIDProviderListResponseSchema().dump({"providers": providers})
@@ -104,13 +101,13 @@ class OpenIDProviderResource(Resource):
             logout_endpoint = obj["logout_endpoint"]
 
         if db.session.query(
-            exists().where(and_(OpenIDProvider.name == obj["name"]))
+            exists().where(and_(OpenIDProviderSettings.name == obj["name"]))
         ).scalar():
             raise Conflict(
                 "The identity provider is already registered with the given name"
             )
 
-        provider = OpenIDProvider(
+        provider_settings = OpenIDProviderSettings(
             name=obj["name"],
             client_id=obj["client_id"],
             client_secret=client_secret,
@@ -121,16 +118,16 @@ class OpenIDProviderResource(Resource):
             logout_endpoint=logout_endpoint,
         )
 
-        group_name_obj = load_schema(
-            {"name": provider.group_name}, GroupNameSchemaBase()
-        )
+        provider = provider_settings.get_oidc_provider()
+        group_name = provider.get_group_name()
+        group_name_obj = load_schema({"name": group_name}, GroupNameSchemaBase())
 
         if db.session.query(
             exists().where(Group.name == group_name_obj["name"])
         ).scalar():
             raise Conflict("Group exists yet, choose another provider name")
 
-        group = Group(name=group_name_obj["name"], immutable=True, workspace=False)
+        group = provider.create_provider_group()
         db.session.add(group)
         db.session.flush()
         db.session.refresh(group)
@@ -174,15 +171,15 @@ class OpenIDSingleProviderResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        provider = (
-            db.session.query(OpenIDProvider)
-            .filter(OpenIDProvider.name == provider_name)
+        provider_settings = (
+            db.session.query(OpenIDProviderSettings)
+            .filter(OpenIDProviderSettings.name == provider_name)
             .first()
         )
-        if not provider:
+        if not provider_settings:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
         schema = OpenIDProviderItemResponseSchema()
-        return schema.dump(provider)
+        return schema.dump(provider_settings)
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -223,48 +220,48 @@ class OpenIDSingleProviderResource(Resource):
         """
         schema = OpenIDProviderUpdateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
-        provider = (
-            db.session.query(OpenIDProvider)
-            .filter(OpenIDProvider.name == provider_name)
+        provider_settings = (
+            db.session.query(OpenIDProviderSettings)
+            .filter(OpenIDProviderSettings.name == provider_name)
             .first()
         )
-        if not provider:
+        if not provider_settings:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
         client_id = obj["client_id"]
         if client_id is not None:
-            provider.client_id = client_id
+            provider_settings.client_id = client_id
 
         client_secret = obj["client_secret"]
         if client_secret is not None:
-            provider.client_secret = client_secret
+            provider_settings.client_secret = client_secret
 
         authorization_endpoint = obj["authorization_endpoint"]
         if authorization_endpoint is not None:
-            provider.authorization_endpoint = authorization_endpoint
+            provider_settings.authorization_endpoint = authorization_endpoint
 
         token_endpoint = obj["token_endpoint"]
         if token_endpoint is not None:
-            provider.token_endpoint = token_endpoint
+            provider_settings.token_endpoint = token_endpoint
 
         userinfo_endpoint = obj["userinfo_endpoint"]
         if userinfo_endpoint is not None:
-            provider.userinfo_endpoint = userinfo_endpoint
+            provider_settings.userinfo_endpoint = userinfo_endpoint
 
         jwks_endpoint = obj["jwks_endpoint"]
         if jwks_endpoint is not None:
-            provider.jwks_endpoint = jwks_endpoint
+            provider_settings.jwks_endpoint = jwks_endpoint
 
         logout_endpoint = obj["logout_endpoint"]
         if logout_endpoint is not None:
-            provider.logout_endpoint = logout_endpoint
+            provider_settings.logout_endpoint = logout_endpoint
 
         db.session.commit()
 
         logger.info("Provider updated", extra={"provider": provider_name})
 
         schema = OpenIDProviderSuccessResponseSchema()
-        return schema.dump({"name": provider.name})
+        return schema.dump({"name": provider_settings.name})
 
     @requires_authorization
     @requires_capabilities(Capabilities.manage_users)
@@ -298,16 +295,16 @@ class OpenIDSingleProviderResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        provider = (
-            db.session.query(OpenIDProvider)
-            .filter(OpenIDProvider.name == provider_name)
+        provider_settings = (
+            db.session.query(OpenIDProviderSettings)
+            .filter(OpenIDProviderSettings.name == provider_name)
             .first()
         )
-        provider_group_name = provider.group_name
-        if not provider:
+        if not provider_settings:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        db.session.delete(provider)
+        provider_group_name = provider_settings.group.name
+        db.session.delete(provider_settings)
         db.session.commit()
 
         hooks.on_removed_group(provider_group_name)
@@ -343,16 +340,17 @@ class OpenIDAuthenticateResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        provider = (
-            db.session.query(OpenIDProvider)
-            .filter(OpenIDProvider.name == provider_name)
+        provider_settings = (
+            db.session.query(OpenIDProviderSettings)
+            .filter(OpenIDProviderSettings.name == provider_name)
             .first()
         )
-        if not provider:
+        if not provider_settings:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
-        oidc_client = provider.get_oidc_client()
+        provider = provider_settings.get_oidc_provider()
+        oidc_client = provider.client
         url, state, nonce = oidc_client.create_authorization_url(redirect_uri)
 
         schema = OpenIDLoginResponseSchema()
@@ -361,18 +359,19 @@ class OpenIDAuthenticateResource(Resource):
 
 class OpenIDAuthorizeResource(Resource):
     def post(self, provider_name):
-        provider = (
-            db.session.query(OpenIDProvider)
-            .filter(OpenIDProvider.name == provider_name)
+        provider_settings = (
+            db.session.query(OpenIDProviderSettings)
+            .filter(OpenIDProviderSettings.name == provider_name)
             .first()
         )
-        if not provider:
+        if not provider_settings:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
-        oidc_client = provider.get_oidc_client()
+        provider = provider_settings.get_oidc_provider()
+        oidc_client = provider.client
         id_token_claims = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
@@ -381,7 +380,7 @@ class OpenIDAuthorizeResource(Resource):
             db.session.query(OpenIDUserIdentity)
             .filter(
                 OpenIDUserIdentity.sub_id == id_token_claims["sub"],
-                OpenIDUserIdentity.provider_id == provider.id,
+                OpenIDUserIdentity.provider_id == provider_settings.id,
             )
             .first()
         )
@@ -422,20 +421,21 @@ class OpenIDAuthorizeResource(Resource):
 
 class OpenIDRegisterUserResource(Resource):
     def post(self, provider_name):
-        provider = (
-            db.session.query(OpenIDProvider)
-            .filter(OpenIDProvider.name == provider_name)
+        provider_settings = (
+            db.session.query(OpenIDProviderSettings)
+            .filter(OpenIDProviderSettings.name == provider_name)
             .first()
         )
-        if not provider:
+        if not provider_settings:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        group = provider.group
+        provider_group = provider_settings.group
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
-        oidc_client = provider.get_oidc_client()
+        provider = provider_settings.get_oidc_provider()
+        oidc_client = provider.client
         id_token_claims = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )
@@ -443,7 +443,7 @@ class OpenIDRegisterUserResource(Resource):
         if db.session.query(
             exists().where(
                 and_(
-                    OpenIDUserIdentity.provider_id == provider.id,
+                    OpenIDUserIdentity.provider_id == provider_settings.id,
                     OpenIDUserIdentity.sub_id == id_token_claims["sub"],
                 )
             )
@@ -451,46 +451,14 @@ class OpenIDRegisterUserResource(Resource):
             raise Conflict("User is already bound with selected provider.")
 
         userinfo = oidc_client.userinfo()
-        login_claims = ["preferred_username", "nickname", "name"]
-
-        for claim in login_claims:
-            username = userinfo.get(claim)
-            if not username:
-                continue
-            try:
-                UserLoginSchemaBase().load({"login": username})
-            except ValidationError:
-                continue
-            already_exists = db.session.query(
-                exists().where(Group.name == username)
-            ).scalar()
-            if not already_exists:
-                break
-
-        # If no candidates in claims: try fallback login
-        else:
-            # If no candidates in claims: try fallback login
-            sub_md5 = hashlib.md5(id_token_claims["sub"].encode("utf-8")).hexdigest()[
-                :8
-            ]
-            username = f"{provider_name}-{sub_md5}"
-
-        if "email" in userinfo.keys():
-            user_email = userinfo["email"]
-        else:
-            user_email = f'{id_token_claims["sub"]}@mwdb.local'
-
-        user = User.create(
-            username,
-            user_email,
-            "Registered via OpenID Connect protocol",
-        )
-
+        user = provider.create_user(id_token_claims["sub"], userinfo)
         identity = OpenIDUserIdentity(
-            sub_id=id_token_claims["sub"], provider_id=provider.id, user_id=user.id
+            sub_id=id_token_claims["sub"],
+            provider_id=provider_settings.id,
+            user_id=user.id,
         )
 
-        if not group.add_member(user):
+        if not provider_group.add_member(user):
             raise Conflict("Member is already added")
 
         db.session.add(identity)
@@ -506,7 +474,7 @@ class OpenIDRegisterUserResource(Resource):
         hooks.on_created_user(user)
         if user_private_group:
             hooks.on_created_group(user_private_group)
-        hooks.on_created_membership(group, user)
+        hooks.on_created_membership(provider_group, user)
         logger.info(
             "User logged in via OpenID Provider",
             extra={"login": user.login, "provider": provider_name},
@@ -557,19 +525,20 @@ class OpenIDBindAccountResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        provider = (
-            db.session.query(OpenIDProvider)
-            .filter(OpenIDProvider.name == provider_name)
+        provider_settings = (
+            db.session.query(OpenIDProviderSettings)
+            .filter(OpenIDProviderSettings.name == provider_name)
             .first()
         )
-        if not provider:
+        if not provider_settings:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        group = provider.group
+        provider_group = provider_settings.group
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
+        provider = provider_settings.get_oidc_provider()
         oidc_client = provider.get_oidc_client()
         id_token_claims = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
@@ -577,7 +546,7 @@ class OpenIDBindAccountResource(Resource):
         if db.session.query(
             exists().where(
                 and_(
-                    OpenIDUserIdentity.provider_id == provider.id,
+                    OpenIDUserIdentity.provider_id == provider_settings.id,
                     or_(
                         OpenIDUserIdentity.user_id == g.auth_user.id,
                         OpenIDUserIdentity.sub_id == id_token_claims["sub"],
@@ -589,22 +558,22 @@ class OpenIDBindAccountResource(Resource):
 
         identity = OpenIDUserIdentity(
             sub_id=id_token_claims["sub"],
-            provider_id=provider.id,
+            provider_id=provider_settings.id,
             user_id=g.auth_user.id,
         )
 
-        if not group.add_member(g.auth_user):
+        if not provider_group.add_member(g.auth_user):
             raise Conflict("Member is already added")
 
         db.session.add(identity)
 
         db.session.commit()
 
-        hooks.on_created_membership(group, g.auth_user)
+        hooks.on_created_membership(provider_group, g.auth_user)
 
         logger.info(
             "Account was successfully bound with OpenID Identity",
-            extra={"user": g.auth_user.login, "provider": provider.name},
+            extra={"user": g.auth_user.login, "provider": provider_settings.name},
         )
 
 
@@ -661,24 +630,23 @@ class OpenIDLogoutResource(Resource):
                   application/json:
                     schema: OpenIDLogoutLinkResponseSchema
             404:
-                description: Requested provider doesn't exist
-            412:
                 description: |
-                    Logout endpoint is not specified for this provider
+                    Requested provider doesn't exist or logout endpoint
+                    is not specified for this provider
             503:
                 description: |
                     Request canceled due to database statement timeout.
         """
-        provider = (
-            db.session.query(OpenIDProvider)
-            .filter(OpenIDProvider.name == provider_name)
+        provider_settings = (
+            db.session.query(OpenIDProviderSettings)
+            .filter(OpenIDProviderSettings.name == provider_name)
             .first()
         )
-        if not provider:
+        if not provider_settings:
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
-        if not provider.logout_endpoint:
+        if not provider_settings.logout_endpoint:
             raise NotFound(f"Logout endpoint is not configured for '{provider_name}'")
 
         schema = OpenIDLogoutLinkResponseSchema()
-        return schema.dump({"url": provider.logout_endpoint})
+        return schema.dump({"url": provider_settings.logout_endpoint})

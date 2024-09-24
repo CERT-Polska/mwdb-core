@@ -12,6 +12,11 @@ from authlib.oidc.core import CodeIDToken, ImplicitIDToken, UserInfo
 
 
 class OpenIDClient:
+    """
+    Stateful client representing OpenID Connect session using
+    specified client and provider data
+    """
+
     supported_algorithms = ["HS256", "HS384", "HS512", "RS256", "RS384", "RS512"]
 
     def __init__(

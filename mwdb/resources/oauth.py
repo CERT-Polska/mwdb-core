@@ -132,8 +132,8 @@ class OpenIDProviderResource(Resource):
         db.session.flush()
         db.session.refresh(group)
 
-        provider.group_id = group.id
-        db.session.add(provider)
+        provider_settings.group_id = group.id
+        db.session.add(provider_settings)
         db.session.commit()
         hooks.on_created_group(group)
 

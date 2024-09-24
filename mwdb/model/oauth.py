@@ -1,12 +1,13 @@
 from typing import Type
 
 from mwdb.core.oauth.provider import OpenIDProvider
-from mwdb.core.plugins import openid_provider_classes
 
 from . import db
 
 
 def get_oidc_provider_class(provider_name: str) -> Type[OpenIDProvider]:
+    from mwdb.core.plugins import openid_provider_classes
+
     return openid_provider_classes.get(provider_name, OpenIDProvider)
 
 

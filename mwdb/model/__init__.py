@@ -50,7 +50,7 @@ from .config import Config, StaticConfig  # noqa: E402
 from .file import File  # noqa: E402
 from .group import Group, Member  # noqa: E402
 from .karton import KartonAnalysis, karton_object  # noqa: E402
-from .oauth import OpenIDProvider, OpenIDUserIdentity  # noqa: E402
+from .oauth import OpenIDProviderSettings, OpenIDUserIdentity  # noqa: E402
 from .object import Object, relation  # noqa: E402
 from .object_permission import ObjectPermission  # noqa: E402
 from .quick_query import QuickQuery  # noqa: E402
@@ -74,7 +74,7 @@ __all__ = [
     "AttributePermission",
     "Object",
     "ObjectPermission",
-    "OpenIDProvider",
+    "OpenIDProviderSettings",
     "OpenIDUserIdentity",
     "relation",
     "QuickQuery",

@@ -539,7 +539,7 @@ class OpenIDBindAccountResource(Resource):
         obj = loads_schema(request.get_data(as_text=True), schema)
         redirect_uri = f"{app_config.mwdb.base_url}/oauth/callback"
         provider = provider_settings.get_oidc_provider()
-        oidc_client = provider.get_oidc_client()
+        oidc_client = provider.client
         id_token_claims = oidc_client.fetch_id_token(
             obj["code"], obj["state"], obj["nonce"], redirect_uri
         )

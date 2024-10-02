@@ -22,13 +22,13 @@ Features
    setup-and-configuration
    user-guide/index
    integration-guide
-   extra-features
    developer-guide
    remotes-guide
    karton-guide
    oauth-guide
    rich-attributes-guide
    prometheus-guide
+   rate-limits
 
 Indices and tables
 ==================

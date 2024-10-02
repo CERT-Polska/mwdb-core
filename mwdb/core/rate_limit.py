@@ -1,5 +1,5 @@
 import time
-from typing import Optional
+from typing import Iterator, List, Optional, Tuple
 
 from flask import g, request
 from limits import parse
@@ -30,6 +30,53 @@ def get_limit_from_config(key) -> Optional[str]:
     return app_config.get_key("mwdb_limiter", key) or DEFAULT_RATE_LIMITS.get(key)
 
 
+def get_limit_keys_for_request() -> List[Tuple[str, ...]]:
+    """
+    Finds suitable limit keys for current request
+    """
+    # Split blueprint name and resource name from endpoint
+    if request.endpoint:
+        _, resource_name = request.endpoint.split(".", 2)
+    else:
+        resource_name = None
+
+    method = request.method.lower()
+    user_group_keys = (
+        [f"group_{group}" for group in g.auth_user.group_names]
+        if g.auth_user is not None
+        else ["unauthenticated"]
+    )
+
+    # Limit keys from most specific to the least specific
+    if resource_name is not None:
+        resource_limit_keys = [(resource_name, method), (resource_name,), (method,)]
+    else:
+        resource_limit_keys = [(method,)]
+
+    return (
+        [
+            (user_group, *resource_limit_key_items)
+            for user_group in user_group_keys
+            for resource_limit_key_items in resource_limit_keys
+        ]
+        + [(user_group,) for user_group in user_group_keys]
+        + resource_limit_keys
+    )
+
+
+def get_limits_for_request() -> Iterator[Tuple[Tuple[str, ...], List[str]]]:
+    """
+    Finds suitable limits for current request
+    """
+    limit_keys = get_limit_keys_for_request()
+    for limit_key in limit_keys:
+        # Get limit values for key
+        limit_values = get_limit_from_config("_".join(limit_key))
+        if not limit_values:
+            continue
+        yield limit_key, limit_values.split(" ")
+
+
 def apply_rate_limit_for_request() -> bool:
     """
     Raises TooManyRequests if current user has exceeded the rate limit
@@ -49,24 +96,12 @@ def apply_rate_limit_for_request() -> bool:
         Capabilities.unlimited_requests
     ):
         return False
-    # Split blueprint name and resource name from endpoint
-    if request.endpoint:
-        _, resource_name = request.endpoint.split(".", 2)
-    else:
-        resource_name = "None"
-    method = request.method.lower()
+    limits = get_limits_for_request()
     user = g.auth_user.login if g.auth_user is not None else request.remote_addr
-    # Limit keys from most specific to the least specific
-    limit_keys = [[resource_name, method], [resource_name], [method]]
-    for limit_key in limit_keys:
-        # Get limit values for key
-        limit_values = get_limit_from_config("_".join(limit_key))
-        if not limit_values:
-            continue
-        # limits has parse_many, but we're separating values using space
-        for limit_value in limit_values.split(" "):
+    for limit_key, limit_values in limits:
+        for limit_value in limit_values:
             limit_item = parse(limit_value)
-            identifiers = [user, *limit_key]
+            identifiers = (user, *limit_key)
             if not limiter.hit(limit_item, *identifiers):
                 reset_time = limiter.get_window_stats(
                     limit_item, *identifiers
@@ -79,5 +114,5 @@ def apply_rate_limit_for_request() -> bool:
                 raise TooManyRequests(
                     retry_after=retry_after,
                     description=f"Request limit: {limit_value} for "
-                    f"{method} method was exceeded!",
+                    f"{'_'.join(limit_key)} was exceeded!",
                 )

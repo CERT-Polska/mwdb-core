@@ -10,7 +10,10 @@ class Comment(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
     object_id = db.Column(
-        db.Integer, db.ForeignKey("object.id", ondelete="CASCADE"), nullable=False
+        db.Integer,
+        db.ForeignKey("object.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     user_id = db.Column(
         db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True

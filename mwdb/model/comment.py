@@ -16,7 +16,10 @@ class Comment(db.Model):
         index=True,
     )
     user_id = db.Column(
-        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
 
     author = db.relationship("User", lazy="joined")

@@ -95,7 +95,7 @@ class Object(db.Model):
     tags = db.relationship(
         "Tag",
         back_populates="object",
-        lazy="joined",
+        lazy="selectin",
         cascade="save-update, merge, delete",
     )
 

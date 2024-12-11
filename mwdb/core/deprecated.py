@@ -33,10 +33,6 @@ class DeprecatedFeature(Enum):
     # Use GET /<object_type> instead
     # Deprecated in v2.0.0
     legacy_search = "legacy_search"
-    # Legacy ?page parameter in object listing endpoints
-    # Use "?older_than" instead
-    # Deprecated in v2.0.0
-    legacy_page_parameter = "legacy_page_parameter"
     # Legacy Metakey API
     # Use Attribute API instead
     # Deprecated in v2.6.0

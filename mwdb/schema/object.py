@@ -104,7 +104,11 @@ class ObjectItemResponseSchema(Schema):
     favorite = fields.Boolean(required=True, allow_none=False)
 
     parents = fields.Nested(
-        ObjectListItemResponseSchema, many=True, required=True, allow_none=False
+        ObjectListItemResponseSchema,
+        many=True,
+        required=True,
+        allow_none=False,
+        attribute="accessible_parents",
     )
     children = fields.Nested(
         ObjectListItemResponseSchema, many=True, required=True, allow_none=False

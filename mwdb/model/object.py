@@ -150,6 +150,19 @@ class Object(db.Model):
     def favorite(self):
         return g.auth_user in self.followers
 
+    @property
+    def accessible_parents(self):
+        """
+        Parent objects that are accessible for current user
+        """
+        return (
+            db.session.query(Object)
+            .join(relation, relation.c.parent_id == Object.id)
+            .filter(relation.c.child_id == self.id)
+            .order_by(relation.c.creation_time.desc())
+            .filter(g.auth_user.has_access_to_object(Object.id))
+        )
+
     def add_parent(self, parent, commit=True):
         """
         Adding parent with permission inheritance

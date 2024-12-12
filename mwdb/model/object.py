@@ -475,8 +475,6 @@ class Object(db.Model):
             (default: currently authenticated user)
         :return: Object instance or None
         """
-        from .group import Group
-
         if requestor is None:
             requestor = g.auth_user
 
@@ -489,23 +487,6 @@ class Object(db.Model):
         if obj.has_explicit_access(requestor):
             return obj
 
-        # If not, but has "share_queried_objects" rights: give_access
-        if requestor.has_rights(Capabilities.share_queried_objects):
-            share_queried_groups = (
-                db.session.query(Group)
-                .filter(
-                    and_(
-                        Group.capabilities.contains(
-                            [Capabilities.share_queried_objects]
-                        ),
-                        requestor.is_member(Group.id),
-                    )
-                )
-                .all()
-            )
-            for group in share_queried_groups:
-                obj.give_access(group.id, AccessType.QUERIED, obj, requestor)
-            return obj
         # Well.. I've tried
         return None
 

@@ -17,10 +17,6 @@ class DeprecatedFeature(Enum):
     # API keys non-complaint with RFC7519
     # Deprecated in v2.7.0
     legacy_api_key_v2 = "legacy_api_key_v2"
-    # Legacy PUT/POST /api/<object_type>/<parent>
-    # Use POST /api/<object_type> instead
-    # Deprecated in v2.0.0
-    legacy_object_upload = "legacy_file_upload"
     # Legacy /request/sample/<token>
     # Use /file/<id>/download instead
     # Deprecated in v2.2.0

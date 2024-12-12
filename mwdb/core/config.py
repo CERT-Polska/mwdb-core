@@ -136,6 +136,7 @@ class MWDBConfig(Config):
     log_only_slow_sql = key(cast=intbool, required=False, default=False)
     use_x_forwarded_for = key(cast=intbool, required=False, default=False)
     enable_debug_log = key(cast=intbool, required=False, default=False)
+    enable_brownout = key(cast=intbool, required=False, default=False)
 
 
 @section("karton")

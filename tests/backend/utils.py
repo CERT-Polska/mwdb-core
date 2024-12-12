@@ -439,9 +439,9 @@ class MwdbTest(object):
         return res.json()
 
     def search(self, query):
-        res = self.session.get(self.mwdb_url + "/object", json={"query": query})
+        res = self.session.get(self.mwdb_url + "/object", params={"query": query})
         res.raise_for_status()
-        return res.json()
+        return res.json()["objects"]
 
     def check_operational(self):
         for attempt in range(10):

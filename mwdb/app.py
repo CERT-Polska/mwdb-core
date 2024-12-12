@@ -8,7 +8,6 @@ from werkzeug.routing import BaseConverter
 
 from mwdb.core.app import api, app
 from mwdb.core.config import app_config
-from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
 from mwdb.core.log import getLogger, setup_logger
 from mwdb.core.metrics import metric_api_requests, metrics_enabled
 from mwdb.core.plugins import PluginAppContext, load_plugins
@@ -204,11 +203,6 @@ def require_auth():
         # Not a session token? Maybe APIKey token
         if g.auth_user is None:
             g.auth_user = APIKey.verify_token(token)
-        # Still nothing? Maybe legacy API key
-        if g.auth_user is None:
-            g.auth_user = User.verify_legacy_token(token)
-            if g.auth_user is not None:
-                uses_deprecated_api(DeprecatedFeature.legacy_api_key_v1)
 
     if g.auth_user:
         if (

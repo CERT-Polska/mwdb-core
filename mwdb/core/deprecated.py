@@ -19,10 +19,6 @@ class DeprecatedFeature(Enum):
     # API keys non-complaint with RFC7519
     # Deprecated in v2.7.0
     legacy_api_key_v2 = "legacy_api_key_v2"
-    # Legacy /request/sample/<token>
-    # Use /file/<id>/download instead
-    # Deprecated in v2.2.0
-    legacy_file_download = "legacy_file_download"
     # Legacy Metakey API
     # Use Attribute API instead
     # Deprecated in v2.6.0

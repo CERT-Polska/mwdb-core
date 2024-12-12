@@ -41,7 +41,6 @@ from mwdb.resources.config import (
     ConfigResource,
     ConfigStatsResource,
 )
-from mwdb.resources.download import DownloadResource, RequestSampleDownloadResource
 from mwdb.resources.file import (
     FileDownloadResource,
     FileDownloadZipResource,
@@ -299,10 +298,6 @@ api.add_resource(ConfigItemResource, "/config/<hash64:identifier>")
 # Blob endpoints
 api.add_resource(TextBlobResource, "/blob")
 api.add_resource(TextBlobItemResource, "/blob/<hash64:identifier>")
-
-# Download endpoints
-api.add_resource(RequestSampleDownloadResource, "/request/sample/<identifier>")
-api.add_resource(DownloadResource, "/download/<access_token>")
 
 # Quick query endpoints
 api.add_resource(

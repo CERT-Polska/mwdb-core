@@ -16,8 +16,6 @@ logger = getLogger()
 
 
 class DeprecatedFeature(Enum):
-    # Unmanageable API keys, deprecated in v2.0.0
-    legacy_api_key_v1 = "legacy_api_key_v1"
     # API keys non-complaint with RFC7519
     # Deprecated in v2.7.0
     legacy_api_key_v2 = "legacy_api_key_v2"

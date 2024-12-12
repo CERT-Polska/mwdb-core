@@ -49,13 +49,6 @@ from mwdb.resources.file import (
 )
 from mwdb.resources.group import GroupListResource, GroupMemberResource, GroupResource
 from mwdb.resources.karton import KartonAnalysisResource, KartonObjectResource
-from mwdb.resources.metakey import (
-    MetakeyDefinitionManageResource,
-    MetakeyListDefinitionManageResource,
-    MetakeyListDefinitionResource,
-    MetakeyPermissionResource,
-    MetakeyResource,
-)
 from mwdb.resources.metrics import MetricsResource
 from mwdb.resources.oauth import (
     OpenIDAccountIdentitiesResource,
@@ -318,17 +311,6 @@ api.add_resource(
 api.add_resource(AttributeDefinitionListResource, "/attribute")
 api.add_resource(AttributeDefinitionResource, "/attribute/<key>")
 api.add_resource(AttributePermissionResource, "/attribute/<key>/permissions")
-
-# Attribute (metakey) deprecated endpoints
-api.add_resource(MetakeyListDefinitionResource, "/meta/list/<any(read, set):access>")
-api.add_resource(
-    MetakeyResource, "/<any(file, config, blob, object):type>/<hash64:identifier>/meta"
-)
-api.add_resource(MetakeyListDefinitionManageResource, "/meta/manage")
-api.add_resource(MetakeyDefinitionManageResource, "/meta/manage/<key>")
-api.add_resource(
-    MetakeyPermissionResource, "/meta/manage/<key>/permissions/<group_name>"
-)
 
 # Karton endpoints
 api.add_resource(

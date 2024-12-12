@@ -19,14 +19,6 @@ class DeprecatedFeature(Enum):
     # API keys non-complaint with RFC7519
     # Deprecated in v2.7.0
     legacy_api_key_v2 = "legacy_api_key_v2"
-    # Legacy Metakey API
-    # Use Attribute API instead
-    # Deprecated in v2.6.0
-    legacy_metakey_api = "legacy_metakey_api"
-    # Legacy Metakey API
-    # Use Attribute API instead
-    # Deprecated in v2.6.0
-    legacy_metakeys_upload_option = "legacy_metakeys_upload_option"
 
 
 def uses_deprecated_api(

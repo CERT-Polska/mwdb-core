@@ -87,7 +87,6 @@ from mwdb.resources.remotes import (
     RemoteTextBlobPullResource,
     RemoteTextBlobPushResource,
 )
-from mwdb.resources.search import SearchResource
 from mwdb.resources.server import (
     PingResource,
     ServerAdminInfoResource,
@@ -304,9 +303,6 @@ api.add_resource(TextBlobItemResource, "/blob/<hash64:identifier>")
 # Download endpoints
 api.add_resource(RequestSampleDownloadResource, "/request/sample/<identifier>")
 api.add_resource(DownloadResource, "/download/<access_token>")
-
-# Search endpoints
-api.add_resource(SearchResource, "/search")
 
 # Quick query endpoints
 api.add_resource(

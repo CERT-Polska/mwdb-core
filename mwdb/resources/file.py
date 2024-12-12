@@ -11,7 +11,6 @@ from mwdb.schema.file import (
     FileCreateRequestSchema,
     FileDownloadTokenResponseSchema,
     FileItemResponseSchema,
-    FileLegacyCreateRequestSchema,
     FileListResponseSchema,
 )
 
@@ -200,7 +199,6 @@ class FileResource(ObjectResource, FileUploader):
 class FileItemResource(ObjectItemResource, FileUploader):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema
-    CreateRequestSchema = FileLegacyCreateRequestSchema
 
     def call_specialised_remove_hook(self, file):
         hooks.on_removed_file(file)

@@ -13,7 +13,6 @@ from mwdb.schema.blob import BlobCreateSpecSchema
 from mwdb.schema.config import (
     ConfigCreateRequestSchema,
     ConfigItemResponseSchema,
-    ConfigLegacyCreateRequestSchema,
     ConfigListResponseSchema,
     ConfigStatsRequestSchema,
     ConfigStatsResponseSchema,
@@ -305,7 +304,6 @@ class ConfigItemResource(ObjectItemResource, ConfigUploader):
 
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
-    CreateRequestSchema = ConfigLegacyCreateRequestSchema
 
     def call_specialised_remove_hook(self, config):
         hooks.on_removed_config(config)

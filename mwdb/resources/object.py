@@ -249,7 +249,6 @@ class ObjectResource(Resource):
 class ObjectItemResource(Resource, ObjectUploader):
     ObjectType = Object
     ItemResponseSchema = ObjectItemResponseSchema
-    CreateRequestSchema = None
 
     def call_specialised_remove_hook(self, obj):
         pass

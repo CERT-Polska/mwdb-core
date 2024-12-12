@@ -439,7 +439,7 @@ class MwdbTest(object):
         return res.json()
 
     def search(self, query):
-        res = self.session.post(self.mwdb_url + "/search", json={"query": query})
+        res = self.session.get(self.mwdb_url + "/object", json={"query": query})
         res.raise_for_status()
         return res.json()
 

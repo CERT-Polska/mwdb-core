@@ -300,7 +300,7 @@ class ConfigResource(ObjectResource, ConfigUploader):
         return self.create_object(obj)
 
 
-class ConfigItemResource(ObjectItemResource, ConfigUploader):
+class ConfigItemResource(ObjectItemResource):
 
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema

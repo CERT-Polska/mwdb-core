@@ -196,7 +196,7 @@ class FileResource(ObjectResource, FileUploader):
         return self.create_object(obj["options"])
 
 
-class FileItemResource(ObjectItemResource, FileUploader):
+class FileItemResource(ObjectItemResource):
     ObjectType = File
     ItemResponseSchema = FileItemResponseSchema
 

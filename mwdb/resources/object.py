@@ -246,7 +246,7 @@ class ObjectResource(Resource):
         return schema.dump(objects, many=True)
 
 
-class ObjectItemResource(Resource, ObjectUploader):
+class ObjectItemResource(Resource):
     ObjectType = Object
     ItemResponseSchema = ObjectItemResponseSchema
 

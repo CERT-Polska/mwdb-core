@@ -179,7 +179,7 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
         return self.create_object(obj)
 
 
-class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
+class TextBlobItemResource(ObjectItemResource):
     ObjectType = TextBlob
     ItemResponseSchema = BlobItemResponseSchema
 

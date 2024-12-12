@@ -23,10 +23,6 @@ class DeprecatedFeature(Enum):
     # Use /file/<id>/download instead
     # Deprecated in v2.2.0
     legacy_file_download = "legacy_file_download"
-    # Legacy /search
-    # Use GET /<object_type> instead
-    # Deprecated in v2.0.0
-    legacy_search = "legacy_search"
     # Legacy Metakey API
     # Use Attribute API instead
     # Deprecated in v2.6.0

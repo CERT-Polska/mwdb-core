@@ -32,9 +32,6 @@ from . import (
 class ObjectUploader:
     """
     Mixin adding common object upload capabilities to resource
-
-    Merge it with ObjectsResource during retirement of ObjectResource
-    deprecated upload methods
     """
 
     ObjectType = None

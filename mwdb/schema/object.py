@@ -1,7 +1,6 @@
 from marshmallow import Schema, fields, post_dump
 
 from .attribute import AttributeItemRequestSchema, AttributeItemResponseSchema
-from .metakey import MetakeyItemRequestSchema
 from .tag import TagItemResponseSchema, TagRequestSchema
 from .utils import UTCDateTime
 
@@ -18,7 +17,6 @@ class ObjectCountRequestSchema(Schema):
 
 class ObjectCreateRequestSchemaBase(Schema):
     parent = fields.Str(missing=None)
-    metakeys = fields.Nested(MetakeyItemRequestSchema, many=True, missing=[])
     attributes = fields.Nested(AttributeItemRequestSchema, many=True, missing=[])
     upload_as = fields.Str(missing="*", allow_none=False)
     karton_id = fields.UUID(missing=None)

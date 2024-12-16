@@ -6,7 +6,9 @@ from functools import wraps
 from typing import Optional
 
 from flask import g, request
+from werkzeug.exceptions import BadRequest
 
+from mwdb.core.config import app_config
 from mwdb.core.log import getLogger
 from mwdb.core.metrics import metric_deprecated_usage
 
@@ -60,6 +62,14 @@ def uses_deprecated_api(
         f"Used deprecated feature: {feature}"
         + (f" ({method} {endpoint})" if endpoint is not None else "")
     )
+    if app_config.mwdb.enable_brownout:
+        if feature == DeprecatedFeature.legacy_api_key_v2:
+            # This feature won't be removed in v3
+            return
+        raise BadRequest(
+            f"Brownout: {feature} API feature is deprecated and currently disabled. "
+            f"Please upgrade your MWDB API client."
+        )
 
 
 def deprecated_endpoint(feature: DeprecatedFeature):

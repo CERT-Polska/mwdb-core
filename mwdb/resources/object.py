@@ -1,11 +1,8 @@
-from uuid import UUID
-
 from flask import g, request
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
 from mwdb.core.plugins import hooks
 from mwdb.core.search import QueryBaseException, build_query
 from mwdb.core.service import Resource
@@ -70,44 +67,19 @@ class ObjectUploader:
         else:
             parent_object = None
 
-        # Validate metakeys and Karton assignment
-        analysis_id = params.get("karton_id")
+        # If not, rely on 'attributes'
+        attributes = params["attributes"]
+        for attribute in params["attributes"]:
+            key = attribute["key"]
+            if not AttributeDefinition.query_for_set(key).first():
+                raise NotFound(
+                    f"Attribute '{key}' not defined or insufficient "
+                    "permissions to set that one"
+                )
 
-        if params["metakeys"]:
-            uses_deprecated_api(DeprecatedFeature.legacy_metakeys_upload_option)
-            # If 'metakeys' are defined: keep legacy behavior
-            if "attributes" in params and params["attributes"]:
-                raise BadRequest("'attributes' and 'metakeys' options can't be mixed")
-
-            attributes = params["metakeys"]
-            for attribute in params["metakeys"]:
-                key = attribute["key"]
-                if key == "karton":
-                    if analysis_id is not None:
-                        raise BadRequest(
-                            "You can't provide more than one Karton analysis identifier"
-                        )
-                    try:
-                        analysis_id = UUID(attribute["value"])
-                    except (ValueError, AttributeError):
-                        raise BadRequest("'karton' attribute accepts only UUID values")
-                elif not AttributeDefinition.query_for_set(key).first():
-                    raise NotFound(
-                        f"Attribute '{key}' not defined or insufficient "
-                        "permissions to set that one"
-                    )
-        else:
-            # If not, rely on 'attributes'
-            attributes = params["attributes"]
-            for attribute in params["attributes"]:
-                key = attribute["key"]
-                if not AttributeDefinition.query_for_set(key).first():
-                    raise NotFound(
-                        f"Attribute '{key}' not defined or insufficient "
-                        "permissions to set that one"
-                    )
-
-        if analysis_id is not None:
+        # Validate Karton assignment
+        karton_id = params.get("karton_id")
+        if karton_id is not None:
             if not g.auth_user.has_rights(Capabilities.karton_assign):
                 raise Forbidden(
                     "You are not permitted to assign Karton analysis to object"
@@ -126,7 +98,7 @@ class ObjectUploader:
             parent_object,
             share_with,
             attributes,
-            analysis_id,
+            karton_id,
             tags,
             share_3rd_party,
         )

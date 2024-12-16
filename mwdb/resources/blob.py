@@ -144,9 +144,6 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
                       content: "blob contents"
                       parent: null
                       upload_as: "*"
-                      metakeys:
-                        - key: string
-                          value: string
                       attributes:
                         - key: string
                           value: string
@@ -164,7 +161,7 @@ class TextBlobResource(ObjectResource, TextBlobUploader):
             403:
                 description: |
                     No permissions to perform additional operations
-                    (e.g. adding metakeys)
+                    (e.g. adding attributes)
             404:
                 description: Specified group doesn't exist
             409:

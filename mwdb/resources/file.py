@@ -154,10 +154,6 @@ class FileResource(ObjectResource, FileUploader):
                           type: array
                           items:
                             $ref: '#/components/schemas/AttributeItemRequest'
-                        metakeys:
-                          type: array
-                          items:
-                            $ref: '#/components/schemas/MetakeyItemRequest'
                         tags:
                           type: array
                           items:

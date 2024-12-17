@@ -14,6 +14,7 @@ from .metakey import MetakeyItemRequestSchema
 from .tag import TagItemResponseSchema, TagRequestSchema
 from .utils import UTCDateTime
 
+
 class ObjectListRequestSchema(Schema):
     page = fields.Int(missing=None)  # legacy, to be removed in future
     query = fields.Str(missing=None)
@@ -110,7 +111,11 @@ class ObjectItemResponseSchema(Schema):
         attribute="accessible_parents",
     )
     children = fields.Nested(
-        ObjectListItemResponseSchema, many=True, required=True, allow_none=False, attribute='limit_children'
+        ObjectListItemResponseSchema,
+        many=True,
+        required=True,
+        allow_none=False,
+        attribute="limit_children",
     )
 
     attributes = fields.Nested(

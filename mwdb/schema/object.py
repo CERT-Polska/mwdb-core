@@ -13,8 +13,6 @@ from .attribute import AttributeItemRequestSchema, AttributeItemResponseSchema
 from .metakey import MetakeyItemRequestSchema
 from .tag import TagItemResponseSchema, TagRequestSchema
 from .utils import UTCDateTime
-from ..core.rate_limit import limiter
-
 
 class ObjectListRequestSchema(Schema):
     page = fields.Int(missing=None)  # legacy, to be removed in future

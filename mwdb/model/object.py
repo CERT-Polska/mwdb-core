@@ -58,12 +58,14 @@ class Object(db.Model):
     share_3rd_party = db.Column(db.Boolean, nullable=False)
 
     upload_count = column_property(
-        select([func.count(distinct(ObjectPermission.related_user_id))]).where(
+        select([func.count(distinct(ObjectPermission.related_user_id))])
+        .where(
             and_(
                 ObjectPermission.object_id == id,
                 ObjectPermission.reason_type == AccessType.ADDED,
             )
-        ),
+        )
+        .scalar_subquery(),
         deferred=True,
     )
 
@@ -105,7 +107,7 @@ class Object(db.Model):
         "User",
         secondary="comment",
         back_populates="commented_objects",
-        passive_deletes=True,
+        viewonly=True,
     )
 
     shares = db.relationship(

@@ -68,7 +68,7 @@ class User(db.Model):
         "Object",
         secondary="comment",
         back_populates="comment_authors",
-        passive_deletes=True,
+        viewonly=True,
     )
 
     comments = db.relationship(

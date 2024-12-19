@@ -1,4 +1,4 @@
-FROM python:3.8-alpine AS build
+FROM python:3.12-alpine AS build
 
 WORKDIR /app
 RUN python3 -m venv /app/venv
@@ -14,7 +14,7 @@ ARG plugins
 RUN for plugin in $plugins $(find /app/plugins -name 'setup.py' -exec dirname {} \; | sort -u);  \
     do /app/venv/bin/pip --no-cache-dir install $plugin; done
 
-FROM python:3.8-alpine
+FROM python:3.12-alpine
 
 LABEL maintainer="info@cert.pl"
 

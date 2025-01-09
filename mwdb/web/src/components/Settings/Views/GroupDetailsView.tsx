@@ -64,7 +64,7 @@ export function GroupDetailsView() {
                             defaultValue={group.name!}
                             onSubmit={handleUpdate}
                             required
-                            pattern="[A-Za-z0-9_-]{1,32}"
+                            pattern="[A-Za-z0-9_.-]{1,32}"
                         />
                     </DetailsRecord>
                     <DetailsRecord label="Members">

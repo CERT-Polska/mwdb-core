@@ -10,10 +10,10 @@ class ShareRequestSchema(Schema):
 
     @validates("group")
     def validate_name(self, name):
-        if not re.match("^[A-Za-z0-9_-]{1,32}$", name):
+        if not re.match("^[A-Za-z0-9_.-]{1,32}$", name):
             raise ValidationError(
                 "Group should contain max 32 chars and include only "
-                "letters, digits, underscores and dashes"
+                "letters, digits, underscores, dots and dashes"
             )
 
 

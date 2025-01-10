@@ -26,4 +26,4 @@ python-dateutil==2.8.2
 pyzipper==0.3.5
 pycryptodomex==3.19.1
 ssdeep==3.4
-prometheus-client==0.19.0
+prometheus-client==0.21.1

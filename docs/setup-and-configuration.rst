@@ -238,13 +238,21 @@ If you want to store files using object storage, open the ``mwdb.ini`` file and 
     # optional (for AWS IAM role authentication)
     s3_storage_iam_auth = 1
 
+.. note::
+
+   If you are using MinIO, it's recommended to set hash_pathing to 1. Although MinIO is an object storage, it uses prefixes
+   to organize files like in traditional, hierarchical file systems. Read more in
+   `MinIO Core Administration Concepts documentation <https://min.io/docs/minio/linux/administration/concepts.html>`_.
+
+   If you want to migrate from one naming scheme to another, MWDB Core v2.15.0 introduces hash_pathing_fallback option to
+   try both schemes while reading files from storage.
 
 If you use Docker-based setup, all the configuration can be set using environment variables (e.g. ``MWDB_STORAGE_PROVIDER=s3``).
 
 .. note::
 
    If you are using ``karton``, we highly recommend creating a separate bucket for it.
-   Failing to do so might result in data loss caused by ``karton's`` garbage collector. 
+   Failing to do so might result in data loss caused by ``karton's`` garbage collector.
 
 Setting higher upload size limit in Docker
 ------------------------------------------
@@ -310,7 +318,8 @@ Storage settings:
 
 * ``max_upload_size`` (integer) - Maximum upload size in bytes. Keep in mind that this value refers to whole upload request (``Content-Length`` from request header), so the maximum file size is smaller than that by +/- 500B (because of additional payload with metadata). Default is ``None``, which means there is no limit.
 * ``storage_provider`` (disk or s3) - If you want to use S3-compatible object storage instead of local file system, set this option to ``s3``. Default is ``disk``.
-* ``hash_pathing`` (0 or 1) - Should we break up the uploads into different folders. If you use S3-compatible storage, recommended option is ``0`` (default: ``1``).
+* ``hash_pathing`` (0 or 1) - Should we break up the uploads into different folders. If you use S3-compatible storage other than MinIO, recommended option is ``0`` (default: ``1``).
+* ``hash_pathing_fallback`` (0 or 1) - If set to 1, MWDB will try to reach a file contents for reading using both naming schemes (with and without hash_pathing). It's useful during migration from one scheme to another. Default is ``1``.
 * ``s3_storage_endpoint`` (string) - S3 API endpoint for object storage. Required if you use S3-compatible storage.
 * ``s3_storage_access_key`` (string) - S3 API access key for object storage. Required if you use S3-compatible storage.
 * ``s3_storage_secret_key`` (string) - S3 API secret key for object storage. Required if you use S3-compatible storage.

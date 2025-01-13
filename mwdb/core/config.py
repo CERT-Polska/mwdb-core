@@ -82,7 +82,7 @@ class MWDBConfig(Config):
     # Try to open file using opposite hash_pathing setting when MWDB
     # fails to open file using current one. It's useful when you want to
     # migrate from one scheme to another.
-    hash_pathing_fallback = key(cast=intbool, required=False, default=True)
+    hash_pathing_fallback = key(cast=intbool, required=False, default=False)
     # S3 compatible storage endpoint
     s3_storage_endpoint = key(cast=str, required=False)
     # Use TLS with S3 storage

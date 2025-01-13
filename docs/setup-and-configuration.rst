@@ -319,7 +319,7 @@ Storage settings:
 * ``max_upload_size`` (integer) - Maximum upload size in bytes. Keep in mind that this value refers to whole upload request (``Content-Length`` from request header), so the maximum file size is smaller than that by +/- 500B (because of additional payload with metadata). Default is ``None``, which means there is no limit.
 * ``storage_provider`` (disk or s3) - If you want to use S3-compatible object storage instead of local file system, set this option to ``s3``. Default is ``disk``.
 * ``hash_pathing`` (0 or 1) - Should we break up the uploads into different folders. If you use S3-compatible storage other than MinIO, recommended option is ``0`` (default: ``1``).
-* ``hash_pathing_fallback`` (0 or 1) - If set to 1, MWDB will try to reach a file contents for reading using both naming schemes (with and without hash_pathing). It's useful during migration from one scheme to another. Default is ``1``.
+* ``hash_pathing_fallback`` (0 or 1) - If set to 1, MWDB will try to reach a file contents for reading using both naming schemes (with and without hash_pathing). It's useful during migration from one scheme to another. Default is ``0``.
 * ``s3_storage_endpoint`` (string) - S3 API endpoint for object storage. Required if you use S3-compatible storage.
 * ``s3_storage_access_key`` (string) - S3 API access key for object storage. Required if you use S3-compatible storage.
 * ``s3_storage_secret_key`` (string) - S3 API secret key for object storage. Required if you use S3-compatible storage.

@@ -12,8 +12,8 @@ type FormValues = CreateUser;
 const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
     login: Yup.string()
         .matches(
-            /[A-Za-z0-9_-]/,
-            "Login must contain only letters, digits, '_' and '-'"
+            /[A-Za-z0-9_.-]/,
+            "Login must contain only letters, digits, '_', '.' and '-'"
         )
         .max(32, "Max 32 characters allowed.")
         .required("Login is required"),

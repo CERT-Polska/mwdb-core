@@ -79,6 +79,10 @@ class MWDBConfig(Config):
     # Should we break up the uploads into different folders for example:
     # uploads/9/f/8/6/9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
     hash_pathing = key(cast=intbool, required=False, default=True)
+    # Try to open file using opposite hash_pathing setting when MWDB
+    # fails to open file using current one. It's useful when you want to
+    # migrate from one scheme to another.
+    hash_pathing_fallback = key(cast=intbool, required=False, default=False)
     # S3 compatible storage endpoint
     s3_storage_endpoint = key(cast=str, required=False)
     # Use TLS with S3 storage
@@ -136,6 +140,7 @@ class MWDBConfig(Config):
     log_only_slow_sql = key(cast=intbool, required=False, default=False)
     use_x_forwarded_for = key(cast=intbool, required=False, default=False)
     enable_debug_log = key(cast=intbool, required=False, default=False)
+    enable_brownout = key(cast=intbool, required=False, default=False)
 
 
 @section("karton")

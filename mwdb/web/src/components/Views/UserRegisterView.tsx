@@ -25,8 +25,8 @@ const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
     login: Yup.string()
         .required("Login is required")
         .matches(
-            /[A-Za-z0-9_-]{1,32}/,
-            "Login must contain only letters, digits, '_'and '-' characters, max 32 characters allowed."
+            /[A-Za-z0-9_.-]{1,32}/,
+            "Login must contain only letters, digits, '_', '.' and '-' characters, max 32 characters allowed."
         ),
     email: Yup.string()
         .required("Email is required")

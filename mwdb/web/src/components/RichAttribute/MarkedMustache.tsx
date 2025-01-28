@@ -8,6 +8,7 @@ import {
     Token,
 } from "@mwdb-web/commons/helpers";
 import { fromPlugins } from "@mwdb-web/commons/plugins";
+import { builtinLambdas } from "./builtinLambdas";
 
 /**
  * Markdown with Mustache templates for React
@@ -30,14 +31,13 @@ function isFunction(obj: Object): boolean {
     return typeof obj === "function";
 }
 
-function splitName(name: string) {
-    if (name === ".")
-        // Special case for "this"
-        return [];
+function splitByUnescapedSeparator(name: string, separator: string) {
+    const splitRegex = new RegExp(String.raw`(?<!\\)((?:\\\\)*[${separator}])`, "g");
+    const replaceRegex = new RegExp(String.raw`\\([${separator}\\])`, "g");
     return name
-        .split(/(?<!\\)((?:\\\\)*[.])/g)
+        .split(splitRegex)
         .reduce((acc: string[], current: string, index: number) => {
-            const unescapedCurrent = current.replaceAll(/\\([.\\])/g, "$1");
+            const unescapedCurrent = current.replaceAll(replaceRegex, "$1");
             if (index % 2) {
                 // Last character is a dot, rest must be appended to last element
                 const currentWithoutLast = unescapedCurrent.slice(0, -1);
@@ -47,6 +47,13 @@ function splitName(name: string) {
                 return [...acc, unescapedCurrent];
             }
         }, []);
+}
+
+function splitName(name: string) {
+    if (name === ".")
+        // Special case for "this"
+        return [];
+    return splitByUnescapedSeparator(name, ".");
 }
 
 function makeQuery(path: string[], value: string, attributeKey: string) {
@@ -81,18 +88,23 @@ function escapeMarkdown(string: string) {
     return String(string).replace(/([\\`*_{}[\]<>()#+-,!|])/g, "\\$1");
 }
 
+type MustacheLambdaDefinition = {
+    func: Function;
+    asPipeline: boolean;
+    asSection: boolean;
+}
+
 // Extended context to provide special Mustache values in future
 class MustacheContext extends Mustache.Context {
     globalView: any;
     lastPath: string[] | null;
     lastValue: string | null;
     lambdaResults: { [id: string]: any };
-    lambdas: { [name: string]: Function };
+    lambdas: { [name: string]: MustacheLambdaDefinition };
     constructor(
         view: Object,
         parent?: MustacheContext,
         globalView?: any,
-        lambdas?: { [name: string]: Function }
     ) {
         super(view, parent);
         this.globalView = globalView === undefined ? view : globalView;
@@ -101,7 +113,11 @@ class MustacheContext extends Mustache.Context {
         // Stored value from last lookup to determine the type
         this.lastValue = null;
         this.lambdaResults = parent ? parent.lambdaResults : {};
-        this.lambdas = parent ? parent.lambdas : lambdas || {};
+        this.lambdas = parent ? parent.lambdas : {};
+    }
+
+    registerLambda(name: string, func: Function, asPipeline: boolean, asSection: boolean) {
+        this.lambdas[name] = { func, asPipeline, asSection }
     }
 
     push(view: Object): Context {
@@ -118,57 +134,106 @@ class MustacheContext extends Mustache.Context {
         return parentPath;
     }
 
-    lookup(name: string) {
-        let searchable = false;
-        // Check for searchable mark at the beginning
-        if (name[0] === "@") {
-            name = name.slice(1);
-            searchable = true;
-        }
+    lookupView(name: string) {
+        // Make a lookup within a view object
         if (!name) return undefined;
+        const path = splitName(name);
 
         let currentObject = this.view;
-        if (this.lambdas[name]) {
-            const lambda = this.lambdas[name];
-            const currentContext = this;
-            return function lambdaFunction(
-                this: any,
-                text: string,
-                renderer: Function
-            ): string {
-                let lambdaResultId = uniqueId("lambda_result");
-                let result = lambda.call(this, text, renderer);
-                if (typeof result !== "string") {
-                    currentContext.lambdaResults[lambdaResultId] = result;
-                    // Emit reference in markdown
-                    return `[](lambda#${lambdaResultId})`;
-                } else {
-                    return result;
-                }
-            };
-        }
-
-        const path = splitName(name);
         for (let element of path) {
             if (!Object.prototype.hasOwnProperty.call(currentObject, element))
                 return undefined;
             currentObject = currentObject[element];
         }
+
         this.lastPath = this.getParentPath()!.concat(path);
         this.lastValue = currentObject;
-        if (searchable) {
-            if (isFunction(currentObject) || typeof currentObject === "object")
-                // Non-primitives are not directly searchable
-                return undefined;
-            const query = makeQuery(
-                this.lastPath,
-                currentObject,
-                this.globalView["key"]
-            );
-            if (!query) return undefined;
-            return new SearchReference(query, currentObject);
-        }
         return currentObject;
+    }
+
+    emitLambdaResult(result: any): string {
+        if (typeof result !== "string") {
+            let lambdaResultId = uniqueId("lambda_result");
+            this.lambdaResults[lambdaResultId] = result;
+            // Emit reference in markdown
+            return `[](lambda#${lambdaResultId})`;
+        } else {
+            return result;
+        }
+    }
+
+    lookupLambda(name: string) {
+        const lambda = this.lambdas[name];
+        if (!lambda)
+            return undefined
+        if (!lambda.asSection)
+            return undefined
+        const context = this;
+        return function lambdaFunction(
+            this: any,
+            text: string,
+            renderer: Function
+        ): string {
+            let result = lambda.func.call(this, text, renderer);
+            return context.emitLambdaResult(result);
+        }
+    }
+
+    lookupPipeline(pipeline: string) {
+        const [name, ...lambdaNames] = pipeline.split("|").map(name => name.trim());
+        let result = this.lookupView(name);
+        if (typeof result === 'undefined')
+            return undefined;
+        for(let lambdaName of lambdaNames) {
+            const lambda = this.lambdas[lambdaName];
+            if(!lambda)
+                return undefined;
+            if(!lambda.asPipeline)
+                return undefined;
+            result = lambda.func.call(this.view, result);
+            if(typeof result === 'undefined')
+                return undefined;
+        }
+        return this.emitLambdaResult(result);
+    }
+
+    lookupSearchable(name: string) {
+        if (!name) return undefined;
+        let currentObject = this.lookupView(name);
+        if (typeof currentObject === 'undefined')
+            return undefined;
+        if (isFunction(currentObject) || typeof currentObject === "object")
+            // Non-primitives are not directly searchable
+            return undefined;
+        const query = makeQuery(
+            this.lastPath as string[],
+            currentObject,
+            this.globalView["key"]
+        );
+        if (!query) return undefined;
+        return new SearchReference(query, currentObject);
+    }
+
+    lookup(name: string) {
+        // Check for searchable mark at the beginning
+        if (name[0] === "@") {
+            // Searchable field mark
+            name = name.slice(1);
+            return this.lookupSearchable(name);
+        } else if (name.includes("|")) {
+            // Pipeline expression
+            return this.lookupPipeline(name);
+        }
+
+        let object = this.lookupView(name);
+        if(typeof object !== 'undefined')
+            return object;
+
+        let lambda = this.lookupLambda(name);
+        if(typeof lambda !== 'undefined')
+            return lambda;
+
+        return undefined;
     }
 }
 
@@ -242,20 +307,27 @@ const mustacheWriter = new MustacheWriter();
 const markedTokenizer = new MarkedTokenizer();
 
 export function renderValue(template: string, value: Object, options: Option) {
-    const lambdas = fromPlugins("mustacheExtensions").reduce((prev, curr) => {
-        return {
-            ...prev,
-            ...curr,
-        };
-    }, {});
+    const pluginLambdas = [builtinLambdas, ...fromPlugins("mustacheExtensions")];
     const context = new MustacheContext(
         {
             ...value,
         },
-        undefined,
-        undefined,
-        lambdas
     );
+    for(let lambdaSet of pluginLambdas) {
+        for(let lambdaName of Object.keys(lambdaSet)) {
+            let lambda = lambdaSet[lambdaName];
+            if(isFunction(lambda)) {
+                context.registerLambda(lambdaName, lambda, true, true);
+            } else {
+                context.registerLambda(
+                    lambdaName,
+                    lambda["func"],
+                    lambda["asPipeline"] ?? false,
+                    lambda["asSection"] ?? false,
+                )
+            }
+        }
+    }
     const markdown = mustacheWriter.render(template, context);
     const tokens = marked.lexer(markdown, {
         ...marked.defaults,

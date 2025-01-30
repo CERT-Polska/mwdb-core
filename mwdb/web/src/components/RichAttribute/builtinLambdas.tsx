@@ -1,11 +1,14 @@
-function noop() {
+function noop() {}
 
-}
+export type LambdaFunction = (
+    this: object,
+    input: any,
+    options: { callType: "section" | "pipeline"; renderer?: Function }
+) => any;
 
 export const builtinLambdas = {
-    "join": noop,
-    "makeTable": noop,
-    "makeList": noop,
-    "count": noop,
-    "sort": noop,
+    makeTable: noop,
+    makeList: noop,
+    count: noop,
+    sort: noop,
 };

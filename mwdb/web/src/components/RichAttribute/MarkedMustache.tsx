@@ -8,7 +8,7 @@ import {
     Token,
 } from "@mwdb-web/commons/helpers";
 import { fromPlugins } from "@mwdb-web/commons/plugins";
-import { builtinLambdas } from "./builtinLambdas";
+import { builtinLambdas, LambdaFunction } from "./builtinLambdas";
 
 /**
  * Markdown with Mustache templates for React
@@ -32,7 +32,10 @@ function isFunction(obj: Object): boolean {
 }
 
 function splitByUnescapedSeparator(name: string, separator: string) {
-    const splitRegex = new RegExp(String.raw`(?<!\\)((?:\\\\)*[${separator}])`, "g");
+    const splitRegex = new RegExp(
+        String.raw`(?<!\\)((?:\\\\)*[${separator}])`,
+        "g"
+    );
     const replaceRegex = new RegExp(String.raw`\\([${separator}\\])`, "g");
     return name
         .split(splitRegex)
@@ -88,24 +91,14 @@ function escapeMarkdown(string: string) {
     return String(string).replace(/([\\`*_{}[\]<>()#+-,!|])/g, "\\$1");
 }
 
-type MustacheLambdaDefinition = {
-    func: Function;
-    asPipeline: boolean;
-    asSection: boolean;
-}
-
 // Extended context to provide special Mustache values in future
 class MustacheContext extends Mustache.Context {
     globalView: any;
     lastPath: string[] | null;
     lastValue: string | null;
     lambdaResults: { [id: string]: any };
-    lambdas: { [name: string]: MustacheLambdaDefinition };
-    constructor(
-        view: Object,
-        parent?: MustacheContext,
-        globalView?: any,
-    ) {
+    lambdas: { [name: string]: LambdaFunction };
+    constructor(view: Object, parent?: MustacheContext, globalView?: any) {
         super(view, parent);
         this.globalView = globalView === undefined ? view : globalView;
         // Stored absolute path of last lookup
@@ -116,8 +109,9 @@ class MustacheContext extends Mustache.Context {
         this.lambdas = parent ? parent.lambdas : {};
     }
 
-    registerLambda(name: string, func: Function, asPipeline: boolean, asSection: boolean) {
-        this.lambdas[name] = { func, asPipeline, asSection }
+    registerLambdas(lambdas: { [name: string]: LambdaFunction }) {
+        for (let lambdaName of Object.keys(lambdas))
+            this.lambdas[lambdaName] = lambdas[lambdaName];
     }
 
     push(view: Object): Context {
@@ -164,35 +158,32 @@ class MustacheContext extends Mustache.Context {
 
     lookupLambda(name: string) {
         const lambda = this.lambdas[name];
-        if (!lambda)
-            return undefined
-        if (!lambda.asSection)
-            return undefined
+        if (!lambda) return undefined;
         const context = this;
         return function lambdaFunction(
             this: any,
             text: string,
             renderer: Function
         ): string {
-            let result = lambda.func.call(this, text, renderer);
+            let result = lambda.call(this, text, {
+                callType: "section",
+                renderer,
+            });
             return context.emitLambdaResult(result);
-        }
+        };
     }
 
     lookupPipeline(pipeline: string) {
-        const [name, ...lambdaNames] = pipeline.split("|").map(name => name.trim());
+        const [name, ...lambdaNames] = pipeline
+            .split("|")
+            .map((name) => name.trim());
         let result = this.lookupView(name);
-        if (typeof result === 'undefined')
-            return undefined;
-        for(let lambdaName of lambdaNames) {
+        if (typeof result === "undefined") return undefined;
+        for (let lambdaName of lambdaNames) {
             const lambda = this.lambdas[lambdaName];
-            if(!lambda)
-                return undefined;
-            if(!lambda.asPipeline)
-                return undefined;
-            result = lambda.func.call(this.view, result);
-            if(typeof result === 'undefined')
-                return undefined;
+            if (!lambda) return undefined;
+            result = lambda.call(this.view, result, { callType: "pipeline" });
+            if (typeof result === "undefined") return undefined;
         }
         return this.emitLambdaResult(result);
     }
@@ -200,8 +191,7 @@ class MustacheContext extends Mustache.Context {
     lookupSearchable(name: string) {
         if (!name) return undefined;
         let currentObject = this.lookupView(name);
-        if (typeof currentObject === 'undefined')
-            return undefined;
+        if (typeof currentObject === "undefined") return undefined;
         if (isFunction(currentObject) || typeof currentObject === "object")
             // Non-primitives are not directly searchable
             return undefined;
@@ -226,12 +216,10 @@ class MustacheContext extends Mustache.Context {
         }
 
         let object = this.lookupView(name);
-        if(typeof object !== 'undefined')
-            return object;
+        if (typeof object !== "undefined") return object;
 
         let lambda = this.lookupLambda(name);
-        if(typeof lambda !== 'undefined')
-            return lambda;
+        if (typeof lambda !== "undefined") return lambda;
 
         return undefined;
     }
@@ -307,26 +295,15 @@ const mustacheWriter = new MustacheWriter();
 const markedTokenizer = new MarkedTokenizer();
 
 export function renderValue(template: string, value: Object, options: Option) {
-    const pluginLambdas = [builtinLambdas, ...fromPlugins("mustacheExtensions")];
-    const context = new MustacheContext(
-        {
-            ...value,
-        },
-    );
-    for(let lambdaSet of pluginLambdas) {
-        for(let lambdaName of Object.keys(lambdaSet)) {
-            let lambda = lambdaSet[lambdaName];
-            if(isFunction(lambda)) {
-                context.registerLambda(lambdaName, lambda, true, true);
-            } else {
-                context.registerLambda(
-                    lambdaName,
-                    lambda["func"],
-                    lambda["asPipeline"] ?? false,
-                    lambda["asSection"] ?? false,
-                )
-            }
-        }
+    const pluginLambdas = [
+        builtinLambdas,
+        ...fromPlugins("mustacheExtensions"),
+    ];
+    const context = new MustacheContext({
+        ...value,
+    });
+    for (let lambdaSet of pluginLambdas) {
+        context.registerLambdas(lambdaSet);
     }
     const markdown = mustacheWriter.render(template, context);
     const tokens = marked.lexer(markdown, {

@@ -1,14 +1,9 @@
 import _, { uniqueId } from "lodash";
 import Mustache, { Context } from "mustache";
 import { marked, Tokenizer } from "marked";
-import { escapeSearchValue } from "@mwdb-web/commons/helpers";
 import { fromPlugins } from "@mwdb-web/commons/plugins";
-import {
-    markdownRenderer,
-    MarkdownRendererOptions,
-    Token,
-} from "./MarkdownRenderer";
-import { builtinLambdas, LambdaFunction } from "./builtinLambdas";
+import { markdownRenderer, Token } from "./MarkdownRenderer";
+import { builtinLambdas } from "./builtinLambdas";
 
 /**
  * Markdown with Mustache templates for React
@@ -187,10 +182,17 @@ class MustacheContext extends Mustache.Context {
                     context.lastPath
                 );
             };
+            const markdownRenderer = (markdown: string) => {
+                return context.renderContext.renderMarkdown(
+                    markdown,
+                    context.lambdaResults
+                );
+            };
             let result = lambda.call(this, template, {
                 callType: "section",
                 renderer: subrender,
                 mustacheRenderer,
+                markdownRenderer,
                 context,
             });
             let lambdaResult = context.emitLambdaResult(result);
@@ -342,17 +344,24 @@ class MarkedMustache {
         return this.options.lambdas;
     }
 
-    render(template: string, view: object, initialPath?: string[]) {
-        const context = new MustacheContext(view, this, undefined, initialPath);
-        const markdown = mustacheWriter.render(template, context);
+    renderMarkdown(
+        markdown: string,
+        lambdaResults: { [id: string]: any }
+    ): string {
         const tokens = marked.lexer(markdown, {
             ...marked.defaults,
             tokenizer: markedTokenizer,
         }) as Token[];
         return markdownRenderer(tokens, {
             searchEndpoint: this.options.searchEndpoint,
-            lambdaResults: context.lambdaResults,
+            lambdaResults: lambdaResults,
         });
+    }
+
+    render(template: string, view: object, initialPath?: string[]) {
+        const context = new MustacheContext(view, this, undefined, initialPath);
+        const markdown = mustacheWriter.render(template, context);
+        return this.renderMarkdown(markdown, context.lambdaResults);
     }
 }
 
@@ -370,12 +379,6 @@ export function renderValue(
         builtinLambdas,
         ...fromPlugins("mustacheExtensions"),
     ];
-
-    function makeQuery(path: string[], value: string): string {
-        console.log(path);
-        // TODO: make it context-aware
-        return "";
-    }
 
     let lambdas = {};
     for (let lambdaSet of pluginLambdas) lambdas = { ...lambdas, ...lambdaSet };

@@ -117,7 +117,11 @@ export function markdownRenderer(
                     if (!options.lambdaResults?.hasOwnProperty(id)) {
                         return <i>{`(BUG: No lambda result for ${id})`}</i>;
                     }
-                    return options.lambdaResults[id];
+                    const result = options.lambdaResults[id];
+                    if (typeof result === "function") {
+                        const Component = result;
+                        return <Component />;
+                    } else return result;
                 }
             }
             return (

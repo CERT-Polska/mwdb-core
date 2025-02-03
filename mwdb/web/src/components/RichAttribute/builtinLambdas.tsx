@@ -7,12 +7,12 @@ import {
     faPlus,
     faMinus,
 } from "@fortawesome/free-solid-svg-icons";
-import { escapeSearchValue } from "@mwdb-web/commons/helpers";
 
 export type LambdaSectionOptions = {
     callType: "section";
     renderer: (template: string) => any;
     mustacheRenderer: (template: string) => string;
+    markdownRenderer: (markdown: string) => string;
     context: any;
 };
 
@@ -128,28 +128,33 @@ function section(text: any, options: LambdaSectionOptions): any {
 }
 
 function collapseHeader(header: any, options: LambdaSectionOptions): any {
-    options.context.lambdaContext["collapseHeader"] = options.renderer(header);
+    options.context.lambdaContext["collapseHeader"] =
+        options.mustacheRenderer(header);
     return "";
 }
 
 function collapse(text: any, options: LambdaSectionOptions): any {
-    const [collapsed, setCollapsed] = useState(true);
-    return (
-        <>
-            <div
-                className="md-p-inline my-2"
-                onClick={() => setCollapsed((collapsed) => !collapsed)}
-                style={{ cursor: "pointer" }}
-            >
-                <FontAwesomeIcon
-                    className="mx-2"
-                    icon={collapsed ? faPlus : faMinus}
-                />
-                {options.context.lambdaContext["collapseHeader"]}
-            </div>
-            {!collapsed ? options.renderer(text) : []}
-        </>
-    );
+    // We need to return a component here to be rendered by MarkdownRenderer
+    const header = options.context.lambdaContext["collapseHeader"];
+    return () => {
+        const [collapsed, setCollapsed] = useState(true);
+        return (
+            <>
+                <div
+                    className="md-p-inline my-2"
+                    onClick={() => setCollapsed((collapsed) => !collapsed)}
+                    style={{ cursor: "pointer" }}
+                >
+                    <FontAwesomeIcon
+                        className="mx-2"
+                        icon={collapsed ? faPlus : faMinus}
+                    />
+                    {options.markdownRenderer(header)}
+                </div>
+                {!collapsed ? options.renderer(text) : []}
+            </>
+        );
+    };
 }
 
 function indicatorType(
@@ -209,7 +214,7 @@ export const builtinLambdas = {
     "indicator.type": indicatorType,
     indicator: indicator,
     "collapse.header": collapseHeader,
-    collapse: collapse,
+    collapse,
     if: _if,
     then: _then,
     else: _else,

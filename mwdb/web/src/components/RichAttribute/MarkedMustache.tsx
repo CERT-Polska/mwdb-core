@@ -4,6 +4,10 @@ import { marked, Tokenizer } from "marked";
 import { fromPlugins } from "@mwdb-web/commons/plugins";
 import { markdownRenderer, Token } from "./MarkdownRenderer";
 import { builtinLambdas } from "./builtinLambdas";
+import {
+    LambdaRenderer,
+    LambdaSet,
+} from "@mwdb-web/components/RichAttribute/lambdaTypes";
 
 /**
  * Markdown with Mustache templates for React
@@ -159,26 +163,23 @@ class MustacheContext extends Mustache.Context {
         }
     }
 
-    lookupLambda(name: string) {
-        if (name.startsWith("$")) {
-            // If you want to call lambda, but its name collides with
-            // object key, you can alternatively put $ on the
-            // beginning
-            name = name.slice(1);
-        }
-        const lambda = this.renderContext.lambdas[name];
-        if (!lambda) return undefined;
+    resolveRenderer(lambda: LambdaRenderer, view?: any) {
+        /**
+         * Renderers are functions that are called by Writer.renderSection.
+         * We use this mechanism to make lambda render part of the template by itself.
+         * Lambda can also override rendering view.
+         * https://github.com/janl/mustache.js/tree/master?tab=readme-ov-file#functions
+         */
         const context = this;
-
         return function lambdaFunction(
             this: any,
             template: string,
-            mustacheRenderer: Function
+            mustacheRenderer: (template: string, view?: any) => string
         ): string {
-            const subrender = (template: string) => {
+            const subrender = (template: string, view?: any) => {
                 return context.renderContext.render(
                     template,
-                    this,
+                    typeof view === "undefined" ? this : view,
                     context.lastPath
                 );
             };
@@ -188,8 +189,7 @@ class MustacheContext extends Mustache.Context {
                     context.lambdaResults
                 );
             };
-            let result = lambda.call(this, template, {
-                callType: "section",
+            let result = lambda.func.call(view ?? this, template, {
                 renderer: subrender,
                 mustacheRenderer,
                 markdownRenderer,
@@ -198,8 +198,23 @@ class MustacheContext extends Mustache.Context {
             let lambdaResult = context.emitLambdaResult(result);
             if (lambdaResult instanceof LambdaResultReference)
                 return lambdaResult.toMarkdown();
+            // If renderer returns a string, it's supposed to be Markdown output
+            // No Markdown escaping is done here.
             else return lambdaResult;
         };
+    }
+
+    lookupLambda(name: string) {
+        if (name.startsWith("$")) {
+            // If you want to call lambda, but its name collides with
+            // object key, you can alternatively put $ on the
+            // beginning
+            name = name.slice(1);
+        }
+        const lambda = this.renderContext.lambdas[name];
+        if (!lambda) return undefined;
+        if (lambda.lambdaType !== "renderer") return undefined;
+        return this.resolveRenderer(lambda);
     }
 
     lookupPipeline(pipeline: string) {
@@ -208,16 +223,28 @@ class MustacheContext extends Mustache.Context {
             .map((name) => name.trim());
         let result = this.lookupView(name);
         if (typeof result === "undefined") return undefined;
-        for (let lambdaName of lambdaNames) {
+        // Only transformers are accepted in the middle of the pipeline can only be transformers
+        for (let lambdaName of lambdaNames.slice(0, -1)) {
             const lambda = this.renderContext.lambdas[lambdaName];
             if (!lambda) return undefined;
-            result = lambda.call(this.view, result, {
-                callType: "pipeline",
+            if (lambda.lambdaType !== "transformer") return undefined;
+            result = lambda.func.call(this.view, result, {
                 context: this,
             });
             if (typeof result === "undefined") return undefined;
         }
-        return result;
+        // Then let's resolve last lambda depending on its time
+        const lambda =
+            this.renderContext.lambdas[lambdaNames[lambdaNames.length - 1]];
+        if (!lambda) return undefined;
+        if (lambda.lambdaType === "transformer") {
+            result = lambda.func.call(this.view, result, {
+                context: this,
+            });
+            return result;
+        } else {
+            return this.resolveRenderer(lambda, result);
+        }
     }
 
     lookupSearchable(name: string) {
@@ -261,6 +288,75 @@ class MustacheWriter extends Mustache.Writer {
     getConfigEscape() {
         // Override default (HTML) escape function
         return escapeMarkdown;
+    }
+
+    renderSection(
+        token: any,
+        context: MustacheContext,
+        partials: any,
+        originalTemplate: string,
+        config: any
+    ): any {
+        // https://github.com/janl/mustache.js/blob/972fd2b27a036888acfcb60d6119317744fac7ee/mustache.js#L585
+        let buffer = "";
+        let value = context.lookup(token[1]);
+
+        if (!value) return;
+
+        if (Array.isArray(value)) {
+            for (let j = 0, valueLength = value.length; j < valueLength; ++j) {
+                buffer += this.renderTokens(
+                    token[4],
+                    context.push(value[j]),
+                    partials,
+                    originalTemplate,
+                    config
+                );
+            }
+        } else if (
+            typeof value === "object" ||
+            typeof value === "string" ||
+            typeof value === "number"
+        ) {
+            buffer += this.renderTokens(
+                token[4],
+                context.push(value),
+                partials,
+                originalTemplate,
+                config
+            );
+        } else if (isFunction(value)) {
+            const self = this;
+            function subRender(template: string, view?: any): string {
+                if (typeof view === "undefined")
+                    return self.render(template, context, partials, config);
+                else
+                    return self.render(
+                        template,
+                        context.push(view),
+                        partials,
+                        config
+                    );
+            }
+
+            // Extract the portion of the original template that the section contains.
+            value = value.call(
+                context.view,
+                originalTemplate.slice(token[3], token[5]),
+                subRender
+            );
+
+            if (value != null) buffer += value;
+        } else {
+            buffer += this.renderTokens(
+                token[4],
+                context,
+                partials,
+                originalTemplate,
+                config
+            );
+        }
+        return buffer;
     }
 
     escapedValue(token: string[], context: Context) {
@@ -327,7 +423,7 @@ const markedTokenizer = new MarkedTokenizer();
 
 type MarkedMustacheOptions = {
     searchEndpoint: string;
-    lambdas: { [name: string]: Function };
+    lambdas: LambdaSet;
     makeQuery: (path: string[], value: any) => string | undefined;
 };
 
@@ -375,7 +471,7 @@ export function renderValue(
     value: Object,
     options: RenderOptions
 ) {
-    const pluginLambdas = [
+    const pluginLambdas: LambdaSet[] = [
         builtinLambdas,
         ...fromPlugins("mustacheExtensions"),
     ];

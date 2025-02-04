@@ -6,64 +6,59 @@ import {
     faInfoCircle,
     faPlus,
     faMinus,
+    faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
+import {
+    lambdaRenderer,
+    LambdaRendererOptions,
+    LambdaSet,
+    lambdaTransformer,
+    LambdaTransformerOptions,
+} from "@mwdb-web/components/RichAttribute/lambdaTypes";
 
-export type LambdaSectionOptions = {
-    callType: "section";
-    renderer: (template: string) => any;
-    mustacheRenderer: (template: string) => string;
-    markdownRenderer: (markdown: string) => string;
-    context: any;
-};
-
-export type LambdaPipelineOptions = {
-    callType: "pipeline";
-    context: any;
-};
-
-export type LambdaFunction = (
-    this: object,
-    input: any,
-    options: LambdaSectionOptions | LambdaPipelineOptions
-) => any;
-
-function count(input: any[]): any {
+const count = lambdaTransformer(function (input: any[]): any {
     return input.length;
-}
+});
 
-function sort(input: any[]): any {
+const sort = lambdaTransformer(function (input: any[]): any {
     return input.sort((a, b) =>
         a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
     );
-}
+});
 
-function first(input: any[]): any {
+const first = lambdaTransformer(function (input: any[]): any {
     if (input.length > 0) {
         return [input[0]];
     } else {
         return [];
     }
-}
+});
 
-function last(input: any[]): any {
+const last = lambdaTransformer(function (input: any[]): any {
     if (input.length > 0) {
         return [input[input.length - 1]];
     } else {
         return [];
     }
-}
+});
 
-function renderParam(input: any, options: LambdaSectionOptions): any {
+function renderParam(input: any, options: LambdaRendererOptions): any {
     // Renders section that is meant to be a parameter for another lambda.
     return options.mustacheRenderer(input).trim();
 }
 
-function groupBy(key: any, options: LambdaSectionOptions): any {
+const groupBy = lambdaRenderer(function (
+    key: any,
+    options: LambdaRendererOptions
+): any {
     options.context.lambdaContext["groupBy"] = renderParam(key, options);
     return "";
-}
+});
 
-function group(input: any[], options: LambdaSectionOptions): any {
+const group = lambdaTransformer(function (
+    input: any[],
+    options: LambdaTransformerOptions
+): any {
     const groupBy = options.context.lambdaContext["groupBy"];
     let result: any = {};
     for (let item of input) {
@@ -74,49 +69,64 @@ function group(input: any[], options: LambdaSectionOptions): any {
         result[key].push(item);
     }
     return result;
-}
+});
 
-function keys(input: any): any {
+const keys = lambdaTransformer(function (input: any): any {
     return Object.keys(input);
-}
+});
 
-function values(input: any): any {
+const values = lambdaTransformer(function (input: any): any {
     return Object.values(input);
-}
+});
 
-function entries(input: any): any {
+const entries = lambdaTransformer(function (input: any): any {
     return Object.entries(input).map(([k, v]) => ({ key: k, value: v }));
-}
+});
 
-function jsonify(input: any[]): any {
+const jsonify = lambdaTransformer(function (input: any[]): any {
     return JSON.stringify(input);
-}
+});
 
-function _if(text: any, options: LambdaSectionOptions): any {
+const _if = lambdaRenderer(function (
+    text: any,
+    options: LambdaRendererOptions
+): any {
     /**
      * {{if}} clauses are useful if you want to render something conditionally
      * Simple sections work the same, but then value references are in nested
      * contexts
      */
     options.context.lambdaContext["if"] = !!renderParam(text, options);
-}
+});
 
-function _then(text: any, options: LambdaSectionOptions): any {
+const _then = lambdaRenderer(function (
+    text: any,
+    options: LambdaRendererOptions
+): any {
     if (options.context.lambdaContext["if"]) return options.renderer(text);
     else return "";
-}
+});
 
-function _else(text: any, options: LambdaSectionOptions): any {
+const _else = lambdaRenderer(function (
+    text: any,
+    options: LambdaRendererOptions
+): any {
     if (!options.context.lambdaContext["if"]) return options.renderer(text);
     else return "";
-}
+});
 
-function sectionHeader(header: any, options: LambdaSectionOptions): any {
+const sectionHeader = lambdaRenderer(function (
+    header: any,
+    options: LambdaRendererOptions
+): any {
     options.context.lambdaContext["sectionHeader"] = options.renderer(header);
     return "";
-}
+});
 
-function section(text: any, options: LambdaSectionOptions): any {
+const section = lambdaRenderer(function (
+    text: any,
+    options: LambdaRendererOptions
+): any {
     return (
         <>
             <div className="py-2 pl-4 bg-light">
@@ -125,15 +135,21 @@ function section(text: any, options: LambdaSectionOptions): any {
             {options.renderer(text)}
         </>
     );
-}
+});
 
-function collapseHeader(header: any, options: LambdaSectionOptions): any {
+const collapseHeader = lambdaRenderer(function (
+    header: any,
+    options: LambdaRendererOptions
+): any {
     options.context.lambdaContext["collapseHeader"] =
         options.mustacheRenderer(header);
     return "";
-}
+});
 
-function collapse(text: any, options: LambdaSectionOptions): any {
+const collapse = lambdaRenderer(function (
+    text: any,
+    options: LambdaRendererOptions
+): any {
     // We need to return a component here to be rendered by MarkdownRenderer
     const header = options.context.lambdaContext["collapseHeader"];
     return () => {
@@ -155,20 +171,23 @@ function collapse(text: any, options: LambdaSectionOptions): any {
             </>
         );
     };
-}
+});
 
-function indicatorType(
+const indicatorType = lambdaRenderer(function (
     this: any,
     value: any,
-    options: LambdaSectionOptions
+    options: LambdaRendererOptions
 ): any {
     options.context.lambdaContext["indicatorType"] = renderParam(
         value,
         options
     );
-}
+});
 
-function indicator(text: any, options: LambdaSectionOptions): any {
+const indicator = lambdaRenderer(function (
+    text: any,
+    options: LambdaRendererOptions
+): any {
     const indicatorType = options.context.lambdaContext["indicatorType"];
     let icon = [];
     if (indicatorType == "success") {
@@ -196,9 +215,38 @@ function indicator(text: any, options: LambdaSectionOptions): any {
             {icon} {options.renderer(text)}
         </div>
     );
-}
+});
 
-export const builtinLambdas = {
+const paginatedList = lambdaRenderer(function (
+    text: any,
+    options: LambdaRendererOptions
+) {
+    return () => {
+        const [limit, setLimit] = useState(5);
+        if (!Array.isArray(this)) return [];
+        const elements = this.slice(0, limit).map((element, index) => {
+            return (
+                <li key={"element-" + index}>
+                    {options.renderer(text, element)}
+                </li>
+            );
+        });
+        if (limit < this.length) {
+            elements.push(
+                <div
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setLimit((limit) => limit + 10)}
+                >
+                    <FontAwesomeIcon icon={faChevronDown} /> More (
+                    {this.length - limit} elements)
+                </div>
+            );
+        }
+        return <ul>{elements}</ul>;
+    };
+});
+
+export const builtinLambdas: LambdaSet = {
     count,
     sort,
     first,
@@ -218,4 +266,5 @@ export const builtinLambdas = {
     if: _if,
     then: _then,
     else: _else,
+    paginatedList: paginatedList,
 };

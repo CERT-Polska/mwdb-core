@@ -322,7 +322,7 @@ keys
 
 Transforms dictionary into an array of keys. 
 
-If we use further transform object from ``group`` example and apply it to the following template:
+If we apply the object from ``group`` example to the following template:
 
 .. code-block:: mustache
 
@@ -343,7 +343,7 @@ values
 
 Transforms dictionary into an array of values. 
 
-If we use further transform object from ``group`` example and apply it to the following template:
+If we apply the object from ``group`` example to the following template:
 
 .. code-block:: mustache
 
@@ -364,7 +364,7 @@ Mustache will render:
 entries
 ^^^^^^^
 
-Transforms dictionary into an array of ``{"key": <key>, "value": <value>}`` objects. If we use further transform object from ``group`` example and apply it to the following template:
+Transforms dictionary into an array of ``{"key": <key>, "value": <value>}`` objects. If we apply the object from ``group`` example to the following template:
 
 .. code-block:: mustache
 

@@ -217,32 +217,48 @@ const indicator = lambdaRenderer(function (
     );
 });
 
-const paginatedList = lambdaRenderer(function (
+const paginatedHeader = lambdaRenderer(function (
     text: any,
     options: LambdaRendererOptions
 ) {
+    // TODO: This removes also indentation that may be necessary
+    options.context.lambdaContext["paginatedHeader"] = options
+        .mustacheRenderer(text)
+        .trim();
+    return "";
+});
+
+const paginated = lambdaRenderer(function (
+    text: any,
+    options: LambdaRendererOptions
+) {
+    const header = options.context.lambdaContext["paginatedHeader"];
     return () => {
         const [limit, setLimit] = useState(5);
+
         if (!Array.isArray(this)) return [];
-        const elements = this.slice(0, limit).map((element, index) => {
-            return (
-                <li key={"element-" + index}>
-                    {options.renderer(text, element)}
-                </li>
-            );
+        const elements = this.slice(0, limit).map((element) => {
+            // TODO: This removes also indentation that may be necessary
+            return options.mustacheRenderer(text, element).trim();
         });
-        if (limit < this.length) {
-            elements.push(
+        const partialElement = options.markdownRenderer(
+            (header ? header + "\n" : "") + elements.join("\n")
+        );
+        return [
+            partialElement,
+            limit < this.length ? (
                 <div
+                    className="ml-4"
                     style={{ cursor: "pointer" }}
                     onClick={() => setLimit((limit) => limit + 10)}
                 >
-                    <FontAwesomeIcon icon={faChevronDown} /> More (
-                    {this.length - limit} elements)
+                    <FontAwesomeIcon icon={faChevronDown} className="mx-2" />
+                    More ({this.length - limit})
                 </div>
-            );
-        }
-        return <ul>{elements}</ul>;
+            ) : (
+                []
+            ),
+        ];
     };
 });
 
@@ -266,5 +282,6 @@ export const builtinLambdas: LambdaSet = {
     if: _if,
     then: _then,
     else: _else,
-    paginatedList: paginatedList,
+    "paginated.header": paginatedHeader,
+    paginated: paginated,
 };

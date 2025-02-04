@@ -127,7 +127,7 @@ They are simple functions that may be called on an attribute or a part of a temp
 Transformers
 ~~~~~~~~~~~~
 
-Transformer gets attribute as an argument and returns transformed value of that attribute. To call the transformer, we use a pipeline operator (|) within a mustache tag
+Transformer gets attribute as an argument and returns transformed value of that attribute. To call the transformer, we use a pipeline operator ``|`` within a mustache tag.
 
 Built-in transformers:
 
@@ -136,13 +136,13 @@ count
 
 Returns the number of elements in an array.
 
-Template:
+**Template:**
 
 .. code-block:: mustache
 
     {{value.items|count}}
 
-Object:
+**Object:**
 
 .. code-block:: json
 
@@ -152,7 +152,7 @@ Object:
         }
     }
 
-Render:
+**Render:**
 
 .. code-block:: text
 
@@ -161,9 +161,9 @@ Render:
 sort
 ^^^^^
 
-Sorts elements lexicographically in an array
+Sorts elements lexicographically in an array.
 
-Template:
+**Template:**
 
 .. code-block:: mustache
 
@@ -171,7 +171,7 @@ Template:
     - {{.}}
     {{/value.items|sort}}
 
-Object:
+**Object:**
 
 .. code-block:: json
 
@@ -181,7 +181,7 @@ Object:
         }
     }
 
-Render:
+**Render:**
 
 .. code-block:: text
 
@@ -193,9 +193,9 @@ Render:
 first
 ^^^^^
 
-Returns an array with only first element e.g. ``[1,2,3]`` is transformed into ``[1]``
+Returns an array with only the first element, e.g. ``[1,2,3]`` is transformed into ``[1]``.
 
-Template:
+**Template:**
 
 .. code-block:: mustache
 
@@ -203,7 +203,7 @@ Template:
     - {{.}}
     {{/value.items|first}}
 
-Object:
+**Object:**
 
 .. code-block:: json
 
@@ -213,7 +213,7 @@ Object:
         }
     }
 
-Render:
+**Render:**
 
 .. code-block:: text
 
@@ -222,9 +222,9 @@ Render:
 last
 ^^^^^
 
-Returns an array with only last element e.g. ``[1,2,3]`` is transformed into ``[3]``
+Returns an array with only the last element, e.g. ``[1,2,3]`` is transformed into ``[3]``.
 
-Template:
+**Template:**
 
 .. code-block:: mustache
 
@@ -232,7 +232,7 @@ Template:
     - {{.}}
     {{/value.items|last}}
 
-Object:
+**Object:**
 
 .. code-block:: json
 
@@ -242,7 +242,7 @@ Object:
         }
     }
 
-Render:
+**Render:**
 
 .. code-block:: text
 
@@ -251,9 +251,9 @@ Render:
 group
 ^^^^^
 
-This parametrized transformer takes an array of dictionaries and aggregates them using provided key.
+This parametrized transformer takes an array of dictionaries as input and aggregates them using a provided key.
 
-e.g. if we have attribute value like one provided below:
+For example, if we have an attribute value like the one provided below:
 
 .. code-block:: json
 
@@ -287,7 +287,7 @@ and we use this template:
     - {{.|jsonify}}
     {{/value.imports|group}}
 
-``group`` will transform ``imports`` array into form:
+``group`` will transform ``imports`` array into a form:
 
 .. code-block:: json
 
@@ -315,12 +315,14 @@ and we use this template:
    }
 
 This form isn't directly usable as we don't have a good way in Mustache to iterate over dictionaries, but
-we can transform it back to array using ``keys``, ``values`` or ``entries``.
+we can transform it back to an array using ``keys``, ``values`` or ``entries``.
 
 keys
 ^^^^
 
-Transforms dictionary into array of keys. If we use further transform object from ``group`` example and apply it to the following template:
+Transforms dictionary into an array of keys. 
+
+If we use further transform object from ``group`` example and apply it to the following template:
 
 .. code-block:: mustache
 
@@ -339,7 +341,9 @@ Mustache will render:
 values
 ^^^^^^
 
-Transforms dictionary into array of values. If we use further transform object from ``group`` example and apply it to the following template:
+Transforms dictionary into an array of values. 
+
+If we use further transform object from ``group`` example and apply it to the following template:
 
 .. code-block:: mustache
 
@@ -360,7 +364,7 @@ Mustache will render:
 entries
 ^^^^^^^
 
-Transforms dictionary into array of ``{"key": <key>, "value": <value>}`` objects. If we use further transform object from ``group`` example and apply it to the following template:
+Transforms dictionary into an array of ``{"key": <key>, "value": <value>}`` objects. If we use further transform object from ``group`` example and apply it to the following template:
 
 .. code-block:: mustache
 
@@ -386,8 +390,8 @@ Mustache will render:
 jsonify
 ^^^^^^^
 
-Simply passes object to ``JSON.stringify`` and produces JSON representation of an object. This transformer is useful
-especially for debugging your templates if you're not sure what keys are available in current view.
+Simply passes an object to ``JSON.stringify`` and produces JSON representation of an object. This transformer is useful
+especially for debugging your templates if you're not sure what keys are available in the current view.
 
 Renderers
 ~~~~~~~~~
@@ -397,10 +401,10 @@ These are usually a special sections that allows you to conditionally render a s
 if-then-else
 ^^^^^^^^^^^^
 
-Mustache is logicless template language and if we want to render something conditionally, usually sections ``{{#name}}{{/name}}`` and
-inverted sections ``{{^name}}{{/name}}`` are the elements of choice. Unfortunately, sections themselves are pretty limited:
+Mustache is a logicless template language and if we want to render something conditionally, sections ``{{#name}}{{/name}}`` and
+inverted sections ``{{^name}}{{/name}}`` are usually the elements of choice. Unfortunately, sections themselves are pretty limited:
 
-- sections can be used for conditional rendering, but if you pass an array, it will be rendered n times for each element
+- sections can be used for conditional rendering, but if you pass an array, it will be rendered *n* times for each element
 - sections are moving scope into the object, so you can't refer anymore to outer attributes
 
 That's why MWDB provides a lambda that allows you to build a conditional clause:
@@ -419,16 +423,18 @@ That's why MWDB provides a lambda that allows you to build a conditional clause:
     {{#else}}
     {{/else}}
 
-If ``{{#if}}`` sections renders into anything that is non-empty and not a "0", subsequent ``{{#then}}` section is rendered.
+If ``{{#if}}`` section renders into anything that is non-empty and not a "0", subsequent ``{{#then}}` section is rendered.
 ``{{#else}}`` section is rendered otherwise.
 
 section
 ^^^^^^^
 
-This widget allows you to render a nicely looking section with header and body.
+This widget allows you to render a nicely looking section with a header and a body.
 
-``{{#section.header}}` is a section that is rendered within a header
-``{{#section}}`` is an actual body of a section
+``{{#section.header}}`` is a section that is rendered within a header.
+``{{#section}}`` is an actual body of a section.
+
+A code example:
 
 .. code-block:: mustache
 
@@ -457,10 +463,12 @@ which renders to:
 collapse
 ^^^^^^^^
 
-Renders a collapsible element
+Renders a collapsible element.
 
-``{{#collapse.header}}` represents a collapsible element header
-``{{#collapse}}`` is an actual body of a collapsible element
+``{{#collapse.header}}`` represents a collapsible element header.
+``{{#collapse}}`` is an actual body of a collapsible element.
+
+A code example:
 
 .. code-block:: mustache
 
@@ -482,7 +490,15 @@ which renders to:
 indicator
 ^^^^^^^^^
 
-Renders an indicator. There are four possible types: success, warning, danger or info (default).
+Renders an indicator. There are four possible types: 
+
+- success, 
+- warning, 
+- danger, 
+- info (the default).
+
+A code example:
+
 
 .. code-block::
 
@@ -507,7 +523,7 @@ which renders to:
 Extensibility using plugins
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Frontend plugins are able to provide own set of lambdas using ``mustacheExtensions`` extension point.
+Frontend plugins can provide own set of lambdas using ``mustacheExtensions`` extension point.
 
 See the code of ``@mwdb-web/components/RichAttribute/builtinLambdas`` and ``@mwdb-web/components/RichAttribute/MarkedMustache`` for details.
 
@@ -517,7 +533,7 @@ Other features
 Interactive search links
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-There is special ``@`` markup that allows you to easily generate an interactive search link for an attribute.
+There is a special ``@`` markup that allows you to easily generate an interactive search link for an attribute.
 
 .. code-block::
 
@@ -532,9 +548,9 @@ There is special ``@`` markup that allows you to easily generate an interactive 
    :target: ./_static/rich-template-searchables.png
    :alt: Searchable element
 
-These usually work well for untransformed and simple templates so we can track the object path in Mustache context.
+These usually work well for untransformed and simple templates so we can track the object path in the Mustache context.
 
-It may not work if you apply a lambda. In that case, you can use a Markdown syntax for links with `search#` URI to generate query link directly.
+It may not work if you apply a lambda. In that case, you can use a Markdown syntax for links with ``search#`` URI to generate query link directly.
 
 .. code-block::
 

@@ -217,14 +217,22 @@ const indicator = lambdaRenderer(function (
     );
 });
 
+function indentedTrim(text: string) {
+    let trimmed = "";
+    for (let line of text.split(/\r?\n/)) {
+        if (!trimmed && !line.trim()) continue;
+        trimmed += line + "\n";
+    }
+    return trimmed.trimEnd();
+}
+
 const paginatedHeader = lambdaRenderer(function (
     text: any,
     options: LambdaRendererOptions
 ) {
-    // TODO: This removes also indentation that may be necessary
-    options.context.lambdaContext["paginatedHeader"] = options
-        .mustacheRenderer(text)
-        .trim();
+    options.context.lambdaContext["paginatedHeader"] = indentedTrim(
+        options.mustacheRenderer(text)
+    );
     return "";
 });
 
@@ -238,8 +246,7 @@ const paginated = lambdaRenderer(function (
 
         if (!Array.isArray(this)) return [];
         const elements = this.slice(0, limit).map((element) => {
-            // TODO: This removes also indentation that may be necessary
-            return options.mustacheRenderer(text, element).trim();
+            return indentedTrim(options.mustacheRenderer(text, element));
         });
         const partialElement = options.markdownRenderer(
             (header ? header + "\n" : "") + elements.join("\n")

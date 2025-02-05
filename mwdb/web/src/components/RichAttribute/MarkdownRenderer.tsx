@@ -35,16 +35,20 @@ export type Token = {
     rows?: Token[][];
 };
 
-export type Option = {
+export type MarkdownRendererOptions = {
     searchEndpoint: string;
+    lambdaResults?: { [id: string]: any };
 };
 
 // Custom renderer into React components
-export function renderTokens(tokens: Token[], options?: Option): any {
+export function markdownRenderer(
+    tokens: Token[],
+    options: MarkdownRendererOptions
+): any {
     const renderers = {
         text(token: Token) {
             return token.tokens
-                ? renderTokens(token.tokens, options)
+                ? markdownRenderer(token.tokens, options)
                 : token.text ?? "";
         },
         escape(token: Token) {
@@ -53,21 +57,21 @@ export function renderTokens(tokens: Token[], options?: Option): any {
         strong(token: Token) {
             return (
                 <strong key={uniqueId()}>
-                    {renderTokens(token.tokens ?? [], options)}
+                    {markdownRenderer(token.tokens ?? [], options)}
                 </strong>
             );
         },
         em(token: Token) {
             return (
                 <em key={uniqueId()}>
-                    {renderTokens(token.tokens ?? [], options)}
+                    {markdownRenderer(token.tokens ?? [], options)}
                 </em>
             );
         },
         del(token: Token) {
             return (
                 <del key={uniqueId()}>
-                    {renderTokens(token.tokens ?? [], options)}
+                    {markdownRenderer(token.tokens ?? [], options)}
                 </del>
             );
         },
@@ -77,40 +81,52 @@ export function renderTokens(tokens: Token[], options?: Option): any {
         blockquote(token: Token) {
             return (
                 <blockquote key={uniqueId()} className="blockquote">
-                    {renderTokens(token.tokens ?? [], options)}
+                    {markdownRenderer(token.tokens ?? [], options)}
                 </blockquote>
             );
         },
         paragraph(token: Token) {
             return (
                 <p key={uniqueId()} style={{ margin: "0" }}>
-                    {renderTokens(token.tokens ?? [], options)}
+                    {markdownRenderer(token.tokens ?? [], options)}
                 </p>
             );
         },
         link(token: Token) {
-            if (token.href && token.href.startsWith("search#")) {
-                const query = token.href.slice("search#".length);
-                const search =
-                    "?" +
-                    new URLSearchParams({
-                        q: decodeURIComponent(query),
-                    }).toString();
-                return (
-                    <Link
-                        key={uniqueId()}
-                        to={{
-                            pathname: options?.searchEndpoint,
-                            search,
-                        }}
-                    >
-                        {renderTokens(token.tokens ?? [], options)}
-                    </Link>
-                );
+            if (token.href) {
+                if (token.href.startsWith("search#")) {
+                    const query = token.href.slice("search#".length);
+                    const search =
+                        "?" +
+                        new URLSearchParams({
+                            q: decodeURIComponent(query),
+                        }).toString();
+                    return (
+                        <Link
+                            key={uniqueId()}
+                            to={{
+                                pathname: options?.searchEndpoint,
+                                search,
+                            }}
+                        >
+                            {markdownRenderer(token.tokens ?? [], options)}
+                        </Link>
+                    );
+                } else if (token.href.startsWith("lambda#")) {
+                    const id = token.href.slice("lambda#".length);
+                    if (!options.lambdaResults?.hasOwnProperty(id)) {
+                        return <i>{`(BUG: No lambda result for ${id})`}</i>;
+                    }
+                    const result = options.lambdaResults[id];
+                    if (typeof result === "function") {
+                        const Component = result;
+                        return <Component />;
+                    } else return result;
+                }
             }
             return (
                 <a key={uniqueId()} href={token.href}>
-                    {renderTokens(token.tokens ?? [], options)}
+                    {markdownRenderer(token.tokens ?? [], options)}
                 </a>
             );
         },
@@ -118,7 +134,7 @@ export function renderTokens(tokens: Token[], options?: Option): any {
             return (
                 <ul key={uniqueId()} style={{ margin: "0" }}>
                     {token.items?.map((item: Token) =>
-                        renderTokens([item], options)
+                        markdownRenderer([item], options)
                     )}
                 </ul>
             );
@@ -126,7 +142,7 @@ export function renderTokens(tokens: Token[], options?: Option): any {
         list_item(token: Token) {
             return (
                 <li key={uniqueId()}>
-                    {renderTokens(token.tokens ?? [], options)}
+                    {markdownRenderer(token.tokens ?? [], options)}
                 </li>
             );
         },
@@ -144,7 +160,10 @@ export function renderTokens(tokens: Token[], options?: Option): any {
                         >
                             {token.header?.map((head: Token, index: number) => (
                                 <div className={tableClasses.cell} key={index}>
-                                    {renderTokens(head.tokens ?? [], options)}
+                                    {markdownRenderer(
+                                        head.tokens ?? [],
+                                        options
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -155,7 +174,7 @@ export function renderTokens(tokens: Token[], options?: Option): any {
                                         key={cellIndex}
                                         className={tableClasses.cell}
                                     >
-                                        {renderTokens(
+                                        {markdownRenderer(
                                             cell.tokens ?? [],
                                             options
                                         )}

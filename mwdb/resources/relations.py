@@ -54,7 +54,14 @@ class RelationsResource(Resource):
             raise NotFound("Object not found")
 
         relations = RelationsResponseSchema()
-        return relations.dump(db_object)
+        parents = db_object.get_limited_parents_per_type()
+        children = db_object.get_limited_children_per_type()
+        return relations.dump(
+            {
+                "parents": parents,
+                "children": children,
+            }
+        )
 
 
 class ObjectChildResource(Resource):

@@ -17,10 +17,18 @@ import {
     ConfirmationModal,
     TagList,
 } from "@mwdb-web/commons/ui";
-import { getErrorMessage } from "@mwdb-web/commons/helpers";
+import {
+    getErrorMessage,
+    makeSearchLink,
+    mapObjectTypeToSearchPath,
+} from "@mwdb-web/commons/helpers";
 import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { RelationsAddModal } from "../Actions/RelationsAddModal";
-import { Capability, RelationItem } from "@mwdb-web/types/types";
+import {
+    Capability,
+    ObjectLegacyType,
+    RelationItem,
+} from "@mwdb-web/types/types";
 
 type RelationToRemove = {
     relation: "parent" | "child";
@@ -32,6 +40,9 @@ type Props = {
     parents?: RelationItem[];
     header?: string;
     icon?: IconDefinition;
+    parentsCount?: number;
+    childrenCount?: number;
+    elementType?: ObjectLegacyType;
     updateRelationsActivePage?: () => void;
 };
 
@@ -191,11 +202,56 @@ export function RelationsBox(props: Props) {
             </td>
         </tr>
     ));
+
+    let header;
+    let elementCount = (props.parentsCount || 0) + (props.childrenCount || 0);
+    if (!props.header) {
+        header = "Relations";
+    } else {
+        if (props.parentsCount && props.parentsCount >= 100) {
+            let queryLink = makeSearchLink({
+                field: "child",
+                value: `(dhash:${context.object?.id})`,
+                noEscape: true,
+                pathname: mapObjectTypeToSearchPath(
+                    props.elementType || "file"
+                ),
+            });
+            header = (
+                <>
+                    {props.header}: {elementCount}+ (
+                    <Link to={queryLink}>query all parents</Link>)
+                </>
+            );
+        } else if (props.childrenCount && props.childrenCount >= 100) {
+            let queryLink = makeSearchLink({
+                field: "parent",
+                value: `(dhash:${context.object?.id})`,
+                noEscape: true,
+                pathname: mapObjectTypeToSearchPath(
+                    props.elementType || "file"
+                ),
+            });
+            header = (
+                <>
+                    {props.header}: {elementCount}+ (
+                    <Link to={queryLink}>query all children</Link>)
+                </>
+            );
+        } else {
+            header = (
+                <>
+                    {props.header}: {elementCount}
+                </>
+            );
+        }
+    }
+
     return (
         <div className="card card-default">
             <div className="card-header">
                 {props.icon && <FontAwesomeIcon icon={props.icon} size="1x" />}
-                {props.header || "Relations"}
+                {header}
                 {!api.remote ? (
                     <Link
                         to="#"

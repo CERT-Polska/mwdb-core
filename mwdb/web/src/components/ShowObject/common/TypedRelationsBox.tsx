@@ -66,7 +66,10 @@ export function TypedRelationsBox(props: Props) {
         return (
             <div>
                 <RelationsBox
-                    header={`${props.header}: ${typedRelationsCount}`}
+                    header={props.header}
+                    parentsCount={parentsFiltered.length}
+                    childrenCount={childrenFiltered.length}
+                    elementType={props.type}
                     icon={props.icon}
                     updateRelationsActivePage={() =>
                         updateActivePage(

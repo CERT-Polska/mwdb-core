@@ -158,7 +158,9 @@ class Object(db.Model):
     @classmethod
     def _get_object_types(cls):
         mapper = cls.__mapper__
-        return mapper.polymorphic_map.keys() - {mapper.polymorphic_identity}
+        return mapper.polymorphic_map.keys() - {
+            Object.__mapper_args__["polymorphic_identity"]
+        }
 
     def _get_relations_limited_per_type(self, relation_query, limit_each):
         object_type_names = [(object_type,) for object_type in self._get_object_types()]

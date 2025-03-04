@@ -1,4 +1,4 @@
-import { GenericOrJSX } from "@mwdb-web/types/types";
+import { GenericOrJSX, ObjectLegacyType } from "@mwdb-web/types/types";
 
 export { downloadData } from "./download";
 export * from "./search";
@@ -44,6 +44,18 @@ export function mapObjectType(objectType: string): string {
             file: "file",
             static_config: "config",
             text_blob: "blob",
+        }[objectType] || objectType
+    );
+}
+
+export function mapObjectTypeToSearchPath(
+    objectType: ObjectLegacyType
+): string {
+    return (
+        {
+            file: "/",
+            static_config: "/configs",
+            text_blob: "/blobs",
         }[objectType] || objectType
     );
 }

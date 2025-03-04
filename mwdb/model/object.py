@@ -4,11 +4,12 @@ from typing import Any, Dict, Optional
 from uuid import UUID
 
 from flask import g
-from sqlalchemy import and_, cast, distinct, exists, func, select
+from sqlalchemy import and_, cast, distinct, exists, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import column_property
-from sqlalchemy.sql.expression import true
+from sqlalchemy.sql.expression import column, select, true, values
+from sqlalchemy.sql.sqltypes import String
 
 from mwdb.core.capabilities import Capabilities
 
@@ -17,6 +18,8 @@ from .attribute import Attribute, AttributeDefinition, AttributePermission
 from .karton import KartonAnalysis, karton_object
 from .object_permission import AccessType, ObjectPermission
 from .tag import Tag
+
+RELATIONS_VIEW_LIMIT_PER_TYPE = 100
 
 relation = db.Table(
     "relation",
@@ -152,8 +155,31 @@ class Object(db.Model):
     def favorite(self):
         return g.auth_user in self.followers
 
-    @property
-    def accessible_parents(self):
+    @classmethod
+    def _get_object_types(cls):
+        mapper = cls.__mapper__
+        return mapper.polymorphic_map.keys() - {
+            Object.__mapper_args__["polymorphic_identity"]
+        }
+
+    def _get_relations_limited_per_type(self, relation_query, limit_each):
+        object_type_names = [(object_type,) for object_type in self._get_object_types()]
+        object_types = values(column("object_type", String), name="object_types").data(
+            object_type_names
+        )
+        relations = db.aliased(
+            Object,
+            (
+                relation_query.filter(Object.type == object_types.c.object_type)
+                .limit(limit_each)
+                .subquery()
+                .lateral()
+            ),
+        )
+        entries = db.session.query(object_types, relations).join(relations, true).all()
+        return [related_object for _, related_object in entries]
+
+    def get_parents_subquery(self):
         """
         Parent objects that are accessible for current user
         """
@@ -163,6 +189,35 @@ class Object(db.Model):
             .filter(relation.c.child_id == self.id)
             .order_by(relation.c.creation_time.desc())
             .filter(g.auth_user.has_access_to_object(Object.id))
+        )
+
+    def get_children_subquery(self):
+        """
+        Child objects that are accessible for current user
+        """
+        return (
+            db.session.query(Object)
+            .join(relation, relation.c.child_id == Object.id)
+            .filter(relation.c.parent_id == self.id)
+            .order_by(relation.c.creation_time.desc())
+            .filter(g.auth_user.has_access_to_object(Object.id))
+        )
+
+    def get_limited_parents_per_type(self, limit_each=RELATIONS_VIEW_LIMIT_PER_TYPE):
+        """
+        Parent objects that are directly loaded for API.
+        Query loads only *limit_each* number of relations for each object type.
+        """
+        return self._get_relations_limited_per_type(
+            self.get_parents_subquery(), limit_each
+        )
+
+    def get_limited_children_per_type(self, limit_each=RELATIONS_VIEW_LIMIT_PER_TYPE):
+        """
+        Parent objects that are accessible for current user
+        """
+        return self._get_relations_limited_per_type(
+            self.get_children_subquery(), limit_each
         )
 
     def add_parent(self, parent, commit=True):

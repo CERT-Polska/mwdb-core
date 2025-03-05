@@ -142,6 +142,9 @@ class MWDBConfig(Config):
     enable_debug_log = key(cast=intbool, required=False, default=False)
     enable_brownout = key(cast=intbool, required=False, default=False)
 
+    log_level = key(cast=str, required=False, default=None)
+    log_config_file = key(cast=path, required=False, default=None)
+
 
 @section("karton")
 class KartonConfig(Config):

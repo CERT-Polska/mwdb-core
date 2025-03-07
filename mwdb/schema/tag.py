@@ -19,6 +19,7 @@ class TagSchemaBase(Schema):
 
 class TagListRequestSchema(Schema):
     query = fields.Str(missing="")
+    count = fields.Int()
 
 
 class TagRequestSchema(TagSchemaBase):

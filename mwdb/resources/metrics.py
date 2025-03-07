@@ -1,4 +1,5 @@
 from flask import Response
+from prometheus_client import CONTENT_TYPE_LATEST
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.metrics import collect
@@ -32,5 +33,5 @@ class MetricsResource(Resource):
         metrics = collect()
         return Response(
             metrics,
-            content_type="application/octet-stream",
+            content_type=CONTENT_TYPE_LATEST,
         )

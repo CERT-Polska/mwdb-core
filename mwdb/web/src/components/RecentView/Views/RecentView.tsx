@@ -37,15 +37,18 @@ export function RecentView(props: Props) {
             // Optionally convert query if only hash or hashes were provided
             query = multiFromHashes(query);
             // Set query in URL (currentQuery, countingEnabled)
-            setSearchParams((prev) => {
-                if (query === prev.get("query"))
-                    throw new Error("Tried to set the same query twice");
-                return {
-                    ...Object.fromEntries(prev.entries()),
-                    q: query,
-                    count: prev.get("count") === "1" ? "1" : "0",
-                };
-            });
+            setSearchParams(
+                (prev) => {
+                    if (query === prev.get("query"))
+                        throw new Error("Tried to set the same query twice");
+                    return {
+                        ...Object.fromEntries(prev.entries()),
+                        q: query,
+                        count: prev.get("count") === "1" ? "1" : "0",
+                    };
+                },
+                { replace: true }
+            );
         },
         [setSearchParams]
     );

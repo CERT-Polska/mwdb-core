@@ -17,6 +17,7 @@ logger = getLogger()
 
 _plugin_handlers = []
 loaded_plugins = {}
+openid_provider_classes = {}
 
 
 class PluginAppContext(object):
@@ -32,6 +33,10 @@ class PluginAppContext(object):
 
     def register_schema_spec(self, schema_name, schema):
         api.spec.components.schema(schema_name, schema=schema)
+
+    def register_openid_provider_class(self, provider_name, provider_class):
+        global openid_provider_classes
+        openid_provider_classes[provider_name] = provider_class
 
 
 def hook_handler_method(meth):

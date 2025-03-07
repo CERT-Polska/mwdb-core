@@ -7,6 +7,13 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
 
+v2.14.0
+-------
+
+This release is focused on minor improvements of performance and OpenID Connect features.
+
+Complete changelog can be found here: `v2.13.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.14.0>`_.
+
 v2.13.0
 -------
 

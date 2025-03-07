@@ -8,7 +8,7 @@ class Tag(db.Model):
     )
 
     id = db.Column(db.Integer, primary_key=True)
-    tag = db.Column(db.String, nullable=False, index=True)
+    tag = db.Column(db.String(collation="C"), nullable=False, index=True)
     object_id = db.Column(
         db.Integer,
         db.ForeignKey("object.id", ondelete="CASCADE"),

@@ -173,6 +173,10 @@ pre.attribute-object {
     color: red;
 }
 
+.md-p-inline > p {
+    display: inline-block;
+}
+
 /***
  User login CSS
  ***/
@@ -400,6 +404,16 @@ a.blob {
 
 .not-expanded-node > g.label:hover {
     transform: scale(1.1);
+}
+/* Relation graph */
+
+.dagre-d3 .tag {
+    max-width: 100%;
+}
+
+.dagre-d3 .tag span {
+    white-space: pre-wrap;
+    width: 100%;
 }
 
 /* react-modal css fix */

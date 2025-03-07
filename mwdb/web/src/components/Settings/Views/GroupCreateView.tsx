@@ -13,8 +13,8 @@ type FormValues = {
 const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
     name: Yup.string()
         .matches(
-            /[A-Za-z0-9_-]/,
-            "Group name must contain only letters, digits, '_' and '-' characters"
+            /[A-Za-z0-9_.-]/,
+            "Group name must contain only letters, digits, '_', '.' and '-' characters"
         )
         .max(32, "Max 32 characters allowed.")
         .required("Name is required"),

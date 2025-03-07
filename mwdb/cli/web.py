@@ -1,4 +1,5 @@
 import os
+import pathlib
 import shutil
 import subprocess
 import tempfile
@@ -20,27 +21,23 @@ def discover_web_plugins():
 
 
 def npm_build_web(target_dir):
-    config_paths = [
-        "./package.json",
-        "./package-lock.json",
-        "./config-overrides.js",
-        "./public",
-        "./src",
-    ]
+    paths_to_ignore = ["node_modules", ".gitignore"]
 
     with tempfile.TemporaryDirectory() as context_dirname:
         # Copy files to context directory
         logger.info("Creating build context...")
-        for path in config_paths:
-            src = os.path.join(web_package_dir, path)
-            dst = os.path.join(context_dirname, path)
-            if os.path.isfile(src):
-                shutil.copy(src, dst)
-            elif os.path.isdir(src):
-                shutil.copytree(src, dst)
+        dst = pathlib.Path(context_dirname)
+        for path in pathlib.Path(web_package_dir).iterdir():
+            if path.name in paths_to_ignore:
+                continue
+            if path.is_file():
+                shutil.copy(path, dst / path.name)
+            elif path.is_dir():
+                shutil.copytree(path, dst / path.name)
             else:
                 raise RuntimeError(
-                    "Critical error: expected file {} doesn't exist".format(path)
+                    f"Critical error: file {path} is not a regular file "
+                    "nor directory"
                 )
 
         # Run npm install for web core
@@ -66,5 +63,5 @@ def npm_build_web(target_dir):
             shutil.rmtree(target_dir)
 
         logger.info("Collecting artifacts to %s", target_dir)
-        shutil.move(os.path.join(context_dirname, "build"), target_dir)
+        shutil.move(os.path.join(context_dirname, "dist"), target_dir)
         logger.info("Web application built successfully!")

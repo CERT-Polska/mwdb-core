@@ -103,26 +103,25 @@ class ObjectItemResponseSchema(Schema):
     upload_time = UTCDateTime(required=True, allow_none=False)
     favorite = fields.Boolean(required=True, allow_none=False)
 
-    parents = fields.Nested(
-        ObjectListItemResponseSchema, many=True, required=True, allow_none=False
-    )
-    children = fields.Nested(
-        ObjectListItemResponseSchema, many=True, required=True, allow_none=False
-    )
-    attributes = fields.Nested(
-        AttributeItemResponseSchema, many=True, required=True, allow_none=False
-    )
+    parents = fields.Method(serialize="_get_parents")
+    children = fields.Method(serialize="_get_children")
+    attributes = fields.Method(serialize="_get_attributes")
     share_3rd_party = fields.Boolean(required=True, allow_none=False)
 
-    @post_dump(pass_original=True)
-    def get_accessible_attributes(self, data, object, **kwargs):
-        """
-        Replace all object attributes with attributes accessible for current user
-        """
+    def _get_parents(self, object):
+        object_parents = object.get_limited_parents_per_type()
+        schema = ObjectListItemResponseSchema()
+        return schema.dump(object_parents, many=True)
+
+    def _get_children(self, object):
+        object_children = object.get_limited_children_per_type()
+        schema = ObjectListItemResponseSchema()
+        return schema.dump(object_children, many=True)
+
+    def _get_attributes(self, object):
         object_attributes = object.get_attributes()
         schema = AttributeItemResponseSchema()
-        attributes_serialized = schema.dump(object_attributes, many=True)
-        return {**data, "attributes": attributes_serialized}
+        return schema.dump(object_attributes, many=True)
 
 
 class ObjectCountResponseSchema(Schema):

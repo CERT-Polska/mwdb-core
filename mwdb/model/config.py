@@ -11,8 +11,8 @@ from .object import Object
 
 
 class Config(Object):
-    family = db.Column(db.String(32), index=True)
-    config_type = db.Column(db.String(32), index=True)
+    family = db.Column(db.String(32, collation="C"), index=True)
+    config_type = db.Column(db.String(32, collation="C"), index=True)
     _cfg = db.Column("cfg", JSONB)
 
     __mapper_args__ = {

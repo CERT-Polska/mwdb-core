@@ -4,23 +4,28 @@ describe("Sample view test - mwdb-core", function () {
   it("Sample view test - existent and non-existent md5 and sha256 hashes", function () {
     requestLogin(Cypress.env("user"), Cypress.env("password"));
 
-    const fileName = "TEST";
-    const method = "POST";
-    const apiUrl = "/api/file";
-
-    const fileType = "text/plain";
 
     const addedFile = new Cypress.Promise((resolve) => {
+      const fileName = "TEST";
+      const method = "POST";
+      const apiUrl = "/api/file";
+
+      const fileType = "text/plain";
+
       cy.get("@token").then((token) => {
         cy.fixture(fileName).then((bin) => {
-          return Cypress.Blob.binaryStringToBlob(bin, fileType).then((blob) => {
-            const formData = new FormData();
-            formData.set("file", blob, fileName);
-
-            cy.formRequest(method, apiUrl, formData, token).then((response) => {
-              expect(response.status).to.eq(200);
-              resolve(response.response.body);
-            });
+          const blob = Cypress.Blob.binaryStringToBlob(bin, fileType);
+          const formData = new FormData();
+          formData.set("file", blob, fileName);
+          cy.request({
+              url: apiUrl,
+              method,
+              headers: {"Authorization": "Bearer " + token},
+              body: formData,
+          }).then((response) => {
+            expect(response.status).to.eq(200);
+            const bodyString = Cypress.Blob.arrayBufferToBinaryString(response.body);
+            resolve(JSON.parse(bodyString));
           });
         });
       });

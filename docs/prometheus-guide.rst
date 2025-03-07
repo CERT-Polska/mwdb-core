@@ -5,6 +5,10 @@ Prometheus metrics
 
 MWDB allows to enable Prometheus metrics to grab information about API usage by users.
 
+.. warning::
+
+    This feature requires Redis database to be configured.
+
 Available metrics:
 
 - ``mwdb_api_requests (method, endpoint, user, status_code)`` that tracks usage of specific endpoints by users and status codes.

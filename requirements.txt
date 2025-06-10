@@ -7,7 +7,7 @@ Flask-Migrate==4.0.7
 SQLAlchemy==1.4.54
 marshmallow==3.20.2
 psycopg2-binary==2.9.10
-requests==2.32.0
+requests==2.32.4
 apispec[marshmallow,yaml]==6.4.0
 bcrypt==4.2.1
 python-magic==0.4.18

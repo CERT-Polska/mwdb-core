@@ -16,7 +16,9 @@ export function AttributeRenderer({
     onRemoveAttribute,
 }: Props) {
     const [collapsed, setCollapsed] = useState<boolean>(true);
+    const [showRaw, setShowRaw] = useState<boolean>(false);
     const isCollapsible = attributes.length > 3;
+    const isRichRendered = attributeDefinition.rich_template !== "";
     const visibleAttributes = collapsed ? attributes.slice(0, 3) : attributes;
 
     return (
@@ -26,6 +28,9 @@ export function AttributeRenderer({
             onCollapse={(collapsed) => setCollapsed(collapsed)}
             collapsed={collapsed}
             collapsible={isCollapsible}
+            onShowRaw={(showRaw) => setShowRaw(showRaw)}
+            showRaw={showRaw}
+            isRichRendered={isRichRendered}
         >
             <>
                 {visibleAttributes.map((attribute: Attribute) => (
@@ -35,6 +40,7 @@ export function AttributeRenderer({
                         value={attribute.value}
                         attributeDefinition={attributeDefinition}
                         onRemove={onRemoveAttribute}
+                        showRaw={showRaw}
                     />
                 ))}
             </>

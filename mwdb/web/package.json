@@ -41,7 +41,7 @@
         "react-toastify": "^9.1.1",
         "readable-timestamp": "^0.2.0",
         "sha1": "^1.1.1",
-        "swagger-ui-react": "^5.20.0",
+        "swagger-ui-react": "^5.25.2",
         "typescript": "^5.0.4",
         "yup": "0.32.11"
     },
@@ -63,7 +63,7 @@
         "@types/react-js-pagination": "^3.0.4",
         "@types/react-modal": "^3.16.0",
         "@types/sha1": "^1.1.3",
-        "@types/swagger-ui-react": "^4.18.0",
+        "@types/swagger-ui-react": "^5.18.0",
         "@vitejs/plugin-react": "^4.5.2",
         "babel-jest": "^29.5.0",
         "dpdm": "^3.9.0",

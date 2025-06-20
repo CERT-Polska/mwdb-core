@@ -1,6 +1,7 @@
 """
 Utilities for marking deprecated features to monitor usage
 """
+
 from enum import Enum
 from functools import wraps
 from typing import Optional

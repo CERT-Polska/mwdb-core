@@ -41,7 +41,7 @@
         "react-toastify": "^9.1.1",
         "readable-timestamp": "^0.2.0",
         "sha1": "^1.1.1",
-        "swagger-ui-react": "^5.20.0",
+        "swagger-ui-react": "^5.25.2",
         "typescript": "^5.0.4",
         "yup": "0.32.11"
     },

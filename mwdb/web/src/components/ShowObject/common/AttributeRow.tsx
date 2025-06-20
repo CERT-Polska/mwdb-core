@@ -7,6 +7,9 @@ type Props = {
     collapsed: boolean;
     onCollapse: (val: boolean) => void;
     collapsible: boolean;
+    onShowRaw: (val: boolean) => void;
+    showRaw: boolean;
+    isRichRendered: boolean;
     children: JSX.Element;
 };
 
@@ -16,6 +19,9 @@ export function AttributeRow({
     collapsed,
     onCollapse,
     collapsible,
+    onShowRaw,
+    showRaw,
+    isRichRendered,
     children,
 }: Props) {
     return (
@@ -41,6 +47,23 @@ export function AttributeRow({
                 >
                     {attributeLabel || attributeKey}
                 </span>
+                {isRichRendered ? (
+                    <div
+                        style={{
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                            fontWeight: "normal",
+                        }}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            onShowRaw(!showRaw);
+                        }}
+                    >
+                        Show {showRaw ? "rendered" : "raw"}
+                    </div>
+                ) : (
+                    <></>
+                )}
             </th>
             <td className="flickerable">
                 {children}

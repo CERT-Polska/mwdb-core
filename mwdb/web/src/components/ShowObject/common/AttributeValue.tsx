@@ -15,6 +15,7 @@ type Props = {
         key: string;
     };
     onRemove?: (id: number) => void;
+    showRaw: boolean;
 };
 
 export function AttributeValue({
@@ -22,6 +23,7 @@ export function AttributeValue({
     attributeId,
     attributeDefinition,
     onRemove,
+    showRaw,
 }: Props) {
     const {
         url_template: urlTemplate,
@@ -33,7 +35,7 @@ export function AttributeValue({
     let valueRender: JSX.Element;
     let valueRaw: string;
 
-    if (richTemplate !== "") {
+    if (richTemplate !== "" && !showRaw) {
         valueRender = (
             <RichAttributeValue
                 attributeDefinition={attributeDefinition}

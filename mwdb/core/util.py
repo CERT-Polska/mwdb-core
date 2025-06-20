@@ -47,18 +47,18 @@ def traverse(obj, fn):
 def config_encode(obj):
     return traverse(
         obj,
-        lambda o: o.encode("unicode_escape").decode("utf-8")
-        if isinstance(o, str)
-        else o,
+        lambda o: (
+            o.encode("unicode_escape").decode("utf-8") if isinstance(o, str) else o
+        ),
     )
 
 
 def config_decode(obj):
     return traverse(
         obj,
-        lambda o: bytes(o, "utf-8").decode("unicode_escape")
-        if isinstance(o, str)
-        else o,
+        lambda o: (
+            bytes(o, "utf-8").decode("unicode_escape") if isinstance(o, str) else o
+        ),
     )
 
 

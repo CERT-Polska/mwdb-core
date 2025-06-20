@@ -22,7 +22,6 @@ openid_provider_classes = {}
 
 class PluginAppContext(object):
     def register_hook_handler(self, hook_handler_cls):
-        global _plugin_handlers
         _plugin_handlers.append(hook_handler_cls())
 
     def register_resource(self, resource, *urls, **kwargs):
@@ -35,7 +34,6 @@ class PluginAppContext(object):
         api.spec.components.schema(schema_name, schema=schema)
 
     def register_openid_provider_class(self, provider_name, provider_class):
-        global openid_provider_classes
         openid_provider_classes[provider_name] = provider_class
 
 
@@ -295,8 +293,6 @@ def get_plugin_info():
 
 
 def call_hook(hook_name, *args, **kwargs):
-    global _plugin_handlers
-
     if not hasattr(PluginHookBase, hook_name):
         logger.warning("Undefined hook: {}".format(hook_name))
         return

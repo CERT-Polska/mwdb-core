@@ -10,3 +10,11 @@ line_length = 88
 lint-version = "2"
 source = "mwdb/"
 use-mypy = false
+
+[tool.black]
+exclude = '''
+/(
+mwdb/web/.+ |
+mwdb/model/migrations/.+
+/)
+'''

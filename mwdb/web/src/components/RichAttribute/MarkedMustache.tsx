@@ -263,6 +263,8 @@ class MustacheContext extends Mustache.Context {
     }
 
     lookup(name: string) {
+        // Reset path before lookup
+        this.lastPath = this.parentPath.slice();
         // Check for searchable mark at the beginning
         if (name[0] === "@") {
             // Searchable field mark

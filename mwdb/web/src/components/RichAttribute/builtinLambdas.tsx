@@ -87,6 +87,10 @@ const jsonify = lambdaTransformer(function (input: any[]): any {
     return JSON.stringify(input);
 });
 
+const uriencode = lambdaTransformer(function (input: any): any {
+    return encodeURIComponent(input);
+});
+
 const _if = lambdaRenderer(function (
     text: any,
     options: LambdaRendererOptions
@@ -279,6 +283,7 @@ export const builtinLambdas: LambdaSet = {
     values,
     entries,
     jsonify,
+    uriencode,
     "group.by": groupBy,
     "section.header": sectionHeader,
     section: section,

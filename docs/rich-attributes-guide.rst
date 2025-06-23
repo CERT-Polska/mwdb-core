@@ -393,6 +393,11 @@ jsonify
 Simply passes an object to ``JSON.stringify`` and produces JSON representation of an object. This transformer is useful
 especially for debugging your templates if you're not sure what keys are available in the current view.
 
+uriencode
+^^^^^^^^^
+
+Passes value to ``encodeURIComponent``. This transformer is useful for encoding attribute value into clickable URI.
+
 Renderers
 ~~~~~~~~~
 
@@ -557,11 +562,11 @@ It may not work if you apply a lambda. In that case, you can use a Markdown synt
     {{#value}}
     - **{{dllname}}**
         {{#functions}}
-        - [{{.}}](search#attribute.test-attribute*.functions*:{{.|jsonify}})
+        - [{{.}}](search#attribute.test-attribute*.functions*:{{.|jsonify|uriencode}})
         {{/functions}}
     {{/value}}
 
-If you worry about proper escaping, ``jsonify`` is enough because your value will be properly encoded into final URI by Markdown renderer.
+If you worry about proper query escaping, ``jsonify`` and ``uriencode`` should be enough to encode your value into final URI by Markdown renderer.
 
 Known issues
 ------------

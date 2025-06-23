@@ -1,4 +1,5 @@
 import logging
+import logging.config
 
 from flask import g
 from pythonjsonlogger import jsonlogger
@@ -53,7 +54,21 @@ def setup_logger():
     handler.setFormatter(formatter)
     handler.addFilter(ContextFilter())
     logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG if app_config.mwdb.enable_debug_log else logging.INFO)
+
+    if app_config.mwdb.log_level is not None:
+        log_level_mapping = logging.getLevelNamesMapping()
+        log_level = log_level_mapping[app_config.mwdb.log_level.upper()]
+        logger.setLevel(log_level)
+    else:
+        logger.setLevel(
+            logging.DEBUG if app_config.mwdb.enable_debug_log else logging.INFO
+        )
+
+    if app_config.mwdb.log_config_file is not None:
+        logging.config.fileConfig(
+            app_config.mwdb.log_config_file,
+            disable_existing_loggers=False,
+        )
 
 
 def getLogger():

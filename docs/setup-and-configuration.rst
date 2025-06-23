@@ -342,6 +342,9 @@ Extra features:
 * ``enable_hooks`` (0 or 1) - enable plugin hooks
 * ``enable_oidc`` (0 or 1) - enable OIDC (experimental)
 * ``listing_endpoints_count_limit`` (integer) - Limits number of objects returned by listing endpoints. Default is ``1000``.
+* ``log_level`` (string) - logging threshold for MWDB logger (e.g. WARNING, see also `Python logging levels <https://docs.python.org/3/library/logging.html#logging-levels>`_)
+* ``log_config_file`` (string) - Python logging configuration file (see also `logging.config configuration file format <https://docs.python.org/3/library/logging.config.html#logging-config-fileformat>`_)
+
 
 Registration feature settings:
 

@@ -7,6 +7,37 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
 
+v2.15.0
+-------
+
+This release contains major improvements of performance and new Rich Attributes features.
+
+Complete changelog can be found here: `v2.15.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.15.0>`_.
+
+[Important change] Exposed relationships are limited type-wise to 100 elements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In previous versions of MWDB, related objects were eagerly loaded without pagination. While this approach simplified
+access to related data, it became problematic for frequently occurring objects with a large number of relationships.
+Eager loading in such cases lead to significant performance degradation.
+
+Starting with version v2.15.0, MWDB limits the number of related objects loaded per object type to 100 in
+``GET /api/object/{identifier}`` and ``/api/{type}/{identifier}/relations``.
+
+If you want to get all relationships, use proper search query such as ``parent:(dhash:"<sha256>")``. Listing endpoints
+implement pagination, so big sets of relationships can be loaded much more efficiently.
+
+[Feature] Lambdas - new feature of Rich Attributes templates
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In v2.15.0, MWDB adds support for Lambdas that follow a similar concept to `Jinja filters <https://jinja.palletsprojects.com/en/stable/templates/#filters>`_.
+
+This feature allows to apply basic transformations on objects such as grouping, sorting and counting. You can also build
+basic conditional clauses using if-then-else syntax. Another feature are custom widgets that can be used for making
+collapsible lists, sections and indicators.
+
+Read more about this feature in :ref:`Rich attributes guide`.
+
 v2.14.0
 -------
 

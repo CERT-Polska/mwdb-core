@@ -1,21 +1,40 @@
 import { ObjectAction, useTabContext } from "./ShowObject";
+import { useState } from "react";
+import { NavDropdown } from "@mwdb-web/commons/ui";
+
+const modes = ["raw", "text", "hex"] as const;
+type Mode = (typeof modes)[number];
 
 export function PreviewSwitchAction() {
     const tabContext = useTabContext();
-    const mode = tabContext.subTab || "raw";
+    const [currentMode, setCurrentMode] = useState<Mode>("raw");
 
-    if (mode === "raw") {
-        return (
-            <ObjectAction
-                label="Hex view"
-                link={tabContext.getTabLink(tabContext.tab ?? "", "hex")}
-            />
-        );
-    }
     return (
-        <ObjectAction
-            label="Raw view"
-            link={tabContext.getTabLink(tabContext.tab ?? "", "raw")}
+        <NavDropdown
+            title="Mode"
+            elements={modes.map((mode) => {
+                const selected = currentMode === mode;
+
+                const selectedStyle = {
+                    fontWeight: selected ? "bold" : "normal",
+                    pointerEvents: (selected ? "none" : "auto") as
+                        | "none"
+                        | "auto",
+                };
+
+                return (
+                    <span className="nav-item" style={selectedStyle} key={mode}>
+                        <ObjectAction
+                            label={mode}
+                            link={tabContext.getTabLink(
+                                tabContext.tab ?? "",
+                                mode
+                            )}
+                            action={() => setCurrentMode(mode)}
+                        />
+                    </span>
+                );
+            })}
         />
     );
 }

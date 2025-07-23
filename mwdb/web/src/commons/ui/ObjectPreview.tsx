@@ -53,7 +53,7 @@ type Props = {
     json?: boolean;
 };
 
-export function HexView(props: Props) {
+export function ObjectPreview(props: Props) {
     const [editor, setEditor] = useState<IEditorProps | null>(null);
 
     const setEditorRef = useCallback((node: AceEditor) => {
@@ -76,13 +76,39 @@ export function HexView(props: Props) {
     }, [editor, props.mode]);
 
     const value = useMemo(() => {
-        const rows = [];
         if (!props.content) return "";
         if (props.mode === "raw") {
             if (props.content instanceof ArrayBuffer)
                 return new TextDecoder().decode(props.content);
             else return props.content;
+        } else if (props.mode === "text") {
+            let buffer: Uint8Array;
+            if (props.content instanceof ArrayBuffer)
+                buffer = new Uint8Array(props.content);
+            else buffer = new TextEncoder().encode(props.content);
+
+            const MIN_LENGTH = 4;
+            let result: string[] = [];
+            let current: string[] = [];
+
+            for (let byte of buffer) {
+                if (byte >= 0x20 && byte <= 0x7e) {
+                    current.push(String.fromCharCode(byte));
+                } else {
+                    if (current.length >= MIN_LENGTH) {
+                        result.push(current.join(""));
+                    }
+                    current = [];
+                }
+            }
+
+            if (current.length >= MIN_LENGTH) {
+                result.push(current.join(""));
+            }
+
+            return result.join("\n");
         } else {
+            const rows = [];
             let content;
             if (props.content instanceof ArrayBuffer) {
                 content = new Uint8Array(props.content);

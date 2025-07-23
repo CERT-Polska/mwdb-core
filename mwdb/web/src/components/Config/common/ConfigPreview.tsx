@@ -1,5 +1,5 @@
 import { ObjectContext } from "@mwdb-web/commons/context";
-import { HexView } from "@mwdb-web/commons/ui";
+import { ObjectPreview } from "@mwdb-web/commons/ui";
 import { ConfigData } from "@mwdb-web/types/types";
 import { useContext } from "react";
 
@@ -16,7 +16,7 @@ export function ConfigPreview() {
     }
 
     return (
-        <HexView
+        <ObjectPreview
             content={JSON.stringify(cfg, null, 4)}
             mode="raw"
             showInvisibles={false}

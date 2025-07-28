@@ -423,7 +423,7 @@ a.blob {
 .dagre-d3 .card-footer.tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 2px;
     align-items: flex-start;
 }
 

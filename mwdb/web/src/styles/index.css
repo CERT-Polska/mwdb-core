@@ -409,11 +409,22 @@ a.blob {
 
 .dagre-d3 .tag {
     max-width: 100%;
+    display: flex;
+    overflow: visible;
+    height: auto;
 }
 
 .dagre-d3 .tag span {
     white-space: pre-wrap;
     width: 100%;
+    height: auto;
+}
+
+.dagre-d3 .card-footer.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: flex-start;
 }
 
 /* react-modal css fix */

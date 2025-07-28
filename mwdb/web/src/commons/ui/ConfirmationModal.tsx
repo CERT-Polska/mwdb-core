@@ -37,7 +37,7 @@ export function ConfirmationModal(props: Props) {
                 content: {
                     ...modalStyle.content,
                     ...(props.contentStyle || {}),
-                }
+                },
             }}
         >
             <div className="modal-header">

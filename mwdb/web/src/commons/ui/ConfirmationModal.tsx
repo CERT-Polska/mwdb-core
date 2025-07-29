@@ -23,7 +23,7 @@ export function ConfirmationModal(props: Props) {
             bottom: "auto",
             marginRight: "-50%",
             transform: "translate(-50%, -50%)",
-            maxHeight: "80%",
+            maxHeight: "100%",
         },
     };
 

@@ -11,6 +11,7 @@ type Props = ReactModal.Props & {
     onConfirm?: React.MouseEventHandler;
     confirmDisabled?: boolean;
     confirmText?: string;
+    contentStyle?: React.CSSProperties;
 };
 
 export function ConfirmationModal(props: Props) {
@@ -32,7 +33,12 @@ export function ConfirmationModal(props: Props) {
             isOpen={props.isOpen}
             onRequestClose={props.onRequestClose}
             onAfterOpen={props.onAfterOpen}
-            style={modalStyle}
+            style={{
+                content: {
+                    ...modalStyle.content,
+                    ...(props.contentStyle || {}),
+                },
+            }}
         >
             <div className="modal-header">
                 <h5 className="modal-title">{props.message}</h5>

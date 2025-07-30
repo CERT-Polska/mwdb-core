@@ -9,7 +9,7 @@ export { FeatureSwitch } from "./FeatureSwitch";
 export { GroupBadge } from "./GroupBadge";
 export { UserBadge } from "./UserBadge";
 export { Hash } from "./Hash";
-export { HexView } from "./HexView";
+export { ObjectPreview } from "./ObjectPreview";
 export { Identicon } from "./Identicon";
 export { NavDropdown } from "./NavDropdown";
 export { ObjectLink } from "./ObjectLink";

@@ -13,14 +13,14 @@ export function PreviewSwitchAction() {
         <NavDropdown
             title="Mode"
             elements={modes.map((mode) => {
-                const selected = currentMode === mode;
+                const navItem = currentMode === mode;
 
-                const selectedStyle = {
-                    fontWeight: selected ? "bold" : "normal",
+                const navItemStyle = {
+                    fontWeight: navItem ? "bold" : "normal",
                 };
 
                 return (
-                    <span className="nav-item" style={selectedStyle} key={mode}>
+                    <span className="nav-item" style={navItemStyle} key={mode}>
                         <ObjectAction
                             label={mode}
                             link={tabContext.getTabLink(

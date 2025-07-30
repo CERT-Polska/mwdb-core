@@ -2,7 +2,7 @@ import { ObjectAction, useTabContext } from "./ShowObject";
 import { useState } from "react";
 import { NavDropdown } from "@mwdb-web/commons/ui";
 
-const modes = ["raw", "text", "hex"] as const;
+const modes = ["raw", "hex", "strings", "widechar"] as const;
 type Mode = (typeof modes)[number];
 
 export function PreviewSwitchAction() {
@@ -17,9 +17,6 @@ export function PreviewSwitchAction() {
 
                 const selectedStyle = {
                     fontWeight: selected ? "bold" : "normal",
-                    pointerEvents: (selected ? "none" : "auto") as
-                        | "none"
-                        | "auto",
                 };
 
                 return (

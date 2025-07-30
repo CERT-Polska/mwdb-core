@@ -53,6 +53,96 @@ type Props = {
     json?: boolean;
 };
 
+function extractPrintableSequences(
+    units: number[],
+    isPrintable: (u: number) => boolean,
+    minLength: number = 4
+): string {
+    const result: string[] = [];
+    let current: string[] = [];
+
+    for (const u of units) {
+        if (isPrintable(u)) {
+            current.push(String.fromCharCode(u));
+        } else {
+            if (current.length >= minLength) result.push(current.join(""));
+            current = [];
+        }
+    }
+    if (current.length >= minLength) result.push(current.join(""));
+
+    return result.join("\n");
+}
+
+function formatRaw(content: Content): string {
+    if (content instanceof ArrayBuffer)
+        return new TextDecoder().decode(content);
+    return content;
+}
+
+function getArrayBuffer(content: Content): ArrayBuffer {
+    return content instanceof ArrayBuffer
+        ? content
+        : new TextEncoder().encode(content).buffer;
+}
+
+function formatPrintable(
+    content: Content,
+    format: "UTF-8" | "UTF-16(LE)"
+): string {
+    let units: number[];
+    let isPrintable: (u: number) => boolean;
+
+    if (format === "UTF-16(LE)") {
+        const buffer = getArrayBuffer(content);
+        const totalUnits = Math.floor(buffer.byteLength / 2);
+        const units16 = new Uint16Array(buffer, 0, totalUnits);
+        units = Array.from(units16);
+        isPrintable = (u) => u >= 0x20 && u <= 0x7e;
+    } else {
+        const buffer = new Uint8Array(getArrayBuffer(content));
+        units = Array.from(buffer);
+        isPrintable = (u) => u >= 0x20 && u <= 0x7e;
+    }
+
+    const sequences = extractPrintableSequences(units, isPrintable);
+    if (!sequences) {
+        return (
+            `No ${format} characters to display in this mode.\n` +
+            "Only printable ASCII characters (0x20–0x7E) are supported."
+        );
+    }
+    return sequences;
+}
+
+function formatHex(content: Content): string {
+    const bytes = new Uint8Array(getArrayBuffer(content));
+
+    const rows: string[] = [];
+    let byteRow: string[] = [];
+    let asciiRow: string[] = [];
+
+    for (let idx = 0; idx < bytes.length; idx++) {
+        if (idx && idx % 16 === 0) {
+            rows.push(byteRow.join(" ").padEnd(50, " ") + asciiRow.join(""));
+            byteRow = [];
+            asciiRow = [];
+        }
+        byteRow.push(bytes[idx].toString(16).padStart(2, "0"));
+        asciiRow.push(
+            bytes[idx] >= 0x20 && bytes[idx] <= 0x7e
+                ? String.fromCharCode(bytes[idx])
+                : "."
+        );
+    }
+
+    if (byteRow.length > 0) {
+        rows.push(byteRow.join(" ").padEnd(50, " ") + asciiRow.join(""));
+    }
+
+    return rows.join("\n");
+}
+
 export function ObjectPreview(props: Props) {
     const [editor, setEditor] = useState<IEditorProps | null>(null);
 
@@ -67,76 +157,23 @@ export function ObjectPreview(props: Props) {
 
     useEffect(() => {
         if (editor && props.mode === "hex") {
-            const numberRenderer = new HexViewNumberRenderer();
-            numberRenderer.attach(editor);
-            return () => {
-                numberRenderer.detach(editor);
-            };
+            const renderer = new HexViewNumberRenderer();
+            renderer.attach(editor);
+            return () => renderer.detach(editor);
         }
     }, [editor, props.mode]);
 
     const value = useMemo(() => {
         if (!props.content) return "";
-        if (props.mode === "raw") {
-            if (props.content instanceof ArrayBuffer)
-                return new TextDecoder().decode(props.content);
-            else return props.content;
-        } else if (props.mode === "text") {
-            let buffer: Uint8Array;
-            if (props.content instanceof ArrayBuffer)
-                buffer = new Uint8Array(props.content);
-            else buffer = new TextEncoder().encode(props.content);
-
-            const MIN_LENGTH = 4;
-            let result: string[] = [];
-            let current: string[] = [];
-
-            for (let byte of buffer) {
-                if (byte >= 0x20 && byte <= 0x7e) {
-                    current.push(String.fromCharCode(byte));
-                } else {
-                    if (current.length >= MIN_LENGTH) {
-                        result.push(current.join(""));
-                    }
-                    current = [];
-                }
-            }
-
-            if (current.length >= MIN_LENGTH) {
-                result.push(current.join(""));
-            }
-
-            return result.join("\n");
-        } else {
-            const rows = [];
-            let content;
-            if (props.content instanceof ArrayBuffer) {
-                content = new Uint8Array(props.content);
-            } else {
-                content = new TextEncoder().encode(props.content);
-            }
-            let byteRow = [];
-            let asciiRow = [];
-            for (let idx = 0; idx < content.length; idx++) {
-                if (idx && idx % 16 === 0) {
-                    rows.push(
-                        byteRow.join(" ").padEnd(50, " ") + asciiRow.join("")
-                    );
-                    byteRow = [];
-                    asciiRow = [];
-                }
-                byteRow.push(content[idx].toString(16).padStart(2, "0"));
-                asciiRow.push(
-                    content[idx] >= 0x20 && content[idx] <= 0x7e
-                        ? String.fromCharCode(content[idx])
-                        : "."
-                );
-            }
-            if (byteRow.length > 0)
-                rows.push(
-                    byteRow.join(" ").padEnd(50, " ") + asciiRow.join("")
-                );
-            return rows.join("\n");
+        switch (props.mode) {
+            case "raw":
+                return formatRaw(props.content);
+            case "strings":
+                return formatPrintable(props.content, "UTF-8");
+            case "widechar":
+                return formatPrintable(props.content, "UTF-16(LE)");
+            default:
+                return formatHex(props.content);
         }
     }, [props.content, props.mode]);
 

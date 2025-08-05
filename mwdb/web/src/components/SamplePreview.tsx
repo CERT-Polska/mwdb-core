@@ -2,7 +2,7 @@ import { APIContext } from "@mwdb-web/commons/api";
 import { useContext, useEffect, useState } from "react";
 import { ObjectContext, useTabContext } from "./ShowObject";
 import { negateBuffer } from "@mwdb-web/commons/helpers";
-import { HexView } from "@mwdb-web/commons/ui";
+import { ObjectPreview } from "@mwdb-web/commons/ui";
 
 export function SamplePreview() {
     const [content, setContent] = useState<ArrayBuffer>(new ArrayBuffer(0));
@@ -33,7 +33,7 @@ export function SamplePreview() {
     }, [objectContext?.object?.id]);
 
     return (
-        <HexView
+        <ObjectPreview
             content={content}
             mode={tabContext.subTab || "raw"}
             showInvisibles

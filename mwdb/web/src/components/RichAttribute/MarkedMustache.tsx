@@ -104,14 +104,17 @@ class MustacheContext extends Mustache.Context {
     lambdaContext: { [key: string]: any };
     parentPath: string[];
     lastPath: string[];
+    localVars: { [key: string]: any };
 
     constructor(
         view: Object,
         renderContext: MarkedMustache,
         parent?: MustacheContext,
+        localVars?: { [key: string]: any },
         initialPath?: string[]
     ) {
         super(view, parent);
+        this.localVars = localVars ?? {};
         this.renderContext = renderContext;
         this.lambdaResults = parent ? parent.lambdaResults : {};
         this.lambdaContext = parent ? parent.lambdaContext : {};
@@ -130,6 +133,10 @@ class MustacheContext extends Mustache.Context {
     push(view: Object): Context {
         // Creates new nested context (for section)
         return new MustacheContext(view, this.renderContext, this);
+    }
+
+    pushWithLocalVars(view: Object, localVars: { [key: string]: any }) {
+        return new MustacheContext(view, this.renderContext, this, localVars);
     }
 
     lookupView(name: string) {
@@ -281,7 +288,7 @@ class MustacheContext extends Mustache.Context {
         let lambda = this.lookupLambda(name);
         if (typeof lambda !== "undefined") return lambda;
 
-        return undefined;
+        return this.localVars[name];
     }
 }
 
@@ -309,7 +316,10 @@ class MustacheWriter extends Mustache.Writer {
             for (let j = 0, valueLength = value.length; j < valueLength; ++j) {
                 buffer += this.renderTokens(
                     token[4],
-                    context.push(value[j]),
+                    context.pushWithLocalVars(value[j], {
+                        $arrayIndex: j,
+                        $isLastElement: j == value.length - 1,
+                    }),
                     partials,
                     originalTemplate,
                     config
@@ -420,7 +430,13 @@ class MarkedMustache {
     }
 
     render(template: string, view: object, initialPath?: string[]) {
-        const context = new MustacheContext(view, this, undefined, initialPath);
+        const context = new MustacheContext(
+            view,
+            this,
+            undefined,
+            undefined,
+            initialPath
+        );
         const markdown = mustacheWriter.render(template, context);
         return this.renderMarkdown(markdown, context.lambdaResults);
     }

@@ -23,7 +23,7 @@
         "diff-match-patch": "^1.0.4",
         "identicon.js": "^2.3.2",
         "lodash": "^4.17.10",
-        "marked": "^4.0.10",
+        "marked": "^15.0.12",
         "mustache": "^4.2.0",
         "popper.js": "^1.16.1",
         "react": "^18.1.0",

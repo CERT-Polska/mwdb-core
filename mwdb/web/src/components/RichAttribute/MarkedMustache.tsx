@@ -374,49 +374,12 @@ class MustacheWriter extends Mustache.Writer {
     }
 }
 
-// Overrides to not use HTML escape
-// https://github.com/markedjs/marked/blob/e3f8cd7c7ce75ce4f7e22bd082c45deb1678846d/src/Tokenizer.js#L67
+// Tokenizer overrides
+// Reference: https://github.com/markedjs/marked/blob/v15.0.12/src/Tokenizer.ts#L61
 class MarkedTokenizer extends Tokenizer {
     rules: any;
-    escape(src: string): any {
-        const cap = this.rules.inline.escape.exec(src);
-        if (cap) {
-            return {
-                type: "escape",
-                raw: cap[0],
-                text: cap[1],
-            };
-        }
+    url(src: string): any {
         return false;
-    }
-
-    codespan(src: string): any {
-        const cap = this.rules.inline.code.exec(src);
-        if (cap) {
-            let text = cap[2].replace(/\n/g, " ");
-            const hasNonSpaceChars = /[^ ]/.test(text);
-            const hasSpaceCharsOnBothEnds = /^ /.test(text) && / $/.test(text);
-            if (hasNonSpaceChars && hasSpaceCharsOnBothEnds) {
-                text = text.substring(1, text.length - 1);
-            }
-            return {
-                type: "codespan",
-                raw: cap[0],
-                text,
-            };
-        }
-    }
-
-    inlineText(src: string, smartypants: (cap: string) => string): any {
-        const cap = this.rules.inline.text.exec(src);
-        if (cap) {
-            let text = this.options.smartypants ? smartypants(cap[0]) : cap[0];
-            return {
-                type: "text",
-                raw: cap[0],
-                text,
-            };
-        }
     }
 }
 

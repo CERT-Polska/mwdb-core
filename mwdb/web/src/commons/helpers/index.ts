@@ -4,6 +4,8 @@ export { downloadData } from "./download";
 export * from "./search";
 export * from "./filesize";
 export * from "./paginate";
+export type { ObjectContent } from "./preview";
+export { formatRaw, formatPrintable, formatHex } from "./preview";
 export { getErrorMessage } from "./getErrorMessage";
 
 export const capitalize = (s: string): string => {

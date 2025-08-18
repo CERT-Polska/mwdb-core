@@ -43,8 +43,8 @@ export function formatPrintable(
     if (format === "UTF-16(LE)") {
         const buffer = getArrayBuffer(content);
         const totalUnits = Math.floor(buffer.byteLength / 2);
-        const units16 = new Uint16Array(buffer, 0, totalUnits);
-        units = Array.from(units16);
+        const chars = new Uint16Array(buffer, 0, totalUnits);
+        units = Array.from(chars);
         isPrintable = (u) => u >= 0x20 && u <= 0x7e;
     } else {
         const buffer = new Uint8Array(getArrayBuffer(content));
@@ -54,10 +54,7 @@ export function formatPrintable(
 
     const sequences = extractPrintableSequences(units, isPrintable);
     if (!sequences) {
-        return (
-            `No ${format} characters to display in this mode.\n` +
-            "Only printable ASCII characters (0x20–0x7E) are supported."
-        );
+        return "";
     }
     return sequences;
 }

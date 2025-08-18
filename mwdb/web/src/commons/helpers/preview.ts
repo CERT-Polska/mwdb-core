@@ -1,16 +1,16 @@
 export type ObjectContent = string | ArrayBuffer;
 
 function extractPrintableSequences(
-    units: number[],
+    charCodes: number[],
     isPrintable: (u: number) => boolean,
     minLength: number = 4
 ): string {
     const result: string[] = [];
     let current: string[] = [];
 
-    for (const u of units) {
-        if (isPrintable(u)) {
-            current.push(String.fromCharCode(u));
+    for (const c of charCodes) {
+        if (isPrintable(c)) {
+            current.push(String.fromCharCode(c));
         } else {
             if (current.length >= minLength) result.push(current.join(""));
             current = [];
@@ -37,22 +37,22 @@ export function formatPrintable(
     content: ObjectContent,
     format: "UTF-8" | "UTF-16(LE)"
 ): string {
-    let units: number[];
+    let charCodes: number[];
     let isPrintable: (u: number) => boolean;
 
     if (format === "UTF-16(LE)") {
         const buffer = getArrayBuffer(content);
-        const totalUnits = Math.floor(buffer.byteLength / 2);
-        const chars = new Uint16Array(buffer, 0, totalUnits);
-        units = Array.from(chars);
+        const totalChars = Math.floor(buffer.byteLength / 2);
+        const chars = new Uint16Array(buffer, 0, totalChars);
+        charCodes = Array.from(chars);
         isPrintable = (u) => u >= 0x20 && u <= 0x7e;
     } else {
         const buffer = new Uint8Array(getArrayBuffer(content));
-        units = Array.from(buffer);
+        charCodes = Array.from(buffer);
         isPrintable = (u) => u >= 0x20 && u <= 0x7e;
     }
 
-    const sequences = extractPrintableSequences(units, isPrintable);
+    const sequences = extractPrintableSequences(charCodes, isPrintable);
     if (!sequences) {
         return "";
     }

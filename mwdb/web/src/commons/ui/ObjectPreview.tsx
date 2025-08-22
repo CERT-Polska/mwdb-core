@@ -1,5 +1,11 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import AceEditor, { IEditorProps } from "react-ace";
+import {
+    formatHex,
+    formatPrintable,
+    formatRaw,
+    ObjectContent,
+} from "@mwdb-web/commons/helpers";
 
 import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/mode-json";
@@ -44,16 +50,14 @@ class HexViewNumberRenderer {
     }
 }
 
-type Content = string | ArrayBuffer;
-
 type Props = {
-    content: Content;
+    content: ObjectContent;
     mode: string;
     showInvisibles: boolean;
     json?: boolean;
 };
 
-export function HexView(props: Props) {
+export function ObjectPreview(props: Props) {
     const [editor, setEditor] = useState<IEditorProps | null>(null);
 
     const setEditorRef = useCallback((node: AceEditor) => {
@@ -67,50 +71,23 @@ export function HexView(props: Props) {
 
     useEffect(() => {
         if (editor && props.mode === "hex") {
-            const numberRenderer = new HexViewNumberRenderer();
-            numberRenderer.attach(editor);
-            return () => {
-                numberRenderer.detach(editor);
-            };
+            const renderer = new HexViewNumberRenderer();
+            renderer.attach(editor);
+            return () => renderer.detach(editor);
         }
     }, [editor, props.mode]);
 
     const value = useMemo(() => {
-        const rows = [];
         if (!props.content) return "";
-        if (props.mode === "raw") {
-            if (props.content instanceof ArrayBuffer)
-                return new TextDecoder().decode(props.content);
-            else return props.content;
-        } else {
-            let content;
-            if (props.content instanceof ArrayBuffer) {
-                content = new Uint8Array(props.content);
-            } else {
-                content = new TextEncoder().encode(props.content);
-            }
-            let byteRow = [];
-            let asciiRow = [];
-            for (let idx = 0; idx < content.length; idx++) {
-                if (idx && idx % 16 === 0) {
-                    rows.push(
-                        byteRow.join(" ").padEnd(50, " ") + asciiRow.join("")
-                    );
-                    byteRow = [];
-                    asciiRow = [];
-                }
-                byteRow.push(content[idx].toString(16).padStart(2, "0"));
-                asciiRow.push(
-                    content[idx] >= 0x20 && content[idx] <= 0x7e
-                        ? String.fromCharCode(content[idx])
-                        : "."
-                );
-            }
-            if (byteRow.length > 0)
-                rows.push(
-                    byteRow.join(" ").padEnd(50, " ") + asciiRow.join("")
-                );
-            return rows.join("\n");
+        switch (props.mode) {
+            case "raw":
+                return formatRaw(props.content);
+            case "strings":
+                return formatPrintable(props.content, "UTF-8");
+            case "widechar":
+                return formatPrintable(props.content, "UTF-16(LE)");
+            default:
+                return formatHex(props.content);
         }
     }, [props.content, props.mode]);
 

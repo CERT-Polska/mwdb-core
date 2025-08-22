@@ -1,13 +1,17 @@
 import { ObjectAction, useTabContext } from "./ShowObject";
-import { useState } from "react";
 import { NavDropdown } from "@mwdb-web/commons/ui";
 
 const modes = ["raw", "hex", "strings", "widechar"] as const;
 type Mode = (typeof modes)[number];
 
+const isMode = (v: unknown): v is Mode =>
+    typeof v === "string" && (modes as readonly string[]).includes(v);
+
 export function PreviewSwitchAction() {
     const tabContext = useTabContext();
-    const [currentMode, setCurrentMode] = useState<Mode>("raw");
+    const currentMode: Mode = isMode(tabContext.subTab)
+        ? tabContext.subTab
+        : "raw";
 
     return (
         <NavDropdown
@@ -27,7 +31,6 @@ export function PreviewSwitchAction() {
                                 tabContext.tab ?? "",
                                 mode
                             )}
-                            action={() => setCurrentMode(mode)}
                         />
                     </span>
                 );

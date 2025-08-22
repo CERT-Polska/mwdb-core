@@ -568,6 +568,37 @@ It may not work if you apply a lambda. In that case, you can use a Markdown synt
 
 If you worry about proper query escaping, ``jsonify`` and ``uriencode`` should be enough to encode your value into final URI by Markdown renderer.
 
+Array indices
+~~~~~~~~~~~~~
+
+.. versionadded:: 2.16.0
+
+If Mustache section enumerates an array, two special attributes are available:
+
+- ``$arrayIndex`` is set to the index of current element
+- ``$isLastElement`` is set to true when current element is last in the array and false otherwise
+
+This is especially useful for making commas between elements:
+
+.. code-block::
+
+    {{#value.receivers}}{{#$arrayIndex}}, {{/$arrayIndex}}{{@.}}{{/value.receivers}}
+
+The above template renders a comma only if ``$arrayIndex`` is non-zero, so the comma will be put only between the
+consecutive elements. We can also use inverted section and ``$isLastElement`` value to make the equivalent template:
+
+.. code-block::
+
+    {{#value.receivers}}{{@.}}{{^$isLastElement }}, {{/$isLastElement }}{{/value.receivers}}
+
+.. note::
+
+    These attributes are available only if:
+
+    - they're referenced directly in the array enumerating section
+    - elements does not contain ``$arrayIndex`` and ``$isLastElement`` elements, as element attributes have precedence
+      over special attributes injected into context
+
 Known issues
 ------------
 

@@ -6,6 +6,7 @@ type Props = {
     icon?: IconProp;
     elements: JSX.Element[];
     badge?: string;
+    position?: string;
 };
 
 export function NavDropdown(props: Props) {
@@ -34,7 +35,10 @@ export function NavDropdown(props: Props) {
                     </span>
                 )}
             </a>
-            <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+            <div
+                className={`dropdown-menu dropdown-menu-${props.position === "right" ? "right" : "left"}`}
+                aria-labelledby="navbarDropdown"
+            >
                 {props.elements}
             </div>
         </div>

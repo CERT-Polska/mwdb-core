@@ -5,6 +5,8 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { capitalize } from "../helpers";
 import { TabContextValues } from "@mwdb-web/types/context";
+import { PreviewSwitchAction } from "@mwdb-web/components/PreviewSwitchAction";
+import { NavDropdown } from "@mwdb-web/commons/ui/NavDropdown";
 
 export const TabContext = React.createContext<TabContextValues>(
     {} as TabContextValues
@@ -25,14 +27,40 @@ export function ObjectTab(props: Props) {
     useEffect(() => {
         if (context.tab !== props.tab) return;
         context.setComponent(props.component);
-        context.setActions(
-            props.actions?.map((action, index) => {
-                return {
-                    ...action,
-                    key: index,
-                };
-            }) || []
-        );
+
+        const previewSwitchAction =
+            props.actions?.find(
+                (action) => action.type === PreviewSwitchAction
+            ) || null;
+        const otherActions =
+            props.actions?.filter(
+                (action) => action.type !== PreviewSwitchAction
+            ) || [];
+        const actionsArray: JSX.Element[] = [];
+
+        if (previewSwitchAction) {
+            actionsArray.push(
+                React.cloneElement(previewSwitchAction as React.ReactElement, {
+                    key: "preview-switch",
+                })
+            );
+        }
+        if (otherActions.length > 0) {
+            actionsArray.push(
+                <NavDropdown
+                    key="nav-dropdown"
+                    title="Action"
+                    position="right"
+                    elements={otherActions.map((action, idx) =>
+                        React.cloneElement(action as React.ReactElement, {
+                            key: `dropdown-action-${idx}`,
+                        })
+                    )}
+                />
+            );
+        }
+
+        context.setActions(actionsArray);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [context.tab]);
 

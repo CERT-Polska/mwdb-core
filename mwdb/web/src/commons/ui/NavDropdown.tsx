@@ -11,6 +11,8 @@ type Props = {
 
 export function NavDropdown(props: Props) {
     if (!props.elements.length) return <div />;
+    const position = props.position || "left";
+
     return (
         <div className="nav-item dropdown">
             <a
@@ -36,7 +38,7 @@ export function NavDropdown(props: Props) {
                 )}
             </a>
             <div
-                className={`dropdown-menu dropdown-menu-${props.position || "left"}`}
+                className={`dropdown-menu dropdown-menu-${position}`}
                 aria-labelledby="navbarDropdown"
             >
                 {props.elements}

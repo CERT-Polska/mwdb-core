@@ -36,8 +36,7 @@ export function NavDropdown(props: Props) {
                 )}
             </a>
             <div
-                className={`dropdown-menu dropdown-menu
-                -${props.position === "right" ? "right" : "left"}`}
+                className={`dropdown-menu dropdown-menu-${props.position || "left"}`}
                 aria-labelledby="navbarDropdown"
             >
                 {props.elements}

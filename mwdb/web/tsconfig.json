@@ -31,7 +31,7 @@
     }
   },
   "include": [
-    "src/**/*"
+    "src"
   ],
   "references": [
     {

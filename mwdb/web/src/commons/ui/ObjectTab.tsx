@@ -43,9 +43,9 @@ export function ObjectTab(props: Props) {
         const actionsArray: JSX.Element[] = [];
         if (previewSwitchAction) {
             actionsArray.push(
-                React.cloneElement(previewSwitchAction, {
-                    key: "preview-switch",
-                })
+                <React.Fragment key="preview-switch">
+                    {previewSwitchAction}
+                </React.Fragment>
             );
         }
         if (otherActions.length > 0 && props.dropdownActions !== false) {
@@ -54,18 +54,20 @@ export function ObjectTab(props: Props) {
                     key="nav-dropdown"
                     title="Action"
                     position="right"
-                    elements={otherActions.map((action, idx) =>
-                        React.cloneElement(action, {
-                            key: `dropdown-action-${idx}`,
-                        })
-                    )}
+                    elements={otherActions.map((action, idx) => (
+                        <React.Fragment key={`dropdown-action-${idx}`}>
+                            {action}
+                        </React.Fragment>
+                    ))}
                 />
             );
         } else if (otherActions.length > 0) {
             actionsArray.push(
-                ...otherActions.map((action, idx) =>
-                    React.cloneElement(action, { key: `direct-action-${idx}` })
-                )
+                ...otherActions.map((action, idx) => (
+                    <React.Fragment key={`direct-action-${idx}`}>
+                        {action}
+                    </React.Fragment>
+                ))
             );
         }
 

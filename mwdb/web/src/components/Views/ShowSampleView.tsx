@@ -63,13 +63,13 @@ export function ShowSampleView() {
                     icon={faFingerprint}
                     component={SampleDetails}
                     actions={[
-                        <RemoveAction />,
-                        <PushAction />,
-                        <PullAction />,
-                        <UploadChildAction />,
                         <FavoriteAction />,
-                        <ZipAction zip={zipSample} />,
                         <DownloadAction download={downloadSample} />,
+                        <ZipAction zip={zipSample} />,
+                        <UploadChildAction />,
+                        <PullAction />,
+                        <PushAction />,
+                        <RemoveAction />,
                     ]}
                 />
                 <RelationsTab />
@@ -79,12 +79,12 @@ export function ShowSampleView() {
                     component={SamplePreview}
                     actions={[
                         <PreviewSwitchAction />,
-                        <RemoveAction />,
-                        <PushAction />,
-                        <PullAction />,
-                        <UploadChildAction />,
                         <FavoriteAction />,
                         <DownloadAction download={downloadSample} />,
+                        <UploadChildAction />,
+                        <PullAction />,
+                        <PushAction />,
+                        <RemoveAction />,
                     ]}
                 />
             </Extendable>

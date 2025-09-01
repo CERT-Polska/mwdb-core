@@ -19,6 +19,7 @@ type Props = {
     icon?: IconProp;
     tab: string;
     label?: string | JSX.Element;
+    dropdownActions?: boolean;
 };
 
 export function ObjectTab(props: Props) {
@@ -26,18 +27,20 @@ export function ObjectTab(props: Props) {
 
     useEffect(() => {
         if (context.tab !== props.tab) return;
+
         context.setComponent(props.component);
 
         const previewSwitchAction =
             props.actions?.find(
                 (action) => action.type === PreviewSwitchAction
             ) || null;
+
         const otherActions =
             props.actions?.filter(
                 (action) => action.type !== PreviewSwitchAction
             ) || [];
-        const actionsArray: JSX.Element[] = [];
 
+        const actionsArray: JSX.Element[] = [];
         if (previewSwitchAction) {
             actionsArray.push(
                 React.cloneElement(previewSwitchAction as React.ReactElement, {
@@ -45,7 +48,7 @@ export function ObjectTab(props: Props) {
                 })
             );
         }
-        if (otherActions.length > 0) {
+        if (otherActions.length > 0 && props.dropdownActions !== false) {
             actionsArray.push(
                 <NavDropdown
                     key="nav-dropdown"
@@ -58,11 +61,13 @@ export function ObjectTab(props: Props) {
                     )}
                 />
             );
+        } else if (otherActions.length > 0) {
+            actionsArray.push(...otherActions);
         }
 
         context.setActions(actionsArray);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [context.tab]);
+    }, [context.tab, props.dropdownActions]);
 
     return (
         <li className="nav-item">

@@ -21,6 +21,7 @@ export function RelationsTab() {
             actions={[
                 <ObjectAction label="Zoom" icon={faSearch} link={zoomLink} />,
             ]}
+            dropdownActions={false}
             component={() => (
                 <RelationsPlotView
                     hash={context.object!.id ?? ""}

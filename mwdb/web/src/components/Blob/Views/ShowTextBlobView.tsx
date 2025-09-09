@@ -53,12 +53,12 @@ export function ShowTextBlobView() {
                     icon={faFingerprint}
                     component={TextBlobDetails}
                     actions={[
-                        <RemoveAction />,
-                        <PushAction />,
-                        <PullAction />,
-                        <BlobDiffAction />,
                         <FavoriteAction />,
                         <DownloadAction download={downloadTextBlob} />,
+                        <BlobDiffAction />,
+                        <PullAction />,
+                        <PushAction />,
+                        <RemoveAction />,
                     ]}
                 />
                 <RelationsTab />
@@ -67,12 +67,12 @@ export function ShowTextBlobView() {
                     icon={faSearch}
                     component={TextBlobPreview}
                     actions={[
-                        <RemoveAction />,
-                        <PushAction />,
-                        <PullAction />,
-                        <BlobDiffAction />,
                         <FavoriteAction />,
                         <DownloadAction download={downloadTextBlob} />,
+                        <BlobDiffAction />,
+                        <PullAction />,
+                        <PushAction />,
+                        <RemoveAction />,
                     ]}
                 />
             </Extendable>

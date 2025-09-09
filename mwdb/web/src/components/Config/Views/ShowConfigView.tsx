@@ -54,11 +54,11 @@ export function ShowConfigView() {
                     icon={faFingerprint}
                     component={ConfigDetails}
                     actions={[
-                        <RemoveAction />,
-                        <PushAction />,
-                        <PullAction />,
                         <FavoriteAction />,
                         <DownloadAction download={downloadTextBlob} />,
+                        <PullAction />,
+                        <PushAction />,
+                        <RemoveAction />,
                     ]}
                 />
                 <RelationsTab />
@@ -67,11 +67,11 @@ export function ShowConfigView() {
                     icon={faSearch}
                     component={ConfigPreview}
                     actions={[
-                        <RemoveAction />,
-                        <PushAction />,
-                        <PullAction />,
                         <FavoriteAction />,
                         <DownloadAction download={downloadTextBlob} />,
+                        <PullAction />,
+                        <PushAction />,
+                        <RemoveAction />,
                     ]}
                 />
             </Extendable>

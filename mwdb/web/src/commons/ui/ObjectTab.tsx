@@ -52,7 +52,7 @@ export function ObjectTab(props: Props) {
             actionsArray.push(
                 <NavDropdown
                     key="nav-dropdown"
-                    title="Action"
+                    title="Actions"
                     position="right"
                     elements={otherActions.map((action, idx) => (
                         <React.Fragment key={`dropdown-action-${idx}`}>

@@ -24,6 +24,6 @@ pyJWT==2.4.0
 limits==3.9.0
 python-dateutil==2.8.2
 pyzipper==0.3.5
-pycryptodomex~=3.23
+pycryptodomex==3.23.0
 ssdeep==3.4
 prometheus-client==0.21.1

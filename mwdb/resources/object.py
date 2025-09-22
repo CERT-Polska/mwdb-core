@@ -240,9 +240,11 @@ class ObjectResource(Resource):
 
         db_query = db_query.filter(
             g.auth_user.has_access_to_object(Object.id)
-        ).order_by(Object.id.desc())
+        ).order_by(Object.upload_time.desc(), Object.id.desc())
         if pivot_obj:
-            db_query = db_query.filter(Object.id < pivot_obj.id)
+            db_query = db_query.filter(
+                Object.upload_time <= pivot_obj.upload_time, Object.id < pivot_obj.id
+            )
         # Legacy parameter - to be removed in the future
         elif obj["page"] is not None and obj["page"] > 1:
             db_query = db_query.offset((obj["page"] - 1) * 10)

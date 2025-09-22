@@ -9,6 +9,7 @@ import { RecentViewList } from "./RecentViewList";
 import { QuickQuery } from "../common/QuickQuery";
 import { ObjectType } from "@mwdb-web/types/types";
 import { AxiosError } from "axios";
+import { QueryInput } from "../common/QueryInput";
 
 type Props = {
     type: ObjectType;
@@ -137,7 +138,7 @@ export function RecentView(props: Props) {
                         setCurrentQuery(queryInput);
                     }}
                 >
-                    <div className="input-group">
+                    <div className="input-group dropdown">
                         <div className="input-group-prepend">
                             <input
                                 className="btn btn-outline-danger"
@@ -149,12 +150,14 @@ export function RecentView(props: Props) {
                                 }}
                             />
                         </div>
-                        <input
-                            className="form-control small"
-                            type="text"
-                            placeholder="Search (Lucene query or hash)..."
+                        <QueryInput
                             value={queryInput}
-                            onChange={(evt) => setQueryInput(evt.target.value)}
+                            onChange={(currentValue) =>
+                                setQueryInput(currentValue)
+                            }
+                            onSubmit={() => {
+                                setCurrentQuery(queryInput);
+                            }}
                         />
                         <div className="input-group-append">
                             <div className="btn-group">

@@ -87,6 +87,17 @@ const allowedStates: { [state: string]: { [expectedLexem: string]: string } } =
         },
     };
 
+export const LPAR_TYPES: string[] = ["expr_lpar", "value_lpar", "value_lrange"];
+export const RPAR_TYPES: string[] = ["expr_rpar", "range_rrange"];
+export const FIELD_TYPES: string[] = ["expr_phrase", "expr_term"];
+export const FIELD_PART_TYPES: string[] = ["expr_arrayref", "expr_fieldsep"];
+export const OPER_TYPES: string[] = [
+    "expr_notop",
+    "expr_boolop",
+    "range_toop",
+    "value_compop",
+];
+
 export function* lexQuery(
     query: string
 ): Generator<[moo.Token, string, string[]]> {
@@ -100,4 +111,71 @@ export function* lexQuery(
         currentState = allowedStates[currentState][token.type];
         yield [token, currentState, Object.keys(allowedStates[currentState])];
     }
+}
+
+export type QueryAnnotation = {
+    type: string;
+    value: string;
+    offset: number;
+    lastOpenedBracket?: boolean;
+    error?: string;
+};
+
+export type AnnotatedQuery = {
+    annotations: QueryAnnotation[];
+    nextPossibleTokens: string[];
+};
+
+export function annotateQuery(query: string): AnnotatedQuery {
+    const annotations: QueryAnnotation[] = [];
+    const openedParentheses: QueryAnnotation[] = [];
+
+    let nextOffset = 0;
+    let nextPossibleTokens: string[] = [];
+    try {
+        if (!query.length) {
+            let _rest;
+            [_rest, _rest, nextPossibleTokens] = lexQuery(" ").next().value;
+        } else {
+            for (const [token, _, nextTokens] of lexQuery(query)) {
+                let tokenType: string = token.type as string;
+                let annotation: QueryAnnotation = {
+                    type: tokenType,
+                    value: token.value,
+                    offset: token.offset,
+                };
+                if (LPAR_TYPES.includes(tokenType)) {
+                    if (openedParentheses.length > 0) {
+                        openedParentheses[
+                            openedParentheses.length - 1
+                        ].lastOpenedBracket = false;
+                    }
+                    annotation.lastOpenedBracket = true;
+                    openedParentheses.push(annotation);
+                } else if (RPAR_TYPES.includes(tokenType)) {
+                    openedParentheses[
+                        openedParentheses.length - 1
+                    ].lastOpenedBracket = false;
+                    openedParentheses.pop();
+                    if (openedParentheses.length > 0) {
+                        openedParentheses[
+                            openedParentheses.length - 1
+                        ].lastOpenedBracket = true;
+                    }
+                }
+                annotations.push(annotation);
+                nextOffset = token.offset + token.value.length;
+                nextPossibleTokens = nextTokens;
+            }
+        }
+    } catch (e: any) {
+        annotations.push({
+            type: "error",
+            value: query.slice(nextOffset),
+            error: e.toString(),
+            offset: nextOffset,
+        });
+        nextPossibleTokens = [];
+    }
+    return { annotations, nextPossibleTokens };
 }

@@ -1,5 +1,5 @@
-import { ObjectType } from "@mwdb-web/types/types";
-import { useEffect, useState } from "react";
+import { AttributeDefinition, ObjectType } from "@mwdb-web/types/types";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     annotateQuery,
     FIELD_PART_TYPES,
@@ -7,6 +7,8 @@ import {
     LPAR_TYPES,
     RPAR_TYPES,
 } from "@mwdb-web/components/RecentView/common/luceneLexer";
+import { api } from "@mwdb-web/commons/api";
+import { toast } from "react-toastify";
 
 export type QuerySuggestion = {
     suggestion: string;
@@ -182,7 +184,6 @@ function getCurrentField(currentQuery: string): [string[], boolean] {
     ) {
         currentField.push("");
     }
-    console.log(bracketStack);
     return [
         currentField,
         bracketStack.some((fieldType) => fieldType === "value_lpar"),
@@ -215,7 +216,14 @@ function makeSuggestion(
     };
 }
 
-function getSuggestions(currentQuery: string, objectType: ObjectType) {
+async function fetchSuggestions(
+    currentQuery: string,
+    objectType: ObjectType,
+    subfieldSuggestionGetters: Record<
+        string,
+        (currentField: string[]) => Promise<QuerySuggestion[]>
+    >
+): Promise<QuerySuggestion[]> {
     const [currentField, insideSubquery] = getCurrentField(currentQuery);
     const suggestions: QuerySuggestion[] = [];
     if (!currentField.length) return [];
@@ -273,21 +281,157 @@ function getSuggestions(currentQuery: string, objectType: ObjectType) {
             }
         }
         return suggestions;
+    } else {
+        const getSubfieldSuggestion =
+            subfieldSuggestionGetters[currentField[0]];
+        if (!getSubfieldSuggestion) {
+            return [];
+        }
+        return await getSubfieldSuggestion(currentField);
     }
-    return [];
+}
+
+function getStructureFromValue(value: any): any {
+    if (Array.isArray(value)) {
+        let structure = {};
+        for (let el of value) {
+            Object.assign(structure, getStructureFromValue(el));
+        }
+        return structure;
+    } else if (typeof value === "object") {
+        let structure: { [key: string]: any } = {};
+        for (let [key, val] of Object.entries(value)) {
+            structure[key] = getStructureFromValue(val);
+        }
+        return structure;
+    } else {
+        return {};
+    }
+}
+
+type AttributesStructure = {
+    descriptions: { [key: string]: string };
+    values: { [key: string]: any };
+};
+
+function getAttributesStructure(
+    attributeDefinitions: AttributeDefinition[]
+): AttributesStructure {
+    const values: { [key: string]: any } = {};
+    const descriptions: { [key: string]: string } = {};
+    for (let attributeDefinition of attributeDefinitions) {
+        descriptions[attributeDefinition.key] = attributeDefinition.description;
+        values[attributeDefinition.key] = {};
+        if (attributeDefinition.example_value) {
+            try {
+                const exampleValue = JSON.parse(
+                    attributeDefinition.example_value
+                );
+                values[attributeDefinition.key] =
+                    getStructureFromValue(exampleValue);
+            } catch (e) {
+                console.error(
+                    "Failed to parse example value, ignoring that attribute definition"
+                );
+            }
+        }
+    }
+    return { descriptions, values };
+}
+
+function useAttributesStructure(): () => Promise<AttributesStructure> {
+    const promise = useRef<Promise<AttributesStructure> | null>(null);
+
+    return useCallback(async () => {
+        if (!promise.current) {
+            promise.current = new Promise((resolve, reject) => {
+                api.getAttributeDefinitions("read")
+                    .then((response) => {
+                        let attributesStructure = getAttributesStructure(
+                            response.data["attribute_definitions"]
+                        );
+                        resolve(attributesStructure);
+                    })
+                    .catch((error) => {
+                        toast(error.toString(), { type: "error" });
+                    });
+            });
+        }
+        return await promise.current;
+    }, []);
+}
+
+function getAttributeSuggestions(
+    currentField: string[],
+    attributeStructure: AttributesStructure
+): QuerySuggestion[] {
+    if (currentField.length <= 1) return [];
+    if (currentField.length == 2) {
+        let suggestions = [];
+        for (let attributeKey of Object.keys(attributeStructure.descriptions)) {
+            let suggestion = makeSuggestion(currentField[1], attributeKey, {
+                description: attributeStructure.descriptions[attributeKey],
+                subfields:
+                    Object.keys(attributeStructure.values[attributeKey] || {})
+                        .length > 0,
+            });
+            if (suggestion) suggestions.push(suggestion);
+        }
+        return suggestions;
+    } else {
+        let suggestions = [];
+        const attributeKey = currentField[1];
+        let values = attributeStructure.values[attributeKey] || {};
+        for (let field of currentField.slice(2, currentField.length - 1)) {
+            if (!Object.keys(values[field] || {}).length) {
+                return [];
+            }
+            values = values[field] || {};
+        }
+        let lastField = currentField[currentField.length - 1];
+        for (let subfield of Object.keys(values)) {
+            let suggestion = makeSuggestion(lastField, subfield, {
+                description: "",
+                subfields: Object.keys(values[subfield] || {}).length > 0,
+            });
+            if (suggestion) suggestions.push(suggestion);
+        }
+        return suggestions;
+    }
 }
 
 export function useQuerySuggestions(
     currentQuery: string,
     objectType: ObjectType
 ): [QuerySuggestion[], boolean] {
+    const loadAttributesStructure = useAttributesStructure();
     const [suggestions, setSuggestions] = useState<QuerySuggestion[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
+    const fetchAttributeSuggestions = useCallback(
+        async (currentField: string[]) => {
+            let attributesStructure = await loadAttributesStructure();
+            return getAttributeSuggestions(currentField, attributesStructure);
+        },
+        [loadAttributesStructure]
+    );
+
     useEffect(() => {
-        const suggestions = getSuggestions(currentQuery, objectType);
-        setSuggestions(suggestions);
-    }, [currentQuery, objectType, setSuggestions]);
+        let valid = true;
+        fetchSuggestions(currentQuery, objectType, {
+            attribute: fetchAttributeSuggestions,
+            meta: fetchAttributeSuggestions,
+        }).then((suggestions) => {
+            if (valid) {
+                setSuggestions(suggestions);
+                setLoading(false);
+            }
+        });
+        setLoading(true);
+        return () => {
+            valid = false;
+        };
+    }, [currentQuery, objectType, setSuggestions, fetchAttributeSuggestions]);
 
     return [suggestions, loading];
 }

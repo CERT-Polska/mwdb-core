@@ -16,7 +16,7 @@ setup(name="mwdb-core",
       include_package_data=True,
       url="https://github.com/CERT-Polska/mwdb-core",
       install_requires=open("requirements.txt").read().splitlines(),
-      python_requires='>=3.7',
+      python_requires='>=3.10',
       entry_points={
         'console_scripts': [
             'mwdb-core=mwdb.cli:cli'

@@ -3,7 +3,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unaut
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
-from mwdb.core.plugins import hooks
+from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
 from mwdb.model import File
 from mwdb.model.file import EmptyFileError

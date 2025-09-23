@@ -7,11 +7,10 @@ from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFoun
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
-from mwdb.core.plugins import hooks
+from mwdb.core.hooks import hooks
 from mwdb.core.search import QueryBaseException, build_query
 from mwdb.core.service import Resource
 from mwdb.model import AttributeDefinition, Object, db
-from mwdb.model.tag import Tag
 from mwdb.schema.object import (
     ObjectCountRequestSchema,
     ObjectCountResponseSchema,
@@ -45,10 +44,6 @@ class ObjectUploader:
         if app_config.mwdb.enable_karton and not object.is_analyzed():
             object.spawn_analysis(arguments=params.get("karton_arguments", {}))
         hooks.on_created_object(object)
-        tags = params.get("tags")
-        for tag in tags:
-            db_tag = Tag(tag=tag["tag"], object_id=object.id)
-            hooks.on_created_tag(object, db_tag)
 
     def on_reuploaded(self, object, params):
         hooks.on_reuploaded_object(object)

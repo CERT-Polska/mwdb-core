@@ -12,6 +12,7 @@ from sqlalchemy.sql.expression import column, select, true, values
 from sqlalchemy.sql.sqltypes import String
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.hooks import hooks
 
 from . import db
 from .attribute import Attribute, AttributeDefinition, AttributePermission
@@ -257,6 +258,7 @@ class Object(db.Model):
             )
         if commit:
             db.session.commit()
+        hooks.on_created_relation(parent, self)
         return True
 
     def remove_parent(self, parent, commit=True):
@@ -288,6 +290,7 @@ class Object(db.Model):
 
         if commit:
             db.session.commit()
+        hooks.on_removed_relation(parent, self)
         return True
 
     def get_share_for_group(self, group_id) -> Optional[ObjectPermission]:
@@ -603,6 +606,7 @@ class Object(db.Model):
         """
         db_tag = self.get_tag(tag_name)
         if db_tag:
+            hooks.on_reuploaded_tag(self, db_tag)
             return False
 
         is_new = False
@@ -620,6 +624,10 @@ class Object(db.Model):
 
         if commit:
             db.session.commit()
+        if is_new:
+            hooks.on_created_tag(self, db_tag)
+        else:
+            hooks.on_reuploaded_tag(self, db_tag)
         return is_new
 
     def remove_tag(self, tag_name, commit=True):
@@ -646,6 +654,7 @@ class Object(db.Model):
 
         if commit:
             db.session.commit()
+        hooks.on_removed_tag(self, db_tag)
         return is_removed
 
     def get_attributes(
@@ -743,6 +752,8 @@ class Object(db.Model):
 
         db_attribute = Attribute(key=key, value=value, object_id=self.id)
         _, is_new = Attribute.get_or_create(db_attribute)
+        if is_new:
+            hooks.on_created_attribute(self, db_attribute)
         if commit:
             db.session.commit()
         return is_new
@@ -761,15 +772,23 @@ class Object(db.Model):
                 )
             )
 
+        attribute = attribute_query.first()
+        if not attribute:
+            return False
+
+        is_removed = True
         try:
             rows = attribute_query.delete(synchronize_session="fetch")
             db.session.commit()
-            return rows > 0
+            is_removed = rows > 0
         except IntegrityError:
             db.session.refresh(self)
             if attribute_query.first():
                 raise
-        return True
+
+        if is_removed:
+            hooks.on_removed_attribute(self, attribute)
+        return is_removed
 
     def remove_attribute(self, key, value, check_permissions=True):
         attribute_query = db.session.query(Attribute).filter(
@@ -783,15 +802,22 @@ class Object(db.Model):
         if check_permissions and not AttributeDefinition.query_for_set(key).first():
             return False
 
+        attribute = attribute_query.first()
+        if not attribute:
+            return False
+
+        is_removed = True
         try:
             rows = attribute_query.delete(synchronize_session="fetch")
             db.session.commit()
-            return rows > 0
+            is_removed = rows > 0
         except IntegrityError:
             db.session.refresh(self)
             if attribute_query.first():
                 raise
-        return True
+        if is_removed:
+            hooks.on_removed_attribute(self, attribute)
+        return is_removed
 
     def get_uploaders(self):
         """

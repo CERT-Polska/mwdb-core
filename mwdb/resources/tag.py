@@ -2,7 +2,6 @@ from flask import g, request
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.core.plugins import hooks
 from mwdb.core.service import Resource
 from mwdb.model import Tag, db
 from mwdb.schema.tag import (
@@ -191,17 +190,10 @@ class TagResource(Resource):
             raise NotFound("Object not found")
 
         tag_name = obj["tag"]
-        is_new = db_object.add_tag(tag_name)
+        db_object.add_tag(tag_name)
 
         logger.info("Tag added", extra={"tag": tag_name, "dhash": db_object.dhash})
         db.session.refresh(db_object)
-
-        tag = next((t for t in db_object.tags if t.tag == tag_name), None)
-        if is_new and tag:
-            hooks.on_created_tag(db_object, tag)
-            hooks.on_changed_object(db_object)
-        elif tag:
-            hooks.on_reuploaded_tag(db_object, tag)
 
         schema = TagItemResponseSchema(many=True)
         return schema.dump(db_object.tags)
@@ -267,14 +259,10 @@ class TagResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
-        tag_to_delete = next((t for t in db_object.tags if t.tag == obj["tag"]), None)
         tag_name = obj["tag"]
-        is_removed = db_object.remove_tag(tag_name)
+        db_object.remove_tag(tag_name)
 
         logger.info("Tag removed", extra={"tag": tag_name, "dhash": db_object.dhash})
         db.session.refresh(db_object)
-        if is_removed and tag_to_delete:
-            hooks.on_removed_tag(db_object, tag_to_delete)
-            hooks.on_changed_object(db_object)
         schema = TagItemResponseSchema(many=True)
         return schema.dump(db_object.tags)

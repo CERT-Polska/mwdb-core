@@ -6,7 +6,7 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.core.plugins import hooks
+from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
 from mwdb.model import Group, OpenIDProviderSettings, OpenIDUserIdentity, db
 from mwdb.schema.auth import AuthSuccessResponseSchema

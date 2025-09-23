@@ -1,28 +1,25 @@
 import contextlib
-import functools
 import importlib
 import pkgutil
 import sys
+from typing import Type
 
 from mwdb.core.app import api, app
 from mwdb.core.config import app_config
+from mwdb.core.hooks import HookHandler, register_hook_handler
 from mwdb.core.log import getLogger
 from mwdb.core.util import is_subdir
-from mwdb.model import Comment, Config, File, Object, Tag, TextBlob
-from mwdb.model.attribute import Attribute, AttributeDefinition
-from mwdb.model.group import Group
-from mwdb.model.user import User
 
 logger = getLogger()
 
-_plugin_handlers = []
 loaded_plugins = {}
 openid_provider_classes = {}
+PluginHookHandler = HookHandler
 
 
 class PluginAppContext(object):
-    def register_hook_handler(self, hook_handler_cls):
-        _plugin_handlers.append(hook_handler_cls())
+    def register_hook_handler(self, hook_handler_cls: Type["PluginHookHandler"]):
+        register_hook_handler(hook_handler_cls())
 
     def register_resource(self, resource, *urls, **kwargs):
         api.add_resource(resource, *urls, **kwargs)
@@ -35,163 +32,6 @@ class PluginAppContext(object):
 
     def register_openid_provider_class(self, provider_name, provider_class):
         openid_provider_classes[provider_name] = provider_class
-
-
-def hook_handler_method(meth):
-    @functools.wraps(meth)
-    def hook_handler(self, *args, **kwargs):
-        if self.is_callee:
-            meth(self, *args, **kwargs)
-        else:
-            call_hook(meth.__name__, *args, **kwargs)
-
-    return hook_handler
-
-
-class PluginHookBase(object):
-    def __init__(self, is_callee=False):
-        self.is_callee = is_callee
-
-    @hook_handler_method
-    def on_created_object(self, object: Object):
-        pass
-
-    @hook_handler_method
-    def on_reuploaded_object(self, object: Object):
-        pass
-
-    @hook_handler_method
-    def on_removed_object(self, object: Object):
-        pass
-
-    @hook_handler_method
-    def on_created_file(self, file: File):
-        pass
-
-    @hook_handler_method
-    def on_reuploaded_file(self, file: File):
-        pass
-
-    @hook_handler_method
-    def on_removed_file(self, file: File):
-        pass
-
-    @hook_handler_method
-    def on_created_config(self, config: Config):
-        pass
-
-    @hook_handler_method
-    def on_reuploaded_config(self, config: Config):
-        pass
-
-    @hook_handler_method
-    def on_removed_config(self, config: Config):
-        pass
-
-    @hook_handler_method
-    def on_created_text_blob(self, blob: TextBlob):
-        pass
-
-    @hook_handler_method
-    def on_reuploaded_text_blob(self, blob: TextBlob):
-        pass
-
-    @hook_handler_method
-    def on_removed_text_blob(self, blob: TextBlob):
-        pass
-
-    @hook_handler_method
-    def on_created_tag(self, object: Object, tag: Tag):
-        pass
-
-    @hook_handler_method
-    def on_reuploaded_tag(self, object: Object, tag: Tag):
-        pass
-
-    @hook_handler_method
-    def on_removed_tag(self, object: Object, tag: Tag):
-        pass
-
-    @hook_handler_method
-    def on_created_comment(self, object: Object, comment: Comment):
-        pass
-
-    @hook_handler_method
-    def on_removed_comment(self, object: Object, comment: Comment):
-        pass
-
-    @hook_handler_method
-    def on_created_relation(self, parent: Object, child: Object):
-        pass
-
-    @hook_handler_method
-    def on_removed_relation(self, parent: Object, child: Object):
-        pass
-
-    @hook_handler_method
-    def on_created_attribute_key(self, attribute_def: AttributeDefinition):
-        pass
-
-    @hook_handler_method
-    def on_updated_attribute_key(self, attribute_def: AttributeDefinition):
-        pass
-
-    @hook_handler_method
-    def on_removed_attribute_key(self, attribute_def: AttributeDefinition):
-        pass
-
-    @hook_handler_method
-    def on_created_attribute(self, object: Object, attribute: Attribute):
-        pass
-
-    @hook_handler_method
-    def on_removed_attribute(self, object: Object, attribute: Attribute):
-        pass
-
-    @hook_handler_method
-    def on_created_user(self, user: User):
-        pass
-
-    @hook_handler_method
-    def on_removed_user(self, user: User):
-        pass
-
-    @hook_handler_method
-    def on_updated_user(self, user: User):
-        pass
-
-    @hook_handler_method
-    def on_created_group(self, group: Group):
-        pass
-
-    @hook_handler_method
-    def on_removed_group(self, group: Group):
-        pass
-
-    @hook_handler_method
-    def on_updated_group(self, group: Group):
-        pass
-
-    @hook_handler_method
-    def on_created_membership(self, group: Group, user: User):
-        pass
-
-    @hook_handler_method
-    def on_removed_membership(self, group: Group, user: User):
-        pass
-
-    @hook_handler_method
-    def on_updated_membership(self, group: Group, user: User):
-        pass
-
-    @hook_handler_method
-    def on_changed_object(self, object: Object):
-        pass
-
-
-class PluginHookHandler(PluginHookBase):
-    def __init__(self):
-        super().__init__(True)
 
 
 def iter_local_plugin_modules():
@@ -251,7 +91,7 @@ def load_plugins(app_context: PluginAppContext):
         for plugin_name in plugin_list:
             try:
                 plugin = importlib.import_module(plugin_name)
-                if getattr(plugin, "__doc__", "").startswith(
+                if (getattr(plugin, "__doc__") or "").startswith(
                     "Karton integration plugin"
                 ):
                     logger.warning(
@@ -290,27 +130,3 @@ def get_plugin_info():
         }
         for plugin_name, plugin in loaded_plugins.items()
     }
-
-
-def call_hook(hook_name, *args, **kwargs):
-    if not hasattr(PluginHookBase, hook_name):
-        logger.warning("Undefined hook: {}".format(hook_name))
-        return
-
-    if not app_config.mwdb.enable_hooks:
-        logger.info(
-            "Hook {} will not be ran because enable_hooks is disabled.".format(
-                hook_name
-            )
-        )
-        return
-
-    for hook_handler in _plugin_handlers:
-        try:
-            fn = getattr(hook_handler, hook_name)
-            fn(*args, **kwargs)
-        except Exception:
-            logger.exception("Hook {} raised exception".format(hook_name))
-
-
-hooks = PluginHookBase()

@@ -182,6 +182,7 @@ function getCurrentField(currentQuery: string): [string[], boolean] {
             FIELD_TYPES.includes(tokenType)
         )
     ) {
+        // If next field name part is expected, but there is no token: put empty string
         currentField.push("");
     }
     return [
@@ -191,13 +192,13 @@ function getCurrentField(currentQuery: string): [string[], boolean] {
 }
 
 function makeSuggestion(
-    lastField: string,
-    fieldName: string,
+    partialInput: string,
+    suggestedInput: string,
     definition: FieldDefinition,
     prefix: string = ""
 ): QuerySuggestion | null {
-    let suggestion = prefix + fieldName;
-    if (!suggestion.startsWith(lastField)) {
+    let suggestion = prefix + suggestedInput;
+    if (!suggestion.startsWith(partialInput)) {
         return null;
     }
     if (definition.subquery) {
@@ -211,7 +212,7 @@ function makeSuggestion(
         suggestion,
         description: definition.description,
         apply: (currentQuery) =>
-            currentQuery.slice(0, currentQuery.length - lastField.length) +
+            currentQuery.slice(0, currentQuery.length - partialInput.length) +
             suggestion,
     };
 }
@@ -231,7 +232,7 @@ async function fetchSuggestions(
     // Handle untyped query
     if (objectType === "object" || insideSubquery) {
         if (currentField.length === 1) {
-            // If doesn't contain type selector: generate untyped and typed suggestions
+            // If doesn't contain type selector: generate untyped...
             for (let objectField of Object.keys(fieldDefinitions.object)) {
                 let suggestion = makeSuggestion(
                     lastField,
@@ -242,6 +243,7 @@ async function fetchSuggestions(
                     suggestions.push(suggestion);
                 }
             }
+            // ... and then typed suggestions with type selector prefix
             for (let objectType of ["file", "config", "blob"] as ObjectType[]) {
                 for (let typedField of Object.keys(
                     fieldDefinitions[objectType]
@@ -260,12 +262,16 @@ async function fetchSuggestions(
             return suggestions;
         } else {
             // If contains type selector: set it as object type
+            // and shift currentField
             if (Object.keys(fieldDefinitions).includes(currentField[0])) {
                 objectType = currentField.shift() as ObjectType;
             }
         }
     }
+    // Here type selector is gone
     if (currentField.length === 1) {
+        // If current field path doesn't contain any subfields
+        // then get field suggestions
         const definitions = {
             ...fieldDefinitions.object,
             ...fieldDefinitions[objectType],
@@ -282,6 +288,9 @@ async function fetchSuggestions(
         }
         return suggestions;
     } else {
+        // If we're in the subfield, it's possible
+        // that we need to fetch suggestion information
+        // from API
         const getSubfieldSuggestion =
             subfieldSuggestionGetters[currentField[0]];
         if (!getSubfieldSuggestion) {
@@ -340,8 +349,13 @@ function getAttributesStructure(
 }
 
 function useAttributesStructure(): () => Promise<AttributesStructure> {
+    // We want to fetch attributes only once, but there may be multiple requests for it
+    // as user is typing the search input containing "attribute." field.
+    // That's why:
+    // - we create promise only once and then use it multiple times
+    //   (multiple loader invocations await on the same promise)
+    // - resolved promise effectively keeps the information about attributes
     const promise = useRef<Promise<AttributesStructure> | null>(null);
-
     return useCallback(async () => {
         if (!promise.current) {
             promise.current = new Promise((resolve, reject) => {

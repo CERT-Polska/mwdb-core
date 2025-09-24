@@ -30,8 +30,13 @@ const lexer = moo.states({
     unfinished_phrase: {},
 });
 
+/**
+ * Making a full-blown parser would be too complicated here.
+ * Instead, we use lexer and simple state machine
+ */
 const allowedStates: { [state: string]: { [expectedLexem: string]: string } } =
     {
+        // Beginning of the expression
         main: {
             expr_notop: "main",
             expr_lpar: "main",
@@ -39,15 +44,18 @@ const allowedStates: { [state: string]: { [expectedLexem: string]: string } } =
             expr_phrase: "fieldsep",
             expr_term: "fieldsep",
         },
+        // End of field name, field separator ('.') is expected
         fieldsep: {
             expr_valuesep: "value_start",
             expr_fieldsep: "fieldname",
             expr_arrayref: "fieldsep",
         },
+        // Field name after field separator ('.')
         fieldname: {
             expr_phrase: "fieldsep",
             expr_term: "fieldsep",
         },
+        // Field value after value separator (':')
         value_start: {
             value_compop: "value",
             value_lrange: "range_start",
@@ -55,42 +63,54 @@ const allowedStates: { [state: string]: { [expectedLexem: string]: string } } =
             value_phrase: "value_end",
             value_term: "value_end",
         },
+        // Value preceded by comparison operator (e.g. 'size:>25')
         value: {
             value_phrase: "value_end",
             value_term: "value_end",
         },
+        // End of value, boolean operator or ')' expected
         value_end: {
             expr_boolop: "after_boolop",
             expr_space: "value_end",
             expr_rpar: "value_end",
         },
+        // Boolean operator must be followed by space or '('
         after_boolop: {
             expr_space: "main",
             expr_lpar: "main",
         },
+        // First element of range (after '[' or '{')
         range_start: {
             range_phrase: "range_to",
             range_term: "range_to",
         },
+        // TO operator expected
         range_to: {
             range_space: "range_to",
             range_toop: "range_end",
         },
+        // Second element of range expected (after 'TO')
         range_end: {
             range_space: "range_end",
             range_phrase: "range_fin",
             range_term: "range_fin",
         },
+        // After second element of range, end of range expected (']' or '}')
         range_fin: {
             range_space: "range_fin",
             range_rrange: "value_end",
         },
     };
 
+// Left parentheses types (for parentheses counting)
 export const LPAR_TYPES: string[] = ["expr_lpar", "value_lpar", "value_lrange"];
+// Right parentheses types (for parentheses counting)
 export const RPAR_TYPES: string[] = ["expr_rpar", "range_rrange"];
+// Field name parts
 export const FIELD_TYPES: string[] = ["expr_phrase", "expr_term"];
+// Other expected tokens being a part of field name
 export const FIELD_PART_TYPES: string[] = ["expr_arrayref", "expr_fieldsep"];
+// Keyword operators
 export const OPER_TYPES: string[] = [
     "expr_notop",
     "expr_boolop",
@@ -134,8 +154,8 @@ export function annotateQuery(query: string): AnnotatedQuery {
     let nextPossibleTokens: string[] = [];
     try {
         if (!query.length) {
-            let _rest;
-            [_rest, _rest, nextPossibleTokens] = lexQuery(" ").next().value;
+            // If query is empty: at least extract next possible tokens
+            nextPossibleTokens = lexQuery(" ").next().value[2];
         } else {
             for (const [token, _, nextTokens] of lexQuery(query)) {
                 let tokenType: string = token.type as string;

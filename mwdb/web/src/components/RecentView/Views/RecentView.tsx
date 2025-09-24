@@ -152,6 +152,7 @@ export function RecentView(props: Props) {
                                 onClick={(ev) => {
                                     ev.preventDefault();
                                     setCurrentQuery("");
+                                    setQueryInput("");
                                 }}
                             />
                         </div>

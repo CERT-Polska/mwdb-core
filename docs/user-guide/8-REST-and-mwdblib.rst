@@ -222,6 +222,42 @@ Sometimes you may want to keep track of the latest reported sample between scrip
         report_new_sample(sample)
         store_last(sample.id)
 
+Optimizing iteration over long list of objects
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, MWDB returns object lists in very small batches - 10 items at the time. This is a good default
+for Web UI and for handling heavy search queries, as it allows the system to quickly return initial results
+from the database.
+
+However, if you're using mwdblib to retrieve a large number of items - for example, the 1000 most recent files -
+the default behavior will result in 100 separate requests to the server. This introduces unnecessary overhead and
+increases the risk of hitting the request rate limit.
+
+This can be optimized by setting `chunk_size` argument, which is supported by all listing methods such as ``recent_files`` or ``search_files``:
+
+.. code-block:: python
+
+    from mwdblib import MWDB
+
+    mwdb = MWDB(api_key="<secret>")
+
+    def report_new_sample(sample):
+        print(f"Found matching sample {sample.name} ({sample.sha256})")
+
+    # Get samples from last hour using chunk_size=100
+    for sample in mwdb.search_files("upload_time:>1h", chunk_size=100):
+        report_new_sample(sample)
+
+
+Using a larger ``chunk_size`` than default one significantly improves performance for larger result sets:
+
+.. code-block:: console
+
+   $ python3 -m timeit -n 1 -r 3 -s "import mwdblib; mwdb = mwdblib.MWDB()" "list(mwdb.search_files('upload_time:>1h'))"
+   1 loop, best of 3: 1.09 sec per loop
+   $ python3 -m timeit -n 1 -r 3 -s "import mwdblib; mwdb = mwdblib.MWDB()" "list(mwdb.search_files('upload_time:>1h', chunk_size=100))"
+   1 loop, best of 3: 223 msec per loop
+
 Retrieving Karton analysis status
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

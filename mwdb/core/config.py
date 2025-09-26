@@ -145,6 +145,10 @@ class MWDBConfig(Config):
     log_level = key(cast=str, required=False, default=None)
     log_config_file = key(cast=path, required=False, default=None)
 
+    group_invite_expiration_time = key(
+        cast=int, required=False, default=7 * 24 * 3600
+    )  # one week
+
 
 @section("karton")
 class KartonConfig(Config):

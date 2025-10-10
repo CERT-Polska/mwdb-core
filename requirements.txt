@@ -19,7 +19,7 @@ redis==4.5.4
 boto3==1.24.38
 typed-config==1.1.0
 karton-core==5.4.0
-Authlib==1.6.4
+Authlib==1.6.5
 pyJWT==2.4.0
 limits==3.9.0
 python-dateutil==2.8.2

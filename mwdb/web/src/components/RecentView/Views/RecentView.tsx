@@ -9,6 +9,8 @@ import { RecentViewList } from "./RecentViewList";
 import { QuickQuery } from "../common/QuickQuery";
 import { ObjectType } from "@mwdb-web/types/types";
 import { AxiosError } from "axios";
+import { QueryInput } from "../common/QueryInput";
+import { useQuerySuggestions } from "../common/useQuerySuggestions";
 
 type Props = {
     type: ObjectType;
@@ -30,6 +32,10 @@ export function RecentView(props: Props) {
     }> | null>(null);
     const [objectCount, setObjectCount] = useState<number | null>(null);
     const countingEnabled = searchParams.get("count") === "1" ? 1 : 0;
+    const [suggestions, loadingSuggestions] = useQuerySuggestions(
+        queryInput,
+        props.type
+    );
 
     const setCurrentQuery = useCallback(
         (query: string) => {
@@ -137,7 +143,7 @@ export function RecentView(props: Props) {
                         setCurrentQuery(queryInput);
                     }}
                 >
-                    <div className="input-group">
+                    <div className="input-group dropdown">
                         <div className="input-group-prepend">
                             <input
                                 className="btn btn-outline-danger"
@@ -146,15 +152,20 @@ export function RecentView(props: Props) {
                                 onClick={(ev) => {
                                     ev.preventDefault();
                                     setCurrentQuery("");
+                                    setQueryInput("");
                                 }}
                             />
                         </div>
-                        <input
-                            className="form-control small"
-                            type="text"
-                            placeholder="Search (Lucene query or hash)..."
+                        <QueryInput
                             value={queryInput}
-                            onChange={(evt) => setQueryInput(evt.target.value)}
+                            onChange={(currentValue) =>
+                                setQueryInput(currentValue)
+                            }
+                            onSubmit={() => {
+                                setCurrentQuery(queryInput);
+                            }}
+                            suggestions={suggestions}
+                            loadingSuggestions={loadingSuggestions}
                         />
                         <div className="input-group-append">
                             <div className="btn-group">

@@ -219,7 +219,7 @@ Untyped fields
 * ``dhash:<string>`` - Object identifier (SHA256)
 * ``tag:<string>`` - Object tag
 * ``comment:<string>`` - Object comment contents
-* ``meta.<attribute>:<string>`` - Object attribute value
+* ``attribute.<attribute>:<string>`` - Object attribute value
 * ``upload_time:<datetime>`` - Object first upload timestamp
 * ``karton:<uuid>`` - Karton analysis artifacts
 

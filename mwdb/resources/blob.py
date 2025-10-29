@@ -3,7 +3,7 @@ from werkzeug.exceptions import Conflict
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
-from mwdb.core.plugins import hooks
+from mwdb.core.hooks import hooks
 from mwdb.model import TextBlob
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.blob import (

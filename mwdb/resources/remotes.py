@@ -7,7 +7,7 @@ from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
-from mwdb.core.plugins import hooks
+from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
 from mwdb.model import Config, File, TextBlob, db
 from mwdb.model.object import ObjectTypeConflictError

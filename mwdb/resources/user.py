@@ -8,8 +8,8 @@ from werkzeug.exceptions import Conflict, Forbidden, InternalServerError, NotFou
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
+from mwdb.core.hooks import hooks
 from mwdb.core.mail import MailError, send_email_notification
-from mwdb.core.plugins import hooks
 from mwdb.core.service import Resource
 from mwdb.model import Group, Member, User, db
 from mwdb.schema.user import (

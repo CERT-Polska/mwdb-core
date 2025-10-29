@@ -1,7 +1,6 @@
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.core.plugins import hooks
 from mwdb.core.service import Resource
 from mwdb.model import Object, db
 from mwdb.schema.relations import RelationsResponseSchema
@@ -123,12 +122,6 @@ class ObjectChildResource(Resource):
 
         db.session.commit()
         if is_added:
-            hooks.on_created_relation(parent_object, child_object)
-            if parent_object.id != child_object.id:
-                hooks.on_changed_object(parent_object)
-                hooks.on_changed_object(child_object)
-            else:
-                hooks.on_changed_object(parent_object)
             logger.info(
                 "Child added",
                 extra={"parent": parent_object.dhash, "child": child_object.dhash},
@@ -192,13 +185,6 @@ class ObjectChildResource(Resource):
         if not result:
             # Relation already removed
             return
-
-        hooks.on_removed_relation(parent_object, child_object)
-        if parent_object.id != child_object.id:
-            hooks.on_changed_object(parent_object)
-            hooks.on_changed_object(child_object)
-        else:
-            hooks.on_changed_object(parent_object)
 
         logger.info(
             "Child removed",

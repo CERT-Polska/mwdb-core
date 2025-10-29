@@ -2,7 +2,7 @@ from flask import g, request
 from werkzeug.exceptions import NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.core.plugins import hooks
+from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
 from mwdb.model import Comment, db
 from mwdb.schema.comment import CommentItemResponseSchema, CommentRequestSchema
@@ -129,7 +129,6 @@ class CommentResource(Resource):
 
         db.session.refresh(comment)
         hooks.on_created_comment(db_object, comment)
-        hooks.on_changed_object(db_object)
         schema = CommentItemResponseSchema()
         return schema.dump(comment)
 
@@ -194,6 +193,5 @@ class CommentDeleteResource(Resource):
             logger.info("comment deleted", extra={"comment": comment_id})
             db.session.commit()
             hooks.on_removed_comment(db_object, db_comment)
-            hooks.on_changed_object(db_object)
         else:
             raise NotFound("Comment not found")

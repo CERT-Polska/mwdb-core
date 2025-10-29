@@ -6,7 +6,7 @@ from sqlalchemy import exists, func
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import false
-from werkzeug.exceptions import Conflict, Forbidden, InternalServerError
+from werkzeug.exceptions import BadRequest, Conflict, Forbidden, InternalServerError
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -237,7 +237,10 @@ class ChangePasswordResource(Resource):
         if user is None:
             raise Forbidden("Set password token expired")
 
-        user.set_password(password=obj["password"])
+        try:
+            user.set_password(password=obj["password"])
+        except ValueError:
+            raise BadRequest("Password can't be longer than 72 bytes")
         db.session.commit()
 
         logger.info("Password changed", extra={"user": user.login})

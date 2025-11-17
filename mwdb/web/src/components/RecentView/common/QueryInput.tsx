@@ -67,7 +67,9 @@ function Leaf({ attributes, children, leaf }: RenderLeafProps) {
             style = {
                 color: "purple",
             };
-        } else if (annotation.type === "value_phrase") {
+        } else if (
+            ["value_phrase", "value_phrase_unfin"].includes(annotation.type)
+        ) {
             // Style of quoted value (phrase)
             style = {
                 color: "green",

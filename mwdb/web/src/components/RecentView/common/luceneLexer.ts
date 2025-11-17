@@ -18,7 +18,11 @@ const lexer = moo.states({
         value_lrange: { match: /[\[{]/, next: "range" },
         value_lpar: { match: "(", next: "expression" },
         value_phrase: { match: /"(?:\\.|[^\n"\\])*"/, next: "expression" },
-        value_term: { match: /(?:[^\s:^\\~(){}\[\]]|\\.)+/, next: "expression" },
+        value_phrase_unfin: { match: /"(?:\\.|[^\n"\\])*/, next: "expression" },
+        value_term: {
+            match: /(?:[^\s:^\\~(){}\[\]]|\\.)+/,
+            next: "expression",
+        },
     },
     range: {
         range_rrange: { match: /[}\]]/, next: "expression" },
@@ -61,6 +65,7 @@ const allowedStates: { [state: string]: { [expectedLexem: string]: string } } =
             value_lrange: "range_start",
             value_lpar: "main",
             value_phrase: "value_end",
+            value_phrase_unfin: "phrase_unfin",
             value_term: "value_end",
         },
         // Value preceded by comparison operator (e.g. 'size:>25')
@@ -100,6 +105,8 @@ const allowedStates: { [state: string]: { [expectedLexem: string]: string } } =
             range_space: "range_fin",
             range_rrange: "value_end",
         },
+        // Synthetic terminal state for unfinished phrases
+        phrase_unfin: {},
     };
 
 // Left parentheses types (for parentheses counting)

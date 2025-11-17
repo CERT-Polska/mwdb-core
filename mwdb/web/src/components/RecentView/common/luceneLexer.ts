@@ -6,7 +6,7 @@ const lexer = moo.states({
         expr_notop: "NOT",
         expr_phrase: /"(?:\\.|[^\n"\\])*"/,
         expr_fieldsep: ".",
-        expr_term: /(?:\w|\\.)+/,
+        expr_term: /(?:[^\s:^\\~(){}\[\].]|\\.)+/,
         expr_arrayref: "*",
         expr_valuesep: { match: ":", next: "value" },
         expr_lpar: "(",
@@ -18,7 +18,7 @@ const lexer = moo.states({
         value_lrange: { match: /[\[{]/, next: "range" },
         value_lpar: { match: "(", next: "expression" },
         value_phrase: { match: /"(?:\\.|[^\n"\\])*"/, next: "expression" },
-        value_term: { match: /(?:\w|\\.|[*?\-_.])+/, next: "expression" },
+        value_term: { match: /(?:[^\s:^\\~(){}\[\]]|\\.)+/, next: "expression" },
     },
     range: {
         range_rrange: { match: /[}\]]/, next: "expression" },

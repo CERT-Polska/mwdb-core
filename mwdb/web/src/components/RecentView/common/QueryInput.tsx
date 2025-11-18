@@ -265,6 +265,10 @@ export function QueryInput(props: QueryInputProps) {
                     style={{
                         maxHeight: "8rem",
                         overflowY: "auto",
+                        ...(!props.loadingSuggestions &&
+                        props.suggestions.length == 0
+                            ? { visibility: "hidden" }
+                            : {}),
                     }}
                 >
                     {!props.loadingSuggestions ? (

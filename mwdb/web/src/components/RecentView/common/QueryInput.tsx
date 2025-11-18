@@ -257,7 +257,7 @@ export function QueryInput(props: QueryInputProps) {
                         padding: "6px 8px",
                         borderRadius: "4px",
                         width: "250px",
-                        overflowX: "auto",
+                        overflowX: "hidden",
                     }}
                 />
                 <div

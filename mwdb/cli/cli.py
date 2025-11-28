@@ -133,3 +133,17 @@ def configure_web(ctx, target_dir):
             ),
             err=True,
         )
+
+
+@cli.command()
+@click.password_option()
+def set_admin_password(password):
+    """
+    Set administrator password for MWDB instance
+    """
+    from mwdb.model import User, db
+
+    admin = db.session.query(User).filter(User.login == "admin").first()
+    admin.set_password(password)
+    db.session.add(admin)
+    db.session.commit()

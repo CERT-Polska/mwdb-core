@@ -1,18 +1,18 @@
 import { fromPlugins } from "./loader";
 
 type Props = {
-    [extensionProp: string]: any;
     ident: string;
-    fallback?: JSX.Element;
+    children?: any;
+    [extensionProp: string]: any;
 };
 
-export function Extension({ ident, fallback, ...props }: Props) {
+export function Extension({ ident, children, ...props }: Props) {
     const components = fromPlugins(ident);
-    if (components.length === 0) return fallback || <></>;
+    if (components.length === 0) return children || <></>;
     return (
         <>
             {components.map((ExtElement) => (
-                <ExtElement {...props} />
+                <ExtElement {...props}>{children}</ExtElement>
             ))}
         </>
     );

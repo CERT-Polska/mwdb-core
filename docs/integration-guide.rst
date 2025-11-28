@@ -335,6 +335,58 @@ by references to few methods and wrappers from ``common/plugins`` :
 
 So ``navbar`` is one of ``Extendable`` wrappers that can be found within application and that's why we can add extra navbar item.
 
+Web plugins: Transforming Extendable element
+--------------------------------------------
+
+.. versionadded:: 2.16.0
+
+MWDB Core applies the ``Extendable`` wrapper primarily to basic container components. For example: the ``ShowObject`` view component is composed of two Extendables: ``showObjectLeftColumn`` and ``showObjectRightColumn``. As explained in the previous sections, plugins can normally place elements *before*, *after* and *instead of* the original component.
+
+But what if you want to insert an additional card **between** existing cards in the left column rather than only before/after the entire block?
+
+Starting from version 2.16.0, ``<name>Replace`` extension components are treated as wrappers around the original element. The original component is passed as ``children``, which allows you to transform or rearrange those children using utilities like `React.Children.map <https://18.react.dev/reference/react/Children#children-map>`_.
+
+To simplify common use cases, MWDB provides a helper component called ``InjectAfter``. It injects a custom element after the specified index in the original children list.
+
+For example, to render an "Extra Tab" card immediately after the basic object details, you can write:
+
+.. code-block:: jsx
+
+    import React from 'react';
+    import { InjectAfter } from "@mwdb-web/commons/plugins";
+
+    function ObjectExtraTab() {
+        return (
+            <div className="card">
+                <div className="card-header">
+                    Extra tab
+                </div>
+                <div className="card-body">
+                    Hello from this tab
+                </div>
+            </div>
+        )
+    }
+
+    export default () => ({
+        showObjectLeftColumnReplace: [
+            ({children}) => (
+                <InjectAfter
+                    afterElementIndex={0}
+                    element={() => <ObjectExtraTab />}
+                >
+                    {children}
+                </InjectAfter>
+            )
+        ],
+    })
+
+.. note::
+
+    Only one replacement should be defined for each Extendable.
+    If multiple plugins attempt to replace the same Extendable,
+    the original children will be rendered multiple times.
+
 Web plugins: how it works internally?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

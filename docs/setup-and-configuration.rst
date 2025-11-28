@@ -333,6 +333,7 @@ Extra features:
 
 * ``enable_rate_limit`` (0 or 1) - Turns on rate limiting. Requires Redis database and ``redis_uri`` to be set. Default is ``0``.
 * ``enable_registration`` (0 or 1) - Turns on user registration features. Requires additional configuration. Default is ``0``.
+* ``enable_password_auth`` (0 or 1) - Enables password-based authentication. You may disable it if you want to authenticate only via OpenID Connect. Default is ``1``.
 * ``enable_maintenance`` (0 or 1) - Turns on maintenance mode, making MWDB unavailable for users other than ``admin``. Default is ``0``.
 * ``enable_json_logger`` (0 or 1) - Enables JSON logging which may be more convenient for automated log processing. Default is ``0``.
 * ``enable_prometheus_metrics`` (0 or 1) - Enables Prometheus metrics (\ ``/api/varz`` endpoint\ )

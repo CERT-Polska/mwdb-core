@@ -59,6 +59,7 @@ class ServerInfoResource(Resource):
                 "instance_name": app_config.mwdb.instance_name,
                 "is_maintenance_set": app_config.mwdb.enable_maintenance,
                 "is_registration_enabled": app_config.mwdb.enable_registration,
+                "is_password_auth_enabled": app_config.mwdb.enable_password_auth,
                 "is_karton_enabled": app_config.mwdb.enable_karton,
                 "is_oidc_enabled": app_config.mwdb.enable_oidc,
                 "is_3rd_party_sharing_consent_enabled": (

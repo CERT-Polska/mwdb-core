@@ -94,83 +94,99 @@ export function UserLoginView() {
             <div className="background" />
             <View fluid ident="userLogin">
                 <h2>Welcome to MWDB</h2>
-                <h6>Log in using mwdb credentials</h6>
-                <form
-                    onSubmit={(ev) => {
-                        ev.preventDefault();
-                        tryLogin();
-                    }}
-                >
-                    <Extension ident="userLoginNote" />
-                    <div className="form-group">
-                        <label className="required">Login</label>
-                        <input
-                            type="text"
-                            name="login"
-                            value={login}
-                            onChange={(ev) => setLogin(ev.target.value)}
-                            className="form-control"
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label className="required">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={password}
-                            onChange={(ev) => setPassword(ev.target.value)}
-                            className="form-control"
-                            required
-                        />
-                    </div>
-                    <input
-                        type="submit"
-                        value="Log in"
-                        className="form-control btn btn-success"
-                    />
-                    <nav
-                        className="form-group"
-                        style={{ textAlign: "center", marginTop: "5px" }}
+                <h6>Please log in to continue</h6>
+                <ShowIf condition={config.config.is_password_auth_enabled}>
+                    <form
+                        onSubmit={(ev) => {
+                            ev.preventDefault();
+                            tryLogin();
+                        }}
                     >
-                        <div className="d-flex justify-content-between">
-                            <div>
-                                <Link to="/recover_password">
-                                    Forgot password?
-                                </Link>
-                            </div>
-                            <div>
-                                <ShowIf
-                                    condition={
-                                        config.config["is_registration_enabled"]
-                                    }
-                                >
-                                    <Link to="/register">Register user</Link>
-                                </ShowIf>
-                            </div>
+                        <Extension ident="userLoginNote" />
+                        <div className="form-group">
+                            <label className="required">Login</label>
+                            <input
+                                type="text"
+                                name="login"
+                                value={login}
+                                onChange={(ev) => setLogin(ev.target.value)}
+                                className="form-control"
+                                required
+                            />
                         </div>
-                    </nav>
-                    <ShowIf condition={providers.length > 0}>
-                        <>
-                            <hr />
-                            <h6>Log in using OAuth</h6>
-                            {providers.length <= 5 ? (
-                                providers.map((provider, i) => (
-                                    <ProviderButton
-                                        provider={provider}
-                                        color={
-                                            colorsList[i % colorsList.length]
+                        <div className="form-group">
+                            <label className="required">Password</label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={password}
+                                onChange={(ev) => setPassword(ev.target.value)}
+                                className="form-control"
+                                required
+                            />
+                        </div>
+                        <input
+                            type="submit"
+                            value="Log in"
+                            className="form-control btn btn-success"
+                        />
+                        <nav
+                            className="form-group"
+                            style={{ textAlign: "center", marginTop: "5px" }}
+                        >
+                            <div className="d-flex justify-content-between">
+                                <div>
+                                    <Link to="/recover_password">
+                                        Forgot password?
+                                    </Link>
+                                </div>
+                                <div>
+                                    <ShowIf
+                                        condition={
+                                            config.config[
+                                                "is_registration_enabled"
+                                            ]
                                         }
-                                    />
-                                ))
-                            ) : (
-                                <ProvidersSelectList
-                                    providersList={providers}
+                                    >
+                                        <Link to="/register">
+                                            Register user
+                                        </Link>
+                                    </ShowIf>
+                                </div>
+                            </div>
+                        </nav>
+                    </form>
+                </ShowIf>
+                <ShowIf condition={providers.length > 0}>
+                    <>
+                        <hr />
+                        <h6>Log in using OAuth</h6>
+                        {providers.length <= 5 ? (
+                            providers.map((provider, i) => (
+                                <ProviderButton
+                                    provider={provider}
+                                    color={colorsList[i % colorsList.length]}
                                 />
-                            )}
-                        </>
-                    </ShowIf>
-                </form>
+                            ))
+                        ) : (
+                            <ProvidersSelectList providersList={providers} />
+                        )}
+                    </>
+                </ShowIf>
+                <ShowIf
+                    condition={
+                        !config.config.is_password_auth_enabled &&
+                        providers.length === 0
+                    }
+                >
+                    <strong>
+                        Error: No UI authentication methods enabled. This MWDB
+                        instance may be available only via API.
+                        <br />
+                        Please ask MWDB instance administrator for further
+                        instructions.
+                    </strong>
+                </ShowIf>
             </View>
         </div>
     );

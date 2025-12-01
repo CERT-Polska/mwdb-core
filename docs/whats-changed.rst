@@ -7,6 +7,13 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
 
+v2.16.0
+-------
+
+This release contains new UI features and performance improvements.
+
+Complete changelog can be found here: `v2.16.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.16.0>`_.
+
 v2.15.0
 -------
 

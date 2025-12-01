@@ -118,6 +118,7 @@ class MWDBConfig(Config):
 
     enable_rate_limit = key(cast=intbool, required=False, default=False)
     enable_registration = key(cast=intbool, required=False, default=False)
+    enable_password_auth = key(cast=intbool, required=False, default=True)
     enable_maintenance = key(cast=intbool, required=False, default=False)
     enable_hooks = key(cast=intbool, required=False, default=True)
     enable_karton = key(cast=intbool, required=False, default=False)

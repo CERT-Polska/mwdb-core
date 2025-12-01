@@ -65,9 +65,17 @@ After successfully registering the correct information about the appropriate pro
 
 To do this go to the ``Profile`` and click on the ``OpenID Connect`` section. There you can link your local account with an external identity.
 
-Now to test authentication with external provider, please log out and go to the ``OAuth authenication`` tab where you can log in with OpenID Connect protocol.
+Now to test authentication with external provider, please log out and go to the ``OAuth authentication`` tab where you can log in with OpenID Connect protocol.
 
 .. note::
     It is also possible to create a new MWDB account by authorizing through external identity provider.
 
     For users who already have MWDB accounts it is recommended to bind the account with external identity in Profile section.
+
+Disable password-based authentication
+-------------------------------------
+
+.. versionadded:: 2.16.0
+
+If you want to use only OpenID Connect for authentication and disable
+regular password-based login, set ``enable_password_auth`` option in MWDB configuration to ``0``.

@@ -79,6 +79,11 @@ class LoginResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
+        if not app_config.mwdb.enable_password_auth:
+            raise Forbidden(
+                "Password-based authentication is disabled by administrator."
+            )
+
         schema = AuthLoginRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
@@ -229,6 +234,11 @@ class ChangePasswordResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
+        if not app_config.mwdb.enable_password_auth:
+            raise Forbidden(
+                "Password-based authentication is disabled by administrator."
+            )
+
         schema = AuthSetPasswordRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
@@ -279,6 +289,11 @@ class RequestPasswordChangeResource(Resource):
                 When SMTP server is unavailable or not properly configured
                 on the server.
         """
+        if not app_config.mwdb.enable_password_auth:
+            raise Forbidden(
+                "Password-based authentication is disabled by administrator."
+            )
+
         login = g.auth_user.login
         email = g.auth_user.email
 
@@ -343,6 +358,11 @@ class RecoverPasswordResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
+        if not app_config.mwdb.enable_password_auth:
+            raise Forbidden(
+                "Password-based authentication is disabled by administrator."
+            )
+
         schema = AuthRecoverPasswordRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 

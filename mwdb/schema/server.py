@@ -11,6 +11,7 @@ class ServerInfoResponseSchema(Schema):
     instance_name = fields.Str(required=True, allow_none=False)
     is_maintenance_set = fields.Boolean(required=True, allow_none=False)
     is_registration_enabled = fields.Boolean(required=True, allow_none=False)
+    is_password_auth_enabled = fields.Boolean(required=True, allow_none=False)
     is_karton_enabled = fields.Boolean(required=True, allow_none=False)
     is_oidc_enabled = fields.Boolean(required=True, allow_none=False)
     is_3rd_party_sharing_consent_enabled = fields.Boolean(

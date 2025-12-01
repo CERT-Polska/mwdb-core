@@ -56,6 +56,7 @@ services:
     environment:
       HOST: 0.0.0.0
       REACT_APP_API_URL: "/api/"
+      __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: "mwdb-web"
     volumes:
       - "./mwdb/web/public:/app/public"
       - "./mwdb/web/src:/app/src"
@@ -75,7 +76,7 @@ services:
     ports:
       - "127.0.0.1:8025:8025"
   karton-system:
-    image: certpl/karton-system:v5.0.0
+    image: certpl/karton-system:v5.9.0
     depends_on:
       - redis
       - minio
@@ -84,14 +85,14 @@ services:
     entrypoint: karton-system
     command: --setup-bucket
   karton-classifier:
-    image: certpl/karton-classifier:v1.4.0
+    image: certpl/karton-classifier:v2.1.0
     depends_on:
       - redis
       - minio
     volumes:
       - "./dev/karton.ini:/etc/karton/karton.ini"
   karton-dashboard:
-    image: certpl/karton-dashboard:v1.4.0
+    image: certpl/karton-dashboard:v1.6.0
     depends_on:
       - redis
       - minio
@@ -100,15 +101,13 @@ services:
     ports:
       - "127.0.0.1:8030:5000"
   karton-mwdb-reporter:
-    image: certpl/karton-mwdb-reporter:v1.2.0
+    image: certpl/karton-mwdb-reporter:v1.3.0
     depends_on:
       - redis
       - minio
       - mwdb-web
+      - mwdb
     volumes:
       - "./dev/karton.ini:/etc/karton/karton.ini"
     env_file:
       - mwdb-vars.env
-    environment:
-      KARTON_MWDB_USERNAME: ${MWDB_ADMIN_LOGIN}
-      KARTON_MWDB_PASSWORD: ${MWDB_ADMIN_PASSWORD}

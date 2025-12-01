@@ -143,7 +143,9 @@ def set_admin_password(password):
     """
     from mwdb.model import User, db
 
-    admin = db.session.query(User).filter(User.login == "admin").first()
+    admin = (
+        db.session.query(User).filter(User.login == app_config.mwdb.admin_login).first()
+    )
     admin.set_password(password)
     db.session.add(admin)
     db.session.commit()

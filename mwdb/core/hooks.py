@@ -1,6 +1,6 @@
 import abc
 import functools
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from mwdb.core.config import app_config
 from mwdb.core.log import getLogger
@@ -58,32 +58,33 @@ def execute_hook_handlers():
                 )
 
 
-def hook_method(meth):
-    @functools.wraps(meth)
+def hook_method(method):
+    @functools.wraps(method)
     def hook_handler(self: "HookMethods", *args, **kwargs):
-        self.handle_hook_method_call(meth, *args, **kwargs)
+        self._schedule_hook(method.__name__, *args, **kwargs)
+        return method(self, *args, **kwargs)
 
     return hook_handler
 
 
-def changes_object(meth):
-    @functools.wraps(meth)
+def changes_object(method):
+    @functools.wraps(method)
     def hook_handler(self: "HookMethods", *args, **kwargs):
         from mwdb.model import Object
 
         for arg in args:
             if isinstance(arg, Object):
-                self.handle_hook_method_call(self.on_changed_object, arg)
+                self._schedule_hook("on_changed_object", arg)
         for kwarg in kwargs.values():
             if isinstance(kwarg, Object):
-                self.handle_hook_method_call(self.on_changed_object, kwarg)
+                self._schedule_hook("on_changed_object", kwarg)
+        return method(self, *args, **kwargs)
 
     return hook_handler
 
 
 class HookMethods(abc.ABC):
-    def handle_hook_method_call(self, method: Callable, *args: Any, **kwargs: Any):
-        raise NotImplementedError
+    def _schedule_hook(self, method_name: str, *args: Any, **kwargs: Any): ...
 
     @hook_method
     def on_created_object(self, object: "Object"): ...
@@ -198,13 +199,13 @@ class HookMethods(abc.ABC):
 
 
 class HookHandler(HookMethods):
-    def handle_hook_method_call(self, method: Callable, *args: Any, **kwargs: Any):
-        method(*args, **kwargs)
+    def _schedule_hook(self, method_name: str, *args: Any, **kwargs: Any):
+        return
 
 
 class HookDispatcher(HookMethods):
-    def handle_hook_method_call(self, method: Callable, *args: Any, **kwargs: Any):
-        schedule_hook(method.__name__, args, kwargs)
+    def _schedule_hook(self, method_name: str, *args: Any, **kwargs: Any):
+        schedule_hook(method_name, args, kwargs)
 
 
 hooks = HookDispatcher()

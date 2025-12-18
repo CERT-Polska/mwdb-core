@@ -3,10 +3,15 @@ import { KartonAnalysisRow } from "../common/KartonAnalysisRow";
 
 type Props = {
     analyses: KartonAnalysis[];
-    handleRemoveAnalysis: (id: number) => void;
+    handleRemoveAnalysis: (id: string) => void;
+    loadMore: (() => Promise<void>) | null;
 };
 
-export function KartonAnalysisList({ analyses, handleRemoveAnalysis }: Props) {
+export function KartonAnalysisList({
+    analyses,
+    handleRemoveAnalysis,
+    loadMore,
+}: Props) {
     if (!analyses) {
         return <div className="card-body text-muted">Loading data...</div>;
     }
@@ -19,19 +24,30 @@ export function KartonAnalysisList({ analyses, handleRemoveAnalysis }: Props) {
     }
     return (
         <table className="table table-striped table-bordered wrap-table">
-            {analyses
-                .slice()
-                .reverse()
-                .map((analysis) => (
-                    <tr key={analysis.id}>
-                        <td>
-                            <KartonAnalysisRow
-                                analysis={analysis}
-                                removeAnalysis={handleRemoveAnalysis}
-                            />
-                        </td>
-                    </tr>
-                ))}
+            {analyses.slice().map((analysis) => (
+                <tr key={analysis.id}>
+                    <td>
+                        <KartonAnalysisRow
+                            analysis={analysis}
+                            removeAnalysis={handleRemoveAnalysis}
+                        />
+                    </td>
+                </tr>
+            ))}
+            {loadMore ? (
+                <tr key="loadMore">
+                    <td>
+                        <button
+                            className="btn btn-link"
+                            onClick={() => loadMore()}
+                        >
+                            Load more...
+                        </button>
+                    </td>
+                </tr>
+            ) : (
+                []
+            )}
         </table>
     );
 }

@@ -5,6 +5,7 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.service import Resource
 from mwdb.model import KartonAnalysis, Object
 from mwdb.schema.karton import (
+    KartonAnalysisListRequestSchema,
     KartonItemResponseSchema,
     KartonListResponseSchema,
     KartonSubmitAnalysisRequestSchema,
@@ -13,6 +14,7 @@ from mwdb.schema.karton import (
 from . import (
     access_object,
     is_valid_uuid,
+    load_schema,
     loads_schema,
     logger,
     requires_authorization,
@@ -45,6 +47,14 @@ class KartonObjectResource(Resource):
               schema:
                 type: string
               description: Object identifier
+            - in: query
+              name: older_than
+              schema:
+                type: string
+              description: |
+                Fetch analyses which are older than the analysis
+                specified by identifier.
+              required: false
         responses:
             200:
                 description: Information about analysis status
@@ -63,9 +73,12 @@ class KartonObjectResource(Resource):
         if db_object is None:
             raise NotFound("Object not found")
 
+        obj = load_schema(request.args, KartonAnalysisListRequestSchema())
+
         status = db_object.get_analysis_status()
         schema = KartonListResponseSchema()
-        return schema.dump({"status": status, "analyses": db_object.analyses})
+        analyses = db_object.get_latest_analyses(older_than=obj["older_than"])
+        return schema.dump({"status": status, "analyses": analyses})
 
     @requires_authorization
     @requires_capabilities(Capabilities.karton_reanalyze)

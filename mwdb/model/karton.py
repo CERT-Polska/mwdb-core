@@ -1,6 +1,7 @@
 import datetime
 
 from flask import g
+from sqlalchemy import exists
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.exc import IntegrityError
 
@@ -113,3 +114,8 @@ class KartonAnalysis(db.Model):
         )
         db.session.add(analysis)
         return analysis
+
+    def has_objects(self) -> bool:
+        return db.session.query(
+            exists([1]).where(karton_object.c.analysis_id == self.id)
+        ).scalar()

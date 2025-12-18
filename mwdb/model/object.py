@@ -1,13 +1,14 @@
 import datetime
+import uuid
 from collections import namedtuple
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from flask import g
-from sqlalchemy import and_, cast, distinct, exists, func
+from sqlalchemy import and_, cast, delete, distinct, exists, func, insert
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import column_property
+from sqlalchemy.orm import aliased, column_property
 from sqlalchemy.sql.expression import column, select, true, values
 from sqlalchemy.sql.sqltypes import String
 
@@ -221,25 +222,42 @@ class Object(db.Model):
             self.get_children_subquery(), limit_each
         )
 
+    def has_parent(self, parent):
+        parent_entity = aliased(Object, name="parent")
+        return db.session.query(
+            exists().where(
+                parent_entity.id == parent.id,
+                parent_entity.children.any(Object.id == self.id),
+            )
+        ).scalar()
+
     def add_parent(self, parent, commit=True):
         """
         Adding parent with permission inheritance
         """
-        if parent in self.parents:
+        if self.has_parent(parent):
             # Relationship already exist
             return False
 
         # Add relationship in nested transaction
         db.session.begin_nested()
         try:
-            self.parents.append(parent)
+            # We don't use self.parents.append to
+            # avoid lazy-loading of all analyses
+            db.session.execute(
+                insert(relation).values(
+                    parent_id=parent.id,
+                    child_id=self.id,
+                    creation_time=datetime.datetime.utcnow(),
+                )
+            )
             db.session.flush()
             db.session.commit()
         except IntegrityError:
             # The same relationship was added concurrently
             db.session.rollback()
             db.session.refresh(self)
-            if parent not in self.parents:
+            if not self.has_parent(parent):
                 raise
             return False
         # Inherit permissions from parent (in the same transaction)
@@ -265,7 +283,7 @@ class Object(db.Model):
         """
         Removing child with modify permission inheritance
         """
-        if parent not in self.parents:
+        if not self.has_parent(parent):
             # Relationship not exist
             return False
 
@@ -277,14 +295,21 @@ class Object(db.Model):
             if parent.id != self.id:
                 for share in parent.shares:
                     self.uninherit_share(share)
-            # Remove parent
-            self.parents.remove(parent)
+            # Remove parent itself
+            # We don't use self.parents.remove to
+            # avoid lazy-loading of all analyses
+            db.session.execute(
+                delete(relation).where(
+                    relation.c.parent_id == parent.id,
+                    relation.c.child_id == self.id,
+                )
+            )
             db.session.flush()
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
             db.session.refresh(self)
-            if parent in self.parents:
+            if self.has_parent(parent):
                 raise
             return False
 
@@ -860,38 +885,72 @@ class Object(db.Model):
             db.session.commit()
         return analysis
 
+    def is_analysis_assigned(self, analysis: KartonAnalysis) -> bool:
+        return db.session.query(
+            exists().where(
+                Object.id == self.id,
+                Object.analyses.any(KartonAnalysis.id == analysis.id),
+            )
+        ).scalar()
+
     def assign_analysis(self, analysis_id, commit=True):
         """
         Assigns KartonAnalysis to the object
         """
         analysis, is_new = KartonAnalysis.get_or_create(analysis_id, self)
 
-        if not is_new and analysis.id not in [
-            existing.id for existing in self.analyses
-        ]:
+        if not is_new and not self.is_analysis_assigned(analysis):
             db.session.begin_nested()
             try:
-                self.analyses.append(analysis)
+                # We don't use self.analyses.append to
+                # avoid lazy-loading of all analyses
+                db.session.execute(
+                    insert(karton_object).values(
+                        analysis_id=analysis.id,
+                        object_id=self.id,
+                    )
+                )
                 db.session.commit()
                 is_new = True
             except IntegrityError:
                 # The same relationship was added concurrently
                 db.session.rollback()
                 db.session.refresh(self)
-                if analysis.id not in [existing.id for existing in self.analyses]:
+                if not self.is_analysis_assigned(analysis):
                     raise
 
         if commit:
             db.session.commit()
         return analysis, is_new
 
-    def is_analyzed(self):
-        return bool(self.analyses)
+    def is_analyzed(self) -> bool:
+        return db.session.query(
+            exists([1]).where(KartonAnalysis.objects.any(Object.id == self.id))
+        ).scalar()
+
+    def get_latest_analyses(
+        self, count: int = 10, older_than: Optional[uuid.UUID] = None
+    ) -> List[KartonAnalysis]:
+        analyses_query = db.session.query(KartonAnalysis).filter(
+            KartonAnalysis.objects.any(Object.id == self.id)
+        )
+        if older_than:
+            subq = (
+                db.session.query(KartonAnalysis.creation_time)
+                .filter(KartonAnalysis.id == older_than)
+                .scalar_subquery()
+            )
+            analyses_query = analyses_query.filter(KartonAnalysis.creation_time < subq)
+        analyses_query = analyses_query.order_by(
+            KartonAnalysis.creation_time.desc()
+        ).limit(count)
+        return analyses_query.all()
 
     def get_analysis_status(self):
-        if not self.analyses:
+        latest_analyses = self.get_latest_analyses()
+        if not latest_analyses:
             return "not_analyzed"
-        for analysis in self.analyses:
+        for analysis in latest_analyses:
             if analysis.status == "running":
                 return "running"
         return "finished"
@@ -909,19 +968,26 @@ class Object(db.Model):
         if db_analysis is None:
             return False
 
-        if db_analysis not in self.analyses:
+        if not self.is_analysis_assigned(db_analysis):
             return False
 
         is_removed = False
         db.session.begin_nested()
         try:
-            self.analyses.remove(db_analysis)
+            # We don't use self.analyses.remove to
+            # avoid lazy-loading of all analyses
+            db.session.execute(
+                delete(karton_object).where(
+                    karton_object.c.analysis_id == db_analysis.id,
+                    karton_object.c.object_id == self.id,
+                )
+            )
             db.session.commit()
             is_removed = True
         except IntegrityError:
             db.session.rollback()
             db.session.refresh(self)
-            if db_analysis in self.analyses:
+            if self.is_analysis_assigned(db_analysis):
                 raise
         # delete analysis if no objects associated
         if db_analysis.objects == []:

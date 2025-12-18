@@ -15,9 +15,10 @@ import { Capability } from "@mwdb-web/types/types";
 export function KartonAnalysisBox() {
     const [isResubmitPending, setResubmitPending] = useState<boolean>(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
-    const [analysisToRemove, setAnalysisToRemove] = useState<number | null>(
+    const [analysisToRemove, setAnalysisToRemove] = useState<string | null>(
         null
     );
+    const [canLoadMore, setCanLoadMore] = useState<boolean>(false);
 
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
@@ -36,16 +37,45 @@ export function KartonAnalysisBox() {
                 updateObjectData({
                     analyses: response.data.analyses,
                 });
+                if (response.data.analyses.length >= 10) {
+                    setCanLoadMore(true);
+                }
             }
         } catch (error) {
             setObjectError(error);
         }
     }
 
+    const loadMoreAnalyses = useCallback(async () => {
+        try {
+            if (objectId && analyses) {
+                setCanLoadMore(false);
+                let response = await api.getKartonAnalysesList(
+                    objectId,
+                    analyses[analyses.length - 1]?.id
+                );
+                updateObjectData({
+                    analyses: [...analyses, ...response.data.analyses],
+                });
+                setCanLoadMore(response.data.analyses.length == 10);
+            }
+        } catch (error) {
+            setObjectError(error);
+        }
+    }, [
+        api,
+        objectId,
+        analyses,
+        setObjectError,
+        setCanLoadMore,
+        updateObjectData,
+    ]);
+
     const getAnalyses = useCallback(updateAnalyses, [
         api,
         objectId,
         setObjectError,
+        setCanLoadMore,
         updateObjectData,
     ]);
 
@@ -72,7 +102,7 @@ export function KartonAnalysisBox() {
         }
     }
 
-    async function removeAnalysis(analysisId: number) {
+    async function removeAnalysis(analysisId: string) {
         try {
             if (objectId) {
                 await api.removeKartonAnalysisFromObject(objectId, analysisId);
@@ -85,7 +115,7 @@ export function KartonAnalysisBox() {
         }
     }
 
-    function handleRemoveAnalysis(analysisId: number) {
+    function handleRemoveAnalysis(analysisId: string) {
         setAnalysisToRemove(analysisId);
         setDeleteModalOpen(true);
     }
@@ -125,6 +155,7 @@ export function KartonAnalysisBox() {
                 <KartonAnalysisList
                     analyses={analyses ?? []}
                     handleRemoveAnalysis={handleRemoveAnalysis}
+                    loadMore={canLoadMore ? loadMoreAnalyses : null}
                 />
             </div>
         </Extendable>

@@ -7,6 +7,10 @@ class KartonSubmitAnalysisRequestSchema(Schema):
     arguments = fields.Dict(missing={}, key=fields.Str(), values=fields.Str())
 
 
+class KartonAnalysisListRequestSchema(Schema):
+    older_than = fields.UUID(missing=None)
+
+
 class KartonProcessingInResponseSchema(Schema):
     received_from = fields.List(fields.Str(), required=True, allow_none=False)
     status = fields.List(fields.Str(), required=True, allow_none=False)

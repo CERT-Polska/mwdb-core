@@ -20,7 +20,7 @@ import { Capability } from "@mwdb-web/types/types";
 
 type Props = {
     analysis: KartonAnalysis;
-    removeAnalysis: (id: number) => void;
+    removeAnalysis: (id: string) => void;
 };
 
 export function KartonAnalysisRow({ analysis, removeAnalysis }: Props) {
@@ -115,7 +115,7 @@ export function KartonAnalysisRow({ analysis, removeAnalysis }: Props) {
             <Link
                 to={makeSearchLink({
                     field: "karton",
-                    value: analysis.id.toString(),
+                    value: analysis.id,
                     pathname: "/search",
                 })}
             >
@@ -140,7 +140,7 @@ export function KartonAnalysisRow({ analysis, removeAnalysis }: Props) {
                 </button>
                 <span className="ml-2">
                     <ActionCopyToClipboard
-                        text={analysis.id.toString()}
+                        text={analysis.id}
                         tooltipMessage="Copy analysis id to clipboard"
                     />
                 </span>

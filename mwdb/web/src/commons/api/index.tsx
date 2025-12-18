@@ -758,8 +758,12 @@ async function requestRemoteZipFileDownloadLink(
     return `${baseURL}/remote/${remote}/api/file/${id}/download/zip?token=${response.data.token}`;
 }
 
-function getKartonAnalysesList(id: string): GetKartonAnalysesListResponse {
-    return axios.get(`/object/${id}/karton`);
+function getKartonAnalysesList(
+    id: string,
+    older_than?: string
+): GetKartonAnalysesListResponse {
+    const params = older_than ? { older_than: older_than } : {};
+    return axios.get(`/object/${id}/karton`, { params });
 }
 
 function getKartonAnalysisStatus(
@@ -775,7 +779,7 @@ function resubmitKartonAnalysis(id: string): ResubmitKartonAnalysisResponse {
 
 function removeKartonAnalysisFromObject(
     id: string,
-    analysis_id: number
+    analysis_id: string
 ): RemoveKartonAnalysisFromObjectResponse {
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }

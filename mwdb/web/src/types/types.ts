@@ -220,7 +220,7 @@ export type Family = {
 
 export type KartonAnalysis = {
     status: string;
-    id: number;
+    id: string;
     processing_in: Record<
         string,
         {

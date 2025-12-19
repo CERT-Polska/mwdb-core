@@ -12,7 +12,7 @@ repos:
     hooks:
       - id: uv-freeze-main
         name: Run uv freeze - main
-        entry: bash -c "uv export --no-hashes --no-group test > requirements.txt"
+        entry: bash -c "uv export --no-hashes --no-group test --no-group dev > requirements.txt"
         language: system
         always_run: true
       - id: uv-freeze-test

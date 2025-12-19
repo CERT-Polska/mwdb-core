@@ -43,6 +43,10 @@ test = [
     "requests",
     "python-baseconv",
 ]
+dev = [
+    "black",
+    "isort",
+]
 
 [tool.isort]
 multi_line_output = 3

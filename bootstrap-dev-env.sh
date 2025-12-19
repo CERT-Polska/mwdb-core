@@ -15,5 +15,6 @@ echo "Installing packages..."
 export UV_VENV_CLEAR=1
 uv venv
 uv sync --frozen
+uv sync --group dev
 uv sync --group test
 source .venv/bin/activate

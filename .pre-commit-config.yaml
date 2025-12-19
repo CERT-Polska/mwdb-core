@@ -14,5 +14,7 @@ repos:
       # Locks the uv.lock file based on our pyproject.toml files
       - id: uv-lock
         args: [ -v ]
+        always_run: true
       # Export our uv.lock file to requirements.txt
       - id: uv-export
+        always_run: true

@@ -12,6 +12,6 @@ repos:
     hooks:
       - id: uv-freeze
         name: Run uv freeze
-        entry: bash -c "uv pip freeze > requirements.txt"
+        entry: bash -c "uv export --no-hashes --no-group test > requirements.txt"
         language: system
         always_run: true

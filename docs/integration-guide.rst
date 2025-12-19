@@ -452,8 +452,8 @@ Building custom backend image is simple as in `Dockerfile` below:
 
     # Install any Alpine dependencies you need
     RUN apk add p7zip
-    # Install any Python dependencies you need (certpl/mwdb image uses venv internally)
-    RUN /app/venv/bin/pip install malduck
+    # Install any Python dependencies you need
+    RUN uv pip install malduck
 
     # Copy arbitrary backend plugins and mail templates
     COPY mail_templates /app/mail_templates

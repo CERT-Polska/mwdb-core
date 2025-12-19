@@ -16,14 +16,22 @@ https://gist.github.com/Chaser324/ce0505fbed06b947d962).
 
 1. Fork the repository.
 
-2. Create a new branch. The name does not matter, but the recommended format
+2. To bootstrap your development environment with uv, run the script `bootstrap-dev-env.sh`.
+   This will install uv, pre-commit, and the required python packages for local development.
+
+   ```bash
+   # This will install the bare minimum environment to manage python dependencies
+   ./bootstrap-dev-env.sh
+   ```
+
+3. Create a new branch. The name does not matter, but the recommended format
   is `feature/xxx` or `fix/yyy`.
 
-3. Work on your changes!
+4. Work on your changes!
 
-4. If possible, add a test or two to the `tests/` directory.
+5. If possible, add a test or two to the `tests/` directory.
 
-5. Remember to autoformat your code. 
+6. Remember to autoformat your code. 
    
    For Python code, install exact versions of formatters from https://github.com/CERT-Polska/lint-python-action.
    Then use formatters and linters listed below.
@@ -40,7 +48,7 @@ https://gist.github.com/Chaser324/ce0505fbed06b947d962).
    npx prettier --write src/
    ```
 
-6. If setup.py version matches the latest release version: 
+7. If setup.py version matches the latest release version: 
    include version bump in your commit according to the [semantic versioning](https://semver.org)
    
    e.g.
@@ -54,7 +62,7 @@ https://gist.github.com/Chaser324/ce0505fbed06b947d962).
    
    Version bump should be included in the same PR.
 
-7. When you feel like you're done, commit the files:
+8. When you feel like you're done, commit the files:
 
 ```bash
 $ git add -A
@@ -82,13 +90,7 @@ That's it! Thank you very much, we appreciate you help.
 docker-compose -f docker-compose-dev.yml up -d
 ```
 
-2. Go to `tests/backend` and install necessary requirements (virtualenv recommended)
-
-```
-(venv) tests/backend$ pip install -r requirements.txt 
-```
-
-3. Export variables from `mwdb-vars.env` and set `MWDB_URL` to API endpoint
+2. Export variables from `mwdb-vars.env` and set `MWDB_URL` to API endpoint
 
 ```
 (venv) tests/backend$ export MWDB_ADMIN_LOGIN=admin
@@ -96,10 +98,10 @@ docker-compose -f docker-compose-dev.yml up -d
 (venv) tests/backend$ export MWDB_URL=http://127.0.0.1/api
 ```
 
-4. Run `pytest` to perform tests
+3. Run `pytest` to perform tests
 
 ```
-(venv) tests/backend$ pytest -k attributes
+(venv) tests/backend$ uv run pytest -k attributes
 ========================================================================================================= test session starts ==========================================================================================================
 platform linux -- Python 3.8.10, pytest-6.2.5, py-1.10.0, pluggy-1.0.0
 rootdir: /home/psrok1/mwdb-core

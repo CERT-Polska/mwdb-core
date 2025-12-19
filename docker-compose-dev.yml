@@ -61,7 +61,7 @@ services:
       - "./docker/plugins:/app/plugins"
     restart: on-failure
   postgres:
-    image: postgres
+    image: postgres:17
     restart: always
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file

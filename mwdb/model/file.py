@@ -3,7 +3,7 @@ import io
 import os
 import shutil
 import tempfile
-from typing import Any, Dict
+from typing import Any, Dict, Iterator
 
 import pyzipper
 from Cryptodome.Util.strxor import strxor_c
@@ -233,7 +233,10 @@ class File(Object):
 
     def read(self):
         """
-        Reads all bytes from the file
+        Reads all bytes from the file.
+
+        This is left for compatibility and should not be used
+        as it will load the whole file contents into memory.
         """
         fh = self.open()
         try:
@@ -292,22 +295,32 @@ class File(Object):
         """
         fh.close()
 
-    def zip_file(self):
-        secret_password = b"infected"
-
-        with tempfile.NamedTemporaryFile() as writer:
-            with open(writer.name, "rb") as reader:
-                with pyzipper.AESZipFile(
-                    writer,
-                    "w",
-                    compression=pyzipper.ZIP_LZMA,
-                    encryption=pyzipper.WZ_AES,
-                ) as zf:
-                    zf.setpassword(secret_password)
-                    zf.writestr(self.file_name, self.read())
-                    yield reader.read()
-                writer.flush()
-                yield reader.read()
+    def zip_file(self, zip_password: bytes, chunk_size: int = 1024 * 256) -> Iterator[bytes]:
+        with tempfile.TemporaryFile() as zipf:
+            # Make encrypted ZIP file
+            # AESZipFile closes the provided file-like object,
+            # so we need to duplicate the fd
+            dupfd = os.dup(zipf.fileno())
+            with os.fdopen(dupfd, "wb") as _zipf, pyzipper.AESZipFile(
+                _zipf,
+                mode="w",
+                compression=pyzipper.ZIP_LZMA,
+                encryption=pyzipper.WZ_AES,
+            ) as aes_zipf:
+                aes_zipf.setpassword(zip_password)
+                with aes_zipf.open(self.file_name, mode="w") as fdst:
+                    fsrc = self.open()
+                    try:
+                        shutil.copyfileobj(fsrc, fdst)
+                    finally:
+                        File.close(fsrc)
+            zipf.seek(0)
+            while True:
+                chunk = zipf.read(chunk_size)
+                if chunk:
+                    yield chunk
+                else:
+                    return
 
     def release_after_upload(self):
         """

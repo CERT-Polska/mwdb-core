@@ -1,0 +1,18 @@
+minimum_pre_commit_version: '3.3.2'
+default_install_hook_types:
+  - pre-push
+  - pre-commit
+  - post-checkout
+  - post-merge
+  - post-commit
+default_stages:
+  - pre-commit
+repos:
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.7.13
+    hooks:
+      # Locks the uv.lock file based on our pyproject.toml files
+      - id: uv-lock
+        args: [ -v ]
+      # Export our uv.lock file to requirements.txt
+      - id: uv-export

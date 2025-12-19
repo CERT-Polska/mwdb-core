@@ -38,7 +38,7 @@ services:
       - "80:80"
     restart: on-failure
   postgres:
-    image: postgres
+    image: postgres:17
     restart: always
     container_name: mwdb_core_e2e_postgres
     environment:

@@ -82,10 +82,14 @@ That's it! Thank you very much, we appreciate you help.
 docker-compose -f docker-compose-dev.yml up -d
 ```
 
-2. Go to `tests/backend` and install necessary requirements (virtualenv recommended)
+2. Go to `tests/backend` and install necessary requirements using pip or uv (recommended)
 
 ```
 (venv) tests/backend$ pip install -r requirements.txt 
+```
+
+```
+tests/backend$ uv sync
 ```
 
 3. Export variables from `mwdb-vars.env` and set `MWDB_URL` to API endpoint

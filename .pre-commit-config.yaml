@@ -10,8 +10,13 @@ default_stages:
 repos:
   - repo: local
     hooks:
-      - id: uv-freeze
-        name: Run uv freeze
+      - id: uv-freeze-main
+        name: Run uv freeze - main
         entry: bash -c "uv export --no-hashes --no-group test > requirements.txt"
+        language: system
+        always_run: true
+      - id: uv-freeze-test
+        name: Run uv freeze - tests
+        entry: bash -c "uv export --no-hashes --only-group test > ./tests/backend/requirements.txt"
         language: system
         always_run: true

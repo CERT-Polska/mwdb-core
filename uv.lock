@@ -877,6 +877,7 @@ test = [
     { name = "pytest" },
     { name = "pytest-rerunfailures" },
     { name = "python-baseconv" },
+    { name = "python-dateutil" },
     { name = "requests" },
 ]
 
@@ -923,6 +924,7 @@ test = [
     { name = "pytest" },
     { name = "pytest-rerunfailures" },
     { name = "python-baseconv" },
+    { name = "python-dateutil", specifier = "==2.8.2" },
     { name = "requests" },
 ]
 

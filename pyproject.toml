@@ -37,6 +37,7 @@ dependencies = [
 
 [dependency-groups]
 test = [
+    "python-dateutil==2.8.2",
     "pyJWT==2.4.0",
     "pytest",
     "pytest-rerunfailures",

@@ -25,7 +25,10 @@ pytest==9.0.2
     # via pytest-rerunfailures
 pytest-rerunfailures==16.1
 python-baseconv==1.2.2
+python-dateutil==2.8.2
 requests==2.32.4
+six==1.17.0
+    # via python-dateutil
 tomli==2.3.0 ; python_full_version < '3.11'
     # via pytest
 typing-extensions==4.15.0 ; python_full_version < '3.11'

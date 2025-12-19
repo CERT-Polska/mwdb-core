@@ -40,3 +40,4 @@ services:
 volumes:
   mwdb-postgres:
   mwdb-uploads:
+

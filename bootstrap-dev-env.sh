@@ -10,12 +10,10 @@ uv pip install pre-commit
 # Install pre-commit hooks
 pre-commit install --install-hooks
 
-for arg in "$@"; do
-    if [[ "$arg" == "install-python-packages" ]]; then
-        echo "Installing packages..."
-        export UV_VENV_CLEAR=1
-        uv venv
-        uv sync --frozen
-        source .venv/bin/activate
-    fi
-done
+# Install all python packages
+echo "Installing packages..."
+export UV_VENV_CLEAR=1
+uv venv
+uv sync --frozen
+uv sync --group test
+source .venv/bin/activate

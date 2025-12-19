@@ -1,8 +1,0 @@
-Credentials for initial mwdb account:
-
------------------------------------------
-Admin login: admin
-Admin password: 0f078e46bf8946d2fccdcf15398208888dc6
------------------------------------------
-
-Please be aware that initial account will be only set up on the first run. If you already have a database with at least one user, then this setting will be ignored for security reasons. You can always create an admin account manually by executing a command. See "flask create_admin --help" for reference.

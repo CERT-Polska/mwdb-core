@@ -35,6 +35,15 @@ dependencies = [
     "werkzeug==3.1.4",
 ]
 
+[dependency-groups]
+test = [
+    "pyJWT==2.4.0",
+    "pytest",
+    "pytest-rerunfailures",
+    "requests",
+    "python-baseconv",
+]
+
 [tool.isort]
 multi_line_output = 3
 include_trailing_comma = true

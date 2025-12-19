@@ -1,6 +1,4 @@
 # Docker Compose file for mwdb-core end-to-end test suite
-
-version: "3.3"
 services:
   mwdb:
     build:
@@ -11,6 +9,11 @@ services:
       - redis
     image: certpl/mwdb
     restart: on-failure
+    healthcheck:
+      test: "wget -qO - 'http://127.0.0.1:8080/api/server' || exit 1"
+      interval: 5s
+      timeout: 10s
+      retries: 10
     environment:
       MWDB_ENABLE_KARTON: 1
       MWDB_REDIS_URI: redis://redis/
@@ -37,8 +40,13 @@ services:
     ports:
       - "80:80"
     restart: on-failure
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
   postgres:
-    image: postgres
+    image: postgres:17
     restart: always
     container_name: mwdb_core_e2e_postgres
     environment:
@@ -65,13 +73,20 @@ services:
     build: tests/frontend
     container_name: mwdb_core_e2e_web_tests
     depends_on:
-      - mwdb
-      - mwdb-web
-      - mailhog
-      - karton-system
-      - karton-classifier
-      - karton-dashboard
-      - karton-mwdb-reporter
+      mwdb:
+        condition: service_healthy
+      mwdb-web:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+      karton-system:
+        condition: service_started
+      karton-classifier:
+        condition: service_started
+      karton-dashboard:
+        condition: service_started
+      karton-mwdb-reporter:
+        condition: service_started
     image: certpl/mwdb-web-tests
     environment:
       MWDB_ADMIN_LOGIN: admin

@@ -17,4 +17,5 @@ repos:
         always_run: true
       # Export our uv.lock file to requirements.txt
       - id: uv-export
+        args: [ --format, requirements-txt ]
         always_run: true

@@ -2,6 +2,7 @@
 /.idea
 .vscode
 /venv
+.venv
 *.pyc
 *.egg-info/
 node_modules/

@@ -5,7 +5,7 @@ Flask==2.3.3
 Flask-SQLAlchemy==3.0.5
 Flask-Migrate==4.0.7
 SQLAlchemy==1.4.54
-marshmallow==3.20.2
+marshmallow==3.26.2
 psycopg2-binary==2.9.10
 requests==2.32.4
 apispec[marshmallow,yaml]==6.4.0

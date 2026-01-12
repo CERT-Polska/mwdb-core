@@ -52,7 +52,7 @@ def zip_stream(
         with pyzipper.AESZipFile(
             zipped_stream,
             "w",
-            compression=pyzipper.ZIP_LZMA,
+            compression=pyzipper.ZIP_DEFLATED,
             encryption=pyzipper.WZ_AES,
         ) as zf:
             zf.setpassword(password)

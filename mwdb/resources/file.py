@@ -18,6 +18,7 @@ from mwdb.schema.file import (
 
 from . import load_schema, requires_authorization, requires_capabilities
 from .object import ObjectItemResource, ObjectResource, ObjectUploader
+from mwdb.core.config import app_config
 
 
 class FileUploader(ObjectUploader):
@@ -569,8 +570,9 @@ class FileDownloadZipResource(Resource):
             if file_obj is None:
                 raise NotFound("Object not found")
 
+        zip_password = app_config.mwdb.zip_download_password.encode()
         return Response(
-            file_obj.zip_file(),
+            file_obj.zip_file(zip_password=zip_password),
             content_type="application/octet-stream",
             headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"},
         )

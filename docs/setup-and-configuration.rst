@@ -345,6 +345,7 @@ Extra features:
 * ``listing_endpoints_count_limit`` (integer) - Limits number of objects returned by listing endpoints. Default is ``1000``.
 * ``log_level`` (string) - logging threshold for MWDB logger (e.g. WARNING, see also `Python logging levels <https://docs.python.org/3/library/logging.html#logging-levels>`_)
 * ``log_config_file`` (string) - Python logging configuration file (see also `logging.config configuration file format <https://docs.python.org/3/library/logging.config.html#logging-config-fileformat>`_)
+* ``zip_download_password`` (string) - Password set while downloading files in zipped/encrypted form. Default is ``infected``.
 
 
 Registration feature settings:

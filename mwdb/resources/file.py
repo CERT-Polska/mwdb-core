@@ -2,6 +2,7 @@ from flask import Response, g, request
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unauthorized
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.config import app_config
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
@@ -569,8 +570,9 @@ class FileDownloadZipResource(Resource):
             if file_obj is None:
                 raise NotFound("Object not found")
 
+        zip_password = app_config.mwdb.zip_download_password.encode()
         return Response(
-            file_obj.zip_file(),
+            file_obj.zip_file(zip_password=zip_password),
             content_type="application/octet-stream",
             headers={"Content-disposition": f"attachment; filename={file_obj.sha256}"},
         )

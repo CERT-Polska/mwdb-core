@@ -295,11 +295,10 @@ class File(Object):
         """
         fh.close()
 
-    def zip_file(self):
-        secret_password = b"infected"
+    def zip_file(self, zip_password: bytes):
         fh = self.open()
         try:
-            yield from zip_stream(self.file_name, fh, secret_password)
+            yield from zip_stream(self.file_name, fh, zip_password)
         finally:
             File.close(fh)
 

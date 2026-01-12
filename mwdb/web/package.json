@@ -48,7 +48,7 @@
         "slate-react": "0.117.4",
         "swagger-ui-react": "^5.30.3",
         "typescript": "^5.0.4",
-        "yup": "0.32.11"
+        "yup": "1.7.1"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.21.4",

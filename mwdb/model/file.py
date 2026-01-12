@@ -5,7 +5,6 @@ import shutil
 import tempfile
 from typing import Any, Dict
 
-import pyzipper
 from Cryptodome.Util.strxor import strxor_c
 from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
@@ -16,6 +15,7 @@ from mwdb.core.auth import AuthScope, generate_token, verify_token
 from mwdb.core.config import StorageProviderType, app_config
 from mwdb.core.karton import send_file_to_karton
 from mwdb.core.util import calc_crc32, calc_hash, calc_magic, calc_ssdeep, get_s3_client
+from mwdb.core.zip_stream import zip_stream
 
 from . import db
 from .object import Object
@@ -234,6 +234,9 @@ class File(Object):
     def read(self):
         """
         Reads all bytes from the file
+
+        This is left for compatibility and should not be used
+        as it will load the whole file contents into memory.
         """
         fh = self.open()
         try:
@@ -294,20 +297,11 @@ class File(Object):
 
     def zip_file(self):
         secret_password = b"infected"
-
-        with tempfile.NamedTemporaryFile() as writer:
-            with open(writer.name, "rb") as reader:
-                with pyzipper.AESZipFile(
-                    writer,
-                    "w",
-                    compression=pyzipper.ZIP_LZMA,
-                    encryption=pyzipper.WZ_AES,
-                ) as zf:
-                    zf.setpassword(secret_password)
-                    zf.writestr(self.file_name, self.read())
-                    yield reader.read()
-                writer.flush()
-                yield reader.read()
+        fh = self.open()
+        try:
+            yield from zip_stream(self.file_name, fh, secret_password)
+        finally:
+            File.close(fh)
 
     def release_after_upload(self):
         """

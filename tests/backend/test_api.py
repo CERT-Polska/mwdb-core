@@ -1,4 +1,7 @@
+from io import BytesIO
+
 import pytest
+import pyzipper
 import requests
 from dateutil.parser import parse
 
@@ -215,6 +218,21 @@ def test_download_sample_with_token(admin_session):
     downloaded = r.text
 
     assert downloaded == expected
+
+def test_download_zipped_sample(admin_session):
+    expected = rand_string(size=4096)
+    sample = admin_session.add_sample(filename="sample.bin", content=expected)
+    token = admin_session.get_download_token(sample['id'])
+    r = requests.get(
+        admin_session.mwdb_url + f'/file/{sample["id"]}/download/zip',
+        params={
+            "token": token
+        }
+    )
+    r.raise_for_status()
+    with pyzipper.AESZipFile(BytesIO(r.content)) as zipped_file:
+        zipped_file.setpassword(b"infected")
+        assert zipped_file.read("sample.bin") == expected.encode()
 
 
 def test_object_conflict(admin_session):

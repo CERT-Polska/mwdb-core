@@ -73,6 +73,7 @@ test = [
     "pytest-rerunfailures",
     "requests",
     "python-baseconv",
+    "pyzipper==0.3.5",
 ]
 dev = [
     "black",

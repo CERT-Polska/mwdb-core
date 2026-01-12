@@ -1,6 +1,5 @@
 {
     "files": {
-        "setup.py": "version=\"$VERSION\"",
         "mwdb/version.py": "app_version = \"$VERSION\"",
         "mwdb/web/package.json": "\"name\": \"mwdb-web\",\\s+\"version\": \"$VERSION\"",
         "mwdb/web/package-lock.json": "\"name\": \"mwdb-web\",\\s+\"version\": \"$VERSION\"",

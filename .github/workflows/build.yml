@@ -56,6 +56,31 @@ jobs:
         with:
           name: mwdb-image
           path: mwdb-image
+  build_dist:
+    needs: [lint_core, lint_web]
+    name: Build mwdb-core PyPi distribution package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Build web bundle
+        working-directory: mwdb/web
+        run: |
+          npm install
+          npm run build
+      - name: Build package
+        run: |
+          uv build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mwdb-core-dist
+          path: ./dist/*
   build_frontend:
     needs: [lint_web]
     name: Build mwdb-core web image

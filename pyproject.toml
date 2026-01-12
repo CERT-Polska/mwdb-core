@@ -1,8 +1,24 @@
+[build-system]
+requires = [
+  "setuptools >= 40.9.0",
+]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "mwdb-core"
-version = "2.16.1"
 description = "MWDB Core malware database"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+]
 requires-python = ">=3.10"
+license-files = ["LICENSE", "LICENSE.AGPL"]
+dynamic = ["version"]
+authors = [
+  {name = "CERT Polska", email = "info@cert.pl"},
+]
 dependencies = [
     "alembic==1.14.0",
     "apispec[marshmallow,yaml]==6.4.0",
@@ -34,6 +50,20 @@ dependencies = [
     "typed-config==1.1.0",
     "werkzeug==3.1.5",
 ]
+
+[project.urls]
+Homepage = "https://github.com/CERT-Polska/mwdb-core"
+Documentation = "https://mwdb.readthedocs.io/"
+Repository = "https://github.com/CERT-Polska/mwdb-core.git"
+
+[project.scripts]
+mwdb-core = "mwdb.cli:cli"
+
+[tool.setuptools]
+packages = ["mwdb", "mwdb.cli", "mwdb.core", "mwdb.model", "mwdb.resources", "mwdb.schema"]
+
+[tool.setuptools.dynamic]
+version = {attr = "mwdb.version.app_version"}
 
 [dependency-groups]
 test = [

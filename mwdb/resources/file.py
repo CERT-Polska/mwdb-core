@@ -2,6 +2,7 @@ from flask import Response, g, request
 from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unauthorized
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.config import app_config
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
@@ -18,7 +19,6 @@ from mwdb.schema.file import (
 
 from . import load_schema, requires_authorization, requires_capabilities
 from .object import ObjectItemResource, ObjectResource, ObjectUploader
-from mwdb.core.config import app_config
 
 
 class FileUploader(ObjectUploader):

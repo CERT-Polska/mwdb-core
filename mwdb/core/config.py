@@ -148,6 +148,7 @@ class MWDBConfig(Config):
 
     zip_download_password = key(cast=str, required=False, default="infected")
 
+
 @section("karton")
 class KartonConfig(Config):
     config_path = key(cast=str, required=False, default=None)

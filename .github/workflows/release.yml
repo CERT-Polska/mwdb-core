@@ -7,26 +7,29 @@ on:
 jobs:
   release_pypi:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v4
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v6
         with:
-          node-version: '20'
-      - name: Build web bundle
-        working-directory: mwdb/web
-        run: |
-          npm install
-          npm run build
-      - name: Build package
-        run: |
-          pip3 install setuptools wheel
-          python3 setup.py bdist_wheel
+          workflow: build.yml
+          workflow_conclusion: success
+          name: mwdb-core-dist
+      - uses: nanoufo/action-upload-artifacts-and-release-assets@v2
+        with:
+          path: |
+            mwdb-core-dist/*
+          upload-release-files: true
+          release-upload-url: ${{ github.event.release.upload_url }}
       - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@v1.13.0
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
+          packages-dir: mwdb-core-dist/
   release_docker:
     runs-on: ubuntu-latest
     steps:

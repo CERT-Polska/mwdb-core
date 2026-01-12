@@ -32,7 +32,7 @@
         "react-ace": "^10.1.0",
         "react-copy-to-clipboard": "^5.1.0",
         "react-dom": "^18.1.0",
-        "react-dropzone": "^14.2.1",
+        "react-dropzone": "^14.3.8",
         "react-google-recaptcha": "^2.1.0",
         "react-hook-form": "^7.32.2",
         "react-infinite-scroller": "^1.2.6",

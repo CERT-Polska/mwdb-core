@@ -46,6 +46,8 @@ USER nobody
 RUN mkdir -m 700 /app/uploads
 
 ENV PYTHONPATH=/app
+# We still load it directly from the source and not the installed package in .venv
+# to make it "editable" in dev environments
 ENV FLASK_APP=/app/mwdb/app.py
 WORKDIR /app
 

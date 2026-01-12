@@ -77,6 +77,10 @@ jobs:
       - name: Build package
         run: |
           uv build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mwdb-core-dist
+          path: ./dist/*
   build_frontend:
     needs: [lint_web]
     name: Build mwdb-core web image

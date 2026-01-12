@@ -1,27 +1,35 @@
 # syntax=docker/dockerfile:1
-
-FROM python:3.12-alpine AS build
+# Inspired by https://github.com/astral-sh/uv-docker-example/blob/fa761744819c05f4ce207bde1f0a396f6be3915f/multistage.Dockerfile
+FROM ghcr.io/astral-sh/uv:python3.12-alpine AS builder
 
 WORKDIR /app
 
 RUN apk add --no-cache libffi libffi-dev py3-cffi build-base python3-dev automake m4 autoconf libtool gcc g++ musl-dev openssl-dev cargo postgresql-dev libfuzzy2-dev curl ca-certificates
 
-# Install UV
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && mv /root/.local/bin/uv /usr/local/bin/uv \
-    && mv /root/.local/bin/uvx /usr/local/bin/uvx
+# Omit development dependencies
+ENV UV_NO_DEV=1
 
-RUN uv venv venv --python=$(which python3)
-ENV PATH="/app/venv/bin:$PATH"
+# Disable Python downloads, because we want to use the system interpreter
+# across both images. If using a managed Python version, it needs to be
+# copied from the build image into the final image; see `standalone.Dockerfile`
+# for an example.
+ENV UV_PYTHON_DOWNLOADS=0
+# No hardlinks supported
+ENV UV_LINK_MODE=copy
 
-RUN uv pip --no-cache-dir install wheel
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project
 
-COPY pyproject.toml uv.lock /app/
-RUN uv sync --frozen
+COPY mwdb /app/mwdb
+COPY docker/ pyproject.toml uv.lock /app/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install /app
 
-COPY docker/plugins /app/plugins
 ARG plugins
-RUN for plugin in $plugins $(find /app/plugins -name 'setup.py' -exec dirname {} \; | sort -u);  \
+RUN --mount=type=cache,target=/root/.cache/uv \
+    for plugin in $plugins $(find /app/plugins \( -name 'setup.py' -o -name 'pyproject.toml' \) -exec dirname {} \; | sort -u);  \
     do uv pip --no-cache-dir install $plugin; done
 
 FROM python:3.12-alpine
@@ -30,28 +38,12 @@ LABEL maintainer="info@cert.pl"
 
 RUN apk add --no-cache postgresql-client postgresql-dev libmagic libfuzzy2-dev
 
-# Copy backend files
-COPY --from=build /app/venv /app/venv
+# Copy the application from the builder
+COPY --from=builder --chown=nobody:nobody /app /app
 ENV PATH="/app/venv/bin:$PATH"
 
-COPY --from=build /usr/local/bin/uv /usr/local/bin/uv
-COPY --from=build /usr/local/bin/uvx /usr/local/bin/uvx
-
-COPY docker/ setup.py MANIFEST.in requirements.txt /app/
-COPY mwdb /app/mwdb/
-
-# Install mwdb-core package
-RUN uv pip install /app
-RUN uv pip install gunicorn
-
-# Create a /app/uploads directory
-# Give +r to everything in /app and +x for directories
-# Give rwx permissions to /app/uploads for the current user
-# By default everything is owned by root - change owner to nobody
-RUN mkdir -p /app/uploads/ && \
-    chmod o=rX -R /app && \
-    chmod 700 /app/uploads/ && \
-    chown nobody:nobody /app/uploads/
+USER nobody
+RUN mkdir -m 700 /app/uploads
 
 ENV PYTHONPATH=/app
 ENV FLASK_APP=/app/mwdb/app.py

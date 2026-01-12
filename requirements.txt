@@ -53,6 +53,6 @@ sqlalchemy==1.4.54
 ssdeep==3.4
 typed-config==1.1.0
 typing-extensions==4.15.0
-urllib3==1.26.20
+urllib3==2.6.3
 werkzeug==3.1.5
 wrapt==2.0.1

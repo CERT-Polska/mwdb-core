@@ -1,0 +1,22 @@
+minimum_pre_commit_version: '3.3.2'
+default_install_hook_types:
+  - pre-push
+  - pre-commit
+  - post-checkout
+  - post-merge
+  - post-commit
+default_stages:
+  - pre-commit
+repos:
+  - repo: local
+    hooks:
+      - id: uv-freeze-main
+        name: Run uv freeze - main
+        entry: bash -c "uv export --no-hashes --no-group test --no-group dev > requirements.txt"
+        language: system
+        always_run: true
+      - id: uv-freeze-test
+        name: Run uv freeze - tests
+        entry: bash -c "uv export --no-hashes --only-group test > ./tests/backend/requirements.txt"
+        language: system
+        always_run: true

@@ -7,6 +7,7 @@ import {
     Reducer,
 } from "react";
 import { toast } from "react-toastify";
+import _ from "lodash";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -49,6 +50,17 @@ type ObjectActionReducer = ObjectStateReducer & {
     error?: unknown;
 };
 
+function isDummyUpdate(
+    currentObject: { [k: string]: any },
+    objectUpdate: { [k: string]: any }
+) {
+    // Deeply compares the object update and returns true
+    // if update doesn't actually update the object state
+    return Object.keys(objectUpdate).every((updatedKey) =>
+        _.isEqual(currentObject[updatedKey], objectUpdate[updatedKey])
+    );
+}
+
 function objectReducer(state: ObjectStateReducer, action: ObjectActionReducer) {
     switch (action.type) {
         case objectLoad:
@@ -56,6 +68,11 @@ function objectReducer(state: ObjectStateReducer, action: ObjectActionReducer) {
             return { object: action.object, objectError: null };
         case objectUpdate:
             // Update object data with new information
+            if (!action.object)
+                return { object: state.object, objectError: null };
+            if (state.object && isDummyUpdate(state.object, action.object)) {
+                return { object: state.object, objectError: null };
+            }
             return {
                 object: { ...state.object, ...action.object },
                 objectError: null,

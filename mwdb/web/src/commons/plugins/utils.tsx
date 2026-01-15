@@ -1,4 +1,4 @@
-import React, { Children } from "react";
+import React, { Children, useMemo } from "react";
 
 type InjectAfterProps = {
     afterElementIndex: number;
@@ -11,13 +11,15 @@ export function InjectAfter({
     element,
     children,
 }: InjectAfterProps) {
-    const Element = element;
-    const result: any[] = [];
-    Children.map(children, (child, index) => {
-        result.push(child);
-        if (index === afterElementIndex) {
-            result.push(<Element />);
-        }
-    });
-    return result;
+    return useMemo(() => {
+        const Element = element;
+        const result: any = [];
+        Children.map(children, (child, index) => {
+            result.push(child);
+            if (index === afterElementIndex) {
+                result.push(<Element />);
+            }
+        });
+        return result;
+    }, [afterElementIndex, element, children]);
 }

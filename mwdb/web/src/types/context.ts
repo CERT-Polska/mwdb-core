@@ -89,7 +89,6 @@ export type GroupOutletContext = {
 
 export type ObjectContextValues = {
     object?: Partial<ObjectOrConfigOrBlobData>;
-    objectError: unknown;
     objectType: ObjectType;
     searchEndpoint: string;
     setObjectError: (error: unknown) => void;

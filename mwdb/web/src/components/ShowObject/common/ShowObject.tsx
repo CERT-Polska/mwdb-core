@@ -38,16 +38,13 @@ import { ObjectContextValues } from "@mwdb-web/types/context";
 
 const objectLoad = Symbol("objectLoad");
 const objectUpdate = Symbol("objectUpdate");
-const objectError = Symbol("objectError");
 
-type ObjectStateReducer = {
+type ObjectState = {
     object?: Partial<ObjectOrConfigOrBlobData>;
-    objectError?: unknown;
 };
 
-type ObjectActionReducer = ObjectStateReducer & {
-    type: typeof objectLoad | typeof objectUpdate | typeof objectError;
-    error?: unknown;
+type ObjectAction = ObjectState & {
+    type: typeof objectLoad | typeof objectUpdate;
 };
 
 function isDummyUpdate(
@@ -61,24 +58,20 @@ function isDummyUpdate(
     );
 }
 
-function objectReducer(state: ObjectStateReducer, action: ObjectActionReducer) {
+function objectReducer(state: ObjectState, action: ObjectAction) {
     switch (action.type) {
         case objectLoad:
             // Reload object and wipe lazy-loaded updates
-            return { object: action.object, objectError: null };
+            return { object: action.object };
         case objectUpdate:
             // Update object data with new information
-            if (!action.object)
-                return { object: state.object, objectError: null };
+            if (!action.object) return state;
             if (state.object && isDummyUpdate(state.object, action.object)) {
-                return { object: state.object, objectError: null };
+                return state;
             }
             return {
                 object: { ...state.object, ...action.object },
-                objectError: null,
             };
-        case objectError:
-            return { object: state.object, objectError: action.error };
         default:
             return state;
     }
@@ -109,16 +102,12 @@ export function ShowObject(props: Props) {
     const api = useContext(APIContext);
     const config = useContext(ConfigContext);
     const [objectState, setObjectState] = useReducer<
-        Reducer<ObjectStateReducer, ObjectActionReducer>
+        Reducer<ObjectState, ObjectAction>
     >(objectReducer, {});
 
     const setObjectError = useCallback((error: unknown) => {
         toast(getErrorMessage(error), {
             type: "error",
-        });
-        setObjectState({
-            type: objectError,
-            error,
         });
     }, []);
 
@@ -208,7 +197,6 @@ export function ShowObject(props: Props) {
     const context: ObjectContextValues = useMemo(
         () => ({
             object: objectState.object,
-            objectError: objectState.objectError,
             objectType: objectType,
             searchEndpoint: searchEndpoint,
             updateObject,

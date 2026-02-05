@@ -75,8 +75,8 @@ export function OAuthAuthorizeView() {
                     });
                 } else {
                     toast(
-                        "Account doesn't exist in MWDB and administrator " +
-                            "doesn't allow to create new accounts this way",
+                        "Account doesn't exist in MWDB and OIDC " +
+                            "registration is not enabled",
                         {
                             type: "error",
                         }

@@ -23,19 +23,22 @@ export function EditableBooleanItem(props: Props) {
                 setEdit(false);
             }}
         >
-            {edit ? (
-                <div className="input-group">
-                    <div className="material-switch">
-                        <input
-                            type="checkbox"
-                            className={"form-control"}
-                            checked={value}
-                            name={name}
-                            id={name}
-                            onChange={(ev) => setValue(ev.target.checked)}
-                        />
-                        <Label label="" htmlFor={name} className="bg-success" />
-                    </div>
+            <div className="input-group">
+                <div className="material-switch m-2 mr-4">
+                    <input
+                        type="checkbox"
+                        className={"form-control"}
+                        checked={value}
+                        name={name}
+                        id={name}
+                        onChange={(ev) => {
+                            setEdit(true);
+                            setValue(ev.target.checked);
+                        }}
+                    />
+                    <Label label="" htmlFor={name} className="bg-success" />
+                </div>
+                {edit ? (
                     <div className="input-group-append">
                         <button
                             className="btn btn-outline-success"
@@ -56,29 +59,10 @@ export function EditableBooleanItem(props: Props) {
                             <FontAwesomeIcon icon={faTimes} />
                         </button>
                     </div>
-                </div>
-            ) : (
-                <div>
-                    <div className="material-switch">
-                        <input
-                            type="checkbox"
-                            className={"form-control"}
-                            checked={defaultValue}
-                            name={name}
-                            id={name}
-                            readOnly
-                        />
-                        <Label label="" htmlFor={name} className="bg-success" />
-                    </div>
-                    <EditButton
-                        onClick={(ev) => {
-                            ev.preventDefault();
-                            setValue(defaultValue);
-                            setEdit(true);
-                        }}
-                    />
-                </div>
-            )}
+                ) : (
+                    []
+                )}
+            </div>
         </form>
     );
 }

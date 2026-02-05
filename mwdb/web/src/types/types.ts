@@ -250,6 +250,7 @@ export type ServerInfo = {
     file_upload_timeout: number;
     server_version: string;
     is_registration_enabled: boolean;
+    is_oidc_registration_enabled: boolean;
     is_password_auth_enabled: boolean;
     instance_name: string;
     remotes: string[];
@@ -270,6 +271,7 @@ export type Provider = {
     userinfo_endpoint: string;
     jwks_endpoint: string;
     logout_endpoint: string;
+    requires_approval: boolean;
 };
 
 export type ActivePlugin = {

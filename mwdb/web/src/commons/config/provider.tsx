@@ -125,7 +125,8 @@ export function ConfigProvider(props: Props) {
             serverConfig.config &&
             auth.isAuthenticated &&
             auth.isAdmin &&
-            serverConfig.config.is_registration_enabled
+            (serverConfig.config.is_registration_enabled ||
+                serverConfig.config.is_oidc_registration_enabled)
         ) {
             let timer = setInterval(getPendingUsers, 15000);
             getPendingUsers();

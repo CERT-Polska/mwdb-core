@@ -23,6 +23,7 @@ class OpenIDProviderSettings(db.Model):
     userinfo_endpoint = db.Column(db.Text, nullable=False)
     jwks_endpoint = db.Column(db.Text, nullable=True)
     logout_endpoint = db.Column(db.Text, nullable=True)
+    requires_approval = db.Column(db.Boolean, nullable=False, default=False)
 
     group_id = db.Column(db.Integer, db.ForeignKey("group.id"), nullable=False)
 

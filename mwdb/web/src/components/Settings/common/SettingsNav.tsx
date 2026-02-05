@@ -18,7 +18,12 @@ export function SettingsNav() {
                 <NavLink end to="/settings" className="nav-link">
                     Overview
                 </NavLink>
-                <ShowIf condition={config.config.is_registration_enabled}>
+                <ShowIf
+                    condition={
+                        config.config.is_registration_enabled ||
+                        config.config.is_oidc_registration_enabled
+                    }
+                >
                     <NavLink end to="/settings/pending" className="nav-link">
                         Pending registrations
                         {config.pendingUsers.length ? (

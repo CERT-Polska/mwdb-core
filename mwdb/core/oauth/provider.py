@@ -94,7 +94,9 @@ class OpenIDProvider:
         """
         return "Registered via OpenID Connect protocol"
 
-    def create_user(self, sub: bytes, userinfo: UserInfo) -> "User":
+    def create_user(
+        self, sub: bytes, userinfo: UserInfo, requires_approval: bool
+    ) -> "User":
         """
         Creates a User model object for a new OpenID identity user
         """
@@ -119,4 +121,5 @@ class OpenIDProvider:
             username,
             user_email,
             user_description,
+            pending=requires_approval,
         )

@@ -27,13 +27,13 @@ services:
       - "80:80"
     restart: on-failure
   postgres:
-    image: postgres:17
+    image: postgres:18
     restart: always
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - postgres-vars.env
     volumes:
-      - mwdb-postgres:/var/lib/postgresql/data
+      - mwdb-postgres:/var/lib/postgresql
   redis:
     image: redis:alpine
 

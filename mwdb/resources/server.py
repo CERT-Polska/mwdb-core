@@ -62,6 +62,9 @@ class ServerInfoResource(Resource):
                 "is_password_auth_enabled": app_config.mwdb.enable_password_auth,
                 "is_karton_enabled": app_config.mwdb.enable_karton,
                 "is_oidc_enabled": app_config.mwdb.enable_oidc,
+                "is_oidc_registration_enabled": (
+                    app_config.mwdb.enable_oidc_registration
+                ),
                 "is_3rd_party_sharing_consent_enabled": (
                     app_config.mwdb.enable_3rd_party_sharing_consent
                 ),

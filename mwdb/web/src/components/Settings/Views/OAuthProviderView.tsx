@@ -8,6 +8,7 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useParams } from "react-router-dom";
 import { DetailsRecord } from "../common/DetailsRecord";
 import { Provider } from "@mwdb-web/types/types";
+import { EditableBooleanItem } from "@mwdb-web/commons/ui/EditableBooleanItem";
 
 export function OAuthProviderView() {
     const viewAlert = useViewAlert();
@@ -124,6 +125,13 @@ export function OAuthProviderView() {
                             name="logout_endpoint"
                             type="logout_endpoint"
                             defaultValue={provider.logout_endpoint}
+                            onSubmit={handleSubmit}
+                        />
+                    </DetailsRecord>
+                    <DetailsRecord label="New accounts require approval">
+                        <EditableBooleanItem
+                            name="requires_approval"
+                            defaultValue={provider.requires_approval}
                             onSubmit={handleSubmit}
                         />
                     </DetailsRecord>

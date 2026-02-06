@@ -123,6 +123,7 @@ class MWDBConfig(Config):
     enable_hooks = key(cast=intbool, required=False, default=True)
     enable_karton = key(cast=intbool, required=False, default=False)
     enable_oidc = key(cast=intbool, required=False, default=False)
+    enable_oidc_registration = key(cast=intbool, required=False, default=False)
     enable_3rd_party_sharing_consent = key(cast=intbool, required=False, default=False)
 
     mail_smtp = key(cast=str, required=False)

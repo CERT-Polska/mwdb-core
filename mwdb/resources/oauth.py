@@ -21,6 +21,7 @@ from mwdb.schema.oauth import (
     OpenIDProviderSuccessResponseSchema,
     OpenIDProviderUpdateRequestSchema,
 )
+from mwdb.schema.user import UserSuccessResponseSchema
 
 from . import (
     load_schema,
@@ -100,6 +101,10 @@ class OpenIDProviderResource(Resource):
         if obj["logout_endpoint"]:
             logout_endpoint = obj["logout_endpoint"]
 
+        requires_approval = False
+        if obj["requires_approval"]:
+            requires_approval = obj["requires_approval"]
+
         if db.session.query(
             exists().where(and_(OpenIDProviderSettings.name == obj["name"]))
         ).scalar():
@@ -116,6 +121,7 @@ class OpenIDProviderResource(Resource):
             userinfo_endpoint=obj["userinfo_endpoint"],
             jwks_endpoint=jwks_endpoint,
             logout_endpoint=logout_endpoint,
+            requires_approval=requires_approval,
         )
 
         provider = provider_settings.get_oidc_provider()
@@ -255,6 +261,10 @@ class OpenIDSingleProviderResource(Resource):
         logout_endpoint = obj["logout_endpoint"]
         if logout_endpoint is not None:
             provider_settings.logout_endpoint = logout_endpoint
+
+        requires_approval = obj["requires_approval"]
+        if requires_approval is not None:
+            provider_settings.requires_approval = requires_approval
 
         db.session.commit()
 
@@ -421,6 +431,12 @@ class OpenIDAuthorizeResource(Resource):
 
 class OpenIDRegisterUserResource(Resource):
     def post(self, provider_name):
+        if not (
+            app_config.mwdb.enable_registration
+            or app_config.mwdb.enable_oidc_registration
+        ):
+            raise Forbidden("User registration is not enabled.")
+
         provider_settings = (
             db.session.query(OpenIDProviderSettings)
             .filter(OpenIDProviderSettings.name == provider_name)
@@ -430,6 +446,7 @@ class OpenIDRegisterUserResource(Resource):
             raise NotFound(f"Requested provider name '{provider_name}' not found")
 
         provider_group = provider_settings.group
+        requires_approval = provider_settings.requires_approval
 
         schema = OpenIDAuthorizeRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
@@ -451,7 +468,9 @@ class OpenIDRegisterUserResource(Resource):
             raise Conflict("User is already bound with selected provider.")
 
         userinfo = oidc_client.userinfo()
-        user = provider.create_user(id_token_claims["sub"], userinfo)
+        user = provider.create_user(
+            id_token_claims["sub"], userinfo, requires_approval=requires_approval
+        )
         identity = OpenIDUserIdentity(
             sub_id=id_token_claims["sub"],
             provider_id=provider_settings.id,
@@ -463,11 +482,12 @@ class OpenIDRegisterUserResource(Resource):
 
         db.session.add(identity)
 
-        user.logged_on = datetime.datetime.now()
+        if not requires_approval:
+            user.logged_on = datetime.datetime.now()
+
         db.session.commit()
 
-        auth_token = user.generate_session_token(provider=provider_name)
-
+        # Schedule hooks after successful commit
         user_private_group = next(
             (g for g in user.groups if g.name == user.login), None
         )
@@ -475,6 +495,16 @@ class OpenIDRegisterUserResource(Resource):
         if user_private_group:
             hooks.on_created_group(user_private_group)
         hooks.on_created_membership(provider_group, user)
+
+        if requires_approval:
+            logger.info(
+                "User registered via OpenID Provider and awaits for approval",
+                extra={"login": user.login, "provider": provider_name},
+            )
+            schema = UserSuccessResponseSchema()
+            return schema.dump({"login": user.login})
+
+        auth_token = user.generate_session_token(provider=provider_name)
         logger.info(
             "User logged in via OpenID Provider",
             extra={"login": user.login, "provider": provider_name},

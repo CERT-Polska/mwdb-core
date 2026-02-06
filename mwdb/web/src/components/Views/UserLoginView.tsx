@@ -60,10 +60,7 @@ export function UserLoginView() {
 
     useEffect(() => {
         if (location.state) {
-            if (
-                location.state.attemptedProvider &&
-                config.config["is_registration_enabled"]
-            ) {
+            if (location.state.attemptedProvider) {
                 setOAuthRegisterModalOpen(true);
             }
         }
@@ -87,8 +84,8 @@ export function UserLoginView() {
                     authenticate(location.state.attemptedProvider, "register");
                 }}
             >
-                We couldn't find an account associated with your oAuth identity.
-                Do you want to register using{" "}
+                We couldn't find an account associated with your OpenID
+                identity. Do you want to register using{" "}
                 {location.state ? location.state.attemptedProvider : ""}?
             </ConfirmationModal>
             <div className="background" />

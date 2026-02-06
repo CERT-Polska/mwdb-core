@@ -14,6 +14,7 @@ class ServerInfoResponseSchema(Schema):
     is_password_auth_enabled = fields.Boolean(required=True, allow_none=False)
     is_karton_enabled = fields.Boolean(required=True, allow_none=False)
     is_oidc_enabled = fields.Boolean(required=True, allow_none=False)
+    is_oidc_registration_enabled = fields.Boolean(required=True, allow_none=False)
     is_3rd_party_sharing_consent_enabled = fields.Boolean(
         required=True, allow_none=False
     )

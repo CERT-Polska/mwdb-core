@@ -22,6 +22,7 @@ const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
     userinfo_endpoint: Yup.string().required("Userinfo endpoint required"),
     jwks_endpoint: Yup.string().required("Jwks endpoint required"),
     logout_endpoint: Yup.string().required("Logout endpoint required"),
+    requires_approval: Yup.boolean().default(false),
 });
 
 const formOptions: UseFormProps<FormValues> = {
@@ -38,6 +39,7 @@ const formOptions: UseFormProps<FormValues> = {
         client_id: "",
         client_secret: "",
         logout_endpoint: "",
+        requires_approval: false,
     },
 };
 
@@ -188,6 +190,31 @@ export function OAuthRegisterView() {
                         }`}
                     />
                     <FormError errorField={errors.logout_endpoint} />
+                </div>
+                <div className="form-group">
+                    <Label
+                        label="New accounts require approval"
+                        required
+                        htmlFor={"requires_approval" as keyof FormValues}
+                    />
+                    <div className="material-switch">
+                        <input
+                            type="checkbox"
+                            {...register(
+                                "requires_approval" as keyof FormValues
+                            )}
+                            id={"requires_approval" as keyof FormValues}
+                            className={`form-control ${
+                                errors.requires_approval ? "is-invalid" : ""
+                            }`}
+                        />
+                        <Label
+                            label=""
+                            htmlFor="requires_approval"
+                            className="bg-success"
+                        />
+                        <FormError errorField={errors.requires_approval} />
+                    </div>
                 </div>
                 <input
                     type="submit"

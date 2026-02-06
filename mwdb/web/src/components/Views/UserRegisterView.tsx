@@ -73,7 +73,7 @@ export function UserRegisterView() {
             );
             toast(
                 `User ${response.data.login} registration requested. Account is
-                        waiting for confirmation`,
+                        waiting for administrator approval`,
                 { type: "success" }
             );
             setLoading(false);

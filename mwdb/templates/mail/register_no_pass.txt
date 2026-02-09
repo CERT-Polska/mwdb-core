@@ -1,0 +1,3 @@
+Hi {login},
+
+Your mwdb-core account has been successfully registered.

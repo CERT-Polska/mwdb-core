@@ -20,7 +20,7 @@ const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
     ),
     token_endpoint: Yup.string().required("Token endpoint required"),
     userinfo_endpoint: Yup.string().required("Userinfo endpoint required"),
-    jwks_endpoint: Yup.string().required("Jwks endpoint required"),
+    jwks_endpoint: Yup.string().default(""),
     logout_endpoint: Yup.string().required("Logout endpoint required"),
     requires_approval: Yup.boolean().default(false),
 });
@@ -106,6 +106,7 @@ export function OAuthRegisterView() {
                         htmlFor={"client_secret" as keyof FormValues}
                     />
                     <input
+                        type="password"
                         {...register("client_secret" as keyof FormValues)}
                         id={"client_secret" as keyof FormValues}
                         className={`form-control ${
@@ -163,8 +164,7 @@ export function OAuthRegisterView() {
                 </div>
                 <div className="form-group">
                     <Label
-                        label="Jwks endpoint"
-                        required
+                        label="JWKS endpoint"
                         htmlFor={"jwks_endpoint" as keyof FormValues}
                     />
                     <input
@@ -194,7 +194,6 @@ export function OAuthRegisterView() {
                 <div className="form-group">
                     <Label
                         label="New accounts require approval"
-                        required
                         htmlFor={"requires_approval" as keyof FormValues}
                     />
                     <div className="material-switch">

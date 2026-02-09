@@ -7,6 +7,43 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
 
+v2.17.0
+-------
+
+This release contains major improvements of OpenID Connect integration, as well as further performance enhancements for objects with large numbers of relationships. MWDB Core is now built using the `uv Python package and project manager <https://docs.astral.sh/uv/>`_.
+
+[Important change] Karton analyses are paginated
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Starting with v2.17.0, ``GET /api/{type}/{identifier}/karton`` returns only the 10 most recent analyses by default. Older entries must be retrieved using the new ``older_than`` parameter, which accepts the identifier of the last analysis from the previous page.
+
+This change affects users of ``mwdblib <= 4.6.0``. These versions do not support paginated API for Karton analyses and will therefore return only the most recent entries.
+
+[Important change] virtualenv path changed from /app/venv to /app/.venv
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+v2.17.0 is built using uv, which changes the location of the virtual environment inside the Docker image. The virtualenv path is now ``/app/.venv`` instead of ``/app/venv``.
+
+If you customize MWDB Core Docker images and rely on the virtualenv path somehow (e.g. in startup script), make sure to update all references during the upgrade.
+
+[Important change] Changes in account registration using OpenID Connect
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This release introduces a new configuration option, ``enable_oidc_registration``, which controls whether new accounts can be created during logging in via an OpenID Provider.
+
+Previously, ``enable_registration`` was also used for this purpose, but it enables the standard registration form as well. To preserve backward compatibility, enabling ``enable_registration`` still implicitly enables ``enable_oidc_registration``.
+
+Additionally, administrators can now require approval for accounts created via OpenID Connect. This approval flow is identical to the one used for accounts registered through the standard registration form. More details are available in the :ref:`OpenID Connect authentication (Single Sign-On)` documentation.
+
+[Feature] Multiple improvements in file download as password-protected zip file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MWDB Core supports downloading malware samples as password-protected ZIP files, which is commonly used when working in EDR-protected environments and transferring samples to a dedicated analysis environment.
+
+While the password ``infected`` is widely used, some environments inspect such archives, requiring analysts to use a less common password.
+
+In v2.17.0, the ZIP password can be customized using the new ``zip_download_password`` server configuration option. The implementation has also been optimized: samples are now zipped and streamed in chunks, reducing memory usage during downloads.
+
 v2.16.0
 -------
 

@@ -129,14 +129,23 @@ class UserPendingResource(Resource):
 
         if app_config.mwdb.mail_smtp:
             try:
-                send_email_notification(
-                    "register",
-                    "New account registered in MWDB",
-                    user.email,
-                    base_url=app_config.mwdb.base_url,
-                    login=user.login,
-                    set_password_token=user.generate_set_password_token(),
-                )
+                if app_config.mwdb.enable_password_auth:
+                    send_email_notification(
+                        "register",
+                        "New account registered in MWDB",
+                        user.email,
+                        base_url=app_config.mwdb.base_url,
+                        login=user.login,
+                        set_password_token=user.generate_set_password_token(),
+                    )
+                else:
+                    send_email_notification(
+                        "register_no_pass",
+                        "New account registered in MWDB",
+                        user.email,
+                        base_url=app_config.mwdb.base_url,
+                        login=user.login,
+                    )
             except MailError:
                 logger.exception("Can't send e-mail notification")
                 raise InternalServerError(

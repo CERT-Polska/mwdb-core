@@ -78,7 +78,7 @@ Then fill up form with OpenID provider settings:
 * ``Provider name`` will identify the name of provider for your users
 * ``Client ID`` should be set to the same ID as in Keycloak during creating client (in our case ``mwdb``)
 * ``Client secret`` can be retrieved from Keycloak. Go to client settings in Keycloak and you'll find Client Secret in ``Credentials`` tab.
-* Endpoints can be found in ``http://127.0.0.1:8080/realms/mwdb/.well-known/openid-configuration``.  ``userinfo_endpoint``, ``token_endpoint`` and ``jwks_endpoint`` should be set from the point of view of the MWDB server as they'll be called server-side, so you need to fix the host part in to ``http://keycloak.:8080/`` for our Docker Compose environment. ``authorization_endpoint`` and ``logout_endpoint`` URLs should point at ``127.0.0.1:8080`` - they'll be visited by user's browser.
+* Endpoints can be found in ``http://127.0.0.1:8080/realms/mwdb/.well-known/openid-configuration``.  ``userinfo_endpoint``, ``token_endpoint`` and ``jwks_endpoint`` should be set from the point of view of the MWDB server as they'll be called server-side, so in case of Docker Compose environment you need to change them to ``http://keycloak.:8080/``. ``authorization_endpoint`` and ``logout_endpoint`` URLs should point at ``127.0.0.1:8080`` - they'll be visited by user's browser.
 
 .. image:: ./_static/mwdb-oidc-create2.png
    :target: ./_static/mwdb-oidc-create2.png
@@ -206,12 +206,13 @@ Then log in as an 'admin' and check ``Pending registration`` tab in
 
 Then you can accept the request for an account, so ``foo`` will be able to log in.
 
-.. warning::
+"Pending registration" feature is originally designed for vetting requests coming from public registration form,
+so accepting account involves sending an e-mail notification with set password link when mail server is configured.
 
-    "Pending registration" feature is designed for vetting requests
-    coming from public registration form, so accepting account involves sending an e-mail notification with set password link and requires mail server to be configured.
-
-    You may workaround this issue by changing ``register.txt`` mail template and removing credentials part. To set up your own templates, change ``mail_templates_dir`` in configuration to point at your folder, copy templates from https://github.com/CERT-Polska/mwdb-core/tree/master/mwdb/templates/mail and modify them accordingly.
+If password-based login is disabled, MWDB will use ``register_no_pass.txt`` template. If you want to keep password-based
+login turned on, but don't pass set password link to users - you can achieve this by changing ``register.txt`` mail template
+and removing credentials part. To set up your own templates, change ``mail_templates_dir`` in configuration to point at your folder,
+copy templates from https://github.com/CERT-Polska/mwdb-core/tree/master/mwdb/templates/mail and modify them accordingly.
 
 Disable password-based authentication
 -------------------------------------

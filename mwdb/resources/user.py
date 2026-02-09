@@ -127,21 +127,22 @@ class UserPendingResource(Resource):
         user.registered_by = g.auth_user.id
         db.session.add(user)
 
-        try:
-            send_email_notification(
-                "register",
-                "New account registered in MWDB",
-                user.email,
-                base_url=app_config.mwdb.base_url,
-                login=user.login,
-                set_password_token=user.generate_set_password_token(),
-            )
-        except MailError:
-            logger.exception("Can't send e-mail notification")
-            raise InternalServerError(
-                "SMTP server needed to fulfill this request "
-                "is not configured or unavailable."
-            )
+        if app_config.mwdb.mail_smtp:
+            try:
+                send_email_notification(
+                    "register",
+                    "New account registered in MWDB",
+                    user.email,
+                    base_url=app_config.mwdb.base_url,
+                    login=user.login,
+                    set_password_token=user.generate_set_password_token(),
+                )
+            except MailError:
+                logger.exception("Can't send e-mail notification")
+                raise InternalServerError(
+                    "SMTP server needed to fulfill this request "
+                    "is not properly configured or unavailable."
+                )
 
         db.session.commit()
 
@@ -207,7 +208,7 @@ class UserPendingResource(Resource):
         db.session.delete(group)
         db.session.delete(user)
         db.session.commit()
-        if obj["send_email"]:
+        if app_config.mwdb.mail_smtp and obj["send_email"]:
             try:
                 send_email_notification(
                     "rejection",

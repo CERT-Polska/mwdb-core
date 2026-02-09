@@ -12,6 +12,8 @@ v2.17.0
 
 This release contains major improvements of OpenID Connect integration, as well as further performance enhancements for objects with large numbers of relationships. MWDB Core is now built using the `uv Python package and project manager <https://docs.astral.sh/uv/>`_.
 
+Complete changelog can be found here: `v2.17.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.17.0>`_.
+
 [Important change] Karton analyses are paginated
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -87,7 +89,7 @@ v2.14.0
 
 This release is focused on minor improvements of performance and OpenID Connect features.
 
-Complete changelog can be found here: `v2.13.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.14.0>`_.
+Complete changelog can be found here: `v2.14.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.14.0>`_.
 
 v2.13.0
 -------

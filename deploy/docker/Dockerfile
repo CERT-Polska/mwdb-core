@@ -17,6 +17,9 @@ ENV UV_PYTHON_DOWNLOADS=0
 # No hardlinks supported
 ENV UV_LINK_MODE=copy
 
+# ssdeep relies on 'pkg_resources' that was removed in setuptools 82.0.0
+# It also declares that 'setuptools>=40.9.0' is good enough.
+# Remove this line along with build-constraints file when this issue is resolved
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=ssdeep-build-constraints.txt,target=ssdeep-build-constraints.txt \

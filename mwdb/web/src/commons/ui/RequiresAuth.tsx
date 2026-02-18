@@ -14,9 +14,6 @@ export function RequiresAuth({ children }: Props) {
     const auth = useContext(AuthContext);
     const location = useLocation();
     if (!auth.isAuthenticated) {
-        toast("You need to authenticate before accessing this page", {
-            type: "error",
-        });
         return (
             <Navigate
                 to="/login"

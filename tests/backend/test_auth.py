@@ -178,3 +178,8 @@ def test_invalid_jwt(admin_session):
     session.set_auth_token(jwt.encode(missing_sub_jwt, secret_key, algorithm="HS512"))
     response = session.request("get", "/server")
     assert not response["is_authenticated"]
+
+def test_auth_too_long_password():
+    api = MwdbTest()
+    with ShouldRaise(status_code=400):
+        api.login_as(admin_login(), "a"*80)

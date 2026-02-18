@@ -2,6 +2,9 @@ version = 1
 revision = 3
 requires-python = ">=3.10"
 
+[manifest]
+build-constraints = [{ name = "setuptools", specifier = "<82" }]
+
 [[package]]
 name = "alembic"
 version = "1.14.0"

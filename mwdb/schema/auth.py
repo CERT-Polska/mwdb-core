@@ -8,7 +8,17 @@ class RecaptchaSchemaMixin(Schema):
 
 
 class AuthLoginRequestSchema(UserLoginSchemaBase):
+    MAX_PASSWORD_LENGTH = 72  # UTF-8 bytes
+
     password = fields.Str(required=True, allow_none=False)
+
+    @validates("password")
+    def validate_password(self, value):
+        if len(value.encode()) > self.MAX_PASSWORD_LENGTH:
+            raise ValidationError(
+                f"The password should contain no more than {self.MAX_PASSWORD_LENGTH} "
+                "bytes of UTF-8 characters, your password is too long."
+            )
 
 
 class AuthRegisterRequestSchema(UserLoginSchemaBase, RecaptchaSchemaMixin):
@@ -34,8 +44,8 @@ class AuthSetPasswordRequestSchema(Schema):
             raise ValidationError("Password is too short")
         if len(value.encode()) > self.MAX_PASSWORD_LENGTH:
             raise ValidationError(
-                "The password should contain no more than 72 bytes "
-                "of UTF-8 characters, your password is too long."
+                f"The password should contain no more than {self.MAX_PASSWORD_LENGTH} "
+                "bytes of UTF-8 characters, your password is too long."
             )
 
 

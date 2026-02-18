@@ -16,8 +16,8 @@ class AuthLoginRequestSchema(UserLoginSchemaBase):
     def validate_password(self, value):
         if len(value.encode()) > self.MAX_PASSWORD_LENGTH:
             raise ValidationError(
-                "The password should contain no more than 72 bytes "
-                "of UTF-8 characters, your password is too long."
+                f"The password should contain no more than {self.MAX_PASSWORD_LENGTH} "
+                "bytes of UTF-8 characters, your password is too long."
             )
 
 
@@ -44,8 +44,8 @@ class AuthSetPasswordRequestSchema(Schema):
             raise ValidationError("Password is too short")
         if len(value.encode()) > self.MAX_PASSWORD_LENGTH:
             raise ValidationError(
-                "The password should contain no more than 72 bytes "
-                "of UTF-8 characters, your password is too long."
+                f"The password should contain no more than {self.MAX_PASSWORD_LENGTH} "
+                "bytes of UTF-8 characters, your password is too long."
             )
 
 

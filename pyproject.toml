@@ -65,6 +65,11 @@ packages = ["mwdb", "mwdb.cli", "mwdb.core", "mwdb.model", "mwdb.resources", "mw
 [tool.setuptools.dynamic]
 version = {attr = "mwdb.version.app_version"}
 
+[tool.uv]
+# ssdeep relies on 'pkg_resources' that was removed in setuptools 82.0.0
+# Remove this line along with build-constraints file when this issue is resolved
+build-constraint-dependencies = ["setuptools<82"]
+
 [dependency-groups]
 test = [
     "python-dateutil==2.8.2",

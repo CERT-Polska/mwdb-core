@@ -11,8 +11,10 @@ export function Extension({ ident, children, ...props }: Props) {
     if (components.length === 0) return children || <></>;
     return (
         <>
-            {components.map((ExtElement) => (
-                <ExtElement {...props}>{children}</ExtElement>
+            {components.map((ExtElement, index) => (
+                <ExtElement key={`ext-${index}`} {...props}>
+                    {children}
+                </ExtElement>
             ))}
         </>
     );

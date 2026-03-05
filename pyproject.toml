@@ -22,7 +22,7 @@ authors = [
 dependencies = [
     "alembic==1.14.0",
     "apispec[marshmallow,yaml]==6.4.0",
-    "authlib==1.6.6",
+    "authlib==1.6.9",
     "bcrypt==5.0.0",
     "boto3==1.24.38",
     "click==8.1.3",

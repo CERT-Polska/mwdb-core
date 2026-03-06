@@ -6,6 +6,7 @@ from marshmallow import ValidationError
 from sqlalchemy import exists
 
 from mwdb.schema.user import UserLoginSchemaBase
+from mwdb.schema.group import GroupNameSchemaBase
 
 from .client import OpenIDClient
 
@@ -88,11 +89,42 @@ class OpenIDProvider:
         else:
             return f"{sub}@mwdb.local"
 
+    def get_user_groups(self, claims: dict[str, object]) -> list[str]:
+        """
+        User groups that are used when user registers using OpenID identity
+        """
+        if "groups" in claims.keys():
+            return claims["groups"]
+        else:
+            return []
+
     def get_user_description(self, sub: bytes, userinfo: UserInfo) -> str:
         """
         User description that is used when user registers using OpenID identity
         """
         return "Registered via OpenID Connect protocol"
+
+    def create_user_groups(self, group_names: list[str]) -> list["Group"]:
+        """
+        Creates Group model objects for a new OpenID identity user
+        """
+        from mwdb.model import Group
+
+        groups: list[Group] = []
+        for group_name in group_names:
+            try:
+                GroupNameSchemaBase().load({"name": group_name})
+            except ValidationError:
+                continue
+
+            group = Group.get_by_name(group_name)
+            if group is not None:
+                groups.append(group)
+                continue
+
+            groups.append(Group(name=group_name, openid_provider_name=self.name, immutable=False, workspace=False))
+
+        return groups
 
     def create_user(
         self, sub: bytes, userinfo: UserInfo, requires_approval: bool

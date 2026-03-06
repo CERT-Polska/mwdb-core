@@ -65,6 +65,9 @@ class ServerInfoResource(Resource):
                 "is_oidc_registration_enabled": (
                     app_config.mwdb.enable_oidc_registration
                 ),
+                "is_oidc_groups_enabled": (
+                    app_config.mwdb.enable_oidc_groups
+                ),
                 "is_3rd_party_sharing_consent_enabled": (
                     app_config.mwdb.enable_3rd_party_sharing_consent
                 ),

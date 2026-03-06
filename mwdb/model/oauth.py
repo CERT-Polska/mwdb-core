@@ -3,6 +3,7 @@ from typing import Type
 from mwdb.core.oauth.provider import OpenIDProvider
 
 from . import db
+from .group import Group
 
 
 def get_oidc_provider_class(provider_name: str) -> Type[OpenIDProvider]:
@@ -32,8 +33,17 @@ class OpenIDProviderSettings(db.Model):
         back_populates="provider",
         cascade="all, delete-orphan",
     )
+
+    openid_groups = db.relationship(
+        "Group",
+        foreign_keys=[Group.openid_provider_name],
+        back_populates="openid_provider",
+        lazy="select"
+    )
+
     group = db.relationship(
         "Group",
+        foreign_keys=[group_id],
         cascade="all, delete",
     )
 

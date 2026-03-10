@@ -6,7 +6,7 @@ from sqlalchemy import and_, exists, or_
 from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
-from mwdb.core.config import app_config, OIDCGroupManagementMode
+from mwdb.core.config import OIDCGroupManagementMode, app_config
 from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
 from mwdb.model import Group, OpenIDProviderSettings, OpenIDUserIdentity, db

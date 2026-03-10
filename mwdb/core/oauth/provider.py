@@ -5,8 +5,8 @@ from authlib.oidc.core import UserInfo
 from marshmallow import ValidationError
 from sqlalchemy import exists
 
-from mwdb.schema.user import UserLoginSchemaBase
 from mwdb.schema.group import GroupNameSchemaBase
+from mwdb.schema.user import UserLoginSchemaBase
 
 from .client import OpenIDClient
 

@@ -22,7 +22,7 @@ pycryptodomex==3.23.0
     # via pyzipper
 pygments==2.19.2
     # via pytest
-pyjwt==2.4.0
+pyjwt==2.12.0
 pytest==9.0.2
     # via pytest-rerunfailures
 pytest-rerunfailures==16.1

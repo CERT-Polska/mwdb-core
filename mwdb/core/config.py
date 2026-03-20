@@ -40,9 +40,11 @@ def storage_provider_from_str(v: str) -> StorageProviderType:
     except KeyError:
         raise ValueError(f"Storage provider {v} doesn't exist")
 
+
 class OIDCGroupManagementMode(Enum):
     FULL = "FULL"
     MIXED = "MIXED"
+
 
 def oidc_group_mode_from_str(v: str) -> OIDCGroupManagementMode:
     if not v:
@@ -134,7 +136,10 @@ class MWDBConfig(Config):
 
     # Management mode of OIDC groups
     oidc_groups_mode = key(
-        cast=oidc_group_mode_from_str, required=False, default=OIDCGroupManagementMode.MIXED)
+        cast=oidc_group_mode_from_str,
+        required=False,
+        default=OIDCGroupManagementMode.MIXED,
+    )
 
     remotes = key(cast=list_of_str, required=False, default=[])
 

@@ -22,7 +22,7 @@ pycryptodomex==3.23.0
     # via pyzipper
 pygments==2.19.2
     # via pytest
-pyjwt==2.4.0
+pyjwt==2.12.1
 pytest==9.0.2
     # via pytest-rerunfailures
 pytest-rerunfailures==16.1
@@ -35,6 +35,8 @@ six==1.17.0
 tomli==2.4.0 ; python_full_version < '3.11'
     # via pytest
 typing-extensions==4.15.0 ; python_full_version < '3.11'
-    # via exceptiongroup
+    # via
+    #   exceptiongroup
+    #   pyjwt
 urllib3==1.26.20
     # via requests

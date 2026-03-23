@@ -46,7 +46,6 @@ dependencies = [
     "redis==4.5.4",
     "requests==2.32.4",
     "sqlalchemy==1.4.54",
-    "ssdeep==3.4",
     "typed-config==1.1.0",
     "werkzeug==3.1.6",
 ]
@@ -64,11 +63,6 @@ packages = ["mwdb", "mwdb.cli", "mwdb.core", "mwdb.model", "mwdb.resources", "mw
 
 [tool.setuptools.dynamic]
 version = {attr = "mwdb.version.app_version"}
-
-[tool.uv]
-# ssdeep relies on 'pkg_resources' that was removed in setuptools 82.0.0
-# Remove this line along with build-constraints file when this issue is resolved
-build-constraint-dependencies = ["setuptools<82"]
 
 [dependency-groups]
 test = [

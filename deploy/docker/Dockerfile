@@ -4,8 +4,6 @@ FROM ghcr.io/astral-sh/uv:python3.12-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache libffi libffi-dev py3-cffi build-base python3-dev automake m4 autoconf libtool gcc g++ musl-dev openssl-dev cargo postgresql-dev libfuzzy2-dev curl ca-certificates
-
 # Omit development dependencies
 ENV UV_NO_DEV=1
 
@@ -36,7 +34,7 @@ FROM python:3.12-alpine
 
 LABEL maintainer="info@cert.pl"
 
-RUN apk add --no-cache postgresql-client postgresql-dev libmagic libfuzzy2-dev
+RUN apk add --no-cache postgresql-client postgresql-dev libmagic libfuzzy2
 
 # Copy the application from the builder
 COPY --from=builder --chown=nobody:nobody /app /app

@@ -16,12 +16,14 @@ from zlib import crc32
 import boto3
 import botocore.client
 import magic
-import ssdeep
 from botocore.credentials import (
     ContainerProvider,
     InstanceMetadataFetcher,
     InstanceMetadataProvider,
 )
+
+from .config import app_config
+from .ssdeep import SsdeepHash
 
 
 def config_dhash(obj):
@@ -103,8 +105,14 @@ def calc_magic(stream) -> str:
         magic.magic_close(magic_cookie)
 
 
-def calc_ssdeep(stream):
-    return calc_hash(stream, ssdeep.Hash(), lambda h: h.digest())
+def calc_ssdeep(stream) -> str | None:
+    if not app_config.mwdb.enable_ssdeep:
+        return None
+    hash_obj = SsdeepHash()
+    try:
+        return calc_hash(stream, hash_obj, lambda h: h.digest())
+    finally:
+        hash_obj.close()
 
 
 def calc_crc32(stream):

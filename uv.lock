@@ -2,9 +2,6 @@ version = 1
 revision = 3
 requires-python = ">=3.10"
 
-[manifest]
-build-constraints = [{ name = "setuptools", specifier = "<82" }]
-
 [[package]]
 name = "aioboto3"
 version = "13.3.0"
@@ -1338,7 +1335,6 @@ dependencies = [
     { name = "redis" },
     { name = "requests" },
     { name = "sqlalchemy" },
-    { name = "ssdeep" },
     { name = "typed-config" },
     { name = "werkzeug" },
 ]
@@ -1386,7 +1382,6 @@ requires-dist = [
     { name = "redis", specifier = "==4.5.4" },
     { name = "requests", specifier = "==2.32.4" },
     { name = "sqlalchemy", specifier = "==1.4.54" },
-    { name = "ssdeep", specifier = "==3.4" },
     { name = "typed-config", specifier = "==1.1.0" },
     { name = "werkzeug", specifier = "==3.1.6" },
 ]
@@ -2041,16 +2036,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/0d/3c/884fe389f5bec86a310b81e79abaa1e26e5d78dc10a84d544a6822833e47/SQLAlchemy-1.4.54-cp312-cp312-win32.whl", hash = "sha256:12bc0141b245918b80d9d17eca94663dbd3f5266ac77a0be60750f36102bbb0f", size = 1592027, upload-time = "2024-09-05T17:54:02.253Z" },
     { url = "https://files.pythonhosted.org/packages/01/c3/c690d037be57efd3a69cde16a2ef1bd2a905dafe869434d33836de0983d0/SQLAlchemy-1.4.54-cp312-cp312-win_amd64.whl", hash = "sha256:f941aaf15f47f316123e1933f9ea91a6efda73a161a6ab6046d1cde37be62c88", size = 1593827, upload-time = "2024-09-05T17:52:07.454Z" },
 ]
-
-[[package]]
-name = "ssdeep"
-version = "3.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "cffi" },
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/d3/f17602a7dde1231d332f4067fdd421057ffe335c3bbc295e7ccfab769d95/ssdeep-3.4.tar.gz", hash = "sha256:1b5510716bc495a2b18300ea837fcf944552a1cc678bb74e384bce251d99a85f", size = 110839, upload-time = "2019-10-03T20:50:23.924Z" }
 
 [[package]]
 name = "tomli"

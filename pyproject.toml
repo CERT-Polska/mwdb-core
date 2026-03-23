@@ -72,13 +72,13 @@ build-constraint-dependencies = ["setuptools<82"]
 
 [dependency-groups]
 test = [
-    "python-dateutil==2.8.2",
-    "pyJWT==2.4.0",
+    "python-dateutil",
+    "pyJWT",
     "pytest",
     "pytest-rerunfailures",
     "requests",
     "python-baseconv",
-    "pyzipper==0.3.5",
+    "pyzipper",
 ]
 dev = [
     "black",

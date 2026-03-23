@@ -918,12 +918,12 @@ dev = [
     { name = "isort" },
 ]
 test = [
-    { name = "pyjwt", specifier = "==2.4.0" },
+    { name = "pyjwt" },
     { name = "pytest" },
     { name = "pytest-rerunfailures" },
     { name = "python-baseconv" },
-    { name = "python-dateutil", specifier = "==2.8.2" },
-    { name = "pyzipper", specifier = "==0.3.5" },
+    { name = "python-dateutil" },
+    { name = "pyzipper" },
     { name = "requests" },
 ]
 

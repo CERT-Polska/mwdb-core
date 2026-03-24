@@ -2,7 +2,7 @@
 #    uv export --no-hashes --only-group test
 certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.4
+charset-normalizer==3.4.6
     # via requests
 colorama==0.4.6 ; sys_platform == 'win32'
     # via pytest
@@ -38,5 +38,5 @@ typing-extensions==4.15.0 ; python_full_version < '3.11'
     # via
     #   exceptiongroup
     #   pyjwt
-urllib3==1.26.20
+urllib3==2.6.3
     # via requests

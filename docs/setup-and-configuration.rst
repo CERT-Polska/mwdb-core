@@ -47,7 +47,7 @@ For production environments, you need to install:
 
 .. code-block:: console
 
-    $ apt install gcc libfuzzy-dev python3-dev python3-venv postgresql-client postgresql-common
+    $ apt install gcc libfuzzy2 python3-dev python3-venv postgresql-client postgresql-common
 
 Optionally you can install:
 
@@ -338,6 +338,7 @@ Extra features:
 * ``enable_json_logger`` (0 or 1) - Enables JSON logging which may be more convenient for automated log processing. Default is ``0``.
 * ``enable_prometheus_metrics`` (0 or 1) - Enables Prometheus metrics (\ ``/api/varz`` endpoint\ )
 * ``enable_debug_log`` (0 or 1) - Enables debug logging
+* ``enable_ssdeep`` (0 or 1) - Enables ssdeep evaluation. Default is ``1``.
 * ``redis_uri`` (string) - Redis database connection string, required by rate limiter.
 * ``remotes`` (comma separated strings) - list of MWDB remotes (experimental)
 * ``enable_hooks`` (0 or 1) - enable plugin hooks

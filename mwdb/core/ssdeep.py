@@ -15,12 +15,12 @@ if app_config.mwdb.enable_ssdeep:
         _libfuzzy.fuzzy_digest.argtypes = ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int
         _libfuzzy.fuzzy_digest.restype = ctypes.c_int
         _libfuzzy.fuzzy_free.argtypes = (ctypes.c_void_p,)
-    except Exception:
+    except Exception as e:
         raise RuntimeError(
-            "Failed to load libfuzzy.so. Disable ssdeep evaluation by setting "
+            "Failed to load libfuzzy.so.2. Disable ssdeep evaluation by setting "
             "enable_ssdeep option in configuration to 0 or make sure that 'libfuzzy2' "
             "is installed correctly."
-        )
+        ) from e
 
 
 class SsdeepHash:

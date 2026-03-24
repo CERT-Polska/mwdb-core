@@ -81,8 +81,7 @@ test = [
     "pyzipper",
 ]
 dev = [
-    "black",
-    "isort",
+    "ruff>=0.15.7",
 ]
 
 [tool.isort]
@@ -98,10 +97,11 @@ lint-version = "2"
 source = "mwdb/"
 use-mypy = false
 
-[tool.black]
-exclude = '''
-/(
-mwdb/web/.+ |
-mwdb/model/migrations/.+
-/)
-'''
+[tool.ruff]
+extend-exclude = [
+    "mwdb/web",
+    "mwdb/model/migrations",
+    "tests",
+    "docs",
+    "dev"
+]

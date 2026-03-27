@@ -12,9 +12,9 @@ jobs:
   lint_core:
     runs-on: ubuntu-latest
     steps:
-      - uses: CERT-Polska/lint-python-action@v2
-        with:
-          install-requirements: false
+      - uses: astral-sh/ruff-action@v3
+      - run: ruff check
+      - run: ruff format --check --diff
   lint_web:
     name: Lint mwdb-core web sources
     runs-on: ubuntu-latest

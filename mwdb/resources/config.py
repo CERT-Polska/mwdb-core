@@ -160,7 +160,6 @@ class ConfigUploader(ObjectUploader):
 
 
 class ConfigResource(ObjectResource, ConfigUploader):
-
     ObjectType = Config
     ListResponseSchema = ConfigListResponseSchema
     ItemResponseSchema = ConfigItemResponseSchema
@@ -303,7 +302,6 @@ class ConfigResource(ObjectResource, ConfigUploader):
 
 
 class ConfigItemResource(ObjectItemResource, ConfigUploader):
-
     ObjectType = Config
     ItemResponseSchema = ConfigItemResponseSchema
     CreateRequestSchema = ConfigLegacyCreateRequestSchema

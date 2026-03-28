@@ -81,6 +81,40 @@ const fieldDefinitions: Record<
             description:
                 "Query for objects uploaded by given amount of users (including parents)",
         },
+        ip: {
+            description: "Query for objects linked to a given IP address IOC",
+        },
+        domain: {
+            description: "Query for objects linked to a given domain IOC",
+        },
+        url: {
+            description: "Query for objects linked to a given URL IOC",
+        },
+        port: {
+            description: "Query for objects linked to a given port IOC",
+        },
+        email: {
+            description: "Query for objects linked to a given email IOC",
+        },
+        ioc_hash: {
+            description: "Query for objects linked to a given hash IOC",
+        },
+        ioc: {
+            description:
+                "Query for objects linked to an IOC with a given value (any type)",
+        },
+        ioc_type: {
+            description:
+                "Query for objects linked to IOCs of a given type (ip, domain, url, port, email, hash)",
+        },
+        ioc_category: {
+            description:
+                "Query for objects linked to IOCs with a given category",
+        },
+        ioc_severity: {
+            description:
+                "Query for objects linked to IOCs with a given severity (low, medium, high, critical)",
+        },
     },
     file: {
         name: {

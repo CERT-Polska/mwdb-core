@@ -5,6 +5,7 @@ import {
     ObjectTab,
     LatestConfigTab,
     RelationsTab,
+    IOCTab,
     DownloadAction,
     FavoriteAction,
     RemoveAction,
@@ -62,6 +63,7 @@ export function ShowTextBlobView() {
                     ]}
                 />
                 <RelationsTab />
+                <IOCTab />
                 <ObjectTab
                     tab="preview"
                     icon={faSearch}

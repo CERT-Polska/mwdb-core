@@ -10,6 +10,7 @@ import {
     ShowObject,
     ObjectTab,
     RelationsTab,
+    IOCTab,
     DownloadAction,
     FavoriteAction,
     RemoveAction,
@@ -62,6 +63,7 @@ export function ShowConfigView() {
                     ]}
                 />
                 <RelationsTab />
+                <IOCTab />
                 <ObjectTab
                     tab="preview"
                     icon={faSearch}

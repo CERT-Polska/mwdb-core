@@ -66,26 +66,18 @@ def configure_basic(ctx):
         import traceback
 
         traceback.print_exc()
-        click.echo(
-            textwrap.dedent(
-                f"""
+        click.echo(textwrap.dedent(f"""
         Something went wrong during configuration.
 
         Check if '{app_config.mwdb.postgres_uri}' PostgreSQL connection string
         is correct and database is running.
-                """
-            )
-        )
+                """))
     else:
-        click.echo(
-            textwrap.dedent(
-                """
+        click.echo(textwrap.dedent("""
         MWDB configured successfully!
 
         Use 'mwdb-core run' to run the server.
-        """
-            )
-        )
+        """))
 
 
 @configure.command("web", with_appcontext=False)
@@ -122,15 +114,13 @@ def configure_web(ctx, target_dir):
 
     if app_config.mwdb.web_folder != target_dir:
         click.echo(
-            textwrap.dedent(
-                f"""
+            textwrap.dedent(f"""
         [!] Build target directory differs from directory set in configuration
             ({target_dir} != {app_config.mwdb.web_folder})
             Put the following line in mwdb.ini file to serve web app from new location:
 
             web_folder = {target_dir}
-        """
-            ),
+        """),
             err=True,
         )
 

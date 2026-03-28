@@ -130,9 +130,32 @@ function EditableRow({
     const [editing, setEditing] = useState(false);
     const [category, setCategory] = useState(ioc.category || "");
     const [severity, setSeverity] = useState(ioc.severity || "");
-    const [tagsInput, setTagsInput] = useState((ioc.tags || []).join(", "));
+    const [tags, setTags] = useState<string[]>(ioc.tags || []);
+    const [tagInput, setTagInput] = useState("");
 
-    const searchField = ioc.type === "hash" ? "ioc_hash" : ioc.type;
+    function addTag(raw: string) {
+        const tag = raw.trim();
+        if (tag && !tags.includes(tag)) {
+            setTags((prev) => [...prev, tag]);
+        }
+        setTagInput("");
+    }
+
+    function removeTag(tag: string) {
+        setTags((prev) => prev.filter((t) => t !== tag));
+    }
+
+    function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.key === "Enter" || e.key === ",") {
+            e.preventDefault();
+            addTag(tagInput);
+        }
+        if (e.key === "Backspace" && !tagInput && tags.length > 0) {
+            setTags((prev) => prev.slice(0, -1));
+        }
+    }
+
+    const searchField = ioc.type;
     const searchLink = makeSearchLink({
         field: searchField,
         value: ioc.value,
@@ -140,22 +163,23 @@ function EditableRow({
     });
 
     function handleSave() {
-        const tags = tagsInput
-            .split(",")
-            .map((t) => t.trim())
-            .filter((t) => t.length > 0);
+        const finalTags = tagInput.trim()
+            ? [...tags, tagInput.trim()]
+            : tags;
         onUpdate(ioc.id, {
             category: category.trim() || null,
             severity: severity || null,
-            tags,
+            tags: finalTags,
         });
+        setTagInput("");
         setEditing(false);
     }
 
     function handleCancel() {
         setCategory(ioc.category || "");
         setSeverity(ioc.severity || "");
-        setTagsInput((ioc.tags || []).join(", "));
+        setTags(ioc.tags || []);
+        setTagInput("");
         setEditing(false);
     }
 
@@ -196,12 +220,48 @@ function EditableRow({
                     </select>
                 </td>
                 <td>
-                    <input
-                        className="form-control form-control-sm"
-                        value={tagsInput}
-                        onChange={(e) => setTagsInput(e.target.value)}
-                        placeholder="Tags (comma separated)"
-                    />
+                    <div
+                        className="form-control form-control-sm d-flex flex-wrap align-items-center"
+                        style={{
+                            height: "auto",
+                            minHeight: "calc(1.5em + .5rem + 2px)",
+                            gap: "3px",
+                            cursor: "text",
+                        }}
+                        onClick={(e) => {
+                            const input = (e.currentTarget as HTMLElement).querySelector("input");
+                            input?.focus();
+                        }}
+                    >
+                        {tags.map((tag) => (
+                            <Tag
+                                key={tag}
+                                tag={tag}
+                                searchable={false}
+                                deletable
+                                tagRemove={(e) => {
+                                    e.stopPropagation();
+                                    removeTag(tag);
+                                }}
+                            />
+                        ))}
+                        <input
+                            type="text"
+                            value={tagInput}
+                            onChange={(e) => setTagInput(e.target.value)}
+                            onKeyDown={handleTagKeyDown}
+                            onBlur={() => { if (tagInput.trim()) addTag(tagInput); }}
+                            placeholder={tags.length === 0 ? "Tags (Enter to add)" : ""}
+                            style={{
+                                border: "none",
+                                outline: "none",
+                                flex: 1,
+                                minWidth: "60px",
+                                padding: 0,
+                                fontSize: "inherit",
+                            }}
+                        />
+                    </div>
                 </td>
                 <td>
                     {new Date(ioc.creation_time).toLocaleString()}

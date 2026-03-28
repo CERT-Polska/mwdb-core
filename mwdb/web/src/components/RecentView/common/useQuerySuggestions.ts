@@ -96,9 +96,6 @@ const fieldDefinitions: Record<
         email: {
             description: "Query for objects linked to a given email IOC",
         },
-        ioc_hash: {
-            description: "Query for objects linked to a given hash IOC",
-        },
         mutex: {
             description: "Query for objects linked to a given mutex IOC",
         },
@@ -116,7 +113,7 @@ const fieldDefinitions: Record<
         },
         ioc_type: {
             description:
-                "Query for objects linked to IOCs of a given type (ip, domain, url, port, email, hash, mutex, registry_key, user_agent)",
+                "Query for objects linked to IOCs of a given type (ip, domain, url, port, email, mutex, registry_key, user_agent)",
         },
         ioc_category: {
             description:

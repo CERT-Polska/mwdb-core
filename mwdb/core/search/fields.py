@@ -627,9 +627,7 @@ class IOCField(BaseField):
         value_condition = string_equals(IOC.value, string_value)
 
         if self.ioc_type:
-            return Object.iocs.any(
-                and_(IOC.type == self.ioc_type, value_condition)
-            )
+            return Object.iocs.any(and_(IOC.type == self.ioc_type, value_condition))
         else:
             return Object.iocs.any(value_condition)
 

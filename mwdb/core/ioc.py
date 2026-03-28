@@ -1,3 +1,4 @@
+import ipaddress
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import ClassVar, Dict, FrozenSet, List, Optional, Type
@@ -11,7 +12,6 @@ class IOCType(str, Enum):
     URL = "url"
     PORT = "port"
     EMAIL = "email"
-    HASH = "hash"
     MUTEX = "mutex"
     REGISTRY_KEY = "registry_key"
     USER_AGENT = "user_agent"
@@ -28,9 +28,7 @@ class IOCType(str, Enum):
             return cls(normalized)
         except ValueError:
             valid = ", ".join(t.value for t in cls)
-            raise ValueError(
-                f"Invalid IOC type '{value}'. Must be one of: {valid}"
-            )
+            raise ValueError(f"Invalid IOC type '{value}'. Must be one of: {valid}")
 
 
 class IOCSeverity(str, Enum):
@@ -53,9 +51,7 @@ class IOCSeverity(str, Enum):
             return cls(normalized)
         except ValueError:
             valid = ", ".join(s.value for s in cls)
-            raise ValueError(
-                f"Invalid severity '{value}'. Must be one of: {valid}"
-            )
+            raise ValueError(f"Invalid severity '{value}'. Must be one of: {valid}")
 
 
 # ---------------------------------------------------------------------------
@@ -68,7 +64,8 @@ class BaseIOC:
     """Immutable base for all IOC types.
 
     Each concrete subclass must set the ``IOC_TYPE`` class variable and may
-    override ``sanitize_value`` for type-specific normalization.
+    override ``sanitize_value`` for type-specific normalization and
+    ``validate_value`` for type-specific format checks.
 
     Construction should go through one of the factory classmethods:
 
@@ -88,6 +85,19 @@ class BaseIOC:
     def __post_init__(self):
         if not self.value or not self.value.strip():
             raise ValueError("IOC value must not be empty")
+        type(self).validate_value(self.value)
+
+    # -- validation (override in subclasses) --------------------------------
+
+    @classmethod
+    def validate_value(cls, value: str) -> None:
+        """Validate a sanitized IOC value.
+
+        Subclasses override this for type-specific format checks.  The
+        default implementation accepts any non-empty string (emptiness is
+        already checked in ``__post_init__``).  Raise ``ValueError`` with a
+        descriptive message on invalid input.
+        """
 
     # -- sanitization (override in subclasses) -----------------------------
 
@@ -132,8 +142,8 @@ class BaseIOC:
         """Construct this IOC type from raw (unsanitized) field values.
 
         Applies ``sanitize_value`` to the value and normalizes category /
-        severity.  Raises ``ValueError`` when the value is empty or the
-        severity is unrecognized.
+        severity.  Raises ``ValueError`` when the value is empty, fails
+        format validation, or the severity is unrecognized.
         """
         sanitized_value = cls.sanitize_value(raw_value)
         if not sanitized_value:
@@ -142,9 +152,7 @@ class BaseIOC:
         return cls(
             value=sanitized_value,
             category=category.lower().strip() if category else None,
-            severity=(
-                IOCSeverity.from_string(severity) if severity else None
-            ),
+            severity=(IOCSeverity.from_string(severity) if severity else None),
             tags=tags if tags is not None else [],
         )
 
@@ -165,6 +173,13 @@ class IpIOC(BaseIOC):
         # IPv6 hex digits are case-insensitive; normalise to lowercase.
         return raw_value.lower().strip()
 
+    @classmethod
+    def validate_value(cls, value: str) -> None:
+        try:
+            ipaddress.ip_address(value)
+        except ValueError:
+            raise ValueError(f"Invalid IP address: '{value}'")
+
 
 @dataclass(frozen=True)
 class DomainIOC(BaseIOC):
@@ -176,6 +191,16 @@ class DomainIOC(BaseIOC):
     def sanitize_value(cls, raw_value: str) -> str:
         # Lowercase, strip, and remove a trailing FQDN dot if present.
         return raw_value.lower().strip().rstrip(".")
+
+    @classmethod
+    def validate_value(cls, value: str) -> None:
+        if " " in value or "\t" in value:
+            raise ValueError(f"Invalid domain: '{value}' (must not contain whitespace)")
+        if "://" in value:
+            raise ValueError(
+                f"Invalid domain: '{value}' (looks like a URL, use the "
+                f"'url' type instead)"
+            )
 
 
 @dataclass(frozen=True)
@@ -200,6 +225,15 @@ class PortIOC(BaseIOC):
     def sanitize_value(cls, raw_value: str) -> str:
         return raw_value.strip()
 
+    @classmethod
+    def validate_value(cls, value: str) -> None:
+        try:
+            port = int(value)
+        except ValueError:
+            raise ValueError(f"Invalid port: '{value}' (must be an integer)")
+        if not 0 <= port <= 65535:
+            raise ValueError(f"Invalid port: {port} (must be between 0 and 65535)")
+
 
 @dataclass(frozen=True)
 class EmailIOC(BaseIOC):
@@ -211,17 +245,19 @@ class EmailIOC(BaseIOC):
     def sanitize_value(cls, raw_value: str) -> str:
         return raw_value.lower().strip()
 
-
-@dataclass(frozen=True)
-class HashIOC(BaseIOC):
-    """Cryptographic hash indicator (MD5, SHA-1, SHA-256, etc.)."""
-
-    IOC_TYPE: ClassVar[IOCType] = IOCType.HASH
-
     @classmethod
-    def sanitize_value(cls, raw_value: str) -> str:
-        # Hex hashes are case-insensitive; normalise to lowercase.
-        return raw_value.lower().strip()
+    def validate_value(cls, value: str) -> None:
+        if value.count("@") != 1:
+            raise ValueError(
+                f"Invalid email address: '{value}' (must contain " f"exactly one '@')"
+            )
+        local, domain = value.split("@")
+        if not local:
+            raise ValueError(f"Invalid email address: '{value}' (missing local part)")
+        if not domain or "." not in domain:
+            raise ValueError(
+                f"Invalid email address: '{value}' (missing or invalid " f"domain part)"
+            )
 
 
 @dataclass(frozen=True)
@@ -271,7 +307,6 @@ IOC_IMPLEMENTATIONS: Dict[IOCType, Type[BaseIOC]] = {
     IOCType.URL: UrlIOC,
     IOCType.PORT: PortIOC,
     IOCType.EMAIL: EmailIOC,
-    IOCType.HASH: HashIOC,
     IOCType.MUTEX: MutexIOC,
     IOCType.REGISTRY_KEY: RegistryKeyIOC,
     IOCType.USER_AGENT: UserAgentIOC,

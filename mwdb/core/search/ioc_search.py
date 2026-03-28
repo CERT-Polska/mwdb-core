@@ -27,14 +27,10 @@ from sqlalchemy.dialects.postgresql import array as pg_array
 
 from mwdb.model import IOC, db
 
-from .exceptions import (
-    FieldNotQueryableException,
-    QueryParseException,
-)
-from .node_to_value import range_from_node, node_is_range, string_from_node
+from .exceptions import FieldNotQueryableException, QueryParseException
+from .node_to_value import node_is_range, range_from_node, string_from_node
 from .parse_helpers import range_equals, string_equals
 from .search import QueryTreeVisitor
-
 
 # --- IOC field classes ---
 

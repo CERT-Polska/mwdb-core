@@ -103,6 +103,7 @@ type ObjectCommonData = {
     id: string;
     parents: RelatedObject[];
     tags: Tag[];
+    iocs?: IOCItem[];
     upload_time: string;
     share_3rd_party: boolean;
     analyses?: KartonAnalysis[];
@@ -220,7 +221,7 @@ export type Family = {
     last_upload: string;
 };
 
-export type IOCType = "ip" | "domain" | "url" | "port" | "email" | "hash" | "mutex" | "registry_key" | "user_agent";
+export type IOCType = "ip" | "domain" | "url" | "port" | "email" | "mutex" | "registry_key" | "user_agent";
 
 export type IOCSeverity = "low" | "medium" | "high" | "critical";
 

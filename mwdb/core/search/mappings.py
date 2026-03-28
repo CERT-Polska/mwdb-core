@@ -1,5 +1,6 @@
 from typing import Dict, Tuple, Type
 
+from mwdb.core.ioc import IOCType
 from mwdb.model import (
     Comment,
     Config,
@@ -10,8 +11,6 @@ from mwdb.model import (
     TextBlob,
     User,
 )
-
-from mwdb.core.ioc import IOCType
 
 from .exceptions import FieldNotQueryableException
 from .fields import (
@@ -71,7 +70,6 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "url": IOCField(ioc_type=IOCType.URL),
         "port": IOCField(ioc_type=IOCType.PORT),
         "email": IOCField(ioc_type=IOCType.EMAIL),
-        "ioc_hash": IOCField(ioc_type=IOCType.HASH),
         "mutex": IOCField(ioc_type=IOCType.MUTEX),
         "registry_key": IOCField(ioc_type=IOCType.REGISTRY_KEY),
         "user_agent": IOCField(ioc_type=IOCType.USER_AGENT),

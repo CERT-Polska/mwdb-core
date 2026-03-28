@@ -699,7 +699,7 @@ class Object(db.Model):
             db.session.query(IOC)
             .join(object_ioc, object_ioc.c.ioc_id == IOC.id)
             .filter(object_ioc.c.object_id == self.id)
-            .order_by(IOC.type, IOC.value)
+            .order_by(IOC.creation_time.desc(), IOC.id.desc())
             .all()
         )
 

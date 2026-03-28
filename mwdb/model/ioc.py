@@ -29,9 +29,7 @@ object_ioc = db.Table(
 
 class IOC(db.Model):
     __tablename__ = "ioc"
-    __table_args__ = (
-        db.Index("ix_ioc_type_value", "type", "value", unique=True),
-    )
+    __table_args__ = (db.Index("ix_ioc_type_value", "type", "value", unique=True),)
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     type = db.Column(db.String(50), nullable=False, index=True)
@@ -70,10 +68,7 @@ class IOC(db.Model):
 
         if existing is not None:
             changed = False
-            if (
-                ioc_data.category is not None
-                and existing.category != ioc_data.category
-            ):
+            if ioc_data.category is not None and existing.category != ioc_data.category:
                 existing.category = ioc_data.category
                 changed = True
             if ioc_data.severity is not None:
@@ -95,9 +90,7 @@ class IOC(db.Model):
                 type=ioc_type_value,
                 value=ioc_data.value,
                 category=ioc_data.category,
-                severity=(
-                    ioc_data.severity.value if ioc_data.severity else None
-                ),
+                severity=(ioc_data.severity.value if ioc_data.severity else None),
                 tags=ioc_data.tags,
                 creation_time=datetime.datetime.utcnow(),
             )

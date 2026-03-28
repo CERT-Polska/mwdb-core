@@ -18,7 +18,7 @@ export type QuerySuggestion = {
 const iocFieldDefinitions: Record<string, FieldDefinition> = {
     type: {
         description:
-            "IOC type (ip, domain, url, port, email, hash)",
+            "IOC type (ip, domain, url, port, email, hash, mutex, registry_key, user_agent)",
     },
     value: {
         description: "IOC value (supports wildcards, e.g. 192.168.*)",

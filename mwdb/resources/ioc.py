@@ -2,6 +2,7 @@ from flask import request
 from werkzeug.exceptions import BadRequest, NotFound
 
 from mwdb.core.capabilities import Capabilities
+from mwdb.core.ioc import BaseIOC, IOCUpdate
 from mwdb.core.search.exceptions import QueryBaseException
 from mwdb.core.search.ioc_search import build_ioc_query
 from mwdb.core.service import Resource
@@ -129,17 +130,16 @@ class IOCManageResource(Resource):
         schema = IOCUpdateRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
+        try:
+            update = IOCUpdate.from_dict(obj)
+        except ValueError as e:
+            raise BadRequest(str(e))
+
         ioc = db.session.query(IOC).get(ioc_id)
         if ioc is None:
             raise NotFound("IOC not found")
 
-        if obj.get("category") is not None:
-            ioc.category = obj["category"] or None
-        if obj.get("severity") is not None:
-            ioc.severity = obj["severity"] or None
-        if obj.get("tags") is not None:
-            ioc.tags = obj["tags"]
-
+        ioc.apply_update(update)
         db.session.commit()
 
         logger.info(
@@ -290,23 +290,22 @@ class IOCResource(Resource):
         schema = IOCRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
+        try:
+            ioc_data = BaseIOC.from_dict(obj)
+        except ValueError as e:
+            raise BadRequest(str(e))
+
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
 
-        ioc, is_new = db_object.add_ioc(
-            ioc_type=obj["type"],
-            value=obj["value"],
-            category=obj.get("category"),
-            severity=obj.get("severity"),
-            tags=obj.get("tags", []),
-        )
+        ioc, is_new = db_object.add_ioc(ioc_data)
 
         logger.info(
             "IOC added",
             extra={
-                "ioc_type": obj["type"],
-                "ioc_value": obj["value"],
+                "ioc_type": ioc_data.IOC_TYPE.value,
+                "ioc_value": ioc_data.value,
                 "dhash": db_object.dhash,
             },
         )

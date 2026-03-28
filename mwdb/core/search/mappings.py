@@ -11,6 +11,8 @@ from mwdb.model import (
     User,
 )
 
+from mwdb.core.ioc import IOCType
+
 from .exceptions import FieldNotQueryableException
 from .fields import (
     AttributeField,
@@ -64,12 +66,15 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "karton": UUIDField(Object.analyses, KartonAnalysis.id),
         "comment_author": CommentAuthorField(Object.comment_authors, User.login),
         "upload_count": UploadCountField(),
-        "ip": IOCField(ioc_type="ip"),
-        "domain": IOCField(ioc_type="domain"),
-        "url": IOCField(ioc_type="url"),
-        "port": IOCField(ioc_type="port"),
-        "email": IOCField(ioc_type="email"),
-        "ioc_hash": IOCField(ioc_type="hash"),
+        "ip": IOCField(ioc_type=IOCType.IP),
+        "domain": IOCField(ioc_type=IOCType.DOMAIN),
+        "url": IOCField(ioc_type=IOCType.URL),
+        "port": IOCField(ioc_type=IOCType.PORT),
+        "email": IOCField(ioc_type=IOCType.EMAIL),
+        "ioc_hash": IOCField(ioc_type=IOCType.HASH),
+        "mutex": IOCField(ioc_type=IOCType.MUTEX),
+        "registry_key": IOCField(ioc_type=IOCType.REGISTRY_KEY),
+        "user_agent": IOCField(ioc_type=IOCType.USER_AGENT),
         "ioc": IOCField(),
         "ioc_type": IOCTypeField(),
         "ioc_category": IOCCategoryField(),

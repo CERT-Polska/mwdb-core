@@ -220,7 +220,7 @@ export type Family = {
     last_upload: string;
 };
 
-export type IOCType = "ip" | "domain" | "url" | "port" | "email" | "hash";
+export type IOCType = "ip" | "domain" | "url" | "port" | "email" | "hash" | "mutex" | "registry_key" | "user_agent";
 
 export type IOCSeverity = "low" | "medium" | "high" | "critical";
 

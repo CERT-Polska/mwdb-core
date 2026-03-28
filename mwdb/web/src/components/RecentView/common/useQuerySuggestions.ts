@@ -99,13 +99,24 @@ const fieldDefinitions: Record<
         ioc_hash: {
             description: "Query for objects linked to a given hash IOC",
         },
+        mutex: {
+            description: "Query for objects linked to a given mutex IOC",
+        },
+        registry_key: {
+            description:
+                "Query for objects linked to a given registry key IOC",
+        },
+        user_agent: {
+            description:
+                "Query for objects linked to a given user-agent IOC",
+        },
         ioc: {
             description:
                 "Query for objects linked to an IOC with a given value (any type)",
         },
         ioc_type: {
             description:
-                "Query for objects linked to IOCs of a given type (ip, domain, url, port, email, hash)",
+                "Query for objects linked to IOCs of a given type (ip, domain, url, port, email, hash, mutex, registry_key, user_agent)",
         },
         ioc_category: {
             description:
@@ -301,6 +312,16 @@ async function fetchSuggestions(
                 objectType = currentField.shift() as ObjectType;
             }
         }
+    }
+    // Strip a redundant type-selector prefix even on typed views.
+    // e.g. typing "file." while objectType is already "file" should
+    // still produce field suggestions rather than falling through
+    // to the subfield branch.
+    if (
+        currentField.length > 1 &&
+        Object.keys(fieldDefinitions).includes(currentField[0])
+    ) {
+        objectType = currentField.shift() as ObjectType;
     }
     // Here type selector is gone
     if (currentField.length === 1) {

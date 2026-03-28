@@ -3,6 +3,8 @@ import datetime
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.exc import IntegrityError
 
+from mwdb.core.ioc import BaseIOC, IOCUpdate
+
 from . import db
 
 object_ioc = db.Table(
@@ -32,16 +34,10 @@ class IOC(db.Model):
     )
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    type = db.Column(
-        db.String(50), nullable=False, index=True
-    )  # ip, domain, url, port, email, hash
+    type = db.Column(db.String(50), nullable=False, index=True)
     value = db.Column(db.String, nullable=False, index=True)
-    category = db.Column(
-        db.String(100), nullable=True
-    )  # c2, malware, phishing, etc.
-    severity = db.Column(
-        db.String(20), nullable=True
-    )  # low, medium, high, critical
+    category = db.Column(db.String(100), nullable=True)
+    severity = db.Column(db.String(20), nullable=True)
     tags = db.Column(ARRAY(db.String), default=[], server_default="{}")
     creation_time = db.Column(
         db.DateTime, nullable=False, default=datetime.datetime.utcnow
@@ -54,31 +50,39 @@ class IOC(db.Model):
     )
 
     @classmethod
-    def get_or_create(cls, ioc_type, value, category=None, severity=None, tags=None):
+    def get_or_create(cls, ioc_data: BaseIOC):
         """
         Get existing IOC or create a new one.
-        Uniqueness is based on (type, value).
+
+        Uniqueness is based on (type, value). If an existing IOC is found,
+        its category, severity, and tags are updated when the new data
+        provides different values.
+
         Returns (ioc, is_new) tuple.
         """
-        tags = tags or []
+        ioc_type_value = ioc_data.IOC_TYPE.value
 
         existing = (
             db.session.query(cls)
-            .filter(cls.type == ioc_type, cls.value == value)
+            .filter(cls.type == ioc_type_value, cls.value == ioc_data.value)
             .first()
         )
 
         if existing is not None:
-            # Update category/severity/tags if provided and currently empty
             changed = False
-            if category is not None and existing.category != category:
-                existing.category = category
+            if (
+                ioc_data.category is not None
+                and existing.category != ioc_data.category
+            ):
+                existing.category = ioc_data.category
                 changed = True
-            if severity is not None and existing.severity != severity:
-                existing.severity = severity
-                changed = True
-            if tags and existing.tags != tags:
-                existing.tags = tags
+            if ioc_data.severity is not None:
+                new_severity = ioc_data.severity.value
+                if existing.severity != new_severity:
+                    existing.severity = new_severity
+                    changed = True
+            if ioc_data.tags and existing.tags != ioc_data.tags:
+                existing.tags = ioc_data.tags
                 changed = True
             if changed:
                 db.session.flush()
@@ -88,11 +92,13 @@ class IOC(db.Model):
         db.session.begin_nested()
         try:
             ioc = cls(
-                type=ioc_type,
-                value=value,
-                category=category,
-                severity=severity,
-                tags=tags,
+                type=ioc_type_value,
+                value=ioc_data.value,
+                category=ioc_data.category,
+                severity=(
+                    ioc_data.severity.value if ioc_data.severity else None
+                ),
+                tags=ioc_data.tags,
                 creation_time=datetime.datetime.utcnow(),
             )
             db.session.add(ioc)
@@ -102,10 +108,41 @@ class IOC(db.Model):
             db.session.rollback()
             ioc = (
                 db.session.query(cls)
-                .filter(cls.type == ioc_type, cls.value == value)
+                .filter(
+                    cls.type == ioc_type_value,
+                    cls.value == ioc_data.value,
+                )
                 .first()
             )
             if ioc is None:
                 raise
 
         return ioc, is_new
+
+    def apply_update(self, update: IOCUpdate) -> bool:
+        """
+        Apply a partial update to this IOC.
+
+        Only fields that were explicitly provided in the update are changed.
+        Returns True if any field was modified.
+        """
+        changed = False
+
+        if update.is_provided("category"):
+            new_category = update.category if update.category else None
+            if self.category != new_category:
+                self.category = new_category
+                changed = True
+
+        if update.is_provided("severity"):
+            new_severity = update.severity.value if update.severity else None
+            if self.severity != new_severity:
+                self.severity = new_severity
+                changed = True
+
+        if update.is_provided("tags"):
+            if self.tags != update.tags:
+                self.tags = update.tags
+                changed = True
+
+        return changed

@@ -14,6 +14,7 @@ from sqlalchemy.sql.sqltypes import String
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.hooks import hooks
+from mwdb.core.ioc import BaseIOC
 
 from . import db
 from .attribute import Attribute, AttributeDefinition, AttributePermission
@@ -702,14 +703,15 @@ class Object(db.Model):
             .all()
         )
 
-    def add_ioc(self, ioc_type, value, category=None, severity=None, tags=None,
-                commit=True):
+    def add_ioc(self, ioc_data: BaseIOC, commit=True):
         """
         Add an IOC to this object. Creates the IOC if it doesn't exist,
         otherwise reuses the existing one.
+
+        :param ioc_data: BaseIOC subclass instance describing the IOC
         :return: (IOC, is_newly_linked) tuple
         """
-        ioc, _ = IOC.get_or_create(ioc_type, value, category, severity, tags)
+        ioc, _ = IOC.get_or_create(ioc_data)
 
         # Check if already linked
         is_linked = db.session.query(

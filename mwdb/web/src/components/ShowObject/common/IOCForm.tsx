@@ -1,6 +1,6 @@
 import { useState, useImperativeHandle, forwardRef } from "react";
 
-const IOC_TYPES = ["ip", "domain", "url", "port", "email", "hash"];
+const IOC_TYPES = ["ip", "domain", "url", "port", "email", "hash", "mutex", "registry_key", "user_agent"];
 const IOC_SEVERITIES = ["", "low", "medium", "high", "critical"];
 
 type Props = {
@@ -61,7 +61,7 @@ export const IOCForm = forwardRef<IOCFormHandle, Props>(
                     >
                         {IOC_TYPES.map((t) => (
                             <option key={t} value={t}>
-                                {t.toUpperCase()}
+                                {t.replace(/_/g, " ").toUpperCase()}
                             </option>
                         ))}
                     </select>

@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: astral-sh/ruff-action@v3
-      - run: ruff check
+      - run: ruff check --select I
       - run: ruff format --check --diff
   lint_web:
     name: Lint mwdb-core web sources

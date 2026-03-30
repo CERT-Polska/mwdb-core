@@ -1,8 +1,7 @@
 from typing import Dict, Tuple
 
-from prometheus_client import CollectorRegistry
+from prometheus_client import CollectorRegistry, generate_latest
 from prometheus_client import Gauge as PrometheusGauge
-from prometheus_client import generate_latest
 from redis import Redis
 
 from mwdb.core.config import app_config

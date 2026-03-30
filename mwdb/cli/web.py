@@ -36,8 +36,7 @@ def npm_build_web(target_dir):
                 shutil.copytree(path, dst / path.name)
             else:
                 raise RuntimeError(
-                    f"Critical error: file {path} is not a regular file "
-                    "nor directory"
+                    f"Critical error: file {path} is not a regular file nor directory"
                 )
 
         # Run npm install for web core

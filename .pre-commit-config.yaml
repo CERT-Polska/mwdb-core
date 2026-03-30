@@ -15,3 +15,12 @@ repos:
         entry: bash -c "uv export --no-hashes --only-group test > ./tests/backend/requirements.txt"
         language: system
         always_run: true
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.15.8
+    hooks:
+      # Run the linter.
+      - id: ruff-check
+        args: [ --select, I, --fix ]
+      # Run the formatter.
+      - id: ruff-format

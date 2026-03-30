@@ -276,7 +276,7 @@ api.add_resource(
 # Comment endpoints
 api.add_resource(
     CommentResource,
-    "/<any(file, config, blob, object):type>/" "<hash64:identifier>/comment",
+    "/<any(file, config, blob, object):type>/<hash64:identifier>/comment",
 )
 api.add_resource(
     CommentDeleteResource,

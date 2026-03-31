@@ -1,5 +1,9 @@
 import { RefAttributes } from "react";
-import ReactSelect, { GroupBase, StylesConfig } from "react-select";
+import ReactSelect, {
+    CSSObjectWithLabel,
+    GroupBase,
+    StylesConfig,
+} from "react-select";
 import SelectDef from "react-select/dist/declarations/src/Select";
 import { StateManagerProps } from "react-select/dist/declarations/src/useStateManager";
 
@@ -14,22 +18,25 @@ export function Select<
         RefAttributes<SelectDef<Option, IsMulti, Group>>
 ) {
     const customStyles: StylesConfig<Option, IsMulti, Group> = {
-        multiValue: (provided) => ({
-            ...provided,
-            color: "#fff",
-            backgroundColor: selectedBackgroundColor,
-            borderRadius: 4,
-        }),
-        multiValueLabel: (provided) => ({
-            ...provided,
-            color: "#fff",
-        }),
-        option: (provided, state) => ({
-            ...provided,
-            backgroundColor: state.isSelected
-                ? selectedBackgroundColor
-                : provided.backgroundColor,
-        }),
+        multiValue: (provided) =>
+            ({
+                ...provided,
+                color: "#fff",
+                backgroundColor: selectedBackgroundColor,
+                borderRadius: 4,
+            } as CSSObjectWithLabel),
+        multiValueLabel: (provided) =>
+            ({
+                ...provided,
+                color: "#fff",
+            } as CSSObjectWithLabel),
+        option: (provided, state) =>
+            ({
+                ...provided,
+                backgroundColor: state.isSelected
+                    ? selectedBackgroundColor
+                    : provided.backgroundColor,
+            } as CSSObjectWithLabel),
         clearIndicator: () => ({
             display: "none",
         }),

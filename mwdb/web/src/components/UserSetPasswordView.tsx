@@ -18,7 +18,7 @@ export function UserSetPasswordView() {
     const token =
         new URLSearchParams(window.location.search).get("token") || "";
 
-    const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+    const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
         password: Yup.string()
             .required("Password is required")
             .min(8, "Password must be at least 8 characters"),

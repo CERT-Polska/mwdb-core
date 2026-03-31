@@ -8,7 +8,7 @@ type FormValues = {
     value: string;
 };
 
-const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
     relation: Yup.string().required(
         "Please select parent or child relationship."
     ),

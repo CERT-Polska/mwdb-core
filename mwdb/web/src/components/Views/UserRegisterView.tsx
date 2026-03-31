@@ -21,7 +21,7 @@ type FormValues = {
     recaptcha: string | null;
 };
 
-const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
     login: Yup.string()
         .required("Login is required")
         .matches(
@@ -29,8 +29,8 @@ const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
             "Login must contain only letters, digits, '_', '.' and '-' characters, max 32 characters allowed."
         ),
     email: Yup.string()
-        .required("Email is required")
-        .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, "Value is not email"),
+        .email("Value is not an e-mail")
+        .required("E-mail is required"),
     affiliation: Yup.string().required("Affiliation is required"),
     job_title: Yup.string().required("Job title is required"),
 
@@ -246,6 +246,7 @@ export function UserRegisterView() {
                         )}
                         <div className="d-flex justify-content-between">
                             <button
+                                type="button"
                                 className="btn btn-outline-primary btn-lg"
                                 onClick={() => redirectTo("/login")}
                             >

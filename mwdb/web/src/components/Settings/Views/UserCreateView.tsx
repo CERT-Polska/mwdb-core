@@ -9,7 +9,7 @@ import { CreateUser, FeedQuality } from "@mwdb-web/types/types";
 
 type FormValues = CreateUser;
 
-const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
     login: Yup.string()
         .matches(
             /[A-Za-z0-9_.-]/,
@@ -17,13 +17,11 @@ const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
         )
         .max(32, "Max 32 characters allowed.")
         .required("Login is required"),
-    email: Yup.string()
-        .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid e-mail address")
-        .required("Email is required"),
+    email: Yup.string().email().required("Email is required"),
     additional_info: Yup.string().required("Additional info is required"),
     feed_quality: Yup.string().required(
         "Feed quality is required"
-    ) as Yup.BaseSchema<FeedQuality>,
+    ) as Yup.Schema<FeedQuality>,
     send_email: Yup.boolean().required("Send email is required"),
 });
 

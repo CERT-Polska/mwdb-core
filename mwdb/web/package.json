@@ -48,7 +48,7 @@
         "slate-react": "0.117.4",
         "swagger-ui-react": "^5.32.1",
         "typescript": "^5.0.4",
-        "yup": "0.32.11"
+        "yup": "^1.7.1"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.21.4",
@@ -59,6 +59,7 @@
         "@types/identicon.js": "^2.3.1",
         "@types/jest": "^29.5.1",
         "@types/jquery": "^3.5.33",
+        "@types/lodash": "^4.17.24",
         "@types/marked": "^4.3.0",
         "@types/moo": "^0.5.10",
         "@types/mustache": "^4.2.2",

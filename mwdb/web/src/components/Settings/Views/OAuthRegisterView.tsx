@@ -11,7 +11,7 @@ import { FormError, Label } from "@mwdb-web/commons/ui";
 
 type FormValues = Provider;
 
-const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
     name: Yup.string().required("Name is required"),
     client_id: Yup.string().required("Client ID required"),
     client_secret: Yup.string().required("Client secret required"),

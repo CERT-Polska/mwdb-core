@@ -19,35 +19,36 @@ import { Sharing } from "../common/Sharing";
 
 type FormValues = UploadConfigRequest;
 
-const validationSchema: Yup.SchemaOf<Partial<FormValues>> = Yup.object().shape({
-    cfg: Yup.string().test({
-        message: ({ value }) => {
-            if (!value) {
-                return "";
-            }
-            try {
-                JSON.parse(value);
-                return "";
-            } catch (err: any) {
-                return err.toString();
-            }
-        },
-        test: (value) => {
-            try {
-                JSON.parse(value!);
-                return true;
-            } catch (err) {
-                return false;
-            }
-        },
-    }),
-    family: Yup.string().required("Family is required."),
-    share3rdParty: Yup.bool(),
-    shareWith: Yup.string(),
-    config_type: Yup.string(),
-    parent: Yup.string(),
-    attributes: Yup.array(),
-});
+const validationSchema: Yup.ObjectSchema<Partial<FormValues>> =
+    Yup.object().shape({
+        cfg: Yup.string().test({
+            message: ({ value }) => {
+                if (!value) {
+                    return "";
+                }
+                try {
+                    JSON.parse(value);
+                    return "";
+                } catch (err: any) {
+                    return err.toString();
+                }
+            },
+            test: (value) => {
+                try {
+                    JSON.parse(value!);
+                    return true;
+                } catch (err) {
+                    return false;
+                }
+            },
+        }),
+        family: Yup.string().required("Family is required."),
+        share3rdParty: Yup.bool(),
+        shareWith: Yup.string(),
+        config_type: Yup.string(),
+        parent: Yup.string(),
+        attributes: Yup.array(),
+    });
 
 export function UploadConfigView() {
     const auth = useContext(AuthContext);

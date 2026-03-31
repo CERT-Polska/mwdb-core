@@ -24,16 +24,17 @@ import { Sharing } from "../common/Sharing";
 
 type FormValues = UploadBlobRequest;
 
-const validationSchema: Yup.ObjectSchema<Partial<FormValues>> = Yup.object().shape({
-    content: Yup.string().required("Content is required"),
-    type: Yup.string().required("Type is required"),
-    name: Yup.string().required("Name is required"),
-    parent: Yup.string(),
-    shareWith: Yup.string(),
-    share3rdParty: Yup.bool(),
-    group: Yup.string(),
-    attributes: Yup.array(),
-});
+const validationSchema: Yup.ObjectSchema<Partial<FormValues>> =
+    Yup.object().shape({
+        content: Yup.string().required("Content is required"),
+        type: Yup.string().required("Type is required"),
+        name: Yup.string().required("Name is required"),
+        parent: Yup.string(),
+        shareWith: Yup.string(),
+        share3rdParty: Yup.bool(),
+        group: Yup.string(),
+        attributes: Yup.array(),
+    });
 
 export function UploadBlobView() {
     const searchParams = useSearchParams()[0];

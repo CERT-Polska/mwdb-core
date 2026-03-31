@@ -19,8 +19,7 @@ type FormValues = {
 
 const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
     login: Yup.string().required("Login is required"),
-    email: Yup.string().email()
-        .required("Email is required"),
+    email: Yup.string().email().required("Email is required"),
     recaptcha: Yup.string().nullable().required("Recaptcha is required"),
 });
 

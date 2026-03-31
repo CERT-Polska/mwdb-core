@@ -34,7 +34,40 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 const withSingleLine = (editor: ReactEditor): ReactEditor => {
-    const { normalizeNode } = editor;
+    const { normalizeNode, insertTextData } = editor;
+
+    editor.insertTextData = (data) => {
+        const textData = data.getData("text/plain");
+        if (textData && (textData.includes("\n") || textData.includes("\r"))) {
+            /**
+             * HACK: Bugfix for https://github.com/CERT-Polska/mwdb-core/issues/1149
+             * When text containing new line characters is copy-pasted, Slate internally
+             * splits new lines and emits separate insertText calls for each line.
+             * This operation makes them concatenated without any separator. The last place
+             * where we can override this is DataTransfer object. Unfortunately, it is
+             * immutable because it represents the clipboard contents. So we need to
+             * use a Proxy object to transparently override the getData method
+             * and to inject our split logic.
+             */
+            const spaceSplittedData = textData.replaceAll(/\r\n|\r|\n/g, " ");
+            return insertTextData(
+                new Proxy(data, {
+                    get(target, prop, receiver) {
+                        if (prop === "getData") {
+                            return function (format: string) {
+                                if (format === "text/plain") {
+                                    return spaceSplittedData;
+                                }
+                                return target.getData.call(target, format);
+                            };
+                        }
+                        return Reflect.get(target, prop, receiver);
+                    },
+                })
+            );
+        }
+        return insertTextData(data);
+    };
 
     editor.normalizeNode = ([node, path]) => {
         if (path.length === 0) {

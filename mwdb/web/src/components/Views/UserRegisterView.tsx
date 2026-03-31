@@ -246,6 +246,7 @@ export function UserRegisterView() {
                         )}
                         <div className="d-flex justify-content-between">
                             <button
+                                type="button"
                                 className="btn btn-outline-primary btn-lg"
                                 onClick={() => redirectTo("/login")}
                             >

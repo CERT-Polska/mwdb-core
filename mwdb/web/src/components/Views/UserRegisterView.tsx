@@ -28,7 +28,9 @@ const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
             /[A-Za-z0-9_.-]{1,32}/,
             "Login must contain only letters, digits, '_', '.' and '-' characters, max 32 characters allowed."
         ),
-    email: Yup.string().email().required("Email is required"),
+    email: Yup.string()
+        .email("Value is not an e-mail")
+        .required("E-mail is required"),
     affiliation: Yup.string().required("Affiliation is required"),
     job_title: Yup.string().required("Job title is required"),
 

@@ -19,7 +19,7 @@ import { Sharing } from "../common/Sharing";
 
 type FormValues = UploadConfigRequest;
 
-const validationSchema: Yup.SchemaOf<Partial<FormValues>> = Yup.object().shape({
+const validationSchema: Yup.ObjectSchema<Partial<FormValues>> = Yup.object().shape({
     cfg: Yup.string().test({
         message: ({ value }) => {
             if (!value) {

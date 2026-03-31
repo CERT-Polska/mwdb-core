@@ -17,11 +17,10 @@ type FormValues = {
     recaptcha: string | null;
 };
 
-const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
     login: Yup.string().required("Login is required"),
-    email: Yup.string()
-        .required("Email is required")
-        .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, "Value is not email"),
+    email: Yup.string().email()
+        .required("Email is required"),
     recaptcha: Yup.string().nullable().required("Recaptcha is required"),
 });
 

@@ -24,7 +24,7 @@ import { Sharing } from "../common/Sharing";
 
 type FormValues = UploadBlobRequest;
 
-const validationSchema: Yup.SchemaOf<Partial<FormValues>> = Yup.object().shape({
+const validationSchema: Yup.ObjectSchema<Partial<FormValues>> = Yup.object().shape({
     content: Yup.string().required("Content is required"),
     type: Yup.string().required("Type is required"),
     name: Yup.string().required("Name is required"),

@@ -10,7 +10,7 @@ type FormValues = {
     name: string;
 };
 
-const validationSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
     name: Yup.string()
         .matches(
             /[A-Za-z0-9_.-]/,

@@ -37,6 +37,8 @@ export let capabilitiesList: Record<Capability, string> = {
         "Can mark objects as shareable with 3rd parties",
     [Capability.accessPrometheusMetrics]:
         "Can access Prometheus metrics on /api/varz endpoint",
+    [Capability.addingIocs]: "Can add IOCs to objects",
+    [Capability.removingIocs]: "Can remove IOCs from objects",
 };
 
 afterPluginsLoaded(() => {

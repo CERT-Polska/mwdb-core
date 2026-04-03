@@ -4,12 +4,17 @@ import {
     useReducer,
     useContext,
     useMemo,
+    useState,
     Reducer,
 } from "react";
 import { toast } from "react-toastify";
 import _ from "lodash";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faChevronLeft,
+    faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { ObjectBox } from "./ObjectBox";
 import { MultiRelationsBox } from "./MultiRelationsBox";
@@ -25,6 +30,7 @@ import { ObjectContext } from "@mwdb-web/commons/context";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { View } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
+import { IOCBox } from "./IOCBox";
 import { KartonAnalysisBox } from "./KartonAnalysisBox";
 import {
     BlobData,
@@ -104,6 +110,7 @@ export function ShowObject(props: Props) {
     const [objectState, setObjectState] = useReducer<
         Reducer<ObjectState, ObjectAction>
     >(objectReducer, {});
+    const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
     const setObjectError = useCallback((error: unknown) => {
         toast(getErrorMessage(error), {
@@ -143,8 +150,36 @@ export function ShowObject(props: Props) {
     const objectLayout = objectState.object ? (
         <div className="show-object">
             <Extendable ident="showObject">
+                <div className="d-flex justify-content-end mb-1">
+                    <button
+                        className="btn btn-link btn-sm text-muted p-0"
+                        style={{ fontSize: "0.75rem" }}
+                        onClick={() =>
+                            setSidebarCollapsed(!sidebarCollapsed)
+                        }
+                        title={
+                            sidebarCollapsed
+                                ? "Show sidebar"
+                                : "Hide sidebar"
+                        }
+                    >
+                        <FontAwesomeIcon
+                            icon={
+                                sidebarCollapsed
+                                    ? faChevronLeft
+                                    : faChevronRight
+                            }
+                            className="mr-1"
+                        />
+                        {sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+                    </button>
+                </div>
                 <div className="row">
-                    <div className="col-md-7">
+                    <div
+                        className={
+                            sidebarCollapsed ? "col-md-12" : "col-md-7"
+                        }
+                    >
                         <Extendable ident="showObjectLeftColumn">
                             <div className="card">
                                 <Extendable ident="showObjectPresenter">
@@ -174,19 +209,22 @@ export function ShowObject(props: Props) {
                             )}
                         </Extendable>
                     </div>
-                    <div className="col-md-5">
-                        <Extendable ident="showObjectRightColumn">
-                            <TagBox />
-                            <MultiRelationsBox />
-                            {config.config["is_karton_enabled"] ? (
-                                <KartonAnalysisBox />
-                            ) : (
-                                []
-                            )}
-                            <SharesBox />
-                            <CommentBox />
-                        </Extendable>
-                    </div>
+                    {!sidebarCollapsed && (
+                        <div className="col-md-5">
+                            <Extendable ident="showObjectRightColumn">
+                                <TagBox />
+                                <IOCBox />
+                                <MultiRelationsBox />
+                                {config.config["is_karton_enabled"] ? (
+                                    <KartonAnalysisBox />
+                                ) : (
+                                    []
+                                )}
+                                <SharesBox />
+                                <CommentBox />
+                            </Extendable>
+                        </div>
+                    )}
                 </div>
             </Extendable>
         </div>

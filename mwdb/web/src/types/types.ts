@@ -27,6 +27,8 @@ export enum Capability {
     removingKarton = "karton_unassign",
     modify3rdPartySharing = "modify_3rd_party_sharing",
     accessPrometheusMetrics = "access_prometheus_metrics",
+    addingIocs = "adding_iocs",
+    removingIocs = "removing_iocs",
 }
 
 export type User = {
@@ -101,6 +103,7 @@ type ObjectCommonData = {
     id: string;
     parents: RelatedObject[];
     tags: Tag[];
+    iocs?: IOCItem[];
     upload_time: string;
     share_3rd_party: boolean;
     analyses?: KartonAnalysis[];
@@ -216,6 +219,20 @@ export type Family = {
     count: number;
     family: string;
     last_upload: string;
+};
+
+export type IOCType = "ip" | "domain" | "url" | "port" | "email" | "mutex" | "registry_key" | "user_agent";
+
+export type IOCSeverity = "low" | "medium" | "high" | "critical";
+
+export type IOCItem = {
+    id: number;
+    type: IOCType;
+    value: string;
+    category: string | null;
+    severity: IOCSeverity | null;
+    tags: string[];
+    creation_time: string;
 };
 
 export type KartonAnalysis = {

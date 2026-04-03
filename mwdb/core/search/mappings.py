@@ -1,5 +1,6 @@
 from typing import Dict, Tuple, Type
 
+from mwdb.core.ioc import IOCType
 from mwdb.model import (
     Comment,
     Config,
@@ -20,6 +21,10 @@ from .fields import (
     DatetimeField,
     FavoritesField,
     FileNameField,
+    IOCCategoryField,
+    IOCField,
+    IOCSeverityField,
+    IOCTypeField,
     MultiBlobField,
     MultiConfigField,
     MultiFileField,
@@ -60,6 +65,18 @@ field_mapping: Dict[str, Dict[str, BaseField]] = {
         "karton": UUIDField(Object.analyses, KartonAnalysis.id),
         "comment_author": CommentAuthorField(Object.comment_authors, User.login),
         "upload_count": UploadCountField(),
+        "ip": IOCField(ioc_type=IOCType.IP),
+        "domain": IOCField(ioc_type=IOCType.DOMAIN),
+        "url": IOCField(ioc_type=IOCType.URL),
+        "port": IOCField(ioc_type=IOCType.PORT),
+        "email": IOCField(ioc_type=IOCType.EMAIL),
+        "mutex": IOCField(ioc_type=IOCType.MUTEX),
+        "registry_key": IOCField(ioc_type=IOCType.REGISTRY_KEY),
+        "user_agent": IOCField(ioc_type=IOCType.USER_AGENT),
+        "ioc": IOCField(),
+        "ioc_type": IOCTypeField(),
+        "ioc_category": IOCCategoryField(),
+        "ioc_severity": IOCSeverityField(),
     },
     File.__name__: {
         "name": FileNameField(),

@@ -14,9 +14,11 @@ from sqlalchemy.sql.sqltypes import String
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.hooks import hooks
+from mwdb.core.ioc import BaseIOC
 
 from . import db
 from .attribute import Attribute, AttributeDefinition, AttributePermission
+from .ioc import IOC, object_ioc
 from .karton import KartonAnalysis, karton_object
 from .object_permission import AccessType, ObjectPermission
 from .tag import Tag
@@ -135,6 +137,12 @@ class Object(db.Model):
     analyses = db.relationship(
         "KartonAnalysis",
         secondary=karton_object,
+        back_populates="objects",
+    )
+
+    iocs = db.relationship(
+        "IOC",
+        secondary=object_ioc,
         back_populates="objects",
     )
 
@@ -681,6 +689,88 @@ class Object(db.Model):
             db.session.commit()
         hooks.on_removed_tag(self, db_tag)
         return is_removed
+
+    def get_iocs(self):
+        """
+        Get all IOCs linked to this object
+        :return: List of IOC objects
+        """
+        return (
+            db.session.query(IOC)
+            .join(object_ioc, object_ioc.c.ioc_id == IOC.id)
+            .filter(object_ioc.c.object_id == self.id)
+            .order_by(IOC.creation_time.desc(), IOC.id.desc())
+            .all()
+        )
+
+    def add_ioc(self, ioc_data: BaseIOC, commit=True):
+        """
+        Add an IOC to this object. Creates the IOC if it doesn't exist,
+        otherwise reuses the existing one.
+
+        :param ioc_data: BaseIOC subclass instance describing the IOC
+        :return: (IOC, is_newly_linked) tuple
+        """
+        ioc, _ = IOC.get_or_create(ioc_data)
+
+        # Check if already linked
+        is_linked = db.session.query(
+            db.session.query(object_ioc)
+            .filter(
+                object_ioc.c.object_id == self.id,
+                object_ioc.c.ioc_id == ioc.id,
+            )
+            .exists()
+        ).scalar()
+
+        if is_linked:
+            return ioc, False
+
+        db.session.begin_nested()
+        try:
+            db.session.execute(
+                insert(object_ioc).values(
+                    object_id=self.id,
+                    ioc_id=ioc.id,
+                )
+            )
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return ioc, False
+
+        if commit:
+            db.session.commit()
+        return ioc, True
+
+    def remove_ioc(self, ioc_id, commit=True):
+        """
+        Remove an IOC link from this object.
+        :param ioc_id: IOC id to unlink
+        :return: True if the link was removed
+        """
+        is_linked = db.session.query(
+            db.session.query(object_ioc)
+            .filter(
+                object_ioc.c.object_id == self.id,
+                object_ioc.c.ioc_id == ioc_id,
+            )
+            .exists()
+        ).scalar()
+
+        if not is_linked:
+            return False
+
+        db.session.execute(
+            delete(object_ioc).where(
+                object_ioc.c.object_id == self.id,
+                object_ioc.c.ioc_id == ioc_id,
+            )
+        )
+
+        if commit:
+            db.session.commit()
+        return True
 
     def get_attributes(
         self,

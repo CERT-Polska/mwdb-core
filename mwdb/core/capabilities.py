@@ -51,6 +51,10 @@ class Capabilities(object):
     modify_3rd_party_sharing = "modify_3rd_party_sharing"
     # Can access Prometheus metrics
     access_prometheus_metrics = "access_prometheus_metrics"
+    # Can add IOCs to objects
+    adding_iocs = "adding_iocs"
+    # Can remove IOCs from objects
+    removing_iocs = "removing_iocs"
 
     @classmethod
     def all(cls):

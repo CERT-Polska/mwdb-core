@@ -613,6 +613,55 @@ class UploadCountField(BaseField):
             return Object.upload_count == upload_value
 
 
+class IOCField(BaseField):
+    """Search field for IOCs linked to objects via the object_ioc table."""
+
+    def __init__(self, ioc_type=None):
+        self.ioc_type = ioc_type
+
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        from mwdb.model import IOC
+        from mwdb.model.ioc import object_ioc
+
+        string_value = string_from_node(node, escaped=True)
+        value_condition = string_equals(IOC.value, string_value)
+
+        if self.ioc_type:
+            return Object.iocs.any(and_(IOC.type == self.ioc_type, value_condition))
+        else:
+            return Object.iocs.any(value_condition)
+
+
+class IOCTypeField(BaseField):
+    """Search field for IOC type (e.g., ioc_type:ip)."""
+
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        from mwdb.model import IOC
+
+        string_value = string_from_node(node, escaped=True)
+        return Object.iocs.any(string_equals(IOC.type, string_value))
+
+
+class IOCCategoryField(BaseField):
+    """Search field for IOC category (e.g., ioc_category:c2)."""
+
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        from mwdb.model import IOC
+
+        string_value = string_from_node(node, escaped=True)
+        return Object.iocs.any(string_equals(IOC.category, string_value))
+
+
+class IOCSeverityField(BaseField):
+    """Search field for IOC severity (e.g., ioc_severity:high)."""
+
+    def _get_condition(self, node: Item, path_selector: PathSelector) -> Any:
+        from mwdb.model import IOC
+
+        string_value = string_from_node(node, escaped=True)
+        return Object.iocs.any(string_equals(IOC.severity, string_value))
+
+
 class MultiBaseField(BaseField):
     def _get_condition_for_value(self, escaped_value: str):
         raise NotImplementedError

@@ -214,6 +214,54 @@ login turned on, but don't pass set password link to users - you can achieve thi
 and removing credentials part. To set up your own templates, change ``mail_templates_dir`` in configuration to point at your folder,
 copy templates from https://github.com/CERT-Polska/mwdb-core/tree/master/mwdb/templates/mail and modify them accordingly.
 
+Manage MWDB Groups from OpenID Groups
+-------------------------------------
+
+If your identity provider is correctly configured to return the user groups in the OpenID Token,
+you can map automatically these groups to MWDB groups.
+
+To be able to use this method, you must configure MWDB with special environment variable: ``MWDB_ENABLE_OIDC_GROUPS=1``
+or via ``mwdb.ini`` configuration field: ```enable_oidc_groups = 1```
+
+You can filter the groups coming from OIDC using the environment variable: ``MWDB_OIDC_GROUPS_MATCH_PATTERN=(.*)``
+or via ``mwdb.ini`` configuration field: ```oidc_groups_match_pattern = (.*)```
+
+This variable shall contain a regular expression used for group names filtering.
+
+It shall include one matching group which will be used to perform the mapping with the name of the local group.
+
+The mapping between group names is performed using the environment variable: ``MWDB_OIDC_GROUPS_REPLACE_PATTERN=\1``
+or via ``mwdb.ini`` configuration field: ```oidc_groups_replace_pattern = \1```
+
+By default when this feature is enabled, all the OIDC groups are matched and the full OIDC group names are used for the name of the local groups.
+
+The new created groups are linked to the source OIDC provider used for the login.
+
+It helps to make the distinction between:
+- Local groups: Groups directly created with the MWDB GUI Interface
+- External groups: Groups linked to OIDC providers
+
+This is important to understand the different management modes explained below.
+
+.. note::
+
+   You can for example match only the groups starting by MWDB_xxx by configuration the variable oidc_groups_match_pattern to ``MWDB_(.*)``
+
+   And map these groups to internal groups as EXTERNAL_xxx by configuration the variable oidc_groups_replace_pattern to ``EXTERNAL_\1``
+
+   With this configuration, the group name MWDB_MALWARE_ANALYSTS will be mapped internally to the MWDB group EXTERNAL_MALWARE_ANALYST
+
+The management of MWDB and OIDC Provider groups can be configured with the special environment variable: ``MWDB_OIDC_GROUPS_MODE``
+or via ``mwdb.ini`` configuration field: ```oidc_groups_mode```
+
+Two modes are currently supported:
+- FULL: The OIDC users are added to the groups included in their OIDC Token whatever the type of the groups
+  It means that a user manually added to local MWDB groups will be removed from these groups if they are not included in their OIDC Tokens.
+- MIXED: The OIDC users are only added and removed to the MWDB groups linked to the current OIDC provider.
+  It means that a user will keep his local groups whatever the content of his OIDC Token.
+
+By default the MIXED mode is used.
+
 Disable password-based authentication
 -------------------------------------
 

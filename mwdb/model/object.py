@@ -26,10 +26,18 @@ RELATIONS_VIEW_LIMIT_PER_TYPE = 100
 relation = db.Table(
     "relation",
     db.Column(
-        "parent_id", db.Integer, db.ForeignKey("object.id"), index=True, nullable=False
+        "parent_id",
+        db.Integer,
+        db.ForeignKey("object.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
     ),
     db.Column(
-        "child_id", db.Integer, db.ForeignKey("object.id"), index=True, nullable=False
+        "child_id",
+        db.Integer,
+        db.ForeignKey("object.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
     ),
     db.Column("creation_time", db.DateTime, default=datetime.datetime.utcnow),
     db.Index("ix_relation_parent_child", "parent_id", "child_id", unique=True),
@@ -38,10 +46,18 @@ relation = db.Table(
 favorites = db.Table(
     "favorites",
     db.Column(
-        "user_id", db.Integer, db.ForeignKey("user.id"), index=True, nullable=False
+        "user_id",
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
     ),
     db.Column(
-        "object_id", db.Integer, db.ForeignKey("object.id"), index=True, nullable=False
+        "object_id",
+        db.Integer,
+        db.ForeignKey("object.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
     ),
     db.Index("ix_favorites_object_user", "object_id", "user_id", unique=True),
 )
@@ -83,6 +99,7 @@ class Object(db.Model):
         secondaryjoin=(id == relation.c.parent_id),
         order_by=relation.c.creation_time.desc(),
         back_populates="children",
+        passive_deletes=True,
     )
     children = db.relationship(
         "Object",
@@ -91,10 +108,15 @@ class Object(db.Model):
         secondaryjoin=(id == relation.c.child_id),
         order_by=relation.c.creation_time.desc(),
         back_populates="parents",
+        passive_deletes=True,
     )
 
     attributes = db.relationship(
-        "Attribute", backref="object", lazy=True, cascade="save-update, merge, delete"
+        "Attribute",
+        backref="object",
+        lazy=True,
+        cascade="save-update, merge, delete",
+        passive_deletes=True,
     )
     comments = db.relationship(
         "Comment", backref="object", lazy="dynamic", passive_deletes=True
@@ -103,10 +125,13 @@ class Object(db.Model):
         "Tag",
         back_populates="object",
         lazy="selectin",
-        cascade="save-update, merge, delete",
+        cascade="all, delete",
+        passive_deletes=True,
     )
 
-    followers = db.relationship("User", secondary=favorites, back_populates="favorites")
+    followers = db.relationship(
+        "User", secondary=favorites, back_populates="favorites", passive_deletes=True
+    )
 
     comment_authors = db.relationship(
         "User",
@@ -122,6 +147,7 @@ class Object(db.Model):
         back_populates="object",
         cascade="save-update, merge, delete",
         order_by=ObjectPermission.access_time.asc(),
+        passive_deletes=True,
     )
 
     related_shares = db.relationship(
@@ -130,12 +156,14 @@ class Object(db.Model):
         foreign_keys=[ObjectPermission.related_object_id],
         back_populates="related_object",
         order_by=ObjectPermission.access_time.asc(),
+        passive_deletes=True,
     )
 
     analyses = db.relationship(
         "KartonAnalysis",
         secondary=karton_object,
         back_populates="objects",
+        passive_deletes=True,
     )
 
     @property

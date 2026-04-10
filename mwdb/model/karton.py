@@ -14,12 +14,16 @@ karton_object = db.Table(
     db.Column(
         "analysis_id",
         UUID(as_uuid=True),
-        db.ForeignKey("karton_analysis.id"),
+        db.ForeignKey("karton_analysis.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     ),
     db.Column(
-        "object_id", db.Integer, db.ForeignKey("object.id"), index=True, nullable=False
+        "object_id",
+        db.Integer,
+        db.ForeignKey("object.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
     ),
     db.Index("ix_karton_analysis_object", "analysis_id", "object_id", unique=True),
 )
@@ -38,6 +42,7 @@ class KartonAnalysis(db.Model):
         "Object",
         secondary=karton_object,
         back_populates="analyses",
+        passive_deletes=True,
     )
 
     @property

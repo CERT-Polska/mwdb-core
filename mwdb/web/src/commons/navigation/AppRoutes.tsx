@@ -15,6 +15,7 @@ import { RequiresAuth, RequiresCapability } from "../ui";
 import { RecentSamplesView } from "@mwdb-web/components/File/Views/RecentSamplesView";
 import { RecentConfigsView } from "@mwdb-web/components/Config/Views/RecentConfigsView";
 import { RecentBlobsView } from "@mwdb-web/components/Blob/Views/RecentBlobsView";
+import { IOCManagementView } from "@mwdb-web/components/IOC/Views/IOCManagementView";
 import { ConfigStatsView } from "@mwdb-web/components/Config/Views/ConfigStatsView";
 import { DocsView } from "@mwdb-web/components/Views/DocsView";
 import { ShowSampleView } from "@mwdb-web/components/Views/ShowSampleView";
@@ -78,6 +79,7 @@ export function AppRoutes() {
                 <Route path="/" element={<RecentSamplesView />} />
                 <Route path="configs" element={<RecentConfigsView />} />
                 <Route path="blobs" element={<RecentBlobsView />} />
+                <Route path="iocs" element={<IOCManagementView />} />
                 <Route path="search" element={<SearchView />} />
                 <Route
                     path="upload"

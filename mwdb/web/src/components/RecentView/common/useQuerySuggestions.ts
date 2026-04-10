@@ -81,6 +81,48 @@ const fieldDefinitions: Record<
             description:
                 "Query for objects uploaded by given amount of users (including parents)",
         },
+        ip: {
+            description: "Query for objects linked to a given IP address IOC",
+        },
+        domain: {
+            description: "Query for objects linked to a given domain IOC",
+        },
+        url: {
+            description: "Query for objects linked to a given URL IOC",
+        },
+        port: {
+            description: "Query for objects linked to a given port IOC",
+        },
+        email: {
+            description: "Query for objects linked to a given email IOC",
+        },
+        mutex: {
+            description: "Query for objects linked to a given mutex IOC",
+        },
+        registry_key: {
+            description:
+                "Query for objects linked to a given registry key IOC",
+        },
+        user_agent: {
+            description:
+                "Query for objects linked to a given user-agent IOC",
+        },
+        ioc: {
+            description:
+                "Query for objects linked to an IOC with a given value (any type)",
+        },
+        ioc_type: {
+            description:
+                "Query for objects linked to IOCs of a given type (ip, domain, url, port, email, mutex, registry_key, user_agent)",
+        },
+        ioc_category: {
+            description:
+                "Query for objects linked to IOCs with a given category",
+        },
+        ioc_severity: {
+            description:
+                "Query for objects linked to IOCs with a given severity (low, medium, high, critical)",
+        },
     },
     file: {
         name: {
@@ -267,6 +309,16 @@ async function fetchSuggestions(
                 objectType = currentField.shift() as ObjectType;
             }
         }
+    }
+    // Strip a redundant type-selector prefix even on typed views.
+    // e.g. typing "file." while objectType is already "file" should
+    // still produce field suggestions rather than falling through
+    // to the subfield branch.
+    if (
+        currentField.length > 1 &&
+        Object.keys(fieldDefinitions).includes(currentField[0])
+    ) {
+        objectType = currentField.shift() as ObjectType;
     }
     // Here type selector is gone
     if (currentField.length === 1) {

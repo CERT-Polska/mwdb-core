@@ -25,7 +25,9 @@ class Attribute(db.Model):
     )
 
     id = db.Column(db.Integer, primary_key=True)
-    object_id = db.Column(db.Integer, db.ForeignKey("object.id"), nullable=False)
+    object_id = db.Column(
+        db.Integer, db.ForeignKey("object.id", ondelete="CASCADE"), nullable=False
+    )
     key = db.Column(
         db.String(64),
         db.ForeignKey("attribute_definition.key", ondelete="CASCADE"),

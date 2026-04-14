@@ -38,7 +38,10 @@ class ObjectPermission(db.Model):
     )
 
     access_time = db.Column(
-        db.DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc)
+        db.DateTime,
+        nullable=False,
+        index=True,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     reason_type = db.Column(db.String(32))

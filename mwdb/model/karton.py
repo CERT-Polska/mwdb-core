@@ -68,7 +68,7 @@ class KartonAnalysis(db.Model):
     @property
     def last_update(self):
         return (
-            datetime.datetime.fromtimestamp(self._analysis_state.last_update)
+            datetime.fromtimestamp(self._analysis_state.last_update)
             if self._analysis_state
             else None
         )

@@ -17,7 +17,9 @@ class APIKey(db.Model):
     user_id = db.Column(
         db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
-    issued_on = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    issued_on = db.Column(
+        db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
     issued_by = db.Column(
         db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
     )

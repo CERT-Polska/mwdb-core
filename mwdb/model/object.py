@@ -1,4 +1,3 @@
-import datetime
 import uuid
 from collections import namedtuple
 from datetime import datetime, timezone

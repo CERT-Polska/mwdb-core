@@ -3,6 +3,7 @@ import { useState, useContext } from "react";
 import { APIContext } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
+import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { TagList } from "@mwdb-web/commons/ui";
 import { TagForm } from "./TagForm";
@@ -56,31 +57,35 @@ export function TagBox() {
     }
 
     return (
-        <div className="card card-default">
-            <ConfirmationModal
-                isOpen={modalIsOpen}
-                onRequestClose={() => setModalIsOpen(false)}
-                onConfirm={(e) => tagRemove(tagToRemove)}
-                message={`Remove tag ${tagToRemove}?`}
-                confirmText="Remove"
-            />
-            <div className="card-header">Tags</div>
-            <div className="card-body">
-                {tags && tags.length > 0 ? (
-                    <TagList
-                        tag={""}
-                        tags={tags}
-                        tagRemove={(e, tag) => handleTagRemove(tag)}
-                        deletable={auth.hasCapability(Capability.removingTags)}
-                        searchEndpoint={context.searchEndpoint}
-                    />
-                ) : (
-                    <div className="text-muted">No tags to display</div>
+        <Extendable ident="tagBox">
+            <div className="card card-default">
+                <ConfirmationModal
+                    isOpen={modalIsOpen}
+                    onRequestClose={() => setModalIsOpen(false)}
+                    onConfirm={(e) => tagRemove(tagToRemove)}
+                    message={`Remove tag ${tagToRemove}?`}
+                    confirmText="Remove"
+                />
+                <div className="card-header">Tags</div>
+                <div className="card-body">
+                    {tags && tags.length > 0 ? (
+                        <TagList
+                            tag={""}
+                            tags={tags}
+                            tagRemove={(e, tag) => handleTagRemove(tag)}
+                            deletable={auth.hasCapability(
+                                Capability.removingTags
+                            )}
+                            searchEndpoint={context.searchEndpoint}
+                        />
+                    ) : (
+                        <div className="text-muted">No tags to display</div>
+                    )}
+                </div>
+                {auth.hasCapability(Capability.addingTags) && !api.remote && (
+                    <TagForm onTagSubmit={handleTagSubmit} />
                 )}
             </div>
-            {auth.hasCapability(Capability.addingTags) && !api.remote && (
-                <TagForm onTagSubmit={handleTagSubmit} />
-            )}
-        </div>
+        </Extendable>
     );
 }

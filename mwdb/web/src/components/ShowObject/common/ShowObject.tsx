@@ -77,7 +77,39 @@ function objectReducer(state: ObjectState, action: ObjectAction) {
     }
 }
 
-type Props = {
+type ShowObjectMainBoxProps = {
+    headerIcon: IconDefinition;
+    headerCaption: string;
+    defaultTab?: string;
+    children: JSX.Element | JSX.Element[];
+};
+
+function ShowObjectMainBox({
+    headerIcon,
+    headerCaption,
+    defaultTab,
+    children,
+}: ShowObjectMainBoxProps) {
+    return (
+        <Extendable ident="showObjectMainBox">
+            <div className="card">
+                <Extendable ident="showObjectPresenter">
+                    <div className="card-header detailed-view-header">
+                        <FontAwesomeIcon icon={headerIcon} />
+                        {headerCaption}
+                    </div>
+                    <ObjectBox defaultTab={defaultTab || "details"}>
+                        <Extendable ident="showObjectTabs">
+                            {children}
+                        </Extendable>
+                    </ObjectBox>
+                </Extendable>
+            </div>
+        </Extendable>
+    );
+}
+
+type ShowObjectProps = {
     ident: string;
     children: JSX.Element | JSX.Element[];
     objectType: ObjectType;
@@ -88,7 +120,7 @@ type Props = {
     searchEndpoint: string;
 };
 
-export function ShowObject(props: Props) {
+export function ShowObject(props: ShowObjectProps) {
     const {
         ident,
         objectType,
@@ -146,21 +178,13 @@ export function ShowObject(props: Props) {
                 <div className="row">
                     <div className="col-md-7">
                         <Extendable ident="showObjectLeftColumn">
-                            <div className="card">
-                                <Extendable ident="showObjectPresenter">
-                                    <div className="card-header detailed-view-header">
-                                        <FontAwesomeIcon icon={headerIcon} />
-                                        {headerCaption}
-                                    </div>
-                                    <ObjectBox
-                                        defaultTab={defaultTab || "details"}
-                                    >
-                                        <Extendable ident="showObjectTabs">
-                                            {children}
-                                        </Extendable>
-                                    </ObjectBox>
-                                </Extendable>
-                            </div>
+                            <ShowObjectMainBox
+                                headerIcon={headerIcon}
+                                headerCaption={headerCaption}
+                                defaultTab={defaultTab}
+                            >
+                                {children}
+                            </ShowObjectMainBox>
                             <AttributesBox />
                             {config.config
                                 .is_3rd_party_sharing_consent_enabled && (

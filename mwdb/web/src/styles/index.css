@@ -517,3 +517,21 @@ table.table.share-table thead th {
     background-color: #f9fafb;
     border-bottom: 1px solid #dee2e6;
 }
+
+.extendable-debug-box {
+    display: contents;
+}
+
+.extendable-debug-box.active > * {
+    border: 1px solid red;
+}
+
+.extendable-debug-box.active::before {
+    content: attr(data-label);
+    color: red;
+    position: absolute;
+    background: white;
+    padding: 0 6px;
+    font-size: 14px;
+    z-index: 10000000;
+}

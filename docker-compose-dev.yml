@@ -54,8 +54,10 @@ services:
       - "80:3000"
     environment:
       HOST: 0.0.0.0
-      REACT_APP_API_URL: "/api/"
       NODE_ENV: development
+      # Uncomment this to enable Extendable debug boxes
+      # See also https://github.com/CERT-Polska/mwdb-core/pull/1182
+      # VITE_EXTENDABLE_DEBUG_BOX: 1
     volumes:
       - "./mwdb/web/public:/app/public"
       - "./mwdb/web/src:/app/src"

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 
 from . import db
 
@@ -10,7 +10,7 @@ class QuickQuery(db.Model):
     query = db.Column(db.Text, nullable=False)
     type = db.Column(db.String(50), nullable=False)
     name = db.Column(db.String(64), nullable=False)
-    date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     user_id = db.Column(
         db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False

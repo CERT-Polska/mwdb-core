@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 
 from flask import g
 from sqlalchemy import exists
@@ -34,7 +34,7 @@ class KartonAnalysis(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)
     creation_time = db.Column(
-        db.DateTime, default=datetime.datetime.utcnow, nullable=False
+        db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
     arguments = db.Column(JSONB, nullable=False)
 

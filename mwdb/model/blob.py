@@ -1,5 +1,5 @@
-import datetime
 import hashlib
+from datetime import datetime, timezone
 from typing import Any, Dict
 
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -45,7 +45,7 @@ class TextBlob(Object):
             blob_name=blob_name,
             blob_size=len(content),
             blob_type=blob_type,
-            last_seen=datetime.datetime.utcnow(),
+            last_seen=datetime.now(timezone.utc),
             _content=content.encode("unicode_escape").decode("utf-8"),
             share_3rd_party=share_3rd_party,
         )
@@ -60,7 +60,7 @@ class TextBlob(Object):
         )
         # If object exists yet: we need to refresh last_seen timestamp
         if not is_new:
-            blob_obj.last_seen = datetime.datetime.utcnow()
+            blob_obj.last_seen = datetime.now(timezone.utc)
 
         return blob_obj, is_new
 

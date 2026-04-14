@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import g, request
 from flask_migrate import Migrate
@@ -140,7 +140,7 @@ if app_config.mwdb.serve_web:
 @api.blueprint.before_request
 def assign_request_id():
     g.request_id = token_hex(16)
-    g.request_start_time = datetime.utcnow()
+    g.request_start_time = datetime.now(timezone.utc)
     getLogger().debug(
         "before_request",
         extra={
@@ -163,7 +163,7 @@ def run_hooks(response):
 @api.blueprint.after_request
 def log_request(response):
     if hasattr(g, "request_start_time"):
-        response_time = datetime.utcnow() - g.request_start_time
+        response_time = datetime.now(timezone.utc) - g.request_start_time
     else:
         response_time = None
     response_size = response.calculate_content_length()

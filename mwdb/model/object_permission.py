@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 
 from flask import g
 from sqlalchemy import and_, exists, or_
@@ -38,7 +38,10 @@ class ObjectPermission(db.Model):
     )
 
     access_time = db.Column(
-        db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow
+        db.DateTime,
+        nullable=False,
+        index=True,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     reason_type = db.Column(db.String(32))
@@ -158,7 +161,7 @@ class ObjectPermission(db.Model):
         assert self.group_id == devisor.group_id
         self.related_object_id = devisor.related_object_id
         self.reason_type = devisor.reason_type
-        self.access_time = datetime.datetime.utcnow()
+        self.access_time = datetime.now(timezone.utc)
 
     def inherits(self, origin_share):
         """

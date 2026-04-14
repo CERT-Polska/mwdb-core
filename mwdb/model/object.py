@@ -1,6 +1,6 @@
-import datetime
 import uuid
 from collections import namedtuple
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
@@ -39,7 +39,7 @@ relation = db.Table(
         index=True,
         nullable=False,
     ),
-    db.Column("creation_time", db.DateTime, default=datetime.datetime.utcnow),
+    db.Column("creation_time", db.DateTime, default=lambda: datetime.now(timezone.utc)),
     db.Index("ix_relation_parent_child", "parent_id", "child_id", unique=True),
 )
 
@@ -74,7 +74,7 @@ class Object(db.Model):
     type = db.Column(db.String(50), index=True, nullable=False)
     dhash = db.Column(db.String(64), unique=True, index=True, nullable=False)
     upload_time = db.Column(
-        db.DateTime, nullable=False, index=True, default=datetime.datetime.utcnow
+        db.DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc)
     )
     share_3rd_party = db.Column(db.Boolean, nullable=False)
 
@@ -276,7 +276,7 @@ class Object(db.Model):
                 insert(relation).values(
                     parent_id=parent.id,
                     child_id=self.id,
-                    creation_time=datetime.datetime.utcnow(),
+                    creation_time=datetime.now(timezone.utc),
                 )
             )
             db.session.flush()
@@ -510,7 +510,7 @@ class Object(db.Model):
             created_object = obj
             try:
                 # Try to create the requested object
-                created_object.upload_time = datetime.datetime.utcnow()
+                created_object.upload_time = datetime.now(timezone.utc)
                 db.session.add(created_object)
                 db.session.commit()
                 is_new = True

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 import os
 from typing import Optional, Tuple
 
@@ -113,7 +113,7 @@ class User(db.Model):
             password.encode("utf-8"), bcrypt.gensalt(12)
         ).decode("utf-8")
         self.password_ver = os.urandom(8).hex()
-        self.set_password_on = datetime.datetime.utcnow()
+        self.set_password_on = datetime.now(timezone.utc)
 
     def reset_sessions(self):
         # Should be also called for fresh user objects
@@ -153,9 +153,9 @@ class User(db.Model):
                 user.registered_by = None
             else:
                 user.registered_by = g.auth_user.id
-            user.registered_on = datetime.datetime.utcnow()
+            user.registered_on = datetime.now(timezone.utc)
         else:
-            user.requested_on = datetime.datetime.utcnow()
+            user.requested_on = datetime.now(timezone.utc)
 
         db.session.add(user)
         if commit:

@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback, useContext } from "react";
 
 import { APIContext } from "@mwdb-web/commons/api";
 import { ObjectContext } from "@mwdb-web/commons/context";
+import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
+
 import { SharesList } from "./SharesList";
 import { SharingStatusIcon } from "./SharingStatusIcon";
 
@@ -61,7 +63,7 @@ export function SharesBox() {
     }
 
     return (
-        <div>
+        <Extendable ident="sharesBox">
             <div className="card card-default">
                 <ConfirmationModal
                     isOpen={isModalOpen}
@@ -102,6 +104,6 @@ export function SharesBox() {
                     currentFile={context.object.id}
                 />
             </div>
-        </div>
+        </Extendable>
     );
 }

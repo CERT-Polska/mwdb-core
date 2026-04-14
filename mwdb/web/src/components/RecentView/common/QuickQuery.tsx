@@ -10,6 +10,7 @@ import { QuickQueryAddModal } from "./QuickQueryAddModal";
 import { QuickQueryItem } from "./QuickQueryItem";
 import { ObjectType, Query } from "@mwdb-web/types/types";
 import { isNil } from "lodash";
+import { Extendable } from "@mwdb-web/commons/plugins";
 
 type Props = {
     type: ObjectType;
@@ -211,8 +212,10 @@ export function QuickQuery(props: Props) {
 
     return (
         <div className="quick-query-bar">
-            Quick query: {predefinedQueryBadges}
-            {userQuickQueryBadges}
+            <Extendable {...props} ident="quickQuery">
+                Quick query: {predefinedQueryBadges}
+                {userQuickQueryBadges}
+            </Extendable>
         </div>
     );
 }

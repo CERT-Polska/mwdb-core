@@ -3,6 +3,7 @@ import { useState, useContext, useEffect, useCallback } from "react";
 import { APIContext } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
+import { Extendable } from "@mwdb-web/commons/plugins";
 import { ConfirmationModal } from "@mwdb-web/commons/ui";
 import { CommentList } from "./CommentList";
 import { CommentForm } from "./CommentForm";
@@ -75,22 +76,28 @@ export function CommentBox() {
     }, [getComments]);
 
     return (
-        <div className="card card-default">
-            <ConfirmationModal
-                isOpen={isDeleteModalOpen}
-                onRequestClose={() => setDeleteModalOpen(false)}
-                onConfirm={() => {
-                    removeComment(commentToRemove);
-                }}
-                message="Remove the comment?"
-                confirmText="Remove"
-            />
-            <div className="card-header">Comments</div>
-            <CommentList
-                comments={comments ?? []}
-                removeComment={canRemoveComments ? handleRemoveComment : null}
-            />
-            {canAddComments && <CommentForm submitComment={submitComment} />}
-        </div>
+        <Extendable ident="commentBox">
+            <div className="card card-default">
+                <ConfirmationModal
+                    isOpen={isDeleteModalOpen}
+                    onRequestClose={() => setDeleteModalOpen(false)}
+                    onConfirm={() => {
+                        removeComment(commentToRemove);
+                    }}
+                    message="Remove the comment?"
+                    confirmText="Remove"
+                />
+                <div className="card-header">Comments</div>
+                <CommentList
+                    comments={comments ?? []}
+                    removeComment={
+                        canRemoveComments ? handleRemoveComment : null
+                    }
+                />
+                {canAddComments && (
+                    <CommentForm submitComment={submitComment} />
+                )}
+            </div>
+        </Extendable>
     );
 }

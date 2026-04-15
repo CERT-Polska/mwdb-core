@@ -1,6 +1,7 @@
 export { ShowObject } from "./common/ShowObject";
 
 export { RelationsTab } from "./common/RelationsTab";
+export { IOCTab } from "./common/IOCTab";
 export { LatestConfigTab } from "./common/LatestConfigTab";
 
 export { DownloadAction } from "./Actions/DownloadAction";

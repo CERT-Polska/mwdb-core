@@ -6,6 +6,7 @@ import {
     ObjectTab,
     LatestConfigTab,
     RelationsTab,
+    IOCTab,
     DownloadAction,
     ZipAction,
     FavoriteAction,
@@ -73,6 +74,7 @@ export function ShowSampleView() {
                     ]}
                 />
                 <RelationsTab />
+                <IOCTab />
                 <ObjectTab
                     tab="preview"
                     icon={faSearch}

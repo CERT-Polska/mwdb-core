@@ -1,3 +1,4 @@
+import { useCallback, MouseEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 
@@ -7,6 +8,7 @@ type Props = {
     collapsed: boolean;
     onCollapse: (val: boolean) => void;
     collapsible: boolean;
+    attributesCount: number;
     onShowRaw: (val: boolean) => void;
     showRaw: boolean;
     isRichRendered: boolean;
@@ -19,19 +21,23 @@ export function AttributeRow({
     collapsed,
     onCollapse,
     collapsible,
+    attributesCount,
     onShowRaw,
     showRaw,
     isRichRendered,
     children,
 }: Props) {
+    const switchCollapse = useCallback(
+        (ev: MouseEvent) => {
+            ev.preventDefault();
+            if (collapsible) onCollapse(!collapsed);
+        },
+        [collapsible, collapsed, onCollapse]
+    );
+
     return (
         <tr>
-            <th
-                onClick={(ev) => {
-                    ev.preventDefault();
-                    if (collapsible) onCollapse(!collapsed);
-                }}
-            >
+            <th onClick={switchCollapse}>
                 {collapsible ? (
                     <FontAwesomeIcon
                         icon={collapsed ? faPlus : faMinus}
@@ -68,9 +74,12 @@ export function AttributeRow({
             <td className="flickerable">
                 {children}
                 {collapsible && collapsed ? (
-                    <span style={{ color: "gray", fontWeight: "bold" }}>
-                        ...
-                    </span>
+                    <button
+                        className="unstyled-btn text-muted"
+                        onClick={switchCollapse}
+                    >
+                        ({attributesCount - 3} more...)
+                    </button>
                 ) : (
                     <></>
                 )}

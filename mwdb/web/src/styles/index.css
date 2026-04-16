@@ -535,3 +535,18 @@ table.table.share-table thead th {
     font-size: 14px;
     z-index: 10000000;
 }
+
+button.unstyled-btn {
+    all: unset;
+    display: inline-block;
+    user-select: none;
+    cursor: pointer;
+}
+
+button.unstyled-btn:focus-visible {
+    outline: auto; /* keep focus visibility */
+}
+
+button.unstyled-btn:disabled {
+    cursor: default;
+}

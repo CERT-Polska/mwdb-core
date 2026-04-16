@@ -28,6 +28,7 @@ export function AttributeRenderer({
             onCollapse={(collapsed) => setCollapsed(collapsed)}
             collapsed={collapsed}
             collapsible={isCollapsible}
+            attributesCount={attributes.length}
             onShowRaw={(showRaw) => setShowRaw(showRaw)}
             showRaw={showRaw}
             isRichRendered={isRichRendered}

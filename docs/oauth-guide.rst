@@ -220,47 +220,34 @@ Manage MWDB Groups from OpenID Groups
 If your identity provider is correctly configured to return the user groups in the OpenID Token,
 you can map automatically these groups to MWDB groups.
 
-To be able to use this method, you must configure MWDB with special environment variable: ``MWDB_ENABLE_OIDC_GROUPS=1``
-or via ``mwdb.ini`` configuration field: ```enable_oidc_groups = 1```
+These feature can be enable or disable per provider directly in the administration interface.
 
-You can filter the groups coming from OIDC using the environment variable: ``MWDB_OIDC_GROUPS_MATCH_PATTERN=(.*)``
-or via ``mwdb.ini`` configuration field: ```oidc_groups_match_pattern = (.*)```
+Three modes are available:
+- NONE: The feature is disable. The groups included in the OIDC Token are ignored
+- FULL: The user groups are fully managed by the list of groups included in their OIDC Token.
+  Users will be added to all the MWDB groups included in their OIDC Token and removed from the others whatever the groups providers of origin.
+  It means that a user can be automatically removed from local MWDB groups if these groups are not listed in their OIDC token
+- MIXED: The OIDC users are only added or removed from the MWDB groups of the current OIDC provider.
+  The local groups or groups from other providers remain unchanged whatever the groups listed in their OIDC token.
 
-This variable shall contain a regular expression used for group names filtering.
+You can filter the groups coming from OIDC using the parameter: ``OIDC groups matching pattern=(.*)``
+This variable shall contain a regular expression. It is used to filter and map the external to internal group names.
+Only the external group names matching the regular expression are managed, the other ones are ignored.
 
-It shall include one matching group which will be used to perform the mapping with the name of the local group.
-
-The mapping between group names is performed using the environment variable: ``MWDB_OIDC_GROUPS_REPLACE_PATTERN=\1``
-or via ``mwdb.ini`` configuration field: ```oidc_groups_replace_pattern = \1```
-
-By default when this feature is enabled, all the OIDC groups are matched and the full OIDC group names are used for the name of the local groups.
-
-The new created groups are linked to the source OIDC provider used for the login.
-
-It helps to make the distinction between:
-- Local groups: Groups directly created with the MWDB GUI Interface
-- External groups: Groups linked to OIDC providers
-
-This is important to understand the different management modes explained below.
+The mapping between external and internal group names is performed using the parameter: ``OIDC groups replacing pattern=\1``
+It uses the result of the previous regular expression to build the internal names.
+Regular expression groups are supported.
 
 .. note::
 
-   You can for example match only the groups starting by MWDB_xxx by configuration the variable oidc_groups_match_pattern to ``MWDB_(.*)``
+   You can for example match only the groups starting by MWDB_xxx by configuration the parameter OIDC groups matching pattern to ``MWDB_(.*)``
 
-   And map these groups to internal groups as EXTERNAL_xxx by configuration the variable oidc_groups_replace_pattern to ``EXTERNAL_\1``
+   And map these groups to internal groups as EXTERNAL_xxx by configuration the parameter OIDC groups replacing pattern to ``EXTERNAL_\1``
 
-   With this configuration, the group name MWDB_MALWARE_ANALYSTS will be mapped internally to the MWDB group EXTERNAL_MALWARE_ANALYST
+   With this configuration, the group name MWDB_MALWARE_ANALYSTS will be mapped internally to the local group EXTERNAL_MALWARE_ANALYST
 
-The management of MWDB and OIDC Provider groups can be configured with the special environment variable: ``MWDB_OIDC_GROUPS_MODE``
-or via ``mwdb.ini`` configuration field: ```oidc_groups_mode```
 
-Two modes are currently supported:
-- FULL: The OIDC users are added to the groups included in their OIDC Token whatever the type of the groups
-  It means that a user manually added to local MWDB groups will be removed from these groups if they are not included in their OIDC Tokens.
-- MIXED: The OIDC users are only added and removed to the MWDB groups linked to the current OIDC provider.
-  It means that a user will keep his local groups whatever the content of his OIDC Token.
-
-By default the MIXED mode is used.
+By default this feature is disable
 
 Disable password-based authentication
 -------------------------------------

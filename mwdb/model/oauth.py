@@ -1,14 +1,22 @@
+from enum import Enum
 from typing import Type
 
 from mwdb.core.oauth.provider import OpenIDProvider
 
 from . import db
+from .group import Group
 
 
 def get_oidc_provider_class(provider_name: str) -> Type[OpenIDProvider]:
     from mwdb.core.plugins import openid_provider_classes
 
     return openid_provider_classes.get(provider_name, OpenIDProvider)
+
+
+class OpenIDGroupManagementMode(Enum):
+    NONE = "NONE"
+    FULL = "FULL"
+    MIXED = "MIXED"
 
 
 class OpenIDProviderSettings(db.Model):
@@ -24,6 +32,11 @@ class OpenIDProviderSettings(db.Model):
     jwks_endpoint = db.Column(db.Text, nullable=True)
     logout_endpoint = db.Column(db.Text, nullable=True)
     requires_approval = db.Column(db.Boolean, nullable=False, default=False)
+    oidc_groups_management_mode = db.Column(
+        db.Enum(OpenIDGroupManagementMode), nullable=False
+    )
+    oidc_groups_match_pattern = db.Column(db.Text, nullable=False)
+    oidc_groups_replace_pattern = db.Column(db.Text, nullable=False)
 
     group_id = db.Column(db.Integer, db.ForeignKey("group.id"), nullable=False)
 
@@ -32,8 +45,17 @@ class OpenIDProviderSettings(db.Model):
         back_populates="provider",
         cascade="all, delete-orphan",
     )
+
+    openid_groups = db.relationship(
+        "Group",
+        foreign_keys=[Group.openid_provider_id],
+        back_populates="openid_provider",
+        lazy="select",
+    )
+
     group = db.relationship(
         "Group",
+        foreign_keys=[group_id],
         cascade="all, delete",
     )
 

@@ -40,7 +40,7 @@ export function GroupsListView() {
             </Link>
             <PagedList
                 listItem={GroupItem}
-                columnNames={["Name", "Members"]}
+                columnNames={["Name", "Provider", "Members"]}
                 items={items.slice((activePage - 1) * 10, activePage * 10)}
                 itemCount={items.length}
                 activePage={activePage}

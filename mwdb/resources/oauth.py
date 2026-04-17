@@ -409,40 +409,46 @@ class OpenIDAuthorizeResource(Resource):
         if user.disabled:
             raise Forbidden("User account is disabled.")
 
-        new_user_groups  = []
+        new_user_groups = []
         new_user_group_members = []
         removed_user_group_members = []
         if app_config.mwdb.enable_oidc_groups:
             oidc_group_names = provider.get_user_groups(id_token_claims)
 
-            logger.debug("Retrieve OIDC groups from claims",
+            logger.debug(
+                "Retrieve OIDC groups from claims",
                 extra={"groups": oidc_group_names},
             )
 
-            if app_config.mwdb.oidc_groups_match_pattern:
-                group_names = []
-                pattern = re.compile(app_config.mwdb.oidc_groups_match_pattern)
-                for oidc_group_name in oidc_group_names:
-                    match = pattern.fullmatch(oidc_group_name)
-                    if match is None:
-                        continue
-
-                    try:
-                        group_name = re.sub(app_config.mwdb.oidc_groups_match_pattern, app_config.mwdb.oidc_groups_replace_pattern, oidc_group_name)
-                        group_names.append(group_name)
-                    except re.error as exc:
-                        logger.error("Error during extraction of group name",
-                            extra={
-                                "match_pattern": app_config.mwdb.oidc_groups_match_pattern,
-                                "replace_pattern": app_config.mwdb.oidc_groups_replace_pattern,
-                                "group": oidc_group_names
-                            })
-                        logger.error(exc)
-
-                oidc_group_names = group_names
-
-            oidc_group_names = set(oidc_group_names)
+            oidc_group_names = set()
             user_group_names = set(user.group_names)
+
+            pattern = re.compile(app_config.mwdb.oidc_groups_match_pattern)
+            for oidc_group_name in oidc_group_names:
+                match = pattern.fullmatch(oidc_group_name)
+                if match is None:
+                    continue
+
+                try:
+                    group_name = re.sub(
+                        app_config.mwdb.oidc_groups_match_pattern,
+                        app_config.mwdb.oidc_groups_replace_pattern,
+                        oidc_group_name,
+                    )
+                    oidc_group_names.add(group_name)
+                except re.error as exc:
+                    extra = {
+                        "match_pattern": app_config.mwdb.oidc_groups_match_pattern,
+                        "replace_pattern": app_config.mwdb.oidc_groups_replace_pattern,
+                        "group": oidc_group_name,
+                    }
+
+                    logger.error(
+                        "Error during extraction of group name",
+                        extra,
+                    )
+                    logger.error(exc)
+
             new_user_groups_names = list(oidc_group_names - user_group_names)
             removed_user_groups_names = list(user_group_names - oidc_group_names)
 
@@ -451,12 +457,16 @@ class OpenIDAuthorizeResource(Resource):
             db.session.flush()
 
             for new_user_group in new_user_groups:
-                # Mixed mode - Add only user to openid groups linked to the current provider
-                if app_config.mwdb.oidc_groups_mode == OIDCGroupManagementMode.MIXED and \
-                    new_user_group.openid_provider_name != provider_settings.name:
+                # Mixed mode
+                # Add only user to openid groups linked to the current provider
+                if (
+                    app_config.mwdb.oidc_groups_mode == OIDCGroupManagementMode.MIXED
+                    and new_user_group.openid_provider_name != provider_settings.name
+                ):
                     continue
 
-                logger.debug("Add user membership to group",
+                logger.debug(
+                    "Add user membership to group",
                     extra={"group": new_user_group.name},
                 )
 
@@ -464,11 +474,17 @@ class OpenIDAuthorizeResource(Resource):
                 if new_user_group.add_member(user):
                     new_user_group_members.append(new_user_group)
 
-            removed_user_groups = filter(lambda group: str(group.name) in removed_user_groups_names, user.groups)
+            removed_user_groups = filter(
+                lambda group: str(group.name) in removed_user_groups_names, user.groups
+            )
             for removed_user_group in removed_user_groups:
-                # Mixed mode - Remove only user to openid groups linked to the current provider
-                if app_config.mwdb.oidc_groups_mode == OIDCGroupManagementMode.MIXED and \
-                    removed_user_group.openid_provider_name != provider_settings.name:
+                # Mixed mode
+                # Remove only user to openid groups linked to the current provider
+                if (
+                    app_config.mwdb.oidc_groups_mode == OIDCGroupManagementMode.MIXED
+                    and removed_user_group.openid_provider_name
+                    != provider_settings.name
+                ):
                     continue
 
                 # Keep default and private groups
@@ -479,7 +495,8 @@ class OpenIDAuthorizeResource(Resource):
                 if removed_user_group.name == provider_settings.group.name:
                     continue
 
-                logger.debug("Remove user membership from group",
+                logger.debug(
+                    "Remove user membership from group",
                     extra={"group": removed_user_group.name},
                 )
                 if removed_user_group.remove_member(user):
@@ -566,36 +583,44 @@ class OpenIDRegisterUserResource(Resource):
 
         db.session.add(identity)
 
-        new_user_groups  = []
+        new_user_groups = []
         new_user_group_members = []
         if app_config.mwdb.enable_oidc_groups:
             oidc_group_names = provider.get_user_groups(id_token_claims)
 
-            logger.debug("Retrieve OIDC groups from claims",
+            logger.debug(
+                "Retrieve OIDC groups from claims",
                 extra={"groups": oidc_group_names},
             )
 
-            if app_config.mwdb.oidc_groups_match_pattern:
-                group_names = []
-                pattern = re.compile(app_config.mwdb.oidc_groups_match_pattern)
-                for oidc_group_name in oidc_group_names:
-                    match = pattern.fullmatch(oidc_group_name)
-                    if match is None:
-                        continue
+            oidc_group_names = set()
+            user_group_names = set(user.group_names)
 
-                    try:
-                        group_name = re.sub(app_config.mwdb.oidc_groups_match_pattern, app_config.mwdb.oidc_groups_replace_pattern, oidc_group_name)
-                        group_names.append(group_name)
-                    except re.error as exc:
-                        logger.error("Error during extraction of group name",
-                            extra={
-                                "match_pattern": app_config.mwdb.oidc_groups_match_pattern,
-                                "replace_pattern": app_config.mwdb.oidc_groups_replace_pattern,
-                                "group": oidc_group_names
-                            })
-                        logger.error(exc)
+            pattern = re.compile(app_config.mwdb.oidc_groups_match_pattern)
+            for oidc_group_name in oidc_group_names:
+                match = pattern.fullmatch(oidc_group_name)
+                if match is None:
+                    continue
 
-                oidc_group_names = group_names
+                try:
+                    group_name = re.sub(
+                        app_config.mwdb.oidc_groups_match_pattern,
+                        app_config.mwdb.oidc_groups_replace_pattern,
+                        oidc_group_name,
+                    )
+                    oidc_group_names.add(group_name)
+                except re.error as exc:
+                    extra = {
+                        "match_pattern": app_config.mwdb.oidc_groups_match_pattern,
+                        "replace_pattern": app_config.mwdb.oidc_groups_replace_pattern,
+                        "group": oidc_group_name,
+                    }
+
+                    logger.error(
+                        "Error during extraction of group name",
+                        extra,
+                    )
+                    logger.error(exc)
 
             oidc_group_names = set(oidc_group_names)
             user_group_names = set(user.group_names)
@@ -606,12 +631,16 @@ class OpenIDRegisterUserResource(Resource):
             db.session.flush()
 
             for new_user_group in new_user_groups:
-                # Mixed mode - Add only user to openid groups linked to the current provider
-                if app_config.mwdb.oidc_groups_mode == OIDCGroupManagementMode.MIXED and \
-                    new_user_group.openid_provider_name != provider_settings.name:
+                # Mixed mode
+                # Add only user to openid groups linked to the current provider
+                if (
+                    app_config.mwdb.oidc_groups_mode == OIDCGroupManagementMode.MIXED
+                    and new_user_group.openid_provider_name != provider_settings.name
+                ):
                     continue
 
-                logger.debug("Add user membership to group",
+                logger.debug(
+                    "Add user membership to group",
                     extra={"group": new_user_group.name},
                 )
 

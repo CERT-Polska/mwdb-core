@@ -8,6 +8,7 @@ import {
     PseudoEditableItem,
     FeatureSwitch,
     UserBadge,
+    HighlightText,
 } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
@@ -66,6 +67,11 @@ export function GroupDetailsView() {
                             required
                             pattern="[A-Za-z0-9_.-]{1,32}"
                         />
+                    </DetailsRecord>
+                    <DetailsRecord label="Provider">
+                         <HighlightText filterValue="">
+                            {group.provider ?? "local"}
+                        </HighlightText>
                     </DetailsRecord>
                     <DetailsRecord label="Members">
                         <PseudoEditableItem

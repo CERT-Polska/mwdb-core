@@ -9,6 +9,10 @@ import { useParams } from "react-router-dom";
 import { DetailsRecord } from "../common/DetailsRecord";
 import { Provider } from "@mwdb-web/types/types";
 import { EditableBooleanItem } from "@mwdb-web/commons/ui/EditableBooleanItem";
+import { Select } from "@mwdb-web/commons/ui/Select";
+
+import { OpenIDGroupManagementMode } from "@mwdb-web/types/types";
+
 
 export function OAuthProviderView() {
     const viewAlert = useViewAlert();
@@ -16,6 +20,7 @@ export function OAuthProviderView() {
     const [provider, setProvider] = useState<Provider>({} as Provider);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
+    const oidc_group_management_mode = Object.entries(OpenIDGroupManagementMode) as [OpenIDGroupManagementMode, string][];
 
     async function updateProvider() {
         try {
@@ -132,6 +137,38 @@ export function OAuthProviderView() {
                         <EditableBooleanItem
                             name="requires_approval"
                             defaultValue={provider.requires_approval}
+                            onSubmit={handleSubmit}
+                        />
+                    </DetailsRecord>
+                    <DetailsRecord label="OIDC groups management mode">
+                        <EditableItem
+                            name="oidc_groups_management_mode"
+                            type="oidc_groups_management_mode"
+                            defaultValue={provider.oidc_groups_management_mode}
+                            onSubmit={handleSubmit}
+                            badge
+                            selective
+                        >
+                            {oidc_group_management_mode.map(([key, value]) => (
+                            <option key={key} value={value}>
+                                {value}
+                            </option>
+                            ))}
+                        </EditableItem>
+                    </DetailsRecord>
+                    <DetailsRecord label="OIDC groups matching pattern">
+                        <EditableItem
+                            name="oidc_groups_match_pattern"
+                            type="oidc_groups_match_pattern"
+                            defaultValue={provider.oidc_groups_match_pattern}
+                            onSubmit={handleSubmit}
+                        />
+                    </DetailsRecord>
+                    <DetailsRecord label="OIDC groups replacing pattern">
+                        <EditableItem
+                            name="oidc_groups_replace_pattern"
+                            type="oidc_groups_replace_pattern"
+                            defaultValue={provider.oidc_groups_replace_pattern}
                             onSubmit={handleSubmit}
                         />
                     </DetailsRecord>

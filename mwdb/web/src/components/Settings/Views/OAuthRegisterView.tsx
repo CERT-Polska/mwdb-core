@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import * as Yup from "yup";
 
+import { OpenIDGroupManagementMode } from "@mwdb-web/types/types";
 import { APIContext } from "@mwdb-web/commons/api";
 
 import { useViewAlert } from "@mwdb-web/commons/hooks";
@@ -10,6 +11,9 @@ import { UseFormProps, useForm } from "react-hook-form";
 import { FormError, Label } from "@mwdb-web/commons/ui";
 
 type FormValues = Provider;
+
+const DEFAULT_OIDC_GROUPS_MATCH_PATTERN = "(.*)";
+const DEFAULT_OIDC_GROUPS_REPLACE_PATTERN = "\\1";
 
 const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
     name: Yup.string().required("Name is required"),
@@ -23,6 +27,10 @@ const validationSchema: Yup.ObjectSchema<FormValues> = Yup.object().shape({
     jwks_endpoint: Yup.string().default(""),
     logout_endpoint: Yup.string().required("Logout endpoint required"),
     requires_approval: Yup.boolean().default(false),
+    oidc_groups_management_mode: Yup.mixed<OpenIDGroupManagementMode>()
+        .oneOf(Object.values(OpenIDGroupManagementMode)).required("OIDC groups management mode required"),
+    oidc_groups_match_pattern:  Yup.string().required("OIDC groups match pattern required"),
+    oidc_groups_replace_pattern:  Yup.string().required("OIDC groups replace pattern required"),
 });
 
 const formOptions: UseFormProps<FormValues> = {
@@ -40,8 +48,13 @@ const formOptions: UseFormProps<FormValues> = {
         client_secret: "",
         logout_endpoint: "",
         requires_approval: false,
+        oidc_groups_management_mode: OpenIDGroupManagementMode.NONE,
+        oidc_groups_match_pattern: DEFAULT_OIDC_GROUPS_MATCH_PATTERN,
+        oidc_groups_replace_pattern: DEFAULT_OIDC_GROUPS_REPLACE_PATTERN,
     },
 };
+
+const oidc_group_management_mode = Object.entries(OpenIDGroupManagementMode) as [OpenIDGroupManagementMode, string][];
 
 export function OAuthRegisterView() {
     const api = useContext(APIContext);
@@ -215,6 +228,58 @@ export function OAuthRegisterView() {
                         <FormError errorField={errors.requires_approval} />
                     </div>
                 </div>
+                <div className="form-group">
+                    <Label
+                        label="OIDC groups management mode"
+                        required
+                        htmlFor={"oidc_groups_management_mode" as keyof FormValues}
+                    />
+                    <select
+                        {...register("oidc_groups_management_mode" as keyof FormValues)}
+                        id={"oidc_groups_management_mode" as keyof FormValues}
+                        className={`form-control ${
+                            errors.oidc_groups_management_mode ? "is-invalid" : ""
+                        }`}
+                    >
+                        {oidc_group_management_mode.map(([key, value]) => (
+                            <option key={key} value={value}>
+                                {value}
+                            </option>
+                        ))}
+                    </select>
+                    <FormError errorField={errors.oidc_groups_management_mode} />
+                </div>
+                <div className="form-group">
+                    <Label
+                        label="OIDC groups matching pattern"
+                        required
+                        htmlFor={"oidc_groups_match_pattern" as keyof FormValues}
+                    />
+                    <input
+                        {...register("oidc_groups_match_pattern" as keyof FormValues)}
+                        id={"oidc_groups_match_pattern" as keyof FormValues}
+                        className={`form-control ${
+                            errors.oidc_groups_match_pattern ? "is-invalid" : ""
+                        }`}
+                    />
+                    <FormError errorField={errors.oidc_groups_match_pattern} />
+                </div>
+                <div className="form-group">
+                    <Label
+                        label="OIDC groups replacing pattern"
+                        required
+                        htmlFor={"oidc_groups_replace_pattern" as keyof FormValues}
+                    />
+                    <input
+                        {...register("oidc_groups_replace_pattern" as keyof FormValues)}
+                        id={"oidc_groups_replace_pattern" as keyof FormValues}
+                        className={`form-control ${
+                            errors.oidc_groups_replace_pattern ? "is-invalid" : ""
+                        }`}
+                    />
+                    <FormError errorField={errors.oidc_groups_replace_pattern} />
+                </div>
+
                 <input
                     type="submit"
                     value="Submit"

@@ -26,6 +26,21 @@ class Group(db.Model):
     workspace = db.Column(db.Boolean, nullable=False, default=True)
     immutable = db.Column(db.Boolean, nullable=False, default=False)
 
+    # External group created by OpenID Provider
+    openid_provider_id = db.Column(
+        db.Integer,
+        db.ForeignKey("openid_provider.id"),
+        nullable=True,
+        default=None,
+    )
+
+    openid_provider = db.relationship(
+        "OpenIDProviderSettings",
+        back_populates="openid_groups",
+        foreign_keys=[openid_provider_id],
+        lazy="select",
+    )
+
     members = db.relationship(
         "Member", back_populates="group", cascade="all, delete-orphan"
     )
@@ -65,6 +80,10 @@ class Group(db.Model):
     @property
     def group_admins(self):
         return [member.user.login for member in self.members if member.group_admin]
+
+    @property
+    def provider_name(self):
+        return self.openid_provider.name
 
     def add_member(self, user):
         if user in self.users:

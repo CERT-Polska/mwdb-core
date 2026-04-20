@@ -5,6 +5,7 @@ from authlib.oidc.core import UserInfo
 from marshmallow import ValidationError
 from sqlalchemy import exists
 
+from mwdb.schema.group import GroupNameSchemaBase
 from mwdb.schema.user import UserLoginSchemaBase
 
 from .client import OpenIDClient
@@ -53,15 +54,6 @@ class OpenIDProvider:
         """
         return ("OpenID_" + self.name)[:32]
 
-    def create_provider_group(self) -> "Group":
-        """
-        Creates a Group model object for a new OpenID provider
-        """
-        from mwdb.model import Group
-
-        group_name = self.get_group_name()
-        return Group(name=group_name, immutable=True, workspace=False)
-
     def iter_user_name_variants(self, sub: bytes, userinfo: UserInfo) -> Iterator[str]:
         """
         Yield username variants that are used when user registers using OpenID identity
@@ -87,6 +79,15 @@ class OpenIDProvider:
             return userinfo["email"]
         else:
             return f"{sub}@mwdb.local"
+
+    def get_user_groups(self, claims: dict[str, object]) -> list[str]:
+        """
+        User groups that are used when user registers using OpenID identity
+        """
+        if "groups" in claims.keys():
+            return claims["groups"]
+        else:
+            return []
 
     def get_user_description(self, sub: bytes, userinfo: UserInfo) -> str:
         """

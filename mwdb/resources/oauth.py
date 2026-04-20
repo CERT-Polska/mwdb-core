@@ -1,6 +1,8 @@
 import datetime
+import re
 
 from flask import g, request
+from marshmallow import ValidationError
 from sqlalchemy import and_, exists, or_
 from werkzeug.exceptions import Conflict, Forbidden, NotFound
 
@@ -8,7 +10,13 @@ from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
-from mwdb.model import Group, OpenIDProviderSettings, OpenIDUserIdentity, db
+from mwdb.model import (
+    Group,
+    OpenIDGroupManagementMode,
+    OpenIDProviderSettings,
+    OpenIDUserIdentity,
+    db,
+)
 from mwdb.schema.auth import AuthSuccessResponseSchema
 from mwdb.schema.group import GroupNameSchemaBase
 from mwdb.schema.oauth import (
@@ -105,6 +113,18 @@ class OpenIDProviderResource(Resource):
         if obj["requires_approval"]:
             requires_approval = obj["requires_approval"]
 
+        oidc_groups_management_mode = None
+        if obj["oidc_groups_management_mode"]:
+            oidc_groups_management_mode = obj["oidc_groups_management_mode"]
+
+        oidc_groups_match_pattern = None
+        if obj["oidc_groups_match_pattern"]:
+            oidc_groups_match_pattern = obj["oidc_groups_match_pattern"]
+
+        oidc_groups_replace_pattern = None
+        if obj["oidc_groups_replace_pattern"]:
+            oidc_groups_replace_pattern = obj["oidc_groups_replace_pattern"]
+
         if db.session.query(
             exists().where(and_(OpenIDProviderSettings.name == obj["name"]))
         ).scalar():
@@ -122,6 +142,9 @@ class OpenIDProviderResource(Resource):
             jwks_endpoint=jwks_endpoint,
             logout_endpoint=logout_endpoint,
             requires_approval=requires_approval,
+            oidc_groups_management_mode=oidc_groups_management_mode,
+            oidc_groups_match_pattern=oidc_groups_match_pattern,
+            oidc_groups_replace_pattern=oidc_groups_replace_pattern,
         )
 
         provider = provider_settings.get_oidc_provider()
@@ -133,7 +156,8 @@ class OpenIDProviderResource(Resource):
         ).scalar():
             raise Conflict("Group exists yet, choose another provider name")
 
-        group = provider.create_provider_group()
+        group = Group(name=group_name, immutable=True, workspace=False)
+
         db.session.add(group)
         db.session.flush()
         db.session.refresh(group)
@@ -265,6 +289,18 @@ class OpenIDSingleProviderResource(Resource):
         requires_approval = obj["requires_approval"]
         if requires_approval is not None:
             provider_settings.requires_approval = requires_approval
+
+        oidc_groups_management_mode = obj["oidc_groups_management_mode"]
+        if oidc_groups_management_mode is not None:
+            provider_settings.oidc_groups_management_mode = oidc_groups_management_mode
+
+        oidc_groups_match_pattern = obj["oidc_groups_match_pattern"]
+        if oidc_groups_match_pattern is not None:
+            provider_settings.oidc_groups_match_pattern = oidc_groups_match_pattern
+
+        oidc_groups_replace_pattern = obj["oidc_groups_replace_pattern"]
+        if oidc_groups_replace_pattern is not None:
+            provider_settings.oidc_groups_replace_pattern = oidc_groups_replace_pattern
 
         db.session.commit()
 
@@ -398,7 +434,6 @@ class OpenIDAuthorizeResource(Resource):
             raise Forbidden("Unknown identity")
 
         user = identity.user
-
         if user.pending:
             raise Forbidden(
                 "User registration is pending - "
@@ -408,8 +443,132 @@ class OpenIDAuthorizeResource(Resource):
         if user.disabled:
             raise Forbidden("User account is disabled.")
 
+        new_user_groups = []
+        new_user_group_members = []
+        removed_user_group_members = []
+
+        oidc_groups_management_mode = provider_settings.oidc_groups_management_mode
+        if (oidc_groups_management_mode != OpenIDGroupManagementMode.NONE):
+            oidc_group_names = provider.get_user_groups(id_token_claims)
+
+            logger.debug(
+                "Retrieve OIDC groups from claims",
+                extra={"groups": oidc_group_names},
+            )
+
+            user_group_names = set(user.group_names)
+            current_user_group_names = set()
+
+            pattern = re.compile(provider_settings.oidc_groups_match_pattern)
+            for oidc_group_name in oidc_group_names:
+                # Match group names and replace it if needed
+                match = pattern.fullmatch(oidc_group_name)
+                if match is None:
+                    continue
+
+                try:
+                    group_name = re.sub(
+                        provider_settings.oidc_groups_match_pattern,
+                        provider_settings.oidc_groups_replace_pattern,
+                        oidc_group_name,
+                    )
+                    current_user_group_names.add(group_name)
+                except re.error as exc:
+                    extra = {
+                        "match_pattern": provider_settings.oidc_groups_match_pattern,
+                        "replace_pattern": provider_settings.oidc_groups_replace_pattern,
+                        "group": oidc_group_name,
+                    }
+
+                    logger.error(
+                        "Error during extraction of group name",
+                        extra,
+                    )
+                    logger.error(exc)
+
+            # Manage user groups new memberships
+            new_user_groups_names = list(current_user_group_names - user_group_names)
+            for new_user_groups_name in new_user_groups_names:
+                # Group name validation
+                try:
+                    GroupNameSchemaBase().load({"name": new_user_groups_name})
+                except ValidationError:
+                    logger.warning(
+                        "Group name is not valid. It will be ignored",
+                        new_user_groups_name,
+                    )
+                    continue
+
+                # Get existing group or create a new one
+                group = Group.get_by_name(new_user_groups_name)
+                if group is None:
+                    group = Group(
+                        name=new_user_groups_name,
+                        openid_provider_id=provider_settings.id,
+                        immutable=False,
+                        workspace=False,
+                    )
+                    db.session.add(group)
+                    new_user_groups.append(group)
+
+                # Mixed mode
+                # Add only user to openid groups linked to the current provider
+                if (
+                    oidc_groups_management_mode == OpenIDGroupManagementMode.MIXED
+                    and group.openid_provider_id != provider_settings.id
+                ):
+                    continue
+
+                logger.debug(
+                    "Add user membership to group",
+                    extra={"group": new_user_groups_name},
+                )
+
+                db.session.flush()
+                db.session.refresh(group)
+                if group.add_member(user):
+                    new_user_group_members.append(group)
+
+            # Manage user groups removed memberships
+            removed_user_groups_names = list(
+                user_group_names - current_user_group_names
+            )
+            removed_user_groups = filter(
+                lambda group: str(group.name) in removed_user_groups_names, user.groups
+            )
+            for removed_user_group in removed_user_groups:
+                # Mixed mode
+                # Remove only user to openid groups linked to the current provider
+                if (
+                    oidc_groups_management_mode == OpenIDGroupManagementMode.MIXED
+                    and removed_user_group.openid_provider_id != provider_settings.id
+                ):
+                    continue
+
+                # Keep default and private groups
+                if removed_user_group.default or removed_user_group.private:
+                    continue
+
+                # Keep provider group
+                if removed_user_group.name == provider_settings.group.name:
+                    continue
+
+                logger.debug(
+                    "Remove user membership from group",
+                    extra={"group": removed_user_group.name},
+                )
+                if removed_user_group.remove_member(user):
+                    removed_user_group_members.append(removed_user_group)
+
         user.logged_on = datetime.datetime.now()
         db.session.commit()
+
+        for new_user_group in new_user_groups:
+            hooks.on_created_group(new_user_group)
+        for new_user_group_member in new_user_group_members:
+            hooks.on_created_membership(new_user_group_member, user)
+        for removed_user_group_member in removed_user_group_members:
+            hooks.on_removed_membership(removed_user_group_member, user)
 
         auth_token = user.generate_session_token(provider=provider_name)
 
@@ -482,6 +641,90 @@ class OpenIDRegisterUserResource(Resource):
 
         db.session.add(identity)
 
+        new_user_groups = []
+        new_user_group_members = []
+        oidc_groups_management_mode = provider_settings.oidc_groups_management_mode
+        if (oidc_groups_management_mode != OpenIDGroupManagementMode.NONE):
+            oidc_group_names = provider.get_user_groups(id_token_claims)
+
+            logger.debug(
+                "Retrieve OIDC groups from claims",
+                extra={"groups": oidc_group_names},
+            )
+
+            user_group_names = set(user.group_names)
+            current_user_group_names = set()
+
+            pattern = re.compile(provider_settings.oidc_groups_match_pattern)
+            for oidc_group_name in oidc_group_names:
+                # Match group names and replace it if needed
+                match = pattern.fullmatch(oidc_group_name)
+                if match is None:
+                    continue
+
+                try:
+                    group_name = re.sub(
+                        provider_settings.oidc_groups_match_pattern,
+                        provider_settings.oidc_groups_replace_pattern,
+                        oidc_group_name,
+                    )
+                    current_user_group_names.add(group_name)
+                except re.error as exc:
+                    extra = {
+                        "match_pattern": provider_settings.oidc_groups_match_pattern,
+                        "replace_pattern": provider_settings.oidc_groups_replace_pattern,
+                        "group": oidc_group_name,
+                    }
+
+                    logger.error(
+                        "Error during extraction of group name",
+                        extra,
+                    )
+                    logger.error(exc)
+
+            # Manage user groups new memberships
+            new_user_groups_names = list(current_user_group_names - user_group_names)
+            for new_user_groups_name in new_user_groups_names:
+                # Group name validation
+                try:
+                    GroupNameSchemaBase().load({"name": new_user_groups_name})
+                except ValidationError:
+                    logger.warning(
+                        "Group name is not valid. It will be ignored",
+                        new_user_groups_name,
+                    )
+                    continue
+
+                # Get existing group or create a new one
+                group = Group.get_by_name(new_user_groups_name)
+                if group is None:
+                    group = Group(
+                        name=new_user_groups_name,
+                        openid_provider_id=provider_settings.id,
+                        immutable=False,
+                        workspace=False,
+                    )
+                    db.session.add(group)
+                    new_user_groups.append(group)
+
+                # Mixed mode
+                # Add only user to openid groups linked to the current provider
+                if (
+                    oidc_groups_management_mode == OpenIDGroupManagementMode.MIXED
+                    and group.openid_provider_id != provider_settings.id
+                ):
+                    continue
+
+                logger.debug(
+                    "Add user membership to group",
+                    extra={"group": new_user_groups_name},
+                )
+
+                db.session.flush()
+                db.session.refresh(group)
+                if group.add_member(user):
+                    new_user_group_members.append(group)
+
         if not requires_approval:
             user.logged_on = datetime.datetime.now()
 
@@ -495,6 +738,11 @@ class OpenIDRegisterUserResource(Resource):
         if user_private_group:
             hooks.on_created_group(user_private_group)
         hooks.on_created_membership(provider_group, user)
+
+        for new_user_group in new_user_groups:
+            hooks.on_created_group(new_user_group)
+        for new_user_group_member in new_user_group_members:
+            hooks.on_created_membership(new_user_group_member, user)
 
         if requires_approval:
             logger.info(

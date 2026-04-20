@@ -214,6 +214,41 @@ login turned on, but don't pass set password link to users - you can achieve thi
 and removing credentials part. To set up your own templates, change ``mail_templates_dir`` in configuration to point at your folder,
 copy templates from https://github.com/CERT-Polska/mwdb-core/tree/master/mwdb/templates/mail and modify them accordingly.
 
+Manage MWDB Groups from OpenID Groups
+-------------------------------------
+
+If your identity provider is correctly configured to return the user groups in the OpenID Token,
+you can map automatically these groups to MWDB groups.
+
+These feature can be enable or disable per provider directly in the administration interface.
+
+Three modes are available:
+- NONE: The feature is disable. The groups included in the OIDC Token are ignored
+- FULL: The user groups are fully managed by the list of groups included in their OIDC Token.
+  Users will be added to all the MWDB groups included in their OIDC Token and removed from the others whatever the groups providers of origin.
+  It means that a user can be automatically removed from local MWDB groups if these groups are not listed in their OIDC token
+- MIXED: The OIDC users are only added or removed from the MWDB groups of the current OIDC provider.
+  The local groups or groups from other providers remain unchanged whatever the groups listed in their OIDC token.
+
+You can filter the groups coming from OIDC using the parameter: ``OIDC groups matching pattern=(.*)``
+This variable shall contain a regular expression. It is used to filter and map the external to internal group names.
+Only the external group names matching the regular expression are managed, the other ones are ignored.
+
+The mapping between external and internal group names is performed using the parameter: ``OIDC groups replacing pattern=\1``
+It uses the result of the previous regular expression to build the internal names.
+Regular expression groups are supported.
+
+.. note::
+
+   You can for example match only the groups starting by MWDB_xxx by configuration the parameter OIDC groups matching pattern to ``MWDB_(.*)``
+
+   And map these groups to internal groups as EXTERNAL_xxx by configuration the parameter OIDC groups replacing pattern to ``EXTERNAL_\1``
+
+   With this configuration, the group name MWDB_MALWARE_ANALYSTS will be mapped internally to the local group EXTERNAL_MALWARE_ANALYST
+
+
+By default this feature is disable
+
 Disable password-based authentication
 -------------------------------------
 

@@ -56,7 +56,9 @@ class GroupListResource(Resource):
         """
         objs = (
             db.session.query(Group).options(
-                joinedload(Group.members), joinedload(Group.members, Member.user)
+                joinedload(Group.members),
+                joinedload(Group.members, Member.user),
+                joinedload(Group.openid_provider),
             )
         ).all()
         schema = GroupListResponseSchema()
@@ -100,7 +102,11 @@ class GroupResource(Resource):
         """
         obj = (
             db.session.query(Group)
-            .options(joinedload(Group.members), joinedload(Group.members, Member.user))
+            .options(
+                joinedload(Group.members),
+                joinedload(Group.members, Member.user),
+                joinedload(Group.openid_provider),
+            )
             .filter(Group.name == name)
         ).first()
         if obj is None:

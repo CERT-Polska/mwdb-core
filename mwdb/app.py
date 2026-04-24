@@ -51,6 +51,12 @@ from mwdb.resources.file import (
     FileResource,
 )
 from mwdb.resources.group import GroupListResource, GroupMemberResource, GroupResource
+from mwdb.resources.ioc import (
+    IOCItemResource,
+    IOCListResource,
+    IOCManageResource,
+    IOCResource,
+)
 from mwdb.resources.karton import KartonAnalysisResource, KartonObjectResource
 from mwdb.resources.metakey import (
     MetakeyDefinitionManageResource,
@@ -351,6 +357,18 @@ api.add_resource(MetakeyListDefinitionManageResource, "/meta/manage")
 api.add_resource(MetakeyDefinitionManageResource, "/meta/manage/<key>")
 api.add_resource(
     MetakeyPermissionResource, "/meta/manage/<key>/permissions/<group_name>"
+)
+
+# IOC endpoints
+api.add_resource(IOCListResource, "/ioc")
+api.add_resource(IOCManageResource, "/ioc/<int:ioc_id>")
+api.add_resource(
+    IOCResource,
+    "/<any(file, config, blob, object):type>/<hash64:identifier>/ioc",
+)
+api.add_resource(
+    IOCItemResource,
+    "/<any(file, config, blob, object):type>/<hash64:identifier>/ioc/<int:ioc_id>",
 )
 
 # Karton endpoints

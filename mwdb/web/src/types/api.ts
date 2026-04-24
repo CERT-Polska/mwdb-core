@@ -11,6 +11,7 @@ import {
     Family,
     FileListItem,
     Group,
+    IOCItem,
     KartonAnalysis,
     ObjectData,
     ObjectListItem,
@@ -347,3 +348,15 @@ export type OauthRemoveSingleProviderResponse = Response<null>;
 export type OauthGetLogoutLinkResponse = Response<{
     url: string;
 }>;
+
+export type GetObjectIOCsResponse = Response<IOCItem[]>;
+
+export type AddObjectIOCResponse = Response<IOCItem[]>;
+
+export type RemoveObjectIOCResponse = Response<IOCItem[]>;
+
+export type GetIOCListResponse = Response<{ iocs: IOCItem[] }>;
+
+export type UpdateIOCResponse = Response<IOCItem>;
+
+export type DeleteIOCResponse = Response<{ message: string }>;

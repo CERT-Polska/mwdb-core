@@ -38,5 +38,5 @@ typing-extensions==4.15.0 ; python_full_version < '3.11'
     # via
     #   exceptiongroup
     #   pyjwt
-urllib3==2.6.3
+urllib3==2.7.0
     # via requests

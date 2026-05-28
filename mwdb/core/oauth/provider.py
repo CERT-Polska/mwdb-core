@@ -54,15 +54,6 @@ class OpenIDProvider:
         """
         return ("OpenID_" + self.name)[:32]
 
-    def create_provider_group(self) -> "Group":
-        """
-        Creates a Group model object for a new OpenID provider
-        """
-        from mwdb.model import Group
-
-        group_name = self.get_group_name()
-        return Group(name=group_name, immutable=True, workspace=False)
-
     def iter_user_name_variants(self, sub: bytes, userinfo: UserInfo) -> Iterator[str]:
         """
         Yield username variants that are used when user registers using OpenID identity
@@ -103,35 +94,6 @@ class OpenIDProvider:
         User description that is used when user registers using OpenID identity
         """
         return "Registered via OpenID Connect protocol"
-
-    def create_user_groups(self, group_names: list[str]) -> list["Group"]:
-        """
-        Creates Group model objects for a new OpenID identity user
-        """
-        from mwdb.model import Group
-
-        groups: list[Group] = []
-        for group_name in group_names:
-            try:
-                GroupNameSchemaBase().load({"name": group_name})
-            except ValidationError:
-                continue
-
-            group = Group.get_by_name(group_name)
-            if group is not None:
-                groups.append(group)
-                continue
-
-            groups.append(
-                Group(
-                    name=group_name,
-                    openid_provider_name=self.name,
-                    immutable=False,
-                    workspace=False,
-                )
-            )
-
-        return groups
 
     def create_user(
         self, sub: bytes, userinfo: UserInfo, requires_approval: bool

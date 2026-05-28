@@ -266,7 +266,7 @@ export type Permission = {
 export enum OpenIDGroupManagementMode {
     NONE = "NONE",
     FULL = "FULL",
-    MIXED = "MIXED"
+    MIXED = "MIXED",
 }
 
 export type Provider = {

@@ -69,7 +69,7 @@ export function GroupDetailsView() {
                         />
                     </DetailsRecord>
                     <DetailsRecord label="Provider">
-                         <HighlightText filterValue="">
+                        <HighlightText filterValue="">
                             {group.provider ?? "local"}
                         </HighlightText>
                     </DetailsRecord>

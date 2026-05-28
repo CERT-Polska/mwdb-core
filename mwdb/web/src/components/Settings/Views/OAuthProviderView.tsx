@@ -13,14 +13,15 @@ import { Select } from "@mwdb-web/commons/ui/Select";
 
 import { OpenIDGroupManagementMode } from "@mwdb-web/types/types";
 
-
 export function OAuthProviderView() {
     const viewAlert = useViewAlert();
     const { name } = useParams();
     const [provider, setProvider] = useState<Provider>({} as Provider);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] = useState(false);
-    const oidc_group_management_mode = Object.entries(OpenIDGroupManagementMode) as [OpenIDGroupManagementMode, string][];
+    const oidc_group_management_mode = Object.entries(
+        OpenIDGroupManagementMode
+    ) as [OpenIDGroupManagementMode, string][];
 
     async function updateProvider() {
         try {
@@ -150,9 +151,9 @@ export function OAuthProviderView() {
                             selective
                         >
                             {oidc_group_management_mode.map(([key, value]) => (
-                            <option key={key} value={value}>
-                                {value}
-                            </option>
+                                <option key={key} value={value}>
+                                    {value}
+                                </option>
                             ))}
                         </EditableItem>
                     </DetailsRecord>

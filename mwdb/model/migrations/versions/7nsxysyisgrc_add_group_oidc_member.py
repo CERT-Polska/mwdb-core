@@ -1,7 +1,7 @@
 """Add group oidc provider
 
 Revision ID: 7nsxysyisgrc
-Revises: 6745a530097e
+Revises: 01dea56ffaf7
 Create Date: 2026-02-24 10:36:52.350767
 
 """
@@ -12,7 +12,7 @@ from mwdb.model import OpenIDGroupManagementMode
 
 # revision identifiers, used by Alembic.
 revision = "7nsxysyisgrc"
-down_revision = "6745a530097e"
+down_revision = "01dea56ffaf7"
 branch_labels = None
 depends_on = None
 

@@ -27,9 +27,20 @@ def upgrade():
         "CREATE TYPE openidgroupmanagementmode AS ENUM ('NONE', 'FULL', 'MIXED');"
     )
 
-    op.add_column("openid_provider", sa.Column("oidc_groups_management_mode", sa.Enum(OpenIDGroupManagementMode), nullable=False))
-    op.add_column("openid_provider", sa.Column("oidc_groups_match_pattern", sa.Text(), nullable=False))
-    op.add_column("openid_provider", sa.Column("oidc_groups_replace_pattern", sa.Text(), nullable=False))
+    with op.batch_alter_table('openid_provider', schema=None) as batch_op:
+        batch_op.add_column(sa.Column("oidc_groups_management_mode", sa.Enum(OpenIDGroupManagementMode), nullable=True))
+        batch_op.add_column(sa.Column("oidc_groups_match_pattern", sa.Text(), nullable=True))
+        batch_op.add_column(sa.Column("oidc_groups_replace_pattern", sa.Text(), nullable=True))
+
+    op.execute("UPDATE openid_provider SET oidc_groups_management_mode='NONE';")
+    op.execute("UPDATE openid_provider SET oidc_groups_match_pattern='(.*)';")
+    op.execute("UPDATE openid_provider SET oidc_groups_replace_pattern='\\1';")
+
+    with op.batch_alter_table('openid_provider', schema=None) as batch_op:
+        batch_op.alter_column(sa.Column("oidc_groups_management_mode", sa.Enum(OpenIDGroupManagementMode), nullable=False))
+        batch_op.alter_column(sa.Column("oidc_groups_match_pattern", sa.Text(), nullable=False))
+        batch_op.alter_column(sa.Column("oidc_groups_replace_pattern", sa.Text(), nullable=False))
+
     # ### end Alembic commands ###
 
 

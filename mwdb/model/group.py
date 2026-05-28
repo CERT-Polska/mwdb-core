@@ -26,6 +26,16 @@ class Group(db.Model):
     workspace = db.Column(db.Boolean, nullable=False, default=True)
     immutable = db.Column(db.Boolean, nullable=False, default=False)
 
+    # External Group comming from openid provider
+    openid_provider_name = db.Column(db.String(64), db.ForeignKey("openid_provider.name"), nullable=True, default=None)
+
+    openid_provider = db.relationship(
+        "OpenIDProviderSettings",
+        back_populates="openid_groups",
+        foreign_keys=[openid_provider_name],
+        lazy="select"
+    )
+
     members = db.relationship(
         "Member", back_populates="group", cascade="all, delete-orphan"
     )

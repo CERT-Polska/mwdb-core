@@ -40,6 +40,20 @@ def storage_provider_from_str(v: str) -> StorageProviderType:
     except KeyError:
         raise ValueError(f"Storage provider {v} doesn't exist")
 
+class OIDCGroupManagementMode(Enum):
+    FULL = "FULL"
+    MIXED = "MIXED"
+
+def oidc_group_mode_from_str(v: str) -> OIDCGroupManagementMode:
+    if not v:
+        return OIDCGroupManagementMode.MIXED
+
+    v = v.upper()
+    try:
+        return OIDCGroupManagementMode[v]
+    except KeyError:
+        raise ValueError(f"OIDC group mode {v} doesn't exist")
+
 
 @section("mwdb")
 class MWDBConfig(Config):
@@ -114,6 +128,14 @@ class MWDBConfig(Config):
     # Auto-discover plugins contained in local_plugins_folder
     local_plugins_autodiscover = key(cast=intbool, required=False, default=False)
 
+    # Automatic creation of OIDC groups
+    oidc_groups_match_pattern = key(cast=str, required=False, default="(.*)")
+    oidc_groups_replace_pattern = key(cast=str, required=False, default="\1")
+
+    # Management mode of OIDC groups
+    oidc_groups_mode = key(
+        cast=oidc_group_mode_from_str, required=False, default=OIDCGroupManagementMode.MIXED)
+
     remotes = key(cast=list_of_str, required=False, default=[])
 
     enable_rate_limit = key(cast=intbool, required=False, default=False)
@@ -123,6 +145,7 @@ class MWDBConfig(Config):
     enable_hooks = key(cast=intbool, required=False, default=True)
     enable_karton = key(cast=intbool, required=False, default=False)
     enable_oidc = key(cast=intbool, required=False, default=False)
+    enable_oidc_groups = key(cast=intbool, required=False, default=False)
     enable_oidc_registration = key(cast=intbool, required=False, default=False)
     enable_3rd_party_sharing_consent = key(cast=intbool, required=False, default=False)
     enable_ssdeep = key(cast=intbool, required=False, default=True)

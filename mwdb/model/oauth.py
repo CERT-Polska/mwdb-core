@@ -38,7 +38,7 @@ class OpenIDProviderSettings(db.Model):
         "Group",
         foreign_keys=[Group.openid_provider_name],
         back_populates="openid_provider",
-        lazy="select"
+        lazy="select",
     )
 
     group = db.relationship(

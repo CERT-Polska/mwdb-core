@@ -122,7 +122,14 @@ class OpenIDProvider:
                 groups.append(group)
                 continue
 
-            groups.append(Group(name=group_name, openid_provider_name=self.name, immutable=False, workspace=False))
+            groups.append(
+                Group(
+                    name=group_name,
+                    openid_provider_name=self.name,
+                    immutable=False,
+                    workspace=False,
+                )
+            )
 
         return groups
 

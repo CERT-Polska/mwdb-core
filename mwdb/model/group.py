@@ -29,7 +29,7 @@ class Group(db.Model):
     # External group created by OpenID Provider
     openid_provider_id = db.Column(
         db.Integer,
-        db.ForeignKey("openid_provider.id"),
+        db.ForeignKey("openid_provider.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )

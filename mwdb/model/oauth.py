@@ -6,8 +6,9 @@ from mwdb.core.oauth.provider import OpenIDProvider
 from . import db
 from .group import Group
 
-DEFAULT_OIDC_GROUPS_MATCH_PATTERN = '(.*)'
-DEFAULT_OIDC_GROUPS_REPLACE_PATTERN = '\\1'
+DEFAULT_OIDC_GROUPS_MATCH_PATTERN = "(.*)"
+DEFAULT_OIDC_GROUPS_REPLACE_PATTERN = "\\1"
+
 
 def get_oidc_provider_class(provider_name: str) -> Type[OpenIDProvider]:
     from mwdb.core.plugins import openid_provider_classes
@@ -35,10 +36,16 @@ class OpenIDProviderSettings(db.Model):
     logout_endpoint = db.Column(db.Text, nullable=True)
     requires_approval = db.Column(db.Boolean, nullable=False, default=False)
     oidc_groups_management_mode = db.Column(
-        db.Enum(OpenIDGroupManagementMode), nullable=False, default=OpenIDGroupManagementMode.NONE
+        db.Enum(OpenIDGroupManagementMode),
+        nullable=False,
+        default=OpenIDGroupManagementMode.NONE,
     )
-    oidc_groups_match_pattern = db.Column(db.Text, nullable=False, default=DEFAULT_OIDC_GROUPS_MATCH_PATTERN)
-    oidc_groups_replace_pattern = db.Column(db.Text, nullable=False, default=DEFAULT_OIDC_GROUPS_REPLACE_PATTERN)
+    oidc_groups_match_pattern = db.Column(
+        db.Text, nullable=False, default=DEFAULT_OIDC_GROUPS_MATCH_PATTERN
+    )
+    oidc_groups_replace_pattern = db.Column(
+        db.Text, nullable=False, default=DEFAULT_OIDC_GROUPS_REPLACE_PATTERN
+    )
 
     group_id = db.Column(db.Integer, db.ForeignKey("group.id"), nullable=False)
 

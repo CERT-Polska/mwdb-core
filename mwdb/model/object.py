@@ -74,7 +74,10 @@ class Object(db.Model):
     type = db.Column(db.String(50), index=True, nullable=False)
     dhash = db.Column(db.String(64), unique=True, index=True, nullable=False)
     upload_time = db.Column(
-        db.DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc)
+        db.DateTime,
+        nullable=False,
+        index=True,
+        default=lambda: datetime.now(timezone.utc),
     )
     share_3rd_party = db.Column(db.Boolean, nullable=False)
 

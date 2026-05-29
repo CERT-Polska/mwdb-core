@@ -42,7 +42,7 @@ dependencies = [
     "python-dateutil==2.8.2",
     "python-json-logger==2.0.2",
     "python-magic==0.4.18",
-    "pyzipper==0.3.5",
+    "pyzipper==0.4.0",
     "redis==4.5.4",
     "requests==2.32.4",
     "sqlalchemy==1.4.54",

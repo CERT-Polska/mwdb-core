@@ -220,34 +220,37 @@ Manage MWDB Groups from OpenID Groups
 If your identity provider is correctly configured to return the user groups in the OpenID Token,
 you can map automatically these groups to MWDB groups.
 
-These feature can be enable or disable per provider directly in the administration interface.
+This feature can be enabled or disabled per provider by changing configuration fields in ``Settings`` -> ``OpenID Connect`` and
+choosing proper provider.
+
+.. image:: ./_static/oidc-groups-settings.png
+   :target: ./_static/oidc-groups-settings.png
+   :alt: OIDC groups management settings
 
 Three modes are available:
-- NONE: The feature is disable. The groups included in the OIDC Token are ignored
+
+- NONE: The feature is disabled. The groups included in the OIDC Token are ignored. This setting is a default.
 - FULL: The user groups are fully managed by the list of groups included in their OIDC Token.
   Users will be added to all the MWDB groups included in their OIDC Token and removed from the others whatever the groups providers of origin.
   It means that a user can be automatically removed from local MWDB groups if these groups are not listed in their OIDC token
 - MIXED: The OIDC users are only added or removed from the MWDB groups of the current OIDC provider.
   The local groups or groups from other providers remain unchanged whatever the groups listed in their OIDC token.
 
-You can filter the groups coming from OIDC using the parameter: ``OIDC groups matching pattern=(.*)``
-This variable shall contain a regular expression. It is used to filter and map the external to internal group names.
-Only the external group names matching the regular expression are managed, the other ones are ignored.
+You can filter the groups coming from OIDC Provider using the parameter: ``OIDC groups matching pattern=(.*)``
+This variable shall contain a regular expression. It can be used both for filtering the OIDC group names that will be mapped
+to the MWDB group name and for transforming the OIDC group name to another MWDB group name.
 
-The mapping between external and internal group names is performed using the parameter: ``OIDC groups replacing pattern=\1``
+The name mapping between OIDC and MWDB group names is performed using the parameter: ``OIDC groups replacing pattern=\1``
 It uses the result of the previous regular expression to build the internal names.
-Regular expression groups are supported.
+Regular expression capturing groups are supported.
 
 .. note::
 
-   You can for example match only the groups starting by MWDB_xxx by configuration the parameter OIDC groups matching pattern to ``MWDB_(.*)``
+   To match only the groups starting with MWDB_xxx: the parameter ``OIDC groups matching pattern`` should be set to ``MWDB_(.*)``
 
-   And map these groups to internal groups as EXTERNAL_xxx by configuration the parameter OIDC groups replacing pattern to ``EXTERNAL_\1``
+   Then you can map these groups to MWDB groups named as EXTERNAL_xxx by configuring the parameter ``OIDC groups replacing pattern`` to ``EXTERNAL_\1``
 
-   With this configuration, the group name MWDB_MALWARE_ANALYSTS will be mapped internally to the local group EXTERNAL_MALWARE_ANALYST
-
-
-By default this feature is disable
+   With this configuration, the group name MWDB_MALWARE_ANALYSTS will be mapped internally to the local group EXTERNAL_MALWARE_ANALYSTS
 
 Disable password-based authentication
 -------------------------------------

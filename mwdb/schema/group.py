@@ -57,6 +57,7 @@ class GroupItemResponseSchema(GroupNameSchemaBase):
     admins = fields.List(
         fields.Str(), attribute="group_admins", required=True, allow_none=False
     )
+    provider = fields.Str(attribute="provider_name", missing=None)
 
 
 class GroupListResponseSchema(Schema):

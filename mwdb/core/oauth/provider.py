@@ -53,13 +53,14 @@ class OpenIDProvider:
         """
         return ("OpenID_" + self.name)[:32]
 
-    def create_provider_group(self) -> "Group":
+    def create_provider_group(self, group_name: str) -> "Group":
         """
         Creates a Group model object for a new OpenID provider
+
+        Override this method if you want to create a group with different settings
         """
         from mwdb.model import Group
 
-        group_name = self.get_group_name()
         return Group(name=group_name, immutable=True, workspace=False)
 
     def iter_user_name_variants(self, sub: bytes, userinfo: UserInfo) -> Iterator[str]:
@@ -87,6 +88,15 @@ class OpenIDProvider:
             return userinfo["email"]
         else:
             return f"{sub}@mwdb.local"
+
+    def get_user_groups(self, claims: dict[str, object]) -> list[str]:
+        """
+        User groups that are used when user registers using OpenID identity
+        """
+        if "groups" in claims.keys():
+            return claims["groups"]
+        else:
+            return []
 
     def get_user_description(self, sub: bytes, userinfo: UserInfo) -> str:
         """

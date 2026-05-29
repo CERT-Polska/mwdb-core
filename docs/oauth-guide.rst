@@ -214,6 +214,64 @@ login turned on, but don't pass set password link to users - you can achieve thi
 and removing credentials part. To set up your own templates, change ``mail_templates_dir`` in configuration to point at your folder,
 copy templates from https://github.com/CERT-Polska/mwdb-core/tree/master/mwdb/templates/mail and modify them accordingly.
 
+Manage MWDB groups from OpenID Provider groups
+----------------------------------------------
+
+.. versionadded:: 2.18.0
+
+If your identity provider is configured to include user group information in the OpenID token,
+MWDB can automatically synchronize these groups with local MWDB groups.
+
+This feature can be enabled or disabled separately for each provider in
+``Settings`` → ``OpenID Connect`` by selecting the appropriate provider.
+
+.. image:: ./_static/oidc-groups-settings.png
+   :target: ./_static/oidc-groups-settings.png
+   :alt: OIDC groups management settings
+
+The following synchronization modes are available:
+
+- **NONE** (default): Group synchronization is disabled. Groups included in the OIDC token are ignored.
+- **FULL**: User custom groups are fully synchronized with the groups included in the OIDC token.
+
+  Users are automatically added to all matching MWDB groups and removed from groups that are no longer present in the token.
+  This means that users may be automatically removed from locally assigned MWDB groups if those groups are not included in the OIDC token.
+
+  The following groups are never removed automatically:
+
+  - the user's private group,
+  - the provider group,
+  - groups marked as default (for example, the ``public`` group).
+
+- **MIXED**: Users are added to or removed only from MWDB groups associated with the current OIDC provider.
+  Local groups and groups managed by other providers remain unchanged, regardless of the groups included in the OIDC token.
+
+If a referenced group does not already exist in MWDB, it is created automatically and linked to the corresponding OIDC provider.
+
+User group membership is synchronized whenever the user authenticates to MWDB using the OpenID provider.
+
+Group filtering and name mapping
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Groups received from the OIDC provider can be filtered using the ``OIDC groups matching pattern=(.*)`` parameter.
+
+This parameter accepts a regular expression and can be used both to:
+
+- filter which OIDC groups should be synchronized,
+- transform OIDC group names into MWDB group names.
+
+Group name mapping is configured using the ``OIDC groups replacing pattern=\1`` parameter.
+
+The replacement pattern uses the result of the matching expression to generate the internal MWDB group name.
+Regular expression capture groups are supported.
+
+.. note::
+
+   To synchronize only groups whose names in OIDC start with ``MWDB_``, configure *OIDC groups matching pattern*
+   as: ``MWDB_(.*)``. You can then map these groups to MWDB groups prefixed with ``EXTERNAL_``
+   by setting *OIDC groups replacing pattern* to: ``EXTERNAL_\1``. With this configuration, the OIDC group
+   ``MWDB_MALWARE_ANALYSTS`` will be mapped to the local MWDB group ``EXTERNAL_MALWARE_ANALYSTS``.
+
 Disable password-based authentication
 -------------------------------------
 

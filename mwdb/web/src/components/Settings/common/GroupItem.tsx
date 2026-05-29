@@ -32,6 +32,11 @@ export function GroupItem(props: Props) {
                 </span>
             </td>
             <td>
+                <HighlightText filterValue={props.filterValue ?? ""}>
+                    {props.provider ?? "local"}
+                </HighlightText>
+            </td>
+            <td>
                 {props.name === "public" ? (
                     "(Group is public and contains all members)"
                 ) : (

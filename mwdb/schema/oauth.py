@@ -1,5 +1,7 @@
 from marshmallow import Schema, fields
 
+from mwdb.model import OpenIDGroupManagementMode
+
 
 class OpenIDProviderCreateRequestSchema(Schema):
     name = fields.Str(required=True, allow_none=False)
@@ -11,6 +13,11 @@ class OpenIDProviderCreateRequestSchema(Schema):
     jwks_endpoint = fields.Str(required=True, allow_none=True)
     logout_endpoint = fields.Str(required=False, allow_none=True)
     requires_approval = fields.Bool(required=False, allow_none=False, missing=False)
+    oidc_groups_management_mode = fields.Enum(
+        OpenIDGroupManagementMode, required=False, by_value=True, allow_none=True
+    )
+    oidc_groups_match_pattern = fields.Str(required=False, allow_none=True)
+    oidc_groups_replace_pattern = fields.Str(required=False, allow_none=True)
 
 
 class OpenIDProviderItemResponseSchema(OpenIDProviderCreateRequestSchema):
@@ -27,6 +34,9 @@ class OpenIDProviderUpdateRequestSchema(Schema):
     jwks_endpoint = fields.Str(missing=None)
     logout_endpoint = fields.Str(missing=None)
     requires_approval = fields.Bool(missing=False)
+    oidc_groups_management_mode = fields.Enum(OpenIDGroupManagementMode, missing=None)
+    oidc_groups_match_pattern = fields.Str(missing=None)
+    oidc_groups_replace_pattern = fields.Str(missing=None)
 
 
 class OpenIDAuthorizeRequestSchema(Schema):

@@ -23,7 +23,12 @@ import {
     DeleteQuickQueryResponse,
     DownloadFileResponse,
     DownloadRemoteFileResponse,
+    AddObjectIOCResponse,
+    DeleteIOCResponse,
     EnableSharing3rdPartyResponse,
+    GetIOCListResponse,
+    GetObjectIOCsResponse,
+    UpdateIOCResponse,
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
     GetAttributeDefinitionsResponse,
@@ -93,6 +98,7 @@ import {
     UpdateUserResponse,
     UploadFileResponse,
     UserRequestPasswordChangeResponse,
+    RemoveObjectIOCResponse,
     UploadFileRequest,
     UploadConfigRequest,
     UploadConfigResponse,
@@ -784,6 +790,63 @@ function removeKartonAnalysisFromObject(
     return axios.delete(`/object/${id}/karton/${analysis_id}`);
 }
 
+function getObjectIOCs(id: string): GetObjectIOCsResponse {
+    return axios.get(`/object/${id}/ioc`);
+}
+
+function addObjectIOC(
+    id: string,
+    type: string,
+    value: string,
+    category?: string | null,
+    severity?: string | null,
+    tags?: string[]
+): AddObjectIOCResponse {
+    return axios.put(`/object/${id}/ioc`, {
+        type,
+        value,
+        category: category || null,
+        severity: severity || null,
+        tags: tags || [],
+    });
+}
+
+function removeObjectIOC(
+    id: string,
+    ioc_id: number
+): RemoveObjectIOCResponse {
+    return axios.delete(`/object/${id}/ioc/${ioc_id}`);
+}
+
+function getIOCList(
+    older_than?: number,
+    count?: number,
+    query?: string
+): GetIOCListResponse {
+    return axios.get("/ioc", {
+        params: {
+            older_than: older_than || undefined,
+            count: count || undefined,
+            query: query || undefined,
+        },
+    });
+}
+
+function updateIOC(
+    ioc_id: number,
+    data: {
+        category?: string | null;
+        severity?: string | null;
+        tags?: string[];
+    }
+): UpdateIOCResponse {
+    return axios.put(`/ioc/${ioc_id}`, data);
+}
+
+function deleteIOC(ioc_id: number): DeleteIOCResponse {
+    return axios.delete(`/ioc/${ioc_id}`);
+}
+
 function enableSharing3rdParty(
     identifier: string
 ): EnableSharing3rdPartyResponse {
@@ -893,6 +956,12 @@ export const api = {
     resubmitKartonAnalysis,
     removeKartonAnalysisFromObject,
     enableSharing3rdParty,
+    getObjectIOCs,
+    addObjectIOC,
+    removeObjectIOC,
+    getIOCList,
+    updateIOC,
+    deleteIOC,
 };
 
 export const APIContext = React.createContext({} as ApiContextValues);

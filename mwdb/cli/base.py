@@ -14,15 +14,11 @@ def create_app():
     try:
         app_config.read()
     except Exception as e:
-        click.echo(
-            textwrap.dedent(
-                """
+        click.echo(textwrap.dedent("""
         [!] Wrong MWDB configuration.
 
         Use 'mwdb-core configure' to setup your MWDB instance.
-        """
-            )
-        )
+        """))
         raise NoAppException(f"Application not configured: {str(e)}")
     # Lazy-load app here
     from mwdb import app

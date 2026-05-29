@@ -49,6 +49,7 @@ from .comment import Comment  # noqa: E402
 from .config import Config, StaticConfig  # noqa: E402
 from .file import File  # noqa: E402
 from .group import Group, Member  # noqa: E402
+from .ioc import IOC, object_ioc  # noqa: E402
 from .karton import KartonAnalysis, karton_object  # noqa: E402
 from .oauth import (  # noqa: E402
     OpenIDGroupManagementMode,
@@ -70,6 +71,8 @@ __all__ = [
     "StaticConfig",
     "File",
     "Group",
+    "IOC",
+    "object_ioc",
     "KartonAnalysis",
     "karton_object",
     "Member",

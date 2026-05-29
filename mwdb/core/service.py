@@ -51,16 +51,14 @@ class Resource(MethodView):
 
 
 class Service:
-    description = textwrap.dedent(
-        """
+    description = textwrap.dedent("""
         MWDB API documentation.
 
         If you want to automate things, we recommend using
         <a href="https://github.com/CERT-Polska/mwdblib">
             mwdblib library
         </a>
-    """
-    )
+    """)
     servers = [
         {
             "url": "{scheme}://{host}",

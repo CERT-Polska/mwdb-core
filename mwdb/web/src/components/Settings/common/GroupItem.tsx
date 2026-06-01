@@ -32,9 +32,7 @@ export function GroupItem(props: Props) {
                 </span>
             </td>
             <td>
-                <HighlightText filterValue={props.filterValue ?? ""}>
-                    {props.provider ?? "local"}
-                </HighlightText>
+                {props.provider ?? <span className="text-muted">none</span>}
             </td>
             <td>
                 {props.name === "public" ? (

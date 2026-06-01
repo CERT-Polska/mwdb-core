@@ -8,7 +8,6 @@ import {
     PseudoEditableItem,
     FeatureSwitch,
     UserBadge,
-    HighlightText,
 } from "@mwdb-web/commons/ui";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
@@ -23,7 +22,8 @@ import { Group } from "@mwdb-web/types/types";
 
 export function GroupDetailsView() {
     const viewAlert = useViewAlert();
-    const { group, getGroup }: GroupOutletContext = useOutletContext();
+    const { group, getGroup, openidProviders }: GroupOutletContext =
+        useOutletContext();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     const [isDeleteModalDisabled, setDeleteModalDisabled] =
         useState<boolean>(false);
@@ -36,6 +36,20 @@ export function GroupDetailsView() {
                 success: `Group has been successfully updated.`,
             });
             if (!newValue.name) getGroup();
+        } catch (error) {
+            viewAlert.setAlert({ error });
+        }
+    }
+
+    async function handleProviderUpdate({ provider }: Record<string, string>) {
+        // Convert empty string value to null
+        const newValue = provider || null;
+        try {
+            await api.updateGroup(group.name, { provider: newValue });
+            viewAlert.setAlert({
+                success: `Group has been successfully updated.`,
+            });
+            getGroup();
         } catch (error) {
             viewAlert.setAlert({ error });
         }
@@ -86,11 +100,6 @@ export function GroupDetailsView() {
                             disabled={group.immutable}
                         />
                     </DetailsRecord>
-                    <DetailsRecord label="Provider">
-                        <HighlightText filterValue="">
-                            {group.provider ?? "local"}
-                        </HighlightText>
-                    </DetailsRecord>
                     <DetailsRecord label="Members">
                         <PseudoEditableItem
                             editLocation={`/settings/group/${group.name}/members`}
@@ -111,6 +120,26 @@ export function GroupDetailsView() {
                                         />
                                     ))}
                         </PseudoEditableItem>
+                    </DetailsRecord>
+                    <DetailsRecord
+                        label="OpenID Provider"
+                        tip="Choose which OpenID Provider can manage members of this group in MIXED mode"
+                    >
+                        <EditableItem
+                            name="provider"
+                            defaultValue={group.provider}
+                            renderedValue={group.provider || "none"}
+                            onSubmit={handleProviderUpdate}
+                            selective
+                            disabled={group.immutable}
+                        >
+                            <option value="">none</option>
+                            {openidProviders.map((val) => (
+                                <option value={val} key={`provider-${val}`}>
+                                    {val}
+                                </option>
+                            ))}
+                        </EditableItem>
                     </DetailsRecord>
                 </tbody>
             </table>

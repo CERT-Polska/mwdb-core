@@ -14,6 +14,7 @@ type Props = React.PropsWithChildren<
     SelectOrInput & {
         name: string;
         defaultValue: string;
+        renderedValue?: string;
         type?: string;
         selective?: boolean;
         badge?: boolean;
@@ -31,6 +32,7 @@ export function EditableItem(props: Props) {
         badge,
         children,
         defaultValue,
+        renderedValue,
         onSubmit,
         masked,
         disabled,
@@ -102,7 +104,7 @@ export function EditableItem(props: Props) {
                         {masked ? (
                             <span>{"•".repeat(defaultValue.length)}</span>
                         ) : (
-                            <span>{defaultValue}</span>
+                            <span>{renderedValue ?? defaultValue}</span>
                         )}
                     </span>
                     {!disabled ? (

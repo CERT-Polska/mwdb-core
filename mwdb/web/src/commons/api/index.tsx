@@ -396,7 +396,11 @@ function registerGroup(name: string): RegisterGroupResponse {
 
 function updateGroup(
     name: string,
-    value: { capabilities?: Capability[]; name?: string }
+    value: {
+        capabilities?: Capability[];
+        name?: string;
+        provider?: string | null;
+    }
 ): UpdateGroupResponse {
     return axios.put(`/group/${name}`, value);
 }

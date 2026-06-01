@@ -272,6 +272,58 @@ Regular expression capture groups are supported.
    by setting *OIDC groups replacing pattern* to: ``EXTERNAL_\1``. With this configuration, the OIDC group
    ``MWDB_MALWARE_ANALYSTS`` will be mapped to the local MWDB group ``EXTERNAL_MALWARE_ANALYSTS``.
 
+Managing existing groups in MIXED mode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, MIXED mode performs member synchronization only for new groups that were created by OpenID Provider during
+synchronization.
+
+To manage already existing groups, you need to associate them with chosen provider in Settings.
+
+You can do that by navigating to ``Settings`` → ``Groups`` → <choosing group> and editing the ``OpenID Provider`` field.
+
+.. image:: ./_static/group-setting-oidc-provider.png
+   :target: ./_static/group-setting-oidc-provider.png
+   :alt: Setting OpenID Provider in group
+
+This setting can be also used for excluding the group from OpenID Provider management by editing this field to "none".
+
+Example: Setting up MWDB group management using Keycloak
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Go to ``Client scopes`` and create new client scope
+
+.. image:: ./_static/keycloak-client-scope.png
+   :target: ./_static/keycloak-client-scope.png
+   :alt: Creating Client scope in Keycloak
+
+2. Then, navigate to ``Mappers`` tab and choose ``Configure a new mapper``. Choose ``Group Membership``.
+
+.. image:: ./_static/keycloak-client-scope-new-mapper.png
+   :target: ./_static/keycloak-client-scope-new-mapper.png
+   :alt: Configuring new mapper in Keycloak
+
+.. image:: ./_static/keycloak-client-scope-choose-mapper.png
+   :target: ./_static/keycloak-client-scope-choose-mapper.png
+   :alt: Choosing Group Membership
+
+3. Then set Token Claim Name parameter as "groups" and turn off "Full group path". Full groups paths are preceded with
+slash, so group names can't be directly mapped to MWDB group names. If you want to use nested groups, you may need a
+regex that would provide a correct mapping to valid group name.
+
+.. image:: ./_static/keycloak-client-scope-mapper-details.png
+   :target: ./_static/keycloak-client-scope-mapper-details.png
+   :alt: Client scope mapper settings
+
+4. Then go to ``Clients``, pick MWDB client and add created ``Client scope`` as a default scope for that client.
+
+.. image:: ./_static/keycloak-client-scope-add-to-client.png
+   :target: ./_static/keycloak-client-scope-add-to-client.png
+   :alt: Adding created client scope into client as a default
+
+After setting MIXED or FULL management mode in MWDB configuration - Keycloak groups will be automatically synchronized
+on user logon.
+
 Disable password-based authentication
 -------------------------------------
 

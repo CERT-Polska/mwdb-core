@@ -46,8 +46,7 @@ export function GroupDetailsView() {
         const newValue = provider || null;
         try {
             await api.updateGroup(group.name, { provider: newValue });
-            viewAlert.redirectToAlert({
-                target: `/settings/group/${group.name}`,
+            viewAlert.setAlert({
                 success: `Group has been successfully updated.`,
             });
             getGroup();
@@ -123,12 +122,13 @@ export function GroupDetailsView() {
                         </PseudoEditableItem>
                     </DetailsRecord>
                     <DetailsRecord
-                        label="OpenID provider"
-                        tip="Choose which OpenID provider can manage members of this group"
+                        label="OpenID Provider"
+                        tip="Choose which OpenID Provider can manage members of this group in MIXED mode"
                     >
                         <EditableItem
                             name="provider"
-                            defaultValue={group.provider || "none"}
+                            defaultValue={group.provider}
+                            renderedValue={group.provider || "none"}
                             onSubmit={handleProviderUpdate}
                             selective
                             disabled={group.immutable}

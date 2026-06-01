@@ -68,14 +68,19 @@ Make sure that development Docker Compose is up. Then spawn interactive shell:
 
 .. code-block::
 
-   $ docker-compose -f docker-compose-dev.yml exec mwdb /bin/sh
+   $ docker compose -f docker-compose-dev.yml exec -u $(id -u) mwdb /bin/sh
    /app #
 
-Then use ``flask db migrate`` command to generate migration
+Then enter the virtualenv:
+
+.. code-block::
+    $ . .venv/bin/activate
+
+And use ``flask db migrate`` command to generate migration
 
 .. code-block::
 
-   /app # flask db migrate
+   $ flask db migrate -m "my change"
    INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
    INFO  [alembic.runtime.migration] Will assume transactional DDL.
    INFO  [alembic.ddl.postgresql] Detected sequence named 'tag_id_seq' as owned by integer column 'tag(id)', assuming SERIAL and omitting
@@ -83,16 +88,16 @@ Then use ``flask db migrate`` command to generate migration
    INFO  [alembic.ddl.postgresql] Detected sequence named 'comment_id_seq' as owned by integer column 'comment(id)', assuming SERIAL and omitting
    INFO  [alembic.ddl.postgresql] Detected sequence named 'metakey_id_seq' as owned by integer column 'metakey(id)', assuming SERIAL and omitting
    INFO  [alembic.autogenerate.compare] Detected added column 'comment.likes'
-     Generating /app/migrations/versions/c22b64a416e9_.py ... done
+     Generating /app/migrations/versions/c22b64a416e9_my_change.py ... done
 
-In this case we can find our migration script ``./migrations/versions/c22b64a416e9_.py``. Check if everything is alright and apply migration.
+In this case we can find our migration script ``./migrations/versions/c22b64a416e9_my_change.py``. Check if everything is alright and apply migration.
 
 .. code-block::
 
-   /app # flask db upgrade
+   $ flask db upgrade
    INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
    INFO  [alembic.runtime.migration] Will assume transactional DDL.
-   INFO  [alembic.runtime.migration] Running upgrade 426a27b8e97c -> c22b64a416e9, empty message
+   INFO  [alembic.runtime.migration] Running upgrade 426a27b8e97c -> c22b64a416e9, my change
 
 Now, your feature is ready for tests. If you restart your Docker environment, all migrations will be applied automatically.
 
@@ -100,10 +105,11 @@ If you need to write change on your own e.g. because you need to migrate data in
 
 .. code-block::
 
-   /app # flask db revision
-     Generating /app/migrations/versions/6819021086c5_.py ... done
+    $ flask db revision -m "my change"
+
+    Generating /app/mwdb/model/migrations/versions/be5a821ebbcf_my_change.py ...  done
 
 .. note::
 
-   Alembic migrations generated inside container will be owned by root.
-   If you have problem with permissions, use ``chown`` inside container to change the owner to your local UID.
+   Alembic migrations generated inside container may have wrong owner (especially group id).
+   If you have problem with permissions, use ``chown`` to change the owner to your local UID/GID.

@@ -37,7 +37,10 @@ def _initialize(admin_password):
     db.session.add(registered_group)
 
     admin_group = Group(
-        name=app_config.mwdb.admin_login, capabilities=Capabilities.all(), private=True
+        name=app_config.mwdb.admin_login,
+        capabilities=Capabilities.all(),
+        private=True,
+        immutable=True,
     )
     db.session.add(admin_group)
 

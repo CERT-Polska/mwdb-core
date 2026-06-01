@@ -13,7 +13,10 @@ import {
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+    faTrash,
+    faTriangleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
 import { DetailsRecord } from "../common/DetailsRecord";
 import { GroupOutletContext } from "@mwdb-web/types/context";
 import { Group } from "@mwdb-web/types/types";
@@ -57,6 +60,20 @@ export function GroupDetailsView() {
 
     return (
         <div className="container">
+            {group.immutable ? (
+                <div className="alert alert-warning" role="alert">
+                    <FontAwesomeIcon
+                        className="ml-1 mt-1"
+                        icon={faTriangleExclamation}
+                        size="1x"
+                        pull="left"
+                    />
+                    Group is immutable and managed by system, some fields may be
+                    not editable.
+                </div>
+            ) : (
+                []
+            )}
             <table className="table table-striped table-bordered wrap-table">
                 <tbody>
                     <DetailsRecord label="Group name">
@@ -66,6 +83,7 @@ export function GroupDetailsView() {
                             onSubmit={handleUpdate}
                             required
                             pattern="[A-Za-z0-9_.-]{1,32}"
+                            disabled={group.immutable}
                         />
                     </DetailsRecord>
                     <DetailsRecord label="Provider">
@@ -76,6 +94,7 @@ export function GroupDetailsView() {
                     <DetailsRecord label="Members">
                         <PseudoEditableItem
                             editLocation={`/settings/group/${group.name}/members`}
+                            disabled={group.immutable}
                         >
                             {group &&
                                 group.users

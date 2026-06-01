@@ -5,9 +5,14 @@ import { EditButton } from "./EditButton";
 type Props = {
     children: React.ReactNode;
     editLocation: string;
+    disabled?: boolean;
 };
 
-export function PseudoEditableItem({ children, editLocation }: Props) {
+export function PseudoEditableItem({
+    children,
+    editLocation,
+    disabled,
+}: Props) {
     /*
      Looks the same as regular editable item, but Edit button redirects to the
      separate editing view
@@ -15,9 +20,13 @@ export function PseudoEditableItem({ children, editLocation }: Props) {
     return (
         <div>
             <span className="align-middle">{children}</span>
-            <Link to={editLocation}>
-                <EditButton />
-            </Link>
+            {!disabled ? (
+                <Link to={editLocation}>
+                    <EditButton />
+                </Link>
+            ) : (
+                []
+            )}
         </div>
     );
 }

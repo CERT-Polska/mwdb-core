@@ -26,7 +26,7 @@ class Group(db.Model):
     workspace = db.Column(db.Boolean, nullable=False, default=True)
     immutable = db.Column(db.Boolean, nullable=False, default=False)
 
-    # External group created by OpenID Provider
+    # Group managed by OpenID Provider
     openid_provider_id = db.Column(
         db.Integer,
         db.ForeignKey("openid_provider.id", ondelete="SET NULL"),

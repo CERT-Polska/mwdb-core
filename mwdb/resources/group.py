@@ -6,7 +6,7 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
-from mwdb.model import Group, Member, User, db
+from mwdb.model import Group, Member, User, db, OpenIDProviderSettings
 from mwdb.schema.group import (
     GroupCreateRequestSchema,
     GroupItemResponseSchema,
@@ -234,30 +234,50 @@ class GroupResource(Resource):
         if group is None:
             raise NotFound("No such group")
 
-        immutable_fields = ["name", "default", "workspace"]
+        immutable_fields = ["name", "default", "workspace", "provider"]
         if group.immutable:
             for field in immutable_fields:
-                if obj[field] is not None:
+                if obj.get(field) is not None:
                     raise Forbidden(f"Can't change '{field}', group is immutable")
 
-        if obj["name"] is not None:
+        if obj.get("name") is not None:
             group.name = obj["name"]
 
-        if obj["capabilities"] is not None:
+        if obj.get("capabilities") is not None:
             group.capabilities = obj["capabilities"]
 
-        if obj["default"] is not None:
+        if obj.get("default") is not None:
             group.default = obj["default"]
 
-        if obj["workspace"] is not None:
+        if obj.get("workspace") is not None:
             group.workspace = obj["workspace"]
+
+        if "provider" in obj:
+            if obj["provider"] is None:
+                group.openid_provider = None
+            else:
+                provider_name = obj["provider"]
+                provider_settings = (
+                    db.session.query(OpenIDProviderSettings)
+                    .filter(OpenIDProviderSettings.name == provider_name)
+                    .first()
+                )
+                if not provider_settings:
+                    raise NotFound(f"Provider name '{provider_name}' not found")
+                group.openid_provider = provider_settings
 
         db.session.commit()
 
         hooks.on_updated_group(group)
         logger.info(
             "Group updated",
-            extra={"group": group.name, "capabilities": group.capabilities},
+            extra={
+                "group": group.name,
+                "capabilities": group.capabilities,
+                "default": group.default,
+                "workspace": group.workspace,
+                "provider": group.openid_provider and group.openid_provider.name,
+            },
         )
         schema = GroupSuccessResponseSchema()
         return schema.dump({"name": group.name})

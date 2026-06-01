@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { isEmpty } from "lodash";
 import { useParams, Routes, Route, Link, Outlet } from "react-router-dom";
 
@@ -6,6 +6,8 @@ import { api } from "@mwdb-web/commons/api";
 import { useViewAlert } from "@mwdb-web/commons/hooks";
 import { DeleteCapabilityModal } from "../common/DeleteCapabilityModal";
 import { Capability, Group } from "@mwdb-web/types/types";
+import { toast } from "react-toastify";
+import { getErrorMessage } from "@mwdb-web/commons/helpers";
 
 export function GroupView() {
     const { setAlert } = useViewAlert();
@@ -14,6 +16,18 @@ export function GroupView() {
     const [capabilitiesToDelete, setCapabilitiesToDelete] = useState<
         Capability | ""
     >("");
+    const [openidProviders, setOpenidProviders] = useState<string[]>([]);
+
+    const getProviders = useCallback(async () => {
+        try {
+            const response = await api.oauthGetProviders();
+            setOpenidProviders(response.data["providers"]);
+        } catch (error) {
+            toast(getErrorMessage(error), {
+                type: "error",
+            });
+        }
+    }, []);
 
     async function changeCapabilities(
         capability: Capability | "",
@@ -33,6 +47,7 @@ export function GroupView() {
 
     useEffect(() => {
         getGroup();
+        getProviders();
     }, [name]);
 
     async function getGroup() {
@@ -98,7 +113,14 @@ export function GroupView() {
                 setCapabilitiesToDelete={setCapabilitiesToDelete}
                 successMessage={`Capabilities for ${group.name} successfully changed`}
             />
-            <Outlet context={{ group, getGroup, setCapabilitiesToDelete }} />
+            <Outlet
+                context={{
+                    group,
+                    getGroup,
+                    setCapabilitiesToDelete,
+                    openidProviders,
+                }}
+            />
         </div>
     );
 }

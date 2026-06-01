@@ -85,6 +85,7 @@ export type UserOutletContext = {
 export type GroupOutletContext = {
     group: Group;
     getGroup: () => Promise<void>;
+    openidProviders: string[];
 };
 
 export type ObjectContextValues = {

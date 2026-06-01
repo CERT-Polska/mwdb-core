@@ -22,10 +22,11 @@ class GroupCreateRequestSchema(Schema):
 
 
 class GroupUpdateRequestSchema(Schema):
-    name = fields.Str(missing=None)
-    capabilities = fields.List(fields.Str(), missing=None)
-    default = fields.Boolean(missing=None)
-    workspace = fields.Boolean(missing=None)
+    name = fields.Str(allow_none=True)
+    capabilities = fields.List(fields.Str(), allow_none=True)
+    default = fields.Boolean(allow_none=True)
+    workspace = fields.Boolean(allow_none=True)
+    provider = fields.Str(allow_none=True)
 
     @validates("name")
     def validate_name(self, name):

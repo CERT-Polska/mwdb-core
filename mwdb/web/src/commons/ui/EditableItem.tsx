@@ -1,25 +1,27 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSave } from "@fortawesome/free-solid-svg-icons";
 import { EditButton } from "./EditButton";
 import { InputHTMLAttributes } from "react";
 import { SelectHTMLAttributes } from "react";
 
-type Select = SelectHTMLAttributes<HTMLSelectElement>;
-type Input = InputHTMLAttributes<HTMLInputElement>;
+type Select = Omit<SelectHTMLAttributes<HTMLSelectElement>, "onSubmit">;
+type Input = Omit<InputHTMLAttributes<HTMLInputElement>, "onSubmit">;
 
 type SelectOrInput = Select | Input;
 
-type Props = SelectOrInput & {
-    name: string;
-    defaultValue: string;
-    type?: string;
-    selective?: boolean;
-    badge?: boolean;
-    masked?: boolean;
-    children?: JSX.Element | JSX.Element[];
-    onSubmit: (value: Record<string, string>) => void;
-};
+type Props = React.PropsWithChildren<
+    SelectOrInput & {
+        name: string;
+        defaultValue: string;
+        type?: string;
+        selective?: boolean;
+        badge?: boolean;
+        masked?: boolean;
+        disabled?: boolean;
+        onSubmit: (value: Record<string, string>) => void;
+    }
+>;
 
 export function EditableItem(props: Props) {
     const {
@@ -31,6 +33,8 @@ export function EditableItem(props: Props) {
         defaultValue,
         onSubmit,
         masked,
+        disabled,
+        ...inputProps
     } = props;
     const [value, setValue] = useState<string>(defaultValue);
     const [edit, setEdit] = useState<boolean>(false);
@@ -47,7 +51,7 @@ export function EditableItem(props: Props) {
                 <div className="input-group">
                     {selective ? (
                         <select
-                            {...(props as Select)}
+                            {...(inputProps as Select)}
                             className="form-control"
                             value={value}
                             name={name}
@@ -57,7 +61,7 @@ export function EditableItem(props: Props) {
                         </select>
                     ) : (
                         <input
-                            {...(props as Input)}
+                            {...(inputProps as Input)}
                             type={type || "text"}
                             name={name}
                             className="form-control"
@@ -101,13 +105,17 @@ export function EditableItem(props: Props) {
                             <span>{defaultValue}</span>
                         )}
                     </span>
-                    <EditButton
-                        onClick={(ev) => {
-                            ev.preventDefault();
-                            setValue(defaultValue);
-                            setEdit(true);
-                        }}
-                    />
+                    {!disabled ? (
+                        <EditButton
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                setValue(defaultValue);
+                                setEdit(true);
+                            }}
+                        />
+                    ) : (
+                        []
+                    )}
                 </div>
             )}
         </form>

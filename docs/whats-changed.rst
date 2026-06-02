@@ -7,6 +7,25 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
 
+v2.18.0
+-------
+
+This release contains major improvements of OpenID Connect integration along with various bugfixes and improvements. MWDB Core code is now linted and formatted using `Ruff <https://docs.astral.sh/ruff/>`_.
+
+Complete changelog can be found here: `v2.18.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.18.0>`_.
+
+[New feature] Managing MWDB groups using OpenID Provider
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This release contains new feature that allows to synchronize OpenID Provider groups membership with MWDB groups. The synchronization occurs when user authenticates using OpenID Connect.
+
+There are two synchronization modes:
+
+- **FULL**: User custom groups are fully synchronized with the OIDC groups. Users are automatically added to all matching MWDB groups and removed from groups that are no longer present in the OIDC.
+- **MIXED**: Users are added to or removed only from MWDB groups explicitly associated with the OIDC provider.
+
+Read more about this feature in the :ref:`Manage MWDB groups from OpenID Provider groups` documentation.
+
 v2.17.0
 -------
 

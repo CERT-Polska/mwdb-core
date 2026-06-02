@@ -177,18 +177,23 @@ def log_request(response):
             status_code=str(response.status_code),
         )
 
+    extra = {
+        "path": request.path,
+        "arguments": request.args,
+        "method": request.method,
+        "status": response.status_code,
+        "response_time": response_time,
+        "response_size": response_size,
+        "remote_addr": request.remote_addr,
+        "pid": os.getpid(),
+    }
+
+    if hasattr(g, "sql_queries_count"):
+        extra["sql_queries_count"] = g.sql_queries_count
+
     getLogger().debug(
         "request",
-        extra={
-            "path": request.path,
-            "arguments": request.args,
-            "method": request.method,
-            "status": response.status_code,
-            "response_time": response_time,
-            "response_size": response_size,
-            "remote_addr": request.remote_addr,
-            "pid": os.getpid(),
-        },
+        extra=extra,
     )
 
     return response

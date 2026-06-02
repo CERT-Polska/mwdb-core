@@ -9,7 +9,10 @@ from .config import app_config
 
 class ContextFilter(logging.Filter):
     def filter(self, record):
-        record.auth_user = g.auth_user.login if g.get("auth_user") is not None else None
+        if record.name != "mwdb.sql_profiler":
+            record.auth_user = (
+                g.auth_user.login if g.get("auth_user") is not None else None
+            )
         if g.get("request_id"):
             record.request_id = g.request_id
         return True

@@ -113,3 +113,31 @@ If you need to write change on your own e.g. because you need to migrate data in
 
    Alembic migrations generated inside container may have wrong owner (especially group id).
    If you have problem with permissions, use ``chown`` to change the owner to your local UID/GID.
+
+Debugging database problems
+---------------------------
+
+MWDB Core has built-in SQL logging features that are helpful while debugging slow queries and N+1 query problems.
+
+If you want to have logged all queries in the application:
+
+- set ``enable_sql_profiler=1`` (e.g. via ``MWDB_ENABLE_SQL_PROFILER=1`` environment variable)
+- set ``enable_debug_log=1``
+
+This will emit the following logs:
+
+- ``funcName: before_cursor_execute`` - SQL query and context before execution
+- ``funcName: after_cursor_execute`` - SQL query, context and timing after execution
+- ``funcName: log_request`` - contains additional record ``sql_queries_count`` with count of SQL queries
+  emitted during handling request
+
+.. code-block::
+
+    mwdb-1      | {"funcName": "before_cursor_execute", "levelname": "DEBUG", "message": "Query started", "taskName": null, "sql": "SELECT \"user\".id AS user_id, \"user\".login AS user_login, \"user\".email AS user_email, \"user\".password_hash AS user_password_hash, \"user\".version_uid AS user_version_uid, \"user\".password_ver AS user_password_ver, \"user\".identity_ver AS user_identity_ver, \"user\".additional_info AS user_additional_info, \"user\".disabled AS user_disabled, \"user\".pending AS user_pending, \"user\".requested_on AS user_requested_on, \"user\".registered_on AS user_registered_on, \"user\".registered_by AS user_registered_by, \"user\".logged_on AS user_logged_on, \"user\".set_password_on AS user_set_password_on, \"user\".feed_quality AS user_feed_quality \nFROM \"user\" \nWHERE \"user\".pending = true", "parameters": {}, "path": "/api/user", "method": "GET", "request_id": "eda86733df3302bc86a78da7ba936eaa", "file": "/app/mwdb/resources/user.py", "line": 75, "function": "get", "timestamp": "2026-06-02T13:57:43.390940+00:00"}
+    mwdb-1      | {"funcName": "after_cursor_execute", "levelname": "DEBUG", "message": "Query finished, took 0.002081 seconds", "taskName": null, "sql": "SELECT \"user\".id AS user_id, \"user\".login AS user_login, \"user\".email AS user_email, \"user\".password_hash AS user_password_hash, \"user\".version_uid AS user_version_uid, \"user\".password_ver AS user_password_ver, \"user\".identity_ver AS user_identity_ver, \"user\".additional_info AS user_additional_info, \"user\".disabled AS user_disabled, \"user\".pending AS user_pending, \"user\".requested_on AS user_requested_on, \"user\".registered_on AS user_registered_on, \"user\".registered_by AS user_registered_by, \"user\".logged_on AS user_logged_on, \"user\".set_password_on AS user_set_password_on, \"user\".feed_quality AS user_feed_quality \nFROM \"user\" \nWHERE \"user\".pending = true", "parameters": {}, "path": "/api/user", "method": "GET", "request_id": "eda86733df3302bc86a78da7ba936eaa", "file": "/app/mwdb/resources/user.py", "line": 75, "function": "get", "timestamp": "2026-06-02T13:57:43.393037+00:00"}
+    mwdb-1      | {"funcName": "log_request", "levelname": "DEBUG", "message": "request", "taskName": null, "path": "/api/user", "arguments": {"pending": "1"}, "method": "GET", "status": 200, "response_time": "0:00:00.024094", "response_size": 13, "remote_addr": "172.18.0.7", "pid": 685, "sql_queries_count": 4, "auth_user": "admin", "request_id": "eda86733df3302bc86a78da7ba936eaa", "timestamp": "2026-06-02T13:57:43.394061+00:00"}
+
+If you want to emit warning logs for each query that takes longer than 5 seconds to execute:
+
+- set ``enable_sql_profiler=1`` (e.g. via ``MWDB_ENABLE_SQL_PROFILER=1`` environment variable)
+- set ``log_only_slow_sql=1``

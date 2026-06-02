@@ -54,8 +54,6 @@ __all__ = [
     "ObjectPermission",
     "OpenIDProviderSettings",
     "OpenIDGroupManagementMode",
-    "DEFAULT_OIDC_GROUPS_MATCH_PATTERN",
-    "DEFAULT_OIDC_GROUPS_REPLACE_PATTERN",
     "OpenIDUserIdentity",
     "relation",
     "QuickQuery",

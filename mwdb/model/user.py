@@ -54,7 +54,7 @@ class User(db.Model):
         OpenIDUserIdentity,
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="selectin",
+        lazy="select",
     )
     permissions = db.relationship(
         "ObjectPermission",

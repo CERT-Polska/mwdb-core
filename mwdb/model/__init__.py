@@ -1,42 +1,16 @@
-import logging
-import time
-
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import event
-from sqlalchemy.engine import Engine
 
 from mwdb.core.config import app_config
+from mwdb.core.sql_profiler import attach_sql_profiler
 
 engine_options = {}
-logger = logging.getLogger("mwdb.sql_profiler")
 
 if app_config.mwdb.statement_timeout:
     st_timeout = app_config.mwdb.statement_timeout
     engine_options["connect_args"] = {"options": f"-c statement_timeout={st_timeout}"}
 
-
-def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-    # Got from https://github.com/sqlalchemy/sqlalchemy/wiki/Profiling
-    conn.info.setdefault("query_start_time", []).append(time.time())
-    logger.debug("Query started:\n%s %s", statement, parameters)
-
-
-def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-    total = time.time() - conn.info["query_start_time"].pop(-1)
-    if total > 5:
-        logger.warning(
-            "Slow query took %f seconds:\n%s %s", total, statement, parameters
-        )
-    else:
-        logger.debug("Query finished, took %f seconds", total)
-
-
 if app_config.mwdb.enable_sql_profiler:
-    event.listen(Engine, "before_cursor_execute", before_cursor_execute)
-    event.listen(Engine, "after_cursor_execute", after_cursor_execute)
-    logger.setLevel(
-        logging.WARNING if app_config.mwdb.log_only_slow_sql else logging.DEBUG
-    )
+    attach_sql_profiler()
 
 db = SQLAlchemy(engine_options=engine_options)
 

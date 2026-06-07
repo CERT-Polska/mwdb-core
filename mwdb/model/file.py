@@ -5,6 +5,9 @@ import shutil
 import tempfile
 from typing import Any, Dict
 
+import botocore.exceptions
+import werkzeug
+import werkzeug.datastructures
 from Cryptodome.Util.strxor import strxor_c
 from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql.array import ARRAY
@@ -22,6 +25,10 @@ from .object import Object
 
 
 class EmptyFileError(ValueError):
+    pass
+
+
+class InvalidRangeError(ValueError):
     pass
 
 
@@ -207,6 +214,73 @@ class File(Object):
                 f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
             )
 
+    def _open_range_from_storage(
+        self,
+        fallback_path=False,
+        range: werkzeug.datastructures.Range | None = None,
+    ):
+        """
+        Opens file from storage. Internal method.
+
+        :param fallback_path: Use fallback path (switch hash pathing)
+        :param range: |
+            Werkzeug Range object representing the parsed Range request header.
+            Warning: If file is streamed from DISK, the stream is not truncated
+                into proper length and may be longer than requested range.
+        """
+        if app_config.mwdb.storage_provider == StorageProviderType.S3:
+            # Stream coming from Boto3 get_object is not buffered and not seekable.
+            # We need to download it to the temporary file first.
+            s3_client = get_s3_client(
+                app_config.mwdb.s3_storage_endpoint,
+                app_config.mwdb.s3_storage_access_key,
+                app_config.mwdb.s3_storage_secret_key,
+                app_config.mwdb.s3_storage_region_name,
+                app_config.mwdb.s3_storage_secure,
+                app_config.mwdb.s3_storage_iam_auth,
+            )
+            kwargs = {}
+            if range is not None:
+                kwargs["Range"] = range.to_header()
+            try:
+                obj = s3_client.get_object(
+                    Bucket=app_config.mwdb.s3_storage_bucket_name,
+                    Key=self._calculate_path(fallback_path=fallback_path),
+                    **kwargs,
+                )
+                stream = obj["Body"]
+                metadata = {
+                    "ContentLength": obj["ContentLength"],
+                    "ContentRange": obj.get("ContentRange"),
+                }
+                return stream, metadata
+            except botocore.exceptions.ClientError as error:
+                if error.response["Error"]["Code"] == "InvalidRange":
+                    raise InvalidRangeError() from error
+                else:
+                    raise
+        elif app_config.mwdb.storage_provider == StorageProviderType.DISK:
+            stream = open(self._calculate_path(fallback_path=fallback_path), "rb")
+            try:
+                file_size = stream.seek(0, io.SEEK_END)
+                stream.seek(0, io.SEEK_SET)
+                offsets = range.range_for_length(file_size)
+                if not offsets:
+                    raise InvalidRangeError()
+                stream.seek(offsets[0], io.SEEK_SET)
+                metadata = {
+                    "ContentLength": offsets[1] - offsets[0],
+                    "ContentRange": range.to_content_range_header(file_size),
+                }
+                return stream, metadata
+            except:
+                stream.close()
+                raise
+        else:
+            raise RuntimeError(
+                f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
+            )
+
     def open(self):
         """
         Opens the file stream with contents.
@@ -244,49 +318,84 @@ class File(Object):
         finally:
             File.close(fh)
 
-    def iterate(self, chunk_size=1024 * 256):
+    def iterate(
+        self,
+        chunk_size=1024 * 256,
+        obfuscate: bool = False,
+        range: werkzeug.datastructures.Range | None = None,
+    ):
         """
         Iterates over bytes in the file contents
-        """
-        fh = self.open()
-        try:
-            if hasattr(fh, "stream"):
-                yield from fh.stream(chunk_size)
-            else:
-                while True:
-                    chunk = fh.read(chunk_size)
-                    if chunk:
-                        yield chunk
-                    else:
-                        return
-        finally:
-            File.close(fh)
 
-    def iterate_obfuscated(self, chunk_size=1024 * 256):
-        r"""
-        Iterates over bytes in the file contents with xor applied
-        The idea behind xoring before send is to prevent browsers
-        from caching original samples (malware). Unxoring is provided
-        in mwdb\web\src\components\ShowSample.js in SamplePreview
+        :param obfuscate: |
+            Negate bits. The idea behind xoring before send is to prevent EDR
+            from triggering on malware downloaded while previewing file in UI.
+            Unxoring is provided in mwdb/web/src/components/ShowSample.js in SamplePreview.
+        :param range: |
+            Werkzeug Range object representing the parsed Range request header
         """
 
         def negate_bits(chunk):
             return strxor_c(chunk, 255)
 
-        fh = self.open()
         try:
-            if hasattr(fh, "stream"):
-                yield from map(negate_bits, fh.stream(chunk_size))
+            opened_file, opened_file_metadata = self._open_range_from_storage(
+                range=range
+            )
+        except InvalidRangeError:
+            raise
+        except Exception:
+            if app_config.mwdb.hash_pathing_fallback:
+                opened_file, opened_file_metadata = self._open_range_from_storage(
+                    fallback_path=True,
+                    range=range,
+                )
             else:
+                raise
+
+        def iterate_bytes():
+            # range_end is not really respected by _open_from_storage
+            # because there is no easy way to "truncate" the opened file stream
+            # We need to do it on our own based on returned ContentLength
+            bytes_to_read = opened_file_metadata["ContentLength"]
+            try:
                 while True:
-                    chunk = fh.read(chunk_size)
-                    chunk = negate_bits(chunk)
+                    size_to_read = min(chunk_size, bytes_to_read)
+                    chunk = opened_file.read(size_to_read)
+                    if obfuscate:
+                        chunk = negate_bits(chunk)
                     if chunk:
                         yield chunk
                     else:
                         return
-        finally:
-            File.close(fh)
+                    bytes_to_read -= size_to_read
+                    if bytes_to_read <= 0:
+                        return
+            finally:
+                opened_file.close()
+
+        class FileIterator:
+            def __init__(self, _it, _metadata):
+                self._it = _it
+                self._metadata = _metadata
+
+            @property
+            def metadata(self):
+                return self._metadata
+
+            def __iter__(self):
+                return self
+
+            def __next__(self):
+                return next(self._it)
+
+        return FileIterator(iterate_bytes(), opened_file_metadata)
+
+    def iterate_obfuscated(self, chunk_size=1024 * 256):
+        r"""
+        Iterates over bytes in the file contents with xor applied
+        """
+        return self.iterate(chunk_size=chunk_size, obfuscate=True)
 
     @staticmethod
     def close(fh):

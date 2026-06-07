@@ -1,5 +1,12 @@
 from flask import Response, g, request
-from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unauthorized
+from werkzeug.exceptions import (
+    BadRequest,
+    Conflict,
+    Forbidden,
+    NotFound,
+    Unauthorized,
+    RequestedRangeNotSatisfiable,
+)
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -7,7 +14,7 @@ from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
 from mwdb.model import File
-from mwdb.model.file import EmptyFileError
+from mwdb.model.file import EmptyFileError, InvalidRangeError
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import (
     FileCreateRequestSchema,
@@ -366,17 +373,15 @@ class FileItemResource(ObjectItemResource, FileUploader):
 
 
 class FileDownloadResource(Resource):
-    def get(self, identifier):
+    def head(self, identifier):
         """
         ---
-        summary: Download file
+        summary: Get metadata for file download
         description: |
-            Returns file contents.
+            Returns metadata about the file download.
 
-            Optionally accepts file download token to get
-            the file via direct link (without Authorization header)
-        security:
-            - bearerAuth: []
+            This method can be used for token validation or
+            getting the size of the file contents
         tags:
             - file
         parameters:
@@ -420,7 +425,88 @@ class FileDownloadResource(Resource):
                     Request canceled due to database statement timeout.
         """
         access_token = request.args.get("token")
-        obfuscate = request.args.get("obfuscate")
+        if access_token:
+            file_obj = File.get_by_download_token(access_token)
+            if not file_obj:
+                raise Forbidden("Download token expired, please re-request download.")
+            if not (
+                file_obj.sha1 == identifier
+                or file_obj.sha256 == identifier
+                or file_obj.sha512 == identifier
+                or file_obj.md5 == identifier
+            ):
+                raise Forbidden(
+                    "Download token doesn't apply to the chosen object. "
+                    "Please re-request download."
+                )
+        else:
+            if not g.auth_user:
+                raise Unauthorized("Not authenticated.")
+            file_obj = File.access(identifier)
+            if file_obj is None:
+                raise NotFound("Object not found")
+            return Response(
+                content_type="application/octet-stream",
+                headers={
+                    "Content-Length": file_obj.file_size,
+                    "Content-Disposition": f"attachment; filename={file_obj.sha256}",
+                    "Accept-Ranges": "bytes",
+                },
+            )
+
+    def get(self, identifier):
+        """
+        ---
+        summary: Download file
+        description: |
+            Returns file contents.
+
+            Optionally accepts file download token to get
+            the file via direct link (without Authorization header)
+        tags:
+            - file
+        parameters:
+            - in: path
+              name: identifier
+              schema:
+                type: string
+              description: File identifier (SHA256/SHA512/SHA1/MD5)
+            - in: query
+              name: token
+              schema:
+                type: string
+              description: |
+                File download token for direct link purpose
+              required: false
+            - in: query
+              name: obfuscate
+              schema:
+                type: string
+              description: |
+                Obfuscated response flag to avoid AV detection on preview
+              required: false
+        responses:
+            200:
+                description: File contents
+                content:
+                  application/octet-stream:
+                    schema:
+                      type: string
+                      format: binary
+            403:
+                description: |
+                    When file download token is no longer valid
+                    or was generated for different object
+            404:
+                description: |
+                    When file doesn't exist, object is not a file
+                    or user doesn't have access to this object.
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        access_token = request.args.get("token")
+        obfuscate = request.args.get("obfuscate") == "1"
 
         if access_token:
             file_obj = File.get_by_download_token(access_token)
@@ -443,20 +529,33 @@ class FileDownloadResource(Resource):
             if file_obj is None:
                 raise NotFound("Object not found")
 
-        if obfuscate == "1":
+        if request.range:
+            if len(request.range.ranges) > 1:
+                raise BadRequest("Multiple ranges unsupported")
+            if request.range.units != "bytes":
+                raise BadRequest("Unsupported range unit")
+            try:
+                file_stream = file_obj.iterate(obfuscate=obfuscate, range=request.range)
+            except InvalidRangeError:
+                raise RequestedRangeNotSatisfiable()
             return Response(
-                file_obj.iterate_obfuscated(),
+                file_stream,
+                status=206,
                 content_type="application/octet-stream",
                 headers={
-                    "Content-disposition": f"attachment; filename={file_obj.sha256}"
+                    "Content-Length": file_stream.metadata["ContentLength"],
+                    "Content-Range": file_stream.metadata["ContentRange"],
+                    "Content-Disposition": f"attachment; filename={file_obj.sha256}",
                 },
             )
         else:
+            file_stream = file_obj.iterate(obfuscate=obfuscate)
             return Response(
-                file_obj.iterate(),
+                file_stream,
                 content_type="application/octet-stream",
                 headers={
-                    "Content-disposition": f"attachment; filename={file_obj.sha256}"
+                    "Content-Length": file_stream.metadata["ContentLength"],
+                    "Content-Disposition": f"attachment; filename={file_obj.sha256}",
                 },
             )
 

@@ -403,12 +403,6 @@ class File(Object):
 
         return FileIterator(iterate_bytes(), opened_file_metadata)
 
-    def iterate_obfuscated(self, chunk_size=1024 * 256):
-        r"""
-        Iterates over bytes in the file contents with xor applied
-        """
-        return self.iterate(chunk_size=chunk_size, obfuscate=True)
-
     @staticmethod
     def close(fh):
         """

@@ -185,6 +185,7 @@ jobs:
     needs: [build_core, build_frontend, build_backend_e2e]
     name: Perform backend e2e tests
     strategy:
+      fail-fast: false
       matrix:
         with_args:
           - "-with karton"

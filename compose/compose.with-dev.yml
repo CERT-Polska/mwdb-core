@@ -1,6 +1,7 @@
 # Enables development environment with auto-reload
 services:
   mwdb:
+    image: !reset null
     environment:
       HOT_RELOAD: 1
       MWDB_MAIL_SMTP: "mailhog:1025"
@@ -17,6 +18,7 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/Dockerfile-web-dev
+    image: !reset null
     ports: !override
       - "80:3000"
     healthcheck:

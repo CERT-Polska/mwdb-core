@@ -1,6 +1,7 @@
 # End-to-end test suite
 services:
   mwdb:
+    image: !reset null
     environment:
       MWDB_POSTGRES_URI: postgresql://mwdb:e2e-postgres-password@postgres/mwdb
       # Hardcoded secret key for consistent JWT testing
@@ -12,6 +13,8 @@ services:
       MWDB_RECAPTCHA_SECRET: "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
       MWDB_ENABLE_REGISTRATION: 1
       MWDB_ENABLE_PROMETHEUS_METRICS: 1
+  mwdb-web:
+    image: !reset null
   postgres:
     image: postgres:17
     restart: always

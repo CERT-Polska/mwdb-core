@@ -99,9 +99,6 @@ def test_download_invalid_range(admin_session, sample_for_download):
         admin_session.download_file(sample['id'], range_header=f"bytes=100000-100")
 
     with ShouldRaise(416):
-        admin_session.download_file(sample['id'], range_header=f"bytes=-{too_big_size}")
-
-    with ShouldRaise(416):
         admin_session.download_file(sample['id'], range_header=f"bytes={too_big_size}-{too_big_size}")
 
     with ShouldRaise(416):

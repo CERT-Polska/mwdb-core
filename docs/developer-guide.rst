@@ -10,18 +10,17 @@ Then build images using
 
 .. code-block::
 
-    docker-compose -f docker-compose-dev.yml build
+    ./compose.sh --with dev build
 
 and run MWDB via 
 
 .. code-block::
 
-    docker-compose -f docker-compose-dev.yml up -d
+    ./compose.sh --with dev up -d
 
 After a minute - MWDB should be accessible via ``http://127.0.0.1`` with enabled hot-reload and debug facilities.
 
 All changes in code are automatically reloaded excluding:
-
 
 * Changes in database model, which need migrations
 * Changes in configuration
@@ -30,6 +29,10 @@ All changes in code are automatically reloaded excluding:
 In cases mentioned above - Docker images need to be rebuilt.
 
 Password for administration account is available in ``mwdb-vars.env`` file in ``MWDB_ADMIN_PASSWORD`` field.
+
+.. note::
+
+   Check ``./compose.sh --help`` for extra features that can be turned on in development environment
 
 Testing mail-related features
 -----------------------------
@@ -68,7 +71,7 @@ Make sure that development Docker Compose is up. Then spawn interactive shell:
 
 .. code-block::
 
-   $ docker compose -f docker-compose-dev.yml exec -u $(id -u) mwdb /bin/sh
+   $ ./compose.sh --with dev exec -u $(id -u) mwdb /bin/sh
    /app #
 
 Then enter the virtualenv:

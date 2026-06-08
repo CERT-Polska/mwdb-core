@@ -184,6 +184,12 @@ jobs:
   test_backend_e2e:
     needs: [build_core, build_frontend, build_backend_e2e]
     name: Perform backend e2e tests
+    strategy:
+      fail-fast: false
+      matrix:
+        with_args:
+          - "--with karton"
+          - "--with karton --with s3"
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -206,13 +212,13 @@ jobs:
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          docker compose -f docker-compose-e2e.yml up -d mwdb-tests
-          docker compose -f docker-compose-e2e.yml logs -f -t mwdb-tests
+          ./compose.sh --with e2e ${{ matrix.with_args }} up -d mwdb-tests
+          ./compose.sh --with e2e ${{ matrix.with_args }} logs -f -t mwdb-tests
           ([ $(docker wait mwdb_core_e2e_tests) == 0 ])
       - name: Job failed - storing application logs
         if: ${{ failure() }}
         run: |
-          docker compose -f docker-compose-e2e.yml logs --no-color -t mwdb > ./mwdb-e2e-logs
+          ./compose.sh --with e2e ${{ matrix.with_args }} logs --no-color -t mwdb > ./mwdb-e2e-logs
       - name: Job failed - upload application logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
@@ -244,8 +250,8 @@ jobs:
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          docker compose -f docker-compose-e2e.yml up -d web-tests
-          docker compose -f docker-compose-e2e.yml logs -f -t web-tests
+          ./compose.sh --with karton --with e2e up -d web-tests
+          ./compose.sh --with karton --with e2e logs -f -t web-tests
           ([ $(docker wait mwdb_core_e2e_web_tests) == 0 ])
       - name: Job failed - storing videos from e2e tests
         if: ${{ failure() }}
@@ -278,8 +284,8 @@ jobs:
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          docker compose -f docker-compose-unit-test.yml up -d
-          docker compose -f docker-compose-unit-test.yml logs -f -t
+          docker compose -f compose/compose.web-unit-tests.yml up -d
+          docker compose -f compose/compose.web-unit-tests.yml logs -f -t
   push_images:
     needs: [test_backend_e2e, test_frontend_e2e, test_frontend_unit]
     name: Push images on Docker Hub

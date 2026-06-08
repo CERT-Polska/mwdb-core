@@ -1,6 +1,3 @@
-# Docker Compose file for mwdb-core unit test
-
-version: "3.3"
 services:
   web-unit-tests:
     build:

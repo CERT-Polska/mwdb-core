@@ -1,0 +1,81 @@
+# Karton integration and development playground
+services:
+  mwdb:
+    environment:
+      MWDB_ENABLE_KARTON: 1
+    depends_on:
+      karton-system-router:
+        condition: service_started
+    volumes:
+      - "./dev/karton.ini:/etc/karton/karton.ini"
+  minio:
+    image: minio/minio
+    entrypoint: sh
+    command: -c "mkdir -p /data/mwdb /data/karton && minio server --address 0.0.0.0:9000 /data"
+    volumes:
+      - /tmp/minio:/data
+    ports:
+      - "127.0.0.1:9000:9000"
+    healthcheck:
+      test: timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    environment:
+      - MINIO_ROOT_USER=mwdb-test-access
+      - MINIO_ROOT_PASSWORD=mwdb-test-key
+  karton-system-router:
+    image: certpl/karton-system:v5.9.0
+    depends_on:
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./config/karton.docker.ini:/etc/karton/karton.ini
+    entrypoint: karton-system
+    command: --setup-bucket --disable-gc
+  karton-system-gc:
+    image: certpl/karton-system:v5.9.0
+    depends_on:
+      karton-system-router:
+        condition: service_started
+    volumes:
+      - ./config/karton.docker.ini:/etc/karton/karton.ini
+    entrypoint: karton-system
+    command: --disable-router
+  karton-classifier:
+    image: certpl/karton-classifier:v2.1.0
+    depends_on:
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - "./dev/karton.ini:/etc/karton/karton.ini"
+  karton-dashboard:
+    image: certpl/karton-dashboard:v1.6.0
+    depends_on:
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - "./dev/karton.ini:/etc/karton/karton.ini"
+    ports:
+      - "127.0.0.1:8030:5000"
+  karton-mwdb-reporter:
+    image: certpl/karton-mwdb-reporter:v1.3.0
+    depends_on:
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mwdb:
+        condition: service_healthy
+      mwdb-web:
+        condition: service_healthy
+    volumes:
+      - "./dev/karton.ini:/etc/karton/karton.ini"
+    env_file:
+      - mwdb-vars.env

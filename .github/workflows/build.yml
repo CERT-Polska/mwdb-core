@@ -283,8 +283,8 @@ jobs:
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          docker compose -f compose/web-unit-tests.yml up -d
-          docker compose -f compose/web-unit-tests.yml logs -f -t
+          docker compose -f compose/compose.web-unit-tests.yml up -d
+          docker compose -f compose/compose.web-unit-tests.yml logs -f -t
   push_images:
     needs: [test_backend_e2e, test_frontend_e2e, test_frontend_unit]
     name: Push images on Docker Hub

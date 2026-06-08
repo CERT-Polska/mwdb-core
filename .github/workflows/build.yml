@@ -184,6 +184,11 @@ jobs:
   test_backend_e2e:
     needs: [build_core, build_frontend, build_backend_e2e]
     name: Perform backend e2e tests
+    strategy:
+      matrix:
+        with_args:
+          - "-with karton"
+          - "-with karton --with s3"
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -206,13 +211,13 @@ jobs:
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          ./compose.sh --with karton --with e2e up -d mwdb-tests
-          ./compose.sh --with karton --with e2e logs -f -t mwdb-tests
+          ./compose.sh --with e2e ${{ matrix.with_args }} up -d mwdb-tests
+          ./compose.sh --with e2e ${{ matrix.with_args }} logs -f -t mwdb-tests
           ([ $(docker wait mwdb_core_e2e_tests) == 0 ])
       - name: Job failed - storing application logs
         if: ${{ failure() }}
         run: |
-          ./compose.sh --with karton --with e2e logs --no-color -t mwdb > ./mwdb-e2e-logs
+          ./compose.sh --with e2e ${{ matrix.with_args }} logs --no-color -t mwdb > ./mwdb-e2e-logs
       - name: Job failed - upload application logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4

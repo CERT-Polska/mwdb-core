@@ -4,7 +4,7 @@ Based on `bitnami/keycloak` Docker image.
 
 **The easy way**
 
-1. `docker-compose -f docker-compose-oidc-dev.yml up`
+1. `./compose.sh --with dev --with oidc up`
 
    Keycloak startup may take a bit longer than MWDB, so wait until you see:
 

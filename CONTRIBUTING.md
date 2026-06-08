@@ -86,7 +86,7 @@ That's it! Thank you very much, we appreciate you help.
 1. Run Docker-Compose environment (e.g. dev)
 
 ```
-docker-compose -f docker-compose-dev.yml up -d
+./compose.sh --with dev up -d
 ```
 
 2. Export variables from `mwdb-vars.env` and set `MWDB_URL` to API endpoint

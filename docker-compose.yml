@@ -1,34 +1,56 @@
 # Docker Compose file for mwdb-core production service
-
-version: "3.3"
 services:
   mwdb:
     build:
       context: .
       dockerfile: deploy/docker/Dockerfile
-    depends_on:
-      - postgres
-      - redis
     image: certpl/mwdb:v2.18.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: on-failure
+    healthcheck:
+      test: "wget -qO - 'http://127.0.0.1:8080/api/server' || exit 1"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      start_interval: 1s
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - mwdb-vars.env
     volumes:
       - mwdb-uploads:/app/uploads
   mwdb-web:
-    depends_on:
-      - mwdb
     build:
       context: .
       dockerfile: deploy/docker/Dockerfile-web
     image: certpl/mwdb-web:v2.18.0
+    healthcheck:
+      test: "wget -qO - 'http://localhost' || exit 1"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      start_interval: 1s
+    depends_on:
+      mwdb:
+        condition: service_healthy
+    restart: on-failure
     ports:
       - "80:80"
-    restart: on-failure
   postgres:
     image: postgres:17
     restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "mwdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      start_interval: 1s
     env_file:
       # NOTE: use gen_vars.sh in order to generate this file
       - postgres-vars.env
@@ -36,7 +58,13 @@ services:
       - mwdb-postgres:/var/lib/postgresql/data
   redis:
     image: redis:alpine
-
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+      start_interval: 1s
 volumes:
   mwdb-postgres:
   mwdb-uploads:

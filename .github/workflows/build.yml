@@ -188,8 +188,8 @@ jobs:
       fail-fast: false
       matrix:
         with_args:
-          - "-with karton"
-          - "-with karton --with s3"
+          - "--with karton"
+          - "--with karton --with s3"
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

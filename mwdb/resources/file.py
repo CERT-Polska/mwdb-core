@@ -530,14 +530,10 @@ class FileDownloadResource(Resource):
                 raise NotFound("Object not found")
 
         if request.range:
-            if len(request.range.ranges) > 1:
-                raise BadRequest("Multiple ranges unsupported")
-            if request.range.units != "bytes":
-                raise BadRequest("Unsupported range unit")
             try:
                 file_stream = file_obj.iterate(obfuscate=obfuscate, range=request.range)
-            except InvalidRangeError:
-                raise RequestedRangeNotSatisfiable()
+            except InvalidRangeError as exc:
+                raise RequestedRangeNotSatisfiable(description=exc.reason) from exc
             return Response(
                 file_stream,
                 status=206,

@@ -29,7 +29,9 @@ class EmptyFileError(ValueError):
 
 
 class InvalidRangeError(ValueError):
-    pass
+    def __init__(self, reason: str | None = None):
+        super().__init__()
+        self.reason = reason
 
 
 class File(Object):
@@ -343,6 +345,12 @@ class File(Object):
 
         def negate_bits(chunk):
             return strxor_c(chunk, 255)
+
+        if range is not None:
+            if len(range.ranges) > 1:
+                raise InvalidRangeError("Multiple ranges unsupported")
+            if range.units != "bytes":
+                raise InvalidRangeError("Unsupported range unit")
 
         try:
             opened_file, opened_file_metadata = self._open_range_from_storage(

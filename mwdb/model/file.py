@@ -268,6 +268,7 @@ class File(Object):
                 stream.seek(0, io.SEEK_SET)
                 if range is not None:
                     offsets = range.range_for_length(file_size)
+                    print("RANGE OFFSETS", offsets, flush=True)
                     if not offsets:
                         raise InvalidRangeError()
                     stream.seek(offsets[0], io.SEEK_SET)

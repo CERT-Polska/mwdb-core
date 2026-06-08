@@ -373,87 +373,6 @@ class FileItemResource(ObjectItemResource, FileUploader):
 
 
 class FileDownloadResource(Resource):
-    def head(self, identifier):
-        """
-        ---
-        summary: Get metadata for file download
-        description: |
-            Returns metadata about the file download.
-
-            This method can be used for token validation or
-            getting the size of the file contents
-        tags:
-            - file
-        parameters:
-            - in: path
-              name: identifier
-              schema:
-                type: string
-              description: File identifier (SHA256/SHA512/SHA1/MD5)
-            - in: query
-              name: token
-              schema:
-                type: string
-              description: |
-                File download token for direct link purpose
-              required: false
-            - in: query
-              name: obfuscate
-              schema:
-                type: string
-              description: |
-                Obfuscated response flag to avoid AV detection on preview
-              required: false
-        responses:
-            200:
-                description: File contents
-                content:
-                  application/octet-stream:
-                    schema:
-                      type: string
-                      format: binary
-            403:
-                description: |
-                    When file download token is no longer valid
-                    or was generated for different object
-            404:
-                description: |
-                    When file doesn't exist, object is not a file
-                    or user doesn't have access to this object.
-            503:
-                description: |
-                    Request canceled due to database statement timeout.
-        """
-        access_token = request.args.get("token")
-        if access_token:
-            file_obj = File.get_by_download_token(access_token)
-            if not file_obj:
-                raise Forbidden("Download token expired, please re-request download.")
-            if not (
-                file_obj.sha1 == identifier
-                or file_obj.sha256 == identifier
-                or file_obj.sha512 == identifier
-                or file_obj.md5 == identifier
-            ):
-                raise Forbidden(
-                    "Download token doesn't apply to the chosen object. "
-                    "Please re-request download."
-                )
-        else:
-            if not g.auth_user:
-                raise Unauthorized("Not authenticated.")
-            file_obj = File.access(identifier)
-            if file_obj is None:
-                raise NotFound("Object not found")
-            return Response(
-                content_type="application/octet-stream",
-                headers={
-                    "Content-Length": file_obj.file_size,
-                    "Content-Disposition": f"attachment; filename={file_obj.sha256}",
-                    "Accept-Ranges": "bytes",
-                },
-            )
-
     def get(self, identifier):
         """
         ---
@@ -529,6 +448,11 @@ class FileDownloadResource(Resource):
             if file_obj is None:
                 raise NotFound("Object not found")
 
+        if not request.range and request.headers.get("Range"):
+            # As of 3.1.8, Werkzeug simply sets request.range to None when
+            # Range header can't be understood. It's better to reject such requests.
+            raise RequestedRangeNotSatisfiable()
+
         if request.range:
             try:
                 file_stream = file_obj.iterate(obfuscate=obfuscate, range=request.range)
@@ -539,6 +463,7 @@ class FileDownloadResource(Resource):
                 status=206,
                 content_type="application/octet-stream",
                 headers={
+                    "Accept-Ranges": "bytes",
                     "Content-Length": file_stream.metadata["ContentLength"],
                     "Content-Range": file_stream.metadata["ContentRange"],
                     "Content-Disposition": f"attachment; filename={file_obj.sha256}",
@@ -550,6 +475,7 @@ class FileDownloadResource(Resource):
                 file_stream,
                 content_type="application/octet-stream",
                 headers={
+                    "Accept-Ranges": "bytes",
                     "Content-Length": file_stream.metadata["ContentLength"],
                     "Content-Disposition": f"attachment; filename={file_obj.sha256}",
                 },

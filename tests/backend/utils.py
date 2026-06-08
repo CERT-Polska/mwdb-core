@@ -400,8 +400,8 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()["token"]
 
-    def download_file(self, identifier, range_header):
-        if range_header:
+    def download_file(self, identifier, range_header=None):
+        if range_header is not None:
             headers = {"Range": range_header}
         else:
             headers = {}

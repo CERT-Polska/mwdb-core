@@ -231,8 +231,6 @@ class File(Object):
                 into proper length and may be longer than requested range.
         """
         if app_config.mwdb.storage_provider == StorageProviderType.S3:
-            # Stream coming from Boto3 get_object is not buffered and not seekable.
-            # We need to download it to the temporary file first.
             s3_client = get_s3_client(
                 app_config.mwdb.s3_storage_endpoint,
                 app_config.mwdb.s3_storage_access_key,

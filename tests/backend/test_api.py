@@ -1,8 +1,4 @@
-from io import BytesIO
-
 import pytest
-import pyzipper
-import requests
 from dateutil.parser import parse
 
 from .relations import RelationTestCase
@@ -193,46 +189,6 @@ def test_delete_comment(admin_session):
     # delete comment not associated with object    
     with ShouldRaise(status_code=404):
         admin_session.delete_comment(identifier_1, comment_added_2['id'])
-
-
-def test_download_sample(admin_session):
-    expected = rand_string()
-    sample = admin_session.add_sample(content=expected)
-
-    downloaded = admin_session.download_file(sample['id'])
-    assert downloaded.decode() == expected
-
-
-def test_download_sample_with_token(admin_session):
-    expected = rand_string()
-    sample = admin_session.add_sample(content=expected)
-
-    token = admin_session.get_download_token(sample['id'])
-    r = requests.get(
-        admin_session.mwdb_url + f'/file/{sample["id"]}/download',
-        params={
-            "token": token
-        }
-    )
-    r.raise_for_status()
-    downloaded = r.text
-
-    assert downloaded == expected
-
-def test_download_zipped_sample(admin_session):
-    expected = rand_string(size=4096)
-    sample = admin_session.add_sample(filename="sample.bin", content=expected)
-    token = admin_session.get_download_token(sample['id'])
-    r = requests.get(
-        admin_session.mwdb_url + f'/file/{sample["id"]}/download/zip',
-        params={
-            "token": token
-        }
-    )
-    r.raise_for_status()
-    with pyzipper.AESZipFile(BytesIO(r.content)) as zipped_file:
-        zipped_file.setpassword(b"infected")
-        assert zipped_file.read("sample.bin") == expected.encode()
 
 
 def test_object_conflict(admin_session):

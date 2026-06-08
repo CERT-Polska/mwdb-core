@@ -302,7 +302,7 @@ Finally we can write simple plugin that adds new ``Hello world`` page. Let's che
         ],
     })
 
-After setting up all of the things, run ``docker-compose -f docker-compose-dev.yml build`` and ``docker-compose -f docker-compose-dev.yml up``
+After setting up all of the things, run ``./compose.sh --with dev build`` and ``./compose.sh --with dev up``
 to run the application. If everything is OK, you should see the results like below:
 
 <show the result>

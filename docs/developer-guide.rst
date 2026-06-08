@@ -71,7 +71,7 @@ Make sure that development Docker Compose is up. Then spawn interactive shell:
 
 .. code-block::
 
-   $ docker compose -f docker-compose-dev.yml exec -u $(id -u) mwdb /bin/sh
+   $ ./compose.sh --with dev exec -u $(id -u) mwdb /bin/sh
    /app #
 
 Then enter the virtualenv:

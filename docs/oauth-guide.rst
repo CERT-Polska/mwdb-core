@@ -17,7 +17,7 @@ To enable OIDC authentication, configure MWDB using one of the following methods
     ...
     enable_oidc=1
 
-If you want to test this functionality, the easiest way is to set up the environment with a ``docker-compose-oidc-dev.yml`` file.
+If you want to test this functionality, the easiest way is to set up the environment with a ``compose/compose.with-oidc.yml`` file.
 It deploys an external identity provider based on `Keycloak <https://www.keycloak.org/>`_
 
 Development environment can be configured automatically using script described in ``dev/oidc/README.md``.
@@ -25,7 +25,13 @@ Development environment can be configured automatically using script described i
 Step-by-step configuration
 --------------------------
 
-In this section we will configure authentication via Keycloak using ``docker-compose-oidc-dev.yml`` environment as an example. In principle, it should work with any other OIDC-capable system.
+In this section we will configure authentication via Keycloak using development environment as an example. In principle, it should work with any other OIDC-capable system.
+
+Start the environment using the following command:
+
+.. code-block:: console
+
+    $ ./compose.sh --with dev --with oidc up -d
 
 .. note::
     Using the OpenID Connect protocol requires correct ``base_url`` to be set in configuration.
@@ -150,7 +156,7 @@ can be turned on by setting:
 
    Enabled ``enable_registration`` implies enabled ``enable_oidc_registration`` for compatibility reasons, as separate option for OIDC was added in v2.17.0.
 
-    ``enable_oidc_registration`` is already enabled in ``docker-compose-oidc-dev.yml`` so you don't have to set anything in demonstration environment.
+    ``enable_oidc_registration`` is already enabled in ``compose.with-oidc.yml`` so you don't have to set anything in demonstration environment.
 
 Then we may try to create user ``foo`` in keycloak (just like ``mwdb-admin`` user before) and try to login.
 

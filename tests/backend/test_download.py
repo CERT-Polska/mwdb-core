@@ -64,3 +64,42 @@ def test_download_zipped_sample(admin_session, sample_for_download):
         zipped_file.setpassword(b"infected")
         assert zipped_file.read("sample.bin") == expected.encode()
 
+
+def test_download_range_sample(admin_session, sample_for_download):
+    sample, expected = sample_for_download
+    downloaded = admin_session.download_file(sample['id'], range_header="bytes=0-512")
+    assert downloaded.decode() == expected[:513]
+
+    downloaded = admin_session.download_file(sample['id'], range_header="bytes=512-1024")
+    assert downloaded.decode() == expected[512:1025]
+
+    downloaded = admin_session.download_file(sample['id'], range_header="bytes=130048-132096")
+    assert downloaded.decode() == expected[130048:132097]
+
+    downloaded = admin_session.download_file(sample['id'], range_header="bytes=130048-")
+    assert downloaded.decode() == expected[130048:]
+
+    downloaded = admin_session.download_file(sample['id'], range_header="bytes=-512")
+    assert downloaded.decode() == expected[-512:]
+
+
+def test_download_invalid_range(admin_session, sample_for_download):
+    sample, expected = sample_for_download
+    too_big_size = len(expected) + 1024
+    downloaded = admin_session.download_file(sample['id'], range_header=f"bytes=0-{too_big_size}")
+    assert downloaded.decode() == expected
+
+    with ShouldRaise(416):
+        admin_session.download_file(sample['id'], range_header=f"bytes={too_big_size}-")
+
+    with ShouldRaise(416):
+        admin_session.download_file(sample['id'], range_header=f"bytes=-100-")
+
+    with ShouldRaise(416):
+        admin_session.download_file(sample['id'], range_header=f"bytes=100000-100")
+
+    with ShouldRaise(416):
+        admin_session.download_file(sample['id'], range_header=f"bytes=-{too_big_size}")
+
+    with ShouldRaise(416):
+        admin_session.download_file(sample['id'], range_header=f"bytes={too_big_size}-{too_big_size}")

@@ -400,8 +400,12 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()["token"]
 
-    def download_file(self, identifier):
-        res = self.session.get(self.mwdb_url + f"/file/{identifier}/download")
+    def download_file(self, identifier, range_header):
+        if range_header:
+            headers = {"Range": range_header}
+        else:
+            headers = {}
+        res = self.session.get(self.mwdb_url + f"/file/{identifier}/download", headers=headers)
         res.raise_for_status()
         return res.content
 

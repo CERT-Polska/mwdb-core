@@ -1,4 +1,4 @@
-# Docker Compose file for mwdb-core end-to-end test suite
+# End-to-end test suite
 services:
   mwdb:
     environment:

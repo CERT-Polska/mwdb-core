@@ -1,3 +1,4 @@
+# Enables S3 file storage using MinIO
 services:
   minio:
     image: minio/minio

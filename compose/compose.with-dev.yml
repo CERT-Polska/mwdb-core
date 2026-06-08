@@ -1,3 +1,4 @@
+# Enables development environment with auto-reload
 services:
   mwdb:
     environment:

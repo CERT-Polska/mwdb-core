@@ -264,14 +264,20 @@ class File(Object):
             try:
                 file_size = stream.seek(0, io.SEEK_END)
                 stream.seek(0, io.SEEK_SET)
-                offsets = range.range_for_length(file_size)
-                if not offsets:
-                    raise InvalidRangeError()
-                stream.seek(offsets[0], io.SEEK_SET)
-                metadata = {
-                    "ContentLength": offsets[1] - offsets[0],
-                    "ContentRange": range.to_content_range_header(file_size),
-                }
+                if range is not None:
+                    offsets = range.range_for_length(file_size)
+                    if not offsets:
+                        raise InvalidRangeError()
+                    stream.seek(offsets[0], io.SEEK_SET)
+                    metadata = {
+                        "ContentLength": offsets[1] - offsets[0],
+                        "ContentRange": range.to_content_range_header(file_size),
+                    }
+                else:
+                    metadata = {
+                        "ContentLength": file_size,
+                        "ContentRange": None,
+                    }
                 return stream, metadata
             except:
                 stream.close()
@@ -357,19 +363,18 @@ class File(Object):
             # range_end is not really respected by _open_from_storage
             # because there is no easy way to "truncate" the opened file stream
             # We need to do it on our own based on returned ContentLength
-            bytes_to_read = opened_file_metadata["ContentLength"]
+            file_size = opened_file_metadata["ContentLength"]
             try:
                 while True:
-                    size_to_read = min(chunk_size, bytes_to_read)
+                    size_to_read = min(chunk_size, file_size)
                     chunk = opened_file.read(size_to_read)
                     if obfuscate:
                         chunk = negate_bits(chunk)
-                    if chunk:
-                        yield chunk
-                    else:
+                    if not chunk:
                         return
-                    bytes_to_read -= size_to_read
-                    if bytes_to_read <= 0:
+                    yield chunk
+                    file_size -= size_to_read
+                    if file_size <= 0:
                         return
             finally:
                 opened_file.close()

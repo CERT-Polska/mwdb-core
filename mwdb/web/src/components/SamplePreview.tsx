@@ -23,12 +23,13 @@ export function SamplePreview() {
             const fileContentResponse = await api.downloadFile(
                 fileId,
                 obfuscate,
-                loadAll ? "" : `bytes=0-${CONTENT_LENGTH_LIMIT-1}`
+                loadAll ? "" : `bytes=0-${CONTENT_LENGTH_LIMIT - 1}`
             );
             console.log(fileContentResponse.headers);
-            const fullContentLength = fileContentResponse.headers["content-range"]?.split("/")[1];
+            const fullContentLength =
+                fileContentResponse.headers["content-range"]?.split("/")[1];
             console.log(fullContentLength);
-            if(fullContentLength) {
+            if (fullContentLength) {
                 console.log(fullContentLength);
                 setFullContentLength(parseInt(fullContentLength));
             }
@@ -48,30 +49,30 @@ export function SamplePreview() {
 
     return (
         <>
-            {
-                !loadAll && fullContentLength > content.byteLength ? (
-                    <div className="alert alert-warning" role="alert">
-                        <FontAwesomeIcon
-                            className="ml-1 mt-1"
-                            icon={faTriangleExclamation}
-                            size="1x"
-                            pull="left"
-                        />
-                        <span className="ml-1">
-                            File size is {humanFileSize(fullContentLength)}. Only the
-                            first {humanFileSize(CONTENT_LENGTH_LIMIT)} is currently
-                            displayed.{" "}
-                            <button
-                                className="unstyled-btn btn-link"
-                                style={{"textDecoration": "underline"}}
-                                onClick={() => setLoadAll(true)}
-                            >
-                                (Load the full content anyway?)
-                            </button>
-                        </span>
-                    </div>
-                ): []
-            }
+            {!loadAll && fullContentLength > content.byteLength ? (
+                <div className="alert alert-warning" role="alert">
+                    <FontAwesomeIcon
+                        className="ml-1 mt-1"
+                        icon={faTriangleExclamation}
+                        size="1x"
+                        pull="left"
+                    />
+                    <span className="ml-1">
+                        File size is {humanFileSize(fullContentLength)}. Only
+                        the first {humanFileSize(CONTENT_LENGTH_LIMIT)} is
+                        currently displayed.{" "}
+                        <button
+                            className="unstyled-btn btn-link"
+                            style={{ textDecoration: "underline" }}
+                            onClick={() => setLoadAll(true)}
+                        >
+                            (Load the full content anyway?)
+                        </button>
+                    </span>
+                </div>
+            ) : (
+                []
+            )}
             <ObjectPreview
                 content={content}
                 mode={tabContext.subTab || "raw"}

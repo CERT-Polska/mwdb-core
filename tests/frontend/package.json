@@ -4,7 +4,7 @@
   "description": "Front-end tests for mwdb-core",
   "dependencies": {},
   "devDependencies": {
-    "cypress": "^13.13.0",
+    "cypress": "^15.16.0",
     "wait-on": "^7.2.0"
   },
   "scripts": {

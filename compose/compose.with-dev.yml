@@ -29,6 +29,10 @@ services:
       # Uncomment this to enable Extendable debug boxes
       # See also https://github.com/CERT-Polska/mwdb-core/pull/1182
       # VITE_EXTENDABLE_DEBUG_BOX: 1
+    volumes:
+      - "./mwdb/web/public:/app/public"
+      - "./mwdb/web/src:/app/src"
+      - "./docker/plugins:/app/plugins"
   mailhog:
     image: mailhog/mailhog:latest
     ports:

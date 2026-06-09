@@ -1,5 +1,12 @@
 from flask import Response, g, request
-from werkzeug.exceptions import BadRequest, Conflict, Forbidden, NotFound, Unauthorized
+from werkzeug.exceptions import (
+    BadRequest,
+    Conflict,
+    Forbidden,
+    NotFound,
+    Unauthorized,
+    RequestedRangeNotSatisfiable,
+)
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -7,7 +14,7 @@ from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
 from mwdb.model import File
-from mwdb.model.file import EmptyFileError
+from mwdb.model.file import EmptyFileError, InvalidRangeError
 from mwdb.model.object import ObjectTypeConflictError
 from mwdb.schema.file import (
     FileCreateRequestSchema,
@@ -375,8 +382,6 @@ class FileDownloadResource(Resource):
 
             Optionally accepts file download token to get
             the file via direct link (without Authorization header)
-        security:
-            - bearerAuth: []
         tags:
             - file
         parameters:
@@ -420,7 +425,7 @@ class FileDownloadResource(Resource):
                     Request canceled due to database statement timeout.
         """
         access_token = request.args.get("token")
-        obfuscate = request.args.get("obfuscate")
+        obfuscate = request.args.get("obfuscate") == "1"
 
         if access_token:
             file_obj = File.get_by_download_token(access_token)
@@ -443,20 +448,36 @@ class FileDownloadResource(Resource):
             if file_obj is None:
                 raise NotFound("Object not found")
 
-        if obfuscate == "1":
+        if not request.range and request.headers.get("Range"):
+            # As of 3.1.8, Werkzeug simply sets request.range to None when
+            # Range header can't be understood. It's better to reject such requests.
+            raise RequestedRangeNotSatisfiable()
+
+        if request.range:
+            try:
+                file_stream = file_obj.iterate(obfuscate=obfuscate, range=request.range)
+            except InvalidRangeError as exc:
+                raise RequestedRangeNotSatisfiable(description=exc.reason) from exc
             return Response(
-                file_obj.iterate_obfuscated(),
+                file_stream,
+                status=206,
                 content_type="application/octet-stream",
                 headers={
-                    "Content-disposition": f"attachment; filename={file_obj.sha256}"
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": file_stream.metadata["ContentLength"],
+                    "Content-Range": file_stream.metadata["ContentRange"],
+                    "Content-Disposition": f"attachment; filename={file_obj.sha256}",
                 },
             )
         else:
+            file_stream = file_obj.iterate(obfuscate=obfuscate)
             return Response(
-                file_obj.iterate(),
+                file_stream,
                 content_type="application/octet-stream",
                 headers={
-                    "Content-disposition": f"attachment; filename={file_obj.sha256}"
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": file_stream.metadata["ContentLength"],
+                    "Content-Disposition": f"attachment; filename={file_obj.sha256}",
                 },
             )
 

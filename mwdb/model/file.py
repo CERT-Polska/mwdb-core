@@ -266,7 +266,6 @@ class File(Object):
                 stream.seek(0, io.SEEK_SET)
                 if range is not None:
                     offsets = range.range_for_length(file_size)
-                    print("RANGE OFFSETS", offsets, flush=True)
                     if not offsets:
                         raise InvalidRangeError()
                     stream.seek(offsets[0], io.SEEK_SET)
@@ -280,7 +279,7 @@ class File(Object):
                         "ContentRange": None,
                     }
                 return stream, metadata
-            except:
+            except BaseException:
                 stream.close()
                 raise
         else:
@@ -375,12 +374,12 @@ class File(Object):
                 while True:
                     size_to_read = min(chunk_size, file_size)
                     chunk = opened_file.read(size_to_read)
-                    if obfuscate:
-                        chunk = negate_bits(chunk)
                     if not chunk:
                         return
+                    if obfuscate:
+                        chunk = negate_bits(chunk)
                     yield chunk
-                    file_size -= size_to_read
+                    file_size -= len(chunk)
                     if file_size <= 0:
                         return
             finally:

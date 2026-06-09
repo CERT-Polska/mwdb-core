@@ -575,10 +575,13 @@ function removeAttributePermission(
     });
 }
 
-function downloadFile(id: string, obfuscate: number = 0): DownloadFileResponse {
+function downloadFile(id: string, obfuscate: number = 0, range: string|null = null): DownloadFileResponse {
     return axios.get(`/file/${id}/download?obfuscate=${obfuscate}`, {
         responseType: "arraybuffer",
         responseEncoding: "binary",
+        headers: {
+            ...(range !== null ? { "Range": range } : {})
+        }
     });
 }
 

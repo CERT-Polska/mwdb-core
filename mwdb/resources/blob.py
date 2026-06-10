@@ -19,6 +19,7 @@ from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 class TextBlobUploader(ObjectUploader):
     def on_created(self, object, params):
+        self.send_to_karton(object, params)
         super().on_created(object, params)
         hooks.on_created_text_blob(object)
 

@@ -1,9 +1,9 @@
 from flask import request
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.service import Resource
-from mwdb.model import KartonAnalysis, Object
+from mwdb.model import KartonAnalysis, Object, File
 from mwdb.schema.karton import (
     KartonAnalysisListRequestSchema,
     KartonItemResponseSchema,
@@ -20,6 +20,7 @@ from . import (
     requires_authorization,
     requires_capabilities,
 )
+from ..core.config import app_config
 
 
 class KartonObjectResource(Resource):
@@ -136,6 +137,13 @@ class KartonObjectResource(Resource):
         db_object = access_object(type, identifier)
         if db_object is None:
             raise NotFound("Object not found")
+
+        if (
+            isinstance(db_object, File)
+            and app_config.mwdb.karton_file_size_limit is not None
+            and db_object.file_size > app_config.mwdb.karton_file_size_limit
+        ):
+            raise Forbidden("File size limit allowed for Karton analysis exceeded")
 
         analysis = db_object.spawn_analysis(obj["arguments"])
         schema = KartonItemResponseSchema()

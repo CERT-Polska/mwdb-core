@@ -1,4 +1,5 @@
 import json
+import typing
 from uuid import UUID
 
 from flask import g, request
@@ -28,6 +29,90 @@ from . import (
     requires_capabilities,
 )
 
+if typing.TYPE_CHECKING:
+    from mwdb.model.group import Group
+
+
+class ValidatedUploadParams(typing.NamedTuple):
+    parent: Object | None
+    analysis_id: UUID | None
+    attributes: list[dict[str, str]]
+    share_with: list["Group"]
+    tags: list[str]
+    share_3rd_party: bool
+
+
+def validate_object_upload_params(params) -> ValidatedUploadParams:
+    # Validate parent object
+    if params["parent"] is not None:
+        if not g.auth_user.has_rights(Capabilities.adding_parents):
+            raise Forbidden("You are not permitted to link with parent")
+
+        parent_object = Object.access(params["parent"])
+
+        if parent_object is None:
+            raise NotFound("Parent object not found")
+    else:
+        parent_object = None
+
+    # Validate metakeys and Karton assignment
+    analysis_id = params.get("karton_id")
+
+    if params["metakeys"]:
+        uses_deprecated_api(DeprecatedFeature.legacy_metakeys_upload_option)
+        # If 'metakeys' are defined: keep legacy behavior
+        if "attributes" in params and params["attributes"]:
+            raise BadRequest("'attributes' and 'metakeys' options can't be mixed")
+
+        attributes = params["metakeys"]
+        for attribute in params["metakeys"]:
+            key = attribute["key"]
+            if key == "karton":
+                if analysis_id is not None:
+                    raise BadRequest(
+                        "You can't provide more than one Karton analysis identifier"
+                    )
+                try:
+                    analysis_id = UUID(attribute["value"])
+                except (ValueError, AttributeError):
+                    raise BadRequest("'karton' attribute accepts only UUID values")
+            elif not AttributeDefinition.query_for_set(key).first():
+                raise NotFound(
+                    f"Attribute '{key}' not defined or insufficient "
+                    "permissions to set that one"
+                )
+    else:
+        # If not, rely on 'attributes'
+        attributes = params["attributes"]
+        for attribute in params["attributes"]:
+            key = attribute["key"]
+            if not AttributeDefinition.query_for_set(key).first():
+                raise NotFound(
+                    f"Attribute '{key}' not defined or insufficient "
+                    "permissions to set that one"
+                )
+
+    if analysis_id is not None:
+        if not g.auth_user.has_rights(Capabilities.karton_assign):
+            raise Forbidden("You are not permitted to assign Karton analysis to object")
+
+    # Validate upload_as argument
+    share_with = get_shares_for_upload(params["upload_as"])
+
+    # Tags argument
+    tags = params.get("tags")
+
+    share_3rd_party = params.get("share_3rd_party", True)
+
+    return ValidatedUploadParams(
+        parent=parent_object,
+        analysis_id=analysis_id,
+        attributes=attributes,
+        share_with=share_with,
+        tags=tags,
+        share_3rd_party=share_3rd_party,
+    )
+
 
 class ObjectUploader:
     """
@@ -40,9 +125,11 @@ class ObjectUploader:
     ObjectType = None
     ItemResponseSchema = None
 
-    def on_created(self, object, params):
+    def send_to_karton(self, object, params):
         if app_config.mwdb.enable_karton and not object.is_analyzed():
             object.spawn_analysis(arguments=params.get("karton_arguments", {}))
+
+    def on_created(self, object, params):
         hooks.on_created_object(object)
 
     def on_reuploaded(self, object, params):
@@ -57,77 +144,16 @@ class ObjectUploader:
     def create_object(self, params):
         params = dict(params)
 
-        # Validate parent object
-        if params["parent"] is not None:
-            if not g.auth_user.has_rights(Capabilities.adding_parents):
-                raise Forbidden("You are not permitted to link with parent")
-
-            parent_object = Object.access(params["parent"])
-
-            if parent_object is None:
-                raise NotFound("Parent object not found")
-        else:
-            parent_object = None
-
-        # Validate metakeys and Karton assignment
-        analysis_id = params.get("karton_id")
-
-        if params["metakeys"]:
-            uses_deprecated_api(DeprecatedFeature.legacy_metakeys_upload_option)
-            # If 'metakeys' are defined: keep legacy behavior
-            if "attributes" in params and params["attributes"]:
-                raise BadRequest("'attributes' and 'metakeys' options can't be mixed")
-
-            attributes = params["metakeys"]
-            for attribute in params["metakeys"]:
-                key = attribute["key"]
-                if key == "karton":
-                    if analysis_id is not None:
-                        raise BadRequest(
-                            "You can't provide more than one Karton analysis identifier"
-                        )
-                    try:
-                        analysis_id = UUID(attribute["value"])
-                    except (ValueError, AttributeError):
-                        raise BadRequest("'karton' attribute accepts only UUID values")
-                elif not AttributeDefinition.query_for_set(key).first():
-                    raise NotFound(
-                        f"Attribute '{key}' not defined or insufficient "
-                        "permissions to set that one"
-                    )
-        else:
-            # If not, rely on 'attributes'
-            attributes = params["attributes"]
-            for attribute in params["attributes"]:
-                key = attribute["key"]
-                if not AttributeDefinition.query_for_set(key).first():
-                    raise NotFound(
-                        f"Attribute '{key}' not defined or insufficient "
-                        "permissions to set that one"
-                    )
-
-        if analysis_id is not None:
-            if not g.auth_user.has_rights(Capabilities.karton_assign):
-                raise Forbidden(
-                    "You are not permitted to assign Karton analysis to object"
-                )
-
-        # Validate upload_as argument
-        share_with = get_shares_for_upload(params["upload_as"])
-
-        # Tags argument
-        tags = params.get("tags")
-
-        share_3rd_party = params.get("share_3rd_party", True)
+        upload_params = validate_object_upload_params(params)
 
         item, is_new = self._create_object(
             params,
-            parent_object,
-            share_with,
-            attributes,
-            analysis_id,
-            tags,
-            share_3rd_party,
+            upload_params.parent,
+            upload_params.share_with,
+            upload_params.attributes,
+            upload_params.analysis_id,
+            upload_params.tags,
+            upload_params.share_3rd_party,
         )
 
         try:

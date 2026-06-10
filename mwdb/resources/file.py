@@ -1,3 +1,4 @@
+from uuid import UUID
 from flask import Response, g, request
 from werkzeug.exceptions import (
     BadRequest,
@@ -22,14 +23,33 @@ from mwdb.schema.file import (
     FileItemResponseSchema,
     FileLegacyCreateRequestSchema,
     FileListResponseSchema,
+    FileChunkedUploadRequestSchema,
+    FileChunkedUploadResponseSchema,
 )
 
-from . import load_schema, requires_authorization, requires_capabilities
-from .object import ObjectItemResource, ObjectResource, ObjectUploader
+from . import load_schema, requires_authorization, requires_capabilities, loads_schema
+from .object import (
+    ObjectItemResource,
+    ObjectResource,
+    ObjectUploader,
+    validate_object_upload_params,
+)
+from mwdb.core.chunked_upload import (
+    initiate_chunked_upload,
+    ChunkedUploadBadRequest,
+    chunked_upload_part,
+    ChunkedUploadNotFound,
+    finalize_chunked_upload,
+)
 
 
 class FileUploader(ObjectUploader):
     def on_created(self, object, params):
+        if (
+            app_config.mwdb.karton_file_size_limit is None
+            or object.file_size <= app_config.mwdb.karton_file_size_limit
+        ):
+            self.send_to_karton(object, params)
         super().on_created(object, params)
         hooks.on_created_file(object)
 
@@ -636,3 +656,217 @@ class FileDownloadZipResource(Resource):
         download_token = file.generate_download_token()
         schema = FileDownloadTokenResponseSchema()
         return schema.dump({"token": download_token})
+
+
+class FileChunkedUploadResource(Resource):
+    @requires_authorization
+    @requires_capabilities(Capabilities.adding_files)
+    def post(self):
+        """
+        ---
+        summary: Initiate chunked file upload
+        description: |
+            Initiate a new file upload in chunks
+
+            Requires `adding_files` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - file
+        requestBody:
+            required: true
+            content:
+              application/json:
+                schema: FileChunkedUploadRequestSchema
+        responses:
+            200:
+                description: Upload identifier and chunk limits
+                content:
+                  application/json:
+                    schema: FileChunkedUploadResponseSchema
+            400:
+                description: Incorrect request parameters
+            403:
+                description: |
+                    No permissions to perform additional operations
+                    (e.g. adding parent, attributes)
+            404:
+                description: |
+                    One of attribute keys doesn't exist
+                    or user doesn't have permission to set it.
+
+                    Specified `upload_as` group doesn't exist
+                    or user doesn't have permission to share objects with that group
+        """
+        if not app_config.mwdb.enable_chunked_upload:
+            raise Forbidden("Chunked upload is not allowed")
+
+        schema = FileChunkedUploadRequestSchema()
+        obj = loads_schema(request.get_data(as_text=True), schema)
+        # Early validation of object params (parent, attributes etc.)
+        validate_object_upload_params(obj)
+
+        # Start chunked upload
+        try:
+            upload_id = initiate_chunked_upload(obj)
+        except ChunkedUploadBadRequest as e:
+            raise BadRequest(str(e)) from e
+
+        schema = FileChunkedUploadResponseSchema()
+        return schema.dump(
+            {
+                "upload_id": upload_id,
+                "min_first_chunk_size": app_config.mwdb_chunked_upload.min_first_chunk_size,
+                "min_chunk_size": app_config.mwdb_chunked_upload.min_chunk_size,
+            }
+        )
+
+
+class FileChunkedUploadItemResource(Resource, ObjectUploader):
+    ObjectType = File
+    ItemResponseSchema = FileItemResponseSchema
+
+    def _create_object(
+        self, spec, parent, share_with, attributes, analysis_id, tags, share_3rd_party
+    ):
+        try:
+            return File.get_or_create_object(
+                file_name=spec["file_name"],
+                file_size=spec["file_size"],
+                file_type=spec["file_type"],
+                crc32=spec["crc32"],
+                md5=spec["md5"],
+                sha1=spec["sha1"],
+                sha256=spec["sha256"],
+                sha512=spec["sha512"],
+                ssdeep=spec["ssdeep"],
+                share_3rd_party=share_3rd_party,
+                parent=parent,
+                share_with=share_with,
+                attributes=attributes,
+                analysis_id=analysis_id,
+                tags=tags,
+            )
+        except ObjectTypeConflictError:
+            raise Conflict("Object already exists and is not a file")
+
+    def on_created(self, object, params):
+        if (
+            app_config.mwdb.karton_file_size_limit is None
+            or object.file_size <= app_config.mwdb.karton_file_size_limit
+        ):
+            self.send_to_karton(object, params)
+            super().on_created(object, params)
+            hooks.on_created_file(object)
+
+    def on_reuploaded(self, object, params):
+        super().on_reuploaded(object, params)
+        hooks.on_reuploaded_file(object)
+
+    @requires_authorization
+    @requires_capabilities(Capabilities.adding_files)
+    def post(self, upload_id, chunk_number):
+        """
+        ---
+        summary: Upload file chunks
+        description: |
+            Uploads next or last file chunk.
+
+            Requires `adding_files` capability.
+        security:
+            - bearerAuth: []
+        tags:
+            - file
+        parameters:
+            - in: path
+              name: upload_id
+              schema:
+                type: string
+              description: Identifier of the initiated upload
+            - in: path
+              name: chunk_number
+              schema:
+                type: string
+              description: Chunk number (starting from 1)
+            - in: query
+              name: last
+              schema:
+                type: number
+              description: |
+                Set to 1 to indicate that chunk is the last one.
+                Uploading last chunk finalizes the upload.
+        requestBody:
+            required: true
+            content:
+              multipart/form-data:
+                schema:
+                  type: object
+                  properties:
+                    chunk:
+                      type: string
+                      format: binary
+                      description: Chunk contents to be uploaded
+                  required:
+                    - chunk
+        responses:
+            200:
+                description: |
+                    Information about uploaded file or {"status": "ok"} in case of
+                    upload continuation
+                content:
+                  application/json:
+                    schema: FileItemResponseSchema
+            403:
+                description: |
+                    No permissions to perform additional operations
+                    (e.g. adding parent, attributes)
+            404:
+                description: |
+                    One of attribute keys doesn't exist
+                    or user doesn't have permission to set it.
+
+                    Specified `upload_as` group doesn't exist
+                    or user doesn't have permission to share objects with that group
+            409:
+                description: Object exists yet but has different type
+            503:
+                description: |
+                    Request canceled due to database statement timeout.
+        """
+        if not app_config.mwdb.enable_chunked_upload:
+            raise Forbidden("Chunked upload is not allowed")
+
+        is_last = request.args.get("last") == "1"
+
+        try:
+            upload_id = UUID(upload_id)
+        except ValueError:
+            raise BadRequest("Invalid upload identifier")
+
+        try:
+            chunked_upload_part(
+                upload_id,
+                chunk_number,
+                request.files["chunk"].stream,
+                is_last,
+            )
+        except ChunkedUploadNotFound as e:
+            raise NotFound(
+                f"Chunked upload {str(upload_id)} not found or expired"
+            ) from e
+        except ChunkedUploadBadRequest as e:
+            raise BadRequest(str(e)) from e
+
+        if is_last:
+            try:
+                file_spec = finalize_chunked_upload(upload_id)
+            except ChunkedUploadNotFound as e:
+                raise NotFound(
+                    f"Chunked upload {str(upload_id)} not found or expired"
+                ) from e
+            except ChunkedUploadBadRequest as e:
+                raise BadRequest(str(e)) from e
+
+            return self.create_object(file_spec)
+        else:
+            return {"status": "ok"}

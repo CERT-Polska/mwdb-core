@@ -1,6 +1,7 @@
 import json
 
 from marshmallow import Schema, fields, pre_load
+from marshmallow.validate import Range
 
 from .config import ConfigLatestItemResponseSchema
 from .object import (
@@ -39,6 +40,16 @@ class FileLegacyCreateRequestSchema(
     pass
 
 
+class FileChunkedUploadRequestSchema(ObjectCreateRequestSchemaBase):
+    file_name = fields.Str(required=True, allow_none=False)
+    file_size = fields.Int(
+        required=True,
+        allow_none=False,
+        validate=[Range(min=1, error="Value must be greater than 0")],
+    )
+    sha256 = fields.Str(required=True, allow_none=False)
+
+
 class FileListItemResponseSchema(ObjectListItemResponseSchema):
     file_name = fields.Str(required=True, allow_none=False)
     file_size = fields.Int(required=True, allow_none=False)
@@ -73,3 +84,9 @@ class FileItemResponseSchema(ObjectItemResponseSchema):
 
 class FileDownloadTokenResponseSchema(Schema):
     token = fields.Str(required=True, allow_none=False)
+
+
+class FileChunkedUploadResponseSchema(Schema):
+    upload_id = fields.UUID(allow_none=False)
+    min_first_chunk_size = fields.Int(allow_none=False)
+    min_chunk_size = fields.Int(allow_none=False)

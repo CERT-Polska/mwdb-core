@@ -49,6 +49,8 @@ from mwdb.resources.file import (
     FileDownloadZipResource,
     FileItemResource,
     FileResource,
+    FileChunkedUploadResource,
+    FileChunkedUploadItemResource,
 )
 from mwdb.resources.group import GroupListResource, GroupMemberResource, GroupResource
 from mwdb.resources.karton import KartonAnalysisResource, KartonObjectResource
@@ -310,6 +312,10 @@ api.add_resource(FileResource, "/file")
 api.add_resource(FileItemResource, "/file/<hash64:identifier>")
 api.add_resource(FileDownloadResource, "/file/<hash64:identifier>/download")
 api.add_resource(FileDownloadZipResource, "/file/<hash64:identifier>/download/zip")
+api.add_resource(FileChunkedUploadResource, "/file/upload")
+api.add_resource(
+    FileChunkedUploadItemResource, "/file/upload/<upload_id>/<int:chunk_number>"
+)
 
 # Config endpoints
 api.add_resource(ConfigResource, "/config")

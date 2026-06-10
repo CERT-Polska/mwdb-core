@@ -1,6 +1,7 @@
 import hashlib
 import io
 import os
+import pathlib
 import shutil
 import tempfile
 from typing import Any, Dict
@@ -17,7 +18,14 @@ from werkzeug.utils import secure_filename
 from mwdb.core.auth import AuthScope, generate_token, verify_token
 from mwdb.core.config import StorageProviderType, app_config
 from mwdb.core.karton import send_file_to_karton
-from mwdb.core.util import calc_crc32, calc_hash, calc_magic, calc_ssdeep, get_s3_client
+from mwdb.core.util import (
+    calc_crc32,
+    calc_hash,
+    calc_magic,
+    calc_ssdeep,
+    get_s3_client,
+    relative_path_for_hash,
+)
 from mwdb.core.zip_stream import zip_stream
 
 from . import db
@@ -83,6 +91,58 @@ class File(Object):
         setattr(self, "_upload_stream", stream)
 
     @classmethod
+    def get_or_create_object(
+        cls,
+        file_name,
+        file_size,
+        file_type,
+        crc32,
+        md5,
+        sha1,
+        sha256,
+        sha512,
+        ssdeep,
+        share_3rd_party,
+        parent,
+        attributes,
+        share_with,
+        analysis_id,
+        tags,
+    ):
+        file_obj = File(
+            dhash=sha256,
+            file_name=secure_filename(file_name),
+            file_size=file_size,
+            file_type=file_type,
+            crc32=crc32,
+            md5=md5,
+            sha1=sha1,
+            sha256=sha256,
+            sha512=sha512,
+            ssdeep=ssdeep,
+            share_3rd_party=share_3rd_party,
+        )
+
+        file_obj, is_new = cls._get_or_create(
+            file_obj,
+            share_3rd_party=share_3rd_party,
+            parent=parent,
+            attributes=attributes,
+            share_with=share_with,
+            analysis_id=analysis_id,
+            tags=tags,
+        )
+
+        if not is_new:
+            original_filename = secure_filename(file_name)
+            if (
+                file_obj.file_name != original_filename
+                and original_filename not in file_obj.alt_names
+            ):
+                file_obj.alt_names.append(original_filename)
+        return file_obj, is_new
+
+    @classmethod
     def get_or_create(
         cls,
         file_name,
@@ -100,8 +160,7 @@ class File(Object):
             raise EmptyFileError
 
         sha256 = calc_hash(file_stream, hashlib.sha256(), lambda h: h.hexdigest())
-        file_obj = File(
-            dhash=sha256,
+        file_obj, is_new = cls.get_or_create_object(
             file_name=secure_filename(file_name),
             file_size=file_size,
             file_type=calc_magic(file_stream),
@@ -112,26 +171,12 @@ class File(Object):
             sha512=calc_hash(file_stream, hashlib.sha512(), lambda h: h.hexdigest()),
             ssdeep=calc_ssdeep(file_stream),
             share_3rd_party=share_3rd_party,
-        )
-
-        file_obj, is_new = cls._get_or_create(
-            file_obj,
-            share_3rd_party=share_3rd_party,
             parent=parent,
             attributes=attributes,
             share_with=share_with,
             analysis_id=analysis_id,
             tags=tags,
         )
-
-        # Check if add new alternative file name
-        if not is_new:
-            original_filename = secure_filename(file_name)
-            if (
-                file_obj.file_name != original_filename
-                and original_filename not in file_obj.alt_names
-            ):
-                file_obj.alt_names.append(original_filename)
 
         if is_new:
             file_stream.seek(0, os.SEEK_SET)
@@ -172,19 +217,14 @@ class File(Object):
                 f"StorageProvider {app_config.mwdb.storage_provider} is not supported"
             )
 
-        sample_sha256 = self.sha256.lower()
-
-        hash_pathing = app_config.mwdb.hash_pathing
-        if fallback_path:
-            hash_pathing = not hash_pathing
-        if hash_pathing:
-            # example: uploads/9/f/8/6/9f86d0818...
-            upload_path = os.path.join(upload_path, *list(sample_sha256)[0:4])
-
+        upload_path = os.path.join(
+            upload_path,
+            relative_path_for_hash(self.sha256, fallback_path=fallback_path),
+        )
         if app_config.mwdb.storage_provider == StorageProviderType.DISK:
-            upload_path = os.path.abspath(upload_path)
+            upload_path = pathlib.Path(upload_path).resolve().as_posix()
 
-        return os.path.join(upload_path, sample_sha256)
+        return upload_path
 
     def _open_from_storage(self, fallback_path=False):
         if app_config.mwdb.storage_provider == StorageProviderType.S3:

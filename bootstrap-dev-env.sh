@@ -14,7 +14,7 @@ pre-commit install --install-hooks
 echo "Installing packages..."
 export UV_VENV_CLEAR=1
 uv venv
-uv sync --frozen
-uv sync --group dev
-uv sync --group test
+uv sync --locked
+uv sync --locked --group dev
+uv sync --locked --group test
 source .venv/bin/activate

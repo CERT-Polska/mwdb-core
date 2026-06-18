@@ -24,7 +24,9 @@ services:
       POSTGRES_DB: mwdb
       POSTGRES_PASSWORD: e2e-postgres-password
   mwdb-tests:
-    build: tests/backend
+    build:
+      context: .
+      dockerfile: tests/backend/Dockerfile
     container_name: mwdb_core_e2e_tests
     depends_on:
       mwdb:

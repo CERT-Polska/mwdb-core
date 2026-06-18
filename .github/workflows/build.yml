@@ -361,7 +361,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: ./tests/backend/Dockerfile
-          context: tests/backend
+          context: .
           tags: |
             certpl/mwdb-tests:${{ github.sha }}
             certpl/mwdb-tests:master

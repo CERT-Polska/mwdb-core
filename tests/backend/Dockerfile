@@ -4,15 +4,7 @@ FROM ghcr.io/astral-sh/uv:python3.12-alpine AS builder
 
 WORKDIR /app
 
-# Omit development dependencies
-ENV UV_NO_DEV=1
-
-# Disable Python downloads, because we want to use the system interpreter
-# across both images. If using a managed Python version, it needs to be
-# copied from the build image into the final image; see `standalone.Dockerfile`
-# for an example.
 ENV UV_PYTHON_DOWNLOADS=0
-# No hardlinks supported
 ENV UV_LINK_MODE=copy
 
 RUN --mount=type=cache,target=/root/.cache/uv \

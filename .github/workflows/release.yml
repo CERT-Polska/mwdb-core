@@ -82,7 +82,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: ./tests/backend/Dockerfile
-          context: tests/backend
+          context: .
           tags: |
             certpl/mwdb-tests:${{ github.event.release.tag_name }}
             certpl/mwdb-tests:latest

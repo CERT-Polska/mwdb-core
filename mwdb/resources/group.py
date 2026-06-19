@@ -6,7 +6,7 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.hooks import hooks
 from mwdb.core.service import Resource
-from mwdb.model import Group, Member, User, db, OpenIDProviderSettings
+from mwdb.model import Group, Member, OpenIDProviderSettings, User, db
 from mwdb.schema.group import (
     GroupCreateRequestSchema,
     GroupItemResponseSchema,

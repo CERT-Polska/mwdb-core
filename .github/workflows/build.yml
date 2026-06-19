@@ -13,7 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: astral-sh/ruff-action@v3
-      - run: ruff check --select I
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - run: ruff check
       - run: ruff format --check --diff
   lint_web:
     name: Lint mwdb-core web sources

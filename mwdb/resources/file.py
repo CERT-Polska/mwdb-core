@@ -4,8 +4,8 @@ from werkzeug.exceptions import (
     Conflict,
     Forbidden,
     NotFound,
-    Unauthorized,
     RequestedRangeNotSatisfiable,
+    Unauthorized,
 )
 
 from mwdb.core.capabilities import Capabilities

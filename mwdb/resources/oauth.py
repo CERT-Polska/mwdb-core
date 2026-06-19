@@ -10,14 +10,14 @@ from werkzeug.exceptions import Conflict, Forbidden, NotFound
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.hooks import hooks
-from mwdb.core.service import Resource
 from mwdb.core.oauth.provider import OpenIDProvider
+from mwdb.core.service import Resource
 from mwdb.model import (
-    User,
     Group,
     OpenIDGroupManagementMode,
     OpenIDProviderSettings,
     OpenIDUserIdentity,
+    User,
     db,
 )
 from mwdb.schema.auth import AuthSuccessResponseSchema

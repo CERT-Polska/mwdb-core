@@ -205,16 +205,16 @@ jobs:
           docker load --input ./mwdb-image/mwdb-image
           docker load --input ./mwdb-web-image/mwdb-web-image
           docker load --input ./mwdb-tests-image/mwdb-tests-image
-          docker tag certpl/mwdb:$GITHUB_SHA certpl/mwdb:latest
-          docker tag certpl/mwdb-web:$GITHUB_SHA certpl/mwdb-web:latest
-          docker tag certpl/mwdb-tests:$GITHUB_SHA certpl/mwdb-tests:latest
+          docker tag certpl/mwdb:${{ github.sha }} mwdb-core-mwdb:latest
+          docker tag certpl/mwdb-web:${{ github.sha }} mwdb-core-mwdb-web:latest
+          docker tag certpl/mwdb-tests:${{ github.sha }} mwdb-core-mwdb-tests:latest
       - name: Setup configuration      
         run: |
           chmod +x gen_vars.sh
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          ./compose.sh --with e2e ${{ matrix.with_args }} up -d mwdb-tests
+          ./compose.sh --with e2e ${{ matrix.with_args }} up --no-build -d mwdb-tests
           ./compose.sh --with e2e ${{ matrix.with_args }} logs -f -t mwdb-tests
           ([ $(docker wait mwdb_core_e2e_tests) == 0 ])
       - name: Job failed - storing application logs
@@ -243,16 +243,16 @@ jobs:
           docker load --input ./mwdb-image/mwdb-image
           docker load --input ./mwdb-web-image/mwdb-web-image
           docker load --input ./mwdb-web-tests-image/mwdb-web-tests-image
-          docker tag certpl/mwdb:$GITHUB_SHA certpl/mwdb:latest
-          docker tag certpl/mwdb-web:$GITHUB_SHA certpl/mwdb-web:latest
-          docker tag certpl/mwdb-web-tests:$GITHUB_SHA certpl/mwdb-web-tests:latest
+          docker tag certpl/mwdb:${{ github.sha }} mwdb-core-mwdb:latest
+          docker tag certpl/mwdb-web:${{ github.sha }} mwdb-core-mwdb-web:latest
+          docker tag certpl/mwdb-web-tests:${{ github.sha }} mwdb-core-mwdb-web-tests:latest
       - name: Setup configuration
         run: |
           chmod +x gen_vars.sh
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          ./compose.sh --with karton --with e2e up -d web-tests
+          ./compose.sh --with karton --with e2e up --no-build -d web-tests
           ./compose.sh --with karton --with e2e logs -f -t web-tests
           ([ $(docker wait mwdb_core_e2e_web_tests) == 0 ])
       - name: Job failed - storing videos from e2e tests
@@ -279,14 +279,14 @@ jobs:
       - name: Import images
         run: |
           docker load --input ./mwdb-web-unit-tests-image/mwdb-web-unit-tests-image
-          docker tag certpl/mwdb-web-unit-tests:$GITHUB_SHA certpl/mwdb-web-unit-tests:latest
+          docker tag certpl/mwdb-web-unit-tests:${{ github.sha }} certpl/mwdb-web-unit-tests:latest
       - name: Setup configuration
         run: |
           chmod +x gen_vars.sh
           ./gen_vars.sh test
       - name: Perform tests
         run: |
-          docker compose -f compose/compose.web-unit-tests.yml up -d
+          docker compose -f compose/compose.web-unit-tests.yml up --no-build -d
           docker compose -f compose/compose.web-unit-tests.yml logs -f -t
   push_images:
     needs: [test_backend_e2e, test_frontend_e2e, test_frontend_unit]

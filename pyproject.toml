@@ -38,7 +38,7 @@ dependencies = [
     "prometheus-client==0.21.1",
     "psycopg2-binary==2.9.10",
     "pycryptodomex==3.23.0",
-    "pyjwt==2.12.1",
+    "pyjwt==2.13.0",
     "python-dateutil==2.8.2",
     "python-json-logger==2.0.2",
     "python-magic==0.4.18",
@@ -67,7 +67,7 @@ version = {attr = "mwdb.version.app_version"}
 [dependency-groups]
 test = [
     "python-dateutil",
-    "pyJWT",
+    "pyjwt",
     "pytest",
     "pytest-rerunfailures",
     "requests",

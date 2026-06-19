@@ -34,7 +34,7 @@ FROM python:3.12-alpine
 
 LABEL maintainer="info@cert.pl"
 
-RUN apk add --no-cache postgresql-client postgresql-dev libmagic libfuzzy2
+RUN apk add --no-cache postgresql-client libmagic libfuzzy2
 
 # Copy the application from the builder
 COPY --from=builder --chown=nobody:nobody /app /app

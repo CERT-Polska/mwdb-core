@@ -29,7 +29,7 @@ def find_application_frame():
 
 
 def get_request_context():
-    from flask import request, g, has_request_context
+    from flask import g, has_request_context, request
 
     if has_request_context():
         request_id = g.request_id if hasattr(g, "request_id") else None
@@ -56,7 +56,7 @@ def before_cursor_execute(conn, cursor, statement, parameters, context, executem
 
 
 def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-    from flask import has_request_context, g
+    from flask import g, has_request_context
 
     if has_request_context():
         g.sql_queries_count = (

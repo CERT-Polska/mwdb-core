@@ -86,3 +86,6 @@ extend-exclude = [
     "docs",
     "dev"
 ]
+
+[tool.ruff.lint]
+extend-select = ["I"]

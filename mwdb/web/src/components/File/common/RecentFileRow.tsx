@@ -4,6 +4,7 @@ import { humanFileSize } from "@mwdb-web/commons/helpers";
 import { RecentInnerRow, RecentRow } from "@mwdb-web/components/RecentView";
 import { RecentRowProps } from "@mwdb-web/types/props";
 import { ObjectData } from "@mwdb-web/types/types";
+import { Extendable } from "@mwdb-web/commons/plugins";
 
 export function RecentFileRow(props: RecentRowProps<ObjectData>) {
     const identicon = (
@@ -32,7 +33,7 @@ export function RecentFileRow(props: RecentRowProps<ObjectData>) {
 
     return (
         <RecentRow firstSeen={props.upload_time}>
-            <>
+            <Extendable {...props} ident="recentFileRow">
                 <td className="col-lg-4 col-6">
                     {/* Wide mode */}
                     <div className="d-none d-lg-block">{identicon}</div>
@@ -109,7 +110,7 @@ export function RecentFileRow(props: RecentRowProps<ObjectData>) {
                         {uploadTime}
                     </RecentInnerRow>
                 </td>
-            </>
+            </Extendable>
         </RecentRow>
     );
 }

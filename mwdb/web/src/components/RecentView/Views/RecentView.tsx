@@ -10,6 +10,7 @@ import { QuickQuery } from "../common/QuickQuery";
 import { ObjectType } from "@mwdb-web/types/types";
 import { AxiosError } from "axios";
 import { QueryInput } from "../common/QueryInput";
+import { Extendable } from "@mwdb-web/commons/plugins";
 import { useQuerySuggestions } from "../common/useQuerySuggestions";
 
 type Props = {
@@ -168,52 +169,54 @@ export function RecentView(props: Props) {
                             loadingSuggestions={loadingSuggestions}
                         />
                         <div className="input-group-append">
-                            <div className="btn-group">
-                                <input
-                                    className="btn btn-outline-success rounded-0"
-                                    type="submit"
-                                    value="Search"
-                                />
-                            </div>
-                            <div
-                                className="btn-group"
-                                data-toggle="tooltip"
-                                title={`Turn ${
-                                    countingEnabled ? "off" : "on"
-                                } results counting`}
-                            >
-                                <input
-                                    type="button"
-                                    className={`btn btn-outline-info rounded-0 shadow-none ${
-                                        searchParams.get("count") === "1"
-                                            ? "active"
-                                            : ""
-                                    }`}
-                                    value="Count"
-                                    onClick={() => {
-                                        setSearchParams(
-                                            (prev) => {
-                                                return {
-                                                    ...Object.fromEntries(
-                                                        prev.entries()
-                                                    ),
-                                                    q: prev.get("q") || "",
-                                                    count: countingEnabled
-                                                        ? "0"
-                                                        : "1",
-                                                };
-                                            },
-                                            { replace: true }
-                                        );
-                                    }}
-                                />
-                            </div>
-                            <a
-                                href="https://mwdb.readthedocs.io/en/latest/user-guide/7-Lucene-search.html"
-                                className="btn btn-outline-primary"
-                            >
-                                ?
-                            </a>
+                            <Extendable ident="queryInputButtons">
+                                <div className="btn-group">
+                                    <input
+                                        className="btn btn-outline-success rounded-0"
+                                        type="submit"
+                                        value="Search"
+                                    />
+                                </div>
+                                <div
+                                    className="btn-group"
+                                    data-toggle="tooltip"
+                                    title={`Turn ${
+                                        countingEnabled ? "off" : "on"
+                                    } results counting`}
+                                >
+                                    <input
+                                        type="button"
+                                        className={`btn btn-outline-info rounded-0 shadow-none ${
+                                            searchParams.get("count") === "1"
+                                                ? "active"
+                                                : ""
+                                        }`}
+                                        value="Count"
+                                        onClick={() => {
+                                            setSearchParams(
+                                                (prev) => {
+                                                    return {
+                                                        ...Object.fromEntries(
+                                                            prev.entries()
+                                                        ),
+                                                        q: prev.get("q") || "",
+                                                        count: countingEnabled
+                                                            ? "0"
+                                                            : "1",
+                                                    };
+                                                },
+                                                { replace: true }
+                                            );
+                                        }}
+                                    />
+                                </div>
+                                <a
+                                    href="https://mwdb.readthedocs.io/en/latest/user-guide/7-Lucene-search.html"
+                                    className="btn btn-outline-primary"
+                                >
+                                    ?
+                                </a>
+                            </Extendable>
                         </div>
                     </div>
                     <div className="input-group">

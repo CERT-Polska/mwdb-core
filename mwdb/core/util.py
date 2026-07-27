@@ -15,15 +15,18 @@ from zlib import crc32
 
 import boto3
 import botocore.client
-import magic
 from botocore.credentials import (
     ContainerProvider,
     InstanceMetadataFetcher,
     InstanceMetadataProvider,
 )
+from pure_magic_rs import MagicDb
 
 from .config import app_config
+from .log import getLogger
 from .ssdeep import SsdeepHash
+
+logger = getLogger()
 
 
 def config_dhash(obj):
@@ -88,21 +91,22 @@ def calc_magic(stream) -> str:
     # Missing python-magic features:
     # - magic_descriptor (https://github.com/ahupp/python-magic/pull/227)
     # - direct support for symlink flag
-    magic_cookie = magic.magic_open(magic.MAGIC_SYMLINK)
-    magic.magic_load(magic_cookie, None)
+    db = MagicDb()
     try:
         fd_path = get_fd_path(stream)
         if fd_path:
-            return magic.maybe_decode(magic.magic_file(magic_cookie, fd_path))
+            magic = db.best_magic_file(fd_path)
         else:
             # Handle BytesIO in-memory streams
             stream.seek(0, os.SEEK_SET)
-            return magic.maybe_decode(magic.magic_buffer(magic_cookie, stream.read()))
-    except magic.MagicException:
+            magic = db.best_magic_buffer(stream.read())
+        if not magic:
+            return "data"
+        return magic.message
+    except Exception:
         # If libmagic fails, we fallback to 'data'
+        logger.exception("pure-magic-rs failed")
         return "data"
-    finally:
-        magic.magic_close(magic_cookie)
 
 
 def calc_ssdeep(stream) -> str | None:

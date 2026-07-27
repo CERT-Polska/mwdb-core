@@ -75,7 +75,7 @@ test = [
     "pyzipper",
 ]
 dev = [
-    "ruff>=0.15.7",
+    "ruff>=0.15.7,<0.16.0",
 ]
 
 [tool.ruff]

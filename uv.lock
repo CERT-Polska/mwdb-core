@@ -1366,7 +1366,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "ruff", specifier = ">=0.15.7" }]
+dev = [{ name = "ruff", specifier = ">=0.15.7,<0.16.0" }]
 test = [
     { name = "pyjwt" },
     { name = "pytest" },

@@ -13,7 +13,7 @@ from mwdb.schema.blob import (
     BlobListResponseSchema,
 )
 
-from . import loads_schema, requires_authorization, requires_capabilities
+from . import load_schema, loads_schema, requires_authorization, requires_capabilities
 from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
@@ -315,7 +315,9 @@ class TextBlobItemResource(ObjectItemResource, TextBlobUploader):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        return super().put(identifier)
+        schema = self.CreateRequestSchema()
+        obj = load_schema(self._get_upload_args(identifier), schema)
+        return self.create_object(obj)
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_objects)

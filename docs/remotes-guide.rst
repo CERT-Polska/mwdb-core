@@ -4,7 +4,11 @@ Remote instances guide
 .. versionadded:: 2.2.0
 
 .. warning::
-    This is **experimental** feature and it may significantly change in the future versions.
+    This is **experimental** and undercooked feature, it is a candidate for deprecation and removal in future versions.
+
+.. warning::
+
+    Version 2.19.0 contains important security fixes regarding this feature
 
 Remote instance feature allows us to connect our local repository with other, external MWDB servers.
 This gives us the ability to view samples located in the remote instance, as well as exchange the objects

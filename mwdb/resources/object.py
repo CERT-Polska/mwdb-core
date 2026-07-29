@@ -2,7 +2,7 @@ import json
 from uuid import UUID
 
 from flask import g, request
-from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
@@ -315,20 +315,6 @@ class ObjectItemResource(Resource, ObjectUploader):
                 args["upload_as"] = request.form["upload_as"]
         args["parent"] = parent_identifier if parent_identifier != "root" else None
         return args
-
-    @requires_authorization
-    def post(self, identifier):
-        if self.ObjectType is Object:
-            raise MethodNotAllowed()
-
-        schema = self.CreateRequestSchema()
-        obj = load_schema(self._get_upload_args(identifier), schema)
-
-        return self.create_object(obj)
-
-    @requires_authorization
-    def put(self, identifier):
-        return self.post(identifier)
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_objects)

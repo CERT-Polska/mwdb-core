@@ -1,5 +1,5 @@
 from .relations import *
-from .utils import rand_string
+from .utils import rand_string, ShouldRaise
 
 
 def test_adding_config_with_inblobs(admin_session):
@@ -35,6 +35,22 @@ def test_adding_config_with_inblobs(admin_session):
 
     assert blob1["blob_name"] in ["In blob name", "Peers blob name"] and \
            blob2["blob_name"] in ["In blob name", "Peers blob name"]
+
+
+def test_adding_configs_legacy_post(admin_session):
+    testCase = RelationTestCase(admin_session)
+
+    Alice = testCase.new_user("Alice", capabilities=[])
+    mwdb_session = Alice.session.session
+    with ShouldRaise(405):
+        request = mwdb_session.post(
+            Alice.session.mwdb_url + "/config/root",
+            json={
+                "family": "family",
+                "cfg": {"request": "should-fail"}
+            },
+        )
+        request.raise_for_status()
 
 
 def test_config_search_by_tags_transactional_added(admin_session):

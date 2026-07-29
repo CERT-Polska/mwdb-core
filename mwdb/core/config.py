@@ -99,6 +99,8 @@ class MWDBConfig(Config):
     s3_storage_iam_auth = key(cast=intbool, required=False)
     # Limit number of objects returned by listing endpoints
     listing_endpoints_count_limit = key(cast=int, required=False, default=1000)
+    # Maximum file size that is submitted to Karton
+    karton_file_size_limit = key(cast=int, required=False, default=None)
 
     # Administrator account login
     admin_login = key(cast=str, required=False, default="admin")
@@ -126,6 +128,7 @@ class MWDBConfig(Config):
     enable_oidc_registration = key(cast=intbool, required=False, default=False)
     enable_3rd_party_sharing_consent = key(cast=intbool, required=False, default=False)
     enable_ssdeep = key(cast=intbool, required=False, default=True)
+    enable_chunked_upload = key(cast=intbool, required=False, default=False)
 
     mail_smtp = key(cast=str, required=False)
     mail_from = key(cast=str, required=False, default="noreply@mwdb")
@@ -162,10 +165,22 @@ class MWDBLimiterConfig(Config):
     pass
 
 
+@section("mwdb_chunked_upload")
+class MWDBChunkedUploadConfig(Config):
+    # Maximum file size uploaded in chunks (default is)
+    max_file_size = key(cast=int, required=False, default=1024 * 1024 * 1024)
+    # Minimum size of first chunk. Libmagic output is evaluated based on the first chunk,
+    # so input must be big enough to have reasonable behavior
+    min_first_chunk_size = key(cast=int, required=False, default=25 * 1024 * 1024)
+    # Minimum size of further chunks. S3 backends require at least 5MB
+    min_chunk_size = key(cast=int, required=False, default=5 * 1024 * 1024)
+
+
 class AppConfig(Config):
     mwdb = group_key(MWDBConfig)
     karton = group_key(KartonConfig)
     mwdb_limiter = group_key(MWDBLimiterConfig)
+    mwdb_chunked_upload = group_key(MWDBChunkedUploadConfig)
 
 
 def _config_sources():

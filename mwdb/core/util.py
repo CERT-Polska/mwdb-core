@@ -203,3 +203,16 @@ def get_s3_client(
         aws_session_token=session_token,
         region_name=region,
     )
+
+
+def relative_path_for_hash(sha256: str, fallback_path: bool = False):
+    sha256 = sha256.lower()
+
+    hash_pathing = app_config.mwdb.hash_pathing
+    if fallback_path:
+        hash_pathing = not hash_pathing
+    if hash_pathing:
+        # example: 9/f/8/6/9f86d0818...
+        return "/".join([*list(sha256)[0:4], sha256])
+    else:
+        return sha256

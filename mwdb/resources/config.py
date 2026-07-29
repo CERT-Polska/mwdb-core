@@ -85,6 +85,7 @@ class ConfigStatsResource(Resource):
 
 class ConfigUploader(ObjectUploader):
     def on_created(self, object, params):
+        self.send_to_karton(object, params)
         super().on_created(object, params)
         hooks.on_created_config(object)
 

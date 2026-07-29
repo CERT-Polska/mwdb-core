@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/Dockerfile
-    image: certpl/mwdb:v2.18.0
+    image: certpl/mwdb:v2.19.0
     depends_on:
       postgres:
         condition: service_healthy
@@ -27,7 +27,7 @@ services:
     build:
       context: .
       dockerfile: deploy/docker/Dockerfile-web
-    image: certpl/mwdb-web:v2.18.0
+    image: certpl/mwdb-web:v2.19.0
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 10s

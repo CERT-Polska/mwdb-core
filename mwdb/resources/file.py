@@ -334,7 +334,9 @@ class FileItemResource(ObjectItemResource, FileUploader):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        return super().post(identifier)
+        schema = self.CreateRequestSchema()
+        obj = load_schema(self._get_upload_args(identifier), schema)
+        return self.create_object(obj)
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_objects)

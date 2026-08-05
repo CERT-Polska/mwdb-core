@@ -1,4 +1,4 @@
-FROM cypress/base:18.20.3
+FROM cypress/base:24.19.0
 
 WORKDIR /app
 COPY package.json /app/package.json

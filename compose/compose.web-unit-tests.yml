@@ -5,3 +5,4 @@ services:
       dockerfile: deploy/docker/Dockerfile-web-unit-test
     container_name: mwdb_core_unit_web_tests
     image: certpl/mwdb-web-unit-tests
+    pull_policy: never

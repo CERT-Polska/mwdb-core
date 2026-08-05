@@ -207,7 +207,7 @@ jobs:
           docker load --input ./mwdb-tests-image/mwdb-tests-image
           docker tag certpl/mwdb:${{ github.sha }} mwdb-core-mwdb:latest
           docker tag certpl/mwdb-web:${{ github.sha }} mwdb-core-mwdb-web:latest
-          docker tag certpl/mwdb-tests:${{ github.sha }} mwdb-core-mwdb-tests:latest
+          docker tag certpl/mwdb-tests:${{ github.sha }} certpl/mwdb-tests:latest
       - name: Setup configuration      
         run: |
           chmod +x gen_vars.sh
@@ -245,7 +245,7 @@ jobs:
           docker load --input ./mwdb-web-tests-image/mwdb-web-tests-image
           docker tag certpl/mwdb:${{ github.sha }} mwdb-core-mwdb:latest
           docker tag certpl/mwdb-web:${{ github.sha }} mwdb-core-mwdb-web:latest
-          docker tag certpl/mwdb-web-tests:${{ github.sha }} mwdb-core-mwdb-web-tests:latest
+          docker tag certpl/mwdb-web-tests:${{ github.sha }} certpl/mwdb-web-tests:latest
       - name: Setup configuration
         run: |
           chmod +x gen_vars.sh

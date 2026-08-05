@@ -2,6 +2,7 @@
 services:
   mwdb:
     image: !reset null
+    pull_policy: never
     environment:
       MWDB_POSTGRES_URI: postgresql://mwdb:e2e-postgres-password@postgres/mwdb
       # Hardcoded secret key for consistent JWT testing
@@ -15,6 +16,7 @@ services:
       MWDB_ENABLE_PROMETHEUS_METRICS: 1
   mwdb-web:
     image: !reset null
+    pull_policy: never
   postgres:
     image: postgres:17
     restart: always
@@ -34,6 +36,7 @@ services:
       mwdb-web:
         condition: service_healthy
     image: certpl/mwdb-tests
+    pull_policy: never
     environment:
       MWDB_ADMIN_LOGIN: admin
       MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password
@@ -47,6 +50,7 @@ services:
       mwdb-web:
         condition: service_healthy
     image: certpl/mwdb-web-tests
+    pull_policy: never
     environment:
       MWDB_ADMIN_LOGIN: admin
       MWDB_ADMIN_PASSWORD: e2e-mwdb-admin-password

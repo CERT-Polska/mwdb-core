@@ -5,7 +5,7 @@
   "dependencies": {},
   "devDependencies": {
     "cypress": "^15.18.1",
-    "wait-on": "^7.2.0"
+    "wait-on": "^9.1.0"
   },
   "scripts": {
     "test": "wait-on http://mwdb-web:80 && cypress run"

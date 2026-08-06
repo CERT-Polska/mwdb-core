@@ -15,22 +15,35 @@ def sample_for_download(admin_session):
     return sample, content
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def download_sessions(admin_session, sample_for_download):
     sample, _ = sample_for_download
+    public_capabilities = admin_session.get_group("public")["capabilities"]
+    admin_session.set_group(
+        "public",
+        capabilities=[
+            capability
+            for capability in public_capabilities
+            if capability
+            not in {"downloading_files", "downloading_zipped_files"}
+        ],
+    )
     sessions = {}
-    for name, capabilities in {
-        "none": [],
-        "raw": ["downloading_files"],
-        "zip": ["downloading_zipped_files"],
-    }.items():
-        username = random_name()
-        admin_session.register_user(username, username, capabilities=capabilities)
-        admin_session.share_with(sample["id"], username)
-        session = MwdbTest()
-        session.login_as(username, username)
-        sessions[name] = session
-    return sessions
+    try:
+        for name, capabilities in {
+            "none": [],
+            "raw": ["downloading_files"],
+            "zip": ["downloading_zipped_files"],
+        }.items():
+            username = random_name()
+            admin_session.register_user(username, username, capabilities=capabilities)
+            admin_session.share_with(sample["id"], username)
+            session = MwdbTest()
+            session.login_as(username, username)
+            sessions[name] = session
+        yield sessions
+    finally:
+        admin_session.set_group("public", capabilities=public_capabilities)
 
 
 def test_download_sample(admin_session, sample_for_download):
@@ -82,6 +95,12 @@ def test_download_zipped_sample(admin_session, sample_for_download):
     with pyzipper.AESZipFile(BytesIO(r.content)) as zipped_file:
         zipped_file.setpassword(b"infected")
         assert zipped_file.read("sample.bin") == expected.encode()
+
+
+def test_download_capabilities_enabled_for_public(admin_session):
+    capabilities = admin_session.get_group("public")["capabilities"]
+    assert "downloading_files" in capabilities
+    assert "downloading_zipped_files" in capabilities
 
 
 def test_download_capabilities(sample_for_download, download_sessions):

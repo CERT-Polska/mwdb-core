@@ -251,8 +251,6 @@ export type ServerInfo = {
     is_maintenance_set: boolean;
     recaptcha_site_key: string;
     file_upload_timeout: number;
-    default_file_download_enabled: boolean;
-    default_zip_download_enabled: boolean;
     server_version: string;
     is_registration_enabled: boolean;
     is_oidc_registration_enabled: boolean;

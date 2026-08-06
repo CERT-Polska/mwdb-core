@@ -26,16 +26,19 @@ import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { SampleDetails } from "../SampleDetails";
 import { SamplePreview } from "../SamplePreview";
 import { PreviewSwitchAction } from "../PreviewSwitchAction";
-import { ObjectOrConfigOrBlobData } from "@mwdb-web/types/types";
+import { Capability, ObjectOrConfigOrBlobData } from "@mwdb-web/types/types";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { useFileDownloadAccess } from "@mwdb-web/commons/hooks";
+import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 
 export function ShowSampleView() {
     const api = useContext(APIContext);
     const params = useParams();
     const remotePath = useRemotePath();
-    const { canDownloadFiles, canDownloadZippedFiles } =
-        useFileDownloadAccess();
+    const { userHasCapabilities } = useCheckCapabilities();
+    const canDownloadFiles = userHasCapabilities(Capability.downloadingFiles);
+    const canDownloadZippedFiles = userHasCapabilities(
+        Capability.downloadingZippedFiles
+    );
 
     async function downloadSample(object?: Partial<ObjectOrConfigOrBlobData>) {
         if (object && object.id) {

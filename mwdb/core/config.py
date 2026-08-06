@@ -149,8 +149,6 @@ class MWDBConfig(Config):
     log_config_file = key(cast=path, required=False, default=None)
 
     zip_download_password = key(cast=str, required=False, default="infected")
-    default_file_download_enabled = key(cast=intbool, required=False, default=True)
-    default_zip_download_enabled = key(cast=intbool, required=False, default=True)
 
 
 @section("karton")

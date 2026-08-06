@@ -9,7 +9,6 @@ from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 from mwdb.core import log
 from mwdb.core.auth import DownloadType
 from mwdb.core.capabilities import Capabilities
-from mwdb.core.config import app_config
 from mwdb.model import Config, File, Group, Object, TextBlob
 
 logger = log.getLogger()
@@ -17,17 +16,13 @@ logger = log.getLogger()
 
 def ensure_file_download_access(download_type):
     if download_type == DownloadType.raw:
-        enabled_by_default = app_config.mwdb.default_file_download_enabled
         capability = Capabilities.downloading_files
     elif download_type == DownloadType.zip:
-        enabled_by_default = app_config.mwdb.default_zip_download_enabled
         capability = Capabilities.downloading_zipped_files
     else:
         raise ValueError(f"Unknown download type: {download_type}")
 
-    if not enabled_by_default and (
-        not g.auth_user or not g.auth_user.has_rights(capability)
-    ):
+    if not g.auth_user or not g.auth_user.has_rights(capability):
         raise Forbidden(
             f"You don't have required capability ({capability}) to download this file"
         )

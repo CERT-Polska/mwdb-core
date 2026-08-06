@@ -206,12 +206,12 @@ Each capability has its own name and scope:
 *
   **downloading_files - Can download files**
 
-  Allows raw file downloads when ``default_file_download_enabled`` is disabled. This also controls file previews.
+  Allows raw file downloads and file previews. Enabled by default for the ``public`` group.
 
 *
   **downloading_zipped_files - Can download password-protected ZIP files**
 
-  Allows password-protected ZIP downloads when ``default_zip_download_enabled`` is disabled.
+  Allows password-protected ZIP downloads. Enabled by default for the ``public`` group.
 
 * 
   **adding_configs - Can upload configs**

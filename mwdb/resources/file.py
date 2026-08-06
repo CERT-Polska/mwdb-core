@@ -425,8 +425,7 @@ class FileDownloadResource(Resource):
                 description: |
                     When file download token is no longer valid
                     or was generated for different object or download format,
-                    or user doesn't have the `downloading_files` capability
-                    when raw downloads are disabled by default.
+                    or user doesn't have the `downloading_files` capability.
             404:
                 description: |
                     When file doesn't exist, object is not a file
@@ -523,8 +522,7 @@ class FileDownloadResource(Resource):
                     or user doesn't have access to this object.
             403:
                 description: |
-                    When user doesn't have the `downloading_files` capability
-                    and raw downloads are disabled by default.
+                    When user doesn't have the `downloading_files` capability.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -577,8 +575,7 @@ class FileDownloadZipResource(Resource):
                 description: |
                     When file download token is no longer valid
                     or was generated for different object or download format,
-                    or user doesn't have the `downloading_zipped_files` capability
-                    when ZIP downloads are disabled by default.
+                    or user doesn't have the `downloading_zipped_files` capability.
             404:
                 description: |
                     When file doesn't exist, object is not a file
@@ -648,8 +645,7 @@ class FileDownloadZipResource(Resource):
                     or user doesn't have access to this object.
             403:
                 description: |
-                    When user doesn't have the `downloading_zipped_files` capability
-                    and ZIP downloads are disabled by default.
+                    When user doesn't have the `downloading_zipped_files` capability.
             503:
                 description: |
                     Request canceled due to database statement timeout.

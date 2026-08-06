@@ -347,8 +347,6 @@ Extra features:
 * ``log_level`` (string) - logging threshold for MWDB logger (e.g. WARNING, see also `Python logging levels <https://docs.python.org/3/library/logging.html#logging-levels>`_)
 * ``log_config_file`` (string) - Python logging configuration file (see also `logging.config configuration file format <https://docs.python.org/3/library/logging.config.html#logging-config-fileformat>`_)
 * ``zip_download_password`` (string) - Password set while downloading files in zipped/encrypted form. Default is ``infected``.
-* ``default_file_download_enabled`` (0 or 1) - Allows raw file downloads by default. If disabled, users need the ``downloading_files`` capability. Default is ``1``.
-* ``default_zip_download_enabled`` (0 or 1) - Allows password-protected ZIP downloads by default. If disabled, users need the ``downloading_zipped_files`` capability. Default is ``1``.
 
 
 Registration feature settings:

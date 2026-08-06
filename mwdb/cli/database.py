@@ -17,7 +17,10 @@ def _initialize(admin_password):
     """
     public_group = Group(
         name=Group.PUBLIC_GROUP_NAME,
-        capabilities=[],
+        capabilities=[
+            Capabilities.downloading_files,
+            Capabilities.downloading_zipped_files,
+        ],
         workspace=False,
         default=True,
         immutable=True,

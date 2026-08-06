@@ -93,8 +93,7 @@ class RequestSampleDownloadResource(Resource):
                     or user doesn't have access to this object.
             403:
                 description: |
-                    When user doesn't have the `downloading_files` capability
-                    and raw downloads are disabled by default.
+                    When user doesn't have the `downloading_files` capability.
             503:
                 description: |
                     Request canceled due to database statement timeout.

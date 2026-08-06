@@ -19,7 +19,7 @@ def upgrade():
         """
         UPDATE public.group
         SET capabilities = array_append(capabilities, 'downloading_files')
-        WHERE array_position(capabilities, 'manage_users') IS NOT NULL
+        WHERE name = 'public'
           AND array_position(capabilities, 'downloading_files') IS NULL;
         """
     )
@@ -27,7 +27,7 @@ def upgrade():
         """
         UPDATE public.group
         SET capabilities = array_append(capabilities, 'downloading_zipped_files')
-        WHERE array_position(capabilities, 'manage_users') IS NOT NULL
+        WHERE name = 'public'
           AND array_position(capabilities, 'downloading_zipped_files') IS NULL;
         """
     )

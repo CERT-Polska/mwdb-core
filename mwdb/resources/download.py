@@ -2,12 +2,13 @@ from flask import Response
 from werkzeug.exceptions import Forbidden, NotFound
 
 from mwdb.core.app import api
+from mwdb.core.auth import DownloadType
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
 from mwdb.core.service import Resource
 from mwdb.model import File
 from mwdb.schema.download import DownloadURLResponseSchema
 
-from . import requires_authorization
+from . import requires_authorization, requires_file_download_access
 
 
 class DownloadResource(Resource):
@@ -39,12 +40,14 @@ class DownloadResource(Resource):
                       type: string
                       format: binary
             403:
-                description: When file download token is no longer valid
+                description: |
+                    When file download token is no longer valid or is not a raw
+                    download token.
             503:
                 description: |
                     Request canceled due to database statement timeout.
         """
-        file_obj = File.get_by_download_token(access_token)
+        file_obj = File.get_by_download_token(access_token, DownloadType.raw)
         if not file_obj:
             raise Forbidden("Download token expired, please re-request download.")
 
@@ -58,6 +61,7 @@ class DownloadResource(Resource):
 class RequestSampleDownloadResource(Resource):
     @deprecated_endpoint(DeprecatedFeature.legacy_file_download)
     @requires_authorization
+    @requires_file_download_access(DownloadType.raw)
     def post(self, identifier):
         """
         ---
@@ -87,6 +91,9 @@ class RequestSampleDownloadResource(Resource):
                 description: |
                     When file doesn't exist, object is not a file
                     or user doesn't have access to this object.
+            403:
+                description: |
+                    When user doesn't have the `downloading_files` capability.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -95,7 +102,7 @@ class RequestSampleDownloadResource(Resource):
         if file is None:
             raise NotFound("Object not found")
 
-        download_token = file.generate_download_token()
+        download_token = file.generate_download_token(DownloadType.raw)
         schema = DownloadURLResponseSchema()
         url = api.relative_url_for(DownloadResource, access_token=download_token)
         return schema.dump({"url": url})

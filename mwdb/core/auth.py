@@ -14,6 +14,11 @@ class AuthScope(Enum):
     download_file = "download_file"
 
 
+class DownloadType(Enum):
+    raw = "raw"
+    zip = "zip"
+
+
 def generate_token(fields, scope, expiration=None):
     issued_at = datetime.datetime.now(tz=datetime.timezone.utc)
     token_claims = {

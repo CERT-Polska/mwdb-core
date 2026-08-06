@@ -7,10 +7,37 @@ from marshmallow import EXCLUDE, ValidationError
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 
 from mwdb.core import log
+from mwdb.core.auth import DownloadType
 from mwdb.core.capabilities import Capabilities
 from mwdb.model import Config, File, Group, Object, TextBlob
 
 logger = log.getLogger()
+
+
+def ensure_file_download_access(download_type):
+    if download_type == DownloadType.raw:
+        capability = Capabilities.downloading_files
+    elif download_type == DownloadType.zip:
+        capability = Capabilities.downloading_zipped_files
+    else:
+        raise ValueError(f"Unknown download type: {download_type}")
+
+    if not g.auth_user or not g.auth_user.has_rights(capability):
+        raise Forbidden(
+            f"You don't have required capability ({capability}) to download this file"
+        )
+
+
+def requires_file_download_access(download_type):
+    def decorator(f):
+        @wraps(f)
+        def endpoint(*args, **kwargs):
+            ensure_file_download_access(download_type)
+            return f(*args, **kwargs)
+
+        return endpoint
+
+    return decorator
 
 
 def requires_capabilities(*required_caps):

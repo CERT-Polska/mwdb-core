@@ -26,13 +26,19 @@ import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { SampleDetails } from "../SampleDetails";
 import { SamplePreview } from "../SamplePreview";
 import { PreviewSwitchAction } from "../PreviewSwitchAction";
-import { ObjectOrConfigOrBlobData } from "@mwdb-web/types/types";
+import { Capability, ObjectOrConfigOrBlobData } from "@mwdb-web/types/types";
 import { Extendable } from "@mwdb-web/commons/plugins";
+import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 
 export function ShowSampleView() {
     const api = useContext(APIContext);
     const params = useParams();
     const remotePath = useRemotePath();
+    const { userHasCapabilities } = useCheckCapabilities();
+    const canDownloadFiles = userHasCapabilities(Capability.downloadingFiles);
+    const canDownloadZippedFiles = userHasCapabilities(
+        Capability.downloadingZippedFiles
+    );
 
     async function downloadSample(object?: Partial<ObjectOrConfigOrBlobData>) {
         if (object && object.id) {
@@ -64,8 +70,12 @@ export function ShowSampleView() {
                     component={SampleDetails}
                     actions={[
                         <FavoriteAction />,
-                        <DownloadAction download={downloadSample} />,
-                        <ZipAction zip={zipSample} />,
+                        ...(canDownloadFiles
+                            ? [<DownloadAction download={downloadSample} />]
+                            : []),
+                        ...(canDownloadZippedFiles
+                            ? [<ZipAction zip={zipSample} />]
+                            : []),
                         <UploadChildAction />,
                         <PullAction />,
                         <PushAction />,
@@ -73,20 +83,22 @@ export function ShowSampleView() {
                     ]}
                 />
                 <RelationsTab />
-                <ObjectTab
-                    tab="preview"
-                    icon={faSearch}
-                    component={SamplePreview}
-                    actions={[
-                        <PreviewSwitchAction />,
-                        <FavoriteAction />,
-                        <DownloadAction download={downloadSample} />,
-                        <UploadChildAction />,
-                        <PullAction />,
-                        <PushAction />,
-                        <RemoveAction />,
-                    ]}
-                />
+                {canDownloadFiles ? (
+                    <ObjectTab
+                        tab="preview"
+                        icon={faSearch}
+                        component={SamplePreview}
+                        actions={[
+                            <PreviewSwitchAction />,
+                            <FavoriteAction />,
+                            <DownloadAction download={downloadSample} />,
+                            <UploadChildAction />,
+                            <PullAction />,
+                            <PushAction />,
+                            <RemoveAction />,
+                        ]}
+                    />
+                ) : null}
             </Extendable>
             <LatestConfigTab label="Static config" />
         </ShowObject>

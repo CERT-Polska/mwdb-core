@@ -395,8 +395,11 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def get_download_token(self, identifier):
-        res = self.session.post(self.mwdb_url + f"/file/{identifier}/download")
+    def get_download_token(self, identifier, zipped=False):
+        suffix = "/zip" if zipped else ""
+        res = self.session.post(
+            self.mwdb_url + f"/file/{identifier}/download{suffix}"
+        )
         res.raise_for_status()
         return res.json()["token"]
 

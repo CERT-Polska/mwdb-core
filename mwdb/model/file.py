@@ -14,7 +14,7 @@ from sqlalchemy.dialects.postgresql.array import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from werkzeug.utils import secure_filename
 
-from mwdb.core.auth import AuthScope, generate_token, verify_token
+from mwdb.core.auth import AuthScope, DownloadType, generate_token, verify_token
 from mwdb.core.config import StorageProviderType, app_config
 from mwdb.core.karton import send_file_to_karton
 from mwdb.core.util import calc_crc32, calc_hash, calc_magic, calc_ssdeep, get_s3_client
@@ -425,17 +425,23 @@ class File(Object):
             self.upload_stream.close()
             self.upload_stream = None
 
-    def generate_download_token(self):
+    def generate_download_token(self, download_type=DownloadType.raw):
         return generate_token(
-            {"identifier": self.sha256},
+            {"identifier": self.sha256, "download_type": download_type.value},
             scope=AuthScope.download_file,
             expiration=60,
         )
 
     @staticmethod
-    def get_by_download_token(download_token):
+    def get_by_download_token(download_token, download_type=DownloadType.raw):
         download_req = verify_token(download_token, scope=AuthScope.download_file)
         if not download_req:
+            return None
+        token_download_type = download_req.get("download_type")
+        if (
+            token_download_type is not None
+            and token_download_type != download_type.value
+        ):
             return None
         return File.get(download_req["identifier"]).first()
 

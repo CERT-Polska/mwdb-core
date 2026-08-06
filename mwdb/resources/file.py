@@ -8,6 +8,7 @@ from werkzeug.exceptions import (
     Unauthorized,
 )
 
+from mwdb.core.auth import DownloadType
 from mwdb.core.capabilities import Capabilities
 from mwdb.core.config import app_config
 from mwdb.core.deprecated import DeprecatedFeature, deprecated_endpoint
@@ -24,7 +25,13 @@ from mwdb.schema.file import (
     FileListResponseSchema,
 )
 
-from . import load_schema, requires_authorization, requires_capabilities
+from . import (
+    ensure_file_download_access,
+    load_schema,
+    requires_authorization,
+    requires_capabilities,
+    requires_file_download_access,
+)
 from .object import ObjectItemResource, ObjectResource, ObjectUploader
 
 
@@ -417,7 +424,8 @@ class FileDownloadResource(Resource):
             403:
                 description: |
                     When file download token is no longer valid
-                    or was generated for different object
+                    or was generated for different object or download format,
+                    or user doesn't have the `downloading_files` capability.
             404:
                 description: |
                     When file doesn't exist, object is not a file
@@ -430,7 +438,7 @@ class FileDownloadResource(Resource):
         obfuscate = request.args.get("obfuscate") == "1"
 
         if access_token:
-            file_obj = File.get_by_download_token(access_token)
+            file_obj = File.get_by_download_token(access_token, DownloadType.raw)
             if not file_obj:
                 raise Forbidden("Download token expired, please re-request download.")
             if not (
@@ -446,6 +454,7 @@ class FileDownloadResource(Resource):
         else:
             if not g.auth_user:
                 raise Unauthorized("Not authenticated.")
+            ensure_file_download_access(DownloadType.raw)
             file_obj = File.access(identifier)
             if file_obj is None:
                 raise NotFound("Object not found")
@@ -484,6 +493,7 @@ class FileDownloadResource(Resource):
             )
 
     @requires_authorization
+    @requires_file_download_access(DownloadType.raw)
     def post(self, identifier):
         """
         ---
@@ -510,6 +520,9 @@ class FileDownloadResource(Resource):
                 description: |
                     When file doesn't exist, object is not a file
                     or user doesn't have access to this object.
+            403:
+                description: |
+                    When user doesn't have the `downloading_files` capability.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -518,7 +531,7 @@ class FileDownloadResource(Resource):
         if file is None:
             raise NotFound("Object not found")
 
-        download_token = file.generate_download_token()
+        download_token = file.generate_download_token(DownloadType.raw)
         schema = FileDownloadTokenResponseSchema()
         return schema.dump({"token": download_token})
 
@@ -561,7 +574,8 @@ class FileDownloadZipResource(Resource):
             403:
                 description: |
                     When file download token is no longer valid
-                    or was generated for different object
+                    or was generated for different object or download format,
+                    or user doesn't have the `downloading_zipped_files` capability.
             404:
                 description: |
                     When file doesn't exist, object is not a file
@@ -573,7 +587,7 @@ class FileDownloadZipResource(Resource):
         access_token = request.args.get("token")
 
         if access_token:
-            file_obj = File.get_by_download_token(access_token)
+            file_obj = File.get_by_download_token(access_token, DownloadType.zip)
             if not file_obj:
                 raise Forbidden("Download token expired, please re-request download.")
             if not (
@@ -589,6 +603,7 @@ class FileDownloadZipResource(Resource):
         else:
             if not g.auth_user:
                 raise Unauthorized("Not authenticated.")
+            ensure_file_download_access(DownloadType.zip)
             file_obj = File.access(identifier)
             if file_obj is None:
                 raise NotFound("Object not found")
@@ -601,6 +616,7 @@ class FileDownloadZipResource(Resource):
         )
 
     @requires_authorization
+    @requires_file_download_access(DownloadType.zip)
     def post(self, identifier):
         """
         ---
@@ -627,6 +643,9 @@ class FileDownloadZipResource(Resource):
                 description: |
                     When file doesn't exist, object is not a file
                     or user doesn't have access to this object.
+            403:
+                description: |
+                    When user doesn't have the `downloading_zipped_files` capability.
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -635,6 +654,6 @@ class FileDownloadZipResource(Resource):
         if file is None:
             raise NotFound("Object not found")
 
-        download_token = file.generate_download_token()
+        download_token = file.generate_download_token(DownloadType.zip)
         schema = FileDownloadTokenResponseSchema()
         return schema.dump({"token": download_token})

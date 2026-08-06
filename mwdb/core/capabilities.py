@@ -29,6 +29,10 @@ class Capabilities(object):
     removing_attributes = "removing_attributes"
     # Can upload files
     adding_files = "adding_files"
+    # Can download files when downloads are disabled by default
+    downloading_files = "downloading_files"
+    # Can download password-protected ZIP files when downloads are disabled by default
+    downloading_zipped_files = "downloading_zipped_files"
     # Can upload configs
     adding_configs = "adding_configs"
     # Can upload blobs

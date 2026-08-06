@@ -16,6 +16,8 @@ export enum Capability {
     addingAllAttributes = "adding_all_attributes",
     removingAttributes = "removing_attributes",
     addingFiles = "adding_files",
+    downloadingFiles = "downloading_files",
+    downloadingZippedFiles = "downloading_zipped_files",
     addingConfigs = "adding_configs",
     addingBlobs = "adding_blobs",
     unlimitedRequests = "unlimited_requests",

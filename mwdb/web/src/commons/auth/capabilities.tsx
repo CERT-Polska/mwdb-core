@@ -22,6 +22,9 @@ export let capabilitiesList: Record<Capability, string> = {
     [Capability.addingAllAttributes]: "Can add all attributes to object",
     [Capability.removingAttributes]: "Can remove attribute from objects",
     [Capability.addingFiles]: "Can upload files",
+    [Capability.downloadingFiles]: "Can download files",
+    [Capability.downloadingZippedFiles]:
+        "Can download password-protected ZIP files",
     [Capability.addingConfigs]: "Can upload configs",
     [Capability.addingBlobs]: "Can upload text blobs",
     [Capability.unlimitedRequests]:

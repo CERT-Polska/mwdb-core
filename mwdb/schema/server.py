@@ -21,6 +21,8 @@ class ServerInfoResponseSchema(Schema):
     recaptcha_site_key = fields.Str(required=True, allow_none=True)
     request_timeout = fields.Int(required=True, allow_none=False)
     file_upload_timeout = fields.Int(required=True, allow_none=False)
+    default_file_download_enabled = fields.Boolean(required=True, allow_none=False)
+    default_zip_download_enabled = fields.Boolean(required=True, allow_none=False)
     statement_timeout = fields.Int(required=False, allow_none=True)
 
 

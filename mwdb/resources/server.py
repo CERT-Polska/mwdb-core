@@ -71,6 +71,12 @@ class ServerInfoResource(Resource):
                 "recaptcha_site_key": app_config.mwdb.recaptcha_site_key,
                 "request_timeout": app_config.mwdb.request_timeout,
                 "file_upload_timeout": app_config.mwdb.file_upload_timeout,
+                "default_file_download_enabled": (
+                    app_config.mwdb.default_file_download_enabled
+                ),
+                "default_zip_download_enabled": (
+                    app_config.mwdb.default_zip_download_enabled
+                ),
                 "statement_timeout": app_config.mwdb.statement_timeout,
             }
         )

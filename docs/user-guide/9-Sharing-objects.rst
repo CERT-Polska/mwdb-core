@@ -203,6 +203,16 @@ Each capability has its own name and scope:
 
   Enables upload of files. Enabled by default for ``registered`` group.
 
+*
+  **downloading_files - Can download files**
+
+  Allows raw file downloads when ``default_file_download_enabled`` is disabled. This also controls file previews.
+
+*
+  **downloading_zipped_files - Can download password-protected ZIP files**
+
+  Allows password-protected ZIP downloads when ``default_zip_download_enabled`` is disabled.
+
 * 
   **adding_configs - Can upload configs**
 

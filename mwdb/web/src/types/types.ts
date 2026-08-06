@@ -16,6 +16,8 @@ export enum Capability {
     addingAllAttributes = "adding_all_attributes",
     removingAttributes = "removing_attributes",
     addingFiles = "adding_files",
+    downloadingFiles = "downloading_files",
+    downloadingZippedFiles = "downloading_zipped_files",
     addingConfigs = "adding_configs",
     addingBlobs = "adding_blobs",
     unlimitedRequests = "unlimited_requests",
@@ -249,6 +251,8 @@ export type ServerInfo = {
     is_maintenance_set: boolean;
     recaptcha_site_key: string;
     file_upload_timeout: number;
+    default_file_download_enabled: boolean;
+    default_zip_download_enabled: boolean;
     server_version: string;
     is_registration_enabled: boolean;
     is_oidc_registration_enabled: boolean;

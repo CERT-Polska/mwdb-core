@@ -1,0 +1,19 @@
+# Shared S3-compatible object store (MinIO/silo) used by S3 storage and Karton
+# Included by compose.with-s3.yml and compose.with-karton.yml via the Compose `include:` directive.
+services:
+  silo:
+    image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+    entrypoint: sh
+    command: -c "mkdir -p /data/mwdb /data/karton && silo server --address 0.0.0.0:9000 /data"
+    volumes:
+      - /tmp/silo:/data
+    ports:
+      - "127.0.0.1:9000:9000"
+    healthcheck:
+      test: timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    environment:
+      - MINIO_ROOT_USER=mwdb-test-access
+      - MINIO_ROOT_PASSWORD=mwdb-test-key

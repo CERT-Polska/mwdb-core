@@ -7,6 +7,11 @@ Rich attributes guide
 
     Added Lambdas feature
 
+.. versionchanged:: 2.20.0
+
+    Links are sanitized to prevent XSS via non-http/https schemes such as ``javascript:``. Absolute URIs must use ``http`` or ``https``;
+    relative URIs and anchors are still supported.
+
 .. warning::
     This feature is still **in development** and it may significantly change in the future versions.
 
@@ -77,6 +82,11 @@ Sections can be also used for conditional rendering: false values or empty lists
 Substituted values are Markdown-escaped by default. If somehow escaping interferes with your template, you can turn it off
 by using triple-mustache tag ``{{{value}}}`` or ``{{&value}}`` syntax.
 
+.. warning::
+
+    Unescaped substitution may lead to Markdown injection. Don't use unescaped substitution if attribute value
+    may originate from untrusted source.
+
 Read more about supported Mustache syntax in Mustache.js project README (https://github.com/janl/mustache.js/)
 
 Markdown basics
@@ -114,6 +124,7 @@ Supported Markdown markups are:
     {{#value.pe-sections}}
     |{{name}}|`{{vaddr}}`|`{{vsize}}`|`{{psize}}`|{{md5}}|
     {{/value.pe-sections}}
+
 
 Lambdas
 -------

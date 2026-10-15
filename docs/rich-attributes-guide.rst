@@ -7,7 +7,7 @@ Rich attributes guide
 
     Added Lambdas feature
 
-.. versionchanged:: 2.19.1
+.. versionchanged:: 2.20.0
 
     Links are sanitized to prevent XSS via non-http/https schemes such as ``javascript:``. Absolute URIs must use ``http`` or ``https``;
     relative URIs and anchors are still supported.

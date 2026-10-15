@@ -14,8 +14,8 @@ This release contains **security fixes** and small improvements regarding file c
 
 Complete changelog can be found here: `v2.20.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.20.0>`_.
 
-[Security fix] Missing sanitization of URLs rendered as links by Rich attributes feature
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Security fix] Missing sanitization of URLs rendered as links by Rich attributes feature and URL templates
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In previous versions, including v2.19.0, links rendered by Rich attribute mechanism were not checked against schemes that may lead to cross-site scripting.
 
@@ -31,6 +31,8 @@ To mitigate this issue, this version introduces sanitization mechanism:
 - whitespace and control characters are removed from the URI
 - if URI looks like preceded by scheme, only ``http:`` and ``https:`` prefix is allowed
 - in case if URL is empty or disallowed, only the link label part is rendered and it is preceded by warning (Empty URI) or (Disallowed URI)
+
+Vulnerability applies to the plain URL templates as well and is also fixed in v2.20.0.
 
 See also:
 

@@ -4,6 +4,7 @@ export { downloadData } from "./download";
 export * from "./search";
 export * from "./filesize";
 export * from "./paginate";
+export * from "./sanitizeUrl";
 export type { ObjectContent } from "./preview";
 export { formatRaw, formatPrintable, formatHex } from "./preview";
 export { getErrorMessage } from "./getErrorMessage";

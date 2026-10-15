@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 import { ActionCopyToClipboard } from "@mwdb-web/commons/ui";
-import { makeSearchLink } from "@mwdb-web/commons/helpers";
+import { makeSearchLink, sanitizeUrl } from "@mwdb-web/commons/helpers";
 import { useNavigate } from "react-router-dom";
 import { RichAttributeValue } from "../common/RichAttributeValue";
 
@@ -44,7 +44,9 @@ export function AttributeValue({
         );
     } else if (typeof value === "string") {
         // URL templates are supported only for string values
-        const url = urlTemplate ? urlTemplate.replace("$value", value) : null;
+        const url = urlTemplate
+            ? sanitizeUrl(urlTemplate.replace("$value", value))
+            : null;
         if (url) {
             valueRender = <a href={url}>{value}</a>;
         } else {

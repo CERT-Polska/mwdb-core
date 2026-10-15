@@ -32,6 +32,10 @@ To mitigate this issue, this version introduces sanitization mechanism:
 - if URI looks like preceded by scheme, only ``http:`` and ``https:`` prefix is allowed
 - in case if URL is empty or disallowed, only the link label part is rendered and it is preceded by warning (Empty URI) or (Disallowed URI)
 
+See also:
+
+- https://github.com/CERT-Polska/mwdb-core/security/advisories/GHSA-j594-8g2x-hx6q
+
 [Important change] ``downloading_files`` and ``downloading_zipped_files`` capabilities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

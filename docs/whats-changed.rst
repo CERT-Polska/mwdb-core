@@ -7,6 +7,39 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
 
+v2.20.0
+-------
+
+This release contains **security fixes** and small improvements regarding file contents preview.
+
+Complete changelog can be found here: `v2.20.0 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.20.0>`_.
+
+[Security fix] Missing sanitization of URLs rendered as links by Rich attributes feature
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In previous versions, including v2.19.0, links rendered by Rich attribute mechanism were not checked against schemes that may lead to cross-site scripting.
+
+The malicious usage of this vulnerability is very limited, because it requires:
+
+- a defined attribute with template that makes the value directly rendered as a link e.g. ``[Open report]({{value}})``,
+- attacker must be authenticated and have a ``set`` permission to set malicious value for that attribute
+- victim with privileges higher than attacker must click on the link to execute the JavaScript code that may steal the session token and use it
+  to perform arbitrary requests with the privileges of the user.
+
+To mitigate this issue, this version introduces sanitization mechanism:
+
+- whitespace and control characters are removed from the URI
+- if URI looks like preceded by scheme, only ``http:`` and ``https:`` prefix is allowed
+- in case if URL is empty or disallowed, only the link label part is rendered and it is preceded by warning (Empty URI) or (Disallowed URI)
+
+[Important change] ``downloading_files`` and ``downloading_zipped_files`` capabilities
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This version introduces additional capabilities that are required for file download and protected file download (encrypted zip).
+Both capabilities are enabled by default for ``public`` group, so the default behavior stays the same after applying this update.
+
+The use case it to allow administrators to disable unprotected download or disable download at all for a specified group of users.
+
 v2.19.0
 -------
 

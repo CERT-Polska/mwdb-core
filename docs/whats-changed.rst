@@ -7,6 +7,18 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
 
+v3.0.0
+------
+
+This release contains **major breaking changes**, removing obsolete and unused features.
+
+[Removed] Remote instances API
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version v3.0.0 removes Remote instances feature introduced in v2.2.0.
+
+Remote API was an undercooked feature that added lots of complexity and potential for vulnerabilities (especially SSRF and permission-related). It was implemented as an experiment for federated MWDB instances, but that experiment has shown that we should try different approach.
+
 v2.20.0
 -------
 

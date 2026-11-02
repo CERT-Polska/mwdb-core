@@ -82,7 +82,7 @@ export function TagBox() {
                         <div className="text-muted">No tags to display</div>
                     )}
                 </div>
-                {auth.hasCapability(Capability.addingTags) && !api.remote && (
+                {auth.hasCapability(Capability.addingTags) && (
                     <TagForm onTagSubmit={handleTagSubmit} />
                 )}
             </div>

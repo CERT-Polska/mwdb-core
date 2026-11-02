@@ -256,7 +256,6 @@ export type ServerInfo = {
     is_oidc_registration_enabled: boolean;
     is_password_auth_enabled: boolean;
     instance_name: string;
-    remotes: string[];
     is_3rd_party_sharing_consent_enabled: boolean;
 };
 

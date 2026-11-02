@@ -15,8 +15,7 @@ export function UploadChildAction() {
     // If user can't add parents: don't show the action
     if (
         !auth.hasCapability(Capability.addingParents) ||
-        !auth.hasCapability(Capability.addingFiles) ||
-        api.remote
+        !auth.hasCapability(Capability.addingFiles)
     )
         return <></>;
 

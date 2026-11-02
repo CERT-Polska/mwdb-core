@@ -14,10 +14,8 @@ export function CommentBox() {
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
 
-    const canRemoveComments =
-        auth.hasCapability(Capability.removingComments) && !api.remote;
-    const canAddComments =
-        auth.hasCapability(Capability.addingComments) && !api.remote;
+    const canRemoveComments = auth.hasCapability(Capability.removingComments);
+    const canAddComments = auth.hasCapability(Capability.addingComments);
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     const [commentToRemove, setCommentToRemove] = useState<number>(0);

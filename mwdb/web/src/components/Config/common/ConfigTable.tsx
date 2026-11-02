@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { makeSearchLink, makeSearchDateLink } from "@mwdb-web/commons/helpers";
 import { Extendable } from "@mwdb-web/commons/plugins";
 import { DataTable, DateString } from "@mwdb-web/commons/ui";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { ConfigRows } from "./ConfigRows";
 
 type Props = {
@@ -12,7 +11,6 @@ type Props = {
 
 export function ConfigTable(props: Props) {
     const object = props.object;
-    const remotePath = useRemotePath();
 
     return (
         <DataTable>
@@ -24,7 +22,7 @@ export function ConfigTable(props: Props) {
                             to={makeSearchLink({
                                 field: "family",
                                 value: object.family,
-                                pathname: `${remotePath}/configs`,
+                                pathname: "/configs",
                             })}
                         >
                             {object.family}
@@ -38,7 +36,7 @@ export function ConfigTable(props: Props) {
                             to={makeSearchLink({
                                 field: "type",
                                 value: object.config_type,
-                                pathname: `${remotePath}/configs`,
+                                pathname: "/configs",
                             })}
                         >
                             {object.config_type}
@@ -54,7 +52,7 @@ export function ConfigTable(props: Props) {
                                 to={makeSearchDateLink({
                                     field: `upload_time`,
                                     value: object.upload_time,
-                                    pathname: `${remotePath}/configs`,
+                                    pathname: "/configs",
                                 })}
                             >
                                 <DateString date={object.upload_time} />

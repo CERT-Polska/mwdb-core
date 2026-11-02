@@ -4,7 +4,6 @@ import { ConfigTable } from "../../Config/common/ConfigTable";
 
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction, ObjectTab } from "@mwdb-web/commons/ui";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 
 type Props = {
     label: string;
@@ -12,7 +11,6 @@ type Props = {
 
 export function LatestConfigTab(props: Props) {
     const context = useContext(ObjectContext);
-    const remotePath = useRemotePath();
 
     if (!context.object) {
         return <></>;
@@ -38,7 +36,7 @@ export function LatestConfigTab(props: Props) {
             actions={[
                 <ObjectAction
                     label="Go to config"
-                    link={`${remotePath}/config/${context.object.latest_config.id}`}
+                    link={`/config/${context.object.latest_config.id}`}
                 />,
             ]}
             component={() => (

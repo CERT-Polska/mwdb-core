@@ -22,7 +22,6 @@ import {
     makeSearchLink,
     mapObjectTypeToSearchPath,
 } from "@mwdb-web/commons/helpers";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { RelationsAddModal } from "../Actions/RelationsAddModal";
 import {
     Capability,
@@ -50,7 +49,6 @@ export function RelationsBox(props: Props) {
     const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
-    const remotePath = useRemotePath();
     const [isAttributeAddModalOpen, setAttributeAddModalOpen] =
         useState<boolean>(false);
     const [isAttributeDeleteModalOpen, setAttributeDeleteModalOpen] =
@@ -152,11 +150,7 @@ export function RelationsBox(props: Props) {
                 )}
             </td>
             <td>
-                <TagList
-                    tag=""
-                    tags={parent.tags}
-                    searchEndpoint={`${remotePath}/search`}
-                />
+                <TagList tag="" tags={parent.tags} searchEndpoint={"/search"} />
             </td>
         </tr>
     ));
@@ -252,21 +246,17 @@ export function RelationsBox(props: Props) {
             <div className="card-header">
                 {props.icon && <FontAwesomeIcon icon={props.icon} size="1x" />}
                 {header}
-                {!api.remote ? (
-                    <Link
-                        to="#"
-                        className="float-right"
-                        onClick={(ev) => {
-                            ev.preventDefault();
-                            setAttributeAddModalOpen(true);
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faPlus} pull="left" size="1x" />
-                        Add
-                    </Link>
-                ) : (
-                    []
-                )}
+                <Link
+                    to="#"
+                    className="float-right"
+                    onClick={(ev) => {
+                        ev.preventDefault();
+                        setAttributeAddModalOpen(true);
+                    }}
+                >
+                    <FontAwesomeIcon icon={faPlus} pull="left" size="1x" />
+                    Add
+                </Link>
             </div>
             {parents.length + children.length > 0 ? (
                 <table

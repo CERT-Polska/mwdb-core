@@ -112,7 +112,7 @@ export function RecentViewList(props: Props) {
         } else {
             listDispatch({ type: "reload" });
         }
-    }, [props.query, props.disallowEmpty, api.remote]);
+    }, [props.query, props.disallowEmpty]);
 
     // Load page on request (pageToLoad != loadedPages)
     useEffect(() => {

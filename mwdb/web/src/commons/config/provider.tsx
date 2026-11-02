@@ -76,24 +76,6 @@ export function ConfigProvider(props: Props) {
         }
     }
 
-    async function updateRemoteInfo() {
-        try {
-            const response = await api.getRemoteNames();
-            setServerConfig({
-                type: configUpdate,
-                config: {
-                    remotes: response.data.remotes,
-                },
-            });
-        } catch (error) {
-            setServerConfig({
-                type: configError,
-                config: {},
-                error,
-            });
-        }
-    }
-
     async function updatePendingUsers() {
         try {
             const response = await api.getPendingUsers();
@@ -115,10 +97,6 @@ export function ConfigProvider(props: Props) {
     useEffect(() => {
         updateServerInfo();
     }, []);
-
-    useEffect(() => {
-        if (auth.isAuthenticated) updateRemoteInfo();
-    }, [auth.isAuthenticated]);
 
     useEffect(() => {
         if (

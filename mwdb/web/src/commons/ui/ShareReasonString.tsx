@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 
 import { ObjectLink } from "./ObjectLink";
-import { useRemotePath } from "../remotes";
 import { makeSearchLink } from "../helpers";
 import { ObjectType } from "@mwdb-web/types/types";
 
@@ -20,7 +19,6 @@ export function ShareReasonString({
     relatedUserLogin,
     showDhash,
 }: Props) {
-    const remotePath = useRemotePath();
     const reasonText =
         reasonType.charAt(0).toUpperCase() + reasonType.slice(1).toLowerCase();
     const isShared = reasonType === "shared";
@@ -42,7 +40,7 @@ export function ShareReasonString({
             to={makeSearchLink({
                 field: isShared ? "sharer" : "uploader",
                 value: relatedUserLogin,
-                pathname: `${remotePath}/search`,
+                pathname: "/search",
             })}
         >
             {isShared ? relatedUserLogin : ""}

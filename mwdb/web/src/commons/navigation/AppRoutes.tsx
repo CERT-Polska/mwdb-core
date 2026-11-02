@@ -31,7 +31,6 @@ import { ProfileResetPassword } from "@mwdb-web/components/Profile/Views/Profile
 import { ProfileOAuth } from "@mwdb-web/components/Profile/Views/ProfileOAuth";
 import { DiffTextBlobView } from "@mwdb-web/components/Blob/Views/DiffTextBlobView";
 import { RelationsPlotView } from "@mwdb-web/components/Views/RelationsPlotView";
-import { RemoteViews } from "@mwdb-web/components/Remote/RemoteViews";
 import { SettingsView } from "@mwdb-web/components/Settings/Views/SettingsView";
 import { SettingsOverviewView } from "@mwdb-web/components/Settings/Views/SettingsOverviewView";
 import { UsersPendingListView } from "@mwdb-web/components/Settings/Views/UsersPendingListView";
@@ -140,19 +139,6 @@ export function AppRoutes() {
                     element={<DiffTextBlobView />}
                 />
                 <Route path="relations" element={<RelationsPlotView />} />
-                <Route path="remote/:remote" element={<RemoteViews />}>
-                    <Route index element={<RecentSamplesView />} />
-                    <Route path="configs" element={<RecentConfigsView />} />
-                    <Route path="blobs" element={<RecentBlobsView />} />
-                    <Route path="search" element={<SearchView />} />
-                    <Route path="file/:hash/*" element={<ShowSampleView />} />
-                    <Route path="config/:hash/*" element={<ShowConfigView />} />
-                    <Route path="blob/:hash/*" element={<ShowTextBlobView />} />
-                    <Route
-                        path="diff/:current/:previous"
-                        element={<DiffTextBlobView />}
-                    />
-                </Route>
                 <Route
                     path="settings"
                     element={

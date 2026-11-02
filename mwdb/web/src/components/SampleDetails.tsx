@@ -15,12 +15,10 @@ import {
     DateString,
     Hash,
 } from "@mwdb-web/commons/ui";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { ObjectData } from "@mwdb-web/types/types";
 
 export function SampleDetails() {
     const context = useContext(ObjectContext);
-    const remotePath = useRemotePath();
 
     if (!context) {
         return <></>;
@@ -38,7 +36,7 @@ export function SampleDetails() {
                             to={makeSearchLink({
                                 field: "name",
                                 value: object.file_name,
-                                pathname: `${remotePath}/`,
+                                pathname: "/",
                             })}
                         >
                             {object.file_name}
@@ -60,7 +58,7 @@ export function SampleDetails() {
                                     to={makeSearchLink({
                                         field: "name",
                                         value: alt_name,
-                                        pathname: `${remotePath}/`,
+                                        pathname: "/",
                                     })}
                                 >
                                     {alt_name}
@@ -82,7 +80,7 @@ export function SampleDetails() {
                             to={makeSearchLink({
                                 field: "size",
                                 value: object.file_size.toString(),
-                                pathname: `${remotePath}/`,
+                                pathname: "/",
                             })}
                         >
                             {humanFileSize(object.file_size)}
@@ -102,7 +100,7 @@ export function SampleDetails() {
                             to={makeSearchLink({
                                 field: "type",
                                 value: object.file_type,
-                                pathname: `${remotePath}/`,
+                                pathname: "/",
                             })}
                         >
                             {object.file_type}
@@ -182,7 +180,7 @@ export function SampleDetails() {
                             to={makeSearchLink({
                                 field: "ssdeep",
                                 value: object.ssdeep,
-                                pathname: `${remotePath}/`,
+                                pathname: "/",
                             })}
                         >
                             {object.ssdeep}
@@ -204,7 +202,7 @@ export function SampleDetails() {
                                 to={makeSearchDateLink({
                                     field: "upload_time",
                                     value: object.upload_time,
-                                    pathname: `${remotePath}/`,
+                                    pathname: "/",
                                 })}
                             >
                                 <DateString date={object.upload_time} />

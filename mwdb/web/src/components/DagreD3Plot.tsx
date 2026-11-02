@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 
 import * as dagreD3 from "dagre-d3";
 import * as d3 from "d3";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { Edge, NodeProp } from "@mwdb-web/types/types";
 
 type RenderContext = {
@@ -23,8 +22,6 @@ type Props = {
 };
 
 export function DagreD3Plot(props: Props) {
-    const remotePath = useRemotePath();
-
     const graph = new dagreD3.graphlib.Graph().setGraph({ compound: true });
     const renderer = new dagreD3.render();
 
@@ -62,7 +59,7 @@ export function DagreD3Plot(props: Props) {
                 useEffect(() => {
                     resolve(undefined);
                 }, []);
-                return <Node node={node} remotePath={remotePath} />;
+                return <Node node={node} />;
             }
             root.render(<NodeComponent />);
         });

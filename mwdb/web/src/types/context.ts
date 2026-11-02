@@ -11,10 +11,6 @@ import {
     ServerInfo,
     User,
 } from "./types";
-import {
-    GetRemoteObjectCountResponse,
-    GetRemoteObjectListResponse,
-} from "./api";
 import { Provider } from "react";
 
 export type TabContextValues = {
@@ -50,21 +46,7 @@ export type AuthContextValues = {
     oAuthLogout: () => Promise<any>;
 };
 
-export type ApiContextValues = typeof api & {
-    remote?: string;
-};
-
-export type RemoteApiContextValues = ApiContextValues & {
-    getObjectCount: (
-        type: ObjectType,
-        query: string
-    ) => GetRemoteObjectCountResponse;
-    getObjectList: (
-        type: ObjectType,
-        older_than: string,
-        query: string
-    ) => GetRemoteObjectListResponse;
-};
+export type ApiContextValues = typeof api;
 
 export type ProfileOutletContext = {
     getUser: () => Promise<void>;

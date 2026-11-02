@@ -35,8 +35,7 @@ export function RemoveAction() {
     }
 
     // If user can't remove objects: don't show the action
-    if (!auth.hasCapability(Capability.removingObjects) || api.remote)
-        return <></>;
+    if (!auth.hasCapability(Capability.removingObjects)) return <></>;
 
     return (
         <>

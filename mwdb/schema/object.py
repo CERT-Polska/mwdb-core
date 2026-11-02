@@ -13,7 +13,6 @@ from .utils import UTCDateTime
 
 
 class ObjectListRequestSchema(Schema):
-    page = fields.Int(missing=None)  # legacy, to be removed in future
     query = fields.Str(missing=None)
     older_than = fields.Str(missing=None)
     count = fields.Int(missing=10)

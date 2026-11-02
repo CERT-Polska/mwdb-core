@@ -1,14 +1,12 @@
 import { useContext } from "react";
 
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { APIContext } from "@mwdb-web/commons/api";
 import { AuthContext } from "@mwdb-web/commons/auth";
 import { ObjectContext } from "@mwdb-web/commons/context";
 import { ObjectAction } from "@mwdb-web/commons/ui";
 import { Capability } from "@mwdb-web/types/types";
 
 export function UploadChildAction() {
-    const api = useContext(APIContext);
     const auth = useContext(AuthContext);
     const context = useContext(ObjectContext);
 

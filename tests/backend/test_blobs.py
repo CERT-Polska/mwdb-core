@@ -16,23 +16,6 @@ def test_adding_blobs(admin_session):
     assert "\x00\x01" in Alice.session.get_blob(blob["id"])["content"]
 
 
-def test_adding_blobs_legacy_post(admin_session):
-    testCase = RelationTestCase(admin_session)
-
-    Alice = testCase.new_user("Alice", capabilities=[])
-    mwdb_session = Alice.session.session
-    with ShouldRaise(405):
-        request = mwdb_session.post(
-            Alice.session.mwdb_url + "/blob/root",
-            json={
-                "blob_name": "blob_name",
-                "blob_type": "blob_type",
-                "content": "content",
-            },
-        )
-        request.raise_for_status()
-
-
 def test_blob_permissions(admin_session):
     testCase = RelationTestCase(admin_session)
 

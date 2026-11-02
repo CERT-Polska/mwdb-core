@@ -1,4 +1,3 @@
-import json
 from uuid import UUID
 
 from flask import g, request
@@ -250,10 +249,9 @@ class ObjectResource(Resource):
         return schema.dump(objects, many=True)
 
 
-class ObjectItemResource(Resource, ObjectUploader):
+class ObjectItemResource(Resource):
     ObjectType = Object
     ItemResponseSchema = ObjectItemResponseSchema
-    CreateRequestSchema = None
 
     def call_specialised_remove_hook(self, obj):
         pass
@@ -294,27 +292,6 @@ class ObjectItemResource(Resource, ObjectUploader):
             raise NotFound("Object not found")
         schema = self.ItemResponseSchema()
         return schema.dump(obj)
-
-    def _get_upload_args(self, parent_identifier):
-        """
-        Transforms upload arguments mixed into various request fields
-        """
-        if request.is_json:
-            # If request is application/json: all args are in JSON
-            args = json.loads(request.get_data(parse_form_data=True, as_text=True))
-        else:
-            if "json" in request.form:
-                # If request is multipart/form-data:
-                # some args are in JSON and some are part of form
-                args = json.loads(request.form["json"])
-            else:
-                args = {}
-            if request.form.get("metakeys"):
-                args["metakeys"] = request.form["metakeys"]
-            if request.form.get("upload_as"):
-                args["upload_as"] = request.form["upload_as"]
-        args["parent"] = parent_identifier if parent_identifier != "root" else None
-        return args
 
     @requires_authorization
     @requires_capabilities(Capabilities.removing_objects)

@@ -90,7 +90,6 @@ import {
 import {
     Capability,
     CreateUser,
-    ObjectLegacyType,
     ObjectType,
     Provider,
 } from "@mwdb-web/types/types";

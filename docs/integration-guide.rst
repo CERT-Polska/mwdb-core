@@ -178,17 +178,17 @@ A lot of hooks have been implemented in MWDB. Each of these hooks is triggered w
 
 List of available hooks and events triggering these hooks.
 
-* ``on_created_object(self, object: Object)``  - object was uploaded (file, blob or config) or pulled from remoted resource
-* ``on_reuploaded_object(self, object: Object)``  - object was again uploaded or pulled from remote resource
+* ``on_created_object(self, object: Object)``  - object was uploaded (file, blob or config)
+* ``on_reuploaded_object(self, object: Object)``  - object was uploaded but already existed before
 * ``on_removed_object(self, object: Object)`` - object was deleted
-* ``on_created_file(self, file: File)`` - file was uploaded or pulled from remoted resource
-* ``on_reuploaded_file(self, file: File):`` - file was again uploaded or pulled from remote resource
+* ``on_created_file(self, file: File)`` - file was uploaded
+* ``on_reuploaded_file(self, file: File):`` - file was uploaded but already existed before
 * ``on_removed_file(self, file: File)`` - file was deleted
-* ``on_created_config(self, config: Config)`` - config was uploaded or pulled from remoted resource
-* ``on_reuploaded_config(self, config: Config)`` - config was again uploaded or pulled from remote resource
+* ``on_created_config(self, config: Config)`` - config was uploaded
+* ``on_reuploaded_config(self, config: Config)`` - config was uploaded but already existed before
 * ``on_removed_config(self, config: Config)`` - config was deleted
-* ``on_created_text_blob(self, blob: TextBlob)`` - text blob was uploaded or pulled from remoted resource
-* ``on_reuploaded_text_blob(self, blob: TextBlob)`` - text blob was again uploaded or pulled from remote resource
+* ``on_created_text_blob(self, blob: TextBlob)`` - text blob was uploaded
+* ``on_reuploaded_text_blob(self, blob: TextBlob)`` - text blob was uploaded but already existed before
 * ``on_removed_text_blob(self, blob: TextBlob)`` - text blob was deleted
 * ``on_created_tag(self, object: Object, tag: Tag)`` - a new tag was created and assigned to object
 * ``on_reuploaded_tag(self, object: Object, tag: Tag)`` - tag was again assigned to object

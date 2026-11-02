@@ -691,7 +691,7 @@ There is new feature that allows to connect directly to the other MWDB Core inst
 This allows us to pull or push objects and discover new objects in the remote repository. At the time of release, feature is considered **beta** so
 don't rely too much on it. If you want to test it, we'll be glad for feedback!
 
-Read :ref:`Remote instances guide` to learn more.
+Read "Remote instances guide" to learn more.
 
 [API] New file download endpoint
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

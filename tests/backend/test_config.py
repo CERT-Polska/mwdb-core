@@ -1,5 +1,5 @@
 from .relations import *
-from .utils import rand_string, ShouldRaise
+from .utils import rand_string
 
 
 def test_adding_config_with_inblobs(admin_session):

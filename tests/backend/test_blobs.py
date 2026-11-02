@@ -1,5 +1,5 @@
 from .relations import *
-from .utils import random_name, rand_string, ShouldRaise
+from .utils import random_name, rand_string
 
 
 def test_adding_blobs(admin_session):

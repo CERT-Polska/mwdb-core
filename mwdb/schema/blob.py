@@ -10,7 +10,6 @@ from .object import (
 from .utils import UTCDateTime
 
 
-# Merge it with BlobCreateRequestSchema during legacy upload remove
 class BlobCreateSpecSchema(Schema):
     blob_name = fields.Str(required=True, allow_none=False)
     blob_type = fields.Str(required=True, allow_none=False)

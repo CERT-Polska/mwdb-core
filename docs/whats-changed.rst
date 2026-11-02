@@ -26,6 +26,7 @@ Version v2.0.0 incorporates support for multiple endpoints and features that wer
 used by mwdb.cert.pl clients. Version v3 removes:
 
 - ``POST/PUT /file|config|blob/<parent>`` family of endpoints
+- ``?page=`` parameter in object listing endpoints (``older_than`` should be used instead)
 
 v2.20.0
 -------

@@ -167,6 +167,8 @@ class RegisterResource(Resource):
         schema = AuthRegisterRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
+        verify_recaptcha(obj.get("recaptcha"))
+
         login = obj["login"]
 
         if db.session.query(exists().where(User.login == login)).scalar():
@@ -174,8 +176,6 @@ class RegisterResource(Resource):
 
         if db.session.query(exists().where(Group.name == login)).scalar():
             raise Conflict("Name already exists")
-
-        verify_recaptcha(obj.get("recaptcha"))
 
         user = User.create(login, obj["email"], obj["additional_info"], pending=True)
 
@@ -366,6 +366,8 @@ class RecoverPasswordResource(Resource):
         schema = AuthRecoverPasswordRequestSchema()
         obj = loads_schema(request.get_data(as_text=True), schema)
 
+        verify_recaptcha(obj.get("recaptcha"))
+
         try:
             user = User.query.filter(
                 User.login == obj["login"],
@@ -380,8 +382,6 @@ class RecoverPasswordResource(Resource):
                 "You are not allowed to recover the password. "
                 "Ask administrator for details."
             )
-
-        verify_recaptcha(obj.get("recaptcha"))
 
         try:
             send_email_notification(

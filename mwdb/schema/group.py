@@ -8,7 +8,7 @@ class GroupNameSchemaBase(Schema):
 
     @validates("name")
     def validate_name(self, name):
-        if not re.match("^[A-Za-z0-9_.-]{1,32}$", name):
+        if re.fullmatch(r"[A-Za-z0-9_.-]{1,32}", name) is None:
             raise ValidationError(
                 "Group should contain max 32 chars and include only "
                 "letters, digits, underscores, dots and dashes"
@@ -30,11 +30,15 @@ class GroupUpdateRequestSchema(Schema):
 
     @validates("name")
     def validate_name(self, name):
-        if name is not None and not re.match("^[A-Za-z0-9_.-]{1,32}$", name):
+        if name is None:
+            return
+        if re.fullmatch(r"[A-Za-z0-9_.-]{1,32}", name) is None:
             raise ValidationError(
                 "Group should contain max 32 chars and include only "
                 "letters, digits, underscores, dots and dashes"
             )
+        if name.lower() == "private":
+            raise ValidationError("Group cannot be named private")
 
 
 class GroupMemberUpdateRequestSchema(Schema):

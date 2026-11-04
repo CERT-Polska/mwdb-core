@@ -12,7 +12,7 @@ class UserLoginSchemaBase(Schema):
 
     @validates("login")
     def validate_login(self, value):
-        if not re.match("^[A-Za-z0-9_.-]{1,32}$", value):
+        if re.fullmatch(r"[A-Za-z0-9_.-]{1,32}", value) is None:
             raise ValidationError(
                 "Login should contain max 32 chars and include only "
                 "letters, digits, underscores, dots and dashes"

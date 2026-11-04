@@ -15,7 +15,7 @@ class MetakeyKeySchema(Schema):
 
     @validates("key")
     def validate_key(self, value):
-        if not re.match("^[A-Za-z0-9_-]{1,32}$", value):
+        if re.fullmatch(r"[A-Za-z0-9_-]{1,32}", value) is None:
             raise ValidationError(
                 "Key should contain max 32 chars and include only letters, "
                 "digits, underscores and dashes"

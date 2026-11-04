@@ -141,13 +141,17 @@ def test_jwt_legacy_api_keys(admin_session):
 
 def test_invalid_jwt(admin_session):
     secret_key = "e2e-testing-key"
-    correct_claims = jwt.decode(admin_session.auth_token, options={"verify_signature": False})
+    correct_claims = jwt.decode(
+        admin_session.auth_token, options={"verify_signature": False}
+    )
 
     session = MwdbTest()
 
     # Test if JWT is correctly validated
     incorrect_audience = {**correct_claims, "aud": "http://evil.com"}
-    session.set_auth_token(jwt.encode(incorrect_audience, secret_key, algorithm="HS512"))
+    session.set_auth_token(
+        jwt.encode(incorrect_audience, secret_key, algorithm="HS512")
+    )
     response = session.request("get", "/server")
     assert not response["is_authenticated"]
 
@@ -179,7 +183,51 @@ def test_invalid_jwt(admin_session):
     response = session.request("get", "/server")
     assert not response["is_authenticated"]
 
+
 def test_auth_too_long_password():
     api = MwdbTest()
     with ShouldRaise(status_code=400):
-        api.login_as(admin_login(), "a"*80)
+        api.login_as(admin_login(), "a" * 80)
+
+
+def test_auth_login_validation():
+    api = MwdbTest()
+    with ShouldRaise(status_code=400):
+        api.login_as(admin_login() + "\n", os.environ["MWDB_ADMIN_PASSWORD"])
+    with ShouldRaise(status_code=400):
+        api.login_as(admin_login() + "\r", os.environ["MWDB_ADMIN_PASSWORD"])
+
+
+def test_register_login_validation(admin_session):
+    with ShouldRaise(status_code=400):
+        admin_session.request(
+            "POST",
+            "/user/" + rand_string() + "\n",
+            json={"email": "test@test.pl", "additional_info": "Test user"},
+        )
+    with ShouldRaise(status_code=400):
+        admin_session.request(
+            "POST",
+            "/user/private\n",
+            json={"email": "test@test.pl", "additional_info": "Test user"},
+        )
+    with ShouldRaise(status_code=400):
+        admin_session.request(
+            "POST",
+            "/user/" + "a" * 32 + "\n",
+            json={"email": "test@test.pl", "additional_info": "Test user"},
+        )
+
+
+def test_group_name_validation(admin_session):
+    with ShouldRaise(status_code=400):
+        admin_session.create_group(rand_string() + "\n")
+    with ShouldRaise(status_code=400):
+        admin_session.create_group("private")
+    admin_session.create_group("valid_group_name")
+    with ShouldRaise(status_code=400):
+        admin_session.set_group("valid_group_name", new_name=rand_string() + "\n")
+    with ShouldRaise(status_code=400):
+        admin_session.set_group("valid_group_name", new_name="private")
+    admin_session.set_group("valid_group_name", new_name="valid_group_name_2")
+    admin_session.remove_group("valid_group_name_2")

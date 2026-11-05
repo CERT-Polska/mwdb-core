@@ -674,7 +674,7 @@ class UserProfileResource(Resource):
                   application/json:
                     schema: UserProfileResponseSchema
             404:
-                description: When user doesn't exist or is not a member of user's group
+                description: When user doesn't exist or is not a member of user's workspace group
             503:
                 description: |
                     Request canceled due to database statement timeout.
@@ -692,7 +692,7 @@ class UserProfileResource(Resource):
                 db.session.query(User)
                 .join(User.memberships)
                 .join(Member.group)
-                .filter(Group.name != "public")
+                .filter(Group.workspace.is_(True))
                 .filter(g.auth_user.is_member(Group.id))
                 .filter(User.login == user_login_obj["login"])
             ).first()

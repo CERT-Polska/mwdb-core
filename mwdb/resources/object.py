@@ -207,9 +207,6 @@ class ObjectResource(Resource):
                 description: |
                     Request canceled due to database statement timeout.
         """
-        if "page" in request.args:
-            uses_deprecated_api(DeprecatedFeature.legacy_page_parameter)
-
         obj = load_schema(request.args, ObjectListRequestSchema())
 
         pivot_obj = None
@@ -236,9 +233,6 @@ class ObjectResource(Resource):
             db_query = db_query.filter(
                 Object.upload_time <= pivot_obj.upload_time, Object.id < pivot_obj.id
             )
-        # Legacy parameter - to be removed in the future
-        elif obj["page"] is not None and obj["page"] > 1:
-            db_query = db_query.offset((obj["page"] - 1) * 10)
 
         objects = db_query.limit(limit).all()
 

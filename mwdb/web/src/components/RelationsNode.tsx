@@ -31,7 +31,6 @@ function styleMapping(type: ObjectType) {
 }
 
 type Props = {
-    remotePath: string;
     node: {
         id: string;
         expanded: boolean;
@@ -71,9 +70,7 @@ export function RelationsNode(props: Props) {
                 <div className="card-body">
                     <p className="card-text">
                         <small className="text-muted">
-                            <a
-                                href={`${props.remotePath}/${nodeType}/${props.node.id}`}
-                            >
+                            <a href={`/${nodeType}/${props.node.id}`}>
                                 {props.node.id.substr(0, 16)}
                             </a>
                         </small>

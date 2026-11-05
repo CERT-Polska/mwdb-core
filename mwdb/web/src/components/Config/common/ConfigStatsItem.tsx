@@ -2,11 +2,9 @@ import { Link } from "react-router-dom";
 
 import { DateString } from "@mwdb-web/commons/ui";
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { Family } from "@mwdb-web/types/types";
 
 export function ConfigStatsItem(props: Family) {
-    const remotePath = useRemotePath();
     return (
         <tr>
             <td>
@@ -14,7 +12,7 @@ export function ConfigStatsItem(props: Family) {
                     to={makeSearchLink({
                         field: "family",
                         value: props.family,
-                        pathname: `${remotePath}/configs`,
+                        pathname: "/configs",
                     })}
                 >
                     {props.family}

@@ -79,17 +79,15 @@ export function QuickQuery(props: Props) {
     };
 
     const predefinedQueryBadges = [
-        !api.remote && (
-            <QuickQueryItem
-                key="uploaded-by-me"
-                label="Only uploaded by me"
-                color="secondary"
-                onClick={(ev) => {
-                    ev.preventDefault();
-                    props.addToQuery("uploader", auth.user.login);
-                }}
-            />
-        ),
+        <QuickQueryItem
+            key="uploaded-by-me"
+            label="Only uploaded by me"
+            color="secondary"
+            onClick={(ev) => {
+                ev.preventDefault();
+                props.addToQuery("uploader", auth.user.login);
+            }}
+        />,
         <QuickQueryItem
             key="exclude-public"
             label="Exclude public"
@@ -99,7 +97,7 @@ export function QuickQuery(props: Props) {
                 props.addToQuery("NOT shared", "public");
             }}
         />,
-        !api.remote && auth.hasCapability(Capability.personalize) && (
+        auth.hasCapability(Capability.personalize) && (
             <QuickQueryItem
                 key="favorites"
                 label="Favorites"
@@ -173,7 +171,7 @@ export function QuickQuery(props: Props) {
         </span>
     );
 
-    const userQuickQueryBadges = !api.remote && (
+    const userQuickQueryBadges = (
         <>
             {queryBadges}
             {auth.hasCapability(Capability.personalize)

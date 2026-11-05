@@ -9,8 +9,6 @@ import {
     DownloadAction,
     ZipAction,
     FavoriteAction,
-    PushAction,
-    PullAction,
     UploadChildAction,
     RemoveAction,
 } from "../ShowObject";
@@ -22,7 +20,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { APIContext } from "@mwdb-web/commons/api";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { SampleDetails } from "../SampleDetails";
 import { SamplePreview } from "../SamplePreview";
 import { PreviewSwitchAction } from "../PreviewSwitchAction";
@@ -33,7 +30,6 @@ import { useCheckCapabilities } from "@mwdb-web/commons/hooks";
 export function ShowSampleView() {
     const api = useContext(APIContext);
     const params = useParams();
-    const remotePath = useRemotePath();
     const { userHasCapabilities } = useCheckCapabilities();
     const canDownloadFiles = userHasCapabilities(Capability.downloadingFiles);
     const canDownloadZippedFiles = userHasCapabilities(
@@ -59,7 +55,7 @@ export function ShowSampleView() {
             ident="showSample"
             objectType="file"
             objectId={params.hash ?? ""}
-            searchEndpoint={`${remotePath}/`}
+            searchEndpoint="/"
             headerIcon={faFile}
             headerCaption="File details"
         >
@@ -77,8 +73,6 @@ export function ShowSampleView() {
                             ? [<ZipAction zip={zipSample} />]
                             : []),
                         <UploadChildAction />,
-                        <PullAction />,
-                        <PushAction />,
                         <RemoveAction />,
                     ]}
                 />
@@ -93,8 +87,6 @@ export function ShowSampleView() {
                             <FavoriteAction />,
                             <DownloadAction download={downloadSample} />,
                             <UploadChildAction />,
-                            <PullAction />,
-                            <PushAction />,
                             <RemoveAction />,
                         ]}
                     />

@@ -272,47 +272,9 @@ export type UploadBlobRequest = {
 
 export type UploadBlobResponse = Response<BlobData>;
 
-export type GetRemoteNamesResponse = Response<{
-    remotes: string[];
-}>;
-
-export type PushObjectRemoteResponse = Response<null>;
-
-export type PullObjectRemoteResponse = Response<null>;
-
 export type GetConfigStatsResponse = Response<{
     families: Family[];
 }>;
-
-export type GetRemoteObjectResponse = Response<ObjectOrConfigOrBlobData>;
-
-export type GetRemoteObjectListResponse = Response<
-    ObjectData[] | ConfigData[] | BlobData[]
->;
-
-export type GetRemoteObjectCountResponse = Response<{
-    count: number;
-}>;
-
-export type GetRemoteObjectTagsResponse = Response<Tag[]>;
-
-export type GetRemoteObjectCommentsResponse = Response<Comment[]>;
-
-export type GetRemoteObjectRelationsResponse = Response<{
-    children: RelatedObject[];
-    parents: RelatedObject[];
-}>;
-
-export type GetRemoteObjectSharesResponse = Response<{
-    groups: string[];
-    shares: Share[];
-}>;
-
-export type GetRemoteObjectAttributesResponse = Response<{
-    attributes: Attribute[];
-}>;
-
-export type DownloadRemoteFileResponse = Response<ArrayBuffer>;
 
 export type GetKartonAnalysesListResponse = Response<{
     analyses: KartonAnalysis[];

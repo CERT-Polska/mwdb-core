@@ -85,7 +85,7 @@ export function SharesBox() {
                 <SharesList
                     shares={shares}
                     groups={groups}
-                    handleShare={!api.remote ? handleShare : undefined}
+                    handleShare={handleShare}
                     currentFile={context.object.id}
                     direct
                 />

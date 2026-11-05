@@ -11,13 +11,10 @@ import "ace-builds/src-noconflict/theme-chrome";
 import { APIContext } from "@mwdb-web/commons/api";
 import { View } from "@mwdb-web/commons/ui";
 import { getErrorMessage } from "@mwdb-web/commons/helpers";
-import { useRemote } from "@mwdb-web/commons/remotes";
 import { DiffTextBlobContentPresenter } from "../../DiffTextBlobContentPresenter";
 import { BlobData } from "@mwdb-web/types/types";
 
 export function DiffTextBlobView() {
-    const remote = useRemote();
-    const remotePath = remote ? `/remote/${remote}` : "";
     const api = useContext(APIContext);
     const { current: currentHash, previous: previousHash } = useParams();
     const [currentBlob, setCurrentBlob] = useState<BlobData | null>(null);
@@ -67,14 +64,14 @@ export function DiffTextBlobView() {
                                     <tr>
                                         <th style={{ width: "49%" }}>
                                             <Link
-                                                to={`${remotePath}/blob/${currentBlob.id}`}
+                                                to={`/blob/${currentBlob.id}`}
                                             >
                                                 {currentBlob.id}
                                             </Link>
                                         </th>
                                         <td>
                                             <Link
-                                                to={`${remotePath}/diff/${previousBlob.id}/${currentBlob.id}`}
+                                                to={`/diff/${previousBlob.id}/${currentBlob.id}`}
                                             >
                                                 <button className="btn btn-primary">
                                                     <FontAwesomeIcon
@@ -86,7 +83,7 @@ export function DiffTextBlobView() {
                                         </td>
                                         <td>
                                             <Link
-                                                to={`${remotePath}/blob/${previousBlob.id}`}
+                                                to={`/blob/${previousBlob.id}`}
                                             >
                                                 {previousBlob.id}
                                             </Link>

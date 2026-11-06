@@ -117,6 +117,11 @@ class ObjectUploader:
 
         # Tags argument
         tags = params.get("tags")
+        if tags and not g.auth_user.has_rights(Capabilities.adding_tags):
+            raise Forbidden(
+                "You don't have required capability "
+                "(adding_tags) to perform this action"
+            )
 
         share_3rd_party = params.get("share_3rd_party", True)
 

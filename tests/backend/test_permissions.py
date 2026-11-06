@@ -101,6 +101,29 @@ def test_adding_tags(admin_session):
     assert {"tag": "tag123"} in admin_session.get_tags(Sample.dhash)
 
 
+def test_adding_tags_on_upload(admin_session):
+    testCase = RelationTestCase(admin_session)
+
+    Alice = testCase.new_user("Alice")
+    Bob = testCase.new_user("Bob", capabilities=["adding_tags"])
+
+    Sample = testCase.new_sample("Sample")
+
+    # Upload without tags doesn't require 'adding_tags' capability
+    Alice.session.add_sample(content=Sample.identity)
+
+    # Upload with tags requires 'adding_tags' capability
+    with ShouldRaise(status_code=403):
+        Alice.session.add_sample(content=Sample.identity, tags=[{"tag": "tag123"}])
+
+    assert {"tag": "tag123"} not in admin_session.get_tags(Sample.dhash)
+
+    # User with 'adding_tags' capability can attach tags during upload
+    Bob.session.add_sample(content=Sample.identity, tags=[{"tag": "tag123"}])
+
+    assert {"tag": "tag123"} in admin_session.get_tags(Sample.dhash)
+
+
 def test_removing_tags(admin_session):
     testCase = RelationTestCase(admin_session)
 

@@ -5,7 +5,7 @@ from .utils import rand_string, ShouldRaise
 def test_adding_config_with_inblobs(admin_session):
     testCase = RelationTestCase(admin_session)
 
-    Alice = testCase.new_user("Alice", capabilities=["reading_blobs", "adding_blobs", "adding_configs"])
+    Alice = testCase.new_user("Alice", capabilities=["reading_blobs", "adding_blobs", "adding_configs", "adding_parents"])
 
     config_json = {
         "cnc": [1, 2, 3],
@@ -35,6 +35,51 @@ def test_adding_config_with_inblobs(admin_session):
 
     assert blob1["blob_name"] in ["In blob name", "Peers blob name"] and \
            blob2["blob_name"] in ["In blob name", "Peers blob name"]
+
+
+def test_adding_config_with_inblobs_by_hash(admin_session):
+    testCase = RelationTestCase(admin_session)
+
+    Group = testCase.new_group("common_group", capabilities=["reading_blobs", "adding_blobs"])
+    Alice = testCase.new_user("Alice", capabilities=["adding_configs", "adding_parents"])
+    Bob = testCase.new_user("Bob", capabilities=[])
+
+    admin_session.add_member(Group.identity, Alice.identity)
+    admin_session.add_member(Group.identity, Bob.identity)
+
+    BlobA = testCase.new_blob("BlobA")
+    BlobB = testCase.new_blob("BlobB")
+    # BlobA is shared within Group
+    BlobA.create(Alice, BlobA)
+    # BlobB is private
+    BlobB.create(Alice, BlobB, upload_as=Alice.identity)
+
+    config_json = {
+        "cnc": [1, 2, 3],
+        "raw_cfg": {
+            "in-blob": BlobA.dhash,
+        }
+    }
+    # Both can add in-blob with shared blob
+    Alice.session.add_config(None, "malwarex", config_json)
+    Bob.session.add_config(None, "malwarex", config_json)
+
+    config_json = {
+        "cnc": [1, 2, 3],
+        "raw_cfg": {
+            "in-blob": BlobA.dhash,
+        },
+        "peers": {
+            "in-blob": BlobB.dhash
+        }
+    }
+    # Only Alice can add in-blob with blob that only Alice has access to
+    Alice.session.add_config(None, "malwarex", config_json)
+
+    with ShouldRaise(403):
+        Bob.session.add_config(None, "malwarex", config_json)
+
+
 
 
 def test_adding_configs_legacy_post(admin_session):

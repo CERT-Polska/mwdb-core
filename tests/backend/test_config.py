@@ -40,9 +40,12 @@ def test_adding_config_with_inblobs(admin_session):
 def test_adding_config_with_inblobs_by_hash(admin_session):
     testCase = RelationTestCase(admin_session)
 
-    Group = testCase.new_group("common_group", capabilities=["reading_blobs", "adding_blobs"])
+    Group = testCase.new_group("common_group", capabilities=["adding_blobs"])
     Alice = testCase.new_user("Alice", capabilities=["adding_configs", "adding_parents"])
-    Bob = testCase.new_user("Bob", capabilities=[])
+    Bob = testCase.new_user("Bob", capabilities=["adding_configs"])
+    Charlie = testCase.new_user(
+        "Charlie", capabilities=["adding_configs", "adding_blobs", "adding_parents"]
+    )
 
     admin_session.add_member(Group.identity, Alice.identity)
     admin_session.add_member(Group.identity, Bob.identity)
@@ -50,9 +53,9 @@ def test_adding_config_with_inblobs_by_hash(admin_session):
     BlobA = testCase.new_blob("BlobA")
     BlobB = testCase.new_blob("BlobB")
     # BlobA is shared within Group
-    BlobA.create(Alice, BlobA)
-    # BlobB is private
-    BlobB.create(Alice, BlobB, upload_as=Alice.identity)
+    BlobA.create(Alice)
+    # BlobB is private to Alice
+    BlobB.create(Alice, upload_as=Alice.identity)
 
     config_json = {
         "cnc": [1, 2, 3],
@@ -60,9 +63,16 @@ def test_adding_config_with_inblobs_by_hash(admin_session):
             "in-blob": BlobA.dhash,
         }
     }
-    # Both can add in-blob with shared blob
+    # Alice has all required capabilities to add config with embedded blob
     Alice.session.add_config(None, "malwarex", config_json)
-    Bob.session.add_config(None, "malwarex", config_json)
+    # Bob is a Group member, but doesn't have 'adding_parents' capability
+    # that is required to link embedded blob with the config
+    with ShouldRaise(403):
+        Bob.session.add_config(None, "malwarex", config_json)
+    # Charlie has all required capabilities, but doesn't have access
+    # to the blob (is not a member of Group)
+    with ShouldRaise(404):
+        Charlie.session.add_config(None, "malwarex", config_json)
 
     config_json = {
         "cnc": [1, 2, 3],
@@ -73,13 +83,75 @@ def test_adding_config_with_inblobs_by_hash(admin_session):
             "in-blob": BlobB.dhash
         }
     }
-    # Only Alice can add in-blob with blob that only Alice has access to
+    # Only Alice can add config with blob that only Alice has access to
     Alice.session.add_config(None, "malwarex", config_json)
 
     with ShouldRaise(403):
         Bob.session.add_config(None, "malwarex", config_json)
 
+    with ShouldRaise(404):
+        Charlie.session.add_config(None, "malwarex", config_json)
 
+
+def test_adding_inblobs_config_without_capabilities(admin_session):
+    testCase = RelationTestCase(admin_session)
+
+    # Blob is shared with everyone, so blob access is not a failure reason
+    Blob = testCase.new_blob("BlobA")
+    Blob.create(upload_as="public")
+
+    # User without 'adding_blobs' capability
+    Alice = testCase.new_user("Alice", capabilities=["adding_configs"])
+
+    # User without 'adding_parents' capability that is required
+    # to link embedded blob (parent relation) with the config
+    Bob = testCase.new_user("Bob", capabilities=["adding_configs", "adding_blobs"])
+
+    # User with all required capabilities
+    Charlie = testCase.new_user(
+        "Charlie", capabilities=["adding_configs", "adding_blobs", "adding_parents"]
+    )
+
+    # Alice and Bob are not permitted to add config with embedded blob: 403
+    for user in (Alice, Bob):
+        key = rand_string(15)
+        hash_config_json = {
+            "cnc": [1, 2, 3],
+            "secret": key,
+            "raw_cfg": {
+                "in-blob": Blob.dhash,
+            },
+        }
+        spec_config_json = {
+            "cnc": [1, 2, 3],
+            "secret": key,
+            "raw_cfg": {
+                "in-blob": {
+                    "blob_name": "In blob name",
+                    "blob_type": "Blob type",
+                    "content": rand_string(15),
+                }
+            },
+        }
+        # 'in-blob' specified by hash and by embedded blob specification
+        with ShouldRaise(403):
+            user.session.add_config(None, "malwarex", hash_config_json)
+        with ShouldRaise(403):
+            user.session.add_config(None, "malwarex", spec_config_json)
+
+        # Config was not created
+        found = user.session.search(f'config.cfg.secret:{key}')
+        assert len(found) == 0
+
+    # Charlie is permitted to add config with embedded blob referenced by hash
+    charlie_config = Charlie.session.add_config(None, "malwarex", {
+        "cnc": [1, 2, 3],
+        "raw_cfg": {
+            "in-blob": Blob.dhash,
+        },
+    })
+    # Blob is linked with the created config as a child
+    assert charlie_config["children"][0]["id"] == Blob.dhash
 
 
 def test_adding_configs_legacy_post(admin_session):

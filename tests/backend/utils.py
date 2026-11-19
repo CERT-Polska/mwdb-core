@@ -443,7 +443,7 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def add_blob(self, parent, blobname=None, blobtype=None, content=None, tags=None, share_3rd_party=None):
+    def add_blob(self, parent, blobname=None, blobtype=None, content=None, tags=None, upload_as=None, share_3rd_party=None):
         if share_3rd_party is None:
             share_3rd_party = True
         res = self.session.post(
@@ -454,6 +454,7 @@ class MwdbTest(object):
                 "content": content or str(uuid.uuid4()),
                 "parent": parent,
                 "tags": tags or [],
+                "upload_as": upload_as or "*",
                 "share_3rd_party": share_3rd_party
             },
         )

@@ -172,6 +172,7 @@ class RelationTestBlob(RelationTestObject):
             blobname="malwarex.inject",
             blobtype="inject",
             content=identity,
+            upload_as=upload_as,
             share_3rd_party=share_3rd_party,
         )
 

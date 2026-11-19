@@ -300,7 +300,7 @@ def test_config_search_upload_count(admin_session):
     for _ in range(2):
         user_name = random_name()
         user_password = random_name()
-        admin_session.register_user(user_name, user_password, ["adding_tags", "adding_configs", "adding_blobs"])
+        admin_session.register_user(user_name, user_password, ["adding_tags", "adding_configs", "adding_blobs", "adding_parents"])
         test_users.append({'user_name': user_name, 'user_password': user_password})
 
     users_session = MwdbTest()

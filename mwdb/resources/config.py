@@ -131,6 +131,9 @@ class ConfigUploader(ObjectUploader):
                 if isinstance(second, dict) and list(second.keys()) == ["in-blob"]:
                     if not g.auth_user.has_rights(Capabilities.adding_blobs):
                         raise Forbidden("You are not permitted to add blob objects")
+                    # Note: 'in-blob' creates a relation that is derived from configuration contents
+                    # (the configuration declares the blob reference dhash, operation authorized by 'adding_blobs')
+                    # 'adding_parents' guards only user-asserted relations, so it is deliberately not required here.
                     blob_obj = self._get_embedded_blob(
                         second["in-blob"], share_with, attributes, share_3rd_party
                     )

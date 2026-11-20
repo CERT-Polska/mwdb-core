@@ -22,7 +22,6 @@ import {
     CreateUserResponse,
     DeleteQuickQueryResponse,
     DownloadFileResponse,
-    DownloadRemoteFileResponse,
     EnableSharing3rdPartyResponse,
     GenerateSetPasswordResponse,
     GetAttributeDefinitionResponse,
@@ -43,15 +42,6 @@ import {
     GetObjectTagsResponse,
     GetPendingUsersResponse,
     GetQuickQueriesResponse,
-    GetRemoteNamesResponse,
-    GetRemoteObjectAttributesResponse,
-    GetRemoteObjectCommentsResponse,
-    GetRemoteObjectCountResponse,
-    GetRemoteObjectListResponse,
-    GetRemoteObjectRelationsResponse,
-    GetRemoteObjectResponse,
-    GetRemoteObjectSharesResponse,
-    GetRemoteObjectTagsResponse,
     GetShareInfoResponse,
     GetTagsResponse,
     GetUserProfileResponse,
@@ -63,8 +53,6 @@ import {
     OauthGetSingleProviderResponse,
     OauthRemoveSingleProviderResponse,
     OauthUpdateSingleProviderResponse,
-    PullObjectRemoteResponse,
-    PushObjectRemoteResponse,
     RegisterGroupResponse,
     RegisterUserResponse,
     RejectPendingUserResponse,
@@ -102,7 +90,6 @@ import {
 import {
     Capability,
     CreateUser,
-    ObjectLegacyType,
     ObjectType,
     Provider,
 } from "@mwdb-web/types/types";
@@ -639,134 +626,12 @@ function uploadConfig(body: UploadConfigRequest): UploadConfigResponse {
     return axios.post("/config", body);
 }
 
-function getRemoteNames(): GetRemoteNamesResponse {
-    return axios.get("/remote");
-}
-
-function pushObjectRemote(
-    remote: string,
-    type: ObjectLegacyType,
-    identifier: string,
-    upload_as: string
-): PushObjectRemoteResponse {
-    return axios.post(`/remote/${remote}/push/${type}/${identifier}`, {
-        upload_as,
-    });
-}
-
-function pullObjectRemote(
-    remote: string,
-    type: ObjectLegacyType,
-    identifier: string,
-    upload_as: string
-): PullObjectRemoteResponse {
-    return axios.post(`/remote/${remote}/pull/${type}/${identifier}`, {
-        upload_as,
-    });
-}
-
 function getConfigStats(fromTime: string): GetConfigStatsResponse {
     return axios.get("/config/stats", {
         params: {
             range: fromTime,
         },
     });
-}
-
-function getRemoteObject(
-    remote: string,
-    type: ObjectType,
-    id: string
-): GetRemoteObjectResponse {
-    return axios.get(`/remote/${remote}/api/${type}/${id}`);
-}
-
-function getRemoteObjectList(
-    remote: string,
-    type: ObjectType,
-    older_than: string,
-    query: string
-): GetRemoteObjectListResponse {
-    return axios.get(`/remote/${remote}/api/${type}`, {
-        params: { older_than, query },
-    });
-}
-
-function getRemoteObjectCount(
-    remote: string,
-    type: string,
-    query: string
-): GetRemoteObjectCountResponse {
-    return axios.get(`/remote/${remote}/api/${type}/count`, {
-        params: { query },
-    });
-}
-
-function getRemoteObjectTags(
-    remote: string,
-    id: string
-): GetRemoteObjectTagsResponse {
-    return axios.get(`/remote/${remote}/api/object/${id}/tag`);
-}
-
-function getRemoteObjectComments(
-    remote: string,
-    id: string
-): GetRemoteObjectCommentsResponse {
-    return axios.get(`/remote/${remote}/api/object/${id}/comment`);
-}
-
-function getRemoteObjectRelations(
-    remote: string,
-    id: number
-): GetRemoteObjectRelationsResponse {
-    return axios.get(`/remote/${remote}/api/object/${id}/relations`);
-}
-
-function getRemoteObjectShares(
-    remote: string,
-    id: string
-): GetRemoteObjectSharesResponse {
-    return axios.get(`/remote/${remote}/api/object/${id}/share`);
-}
-
-function getRemoteObjectAttributes(
-    remote: string,
-    id: string
-): GetRemoteObjectAttributesResponse {
-    return axios.get(`/remote/${remote}/api/object/${id}/attribute`);
-}
-
-function downloadRemoteFile(
-    remote: string,
-    id: string
-): DownloadRemoteFileResponse {
-    return axios.get(`/remote/${remote}/api/file/${id}/download`, {
-        responseType: "arraybuffer",
-        responseEncoding: "binary",
-    });
-}
-
-async function requestRemoteFileDownloadLink(
-    remote: string,
-    id: string
-): Promise<string> {
-    const response = await axios.post(
-        `/remote/${remote}/api/file/${id}/download`
-    );
-    const baseURL = getApiForEnvironment();
-    return `${baseURL}/remote/${remote}/api/file/${id}/download?token=${response.data.token}`;
-}
-
-async function requestRemoteZipFileDownloadLink(
-    remote: string,
-    id: number
-): Promise<string> {
-    const response = await axios.post(
-        `/remote/${remote}/api/file/${id}/download/zip`
-    );
-    const baseURL = getApiForEnvironment();
-    return `${baseURL}/remote/${remote}/api/file/${id}/download/zip?token=${response.data.token}`;
 }
 
 function getKartonAnalysesList(
@@ -881,24 +746,10 @@ export const api = {
     uploadFile,
     uploadBlob,
     uploadConfig,
-    getRemoteNames,
-    pushObjectRemote,
-    pullObjectRemote,
     getConfigStats,
     getObjectRelations,
     addObjectRelation,
     removeObjectRelation,
-    getRemoteObject,
-    getRemoteObjectList,
-    getRemoteObjectCount,
-    getRemoteObjectTags,
-    getRemoteObjectComments,
-    getRemoteObjectRelations,
-    getRemoteObjectShares,
-    getRemoteObjectAttributes,
-    downloadRemoteFile,
-    requestRemoteFileDownloadLink,
-    requestRemoteZipFileDownloadLink,
     getKartonAnalysesList,
     getKartonAnalysisStatus,
     resubmitKartonAnalysis,

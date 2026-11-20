@@ -79,16 +79,6 @@ from mwdb.resources.object import (
 )
 from mwdb.resources.quick_query import QuickQueryItemResource, QuickQueryResource
 from mwdb.resources.relations import ObjectChildResource, RelationsResource
-from mwdb.resources.remotes import (
-    RemoteAPIResource,
-    RemoteConfigPullResource,
-    RemoteConfigPushResource,
-    RemoteFilePullResource,
-    RemoteFilePushResource,
-    RemoteListResource,
-    RemoteTextBlobPullResource,
-    RemoteTextBlobPushResource,
-)
 from mwdb.resources.search import SearchResource
 from mwdb.resources.server import (
     PingResource,
@@ -393,28 +383,6 @@ if app_config.mwdb.enable_oidc:
     api.add_resource(OpenIDBindAccountResource, "/oauth/<provider_name>/bind_account")
     api.add_resource(OpenIDRegisterUserResource, "/oauth/<provider_name>/register")
     api.add_resource(OpenIDLogoutResource, "/oauth/<provider_name>/logout")
-
-# Remote endpoints
-api.add_resource(RemoteListResource, "/remote")
-api.add_resource(RemoteAPIResource, "/remote/<remote_name>/api/<path:remote_path>")
-api.add_resource(
-    RemoteFilePullResource, "/remote/<remote_name>/pull/file/<hash64:identifier>"
-)
-api.add_resource(
-    RemoteConfigPullResource, "/remote/<remote_name>/pull/config/<hash64:identifier>"
-)
-api.add_resource(
-    RemoteTextBlobPullResource, "/remote/<remote_name>/pull/blob/<hash64:identifier>"
-)
-api.add_resource(
-    RemoteFilePushResource, "/remote/<remote_name>/push/file/<hash64:identifier>"
-)
-api.add_resource(
-    RemoteConfigPushResource, "/remote/<remote_name>/push/config/<hash64:identifier>"
-)
-api.add_resource(
-    RemoteTextBlobPushResource, "/remote/<remote_name>/push/blob/<hash64:identifier>"
-)
 
 if metrics_enabled():
     api.add_resource(MetricsResource, "/varz")

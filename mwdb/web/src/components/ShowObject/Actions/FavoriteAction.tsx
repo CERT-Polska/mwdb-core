@@ -32,7 +32,7 @@ export function FavoriteAction() {
         }
     }
 
-    if (!auth.hasCapability(Capability.personalize) || api.remote) return <></>;
+    if (!auth.hasCapability(Capability.personalize)) return <></>;
 
     if (!context.object) {
         return <></>;

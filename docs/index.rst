@@ -23,7 +23,6 @@ Features
    user-guide/index
    integration-guide
    developer-guide
-   remotes-guide
    karton-guide
    oauth-guide
    rich-attributes-guide

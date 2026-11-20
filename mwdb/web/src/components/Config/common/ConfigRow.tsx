@@ -6,7 +6,6 @@ import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import { makeSearchConfigLink } from "@mwdb-web/commons/helpers";
 import { ActionCopyToClipboard, ObjectLink } from "@mwdb-web/commons/ui";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { ConfigRows } from "./ConfigRows";
 
 type Props = {
@@ -27,8 +26,6 @@ export function ConfigRow(props: Props) {
         Object.keys(value).length === 1 &&
         Object.keys(value)[0] === "in-blob";
     const isRegularObject = isObject && !isEmbeddedBlob;
-
-    const remotePath = useRemotePath();
 
     useEffect(() => {
         // Automatically expand all nested objects if parent has been expanded
@@ -53,7 +50,7 @@ export function ConfigRow(props: Props) {
                 to={makeSearchConfigLink({
                     field: path,
                     value: value,
-                    pathname: `${remotePath}/configs`,
+                    pathname: "/configs",
                 })}
             >
                 {String(value)}

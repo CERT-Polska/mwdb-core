@@ -340,7 +340,6 @@ Extra features:
 * ``enable_debug_log`` (0 or 1) - Enables debug logging
 * ``enable_ssdeep`` (0 or 1) - Enables ssdeep evaluation. Default is ``1``.
 * ``redis_uri`` (string) - Redis database connection string, required by rate limiter.
-* ``remotes`` (comma separated strings) - list of MWDB remotes (experimental)
 * ``enable_hooks`` (0 or 1) - enable plugin hooks
 * ``enable_oidc`` (0 or 1) - enable OIDC (experimental)
 * ``listing_endpoints_count_limit`` (integer) - Limits number of objects returned by listing endpoints. Default is ``1000``.

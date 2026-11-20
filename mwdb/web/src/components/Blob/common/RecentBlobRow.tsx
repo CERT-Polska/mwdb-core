@@ -6,12 +6,10 @@ import { faRandom } from "@fortawesome/free-solid-svg-icons";
 import { RecentRow, RecentInnerRow } from "../../RecentView";
 import { TagList } from "@mwdb-web/commons/ui";
 import { DateString, ObjectLink, Hash } from "@mwdb-web/commons/ui";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { BlobData } from "@mwdb-web/types/types";
 import { RecentRowProps } from "@mwdb-web/types/props";
 
 export function RecentBlobRow(props: RecentRowProps<BlobData>) {
-    const remotePath = useRemotePath();
     const searchParams = useSearchParams()[0];
     const diffWith = searchParams.get("diff");
     const blobType = (
@@ -29,7 +27,7 @@ export function RecentBlobRow(props: RecentRowProps<BlobData>) {
         props.id === diffWith ? (
             <Hash hash={props.id} />
         ) : (
-            <Link to={`${remotePath}/diff/${props.id}/${diffWith}`}>
+            <Link to={`/diff/${props.id}/${diffWith}`}>
                 <Hash hash={props.id} />
             </Link>
         )

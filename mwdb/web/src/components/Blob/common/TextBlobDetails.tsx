@@ -10,12 +10,10 @@ import {
 } from "@mwdb-web/commons/helpers";
 import { DataTable, DateString } from "@mwdb-web/commons/ui";
 import { Extendable } from "@mwdb-web/commons/plugins";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { BlobData } from "@mwdb-web/types/types";
 
 export function TextBlobDetails() {
     const context = useContext(ObjectContext);
-    const remotePath = useRemotePath();
 
     if (!context) {
         return <></>;
@@ -33,7 +31,7 @@ export function TextBlobDetails() {
                             to={makeSearchLink({
                                 field: "name",
                                 value: object.blob_name,
-                                pathname: `${remotePath}/blobs`,
+                                pathname: "/blobs",
                             })}
                         >
                             {object.blob_name}
@@ -47,7 +45,7 @@ export function TextBlobDetails() {
                             to={makeSearchLink({
                                 field: "size",
                                 value: object.blob_size.toString(),
-                                pathname: `${remotePath}/blobs`,
+                                pathname: "/blobs",
                             })}
                         >
                             {humanFileSize(object.blob_size)}
@@ -61,7 +59,7 @@ export function TextBlobDetails() {
                             to={makeSearchLink({
                                 field: "type",
                                 value: object.blob_type,
-                                pathname: `${remotePath}/blobs`,
+                                pathname: "/blobs",
                             })}
                         >
                             {object.blob_type}
@@ -77,7 +75,7 @@ export function TextBlobDetails() {
                                 to={makeSearchDateLink({
                                     field: "upload_time",
                                     value: object.upload_time,
-                                    pathname: `${remotePath}/blobs`,
+                                    pathname: "/blobs",
                                 })}
                             >
                                 <DateString date={object.upload_time} />
@@ -96,7 +94,7 @@ export function TextBlobDetails() {
                                 to={makeSearchDateLink({
                                     field: "last_seen",
                                     value: object.last_seen,
-                                    pathname: `${remotePath}/blobs`,
+                                    pathname: "/blobs",
                                 })}
                             >
                                 <DateString date={object.last_seen} />

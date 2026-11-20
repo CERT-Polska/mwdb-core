@@ -22,7 +22,11 @@ logger = logging.getLogger("mwdb.karton")
 class KartonProducer(Producer):
     identity = "karton.mwdb"
     version = app_version
-    with_service_info = True
+    egress_filters = [
+        {"type": "sample", "kind": "raw"},
+        {"type": "config"},
+        {"type": "blob"},
+    ]
 
 
 _karton_producer = None
@@ -35,7 +39,8 @@ def get_karton_producer() -> Optional[Producer]:
     if _karton_producer is None:
         try:
             _karton_producer = KartonProducer(
-                config=KartonConfig(app_config.karton.config_path)
+                identity=KartonProducer.identity,
+                config=KartonConfig(app_config.karton.config_path),
             )
         except Exception:
             logger.exception("Failed to load Karton producer")

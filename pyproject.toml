@@ -13,7 +13,7 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license-files = ["LICENSE", "LICENSE.AGPL"]
 dynamic = ["version"]
 authors = [
@@ -31,7 +31,7 @@ dependencies = [
     "flask-migrate==4.1.0",
     "flask-sqlalchemy==3.0.5",
     "gunicorn==25.1.0",
-    "karton-core==5.9.1",
+    "karton-core==6.1.0",
     "limits==3.9.0",
     "luqum==0.13.0",
     "marshmallow==3.26.2",
@@ -43,7 +43,7 @@ dependencies = [
     "python-json-logger==2.0.2",
     "python-magic==0.4.18",
     "pyzipper==0.4.0",
-    "redis==4.5.4",
+    "redis==8.1.0",
     "requests==2.32.4",
     "sqlalchemy==1.4.54",
     "typed-config==1.1.0",

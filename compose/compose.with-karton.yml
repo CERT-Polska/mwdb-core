@@ -11,7 +11,7 @@ services:
     volumes:
       - "./dev/karton.ini:/etc/karton/karton.ini"
   karton-system-router:
-    image: certpl/karton-system:v5.9.0
+    image: certpl/karton-system:v6.1.0
     depends_on:
       silo:
         condition: service_healthy
@@ -22,7 +22,7 @@ services:
     entrypoint: karton-system
     command: --setup-bucket --disable-gc
   karton-system-gc:
-    image: certpl/karton-system:v5.9.0
+    image: certpl/karton-system:v6.1.0
     depends_on:
       karton-system-router:
         condition: service_started

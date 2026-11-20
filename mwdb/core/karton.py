@@ -22,7 +22,11 @@ logger = logging.getLogger("mwdb.karton")
 class KartonProducer(Producer):
     identity = "karton.mwdb"
     version = app_version
-    with_service_info = True
+    egress_filters = [
+        {"type": "sample", "kind": "raw"},
+        {"type": "config"},
+        {"type": "blob"},
+    ]
 
 
 _karton_producer = None

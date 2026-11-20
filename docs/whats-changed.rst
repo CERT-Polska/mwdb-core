@@ -19,6 +19,14 @@ Version v3.0.0 removes Remote instances feature introduced in v2.2.0.
 
 Remote API was an undercooked feature that added lots of complexity and potential for vulnerabilities (especially SSRF and permission-related). It was implemented as an experiment for federated MWDB instances, but that experiment has shown that we should try different approach.
 
+[Removed] Pre-v2 compatibility features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version v2.0.0 incorporates support for multiple endpoints and features that were already deprecated at the time of v2 release, but were already
+used by mwdb.cert.pl clients. Version v3 removes:
+
+- ``POST/PUT /file|config|blob/<parent>`` family of endpoints
+
 v2.20.0
 -------
 

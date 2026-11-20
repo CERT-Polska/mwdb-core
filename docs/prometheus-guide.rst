@@ -19,7 +19,7 @@ Useful PromQL queries (in most cases we use 5-minute window):
 - ``sum(increase(mwdb_api_requests{}[5m])/5) by (user)`` - counts general API usage by MWDB users in requests per minute
 - ``sum(increase(mwdb_api_requests{status_code != "200"}[5m])) by (user, status_code)`` - API error rate grouped by user and status_code
 - ``sum(increase(mwdb_api_requests{endpoint=~"api.filedownloadresource|api.requestsampledownloadresource|api.downloadresource|api.filedownloadzipresource", method="GET"}[5m])/5) by (user)`` - file download rate
-- ``sum(increase(mwdb_api_requests{endpoint=~"api.fileresource|api.fileitemresource", method="POST"}[5m])/5) by (user)`` - file upload rate
+- ``sum(increase(mwdb_api_requests{endpoint=~"api.fileresource", method="POST"}[5m])/5) by (user)`` - file upload rate
 
 Setup guide
 -----------

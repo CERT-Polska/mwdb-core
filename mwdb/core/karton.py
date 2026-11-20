@@ -39,7 +39,8 @@ def get_karton_producer() -> Optional[Producer]:
     if _karton_producer is None:
         try:
             _karton_producer = KartonProducer(
-                config=KartonConfig(app_config.karton.config_path)
+                identity=KartonProducer.identity,
+                config=KartonConfig(app_config.karton.config_path),
             )
         except Exception:
             logger.exception("Failed to load Karton producer")

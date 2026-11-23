@@ -8,6 +8,8 @@ services:
     depends_on:
       karton-system-router:
         condition: service_started
+      karton-gateway:
+        condition: service_started
     volumes:
       - "./dev/karton-service.ini:/etc/karton/karton.ini"
   karton-system-router:

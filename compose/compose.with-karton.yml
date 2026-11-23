@@ -54,7 +54,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - "./dev/karton.ini:/etc/karton/karton.ini"
+      - "./dev/karton-system.ini:/etc/karton/karton.ini"
     ports:
       - "127.0.0.1:8030:5000"
   karton-mwdb-reporter:

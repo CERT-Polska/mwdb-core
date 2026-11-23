@@ -54,6 +54,8 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      # Change this to karton-service.ini after Karton v6 version
+      # is applied for dashboard
       - "./dev/karton-system.ini:/etc/karton/karton.ini"
     ports:
       - "127.0.0.1:8030:5000"

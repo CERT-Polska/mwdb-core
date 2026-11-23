@@ -9,7 +9,7 @@ services:
       karton-system-router:
         condition: service_started
     volumes:
-      - "./dev/karton.ini:/etc/karton/karton.ini"
+      - "./dev/karton-service.ini:/etc/karton/karton.ini"
   karton-system-router:
     image: certpl/karton-system:v6.1.0
     depends_on:
@@ -18,7 +18,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - "./dev/karton.ini:/etc/karton/karton.ini"
+      - "./dev/karton-system.ini:/etc/karton/karton.ini"
     entrypoint: karton-system
     command: --setup-bucket --disable-gc
   karton-system-gc:
@@ -27,18 +27,25 @@ services:
       karton-system-router:
         condition: service_started
     volumes:
-      - "./dev/karton.ini:/etc/karton/karton.ini"
+      - "./dev/karton-system.ini:/etc/karton/karton.ini"
     entrypoint: karton-system
     command: --disable-router
+  karton-gateway:
+    image: certpl/karton-gateway:v6.1.0
+    depends_on:
+      karton-system-router:
+        condition: service_started
+    volumes:
+      - "./dev/karton-system.ini:/etc/karton/karton.ini"
   karton-classifier:
-    image: certpl/karton-classifier:v2.1.0
+    image: certpl/karton-classifier:d02095771ce85394c3c533df48da4ea4ccf30f78
     depends_on:
       silo:
         condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
-      - "./dev/karton.ini:/etc/karton/karton.ini"
+      - "./dev/karton-service.ini:/etc/karton/karton.ini"
   karton-dashboard:
     image: certpl/karton-dashboard:v1.6.0
     depends_on:
@@ -51,7 +58,7 @@ services:
     ports:
       - "127.0.0.1:8030:5000"
   karton-mwdb-reporter:
-    image: certpl/karton-mwdb-reporter:v1.3.0
+    image: certpl/karton-mwdb-reporter:72f51198ffc93a2144eeb16cb2dc3a2f76fe6c98
     depends_on:
       silo:
         condition: service_healthy
@@ -62,6 +69,6 @@ services:
       mwdb-web:
         condition: service_healthy
     volumes:
-      - "./dev/karton.ini:/etc/karton/karton.ini"
+      - "./dev/karton-service.ini:/etc/karton/karton.ini"
     env_file:
       - mwdb-vars.env

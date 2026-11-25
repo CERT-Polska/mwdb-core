@@ -948,7 +948,7 @@ wheels = [
 
 [[package]]
 name = "karton-core"
-version = "6.1.0"
+version = "6.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aioboto3" },
@@ -961,9 +961,9 @@ dependencies = [
     { name = "redis" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/55/e1/58d36ef8953ec0d3a84c91aeb3aca2f77fb0221904cdfdf343f8ff968eb9/karton_core-6.1.0.tar.gz", hash = "sha256:a00a9ff9e80797d3e8be4d1bfd05342cb315b951170d8a6b9d23523599d2df96", size = 108696, upload-time = "2026-11-17T16:55:32.467Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ba/61/62155ffb255f9d86ba1f3529419076e9c439a3a1c2fcbf5ce984ca7d8d37/karton_core-6.1.1.tar.gz", hash = "sha256:c577895f513cf3c316893edd93944ef153720b23cfe5cdf086cb6c217724a137", size = 108693, upload-time = "2026-11-25T09:21:08.453Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d9/7a/b8476da6d296e0f4eb2f77131cfcca42fab67d8a11344a806fbb1a0fcbd7/karton_core-6.1.0-py3-none-any.whl", hash = "sha256:96f0da0de87580ab00a8fd0006b69dd9534c3435400fefd876e2f35084fa704e", size = 129412, upload-time = "2026-11-17T16:55:31.473Z" },
+    { url = "https://files.pythonhosted.org/packages/0f/9c/3abf660f8731ca92a658eec6c92bd5b5dea36a7a8906977b2e18e60f4303/karton_core-6.1.1-py3-none-any.whl", hash = "sha256:a45180f7e63728fe4a10361a5b4c70ac110615b7440c5093c1cfd9db2aee504a", size = 129392, upload-time = "2026-11-25T09:21:07.591Z" },
 ]
 
 [[package]]
@@ -1278,7 +1278,7 @@ requires-dist = [
     { name = "flask-migrate", specifier = "==4.1.0" },
     { name = "flask-sqlalchemy", specifier = "==3.0.5" },
     { name = "gunicorn", specifier = "==25.1.0" },
-    { name = "karton-core", specifier = "==6.1.0" },
+    { name = "karton-core", specifier = "==6.1.1" },
     { name = "limits", specifier = "==3.9.0" },
     { name = "luqum", specifier = "==0.13.0" },
     { name = "marshmallow", specifier = "==3.26.2" },

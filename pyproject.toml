@@ -31,7 +31,7 @@ dependencies = [
     "flask-migrate==4.1.0",
     "flask-sqlalchemy==3.0.5",
     "gunicorn==25.1.0",
-    "karton-core==6.1.0",
+    "karton-core==6.1.1",
     "limits==3.9.0",
     "luqum==0.13.0",
     "marshmallow==3.26.2",

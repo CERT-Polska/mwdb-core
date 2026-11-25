@@ -7,6 +7,56 @@ have compatibility problems after minor mwdb-core upgrade.
 
 For upgrade instructions, see :ref:`Upgrading mwdb-core to latest version`.
 
+v2.20.1
+-------
+
+This release contains **security fixes** and security improvements.
+
+Complete changelog can be found here: `v2.20.1 changelog <https://github.com/CERT-Polska/mwdb-core/releases/tag/v2.20.1>`_.
+
+[Security fix] Object upload allowed to add tags without requiring 'adding_tags' capability
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Object upload endpoints allow users to add tags along with the uploaded object. When the uploaded object already exists, the specified tags are merged with the existing ones.
+
+MWDB Core before v2.20.1 does not check whether the user is actually authorized to add new tags to the object, so users without the ``adding_tags`` capability can add tags
+without proper authorization.
+
+See also:
+
+- https://github.com/CERT-Polska/mwdb-core/security/advisories/GHSA-xw8w-j823-67pj
+
+[Security fix] User profile information was exposed to all authenticated users
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In MWDB Core, users are able to read the information about other members of a common workspace group. Workspace groups are meant to share objects within the same organization and
+members of the same group are able to see e-mail address, registration and last login timestamp of other members.
+
+``GET /api/profile/{login}`` endpoint that implements this feature, was not checking whether common group is actually a ``workspace`` group, so condition was effectively
+satisfied for any pair of users.
+
+As a result, any authenticated user could retrieve login, e-mail address, registration time and last login time, knowing only the login of another user.
+
+See also:
+
+- https://github.com/CERT-Polska/mwdb-core/security/advisories/GHSA-65g9-xrr6-8cvr
+
+[Security fix] Registration and password recovery endpoints leaked whether user exists before CAPTCHA verification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the ``/auth/register`` endpoint, the checks for existing user logins and group names were performed before the reCAPTCHA verification.
+
+In the ``/auth/recover_password`` endpoint, the user lookup and the ``manage_profile`` capability check were performed before the reCAPTCHA verification.
+
+As a result, unauthenticated attackers were able to determine whether a given login or group name already exists without needing to solve the CAPTCHA. Additionally, in the password recovery endpoint, they were able to confirm valid login and e-mail pairs by observing the difference between error responses.
+
+[Security fix] Trailing newline was accepted in user logins and group names
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Validation of user logins, group names and share names used ``re.match`` with a ``$`` anchor, which matches just before a trailing newline. Identifiers like ``admin\n`` were therefore accepted by the API.
+
+Since v2.20.1, validation uses ``re.fullmatch``, which rejects trailing newline and other leftovers.
+
 v2.20.0
 -------
 

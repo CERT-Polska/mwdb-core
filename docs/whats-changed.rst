@@ -30,6 +30,16 @@ used by mwdb.cert.pl clients. Version v3 removes:
 - unrevokable v1 API keys issued by already removed CLI tool
 - ``POST /search`` endpoint (``GET /object`` should be used instead)
 
+[Removed] ``share_queried_objects`` capability
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version v3.0.0 removes the ``share_queried_objects`` capability that automatically shared object and all its descendants with a group
+if its member accessed the object via direct identifier (e.g. by following a direct link with object's hash).
+
+That behavior was documented as unstable and internally abandoned. The capability is automatically removed from all groups during the
+database upgrade, so no manual action is required. Existing permission entries created by that mechanism (with ``queried`` reason type)
+are left intact and still visible in the shares list.
+
 v2.20.1
 -------
 

@@ -1,9 +1,7 @@
 from marshmallow import (
     Schema,
-    ValidationError,
     fields,
     post_dump,
-    validates_schema,
 )
 
 from .attribute import AttributeItemRequestSchema, AttributeItemResponseSchema
@@ -16,14 +14,6 @@ class ObjectListRequestSchema(Schema):
     query = fields.Str(missing=None)
     older_than = fields.Str(missing=None)
     count = fields.Int(missing=10)
-
-    @validates_schema
-    def validate_key(self, data, **kwargs):
-        if data["page"] is not None and data["older_than"] is not None:
-            raise ValidationError(
-                "'page' and 'older_than' can't be used simultaneously. "
-                "Use 'older_than' for new code."
-            )
 
 
 class ObjectCountRequestSchema(Schema):

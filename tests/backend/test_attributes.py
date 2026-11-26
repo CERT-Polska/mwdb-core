@@ -1,3 +1,5 @@
+import uuid
+
 from pytest import fixture
 from .utils import ShouldRaise, random_name, rand_string
 
@@ -125,6 +127,90 @@ def test_attribute_definition_remove(admin_session, attr_session):
     assert len(attrs) == 0
     with ShouldRaise(404):
         admin_session.get_attribute(attr_name)
+
+
+def test_metakeys_upload_alias(admin_session):
+    """
+    'metakeys' upload option is a deprecated alias for 'attributes':
+    values are mapped to the 'attributes' field on the schema level.
+    """
+    attr_name = random_name().lower()
+    admin_session.add_attribute_definition(attr_name, "")
+    admin_session.add_attribute_permission(
+        attr_name, group="public", can_read=True, can_set=True
+    )
+
+    # File upload via deprecated 'metakeys' option
+    sample = admin_session.add_sample(
+        metakeys=[{"key": attr_name, "value": "random_value"}]
+    )
+    attrs = admin_session.get_attributes(sample["id"])["attributes"]
+    assert len(attrs) == 1
+    assert attrs[0]["key"] == attr_name
+    assert attrs[0]["value"] == "random_value"
+
+    # Config upload via deprecated 'metakeys' option
+    config = admin_session.add_config(
+        None, "malwarex", {"cnc": ["http://evil.local"]}, metakeys=[{"key": attr_name, "value": 1234}]
+    )
+    attrs = admin_session.get_attributes(config["id"])["attributes"]
+    assert len(attrs) == 1
+    assert attrs[0]["key"] == attr_name
+    assert attrs[0]["value"] == 1234
+
+    # Blob upload via deprecated 'metakeys' option
+    blob = admin_session.add_blob(
+        None, metakeys=[{"key": attr_name, "value": {"nested": ["json"]}}]
+    )
+    attrs = admin_session.get_attributes(blob["id"])["attributes"]
+    assert len(attrs) == 1
+    assert attrs[0]["key"] == attr_name
+    assert attrs[0]["value"] == {"nested": ["json"]}
+
+
+def test_metakeys_upload_empty_alias(admin_session):
+    """
+    Empty 'metakeys' list is treated like missing key,
+    so it doesn't conflict with 'attributes' provided in the same request.
+    """
+    attr_name = random_name().lower()
+    admin_session.add_attribute_definition(attr_name, "")
+    admin_session.add_attribute_permission(
+        attr_name, group="public", can_read=True, can_set=True
+    )
+
+    sample = admin_session.add_sample(
+        attributes=[{"key": attr_name, "value": "random_value"}],
+        metakeys=[],
+    )
+    attrs = admin_session.get_attributes(sample["id"])["attributes"]
+    assert len(attrs) == 1
+    assert attrs[0]["key"] == attr_name
+
+
+def test_metakeys_upload_alias_cant_be_mixed(admin_session):
+    """
+    Non-empty 'metakeys' and 'attributes' can't be provided
+    in the same upload request.
+    """
+    attr_name = random_name().lower()
+    admin_session.add_attribute_definition(attr_name, "")
+    with ShouldRaise(400):
+        admin_session.add_sample(
+            attributes=[{"key": attr_name, "value": "first_value"}],
+            metakeys=[{"key": attr_name, "value": "second_value"}],
+        )
+
+
+def test_metakeys_upload_karton_alias(admin_session):
+    """
+    'karton' key provided via 'metakeys' is no longer special-cased
+    and is processed like a regular attribute.
+    """
+    with ShouldRaise(404):
+        admin_session.add_sample(
+            metakeys=[{"key": "karton", "value": str(uuid.uuid4())}]
+        )
 
 
 @fixture(scope="module")

@@ -262,9 +262,10 @@ class ConfigResource(ObjectResource, ConfigUploader):
                       config_type: static
                       parent: null
                       upload_as: "*"
+                      # 'metakeys' is a deprecated alias for 'attributes'
                       metakeys:
-                       - key: string
-                         value: string
+                        - key: string
+                          value: string
                       attributes:
                        - key: string
                          value: string
@@ -282,7 +283,7 @@ class ConfigResource(ObjectResource, ConfigUploader):
             403:
                 description: |
                     No permissions to perform additional operations
-                    (e.g. adding parent, metakeys)
+                    (e.g. adding parent, attributes)
             404:
                 description: |
                     One of attribute keys doesn't exist

@@ -187,6 +187,7 @@ class MwdbTest(object):
         content=None,
         parent=None,
         attributes=None,
+        metakeys=None,
         upload_as=None,
         tags=None,
         share_3rd_party=None,
@@ -200,21 +201,22 @@ class MwdbTest(object):
         if share_3rd_party is None:
             share_3rd_party = True
 
+        options = {
+            "parent": parent,
+            "attributes": attributes or [],
+            "upload_as": upload_as or "*",
+            "tags": tags or [],
+            "share_3rd_party": share_3rd_party
+        }
+        if metakeys is not None:
+            options["metakeys"] = metakeys
         res = self.session.post(
             self.mwdb_url + "/file",
             files={
                 "file": (filename, content),
                 "options": (
                     None,
-                    json.dumps(
-                        {
-                            "parent": parent,
-                            "attributes": attributes or [],
-                            "upload_as": upload_as or "*",
-                            "tags": tags or [],
-                            "share_3rd_party": share_3rd_party
-                        }
-                    ),
+                    json.dumps(options),
                 ),
             },
         )
@@ -387,18 +389,21 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.content
 
-    def add_config(self, parent, family, config_json, tags=None, share_3rd_party=None):
+    def add_config(self, parent, family, config_json, tags=None, metakeys=None, share_3rd_party=None):
         if share_3rd_party is None:
             share_3rd_party = True
+        request = {
+            "family": family,
+            "cfg": config_json,
+            "parent": parent,
+            "tags": tags or [],
+            "share_3rd_party": share_3rd_party,
+        }
+        if metakeys is not None:
+            request["metakeys"] = metakeys
         res = self.session.post(
             self.mwdb_url + "/config",
-            json={
-                "family": family,
-                "cfg": config_json,
-                "parent": parent,
-                "tags": tags or [],
-                "share_3rd_party": share_3rd_party,
-            },
+            json=request,
         )
         res.raise_for_status()
         return res.json()
@@ -418,19 +423,22 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
-    def add_blob(self, parent, blobname=None, blobtype=None, content=None, tags=None, share_3rd_party=None):
+    def add_blob(self, parent, blobname=None, blobtype=None, content=None, tags=None, metakeys=None, share_3rd_party=None):
         if share_3rd_party is None:
             share_3rd_party = True
+        request = {
+            "blob_name": blobname or str(uuid.uuid4()),
+            "blob_type": blobtype or "inject",
+            "content": content or str(uuid.uuid4()),
+            "parent": parent,
+            "tags": tags or [],
+            "share_3rd_party": share_3rd_party
+        }
+        if metakeys is not None:
+            request["metakeys"] = metakeys
         res = self.session.post(
             self.mwdb_url + "/blob",
-            json={
-                "blob_name": blobname or str(uuid.uuid4()),
-                "blob_type": blobtype or "inject",
-                "content": content or str(uuid.uuid4()),
-                "parent": parent,
-                "tags": tags or [],
-                "share_3rd_party": share_3rd_party
-            },
+            json=request,
         )
         res.raise_for_status()
         return res.json()

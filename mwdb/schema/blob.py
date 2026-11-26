@@ -4,14 +4,12 @@ from .config import ConfigItemResponseSchema
 from .object import (
     ObjectCreateRequestSchemaBase,
     ObjectItemResponseSchema,
-    ObjectLegacyMetakeysMixin,
     ObjectListItemResponseSchema,
     ObjectListResponseSchemaBase,
 )
 from .utils import UTCDateTime
 
 
-# Merge it with BlobCreateRequestSchema during legacy upload remove
 class BlobCreateSpecSchema(Schema):
     blob_name = fields.Str(required=True, allow_none=False)
     blob_type = fields.Str(required=True, allow_none=False)
@@ -19,10 +17,6 @@ class BlobCreateSpecSchema(Schema):
 
 
 class BlobCreateRequestSchema(ObjectCreateRequestSchemaBase, BlobCreateSpecSchema):
-    pass
-
-
-class BlobLegacyCreateRequestSchema(BlobCreateRequestSchema, ObjectLegacyMetakeysMixin):
     pass
 
 

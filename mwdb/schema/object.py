@@ -30,7 +30,10 @@ class ObjectCreateRequestSchemaBase(Schema):
         fields.Nested(AttributeItemRequestSchema),
         missing=[],
         load_only=True,
-        metadata={"description": "Deprecated alias for 'attributes'", "deprecated": True},
+        metadata={
+            "description": "Deprecated alias for 'attributes'",
+            "deprecated": True,
+        },
     )
     attributes = fields.Nested(AttributeItemRequestSchema, many=True, missing=[])
     upload_as = fields.Str(missing="*", allow_none=False)

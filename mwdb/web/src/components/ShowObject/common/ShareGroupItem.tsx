@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 
 import { makeSearchLink } from "@mwdb-web/commons/helpers";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { DateString, ShareReasonString } from "@mwdb-web/commons/ui";
 import { Reason, Share } from "@mwdb-web/types/types";
 
@@ -12,7 +11,6 @@ type Props = {
 };
 
 export function ShareGroupItem({ reason, shares, showDhash }: Props) {
-    const remotePath = useRemotePath();
     return (
         <table className="table table-striped table-bordered wrap-table share-table">
             <thead>
@@ -51,7 +49,7 @@ export function ShareGroupItem({ reason, shares, showDhash }: Props) {
                                                 ? "uploader"
                                                 : "shared",
                                         value: share.group_name,
-                                        pathname: `${remotePath}/search`,
+                                        pathname: "/search",
                                     })}
                                 >
                                     {share.group_name}

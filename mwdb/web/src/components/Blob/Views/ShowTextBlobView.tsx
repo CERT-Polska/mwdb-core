@@ -8,8 +8,6 @@ import {
     DownloadAction,
     FavoriteAction,
     RemoveAction,
-    PushAction,
-    PullAction,
 } from "../../ShowObject";
 
 import {
@@ -19,7 +17,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { downloadData } from "@mwdb-web/commons/helpers";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { TextBlobDetails } from "../common/TextBlobDetails";
 import { TextBlobPreview } from "../common/TextBlobPreview";
 import { BlobDiffAction } from "../common/BlobDiffAction";
@@ -28,7 +25,6 @@ import { Extendable } from "@mwdb-web/commons/plugins";
 
 export function ShowTextBlobView() {
     const params = useParams();
-    const remotePath = useRemotePath();
     async function downloadTextBlob(
         object?: Partial<ObjectOrConfigOrBlobData>
     ) {
@@ -42,7 +38,7 @@ export function ShowTextBlobView() {
             ident="showTextBlob"
             objectType="blob"
             objectId={params.hash!}
-            searchEndpoint={`${remotePath}/blobs`}
+            searchEndpoint="/blobs"
             headerIcon={faScroll}
             headerCaption="Blob details"
             defaultTab="preview"
@@ -56,8 +52,6 @@ export function ShowTextBlobView() {
                         <FavoriteAction />,
                         <DownloadAction download={downloadTextBlob} />,
                         <BlobDiffAction />,
-                        <PullAction />,
-                        <PushAction />,
                         <RemoveAction />,
                     ]}
                 />
@@ -70,8 +64,6 @@ export function ShowTextBlobView() {
                         <FavoriteAction />,
                         <DownloadAction download={downloadTextBlob} />,
                         <BlobDiffAction />,
-                        <PullAction />,
-                        <PushAction />,
                         <RemoveAction />,
                     ]}
                 />

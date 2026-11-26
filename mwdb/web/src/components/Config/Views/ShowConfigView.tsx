@@ -13,12 +13,9 @@ import {
     DownloadAction,
     FavoriteAction,
     RemoveAction,
-    PushAction,
-    PullAction,
 } from "../../ShowObject";
 
 import { downloadData } from "@mwdb-web/commons/helpers";
-import { useRemotePath } from "@mwdb-web/commons/remotes";
 import { ConfigDetails } from "../common/ConfigDetails";
 import { ConfigPreview } from "../common/ConfigPreview";
 import { ObjectOrConfigOrBlobData } from "@mwdb-web/types/types";
@@ -26,7 +23,6 @@ import { Extendable } from "@mwdb-web/commons/plugins";
 
 export function ShowConfigView() {
     const params = useParams();
-    const remotePath = useRemotePath();
     async function downloadTextBlob(
         object?: Partial<ObjectOrConfigOrBlobData>
     ) {
@@ -44,7 +40,7 @@ export function ShowConfigView() {
             ident="showConfig"
             objectType="config"
             objectId={params.hash ?? ""}
-            searchEndpoint={`${remotePath}/configs`}
+            searchEndpoint={"/configs"}
             headerIcon={faTable}
             headerCaption="Config details"
         >
@@ -56,8 +52,6 @@ export function ShowConfigView() {
                     actions={[
                         <FavoriteAction />,
                         <DownloadAction download={downloadTextBlob} />,
-                        <PullAction />,
-                        <PushAction />,
                         <RemoveAction />,
                     ]}
                 />
@@ -69,8 +63,6 @@ export function ShowConfigView() {
                     actions={[
                         <FavoriteAction />,
                         <DownloadAction download={downloadTextBlob} />,
-                        <PullAction />,
-                        <PushAction />,
                         <RemoveAction />,
                     ]}
                 />

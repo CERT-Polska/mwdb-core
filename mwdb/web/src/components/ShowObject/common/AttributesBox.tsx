@@ -120,25 +120,17 @@ export function AttributesBox() {
             <div className="card card-default">
                 <div className="card-header">
                     Attributes
-                    {!api.remote ? (
-                        <Link
-                            to="#"
-                            className="float-right"
-                            onClick={(ev) => {
-                                ev.preventDefault();
-                                setAttributeAddModalOpen(true);
-                            }}
-                        >
-                            <FontAwesomeIcon
-                                icon={faPlus}
-                                pull="left"
-                                size="1x"
-                            />
-                            Add
-                        </Link>
-                    ) : (
-                        []
-                    )}
+                    <Link
+                        to="#"
+                        className="float-right"
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            setAttributeAddModalOpen(true);
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faPlus} pull="left" size="1x" />
+                        Add
+                    </Link>
                 </div>
                 {!dataLoaded ? (
                     <div className="card-body text-muted">Loading data...</div>

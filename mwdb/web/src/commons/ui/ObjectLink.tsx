@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 
 import { AuthContext } from "../auth";
 import { mapObjectType } from "../helpers";
-import { useRemotePath } from "../remotes";
 
 import { Hash } from "./Hash";
 
@@ -18,14 +17,13 @@ export function ObjectLink(props: Props) {
     const { type, id, className, inline } = props;
     const auth = useContext(AuthContext);
     const objectType = mapObjectType(props.type);
-    const remotePath = useRemotePath();
 
     if (!auth.isAdmin && (objectType === "user" || objectType === "group")) {
         return <span>{id}</span>;
     }
 
     return (
-        <Link to={`${remotePath}/${objectType}/${id}`} className={className}>
+        <Link to={`/${objectType}/${id}`} className={className}>
             {type === "user" || type === "group" ? (
                 id
             ) : (

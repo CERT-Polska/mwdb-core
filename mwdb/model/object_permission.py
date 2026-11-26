@@ -12,8 +12,6 @@ from . import db
 class AccessType:
     ADDED = "added"
     SHARED = "shared"
-    QUERIED = "queried"
-    MIGRATED = "migrated"
 
 
 class ObjectPermission(db.Model):

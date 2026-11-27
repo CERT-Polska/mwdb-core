@@ -40,8 +40,43 @@ That behavior was documented as unstable and internally abandoned. The capabilit
 database upgrade, so no manual action is required. Existing permission entries created by that mechanism (with ``queried`` reason type)
 are left intact and still visible in the shares list.
 
+[Removed] Legacy Metakey API
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version v3.0.0 removes the legacy Metakey API, deprecated in v2.6.0 in favor of the Attributes API.
+The only legacy endpoint that is kept is ``GET /<type>/<hash>/meta``, so read-only integrations
+keep working, but it no longer returns pseudo ``karton`` attribute entries (see below).
+
+The following endpoints are no longer available. Use the Attributes API counterparts instead:
+
+- ``POST /<type>/<hash>/meta`` - use ``POST /<type>/<hash>/attribute`` instead
+- ``DELETE /<type>/<hash>/meta`` - use ``DELETE /<type>/<hash>/attribute/<attribute_id>`` instead
+- ``GET /meta/list/<read|set>`` - use ``GET /attribute?access=<read|set>`` instead
+- ``GET /meta/manage`` and ``POST /meta/manage`` - use ``GET /attribute`` and ``POST /attribute`` instead
+- ``GET/PUT/DELETE /meta/manage/<key>`` - use ``GET/PUT/DELETE /attribute/<key>`` instead
+- ``PUT/DELETE /meta/manage/<key>/permissions/<group_name>`` - use
+  ``PUT/DELETE /attribute/<key>/permissions`` instead, with ``group_name`` provided
+  in the request body (``PUT``) or query parameters (``DELETE``)
+
+Karton analyses assigned to the object are no longer exposed as pseudo ``karton`` attribute
+(also known as metakey) entries. Use the dedicated Karton API endpoints (``/<type>/<hash>/karton``)
+or the ``karton:`` search field instead. If you look for a way to assign the analysis on upload,
+use the ``karton_id`` upload option.
+
+The ``Object`` model methods, which may be used by plugin code, were changed accordingly:
+
+- ``Object.get_attributes()`` no longer accepts the ``show_karton`` parameter and doesn't append
+  pseudo ``karton`` attribute entries to the results. Use ``Object.get_latest_analyses()``
+  to list Karton analyses assigned to the object
+- ``Object.add_attribute()`` no longer accepts the ``include_karton`` parameter: setting
+  the ``karton`` key is processed like a regular attribute, so it fails if the ``karton``
+  attribute definition doesn't exist. Use ``Object.assign_analysis()`` to assign an
+  existing analysis to the object
+- ``Object.remove_attribute(key, value)`` was removed.
+  Use ``Object.remove_attribute_by_id()`` instead
+
 [Deprecated] ``metakeys`` upload option is now an alias for ``attributes``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``metakeys`` field in object upload options is deprecated and now behaves as a plain alias for the
 ``attributes`` field: values are mapped to ``attributes`` at schema level and processed by the same

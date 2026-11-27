@@ -213,6 +213,33 @@ def test_metakeys_upload_karton_alias(admin_session):
         )
 
 
+def test_legacy_metakey_get(admin_session):
+    """
+    GET /<type>/<hash>/meta is the only remaining legacy Metakey API endpoint.
+    Returns the same attributes as Attributes API, using the legacy
+    'metakeys' response format.
+    """
+    sample_id = admin_session.add_sample()["id"]
+    attr_name = random_name().lower()
+    admin_session.add_attribute_definition(attr_name, "")
+    admin_session.add_attribute_permission(
+        attr_name, group="public", can_read=True, can_set=True
+    )
+    admin_session.add_attribute(sample_id, attr_name, "random_value")
+
+    metakeys = admin_session.get_metakeys(sample_id)["metakeys"]
+    attrs = admin_session.get_attributes(sample_id)["attributes"]
+    assert [(m["key"], m["value"]) for m in metakeys] == [
+        (a["key"], a["value"]) for a in attrs
+    ]
+    # Legacy response includes rendered definition fields
+    assert metakeys[0]["key"] == attr_name
+    assert metakeys[0]["value"] == "random_value"
+    assert "url" in metakeys[0]
+    assert "label" in metakeys[0]
+    assert "description" in metakeys[0]
+
+
 @fixture(scope="module")
 def random_attribute(admin_session, attr_session):
     """

@@ -318,6 +318,14 @@ class MwdbTest(object):
         res.raise_for_status()
         return res.json()
 
+    def get_metakeys(self, identifier, show_hidden=False):
+        res = self.session.get(
+            self.mwdb_url + "/object/" + identifier + "/meta",
+            params={"hidden": int(show_hidden)},
+        )
+        res.raise_for_status()
+        return res.json()
+
     def add_attribute_definition(self, key, template, hidden=False):
         res = self.session.post(
             self.mwdb_url + "/attribute",

@@ -171,8 +171,10 @@ class FileResource(ObjectResource, FileUploader):
                             $ref: '#/components/schemas/AttributeItemRequest'
                         metakeys:
                           type: array
+                          description: |
+                            Deprecated alias for 'attributes'
                           items:
-                            $ref: '#/components/schemas/MetakeyItemRequest'
+                            $ref: '#/components/schemas/AttributeItemRequest'
                         tags:
                           type: array
                           items:

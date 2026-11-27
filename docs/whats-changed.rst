@@ -40,6 +40,24 @@ That behavior was documented as unstable and internally abandoned. The capabilit
 database upgrade, so no manual action is required. Existing permission entries created by that mechanism (with ``queried`` reason type)
 are left intact and still visible in the shares list.
 
+[Deprecated] ``metakeys`` upload option is now an alias for ``attributes``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``metakeys`` field in object upload options is deprecated and now behaves as a plain alias for the
+``attributes`` field: values are mapped to ``attributes`` at schema level and processed by the same
+code path, so both fields share the same format and permission checks. The deprecation is tracked
+using ``legacy_metakeys_upload_option`` metric, so it can be monitored before final removal.
+
+The new behavior differs from the legacy one in following ways:
+
+- ``metakey`` values are no longer coerced to strings: the field accepts the same JSON values as
+  ``attributes``
+- ``karton`` key inside ``metakeys`` is no longer special-cased to assign a Karton analysis.
+  Use the ``karton_id`` upload option instead. Requests relying on the old behavior are rejected
+  with HTTP 404 due to missing ``karton`` attribute definition
+- providing both non-empty ``metakeys`` and ``attributes`` in a single request is still rejected
+  with HTTP 400
+
 v2.20.1
 -------
 

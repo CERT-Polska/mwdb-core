@@ -1,11 +1,14 @@
 from marshmallow import (
     Schema,
+    ValidationError,
     fields,
     post_dump,
+    pre_load,
 )
 
+from mwdb.core.deprecated import DeprecatedFeature, uses_deprecated_api
+
 from .attribute import AttributeItemRequestSchema, AttributeItemResponseSchema
-from .metakey import MetakeyItemRequestSchema
 from .tag import TagItemResponseSchema, TagRequestSchema
 from .utils import UTCDateTime
 
@@ -22,13 +25,40 @@ class ObjectCountRequestSchema(Schema):
 
 class ObjectCreateRequestSchemaBase(Schema):
     parent = fields.Str(missing=None)
-    metakeys = fields.Nested(MetakeyItemRequestSchema, many=True, missing=[])
+    # Deprecated alias for 'attributes', mapped to that field on load
+    metakeys = fields.List(
+        fields.Nested(AttributeItemRequestSchema),
+        missing=[],
+        load_only=True,
+        metadata={
+            "description": "Deprecated alias for 'attributes'",
+            "deprecated": True,
+        },
+    )
     attributes = fields.Nested(AttributeItemRequestSchema, many=True, missing=[])
     upload_as = fields.Str(missing="*", allow_none=False)
     karton_id = fields.UUID(missing=None)
     karton_arguments = fields.Dict(missing={}, keys=fields.Str())
     tags = fields.Nested(TagRequestSchema, many=True, missing=[])
     share_3rd_party = fields.Boolean(missing=True)
+
+    @pre_load
+    def map_metakeys_to_attributes(self, params, **kwargs):
+        """
+        'metakeys' is a deprecated alias for 'attributes'.
+        If provided: mark the deprecated API usage and map the value
+        to the 'attributes' field. Empty list is treated like missing key.
+        """
+        params = dict(params)
+        metakeys = params.pop("metakeys", None)
+        if metakeys:
+            uses_deprecated_api(DeprecatedFeature.legacy_metakeys_upload_option)
+            if params.get("attributes"):
+                raise ValidationError(
+                    "'attributes' and 'metakeys' options can't be mixed"
+                )
+            params["attributes"] = metakeys
+        return params
 
 
 class ObjectListItemResponseSchema(Schema):
